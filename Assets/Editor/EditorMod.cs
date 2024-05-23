@@ -19,5 +19,15 @@ namespace Nox.Mods
         public T GetAssembly<T>() where T : ModInitializer => (T)_initializer;
 
         internal EditorModInitializer GetEditorAssembly() => _initializer;
+
+        private bool _enabled = false;
+        public bool IsEnabled() => _enabled;
+        public void SetEnabled(bool enabled)
+        {
+            if (_enabled == enabled) return;
+            if (enabled) _initializer.OnInitializeEditor(null);
+            else _initializer.OnDispose();
+            _enabled = enabled;
+        }
     }
 }

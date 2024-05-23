@@ -1,17 +1,17 @@
 {
     "$schema": "",
     "type": "mod",
-    "id": "api.nox.world",
-    "name": "World Module",
-    "description": "Provides the World API for the game.",
+    "id": "api.nox.test",
+    "name": "Test Module",
+    "description": "Provides the Test API for the game.",
     "license": "GPL-3.0",
     "contact": {
-        "website": "https://nox.world/",
         "email": "hactazia@gmail.com",
-        "source": "https://github.com/AtelierVR/api.nox.world",
-        "issues": "https://github.com/AtelierVR/api.nox.world/issues"
+        "source": "https://github.com/AtelierVR/api.nox.test",
+        "website": "https://nox.hactazia.fr/",
+        "issues": "https://github.com/AtelierVR/api.nox.test/issues"
     },
-    "author": [
+    "authors": [
         {
             "name": "Hactazia",
             "website": "https://hactazia.fr/",
@@ -20,64 +20,34 @@
         }
     ],
     "contributors": [],
-    "version": "1.0.0", // mod version
-    "entrypoints": { // list of entrypoints
-        "main": [ // main entrypoint, it will be loaded first
-            "WorldMod"
-        ],
-        "client": [ // client entrypoints (optional), only loaded on the client side
-            "WorldClientMod"
-        ],
-        "instance": [ // instance entrypoints (optional), only loaded on the instance side
-            "WorldServerMod"
-        ],
-        "editor": [ // cck entrypoints (optional), only loaded on the editor side
-            "WorldSDKMod"
+    "version": "1.0.0",
+    "entrypoints": {
+        "editor": [
+            "api.nox.test.TestEditorMod"
         ]
     },
-    "references": [ // list external (no mod) modules
-        {
-            "name": "NoxSDK", // module name
-            // "file": "api.nox.sdk.dll", // module file
-            "url": "https://nox.world/download/api.nox.sdk" // module url (optional)
-        },
-        {
-            "name": "UniTask"
-        }
-    ],
-    "engine": [
-        {
-            "name": "unity",
-            "version": "2023.2.19f1"
-        }
-    ],
-    "platforms": {
-        "windows": true,
-        "linux": true,
-        "macos": true,
-        "android": true,
-        "ios": true,
-        "webgl": true
+    "references": [],
+    "engines": {
+        "unity": ">=2023.2.19"
     },
-    "dependencies": { // list of dependencies
-        "game": "1.0.0", // game version
-        "network": "0.0.0", // network compatibility, use SemVer but use major version only
-        "api.nox.sdk.user": {
-            "type": "depends", // depends, recommends, suggests, conflicts, 
-            "version": "1.0.0"
-        }
+    "platforms": [
+        "windows",
+        "linux",
+        "macos",
+        "android",
+        "ios",
+        "webgl"
+    ],
+    "relations": {
+        "game": ">=1.0.0",
+        "network": ">=1.0.0"
     },
-    "side": [ // list of sides the mod is compatible with
-        "client",
-        "instance",
+    "side": [
         "editor"
     ],
-    "required": {
-        "client": false, // If set to false and the mod is universal, clients don't need the mod to join a instance with.
-        "instance": false // If set to false and the mod is universal, instances don't need the mod to run a instance with.
-    },
-    "provides": [ // list of aliases provided by the mod
-        "fr.hactazia.sdk.world"
+    "required": [],
+    "provides": [
+        "fr.hactazia.sdk.test"
     ],
     "permissions": [
         "file",
@@ -86,5 +56,5 @@
         "config",
         "config.global"
     ],
-    "icon": "icon.png" // mod icon 128x128
+    "icon": "icon.png"
 }

@@ -9,6 +9,7 @@ namespace api.nox.test
         public void OnInitialize()
         {
             Debug.Log("Hello from TestMod!");
+            
         }
 
         public void OnUpdate()

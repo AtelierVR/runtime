@@ -4,11 +4,11 @@ namespace Nox.Mods
 {
     public class Reference : CCK.Mods.Metadata.Reference
     {
-        public static Reference LoadFromJson(JToken json) => new()
+        internal static Reference LoadFromJson(JObject json) => new()
         {
-            _name = json["namespace"].Value<string>(),
-            _file = json["file"].Value<string>(),
-            _url = json["url"].Value<string>()
+            _name = json.TryGetValue("name", out var name) ? name.Value<string>() : null,
+            _file = json.TryGetValue("file", out var file) ? file.Value<string>() : null,
+            _url = json.TryGetValue("url", out var url) ? url.Value<string>() : null
         };
 
         public string GetFile() => _file;

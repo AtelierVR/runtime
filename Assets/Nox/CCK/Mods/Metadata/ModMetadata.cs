@@ -11,7 +11,7 @@ namespace Nox.CCK.Mods
         public Version GetVersion();
         public Metadata.SideFlags GetSide();
         public string[] GetPermissions();
-        public Metadata.Required GetRequired();
+        public string[] GetRequired();
         public Metadata.Entries GetEntryPoints();
 
         public string GetName();
@@ -34,7 +34,7 @@ namespace Nox.CCK.Mods
 
         public Metadata.Reference[] GetReferences();
         public Metadata.Engine[] GetEngines();
-        public Metadata.Platform[] GetPlatforms();
+        public string[] GetPlatforms();
 
         public T GetCustom<T>(string key) where T : class;
         public bool HasCustom<T>(string key) where T : class;

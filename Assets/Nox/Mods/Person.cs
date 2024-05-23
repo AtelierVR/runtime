@@ -5,7 +5,7 @@ namespace Nox.Mods
 {
     public class Person : CCK.Mods.Metadata.Person
     {
-        public static Person LoadFromJson(JToken json) => new()
+        internal static Person LoadFromJson(JToken json) => new()
         {
             _name = json["name"].ToString(),
             _email = json["email"].ToString(),

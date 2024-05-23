@@ -6,11 +6,18 @@ namespace Nox.Mods
 {
     public class Relation : CCK.Mods.Metadata.Relation
     {
-        public static Relation LoadFromJson(JToken json) => new()
+        internal static Relation LoadFromJson(string key, JObject json) => new()
         {
-            _id = json["id"].Value<string>(),
-            _relationType = RelationExtensions.GetRelationTypeFromName(json["relationType"].Value<string>()),
-            _version = new VersionMatching(json["version"].Value<string>())
+            _id = key,
+            _relationType = json.TryGetValue("type", out var type) ? RelationExtensions.GetRelationTypeFromName(type.Value<string>()) : CCK.Mods.Metadata.RelationType.Depends,
+            _version = json.TryGetValue("version", out var version) ? new VersionMatching(version.Value<string>()) : new VersionMatching(">=0.0.0")
+        };
+
+        internal static Relation LoadFromData(string id, string version) => new()
+        {
+            _id = id,
+            _relationType = CCK.Mods.Metadata.RelationType.Depends,
+            _version = new VersionMatching(version)
         };
 
         public string GetId() => _id;

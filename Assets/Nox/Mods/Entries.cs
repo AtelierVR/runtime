@@ -5,13 +5,21 @@ namespace Nox.Mods
 {
     public class Entries : CCK.Mods.Metadata.Entries
     {
-        public static Entries LoadFromJson(JToken json) => new()
+        internal static Entries LoadFromJson(JObject json) => new()
         {
-            _main = json["main"].ToObject<string[]>(),
-            _client = json["client"].ToObject<string[]>(),
-            _instance = json["instance"].ToObject<string[]>(),
-            _editor = json["editor"].ToObject<string[]>()
+            _main = json.TryGetValue("main", out var main) ? main.ToObject<string[]>() : new string[0],
+            _client = json.TryGetValue("client", out var client) ? client.ToObject<string[]>() : new string[0],
+            _instance = json.TryGetValue("instance", out var instance) ? instance.ToObject<string[]>() : new string[0],
+            _editor = json.TryGetValue("editor", out var editor) ? editor.ToObject<string[]>() : new string[0]
         };
+
+        internal Entries()
+        {
+            _main = new string[0];
+            _client = new string[0];
+            _instance = new string[0];
+            _editor = new string[0];
+        }
 
         public string[] GetClient() => _client;
 

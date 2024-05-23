@@ -5,7 +5,7 @@ namespace Nox.Mods
 {
     public class Contact : CCK.Mods.Metadata.Contact
     {
-        public static Contact LoadFromJson(JToken json) => new()
+        internal static Contact LoadFromJson(JToken json) => new()
         {
             _customs = json.ToObject<Dictionary<string, object>>()
         };

@@ -73,5 +73,16 @@ namespace Nox.CCK
             GreaterThanOrEqualTo,
             LessThanOrEqualTo
         }
+
+        public override string ToString() => _matchingType switch
+        {
+            Type.GreaterThan => ">" + _version,
+            Type.LessThan => "<" + _version,
+            Type.EqualTo => "==" + _version,
+            Type.NotEqualTo => "!=" + _version,
+            Type.GreaterThanOrEqualTo => ">=" + _version,
+            Type.LessThanOrEqualTo => "<=" + _version,
+            _ => "==" + _version
+        };
     }
 }
