@@ -1,0 +1,16 @@
+{
+    "name": "fr.hactazia.modtest",
+    "rootNamespace": "",
+    "references": [
+        "NoxCCK"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

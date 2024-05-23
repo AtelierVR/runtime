@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 40b2b7dc7eff80945960f33fcbb6868b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 135769
+  packageName: 'VR UI Kit: Material Design System'
+  packageVersion: 2.1
+  assetPath: Assets/VRUI - Material Design/Assets/Animation/VRUI-LoadingCircularSpin.anim
+  uploadId: 366852

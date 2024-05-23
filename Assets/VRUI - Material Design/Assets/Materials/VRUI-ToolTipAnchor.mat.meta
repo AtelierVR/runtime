@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 8b194a52aa3910841906bb06184b1e18
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 135769
+  packageName: 'VR UI Kit: Material Design System'
+  packageVersion: 2.1
+  assetPath: Assets/VRUI - Material Design/Assets/Materials/VRUI-ToolTipAnchor.mat
+  uploadId: 366852

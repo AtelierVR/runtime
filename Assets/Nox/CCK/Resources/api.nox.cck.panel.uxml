@@ -1,0 +1,13 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/Nox/CCK/Resources/CCKPanelStyle.uss?fileID=7433441132597879392&amp;guid=3c1300502312a7240b6d886f5db72c24&amp;type=3#CCKPanelStyle" />
+    <engine:GroupBox style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;">
+        <editor:Toolbar style="flex-grow: 1; border-top-width: 0; border-right-width: 0; border-bottom-width: 1px; border-left-width: 0;">
+            <editor:ToolbarMenu text="Menus" name="pages" style="margin-left: -2px;" />
+            <editor:ToolbarSpacer style="flex-grow: 1;" />
+            <editor:ToolbarButton text="Restart" name="restart" style="border-right-width: -1px;" />
+        </editor:Toolbar>
+    </engine:GroupBox>
+    <engine:GroupBox style="flex-grow: 1; flex-shrink: 1; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;">
+        <engine:VisualElement name="content" style="flex-grow: 1;" />
+    </engine:GroupBox>
+</engine:UXML>

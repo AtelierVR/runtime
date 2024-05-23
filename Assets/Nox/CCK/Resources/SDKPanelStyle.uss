@@ -1,0 +1,13 @@
+#unity-tab-view__header-container {
+    -unity-text-align: upper-center;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+#unity-tab-view__content-container {
+    flex-grow: 1;
+}
+
+#unity-tab__content-container {
+    flex-grow: 1;
+}

@@ -1,0 +1,90 @@
+{
+    "$schema": "",
+    "type": "mod",
+    "id": "api.nox.world",
+    "name": "World Module",
+    "description": "Provides the World API for the game.",
+    "license": "GPL-3.0",
+    "contact": {
+        "website": "https://nox.world/",
+        "email": "hactazia@gmail.com",
+        "source": "https://github.com/AtelierVR/api.nox.world",
+        "issues": "https://github.com/AtelierVR/api.nox.world/issues"
+    },
+    "author": [
+        {
+            "name": "Hactazia",
+            "website": "https://hactazia.fr/",
+            "email": "hactazia@gmail.com",
+            "discord": "hactazia"
+        }
+    ],
+    "contributors": [],
+    "version": "1.0.0", // mod version
+    "entrypoints": { // list of entrypoints
+        "main": [ // main entrypoint, it will be loaded first
+            "WorldMod"
+        ],
+        "client": [ // client entrypoints (optional), only loaded on the client side
+            "WorldClientMod"
+        ],
+        "instance": [ // instance entrypoints (optional), only loaded on the instance side
+            "WorldServerMod"
+        ],
+        "editor": [ // cck entrypoints (optional), only loaded on the editor side
+            "WorldSDKMod"
+        ]
+    },
+    "references": [ // list external (no mod) modules
+        {
+            "name": "NoxSDK", // module name
+            // "file": "api.nox.sdk.dll", // module file
+            "url": "https://nox.world/download/api.nox.sdk" // module url (optional)
+        },
+        {
+            "name": "UniTask"
+        }
+    ],
+    "engine": [
+        {
+            "name": "unity",
+            "version": "2023.2.19f1"
+        }
+    ],
+    "platforms": {
+        "windows": true,
+        "linux": true,
+        "macos": true,
+        "android": true,
+        "ios": true,
+        "webgl": true
+    },
+    "dependencies": { // list of dependencies
+        "game": "1.0.0", // game version
+        "network": "0.0.0", // network compatibility, use SemVer but use major version only
+        "api.nox.sdk.user": {
+            "type": "depends", // depends, recommends, suggests, conflicts, 
+            "version": "1.0.0"
+        }
+    },
+    "side": [ // list of sides the mod is compatible with
+        "client",
+        "instance",
+        "editor"
+    ],
+    "required": {
+        "client": false, // If set to false and the mod is universal, clients don't need the mod to join a instance with.
+        "instance": false // If set to false and the mod is universal, instances don't need the mod to run a instance with.
+    },
+    "provides": [ // list of aliases provided by the mod
+        "fr.hactazia.sdk.world"
+    ],
+    "permissions": [
+        "file",
+        "file.read",
+        "file.write",
+        "config",
+        "config.global"
+    ],
+    "icon": "icon.png" // mod icon 128x128
+}
