@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using Nox.CCK.Editor;
+using UnityEngine.UIElements;
 using static Nox.CCK.Editor.EditorPanel;
 
 namespace Nox.Editor
@@ -8,8 +11,7 @@ namespace Nox.Editor
         public EditorPanel(Mods.EditorMod mod, EditorPanelBuilder panel)
         {
             _modid = mod.GetMetadata().GetId();
-            _id = panel.Id;
-            _name = panel.Name;
+            _panel = panel;
         }
 
         event OnPanelOpenDelegate CCK.Editor.EditorPanel.OnPanelOpen
@@ -30,11 +32,12 @@ namespace Nox.Editor
         private event OnPanelOpenDelegate OnPanelOpen;
         private event OnPanelCloseDelegate OnPanelClose;
         private string _modid;
-        private string _id;
-        private string _name;
+        private EditorPanelBuilder _panel;
         public string GetModId() => _modid;
-        public string GetId() => _id;
-        public string GetName() => _name;
+        public string GetId() => _panel.Id;
+        public string GetName() => _panel.Name;
         internal string GetFullId() => $"{GetModId()}.{GetId()}";
+
+        public VisualElement MakeContent(Dictionary<string, object> data = null) => _panel.OnOpenned(data);
     }
 }

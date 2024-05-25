@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Nox.CCK.Editor;
 using Nox.CCK.Mods;
 using Nox.Editor.Mods;
@@ -45,7 +46,6 @@ namespace Nox.Editor
                 home.Add(new Label("Welcome to the Nox CCK."));
                 rootVisualElement.Q<VisualElement>("content").Add(home);
             }
-
             rootVisualElement.Q<ToolbarButton>("restart").clicked += Restart;
         }
 
@@ -58,38 +58,32 @@ namespace Nox.Editor
             var panels = GetPanels();
             foreach (var panel in panels)
                 dropdown.menu.AppendAction(panel.GetName(), a => Goto(panel.GetFullId()), a => DropdownMenuAction.Status.Normal);
-            // foreach (var mod in mods)
-            // {
-            //     var modAttr = mod.GetMethodWiths<CCKTabAttribute>();
-            //     if (modAttr.Length == 0) continue;
-            //     foreach (var tab in modAttr)
-            //         if (!tab.Attribute.Flags.HasFlag(CCKTabFlags.Hidden))
-            //             dropdown.menu.AppendAction(tab.Attribute.Name, a => Goto(tab.Attribute.Id), a => DropdownMenuAction.Status.Normal);
-            // }
         }
 
 
-        public static bool Goto(string id)
+        public static bool Goto(string id, Dictionary<string, object> data = null)
         {
-            // var tab = Instance.GetTab(id);
-            // if (tab == null) return false;
-            // if (tab.tab.Method.Invoke(tab.mod, new object[] { true }) is not VisualElement content) return false;
-            // var root = Instance.rootVisualElement.Q<VisualElement>("content");
-            // if (root == null) return false;
-            // content.style.flexGrow = 1;
-            // foreach (var child in content.Children())
-            //     child.style.flexGrow = 1;
-            // foreach (var child in root.Children().ToList())
-            //     if (child.name != id)
-            //     {
-            //         root.Remove(child);
-            //         var o = Instance.GetTab(child.name);
-            //         o?.tab.Method.Invoke(o.mod, new object[] { false });
-            //     }
-            // root.Add(content);
-            // content.name = id;
-            // return true;
-            return false;
+            var panel = GetPanel(id);
+            if (panel == null) return false;
+            var content = panel.MakeContent(data);
+            if (content == null) return false; 
+            var root = Instance.rootVisualElement.Q<VisualElement>("content");
+            if (root == null) return false;
+            content.style.flexGrow = 1;
+            foreach (var child in content.Children())
+                child.style.flexGrow = 1;
+            foreach (var child in root.Children().ToList())
+                if (child.name != id)
+                {
+                    root.Remove(child);
+                    var o = GetPanel(child.name);
+                    o?.InvokeClosePanel();
+                }
+            root.Add(content);
+            content.name = id;
+            Instance._activePanelId = id;
+            panel.InvokeOpenPanel();
+            return true;
         }
 
         private List<CCK.Editor.EditorPanel> _panels = new();
