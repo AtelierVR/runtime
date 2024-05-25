@@ -2,9 +2,9 @@ using Nox.CCK.Mods.Cores;
 
 namespace Nox.CCK.Mods.Initializers
 {
-    public interface ClientModInitializer : BaseModInitializer
+    public interface ClientModInitializer : ModInitializer
     {
-        public void OnInitializeClient(ModCoreAPI api);
-        public void OnUpdateClient();
+        public void OnInitializeClient(ClientModCoreAPI api) { }
+        public void OnUpdateClient() { }
     }
 }

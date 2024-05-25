@@ -8,9 +8,11 @@ namespace Nox.CCK.Mods.Cores
 {
     public interface ModCoreAPI
     {
+        public ModMetadata ModMetadata { get; }
         public ChatManager ChatAPI { get; }
         public GroupManager GroupAPI { get; }
         public EventManager EventAPI { get; }
         public NetworkManager NetworkAPI { get; }
+        public ModManager ModAPI { get; }
     }
 }

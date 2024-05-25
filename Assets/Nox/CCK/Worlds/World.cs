@@ -1,7 +1,4 @@
 using System.Linq;
-#if UNITY_EDITOR
-using Nox.CCK.Editor;
-#endif
 
 namespace Nox.CCK.Worlds
 {

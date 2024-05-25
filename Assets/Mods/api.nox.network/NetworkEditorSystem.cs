@@ -1,15 +1,13 @@
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
-using UnityEditor;
 using UnityEngine;
 
 namespace api.nox.game
 {
-    [InitializeOnLoad]
     public class NetworkEditorSystem : EditorModInitializer
     {
 
-        public void OnInitializeEditor(ModCoreAPI api)
+        public void OnInitializeEditor(EditorModCoreAPI api)
         {
             Debug.Log("Hello from GameEditorSystem!");
         }

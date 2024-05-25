@@ -1,8 +1,8 @@
 using Nox.CCK.Mods.Cores;
 
 namespace Nox.CCK.Mods.Initializers {
-    public interface InstanceModInitializer : BaseModInitializer  {
-        public void OnInitializeInstance(ModCoreAPI api);
-        public void OnUpdateInstance();
+    public interface InstanceModInitializer : ModInitializer  {
+        public void OnInitializeInstance(InstanceModCoreAPI api) {}
+        public void OnUpdateInstance() {}
     }
 }

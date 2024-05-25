@@ -1,6 +1,5 @@
 #if UNITY_EDITOR
 using UnityEditor;
-using Nox.CCK.Editor;
 #endif
 
 using System.Collections.Generic;

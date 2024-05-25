@@ -11,7 +11,7 @@ namespace api.nox.test
         {
         }
 
-        public void OnInitializeClient(ModCoreAPI api)
+        public void OnInitializeClient(ClientModCoreAPI api)
         {
             Debug.Log("Hello from TestClientMod!");
         }

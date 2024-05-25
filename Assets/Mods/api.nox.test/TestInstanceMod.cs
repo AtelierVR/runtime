@@ -7,7 +7,7 @@ namespace api.nox.test
     public class TestInstanceMod : InstanceModInitializer
     {
 
-        public void OnInitializeInstance(ModCoreAPI api)
+        public void OnInitializeInstance(InstanceModCoreAPI api)
         {
             Debug.Log("Hello from TestInstanceMod!");
         }
