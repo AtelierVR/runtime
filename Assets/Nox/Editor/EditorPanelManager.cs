@@ -110,6 +110,16 @@ namespace Nox.Editor
             if (Instance == null) return null;
             return HasActivePanel() ? GetPanel(Instance._activePanelId) : null;
         }
+        public static bool IsActivePanel(string panelId)
+        {
+            if (Instance == null) return false;
+            return Instance._activePanelId == panelId;
+        }
+        public static bool IsActivePanel(EditorPanel panel)
+        {
+            if (Instance == null) return false;
+            return IsActivePanel(panel.GetFullId());
+        }
 
         public static EditorPanel GetPanel(string panelId)
         {

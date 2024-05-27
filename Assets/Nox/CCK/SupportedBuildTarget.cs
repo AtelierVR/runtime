@@ -3,7 +3,7 @@ using UnityEditor;
 
 namespace Nox.CCK
 {
-    public enum SuppordBuildTarget
+    public enum SupportBuildTarget
     {
         NoTarget = BuildTarget.NoTarget,
         Windows = BuildTarget.StandaloneWindows64,
@@ -14,41 +14,41 @@ namespace Nox.CCK
 
     public class SuppordTarget
     {
-        public static string GetTargetName(SuppordBuildTarget target)
+        public static string GetTargetName(SupportBuildTarget target)
         {
             switch (target)
             {
-                case SuppordBuildTarget.Windows:
+                case SupportBuildTarget.Windows:
                     return "windows";
-                case SuppordBuildTarget.Linux:
+                case SupportBuildTarget.Linux:
                     return "linux";
-                case SuppordBuildTarget.OSX:
+                case SupportBuildTarget.OSX:
                     return "macos";
-                case SuppordBuildTarget.Android:
+                case SupportBuildTarget.Android:
                     return "android";
                 default:
                     return "unknown";
             }
         }
 
-        public static SuppordBuildTarget GetNameTarget(string target)
+        public static SupportBuildTarget GetNameTarget(string target)
         {
             switch (target)
             {
                 case "windows":
-                    return SuppordBuildTarget.Windows;
+                    return SupportBuildTarget.Windows;
                 case "linux":
-                    return SuppordBuildTarget.Linux;
+                    return SupportBuildTarget.Linux;
                 case "macos":
-                    return SuppordBuildTarget.OSX;
+                    return SupportBuildTarget.OSX;
                 case "android":
-                    return SuppordBuildTarget.Android;
+                    return SupportBuildTarget.Android;
                 default:
-                    return SuppordBuildTarget.NoTarget;
+                    return SupportBuildTarget.NoTarget;
             }
         }
 
-        public static SuppordBuildTarget GetCurrentTarget() => (SuppordBuildTarget)EditorUserBuildSettings.activeBuildTarget;
+        public static SupportBuildTarget GetCurrentTarget() => (SupportBuildTarget)EditorUserBuildSettings.activeBuildTarget;
     }
 }
 #endif

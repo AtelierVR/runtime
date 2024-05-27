@@ -99,7 +99,7 @@ namespace Nox.Editor.Mods
                         incompatiblePlatform = false;
                         break;
                     }
-                    else if (platform == SuppordTarget.GetTargetName((SuppordBuildTarget)EditorUserBuildSettings.activeBuildTarget))
+                    else if (platform == SuppordTarget.GetTargetName((SupportBuildTarget)EditorUserBuildSettings.activeBuildTarget))
                     {
                         incompatiblePlatform = false;
                         break;
@@ -118,7 +118,7 @@ namespace Nox.Editor.Mods
                     }
                 if (incompatiblePlatform)
                     Debug.LogError("Mod " + modSearcher.ModMetadata.GetId()
-                        + " not supported on the current platform (" + SuppordTarget.GetTargetName((SuppordBuildTarget)EditorUserBuildSettings.activeBuildTarget) + ")");
+                        + " not supported on the current platform (" + SuppordTarget.GetTargetName((SupportBuildTarget)EditorUserBuildSettings.activeBuildTarget) + ")");
                 if (incompatibleEngine)
                     if (engineMod != null)
                         Debug.LogError("Mod " + modSearcher.ModMetadata.GetId()
@@ -259,37 +259,49 @@ namespace Nox.Editor.Mods
 
             for (var i = 0; i < readyMods.Count; i++)
                 Debug.Log("Loading mod " + readyMods[i].ModMetadata.GetId() + " v" + readyMods[i].ModMetadata.GetVersion() + " (" + (i + 1) + "/" + readyMods.Count + ")");
+            Debug.Log("Mods loaded");
+
+
 
             var loadedMods = new List<EditorMod>();
             var success = true;
             foreach (var modSearcher in readyMods)
             {
+                Debug.Log("Loading assembly mod " + modSearcher.ModMetadata.GetId() + " v" + modSearcher.ModMetadata.GetVersion() + " (" + modSearcher.ModDLLPath + ")");
                 var assembly = Assembly.LoadFile(modSearcher.ModDLLPath);
                 var main = modSearcher.ModMetadata.GetEntryPoints().GetMain();
                 var editor = modSearcher.ModMetadata.GetEntryPoints().GetEditor();
                 var mainClasses = new List<CCK.Mods.Initializers.ModInitializer>();
                 var editorClasses = new List<CCK.Mods.Initializers.EditorModInitializer>();
                 foreach (var type in assembly.GetTypes())
-                    if (main.Contains(type.FullName) && type.GetInterfaces().Contains(typeof(CCK.Mods.Initializers.ModInitializer)))
+                {
+                    if (main.Contains(type.FullName) && type.GetInterface(typeof(CCK.Mods.Initializers.ModInitializer).FullName) != null)
+                    {
+                        Debug.Log("Found main entry point: " + type.FullName);
                         mainClasses.Add((CCK.Mods.Initializers.ModInitializer)Activator.CreateInstance(type));
-                    else if (editor.Contains(type.FullName) && type.GetInterfaces().Contains(typeof(CCK.Mods.Initializers.EditorModInitializer)))
+                    }
+                    else if (editor.Contains(type.FullName) && type.GetInterface(typeof(CCK.Mods.Initializers.EditorModInitializer).FullName) != null)
+                    {
+                        Debug.Log("Found editor entry point: " + type.FullName);
                         editorClasses.Add((CCK.Mods.Initializers.EditorModInitializer)Activator.CreateInstance(type));
+                    }
+                }
+                
                 if (mainClasses.Count != main.Length)
                     Debug.LogError("Failed to load main entry points for mod " + modSearcher.ModMetadata.GetId());
                 if (editorClasses.Count != editor.Length)
                     Debug.LogError("Failed to load editor entry points for mod " + modSearcher.ModMetadata.GetId());
 
-                Debug.Log("Loaded mod " + modSearcher.ModMetadata.GetId() + " v" + modSearcher.ModMetadata.GetVersion());
-
                 try
                 {
                     var mod = new EditorMod(modSearcher.ModMetadata, mainClasses.ToArray(), editorClasses.ToArray());
                     loadedMods.Add(mod);
-                    if(!mod.SetEnabled(true))
+                    if (!mod.SetEnabled(true))
                         throw new Exception("Failed to enable mod");
                 }
-                catch
+                catch (Exception e)
                 {
+                    UnityEngine.Debug.LogException(e);
                     Debug.LogError("Failed to load mod " + modSearcher.ModMetadata.GetId());
                     success = false;
                 }
@@ -300,7 +312,7 @@ namespace Nox.Editor.Mods
                 foreach (var mod in loadedMods) AddMod(mod);
             else
                 foreach (var mod in loadedMods)
-                    if(mod.SetEnabled(false))
+                    if (mod.SetEnabled(false))
                         Debug.LogError("Failed to disable mod " + mod.GetMetadata().GetId());
         }
 
@@ -340,6 +352,9 @@ namespace Nox.Editor.Mods
         }
 
         internal static List<EditorMod> GetMods() => _mods;
+
+        internal static EditorMod GetMod(string id) =>
+            _mods.FirstOrDefault(mod => mod.GetMetadata().GetId() == id || mod.GetMetadata().GetProvides().Contains(id));
     }
 }
 #endif

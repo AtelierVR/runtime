@@ -20,8 +20,8 @@
     ],
     "version": "1.0.0",
     "entrypoints": {
-        "editor": [
-            "api.nox.game.NetworkEditorSystem"
+        "main": [
+            "api.nox.network.NetworkSystem"
         ]
     },
     "engines": {

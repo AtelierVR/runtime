@@ -1,5 +1,6 @@
 using System;
 using Nox.CCK.Mods;
+using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 
 namespace Nox.Editor.Mods

@@ -22,14 +22,14 @@ namespace Nox.CCK.Worlds
         [SerializeField] public List<SceneAsset> Scenes = new();
         [SerializeField] public List<string> Features = new();
         [SerializeField] public List<ModRequirement> ModRequirements = new();
-        [SerializeField] private SuppordBuildTarget _target = SuppordBuildTarget.NoTarget;
+        [SerializeField] private SupportBuildTarget _target = SupportBuildTarget.NoTarget;
         [SerializeField] public string ServerPublisher = null;
         [SerializeField] public uint IdPublisher = 0;
         [SerializeField] public ushort VersionPublisher = 0;
 
-        public SuppordBuildTarget target
+        public SupportBuildTarget target
         {
-            get => _target == SuppordBuildTarget.NoTarget ? SuppordTarget.GetCurrentTarget() : _target;
+            get => _target == SupportBuildTarget.NoTarget ? SuppordTarget.GetCurrentTarget() : _target;
             set
             {
                 _target = value;
@@ -117,7 +117,7 @@ namespace Nox.CCK.Worlds
             return ModRequirements;
         }
 
-        public SuppordBuildTarget GetBuildPlatform() => target;
+        public SupportBuildTarget GetBuildPlatform() => target;
 #else
         public List<string> GetScenes() => ( data_Scenes ?? new string[0]).ToList();
         public List<string> GetFeatures() => ( data_Features ?? new string[0]).ToList();

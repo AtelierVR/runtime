@@ -14,7 +14,6 @@ namespace api.nox.game
 
         public void OnUpdateEditor()
         {
-            Debug.Log("GameEditorSystem is updating!");
         }
 
         public void OnDispose()

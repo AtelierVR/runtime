@@ -27,7 +27,7 @@ namespace Nox.CCK.Worlds
         }
 
 #if UNITY_EDITOR
-        public Asset GetAsset(ushort version, SuppordBuildTarget target) => assets
+        public Asset GetAsset(ushort version, SupportBuildTarget target) => assets
             .FirstOrDefault(a => a.version == version && a.CompatibleEngine() && a.platform == SuppordTarget.GetTargetName(target));
 #endif
 

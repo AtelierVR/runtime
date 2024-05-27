@@ -6,7 +6,6 @@
         "UniTask"
     ],
     "includePlatforms": [],
-    "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],

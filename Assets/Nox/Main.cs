@@ -2,10 +2,6 @@
 using Nox.Network.Instances;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using Nox.CCK;
-using Nox.Users;
-using System.Threading.Tasks;
-using Nox.Worlds;
 using Nox.Events;
 using Nox.UI;
 
@@ -14,6 +10,7 @@ namespace Nox
     public class Main : MonoBehaviour
     {
         public Autohand.AutoHandPlayer player;
+        
         public static Main Instance { get; private set; }
 
         public void Start()

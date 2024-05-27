@@ -5129,6 +5129,7 @@ MonoBehaviour:
   data_Spawns: []
   data_RespawnHeight: 0
   data_Type: 0
+  SequentialIndex: 0
   NetworkObjects: []
   Spawns: []
   SpawnType: 0

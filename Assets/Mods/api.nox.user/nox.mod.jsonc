@@ -1,0 +1,59 @@
+{
+    "type": "mod",
+    "id": "api.nox.user",
+    "name": "User Module",
+    "description": "Provides the User API for the game.",
+    "license": "GPL-3.0",
+    "contact": {
+        "email": "hactazia@gmail.com",
+        "source": "https://github.com/AtelierVR/api.nox.user",
+        "website": "https://nox.hactazia.fr/",
+        "issues": "https://github.com/AtelierVR/api.nox.user/issues"
+    },
+    "authors": [
+        {
+            "name": "Hactazia",
+            "website": "https://hactazia.fr/",
+            "email": "hactazia@gmail.com",
+            "discord": "hactazia"
+        }
+    ],
+    "contributors": [],
+    "version": "1.0.0",
+    "entrypoints": {
+        "editor": [
+            "api.nox.user.UserEditorMod"
+        ]
+    },
+    "references": [],
+    "engines": {
+        "unity": ">=2023.2.19"
+    },
+    "platforms": [
+        "windows",
+        "linux",
+        "macos",
+        "android",
+        "ios",
+        "webgl"
+    ],
+    "relations": {
+        "game": ">=1.0.0",
+        "network": ">=1.0.0"
+    },
+    "side": [
+        "editor"
+    ],
+    "required": [],
+    "provides": [
+        "fr.hactazia.sdk.user"
+    ],
+    "permissions": [
+        "file",
+        "file.read",
+        "file.write",
+        "config",
+        "config.global"
+    ],
+    "icon": "icon.png"
+}

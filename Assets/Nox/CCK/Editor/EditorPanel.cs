@@ -15,5 +15,6 @@ namespace Nox.CCK.Editor
         public VisualElement MakeContent(Dictionary<string, object> data = null);
         public event OnPanelOpenDelegate OnPanelOpen;
         public event OnPanelCloseDelegate OnPanelClose;
+        public bool IsActive();
     }
 }
