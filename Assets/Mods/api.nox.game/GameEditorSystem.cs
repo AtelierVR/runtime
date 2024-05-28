@@ -6,7 +6,6 @@ namespace api.nox.game
 {
     public class GameEditorSystem : EditorModInitializer
     {
-
         public void OnInitializeEditor(EditorModCoreAPI api)
         {
             Debug.Log("Hello from GameEditorSystem!");

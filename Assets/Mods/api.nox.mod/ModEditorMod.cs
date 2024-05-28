@@ -5,14 +5,14 @@ using Nox.CCK.Mods.Initializers;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace api.nox.test
+namespace api.nox.mod
 {
-    public class TestEditorMod : EditorModInitializer
+    public class ModEditorMod : EditorModInitializer
     {
 
         public void OnInitializeEditor(EditorModCoreAPI api)
         {
-            Debug.Log("Hello from TestEditorMod!");
+            Debug.Log("Hello from ModEditorMod!");
             api.PanelAPI.AddLocalPanel(new PanelExample());
         }
 
@@ -27,8 +27,8 @@ namespace api.nox.test
 
     public class PanelExample : EditorPanelBuilder
     {
-        public string Id { get; } = "panel_example";
-        public string Name { get; } = "Test/Example";
+        public string Id { get; } = "builder";
+        public string Name { get; } = "Mod/Builder";
         public bool Hidded { get; } = false;
 
         public VisualElement OnOpenned(Dictionary<string, object> data)

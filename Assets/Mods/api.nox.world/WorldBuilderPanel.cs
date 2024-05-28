@@ -17,6 +17,7 @@ namespace api.nox.world
     {
         public string Id { get; } = "builder";
         public string Name { get; } = "World/Builder";
+        public bool Hidded { get; } = false;
         private string lasthashnotif = "";
         internal VisualElement _root = new();
         internal MainDescriptor[] Descriptors => MainDescriptorEditor.GetWorldDescriptors(false);

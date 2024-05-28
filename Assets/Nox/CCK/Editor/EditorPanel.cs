@@ -8,6 +8,7 @@ namespace Nox.CCK.Editor
         public string GetModId();
         public string GetId();
         public string GetName();
+        public bool IsHidden();
         public string GetFullId() => $"{GetModId()}.{GetId()}";
 
         public delegate void OnPanelOpenDelegate();

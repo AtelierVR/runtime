@@ -12,47 +12,34 @@ namespace Nox.Editor
 
         internal List<EditorPanel> _panels = new List<EditorPanel>();
 
-        public bool HasActivePanel() => EditorPanelManager.HasActivePanel();
-        public bool HasPanel(string panelId) => _panels.Any(p => p.GetId() == panelId || p.GetFullId() == panelId);
-        internal EditorPanel AddEditorPanel(EditorPanelBuilder panel)
+        public bool SetActivePanel(CCK.Editor.EditorPanel panel) => EditorPanelManager.SetActivePanel(panel);
+        public bool SetActivePanel(string panelId) => EditorPanelManager.HasPanel(panelId) && EditorPanelManager.SetActivePanel(EditorPanelManager.GetPanel(panelId));
+        public CCK.Editor.EditorPanel GetActivePanel() => EditorPanelManager.GetActivePanel();
+        public bool IsActivePanel(CCK.Editor.EditorPanel panel) => EditorPanelManager.IsActivePanel(panel.GetFullId());
+        public bool IsActivePanel(string panelId) => EditorPanelManager.IsActivePanel(panelId);
+        public CCK.Editor.EditorPanel GetPanel(string panelId) => EditorPanelManager.GetPanel(panelId);
+        public CCK.Editor.EditorPanel[] GetPanels() => EditorPanelManager.GetPanels();
+        public bool HasPanel(CCK.Editor.EditorPanel panel) => EditorPanelManager.HasPanel(panel.GetFullId());
+        public bool HasPanel(string panelId) => EditorPanelManager.HasPanel(panelId);
+        public CCK.Editor.EditorPanel AddLocalPanel(EditorPanelBuilder panel)
         {
-            if (HasPanel(panel.Id))
-                return null;
+            if (HasLocalPanel(panel.Id)) return null;
             var editorpanel = new EditorPanel(_mod, panel);
             _panels.Add(editorpanel);
             return editorpanel;
         }
-
-        public bool RemovePanel(string panelId) => HasPanel(panelId) && RemovePanel(GetPanel(panelId));
-        public bool RemovePanel(CCK.Editor.EditorPanel panel)
+        public bool RemoveLocalPanel(CCK.Editor.EditorPanel panel)
         {
-            if (!HasPanel(panel.GetId()))
-                return false;
+            if (!HasLocalPanel(panel)) return false;
             var fullpanel = GetEditorPanel(panel.GetFullId());
-            if (fullpanel.GetFullId() == EditorPanelManager.GetActivePanel().GetFullId())
-            {
-                fullpanel.InvokeClosePanel();
-                SetActivePanel("default");
-            }
             _panels.Remove(fullpanel);
             return true;
         }
-        
-        public bool SetActivePanel(CCK.Editor.EditorPanel panel) => EditorPanelManager.SetActivePanel(panel);
-        public bool SetActivePanel(string panelId) => HasPanel(panelId) && SetActivePanel(GetPanel(panelId));
-        public CCK.Editor.EditorPanel GetActivePanel() => HasActivePanel() ? EditorPanelManager.GetActivePanel() : null;
-        public CCK.Editor.EditorPanel GetPanel(string panelId) => GetEditorPanel(panelId) ?? EditorPanelManager.GetPanel(panelId);
-
-        public CCK.Editor.EditorPanel[] GetPanels() => EditorPanelManager.GetPanels();
-
-        internal EditorPanel GetEditorPanel(string panelId) => _panels.FirstOrDefault(p => p.GetId() == panelId || p.GetFullId() == panelId);
-
-        public bool HasPanel(CCK.Editor.EditorPanel panel) => HasPanel(panel.GetFullId());
-
-        public bool IsActivePanel(CCK.Editor.EditorPanel panel) => IsActivePanel(panel.GetFullId());
-
-        public bool IsActivePanel(string panelId) => GetActivePanel().GetFullId() == panelId;
-
-        public CCK.Editor.EditorPanel AddPanel(EditorPanelBuilder panel) => AddEditorPanel(panel);
+        public bool RemoveLocalPanel(string panelId) => HasLocalPanel(panelId) && RemoveLocalPanel(GetLocalPanel(panelId));
+        public bool HasLocalPanel(CCK.Editor.EditorPanel panel) => HasLocalPanel(panel.GetFullId());
+        public bool HasLocalPanel(string panelId) => _panels.Any(panel => panel.GetId() == panelId || panel.GetFullId() == panelId);
+        public CCK.Editor.EditorPanel GetLocalPanel(string panelId) => GetEditorPanel(panelId);
+        public CCK.Editor.EditorPanel[] GetLocalPanels() => _panels.ToArray();
+        internal EditorPanel GetEditorPanel(string panelId) => _panels.FirstOrDefault(panel => panel.GetId() == panelId || panel.GetFullId() == panelId);
     }
 }

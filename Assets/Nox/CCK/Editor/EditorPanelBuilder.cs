@@ -7,6 +7,7 @@ namespace Nox.CCK.Editor
     {
         public string Id { get; }
         public string Name { get; }
+        public bool Hidded { get; }
 
         public VisualElement OnOpenned(Dictionary<string, object> data);
         public void OnClosed() { }

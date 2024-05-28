@@ -24,9 +24,9 @@ namespace api.nox.world
             _builder = new WorldBuilderPanel(this);
             _publisher = new WorldPublisherPanel(this);
 
-            _loaderpanel = api.PanelAPI.AddPanel(_loader);
-            _builderpanel = api.PanelAPI.AddPanel(_builder);
-            _publisherpanel = api.PanelAPI.AddPanel(_publisher);
+            _loaderpanel = api.PanelAPI.AddLocalPanel(_loader);
+            _builderpanel = api.PanelAPI.AddLocalPanel(_builder);
+            _publisherpanel = api.PanelAPI.AddLocalPanel(_publisher);
         }
 
         public void OnDispose()

@@ -57,7 +57,8 @@ namespace Nox.Editor
             dropdown.Clear();
             var panels = GetPanels();
             foreach (var panel in panels)
-                dropdown.menu.AppendAction(panel.GetName(), a => Goto(panel.GetFullId()), a => DropdownMenuAction.Status.Normal);
+                if (!panel.IsHidden())
+                    dropdown.menu.AppendAction(panel.GetName(), a => Goto(panel.GetFullId()), a => DropdownMenuAction.Status.Normal);
         }
 
 
@@ -66,7 +67,7 @@ namespace Nox.Editor
             var panel = GetPanel(id);
             if (panel == null) return false;
             var content = panel.MakeContent(data);
-            if (content == null) return false; 
+            if (content == null) return false;
             var root = Instance.rootVisualElement.Q<VisualElement>("content");
             if (root == null) return false;
             content.style.flexGrow = 1;
@@ -100,7 +101,7 @@ namespace Nox.Editor
             if (Instance == null) return false;
             var mods = EditorModManager.GetMods();
             foreach (var mod in mods)
-                if (mod.coreAPI.EditorPanelAPI.HasPanel(panelId))
+                if (mod.coreAPI.EditorPanelAPI.HasLocalPanel(panelId))
                     return true;
             return false;
         }
@@ -126,7 +127,7 @@ namespace Nox.Editor
             if (Instance == null) return null;
             var mods = EditorModManager.GetMods();
             foreach (var mod in mods)
-                if (mod.coreAPI.EditorPanelAPI.HasPanel(panelId))
+                if (mod.coreAPI.EditorPanelAPI.HasLocalPanel(panelId))
                     return mod.coreAPI.EditorPanelAPI.GetEditorPanel(panelId);
             return null;
         }

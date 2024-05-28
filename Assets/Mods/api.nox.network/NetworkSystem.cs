@@ -21,8 +21,6 @@ namespace api.nox.network
             World = new NetWorld(this);
         }
         
-
-
         public void OnUpdate()
         {
         }
@@ -41,5 +39,6 @@ namespace api.nox.network
 
         public User GetCurrentUser() => User.user;
         public NetworkAPIWorld WorldAPI => World;
+        public NetworkAPIUser UserAPI => User;
     }
 }

@@ -1,14 +1,15 @@
 {
+    "$schema": "",
     "type": "mod",
-    "id": "api.nox.world",
-    "name": "Test Module",
-    "description": "Provides the Test API for the game.",
+    "id": "api.nox.mod",
+    "name": "Mod Module",
+    "description": "Provides the Mod API for the game.",
     "license": "GPL-3.0",
     "contact": {
         "email": "hactazia@gmail.com",
-        "source": "https://github.com/AtelierVR/api.nox.world",
+        "source": "https://github.com/AtelierVR/api.nox.mod",
         "website": "https://nox.hactazia.fr/",
-        "issues": "https://github.com/AtelierVR/api.nox.world/issues"
+        "issues": "https://github.com/AtelierVR/api.nox.mod/issues"
     },
     "authors": [
         {
@@ -22,7 +23,7 @@
     "version": "1.0.0",
     "entrypoints": {
         "editor": [
-            "api.nox.world.WorldEditorMod"
+            "api.nox.mod.ModEditorMod"
         ]
     },
     "references": [],
@@ -46,7 +47,7 @@
     ],
     "required": [],
     "provides": [
-        "fr.hactazia.sdk.world"
+        "fr.hactazia.sdk.mod"
     ],
     "permissions": [
         "file",
@@ -57,4 +58,3 @@
     ],
     "icon": "icon.png"
 }
-

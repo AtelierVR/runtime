@@ -245,25 +245,23 @@ namespace Nox.Editor.Mods
                 else readyMods.Add(modSearcher);
             }
 
-            // prioritize mods by dependencies
+            // baba is you
             readyMods.Sort((a, b) =>
             {
+                var i = 0;
                 foreach (var required in a.ModMetadata.GetDepends())
                     if (required.GetId() == b.ModMetadata.GetId() || b.ModMetadata.GetProvides().Contains(required.GetId()))
-                        return 1;
+                        i++;
                 foreach (var required in b.ModMetadata.GetDepends())
                     if (required.GetId() == a.ModMetadata.GetId() || a.ModMetadata.GetProvides().Contains(required.GetId()))
-                        return -1;
-                return 0;
+                        i--;
+                return i;
             });
 
             for (var i = 0; i < readyMods.Count; i++)
                 Debug.Log("Loading mod " + readyMods[i].ModMetadata.GetId() + " v" + readyMods[i].ModMetadata.GetVersion() + " (" + (i + 1) + "/" + readyMods.Count + ")");
             Debug.Log("Mods loaded");
 
-
-
-            var loadedMods = new List<EditorMod>();
             var success = true;
             foreach (var modSearcher in readyMods)
             {
@@ -286,7 +284,7 @@ namespace Nox.Editor.Mods
                         editorClasses.Add((CCK.Mods.Initializers.EditorModInitializer)Activator.CreateInstance(type));
                     }
                 }
-                
+
                 if (mainClasses.Count != main.Length)
                     Debug.LogError("Failed to load main entry points for mod " + modSearcher.ModMetadata.GetId());
                 if (editorClasses.Count != editor.Length)
@@ -295,7 +293,7 @@ namespace Nox.Editor.Mods
                 try
                 {
                     var mod = new EditorMod(modSearcher.ModMetadata, mainClasses.ToArray(), editorClasses.ToArray());
-                    loadedMods.Add(mod);
+                    AddMod(mod);
                     if (!mod.SetEnabled(true))
                         throw new Exception("Failed to enable mod");
                 }
@@ -308,12 +306,17 @@ namespace Nox.Editor.Mods
                 if (!success) break;
             }
 
-            if (success)
-                foreach (var mod in loadedMods) AddMod(mod);
-            else
-                foreach (var mod in loadedMods)
-                    if (mod.SetEnabled(false))
-                        Debug.LogError("Failed to disable mod " + mod.GetMetadata().GetId());
+            if (!success)
+                foreach (var modsearch in readyMods)
+                {
+                    var mod = GetMod(modsearch.ModMetadata.GetId());
+                    if (mod != null)
+                    {
+                        if (mod.SetEnabled(false))
+                            Debug.LogError("Failed to disable mod " + mod.GetMetadata().GetId());
+                        RemoveMod(GetMod(mod.GetMetadata().GetId()));
+                    }
+                }
         }
 
         private class ModSearcher
@@ -355,6 +358,14 @@ namespace Nox.Editor.Mods
 
         internal static EditorMod GetMod(string id) =>
             _mods.FirstOrDefault(mod => mod.GetMetadata().GetId() == id || mod.GetMetadata().GetProvides().Contains(id));
+
+        internal static bool HasMod(string id)
+        {
+            foreach (var mod in _mods)
+                if (mod.GetMetadata().GetId() == id || mod.GetMetadata().GetProvides().Contains(id))
+                    return true;
+            return false;
+        }
     }
 }
 #endif

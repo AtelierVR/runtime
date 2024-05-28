@@ -2,13 +2,14 @@ using System;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Mods;
+using Nox.CCK.Mods.Networks;
 using Nox.CCK.Users;
 using UnityEngine;
 using UnityEngine.Networking;
 
 namespace api.nox.network
 {
-    public class NetUser
+    public class NetUser : NetworkAPIUser
     {
         private readonly NetworkSystem _mod;
 
@@ -26,6 +27,7 @@ namespace api.nox.network
             catch { }
             if (req.responseCode != 200) return null;
             var response = JsonUtility.FromJson<Response<User>>(req.downloadHandler.text);
+            user = response.data;
             return response.data;
         }
 
@@ -88,12 +90,5 @@ namespace api.nox.network
                 return new Response<Login> { error = new ResponseError { code = 500, message = "An error occured." } };
             }
         }
-    }
-
-    [Serializable]
-    public class Login : ShareObject
-    {
-        public string token;
-        public User user;
     }
 }

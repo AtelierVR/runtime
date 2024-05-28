@@ -1,12 +1,14 @@
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Users;
 using Nox.CCK.Worlds;
 
 namespace Nox.CCK.Mods.Networks
 {
     public interface NetworkAPI
     {
-        public Users.User GetCurrentUser();
+        public User GetCurrentUser();
         public NetworkAPIWorld WorldAPI { get; }
+        public NetworkAPIUser UserAPI { get; }
     }
 
     public interface NetworkAPIWorld
@@ -21,6 +23,21 @@ namespace Nox.CCK.Mods.Networks
         public UniTask<Asset> CreateAsset(CreateAssetData asset);
         public UniTask<World> CreateWorld(CreateWorldData world);
         public UniTask<World> UpdateWorld(UpdateWorldData world, bool withEmpty = false);
+    }
+
+    public interface NetworkAPIUser
+    {
+        public UniTask<User> FetchUserMe();
+        public UniTask<Response<bool>> FetchLogout();
+        public UniTask<Response<Login>> FetchLogin(string server, string username, string password);
+    }
+
+    
+    [System.Serializable]
+    public class Login : ShareObject
+    {
+        public string token;
+        public User user;
     }
     
     [System.Serializable]

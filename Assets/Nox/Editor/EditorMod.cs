@@ -2,6 +2,7 @@ using System;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Mods.Networks;
 
 namespace Nox.Editor.Mods
 {
@@ -13,6 +14,16 @@ namespace Nox.Editor.Mods
             _initializers = initializers;
             _editorinitializers = editorinitializers;
             coreAPI = new EditorModCoreAPI(this);
+            Debug.Log("htdf 1" + this);
+            Debug.Log("htdf 2" + this?.coreAPI);
+            Debug.Log("htdf 3" + this?.coreAPI?.EditorModAPI);
+            Debug.Log("htdf 4" + this?.coreAPI?.EditorModAPI?.GetEditorMod("network"));
+            Debug.Log("htdf 5" + this?.coreAPI?.EditorModAPI?.GetEditorMod("network")?.GetMainClasses());
+            Debug.Log("htdf 6" + this?.coreAPI?.EditorModAPI?.GetEditorMod("network")?.GetMainClasses()[0]);
+            var net = (this?.coreAPI?.EditorModAPI?.GetEditorMod("network")?.GetMainClasses()[0] as NetworkAPI);
+            Debug.Log("htdf 8" + net);
+            Debug.Log("htdf 9" + net?.WorldAPI);
+            Debug.Log("htdf 10" + net?.UserAPI);
         }
 
         private ModMetadata _metadata;

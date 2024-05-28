@@ -38,6 +38,7 @@ namespace Nox.Editor
         public string GetModId() => _modid;
         public string GetId() => _panel.Id;
         public string GetName() => _panel.Name;
+        public bool IsHidden() => _panel.Hidded;
         internal string GetFullId() => $"{GetModId()}.{GetId()}";
 
         public VisualElement MakeContent(Dictionary<string, object> data = null) => _panel.OnOpenned(data);

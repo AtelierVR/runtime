@@ -20,6 +20,7 @@ namespace api.nox.world
     {
         public string Id { get; } = "publisher";
         public string Name { get; } = "World/Publisher";
+        public bool Hidded { get; } = false;
         internal VisualElement _root = new();
         internal MainDescriptor[] Descriptors => MainDescriptorEditor.GetWorldDescriptors(false);
 
@@ -154,6 +155,7 @@ namespace api.nox.world
                 descriptor.target = (SupportBuildTarget)e.newValue;
             });
             _root.Q<Button>("goto-builder").clicked += () => _mod._api.PanelAPI.SetActivePanel("builder");
+            _root.Q<Button>("goto-login").clicked += () => _mod._api.PanelAPI.SetActivePanel("api.nox.user.login");
             var notifications = _root.Q<VisualElement>("notifications");
             foreach (var type in new NotificationType[] { NotificationType.Error, NotificationType.Warning, NotificationType.Info })
             {

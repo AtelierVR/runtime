@@ -11,6 +11,7 @@ namespace api.nox.world
     {
         public string Id { get; } = "loader";
         public string Name { get; } = "World/Loader";
+        public bool Hidded { get; } = false;
 
         internal WorldEditorMod _mod;
         internal WorldLoaderPanel(WorldEditorMod mod) => _mod = mod;

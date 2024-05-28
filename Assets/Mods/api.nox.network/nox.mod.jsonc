@@ -31,7 +31,7 @@
         "windows"
     ],
     "relations": {
-        "game": ">=1.0.0"
+        // "game": ">=1.0.0"
     },
     "side": [
         "editor"
