@@ -91,6 +91,9 @@ namespace api.nox.mod
             File.WriteAllText(path, json);
             return true;
         }
+
+        public bool Match(ModMetadata req) => GetId() == req.GetId() || GetProvides().Contains(req.GetId());
+        public bool Match(string id) => GetId() == id || GetProvides().Contains(id);
     }
 
     internal class GEngine : MEngine

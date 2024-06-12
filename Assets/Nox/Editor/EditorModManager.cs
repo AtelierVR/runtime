@@ -99,29 +99,17 @@ namespace Nox.Editor.Mods
                 if (mod.Metadata.GetProvides().Length > 0)
                     Debug.Log("Provides: " + string.Join(", ", mod.Metadata.GetProvides()));
             }
-
-            var sidedMods = new List<ModSource>();
-            foreach (var mod in modSearchers)
-                if (mod.Metadata.GetSide().HasFlag(CCK.Mods.Metadata.SideFlags.Editor))
-                    sidedMods.Add(mod);
-                else Debug.LogWarning("Mod " + mod.Metadata.GetId() + " is not for the editor");
-
             var platformEngine = new List<ModSource>();
-            foreach (var mod in sidedMods)
-            {
-                var incompatiblePlatform = false;
-                var incompatibleEngine = false;
-                var noclass = mod.Metadata.GetEntryPoints().GetMain().Length + mod.Metadata.GetEntryPoints().GetEditor().Length == 0;
-                if (!incompatiblePlatform && !incompatibleEngine && !noclass)
+            foreach (var mod in modSearchers)
+                if (mod.Metadata.GetEntryPoints().GetMain().Length + mod.Metadata.GetEntryPoints().GetEditor().Length == 0)
                     platformEngine.Add(mod);
-            }
 
             var ckeckedMods = new List<ModSource>();
 
-            foreach (var mod in sidedMods)
+            foreach (var mod in platformEngine)
             {
                 foreach (var provide in mod.Metadata.GetProvides())
-                    foreach (var mod2 in sidedMods)
+                    foreach (var mod2 in platformEngine)
                         if (mod2.Metadata.GetId() == provide)
                         {
                             Debug.LogError("Mod " + mod.Metadata.GetId() + " provides " + provide + " but it is already provided by " + mod2.Metadata.GetId());

@@ -37,5 +37,8 @@ namespace Nox.CCK.Mods
 
         public JObject ToObject();
         public string ToJson();
+
+        public bool Match(ModMetadata req);
+        public bool Match(string id);
     }
 }

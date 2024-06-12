@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEngine;
 
 namespace Nox.CCK
 {
@@ -30,6 +31,21 @@ namespace Nox.CCK
             "macos" => Platfrom.MacOS,
             "android" => Platfrom.Android,
             _ => Platfrom.None,
+        };
+
+        public static Platfrom CurrentPlatform => Application.platform switch
+        {
+            RuntimePlatform.WindowsPlayer => Platfrom.Windows,
+            RuntimePlatform.WindowsEditor => Platfrom.Windows,
+            RuntimePlatform.LinuxPlayer => Platfrom.Linux,
+            RuntimePlatform.LinuxEditor => Platfrom.Linux,
+            RuntimePlatform.LinuxServer => Platfrom.Linux,
+            RuntimePlatform.LinuxHeadlessSimulation => Platfrom.Linux,
+            RuntimePlatform.OSXPlayer => Platfrom.MacOS,
+            RuntimePlatform.OSXEditor => Platfrom.MacOS,
+            RuntimePlatform.IPhonePlayer => Platfrom.IOS,
+            RuntimePlatform.Android => Platfrom.Android,
+            _ => Platfrom.None
         };
 
 #if UNITY_EDITOR

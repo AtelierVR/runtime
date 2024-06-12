@@ -6,6 +6,8 @@ namespace Nox.CCK.Mods.Initializers
     {
         public void OnInitialize(ModCoreAPI api) { }
         public void OnUpdate() { }
+        public void OnLateUpdate() { }
+        public void OnFixedUpdate() { }
         public void OnDispose();
 
         public virtual T Call<T>(string method, params object[] args)

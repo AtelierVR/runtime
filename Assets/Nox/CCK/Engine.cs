@@ -1,4 +1,7 @@
-﻿namespace Nox.CCK
+﻿using System;
+using UnityEngine;
+
+namespace Nox.CCK
 {
     public enum Engine : byte
     {
@@ -28,5 +31,8 @@
             "source" => Engine.Source,
             _ => Engine.None,
         };
+
+        public static Engine CurrentEngine => Engine.Unity;
+        public static Version CurrentVersion => new(Application.unityVersion.Split('f')[0]);
     }
 }

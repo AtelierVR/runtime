@@ -38,43 +38,7 @@
   "references": [
     {
       "name": "api.nox.test",
-      "file": "b891dcd1f5294ee3950fa111c1c498b5.dll",
-      "engine": {
-        "name": "unity",
-        "version": "==2023.2.19"
-      },
-      "platform": "windows"
-    },
-    {
-      "name": "api.nox.test",
-      "file": "9dac6719d84d48af89e4a56246877c86.dll",
-      "engine": {
-        "name": "unity",
-        "version": "==2023.2.19"
-      },
-      "platform": "windows"
-    },
-    {
-      "name": "api.nox.test",
-      "file": "f52252efc9b746fa9352247cef3c439e.dll",
-      "engine": {
-        "name": "unity",
-        "version": "==2023.2.19"
-      },
-      "platform": "windows"
-    },
-    {
-      "name": "api.nox.test",
-      "file": "7e7eaa2dd8a347d086e83a6bae1f92b5.dll",
-      "engine": {
-        "name": "unity",
-        "version": "==2023.2.19"
-      },
-      "platform": "windows"
-    },
-    {
-      "name": "api.nox.test",
-      "file": "9ba4d136ce7a4e7ca3924ce5f18a6c2e.dll",
+      "file": "9cfbbb0380e649dd9a7b241dc283ef80.dll",
       "engine": {
         "name": "unity",
         "version": "==2023.2.19"

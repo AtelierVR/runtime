@@ -198,5 +198,8 @@ namespace Nox.Mods
         }
 
         public string ToJson() => ToObject().ToString();
+
+        public bool Match(CCKMetadata req) => GetId() == req.GetId() || GetProvides().Contains(req.GetId());
+        public bool Match(string id) => GetId() == id || GetProvides().Contains(id);
     }
 }
