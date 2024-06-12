@@ -143,7 +143,7 @@ namespace api.nox.world
         {
             _root.ClearBindings();
             _root.Clear();
-            _root.Add(Resources.Load<VisualTreeAsset>("api.nox.world.publisher").CloneTree());
+            _root.Add(_mod._api.AssetAPI.GetLocalAsset<VisualTreeAsset>("publisher").CloneTree());
             _root.Q<Label>("version").text = "v" + _mod._api.ModMetadata.GetVersion();
             var descriptor = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
             _root.Q<EnumField>("platform-field").Init(descriptor?.GetBuildPlatform() ?? SupportBuildTarget.NoTarget);
@@ -154,19 +154,19 @@ namespace api.nox.world
                 if (descriptor == null) return;
                 descriptor.target = (SupportBuildTarget)e.newValue;
             });
-            _root.Q<Button>("goto-builder").clicked += () => _mod._api.PanelAPI.SetActivePanel("builder");
+            _root.Q<Button>("goto-builder").clicked += () => _mod._api.PanelAPI.SetActivePanel("api.nox.world.builder");
             _root.Q<Button>("goto-login").clicked += () => _mod._api.PanelAPI.SetActivePanel("api.nox.user.login");
             var notifications = _root.Q<VisualElement>("notifications");
             foreach (var type in new NotificationType[] { NotificationType.Error, NotificationType.Warning, NotificationType.Info })
             {
-                var container = Resources.Load<VisualTreeAsset>("api.nox.world.notification").CloneTree();
+                var container = _mod._api.AssetAPI.GetLocalAsset<VisualTreeAsset>("notification").CloneTree();
                 container.style.display = DisplayStyle.None;
                 container.style.marginLeft = 2;
                 container.style.marginRight = 2;
                 container.name = "notfiication-container-" + type.ToString().ToLower();
                 container.Q<VisualElement>("content").Add(new Label(type.ToString()) { name = "notification-label-" + type.ToString().ToLower() });
                 container.Q<VisualElement>("actions").style.display = DisplayStyle.None;
-                container.Q<Image>("icon").image = Resources.Load<Texture2D>(type.ToString());
+                container.Q<Image>("icon").image = _mod._api.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/"+type.ToString());
                 notifications.Add(container);
             }
             _lastDisplay = DisplayFlags.None;

@@ -283,17 +283,17 @@ namespace api.nox.world
                     notifs.Sort((a, b) => a.Type.CompareTo(b.Type));
                     foreach (var notification in notifs)
                     {
-                        var item = Resources.Load<VisualTreeAsset>("api.nox.world.notification").CloneTree();
+                        var item = _mod._api.AssetAPI.GetLocalAsset<VisualTreeAsset>("notification").CloneTree();
                         item.Q<VisualElement>("content").Add(notification.Content);
                         if (item.Q<VisualElement>("typing") != null)
                             if (notification.Type == NotificationType.Error)
-                                item.Q<Image>("icon").style.backgroundImage = Resources.Load<Texture2D>("error");
+                                item.Q<Image>("icon").style.backgroundImage = _mod._api.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/error");
                             else if (notification.Type == NotificationType.Warning)
-                                item.Q<Image>("icon").style.backgroundImage = Resources.Load<Texture2D>("warning");
+                                item.Q<Image>("icon").style.backgroundImage = _mod._api.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/warning");
                             else if (notification.Type == NotificationType.Info)
-                                item.Q<Image>("icon").style.backgroundImage = Resources.Load<Texture2D>("info");
+                                item.Q<Image>("icon").style.backgroundImage = _mod._api.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/info");
                             else if (notification.Type == NotificationType.Good)
-                                item.Q<Image>("icon").style.backgroundImage = Resources.Load<Texture2D>("good");
+                                item.Q<Image>("icon").style.backgroundImage = _mod._api.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/good");
                             else item.Q<VisualElement>("typing").style.display = DisplayStyle.None;
                         if (notification.Actions != null && notification.Actions.Count > 0)
                             foreach (var action in notification.Actions)
@@ -314,12 +314,12 @@ namespace api.nox.world
             lasthashnotif = "";
             _root.ClearBindings();
             _root.Clear();
-            _root.Add(Resources.Load<VisualTreeAsset>("api.nox.world.builder").CloneTree());
+            _root.Add(_mod._api.AssetAPI.GetLocalAsset<VisualTreeAsset>("builder").CloneTree());
             _root.Q<Label>("version").text = "v" + _mod._api.ModMetadata.GetVersion();
             var descriptor = Descriptors.Length > 0 ? Descriptors[0] : null;
             _root.Q<EnumField>("platform-field").Init(descriptor?.GetBuildPlatform() ?? SupportBuildTarget.NoTarget);
             _root.Q<ObjectField>("descriptor-field").value = descriptor;
-            _root.Q<Button>("goto-publisher").clicked += () => _mod._api.PanelAPI.SetActivePanel("publisher");
+            _root.Q<Button>("goto-publisher").clicked += () => _mod._api.PanelAPI.SetActivePanel("api.nox.world.publisher");
             _root.Q<EnumField>("platform-field").RegisterValueChangedCallback(e =>
             {
                 var descriptor = Descriptors.Length > 0 ? Descriptors[0] : null;

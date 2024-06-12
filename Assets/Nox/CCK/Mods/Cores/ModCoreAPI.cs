@@ -4,6 +4,7 @@ using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Groups;
 using Nox.CCK.Mods.Mods;
 using Nox.CCK.Mods.Networks;
+using Nox.CCK.Mods.Assets;
 
 namespace Nox.CCK.Mods.Cores
 {
@@ -16,5 +17,6 @@ namespace Nox.CCK.Mods.Cores
         public EventAPI EventAPI { get; }
         public NetworkAPI NetworkAPI { get; }
         public ModAPI ModAPI { get; }
+        public AssetAPI AssetAPI { get; }
     }
 }

@@ -1,44 +1,87 @@
 {
-    "type": "modsuystem",
-    "id": "api.nox.network",
-    "name": "Game system",
-    "description": "Provides the Game API for the game.",
-    "license": "GPL-3.0",
-    "contact": {
-        "email": "hactazia@gmail.com",
-        "source": "https://github.com/AtelierVR/api.nox.network",
-        "website": "https://nox.hactazia.fr/",
-        "issues": "https://github.com/AtelierVR/api.nox.network/issues"
+  "type": "modsuystem",
+  "id": "api.nox.network",
+  "provides": [
+    "fr.hactazia.network",
+    "network"
+  ],
+  "name": "Game system",
+  "version": "1.0.0",
+  "description": "Provides the Game API for the game.",
+  "license": "GPL-3.0",
+  "icon": null,
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.network",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.network/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [],
+  "references": [
+    {
+      "name": "api.nox.network",
+      "file": "954712a5ead24a95aafa9a25d9abddf6.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
     },
-    "authors": [
-        {
-            "name": "Hactazia",
-            "website": "https://hactazia.fr/",
-            "email": "hactazia@gmail.com",
-            "discord": "hactazia"
-        }
+    {
+      "name": "api.nox.network",
+      "file": "260d9231dab246188861e146a070aa8e.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    },
+    {
+      "name": "api.nox.network",
+      "file": "46f815f02fd549bfafa11dd4411b2ee0.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    },
+    {
+      "name": "api.nox.network",
+      "file": "f843d60dd6ee473fa7e48ee83615a627.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    },
+    {
+      "name": "api.nox.network",
+      "file": "3e4226c33f10403d8cbf1023bca496d8.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    }
+  ],
+  "entrypoints": {
+    "main": [
+      "api.nox.network.NetworkSystem"
     ],
-    "version": "1.0.0",
-    "entrypoints": {
-        "main": [
-            "api.nox.network.NetworkSystem"
-        ]
-    },
-    "engines": {
-        "unity": ">=2023.2.19"
-    },
-    "platforms": [
-        "windows"
-    ],
-    "relations": {
-        // "game": ">=1.0.0"
-    },
-    "side": [
-        "editor"
-    ],
-    "required": [],
-    "provides": [
-        "fr.hactazia.network",
-        "network"
-    ]
+    "client": [],
+    "editor": [],
+    "instance": []
+  },
+  "side": [
+    "editor"
+  ],
+  "permissions": []
 }

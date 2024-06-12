@@ -8,7 +8,7 @@ namespace Nox.Editor.Mods
     {
         private EditorMod _mod;
         internal EditorModAPI(EditorMod mod) => _mod = mod;
-        
+
         public ModMetadata GetMetadata(string id) => GetEditorMod(id)?.GetMetadata();
 
         internal EditorMod GetEditorMod(string id) => EditorModManager.GetMod(id);
@@ -17,6 +17,8 @@ namespace Nox.Editor.Mods
         public Mod GetMod(string id) => GetEditorMod(id);
 
         public Mod[] GetMods() => GetEditorMods();
+
+        public ModMetadata[] GetDetectedMetadatas() => EditorModManager.DetectedMetadatas();
 
         public UniTask<Mod> LoadMod(string id)
         {

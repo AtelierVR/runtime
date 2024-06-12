@@ -26,10 +26,10 @@ namespace Nox.Editor
         }
 
         [MenuItem("Nox/Restart")]
-        public static void Restart() { }
-
-        [MenuItem("Nox/Compile")]
-        public static void Compile() => AssetDatabase.Refresh();
+        public static void Restart()
+        {
+            AssetDatabase.Refresh();
+        }
 
         private void OnGUI()
         {

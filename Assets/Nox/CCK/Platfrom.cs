@@ -1,4 +1,6 @@
-﻿namespace Nox.CCK
+﻿using UnityEditor;
+
+namespace Nox.CCK
 {
     public enum Platfrom : byte
     {
@@ -29,5 +31,17 @@
             "android" => Platfrom.Android,
             _ => Platfrom.None,
         };
+
+#if UNITY_EDITOR
+        public static Platfrom GetPlatfromFromBuildTarget(BuildTarget target) => target switch
+        {
+            BuildTarget.StandaloneWindows => Platfrom.Windows,
+            BuildTarget.StandaloneWindows64 => Platfrom.Windows,
+            BuildTarget.StandaloneLinux64 => Platfrom.Linux,
+            BuildTarget.StandaloneOSX => Platfrom.MacOS,
+            BuildTarget.Android => Platfrom.Android,
+            _ => Platfrom.None,
+        };
+#endif
     }
 }

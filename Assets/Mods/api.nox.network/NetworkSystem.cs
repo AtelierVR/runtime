@@ -15,7 +15,6 @@ namespace api.nox.network
 
         public void OnInitialize(ModCoreAPI api)
         {
-            Debug.Log("NetworkSystem initialized.");
             _api = api;
             User = new NetUser(this);
             World = new NetWorld(this);

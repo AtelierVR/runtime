@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using Nox.CCK.Editor;
 using Nox.CCK.Users;
@@ -27,7 +28,7 @@ namespace api.nox.user
         {
             if (root == null)
             {
-                root = Resources.Load<VisualTreeAsset>("UserMod").CloneTree();
+                root = _mod._api.AssetAPI.GetLocalAsset<VisualTreeAsset>("panel").CloneTree();
                 var login = root.Q<VisualElement>("login");
                 var loginButton = login.Q<Button>("connect");
                 loginButton.clicked += OnClickLogin;
@@ -116,3 +117,4 @@ namespace api.nox.user
         }
     }
 }
+#endif

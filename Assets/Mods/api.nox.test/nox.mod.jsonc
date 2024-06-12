@@ -1,60 +1,104 @@
 {
-    "$schema": "",
-    "type": "mod",
-    "id": "api.nox.test",
-    "name": "Test Module",
-    "description": "Provides the Test API for the game.",
-    "license": "GPL-3.0",
-    "contact": {
-        "email": "hactazia@gmail.com",
-        "source": "https://github.com/AtelierVR/api.nox.test",
-        "website": "https://nox.hactazia.fr/",
-        "issues": "https://github.com/AtelierVR/api.nox.test/issues"
+  "type": "mod",
+  "id": "api.nox.test",
+  "provides": [
+    "fr.hactazia.sdk.test"
+  ],
+  "name": "Test Module",
+  "version": "1.0.0",
+  "description": "Provides the Test API for the game.",
+  "license": "GPL-3.0",
+  "icon": "icon.png",
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.test",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.test/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [
+    {
+      "id": "game",
+      "version": ">=1.0.0",
+      "type": "depends"
     },
-    "authors": [
-        {
-            "name": "Hactazia",
-            "website": "https://hactazia.fr/",
-            "email": "hactazia@gmail.com",
-            "discord": "hactazia"
-        }
-    ],
-    "contributors": [],
-    "version": "1.0.0",
-    "entrypoints": {
-        "editor": [
-            "api.nox.test.TestEditorMod"
-        ]
+    {
+      "id": "network",
+      "version": ">=1.0.0",
+      "type": "depends"
+    }
+  ],
+  "references": [
+    {
+      "name": "api.nox.test",
+      "file": "b891dcd1f5294ee3950fa111c1c498b5.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
     },
-    "references": [],
-    "engines": {
-        "unity": ">=2023.2.19"
+    {
+      "name": "api.nox.test",
+      "file": "9dac6719d84d48af89e4a56246877c86.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
     },
-    "platforms": [
-        "windows",
-        "linux",
-        "macos",
-        "android",
-        "ios",
-        "webgl"
-    ],
-    "relations": {
-        "game": ">=1.0.0",
-        "network": ">=1.0.0"
+    {
+      "name": "api.nox.test",
+      "file": "f52252efc9b746fa9352247cef3c439e.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
     },
-    "side": [
-        "editor"
+    {
+      "name": "api.nox.test",
+      "file": "7e7eaa2dd8a347d086e83a6bae1f92b5.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    },
+    {
+      "name": "api.nox.test",
+      "file": "9ba4d136ce7a4e7ca3924ce5f18a6c2e.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    }
+  ],
+  "entrypoints": {
+    "main": [],
+    "client": [],
+    "editor": [
+      "api.nox.test.TestEditorMod"
     ],
-    "required": [],
-    "provides": [
-        "fr.hactazia.sdk.test"
-    ],
-    "permissions": [
-        "file",
-        "file.read",
-        "file.write",
-        "config",
-        "config.global"
-    ],
-    "icon": "icon.png"
+    "instance": []
+  },
+  "side": [
+    "editor"
+  ],
+  "permissions": [
+    "file",
+    "file.read",
+    "file.write",
+    "config",
+    "config.global"
+  ],
+  "$schema": ""
 }

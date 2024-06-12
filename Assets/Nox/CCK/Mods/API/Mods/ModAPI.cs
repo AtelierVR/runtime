@@ -10,5 +10,6 @@ namespace Nox.CCK.Mods.Mods
         public UniTask<bool> UnloadMod(string id);
         public UniTask<bool> ReloadMod(string id);
         public ModMetadata GetMetadata(string id);
+        public ModMetadata[] GetDetectedMetadatas();
     }
 }

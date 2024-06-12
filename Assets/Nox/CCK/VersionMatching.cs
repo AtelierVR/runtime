@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace Nox.CCK
 {
@@ -46,6 +47,7 @@ namespace Nox.CCK
                 versionpart = version.Substring(1);
             }
 
+            Debug.WriteLine("Version: " + versionpart);
             _version = new Version(versionpart);
             _matchingType = type;
         }

@@ -4,6 +4,7 @@ namespace Nox.CCK.Mods.Metadata
     {
         string GetNamespace();
         string GetFile();
-        string GetUrl();
+        Engine GetEngine();
+        Platfrom GetPlatform();
     }
 }

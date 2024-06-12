@@ -1,0 +1,96 @@
+{
+  "type": "modsuystem",
+  "id": "api.nox.game",
+  "provides": [
+    "fr.hactazia.game",
+    "game"
+  ],
+  "name": "Game system",
+  "version": "1.0.0",
+  "description": "Provides the Game API for the game.",
+  "license": "GPL-3.0",
+  "icon": null,
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.game",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.game/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [
+    {
+      "id": "network",
+      "version": ">=1.0.0",
+      "type": "depends"
+    }
+  ],
+  "references": [
+    {
+      "name": "api.nox.game",
+      "file": "bc3572f862714b85ac21d7c33f11caf5.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    },
+    {
+      "name": "api.nox.game",
+      "file": "a009a4e08719469e986c131df4ac7acc.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    },
+    {
+      "name": "api.nox.game",
+      "file": "b9766484819949d4ae19fefdd5919915.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    },
+    {
+      "name": "api.nox.game",
+      "file": "6816c8401a0749aba11f881bdca12f60.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    },
+    {
+      "name": "api.nox.game",
+      "file": "e7ef14ace24a49a996d541ef1f28381b.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    }
+  ],
+  "entrypoints": {
+    "main": [],
+    "client": [],
+    "editor": [
+      "api.nox.game.GameEditorSystem"
+    ],
+    "instance": []
+  },
+  "side": [
+    "editor"
+  ],
+  "permissions": [],
+  "custom1": "value1",
+  "custom2": 0.25,
+  "custom3": true
+}

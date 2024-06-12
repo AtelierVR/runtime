@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace Nox.CCK.Mods
 {
@@ -11,7 +12,6 @@ namespace Nox.CCK.Mods
         public Version GetVersion();
         public Metadata.SideFlags GetSide();
         public string[] GetPermissions();
-        public string[] GetRequired();
         public Metadata.Entries GetEntryPoints();
 
         public string GetName();
@@ -19,11 +19,9 @@ namespace Nox.CCK.Mods
         public string GetLicense();
         public string GetIcon(uint size = 0);
 
-
         public Metadata.Contact GetContact();
         public Metadata.Person[] GetAuthors();
         public Metadata.Person[] GetContributors();
-
 
         public Metadata.Relation[] GetRelations();
         public Metadata.Relation[] GetDepends();
@@ -31,13 +29,13 @@ namespace Nox.CCK.Mods
         public Metadata.Relation[] GetConflicts();
         public Metadata.Relation[] GetRecommends();
         public Metadata.Relation[] GetSuggests();
-
         public Metadata.Reference[] GetReferences();
-        public Metadata.Engine[] GetEngines();
-        public string[] GetPlatforms();
 
         public T GetCustom<T>(string key) where T : class;
         public bool HasCustom<T>(string key) where T : class;
         public Dictionary<string, object> GetCustoms();
+
+        public JObject ToObject();
+        public string ToJson();
     }
 }

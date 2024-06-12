@@ -4,7 +4,3 @@
     margin-right: 8px;
     margin-bottom: 6px;
 }
-
-.unity-text-field__label {
-    -unity-text-align: upper-right;
-}

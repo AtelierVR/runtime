@@ -5130,8 +5130,15 @@ MonoBehaviour:
   data_RespawnHeight: 0
   data_Type: 0
   SequentialIndex: 0
-  NetworkObjects: []
-  Spawns: []
+  NetworkObjects:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  Spawns:
+  - {fileID: 1055241733}
+  - {fileID: 1978528953}
   SpawnType: 0
   RespawnHeight: -100
   data_Scenes: []
@@ -5142,7 +5149,7 @@ MonoBehaviour:
   ModRequirements: []
   _target: 19
   ServerPublisher: localhost:53032
-  IdPublisher: 1
+  IdPublisher: 41
   VersionPublisher: 0
 --- !u!4 &1055241735
 Transform:

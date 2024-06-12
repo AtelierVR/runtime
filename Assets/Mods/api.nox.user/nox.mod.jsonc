@@ -1,59 +1,103 @@
 {
-    "type": "mod",
-    "id": "api.nox.user",
-    "name": "User Module",
-    "description": "Provides the User API for the game.",
-    "license": "GPL-3.0",
-    "contact": {
-        "email": "hactazia@gmail.com",
-        "source": "https://github.com/AtelierVR/api.nox.user",
-        "website": "https://nox.hactazia.fr/",
-        "issues": "https://github.com/AtelierVR/api.nox.user/issues"
+  "type": "mod",
+  "id": "api.nox.user",
+  "provides": [
+    "fr.hactazia.sdk.user"
+  ],
+  "name": "User Module",
+  "version": "1.0.0",
+  "description": "Provides the User API for the game.",
+  "license": "GPL-3.0",
+  "icon": "icon.png",
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.user",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.user/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [
+    {
+      "id": "game",
+      "version": ">=1.0.0",
+      "type": "depends"
     },
-    "authors": [
-        {
-            "name": "Hactazia",
-            "website": "https://hactazia.fr/",
-            "email": "hactazia@gmail.com",
-            "discord": "hactazia"
-        }
-    ],
-    "contributors": [],
-    "version": "1.0.0",
-    "entrypoints": {
-        "editor": [
-            "api.nox.user.UserEditorMod"
-        ]
+    {
+      "id": "network",
+      "version": ">=1.0.0",
+      "type": "depends"
+    }
+  ],
+  "references": [
+    {
+      "name": "api.nox.user",
+      "file": "85d54cce277443b78b99c37311aa6d31.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
     },
-    "references": [],
-    "engines": {
-        "unity": ">=2023.2.19"
+    {
+      "name": "api.nox.user",
+      "file": "12e86489feaf4a4c8e1bb89114c2f220.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
     },
-    "platforms": [
-        "windows",
-        "linux",
-        "macos",
-        "android",
-        "ios",
-        "webgl"
-    ],
-    "relations": {
-        "game": ">=1.0.0",
-        "network": ">=1.0.0"
+    {
+      "name": "api.nox.user",
+      "file": "c55f14105c114d5689bf7274c48717ff.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
     },
-    "side": [
-        "editor"
+    {
+      "name": "api.nox.user",
+      "file": "51dc18acfbdd4a5cb14355e09b8d031d.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    },
+    {
+      "name": "api.nox.user",
+      "file": "5c3888f35a724f30973d11695bc6594d.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    }
+  ],
+  "entrypoints": {
+    "main": [],
+    "client": [],
+    "editor": [
+      "api.nox.user.UserEditorMod"
     ],
-    "required": [],
-    "provides": [
-        "fr.hactazia.sdk.user"
-    ],
-    "permissions": [
-        "file",
-        "file.read",
-        "file.write",
-        "config",
-        "config.global"
-    ],
-    "icon": "icon.png"
+    "instance": []
+  },
+  "side": [
+    "editor"
+  ],
+  "permissions": [
+    "file",
+    "file.read",
+    "file.write",
+    "config",
+    "config.global"
+  ]
 }

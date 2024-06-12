@@ -2,9 +2,9 @@
     "name": "NoxEditor",
     "rootNamespace": "",
     "references": [
-        "GUID:f51ebe6a0ceec4240a699833d6309b23",
-        "GUID:279f3992442aa6b409f545c231e4e6d6",
-        "GUID:f5f609b195fbedb438216c18e6dbb7cb"
+        "UniTask",
+        "NoxCCK",
+        "NoxLoader"
     ],
     "includePlatforms": [
         "Editor"

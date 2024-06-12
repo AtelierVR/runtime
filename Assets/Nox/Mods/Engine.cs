@@ -6,7 +6,7 @@ namespace Nox.Mods
 {
     public class Engine : CCK.Mods.Metadata.Engine
     {
-        internal static Engine LoadFromJson(string key, JToken json) => new()
+        internal static Engine LoadFromJson(JObject json) => new()
         {
             _engine = EngineExtensions.GetEngineFromName(json["name"].Value<string>()),
             _version = new VersionMatching(json["version"].Value<string>())

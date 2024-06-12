@@ -2,10 +2,10 @@
     "name": "NoxLoader",
     "rootNamespace": "",
     "references": [
-        "GUID:279f3992442aa6b409f545c231e4e6d6",
-        "GUID:f51ebe6a0ceec4240a699833d6309b23",
-        "GUID:3486a76afa7fdfe49a92b2de0d14b26d",
-        "GUID:6b11664f654f66e4e9f9a0dc64d4a227"
+        "NoxCCK",
+        "UniTask",
+        "SpaceBear",
+        "Autohan"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

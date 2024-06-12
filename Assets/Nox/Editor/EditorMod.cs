@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
@@ -8,28 +9,22 @@ namespace Nox.Editor.Mods
 {
     public class EditorMod : Mod
     {
-        public EditorMod(ModMetadata metadata, ModInitializer[] initializers, EditorModInitializer[] editorinitializers)
+        public EditorMod(ModMetadata metadata, ModInitializer[] initializers, EditorModInitializer[] editorinitializers, string path)
         {
+            _path = path;
             _metadata = metadata;
             _initializers = initializers;
             _editorinitializers = editorinitializers;
             coreAPI = new EditorModCoreAPI(this);
-            Debug.Log("htdf 1" + this);
-            Debug.Log("htdf 2" + this?.coreAPI);
-            Debug.Log("htdf 3" + this?.coreAPI?.EditorModAPI);
-            Debug.Log("htdf 4" + this?.coreAPI?.EditorModAPI?.GetEditorMod("network"));
-            Debug.Log("htdf 5" + this?.coreAPI?.EditorModAPI?.GetEditorMod("network")?.GetMainClasses());
-            Debug.Log("htdf 6" + this?.coreAPI?.EditorModAPI?.GetEditorMod("network")?.GetMainClasses()[0]);
-            var net = (this?.coreAPI?.EditorModAPI?.GetEditorMod("network")?.GetMainClasses()[0] as NetworkAPI);
-            Debug.Log("htdf 8" + net);
-            Debug.Log("htdf 9" + net?.WorldAPI);
-            Debug.Log("htdf 10" + net?.UserAPI);
         }
 
+        private string _path;
         private ModMetadata _metadata;
         private ModInitializer[] _initializers;
         private EditorModInitializer[] _editorinitializers;
 
+        public string GetPath() => _path;
+        public string GetResourcePath() => Path.Combine(_path, "Resources");
         public ModMetadata GetMetadata() => _metadata;
         public ModInitializer[] GetMainClasses() => _initializers;
         internal EditorModInitializer[] GetEditorClasses() => _editorinitializers;
