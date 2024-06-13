@@ -29,5 +29,6 @@ namespace Nox.Mods.Type
                     namespaces.Add(r.GetNamespace());
             return namespaces.Distinct().ToArray();
         }
+        public abstract void Destroy();
     }
 }

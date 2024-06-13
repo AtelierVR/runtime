@@ -23,12 +23,14 @@ namespace Nox.Mods.Type
             return ModMetadata.LoadFromJson(JObject.Parse(File.ReadAllText(file)));
         }
 
-        public override bool IsValid() => !Directory.Exists(_path) && GetMetadata() != null;
+        public override bool IsValid() => Directory.Exists(_path) && GetMetadata() != null;
         public override bool Repart() => IsValid();
 
         public static string[] GetAllMods(string basepath)
         {
-            return Directory.GetDirectories(basepath, "*", SearchOption.AllDirectories);
+            return Directory.GetDirectories(basepath, "*", SearchOption.TopDirectoryOnly)
+                .Where(d => Directory.GetFiles(d, "nox.mod.json*", SearchOption.TopDirectoryOnly).Length > 0)
+                .ToArray();
         }
 
         public override Assembly LoadAssembly(string ns)
@@ -46,6 +48,7 @@ namespace Nox.Mods.Type
                 }
             if (rf == null) return null;
             var p = Path.Combine(_path, "libs/" + rf.GetFile());
+            // check if path is in Application.dataPath, if true, load from Library/ScriptAssemblie
             if (!File.Exists(p)) return null;
             var asm = Assembly.LoadFrom(p);
             _assemblies[ns] = asm;
@@ -56,6 +59,10 @@ namespace Nox.Mods.Type
         {
             if (_assemblies.ContainsKey(ns)) return _assemblies[ns];
             return LoadAssembly(ns);
+        }
+
+        public override void Destroy()
+        {
         }
     }
 }

@@ -16,8 +16,25 @@ namespace Nox.Mods
         private static string[] _originalPaths = new string[]
         {
             Path.Combine(CCK.Constants.GameAppDataPath, "mods"),
-            Path.Combine(Application.dataPath, "..", "Library", "NoxMods")
+            Path.Combine(Application.dataPath, "..", "Library", "NoxMods"),
         };
+
+        private static string[] inpackPaths
+        {
+            get
+            {
+                var paths = new HashSet<string>();
+                var files = Directory
+                    .GetFiles(Application.dataPath, "nox.mod.json*", SearchOption.AllDirectories)
+                    .Distinct().ToArray();
+                foreach (var file in files)
+                {
+                    var path = Path.GetDirectoryName(file);
+                    if (path != null) paths.Add(path);
+                }
+                return paths.ToArray();
+            }
+        }
 
         public static void Init()
         {
@@ -26,7 +43,7 @@ namespace Nox.Mods
 
         public static RuntimeMod CreateMod<T>(string path) where T : ModType
         {
-            var type = (T)System.Activator.CreateInstance(typeof(T), path);
+            var type = (T)Activator.CreateInstance(typeof(T), path);
             if (!type.Repart()) return null;
             return new RuntimeMod(type.GetMetadata(), type);
         }
@@ -54,19 +71,29 @@ namespace Nox.Mods
             }
 
             var mods = new List<RuntimeMod>();
+            foreach (var path in inpackPaths)
+            {
+                var mod = CreateMod<InternalMod>(path);
+                if (mod != null) mods.Add(mod);
+                else results.Add(new ModLoadResult(path, ModLoadResultType.Warning, "Invalid Internal"));
+            }
+
             foreach (var path in archives)
             {
                 var mod = CreateMod<ArchiveMod>(path);
                 if (mod != null) mods.Add(mod);
-                else results.Add(new ModLoadResult(path, ModLoadResultType.Warning, "Invalid mod"));
+                else results.Add(new ModLoadResult(path, ModLoadResultType.Warning, "Invalid Archive"));
             }
 
             foreach (var path in sources)
             {
                 var mod = CreateMod<SourceMod>(path);
                 if (mod != null) mods.Add(mod);
-                else results.Add(new ModLoadResult(path, ModLoadResultType.Warning, "Invalid mod"));
+                else results.Add(new ModLoadResult(path, ModLoadResultType.Warning, "Invalid Source"));
             }
+
+            foreach (var mod in mods)
+                Debug.Log($"Detected mod {mod.GetMetadata().GetId()}");
             if (results.Where(r => r.IsError).ToArray().Length > 0 || mods.Count == 0) return results.ToArray();
 
             // check provides
@@ -248,7 +275,13 @@ namespace Nox.Mods
                     foreach (var n in ns)
                     {
                         var assembly = mod.GetModType().GetAssembly(n);
-                        if (assembly == null) continue;
+                        if (assembly == null)
+                        {
+                            results.Add(new ModLoadResult(mt.GetId(), ModLoadResultType.Error,
+                                $"Assembly for namespace (main) {n} not found"
+                            ));
+                            continue;
+                        }
                         foreach (var type in assembly.GetTypes())
                             if (mainEntries.Contains(type.FullName) && type.GetInterface(typeof(CCK.Mods.Initializers.ModInitializer).FullName) != null)
                                 mc.Add((CCK.Mods.Initializers.ModInitializer)Activator.CreateInstance(type));
@@ -261,7 +294,13 @@ namespace Nox.Mods
                     foreach (var n in ns)
                     {
                         var assembly = mod.GetModType().GetAssembly(n);
-                        if (assembly == null) continue;
+                        if (assembly == null)
+                        {
+                            results.Add(new ModLoadResult(mt.GetId(), ModLoadResultType.Error,
+                                $"Assembly for namespace (client) {n} not found"
+                            ));
+                            continue;
+                        }
                         foreach (var type in assembly.GetTypes())
                             if (clientEntries.Contains(type.FullName) && type.GetInterface(typeof(CCK.Mods.Initializers.ClientModInitializer).FullName) != null)
                                 ec.Add((CCK.Mods.Initializers.ClientModInitializer)Activator.CreateInstance(type));
@@ -355,6 +394,12 @@ namespace Nox.Mods
                 foreach (var instance in mod.GetInstanceClasses())
                     if (mod.IsInstanceEnabled()) instance.OnLateUpdate();
             }
+        }
+
+        public static void OnApplicationQuit()
+        {
+            foreach (var mod in Cache)
+                mod.Destroy();
         }
     }
 }

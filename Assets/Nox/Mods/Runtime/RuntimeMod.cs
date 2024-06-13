@@ -134,5 +134,14 @@ namespace Nox.Mods.Client
         }
 
         public bool IsEnabled() => IsMainEnabled() || IsClientEnabled() || IsInstanceEnabled();
+
+        public void Destroy()
+        {
+            Unload();
+            _mainClasses = new ModInitializer[0];
+            _clientInitializers = new ClientModInitializer[0];
+            _instanceInitializers = new InstanceModInitializer[0];
+            GetModType().Destroy();
+        }
     }
 }

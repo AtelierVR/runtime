@@ -79,5 +79,10 @@ namespace Nox.Mods.Type
             if (_assemblies.ContainsKey(ns)) return _assemblies[ns];
             return LoadAssembly(ns);
         }
+
+        public override void Destroy()
+        {
+            _archive?.Dispose();
+        }
     }
 }
