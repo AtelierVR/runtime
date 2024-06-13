@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using Nox.CCK;
 using Nox.Mods.Client;
 using Nox.Mods.Type;
@@ -71,12 +70,14 @@ namespace Nox.Mods
             }
 
             var mods = new List<RuntimeMod>();
+#if UNITY_EDITOR
             foreach (var path in inpackPaths)
             {
                 var mod = CreateMod<InternalMod>(path);
                 if (mod != null) mods.Add(mod);
                 else results.Add(new ModLoadResult(path, ModLoadResultType.Warning, "Invalid Internal"));
             }
+#endif
 
             foreach (var path in archives)
             {

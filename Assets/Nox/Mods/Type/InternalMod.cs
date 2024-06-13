@@ -1,10 +1,13 @@
-
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json.Linq;
+using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Nox.Mods.Type
 {
@@ -43,7 +46,6 @@ namespace Nox.Mods.Type
 
         public override Assembly GetAssembly(string ns)
         {
-            Debug.Log("InternalMod.GetAssembly: " + ns);
             if (_assemblies.ContainsKey(ns)) return _assemblies[ns];
             return LoadAssembly(ns);
         }
@@ -51,6 +53,25 @@ namespace Nox.Mods.Type
         public override void Destroy()
         {
         }
+
+        public override string[] GetAllAssetNames()
+        {
+            return Directory.GetFiles(Path.Combine(_path, "Resources"), "*", SearchOption.AllDirectories);
+        }
+
+        public override T GetAsset<T>(string ns, string name)
+        {
+            return AssetDatabase.LoadAssetAtPath<T>(Path.Combine(_path, "Resources", ns, name));
+        }
+
+        public override Scene LoadScene(string ns, string name)
+        {
+            var path = Path.Combine(_path, "Resources", ns, "worlds", name, name + ".unity");
+            if (!File.Exists(path)) return default;
+            SceneManager.LoadScene(path, LoadSceneMode.Additive);
+            return SceneManager.GetSceneByPath(path);
+        }
     }
 }
 
+#endif

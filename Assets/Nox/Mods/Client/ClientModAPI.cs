@@ -5,6 +5,7 @@ using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Groups;
 using Nox.CCK.Mods.Mods;
 using Nox.CCK.Mods.Networks;
+using Nox.Mods.Assets;
 using Nox.Mods.Client;
 
 namespace Nox.Mods
@@ -12,6 +13,7 @@ namespace Nox.Mods
     public class ClientModAPI : CCK.Mods.Cores.ClientModCoreAPI
     {
         private RuntimeMod _mod;
+        private RuntimeAssetAPI RuntimeAssetAPI;
 
         internal ClientModAPI(RuntimeMod mod)
         {
@@ -26,6 +28,6 @@ namespace Nox.Mods
         public ChatAPI ChatAPI => throw new System.NotImplementedException();
         public GroupAPI GroupAPI => throw new System.NotImplementedException();
         public EventAPI EventAPI => throw new System.NotImplementedException();
-        public AssetAPI AssetAPI => throw new System.NotImplementedException();
+        public AssetAPI AssetAPI => RuntimeAssetAPI;
     }
 }

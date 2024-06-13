@@ -5,6 +5,7 @@ using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Groups;
 using Nox.CCK.Mods.Mods;
 using Nox.CCK.Mods.Networks;
+using Nox.Mods.Assets;
 using Nox.Mods.Client;
 
 namespace Nox.Mods
@@ -12,8 +13,13 @@ namespace Nox.Mods
     public class ClientModCoreAPI : CCK.Mods.Cores.ClientModCoreAPI
     {
         private RuntimeMod _mod;
+        private RuntimeAssetAPI RuntimeAssetAPI;
         private Dictionary<string, object> _data = new();
-        internal ClientModCoreAPI(RuntimeMod mod) => _mod = mod;
+        internal ClientModCoreAPI(RuntimeMod mod)
+        {
+            _mod = mod;
+            RuntimeAssetAPI = new RuntimeAssetAPI(mod);
+        }
         public Dictionary<string, object> Data => _data;
         public CCK.Mods.ModMetadata ModMetadata => _mod.GetMetadata();
 
@@ -27,6 +33,6 @@ namespace Nox.Mods
 
         public ModAPI ModAPI => throw new System.NotImplementedException();
 
-        public AssetAPI AssetAPI => throw new System.NotImplementedException();
+        public AssetAPI AssetAPI => RuntimeAssetAPI;
     }
 }

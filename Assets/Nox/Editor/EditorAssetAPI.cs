@@ -1,6 +1,7 @@
 
 using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Nox.Editor.Mods
 {
@@ -33,5 +34,15 @@ namespace Nox.Editor.Mods
         }
         public T GetLocalAsset<T>(string name) where T : Object => GetAsset<T>(_mod.GetMetadata().GetId(), name);
         public bool HasLocalAsset<T>(string name) where T : Object => HasAsset<T>(_mod.GetMetadata().GetId(), name);
+
+        public Scene LoadWorld(string ns, string name)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Scene LoadLocalWorld(string name)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json.Linq;
 using Nox.CCK;
+using UnityEngine.SceneManagement;
 
 namespace Nox.Mods.Type
 {
@@ -63,6 +64,21 @@ namespace Nox.Mods.Type
 
         public override void Destroy()
         {
+        }
+
+        public override string[] GetAllAssetNames()
+        {
+            return Directory.GetFiles(Path.Combine(_path, "resources"), "*.*", SearchOption.AllDirectories);
+        }
+
+        public override T GetAsset<T>(string ns, string name)
+        {
+            return null;
+        }
+
+        public override Scene LoadScene(string ns, string name)
+        {
+            return default;
         }
     }
 }

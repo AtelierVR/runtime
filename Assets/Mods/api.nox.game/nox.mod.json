@@ -44,7 +44,9 @@
   ],
   "entrypoints": {
     "main": [],
-    "client": [],
+    "client": [
+      "api.nox.game.GameClientSystem"
+    ],
     "editor": [
       "api.nox.game.GameEditorSystem"
     ],

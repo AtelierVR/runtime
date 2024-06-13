@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Nox.CCK.Mods.Assets
 {
@@ -9,5 +10,8 @@ namespace Nox.CCK.Mods.Assets
 
         public bool HasLocalAsset<T>(string name) where T : Object;
         public T GetLocalAsset<T>(string name) where T : Object;
+
+        public Scene LoadWorld(string ns, string name);
+        public Scene LoadLocalWorld(string name);
     }
 }

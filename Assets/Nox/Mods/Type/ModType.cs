@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Nox.CCK;
+using UnityEngine.SceneManagement;
 
 namespace Nox.Mods.Type
 {
@@ -30,5 +31,8 @@ namespace Nox.Mods.Type
             return namespaces.Distinct().ToArray();
         }
         public abstract void Destroy();
+        public abstract string[] GetAllAssetNames();
+        public abstract T GetAsset<T>(string ns, string name) where T : UnityEngine.Object;
+        public abstract Scene LoadScene(string ns, string name);
     }
 }
