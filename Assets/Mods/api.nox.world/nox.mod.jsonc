@@ -1,0 +1,67 @@
+{
+  "type": "mod",
+  "id": "api.nox.world",
+  "provides": [
+    "fr.hactazia.sdk.world"
+  ],
+  "name": "Test Module",
+  "version": "1.0.0",
+  "description": "Provides the Test API for the game.",
+  "license": "GPL-3.0",
+  "icon": "icon.png",
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.world",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.world/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [
+    {
+      "id": "game",
+      "version": ">=1.0.0",
+      "type": "depends"
+    },
+    {
+      "id": "network",
+      "version": ">=1.0.0",
+      "type": "depends"
+    }
+  ],
+  "references": [
+    {
+      "name": "api.nox.world",
+      "file": "cc19eb2c620b49afb353223ecec9b529.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    }
+  ],
+  "entrypoints": {
+    "main": [],
+    "client": [],
+    "editor": [
+      "api.nox.world.WorldEditorMod"
+    ],
+    "instance": []
+  },
+  "side": [
+    "editor"
+  ],
+  "permissions": [
+    "file",
+    "file.read",
+    "file.write",
+    "config",
+    "config.global"
+  ]
+}

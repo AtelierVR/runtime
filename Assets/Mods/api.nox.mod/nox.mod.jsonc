@@ -1,0 +1,68 @@
+{
+  "type": "mod",
+  "id": "api.nox.mod",
+  "provides": [
+    "fr.hactazia.sdk.mod"
+  ],
+  "name": "Mod Module",
+  "version": "1.0.0",
+  "description": "Provides the Mod API for the game.",
+  "license": "GPL-3.0",
+  "icon": "icon.png",
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.mod",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.mod/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [
+    {
+      "id": "game",
+      "version": ">=1.0.0",
+      "type": "depends"
+    },
+    {
+      "id": "network",
+      "version": ">=1.0.0",
+      "type": "depends"
+    }
+  ],
+  "references": [
+    {
+      "name": "api.nox.mod",
+      "file": "df758c934bb74a2e81968a415ff3dd32.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    }
+  ],
+  "entrypoints": {
+    "main": [],
+    "client": [],
+    "editor": [
+      "api.nox.mod.ModEditorMod"
+    ],
+    "instance": []
+  },
+  "side": [
+    "editor"
+  ],
+  "permissions": [
+    "file",
+    "file.read",
+    "file.write",
+    "config",
+    "config.global"
+  ],
+  "$schema": ""
+}

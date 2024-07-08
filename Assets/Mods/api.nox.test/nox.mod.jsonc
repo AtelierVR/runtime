@@ -1,0 +1,69 @@
+{
+  "type": "mod",
+  "id": "api.nox.test",
+  "provides": [
+    "fr.hactazia.sdk.test"
+  ],
+  "name": "Test Module",
+  "version": "1.0.0",
+  "description": "Provides the Test API for the game.",
+  "license": "GPL-3.0",
+  "icon": "icon.png",
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.test",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.test/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [
+    {
+      "id": "game",
+      "version": ">=1.0.0",
+      "type": "depends"
+    },
+    {
+      "id": "network",
+      "version": ">=1.0.0",
+      "type": "depends"
+    },
+    {
+      "id": "xr",
+      "version": ">=1.0.0",
+      "type": "depends"
+    }
+  ],
+  "references": [],
+  "entrypoints": {
+    "main": [
+      "api.nox.test.TestMod"
+    ],
+    "client": [
+      "api.nox.test.TestClientMod"
+    ],
+    "editor": [
+      "api.nox.test.TestEditorMod"
+    ],
+    "instance": [
+      "api.nox.test.TestInstanceMod"
+    ]
+  },
+  "side": [
+    "editor"
+  ],
+  "permissions": [
+    "file",
+    "file.read",
+    "file.write",
+    "config",
+    "config.global"
+  ],
+  "$schema": ""
+}

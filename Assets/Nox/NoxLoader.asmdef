@@ -1,0 +1,19 @@
+{
+    "name": "NoxLoader",
+    "rootNamespace": "",
+    "references": [
+        "NoxCCK",
+        "UniTask",
+        "SpaceBear",
+        "Autohan"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

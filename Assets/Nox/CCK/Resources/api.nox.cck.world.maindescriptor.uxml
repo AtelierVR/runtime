@@ -1,0 +1,59 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/Nox/CCK/Resources/CCKPanelStyle.uss?fileID=7433441132597879392&amp;guid=3c1300502312a7240b6d886f5db72c24&amp;type=3#CCKPanelStyle" />
+    <engine:VisualElement style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;">
+        <engine:GroupBox style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;">
+            <engine:VisualElement style="flex-grow: 1; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); border-bottom-width: 1px; padding-bottom: 4px; padding-left: 8px; flex-direction: row; padding-right: 8px; padding-top: 4px;">
+                <engine:Label text="World Description" style="flex-grow: 1;" />
+                <engine:Label text="Main" />
+            </engine:VisualElement>
+            <engine:VisualElement name="compiled-message" style="flex-grow: 1; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); border-bottom-width: 1px; padding-top: 4px; padding-bottom: 4px; padding-right: 8px; padding-left: 8px;">
+                <engine:VisualElement style="flex-grow: 1; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); border-bottom-width: 1px; padding-bottom: 0; padding-left: 0; flex-direction: row; padding-right: 0; padding-top: 0; border-top-left-radius: 4px; border-top-right-radius: 4px; border-bottom-right-radius: 4px; border-bottom-left-radius: 4px; border-top-width: 1px; border-right-width: 1px; border-left-width: 1px; margin-top: 4px; margin-right: 0; margin-bottom: 4px; margin-left: 0;">
+                    <engine:VisualElement style="flex-grow: 0; padding-top: 8px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px; border-right-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
+                        <engine:Image name="icon" style="flex-grow: 0; width: 32px; height: 32px; flex-shrink: 0; margin-top: auto; margin-right: auto; margin-bottom: auto; margin-left: auto;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1;">
+                        <engine:VisualElement style="flex-grow: 0; margin-top: auto; margin-right: 0; margin-bottom: auto; margin-left: 0; flex-shrink: 0; padding-top: 8px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px;">
+                            <engine:Label text="This element has been compiled.&#10;It should not be modified and is read-only." style="white-space: normal;" />
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+                </engine:VisualElement>
+            </engine:VisualElement>
+            <engine:TabView style="margin-top: 4px;">
+                <engine:Tab label="General" closeable="false" name="general">
+                    <engine:VisualElement style="flex-grow: 1; margin-top: 4px; margin-bottom: 0; margin-right: 0; margin-left: 0; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
+                        <engine:ListView header-title="Spawns" show-foldout-header="true" show-add-remove-footer="true" reorder-mode="Animated" virtualization-method="DynamicHeight" show-border="true" name="spawns" show-bound-collection-size="true" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;" />
+                        <engine:Button text="Normalize" name="spawns-normalize" style="margin-top: 4px;" />
+                        <engine:EnumField label="Spawn Type" type="Nox.CCK.Worlds.SpawnType, NoxCCK" name="spawn-type" style="margin-right: 4px;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; margin-top: 0; margin-bottom: 0; margin-right: 0; margin-left: 0; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; border-top-width: 0; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
+                        <engine:DoubleField label="Respawn height" value="-100" name="respawn-height" style="margin-right: 4px;" />
+                    </engine:VisualElement>
+                </engine:Tab>
+                <engine:Tab label="Advanced" focusable="false" name="advanced">
+                    <engine:VisualElement style="flex-grow: 1; margin-top: 4px; margin-bottom: 0; margin-right: 0; margin-left: 0; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
+                        <engine:ListView header-title="Network objets" show-foldout-header="true" show-add-remove-footer="true" reorder-mode="Animated" virtualization-method="DynamicHeight" show-border="true" name="network-objects" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;" />
+                        <engine:Button text="Detect" name="network-objects-detect" style="margin-top: 4px;" />
+                        <engine:Button text="Normalize" name="network-objects-normalize" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; margin-top: 0; margin-bottom: 0; margin-right: 0; margin-left: 0; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; border-top-width: 0; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
+                        <editor:ObjectField label="Current scene" type="UnityEditor.SceneAsset, UnityEditor.CoreModule" allow-scene-objects="false" name="current-scene" focusable="false" style="margin-bottom: 4px; margin-right: 4px;" />
+                        <engine:ListView header-title="Additional scenes" show-foldout-header="true" show-add-remove-footer="true" reorder-mode="Animated" virtualization-method="DynamicHeight" show-border="true" name="scenes" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;" />
+                        <engine:Button text="Normalize" name="scenes-normalize" style="margin-top: 4px;" />
+                        <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                            <engine:Button text="Open" name="open-scenes" style="flex-grow: 1;" />
+                            <engine:Button text="Detect" name="detect-scenes" style="flex-grow: 1;" />
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; margin-top: 0; margin-bottom: 0; margin-right: 0; margin-left: 0; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; border-top-width: 0; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
+                        <engine:ListView header-title="Features (alpha)" show-foldout-header="true" show-add-remove-footer="true" reorder-mode="Animated" virtualization-method="DynamicHeight" show-border="true" name="features" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;" />
+                        <engine:Button text="Normalize" name="features-normalize" style="margin-top: 4px;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; margin-top: 0; margin-bottom: 0; margin-right: 0; margin-left: 0; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; border-top-width: 0; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
+                        <engine:ListView header-title="Modding" show-foldout-header="true" show-add-remove-footer="true" reorder-mode="Animated" virtualization-method="DynamicHeight" show-border="true" name="mods" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;" />
+                        <engine:Button text="Normalize" name="mods-normalize" style="margin-top: 4px;" />
+                    </engine:VisualElement>
+                </engine:Tab>
+            </engine:TabView>
+        </engine:GroupBox>
+    </engine:VisualElement>
+</engine:UXML>

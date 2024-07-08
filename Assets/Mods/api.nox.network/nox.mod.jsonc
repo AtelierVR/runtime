@@ -1,0 +1,51 @@
+{
+  "type": "modsuystem",
+  "id": "api.nox.network",
+  "provides": [
+    "fr.hactazia.network",
+    "network"
+  ],
+  "name": "Game system",
+  "version": "1.0.0",
+  "description": "Provides the Game API for the game.",
+  "license": "GPL-3.0",
+  "icon": null,
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.network",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.network/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [],
+  "references": [
+    {
+      "name": "api.nox.network",
+      "file": "372cfc8ccdbc48cb9197ffe6031e0bf2.dll",
+      "engine": {
+        "name": "unity",
+        "version": "==2023.2.19"
+      },
+      "platform": "windows"
+    }
+  ],
+  "entrypoints": {
+    "main": [
+      "api.nox.network.NetworkSystem"
+    ],
+    "client": [],
+    "editor": [],
+    "instance": []
+  },
+  "side": [
+    "editor"
+  ],
+  "permissions": []
+}

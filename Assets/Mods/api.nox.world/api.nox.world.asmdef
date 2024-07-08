@@ -1,0 +1,16 @@
+{
+    "name": "api.nox.world",
+    "rootNamespace": "",
+    "references": [
+        "NoxCCK",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

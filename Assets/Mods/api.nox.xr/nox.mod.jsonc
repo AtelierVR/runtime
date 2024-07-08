@@ -1,0 +1,41 @@
+{
+  "type": "modsystem",
+  "id": "api.nox.xr",
+  "provides": [
+    "fr.hactazia.xr",
+    "xr"
+  ],
+  "name": "XR system",
+  "version": "1.0.0",
+  "description": "Provides the XR API for the game.",
+  "license": "GPL-3.0",
+  "icon": null,
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.xr",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.xr/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [],
+  "references": [],
+  "entrypoints": {
+    "main": [
+      "api.nox.xr.XRSystem"
+    ],
+    "client": [],
+    "editor": [],
+    "instance": []
+  },
+  "side": [
+    "editor"
+  ],
+  "permissions": []
+}
