@@ -16,15 +16,17 @@ namespace Nox.Mods
 {
     public class RuntimeModCoreAPI : CCK.Mods.Cores.ModCoreAPI
     {
-        private RuntimeMod _mod;
-        private RuntimeAssetAPI RuntimeAssetAPI;
-        private RuntimeModAPI RuntimeModAPI;
-        private Dictionary<string, object> _data = new();
+        internal RuntimeMod _mod;
+        internal RuntimeAssetAPI RuntimeAssetAPI;
+        internal RuntimeModAPI RuntimeModAPI;
+        internal RuntimeEventAPI RuntimeEventAPI;
+        internal Dictionary<string, object> _data = new();
         internal RuntimeModCoreAPI(RuntimeMod mod)
         {
             _mod = mod;
             RuntimeAssetAPI = new RuntimeAssetAPI(mod);
             RuntimeModAPI = new RuntimeModAPI(mod);
+            RuntimeEventAPI = new RuntimeEventAPI(mod, EventEntryFlags.Main);
         }
 
         public Dictionary<string, object> Data => _data;
@@ -32,8 +34,8 @@ namespace Nox.Mods
 
         public ChatAPI ChatAPI => throw new System.NotImplementedException();
         public GroupAPI GroupAPI => throw new System.NotImplementedException();
-        public EventAPI EventAPI => throw new System.NotImplementedException();
         public NetworkAPI NetworkAPI => throw new System.NotImplementedException();
+        public EventAPI EventAPI => RuntimeEventAPI;
         public ModAPI ModAPI => RuntimeModAPI;
         public AssetAPI AssetAPI => RuntimeAssetAPI;
         public XRAPI XRAPI => ModAPI.GetMod("xr")?.GetMainClasses().OfType<XRAPI>().First();

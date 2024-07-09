@@ -17,6 +17,9 @@ namespace Nox.Mods.Mods
         public CCK.Mods.ModMetadata GetMetadata(string id) => ModManager.GetMod(id)?.GetMetadata();
         public Mod GetMod(string id) => ModManager.GetMod(id);
         public Mod[] GetMods() => ModManager.GetMods();
+        internal RuntimeMod GetInternalMod(string id) => ModManager.GetMod(id);
+        internal RuntimeMod[] GetInternalMods() => ModManager.GetMods();
+
 
         public UniTask<Mod> LoadMod(string id)
         {

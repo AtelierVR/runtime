@@ -1,5 +1,5 @@
 {
-  "type": "modsuystem",
+  "type": "modsystem",
   "id": "api.nox.game",
   "provides": [
     "fr.hactazia.game",

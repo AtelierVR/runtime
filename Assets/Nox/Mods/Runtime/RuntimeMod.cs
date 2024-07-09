@@ -30,6 +30,7 @@ namespace Nox.Mods.Client
             _metadata = metadata;
             _type = type;
             coreClientAPI = new ClientModCoreAPI(this);
+            coreAPI = new RuntimeModCoreAPI(this);
         }
 
         public ModType GetModType() => _type;
