@@ -1,4 +1,5 @@
 using System;
+using Nox.CCK;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
@@ -29,7 +30,6 @@ namespace api.nox.test
             foreach (var device in devices)
                 Debug.Log("Device: " + device.name);
 
-
             GenerateWidget();
             UpdateWidget();
         }
@@ -38,21 +38,22 @@ namespace api.nox.test
 
         private void GenerateWidget()
         {
-            var prefab = api.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget");
-            if (prefab == null)
-            {
-                Debug.LogError("Failed to load widget prefab");
-                return;
-            }
             _widget = new Widget
             {
                 id = "api.nox.test.widget",
                 width = 1,
                 height = 1,
-                content = Object.Instantiate(prefab),
-                onClick = OnWidgetClicked,
-                onHover = OnWidgetHover
+                GetContent = (Transform tf) => GenerateWidgetContent(_widget, tf)
             };
+        }
+
+        private GameObject GenerateWidgetContent(Widget data, Transform parent)
+        {
+            var baseprefab = api.AssetAPI.GetAsset<GameObject>("game", "prefabs/widget");
+            var prefab = api.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget");
+            var btn = Object.Instantiate(baseprefab, parent);
+            Object.Instantiate(prefab, Reference.GetReference("content", btn).transform);
+            return btn;
         }
 
         private void UpdateWidget()
@@ -86,11 +87,8 @@ namespace api.nox.test
         public string id;
         public uint width = 1;
         public uint height = 1;
-        public GameObject content;
-        public GameObject button = null;
+        public Func<Transform, GameObject> GetContent;
         public bool isInteractable = true;
         public uint weight = 1;
-        public Action onClick = null;
-        public Action<bool> onHover = null;
     }
 }

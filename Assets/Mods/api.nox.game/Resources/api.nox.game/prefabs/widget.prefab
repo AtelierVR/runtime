@@ -228,7 +228,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52bad127038c8cf489f62e6161cd4f4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Key: game.home.item.content
+  Key: content
   Refrence: {fileID: 0}
 --- !u!1 &8318275207486263883
 GameObject:
@@ -317,7 +317,7 @@ GameObject:
   - component: {fileID: 5097503736201078141}
   - component: {fileID: 7407368649064884482}
   m_Layer: 5
-  m_Name: HomeItem
+  m_Name: widget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

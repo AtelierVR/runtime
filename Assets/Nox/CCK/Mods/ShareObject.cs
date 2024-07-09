@@ -13,7 +13,10 @@ namespace Nox.CCK.Mods
         {
             Dictionary<string, object> dict = new();
             foreach (var prop in GetType().GetFields())
+            {
                 dict[prop.Name] = prop.GetValue(this);
+                Debug.Log("Exported " + prop.Name + " " + prop.GetValue(this));
+            }
             return dict;
         }
 
@@ -21,9 +24,11 @@ namespace Nox.CCK.Mods
         {
             foreach (var prop in GetType().GetFields())
                 if (dict.ContainsKey(prop.Name))
+                {
                     prop.SetValue(this, dict[prop.Name]);
+                    Debug.Log("Imported " + prop.Name + " " + prop.GetValue(this));
+                }
         }
-
         public T Convert<T>() where T : ShareObject
         {
             T obj = (T)System.Activator.CreateInstance(typeof(T));

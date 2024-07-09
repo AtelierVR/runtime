@@ -29,28 +29,23 @@ namespace Nox.Mods.Assets
                 Source = context.Source,
                 SourceChannel = context.Channel
             };
-
+            Debug.Log($"Received event {context.EventName} from {context.Source.GetMetadata().GetId()} to {_mod.GetMetadata().GetId()} ({context.Channel})");
             foreach (var sub in _subscriptions)
-                if (sub.EventName != null || sub.EventName == context.EventName)
+                if (sub.EventName == null || sub.EventName == context.EventName)
+                {
+                    Debug.Log($"Invoking event {context.EventName} from {context.Source.GetMetadata().GetId()} to {_mod.GetMetadata().GetId()} ({context.Channel})");
                     sub.Callback(data);
+                }
         }
 
         public void Emit(EventContext context)
         {
-            var ncontext = new RuntimeEventContext(context)
-            {
-                CurrentChannel = _channel,
-                Source = _mod
-            };
-
-            Debug.Log("Event emitted: " + context.EventName);
-            Debug.Log("Data: " + _mod.coreAPI);
+            var ncontext = new RuntimeEventContext(context) { CurrentChannel = _channel, Source = _mod };
             var mod = context.Destination != null ? _mod.coreAPI.RuntimeModAPI.GetInternalMod(context.Destination) : null;
             if (mod != null)
                 mod.coreAPI.RuntimeEventAPI.Receive(ncontext);
             else foreach (var imod in _mod.coreAPI.RuntimeModAPI.GetInternalMods())
                 {
-                    Debug.Log("Event to " + imod.GetMetadata().GetId());
                     if (context.Channel.HasFlag(EventEntryFlags.Main))
                         imod.coreAPI?.RuntimeEventAPI.Receive(ncontext);
                     if (context.Channel.HasFlag(EventEntryFlags.Client))
@@ -94,7 +89,7 @@ namespace Nox.Mods.Assets
             if (_subscriptions.Exists(sub => sub.UID == runtime.UID))
             {
                 runtime.UID = 0;
-                while (_subscriptions.Exists(sub => sub.UID == runtime.UID) || runtime.UID != uint.MaxValue)
+                while (_subscriptions.Exists(sub => sub.UID == runtime.UID) || runtime.UID == uint.MaxValue)
                     runtime.UID++;
                 if (runtime.UID == uint.MaxValue)
                     return null;

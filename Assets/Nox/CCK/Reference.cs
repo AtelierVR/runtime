@@ -9,7 +9,6 @@ namespace Nox.CCK
         public GameObject GetReference() => Refrence != null ? Refrence : gameObject;
         public static GameObject GetReference(string key, GameObject origin = null)
         {
-            Debug.Log("GetReference[" + key + "] from " + origin);
             if (origin == null)
             {
                 foreach (var reference in FindObjectsByType<Reference>(FindObjectsInactive.Include, FindObjectsSortMode.None))

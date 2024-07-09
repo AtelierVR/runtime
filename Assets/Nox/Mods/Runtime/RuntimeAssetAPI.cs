@@ -14,7 +14,12 @@ namespace Nox.Mods.Assets
         }
 
         public T GetAsset<T>(string ns, string name) where T : Object
-        => _mod.GetModType().GetAsset<T>(ns, name);
+        {
+            var mod = _mod.coreAPI.RuntimeModAPI.GetInternalMod(ns);
+            if (mod == null) return null;
+            Debug.Log($"Getting asset {name} from {mod.GetMetadata().GetId()} to {_mod.GetMetadata().GetId()}");
+            return _mod.GetModType().GetAsset<T>(mod.GetMetadata().GetId(), name);
+        }
 
         public T GetLocalAsset<T>(string name) where T : Object
             => _mod.GetModType().GetAsset<T>(_mod.GetMetadata().GetId(), name);
