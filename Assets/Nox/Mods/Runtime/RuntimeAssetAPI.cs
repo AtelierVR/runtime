@@ -1,3 +1,4 @@
+using Nox.CCK;
 using Nox.CCK.Mods.Assets;
 using Nox.Mods.Client;
 using UnityEngine;
@@ -17,18 +18,11 @@ namespace Nox.Mods.Assets
         {
             var mod = _mod.coreAPI.RuntimeModAPI.GetInternalMod(ns);
             if (mod == null) return null;
-            Debug.Log($"Getting asset {name} from {mod.GetMetadata().GetId()} to {_mod.GetMetadata().GetId()}");
             return _mod.GetModType().GetAsset<T>(mod.GetMetadata().GetId(), name);
         }
 
         public T GetLocalAsset<T>(string name) where T : Object
             => _mod.GetModType().GetAsset<T>(_mod.GetMetadata().GetId(), name);
-
-        public Scene LoadLocalWorld(string name, LoadSceneMode mode = LoadSceneMode.Single)
-            => _mod.GetModType().LoadScene(_mod.GetMetadata().GetId(), name, mode);
-
-        public Scene LoadWorld(string ns, string name, LoadSceneMode mode = LoadSceneMode.Single)
-            => _mod.GetModType().LoadScene(ns, name, mode);
 
         public bool HasAsset<T>(string ns, string name) where T : Object
         {
@@ -39,5 +33,11 @@ namespace Nox.Mods.Assets
         {
             throw new System.NotImplementedException();
         }
+
+        public Scene LoadLocalWorld(string name, LoadSceneMode mode = LoadSceneMode.Single)
+            => _mod.GetModType().LoadScene(_mod.GetMetadata().GetId(), name, mode);
+
+        public Scene LoadWorld(string ns, string name, LoadSceneMode mode = LoadSceneMode.Single)
+            => _mod.GetModType().LoadScene(ns, name, mode);
     }
 }

@@ -1569,7 +1569,7 @@ MonoBehaviour:
     flags: -1
   - key: mic
     icon: {fileID: 2800000, guid: 90e715335b2e4c14a950fc1049f25600, type: 3}
-    text: game.ui.menu.microphone
+    text: game.ui.menu.muted
     tooltip: 
     flags: -1
   bottomRightItems: []
@@ -1583,7 +1583,7 @@ MonoBehaviour:
     flags: -1
   - key: test
     icon: {fileID: 2800000, guid: e15f74c758b993a4599d01ab00906596, type: 3}
-    text: friend requests
+    text: game.ui.notification.friend_request
     tooltip: 
     flags: -1
   - key: exit

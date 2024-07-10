@@ -48,7 +48,9 @@
     }
   ],
   "entrypoints": {
-    "main": [],
+    "main": [
+      "api.nox.game.GameSystem"
+    ],
     "client": [
       "api.nox.game.GameClientSystem"
     ],

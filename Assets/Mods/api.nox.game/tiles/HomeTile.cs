@@ -62,17 +62,21 @@ namespace api.nox.game
             homeTile = tile;
             clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
         }
-
         internal void UpdateWidgets()
         {
             if (homeTile == null) return;
             var rect = Reference.GetReference("game.home.widgets", homeTile.content).GetComponent<MenuGridder>();
             // remove to the parent all the children
-            // foreach (Transform child in rect.transform)
-            //     Object.Destroy(child.gameObject);
-
+            foreach (Transform child in rect.transform)
+                Object.Destroy(child.gameObject);
             foreach (var widget in widgets.Values)
-                widget.GetContent(rect.transform);
+            {
+                var go = widget.GetContent(rect.transform);
+                var gi = go.GetComponent<MenuGridderItem>();
+                gi.size = new Vector2(widget.width, widget.height);
+            }
+
+            rect.UpdateContent();
         }
 
         internal void OnOpen(EventData context, string previous)

@@ -21,11 +21,11 @@ namespace api.nox.game
 
         public void UpdatePosition()
         {
+            if (gameObject == null) return;
             var rect = GetComponent<RectTransform>();
             if (rect == null) return;
             var parent = rect.parent?.GetComponent<RectTransform>();
             if (parent == null) return;
-            Debug.Log("Parent: " + parent.name + " for " + rect.name);
             rect.anchoredPosition = new Vector2(
                 position.x * parent.rect.width / gridder.dimensions.x,
                 -position.y * parent.rect.height / gridder.dimensions.y

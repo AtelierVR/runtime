@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b65667ad3fcb0844ca19c25fd393bde0, type: 3}
+  m_Name: langpack
+  m_EditorClassIdentifier: 
+  languages:
+  - IETF: en-US
+    entries:
+    - key: api.nox.test.widget.calendar.time.24
+      value: '{1}:{2}:{3}'
+    - key: api.nox.test.widget.calendar.time.12
+      value: '{0}:{2}:{3} {5}'
+    - key: api.nox.test.widget.calendar.time.24.ms
+      value: '{1}:{2}:{3}.{4}'
+    - key: api.nox.test.widget.calendar.time.12.ms
+      value: '{0}:{2}:{3}.{4} {5}'
+    - key: api.nox.test.widget.calendar.date
+      value: '{0}-{1}-{2}'
+    - key: api.nox.test.widget.calendar.title
+      value: Calendar
+    - key: api.nox.test.widget.calendar.day.monday
+      value: Monday
+    - key: api.nox.test.widget.calendar.day.tuesday
+      value: Tuesday
+    - key: api.nox.test.widget.calendar.day.wednesday
+      value: Wednesday
+    - key: api.nox.test.widget.calendar.day.thursday
+      value: Thursday
+    - key: api.nox.test.widget.calendar.day.friday
+      value: Friday
+    - key: api.nox.test.widget.calendar.day.saturday
+      value: Saturday
+    - key: api.nox.test.widget.calendar.day.sunday
+      value: Sunday
+  - IETF: fr-FR
+    entries:
+    - key: api.nox.test.widget.calendar.time.24
+      value: '{1}:{2}:{3}'
+    - key: api.nox.test.widget.calendar.time.12
+      value: '{0}:{2}:{3} {5}'
+    - key: api.nox.test.widget.calendar.time.24.ms
+      value: '{1}:{2}:{3}.{4}'
+    - key: api.nox.test.widget.calendar.time.12.ms
+      value: '{0}:{2}:{3}.{4} {5}'
+    - key: api.nox.test.widget.calendar.date
+      value: '{2}/{1}/{0}'
+    - key: api.nox.test.widget.calendar.title
+      value: Calendrier
+    - key: api.nox.test.widget.calendar.day.monday
+      value: Lundi
+    - key: api.nox.test.widget.calendar.day.tuesday
+      value: Mardi
+    - key: api.nox.test.widget.calendar.day.wednesday
+      value: Mercredi
+    - key: api.nox.test.widget.calendar.day.thursday
+      value: Jeudi
+    - key: api.nox.test.widget.calendar.day.friday
+      value: Vendredi
+    - key: api.nox.test.widget.calendar.day.saturday
+      value: Samedi
+    - key: api.nox.test.widget.calendar.day.sunday
+      value: Dimanche

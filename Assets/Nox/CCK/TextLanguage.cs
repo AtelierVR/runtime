@@ -18,6 +18,14 @@ namespace Nox.CCK
             }
         }
 
+        void Start()
+        {
+            LanguageManager.OnLanguageChanged += UpdateText;
+            UpdateText();
+        }
+
+        void OnDestroy() => LanguageManager.OnLanguageChanged -= UpdateText;
+
         void OnValidate() => UpdateText();
 
         public void UpdateText()

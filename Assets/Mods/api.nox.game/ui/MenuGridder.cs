@@ -9,7 +9,7 @@ namespace api.nox.game
         void Start() => UpdateContent();
         void OnValidate() => UpdateContent();
 
-        public void UpdateContent(bool fromItem = false)
+        public void UpdateContent()
         {
             var items = GetComponentsInChildren<MenuGridderItem>(true).OrderBy(x => x.index).ToArray();
 

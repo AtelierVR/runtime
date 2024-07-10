@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b65667ad3fcb0844ca19c25fd393bde0, type: 3}
+  m_Name: langpack
+  m_EditorClassIdentifier: 
+  languages:
+  - IETF: fr-FR
+    entries:
+    - key: game.ui.menu.home
+      value: Accueil
+    - key: game.ui.menu.instance
+      value: Menu Ins.
+    - key: game.ui.menu.navigation
+      value: Navigation
+    - key: game.ui.menu.inventory
+      value: Inventaire
+    - key: game.ui.menu.settings
+      value: "Param\xE8tres"
+    - key: game.ui.menu.guide
+      value: Guide
+    - key: game.ui.menu.muted
+      value: "Mut\xE9"
+    - key: game.ui.menu.unmuted
+      value: "D\xE9mut\xE9"
+    - key: game.ui.notification.test
+      value: Notification Test
+    - key: game.ui.notification.friend_request
+      value: Demande d'ami
+    - key: dashboard.main.messages.title
+      value: Messages
+    - key: dashboard.main.widgets.title
+      value: Widgets
+    - key: dashboard.main.time
+      value: '{1}:{2}'
+    - key: dashboard.main.friends.title
+      value: Amis
+  - IETF: en-US
+    entries:
+    - key: game.ui.menu.home
+      value: Home
+    - key: game.ui.menu.instance
+      value: Ins. Menu
+    - key: game.ui.menu.navigation
+      value: Navigation
+    - key: game.ui.menu.inventory
+      value: Inventory
+    - key: game.ui.menu.settings
+      value: Settings
+    - key: game.ui.menu.guide
+      value: Guide
+    - key: game.ui.menu.muted
+      value: Muted
+    - key: game.ui.menu.unmuted
+      value: Unmuted
+    - key: game.ui.notification.test
+      value: Notification test
+    - key: game.ui.notification.friend_request
+      value: Friend request
+    - key: dashboard.main.messages.title
+      value: Messages
+    - key: dashboard.main.widgets.title
+      value: Widgets
+    - key: dashboard.main.time
+      value: '{0}:{2} {5}'
+    - key: dashboard.main.friends.title
+      value: Friends

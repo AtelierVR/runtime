@@ -10,7 +10,6 @@ namespace Nox.CCK.Mods.Assets
 
         public bool HasLocalAsset<T>(string name) where T : Object;
         public T GetLocalAsset<T>(string name) where T : Object;
-
         public Scene LoadWorld(string ns, string name, LoadSceneMode mode = LoadSceneMode.Single);
         public Scene LoadLocalWorld(string name, LoadSceneMode mode = LoadSceneMode.Single);
     }

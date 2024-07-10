@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace Nox.CCK
         [System.Serializable]
         public class LanguageData
         {
-            public string iso;
+            public string IETF;
 
             public List<LanguageEntry> entries = new();
         }
@@ -25,16 +26,20 @@ namespace Nox.CCK
 
         public LanguageData[] languages;
 
-        public string GetLocalizedString(string key, string language, params object[] args)
+        public string GetLocalizedString(string key, string language)
         {
             foreach (var lang in languages)
-                if (lang.iso == language)
+                if (lang.IETF == language)
                     foreach (var entry in lang.entries)
                         if (entry.key == key)
-                            return string.Format(entry.value, args);
-            return string.Format("[{0}:{1}]", language, key);
+                            return entry.value;
+            return null;
         }
 
-        public static string CurrentISO => CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+        internal bool TryGetLocalizedString(string language, string key, out string value)
+        {
+            value = GetLocalizedString(key, language);
+            return value != null;
+        }
     }
 }

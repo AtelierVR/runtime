@@ -29,13 +29,9 @@ namespace Nox.Mods.Assets
                 Source = context.Source,
                 SourceChannel = context.Channel
             };
-            Debug.Log($"Received event {context.EventName} from {context.Source.GetMetadata().GetId()} to {_mod.GetMetadata().GetId()} ({context.Channel})");
             foreach (var sub in _subscriptions)
                 if (sub.EventName == null || sub.EventName == context.EventName)
-                {
-                    Debug.Log($"Invoking event {context.EventName} from {context.Source.GetMetadata().GetId()} to {_mod.GetMetadata().GetId()} ({context.Channel})");
                     sub.Callback(data);
-                }
         }
 
         public void Emit(EventContext context)
