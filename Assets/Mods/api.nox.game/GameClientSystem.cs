@@ -18,6 +18,7 @@ namespace api.nox.game
 
         private GameObject controllerObject;
         private HomeTileManager homeTile;
+        private UserTileManager userTile;
 
         public void OnInitializeClient(ClientModCoreAPI api)
         {
@@ -34,6 +35,7 @@ namespace api.nox.game
             m_bindLeftMenu.action.performed += ctx => OnMenuClick(true);
             m_bindRightMenu.action.performed += ctx => OnMenuClick(false);
             homeTile = new HomeTileManager(this);
+            userTile = new UserTileManager(this);
             api.EventAPI.Subscribe("game.tile", OnTile);
             api.EventAPI.Subscribe("game.tile.goto", OnGotoTile);
         }
@@ -56,6 +58,9 @@ namespace api.nox.game
                 case "game.home":
                 case "default":
                     homeTile.SendTile(context);
+                    break;
+                case "game.user":
+                    userTile.SendTile(context);
                     break;
             }
         }

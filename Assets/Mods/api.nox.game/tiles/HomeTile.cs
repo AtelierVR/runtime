@@ -45,11 +45,9 @@ namespace api.nox.game
         {
             if (homeTile != null)
             {
-                Debug.Log("Sending home tile");
                 clientMod.coreAPI.EventAPI.Emit("game.tile", homeTile);
                 return;
             }
-            Debug.Log("Creating home tile");
             var tile = new TileObject();
             var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.home");
             tile.content = Object.Instantiate(pf);
@@ -62,6 +60,7 @@ namespace api.nox.game
             homeTile = tile;
             clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
         }
+        
         internal void UpdateWidgets()
         {
             if (homeTile == null) return;

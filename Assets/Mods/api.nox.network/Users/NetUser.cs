@@ -1,7 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using Nox.CCK.Mods;
 using Nox.CCK.Mods.Networks;
 using Nox.CCK.Users;
 using UnityEngine;
@@ -13,21 +12,32 @@ namespace api.nox.network
     {
         private readonly NetworkSystem _mod;
 
-        internal User user;
+        internal UserMe user;
 
         internal NetUser(NetworkSystem mod) => _mod = mod;
-        
-        public async UniTask<User> FetchUserMe()
+
+        public async UniTask<UserMe> FetchUserMe()
         {
             var config = Config.Load();
-            if (!config.Has("token") || !config.Has("gateway")) return null;
+            if (!config.Has("token") || !config.Has("gateway"))
+            {
+                user = null;
+                _mod._api.EventAPI.Emit(new NetEventContext("network.user", user, true));
+                return null;
+            }
             var req = new UnityWebRequest(string.Format("{0}/api/users/@me", config.Get<string>("gateway")), "GET") { downloadHandler = new DownloadHandlerBuffer() };
             req.SetRequestHeader("Authorization", string.Format("Bearer {0}", config.Get<string>("token")));
             try { await req.SendWebRequest(); }
             catch { }
-            if (req.responseCode != 200) return null;
-            var response = JsonUtility.FromJson<Response<User>>(req.downloadHandler.text);
+            if (req.responseCode != 200)
+            {
+                user = null;
+                _mod._api.EventAPI.Emit(new NetEventContext("network.user", user, true));
+                return null;
+            }
+            var response = JsonUtility.FromJson<Response<UserMe>>(req.downloadHandler.text);
             user = response.data;
+            _mod._api.EventAPI.Emit(new NetEventContext("network.user", user, true));
             return response.data;
         }
 
@@ -50,10 +60,14 @@ namespace api.nox.network
                     config.Save();
                 }
                 user = null;
+                _mod._api.EventAPI.Emit(new NetEventContext("network.user", user, true));
+                _mod._api.EventAPI.Emit(new NetEventContext("network.user.logout", true, user));
                 return new Response<bool> { data = true };
             }
             catch
             {
+                _mod._api.EventAPI.Emit(new NetEventContext("network.user", user, true));
+                _mod._api.EventAPI.Emit(new NetEventContext("network.user.logout", false, user));
                 return new Response<bool> { error = new ResponseError { code = 500, message = "An error occured." } };
             };
         }
@@ -83,10 +97,14 @@ namespace api.nox.network
                     config.Save();
                 }
                 user = response.data.user;
+                _mod._api.EventAPI.Emit(new NetEventContext("network.user", user, true));
+                _mod._api.EventAPI.Emit(new NetEventContext("network.user.login", true, user));
                 return response;
             }
             catch
             {
+                _mod._api.EventAPI.Emit(new NetEventContext("network.user", user, true));
+                _mod._api.EventAPI.Emit(new NetEventContext("network.user.login", false, user));
                 return new Response<Login> { error = new ResponseError { code = 500, message = "An error occured." } };
             }
         }

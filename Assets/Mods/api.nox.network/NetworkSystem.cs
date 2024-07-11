@@ -1,9 +1,11 @@
+using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Mods.Networks;
 using Nox.CCK.Users;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace api.nox.network
 {
@@ -19,7 +21,7 @@ namespace api.nox.network
             User = new NetUser(this);
             World = new NetWorld(this);
         }
-        
+
         public void OnUpdate()
         {
         }
@@ -36,7 +38,16 @@ namespace api.nox.network
             return null;
         }
 
-        public User GetCurrentUser() => User.user;
+        public UserMe GetCurrentUser() => User.user;
+
+        public async UniTask<Texture2D> FetchTexture(string url)
+        {
+            var req = new UnityWebRequest(url, "GET") { downloadHandler = new DownloadHandlerTexture() };
+            try { await req.SendWebRequest(); } catch { }
+            if (req.responseCode != 200) return null;
+            return DownloadHandlerTexture.GetContent(req);
+        }
+
         public NetworkAPIWorld WorldAPI => World;
         public NetworkAPIUser UserAPI => User;
     }

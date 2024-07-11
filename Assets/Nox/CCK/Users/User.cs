@@ -1,7 +1,9 @@
+using Nox.CCK.Mods;
+
 namespace Nox.CCK.Users
 {
     [System.Serializable]
-    public class User
+    public class User : ShareObject
     {
         public uint id;
         public string username;
@@ -10,5 +12,7 @@ namespace Nox.CCK.Users
         public string server;
         public float rank;
         public string[] links;
+        public string banner;
+        public string thumbnail;
     }
 }

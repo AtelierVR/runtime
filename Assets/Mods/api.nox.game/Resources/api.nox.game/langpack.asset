@@ -16,60 +16,88 @@ MonoBehaviour:
   - IETF: fr-FR
     entries:
     - key: game.ui.menu.home
-      value: Accueil
+      value: "Accueil"
     - key: game.ui.menu.instance
-      value: Menu Ins.
+      value: "Menu Ins."
     - key: game.ui.menu.navigation
-      value: Navigation
+      value: "Navigation"
     - key: game.ui.menu.inventory
-      value: Inventaire
+      value: "Inventaire"
     - key: game.ui.menu.settings
       value: "Param\xE8tres"
     - key: game.ui.menu.guide
-      value: Guide
+      value: "Guide"
     - key: game.ui.menu.muted
       value: "Mut\xE9"
     - key: game.ui.menu.unmuted
       value: "D\xE9mut\xE9"
     - key: game.ui.notification.test
-      value: Notification Test
+      value: "Notification Test"
     - key: game.ui.notification.friend_request
-      value: Demande d'ami
+      value: "Demande d'ami"
     - key: dashboard.main.messages.title
-      value: Messages
+      value: "Messages"
     - key: dashboard.main.widgets.title
-      value: Widgets
+      value: "Widgets"
     - key: dashboard.main.time
       value: '{1}:{2}'
     - key: dashboard.main.friends.title
-      value: Amis
+      value: "Amis"
+    - key: dashboard.main.user.title
+      value: "A propos de {0}"
+    - key: dashboard.main.user.display
+      value: "{0}"
+    - key: dashboard.main.user.badges
+      value: "Badges ({0})"
+    - key: dashboard.main.user.links
+      value: "Liens ({0})"
+    - key: dashboard.main.user.languages
+      value: "Langues ({0})"
+    - key: api.nox.game.widget.userme.title
+      value: "Moi"
+    - key: api.nox.game.widget.userme.display
+      value: "{0}"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home
-      value: Home
+      value: "Home"
     - key: game.ui.menu.instance
-      value: Ins. Menu
+      value: "Ins. Menu"
     - key: game.ui.menu.navigation
-      value: Navigation
+      value: "Navigation"
     - key: game.ui.menu.inventory
-      value: Inventory
+      value: "Inventory"
     - key: game.ui.menu.settings
-      value: Settings
+      value: "Settings"
     - key: game.ui.menu.guide
-      value: Guide
+      value: "Guide"
     - key: game.ui.menu.muted
-      value: Muted
+      value: "Muted"
     - key: game.ui.menu.unmuted
-      value: Unmuted
+      value: "Unmuted"
     - key: game.ui.notification.test
-      value: Notification test
+      value: "Notification test"
     - key: game.ui.notification.friend_request
-      value: Friend request
+      value: "Friend request"
     - key: dashboard.main.messages.title
-      value: Messages
+      value: "Messages"
     - key: dashboard.main.widgets.title
-      value: Widgets
+      value: "Widgets"
     - key: dashboard.main.time
       value: '{0}:{2} {5}'
     - key: dashboard.main.friends.title
-      value: Friends
+      value: "Friends"
+    - key: dashboard.main.user.title
+      value: "About {0}"
+    - key: dashboard.main.user.display
+      value: "{0}"
+    - key: dashboard.main.user.badges
+      value: "Badges ({0})"
+    - key: dashboard.main.user.links
+      value: "Links ({0})"
+    - key: dashboard.main.user.languages
+      value: "Languages ({0})"
+    - key: api.nox.game.widget.userme.title
+      value: "Me"
+    - key: api.nox.game.widget.userme.display
+      value: "{0}"

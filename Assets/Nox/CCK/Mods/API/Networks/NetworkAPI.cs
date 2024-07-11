@@ -1,14 +1,16 @@
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Users;
 using Nox.CCK.Worlds;
+using UnityEngine;
 
 namespace Nox.CCK.Mods.Networks
 {
     public interface NetworkAPI
     {
-        public User GetCurrentUser();
+        public UserMe GetCurrentUser();
         public NetworkAPIWorld WorldAPI { get; }
         public NetworkAPIUser UserAPI { get; }
+        public UniTask<Texture2D> FetchTexture(string url);
     }
 
     public interface NetworkAPIWorld
@@ -27,7 +29,7 @@ namespace Nox.CCK.Mods.Networks
 
     public interface NetworkAPIUser
     {
-        public UniTask<User> FetchUserMe();
+        public UniTask<UserMe> FetchUserMe();
         public UniTask<Response<bool>> FetchLogout();
         public UniTask<Response<Login>> FetchLogin(string server, string username, string password);
     }
@@ -37,7 +39,7 @@ namespace Nox.CCK.Mods.Networks
     public class Login : ShareObject
     {
         public string token;
-        public User user;
+        public UserMe user;
     }
     
     [System.Serializable]

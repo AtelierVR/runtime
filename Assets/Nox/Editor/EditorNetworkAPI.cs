@@ -1,5 +1,7 @@
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Networks;
 using Nox.CCK.Users;
+using UnityEngine;
 
 namespace Nox.Editor.Mods
 {
@@ -15,7 +17,7 @@ namespace Nox.Editor.Mods
 
         internal NetworkAPI GetNetworkAPI()
         {
-            var mainclass = GetNetworkMod()?.GetMainClasses();
+            var mainclass = GetNetworkMod().GetMainClasses();
             if (mainclass == null) return null;
             foreach (var mc in mainclass)
                 if (mc is NetworkAPI)
@@ -23,10 +25,12 @@ namespace Nox.Editor.Mods
             return null;
         }
 
-        public NetworkAPIWorld WorldAPI => GetNetworkAPI()?.WorldAPI;
-        public User GetCurrentUser() => GetNetworkAPI()?.GetCurrentUser();
-        public NetworkAPIUser UserAPI => GetNetworkAPI()?.UserAPI;
+        public NetworkAPIWorld WorldAPI => GetNetworkAPI().WorldAPI;
+        public UserMe GetCurrentUser() => GetNetworkAPI().GetCurrentUser();
+        public NetworkAPIUser UserAPI => GetNetworkAPI().UserAPI;
 
         public override string ToString() => $"{GetType().Name}[Mod={_mod.GetMetadata().GetId()}, APIs={((UserAPI?.GetType().Name ?? "null") + (WorldAPI?.GetType().Name ?? "null"))}]";
+
+        public async UniTask<Texture2D> FetchTexture(string url) => await GetNetworkAPI().FetchTexture(url);
     }
 }
