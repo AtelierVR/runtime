@@ -7,7 +7,9 @@ using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace api.nox.game
@@ -20,6 +22,8 @@ namespace api.nox.game
         private HomeTileManager homeTile;
         private UserTileManager userTile;
         private ServerTileManager serverTile;
+        private NavigationTileManager navigationTile;
+        private EventSystem eventSystem;
 
         public void OnInitializeClient(ClientModCoreAPI api)
         {
@@ -27,6 +31,7 @@ namespace api.nox.game
             api.AssetAPI.LoadLocalWorld("default");
             var controller = api.AssetAPI.GetLocalAsset<GameObject>("prefabs/xr-controller");
             m_controller = Object.Instantiate(controller);
+            m_controller.name = "game.controller";
             GameObject.DontDestroyOnLoad(m_controller);
             var XRControllerComponent = m_controller.AddComponent<XRController>();
             XRControllerComponent.enabled = false;
@@ -38,8 +43,11 @@ namespace api.nox.game
             homeTile = new HomeTileManager(this);
             userTile = new UserTileManager(this);
             serverTile = new ServerTileManager(this);
+            navigationTile = new NavigationTileManager(this);
             api.EventAPI.Subscribe("game.tile", OnTile);
             api.EventAPI.Subscribe("game.tile.goto", OnGotoTile);
+            eventSystem = Reference.GetReference("game.eventsystem", m_controller)?.GetComponent<EventSystem>();
+            eventSystem?.gameObject.SetActive(!coreAPI.XRAPI.IsEnabled());
         }
 
         public void OnTile(Nox.CCK.Mods.Events.EventData context)
@@ -67,17 +75,21 @@ namespace api.nox.game
                 case "game.server":
                     serverTile.SendTile(context);
                     break;
+                case "game.navigation":
+                    navigationTile.SendTile(context);
+                    break;
             }
         }
 
 
         private void OnMenuClick(bool isLeft)
         {
+            if (!coreAPI.XRAPI.IsEnabled() && eventSystem?.currentSelectedGameObject != null) return;
             var menu = GetOrCreateMenu();
             if (!menu.gameObject.activeSelf)
             {
                 var forw = m_headCamera.transform.forward + m_controller.transform.forward / 2;
-                menu.transform.position = m_headCamera.transform.position + forw * .5f;
+                menu.transform.position = m_headCamera.transform.position + forw * (coreAPI.XRAPI.IsEnabled() ? .5f : .4f);
                 var rect = Reference.GetReference("game.menu.canvas", menu.gameObject).GetComponent<RectTransform>();
                 menu.transform.position = new Vector3(
                     menu.transform.position.x,

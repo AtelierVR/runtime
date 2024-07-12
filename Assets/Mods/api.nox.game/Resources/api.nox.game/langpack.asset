@@ -69,6 +69,18 @@ MonoBehaviour:
       value: "{0}"
     - key: dashboard.server.address
       value: "{0}"
+    - key: dashboard.navigation.title
+      value: "Navigation"
+    - key: dashboard.navigation.inputfield
+      value: "Rechercher..."
+    - key: dashboard.navigation.user
+      value: "Utilisateurs"
+    - key: dashboard.navigation.world
+      value: "Mondes"
+    - key: dashboard.navigation.world.title
+      value: "Navigation par Monde"
+    - key: dashboard.navigation.user.title
+      value: "Navigation par Utilisateur"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home
@@ -125,3 +137,16 @@ MonoBehaviour:
       value: "{0}"
     - key: dashboard.server.address
       value: "{0}"
+    - key: dashboard.navigation.title
+      value: "Navigation"
+    - key: dashboard.navigation.inputfield
+      value: "Search..."
+    - key: dashboard.navigation.user
+      value: "Users"
+    - key: dashboard.navigation.user.title
+      value: "Navigation by User"
+    - key: dashboard.navigation.world
+      value: "Worlds"
+    - key: dashboard.navigation.world.title
+      value: "Navigation by World"
+      

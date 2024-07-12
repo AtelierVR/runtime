@@ -18,6 +18,7 @@ namespace api.nox.game
 
         internal UserTileManager(GameClientSystem clientMod)
         {
+            Debug.Log("UserTileManager");
             this.clientMod = clientMod;
             eventUserUpdate = clientMod.coreAPI.EventAPI.Subscribe("network.user", OnUserUpdate);
             Debug.Log("UserTileManager initialized.");

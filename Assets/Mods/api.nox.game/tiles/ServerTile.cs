@@ -18,6 +18,7 @@ namespace api.nox.game
 
         internal ServerTileManager(GameClientSystem clientMod)
         {
+            Debug.Log("ServerTileManager");
             this.clientMod = clientMod;
             eventServerUpdate = clientMod.coreAPI.EventAPI.Subscribe("network.server", OnServerUpdate);
             Debug.Log("ServerTileManager initialized.");

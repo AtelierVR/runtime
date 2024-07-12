@@ -29,6 +29,7 @@ namespace Nox.Mods.Assets
                 Source = context.Source,
                 SourceChannel = context.Channel
             };
+            Debug.Log($"Receiving event {context.EventName} from {context.Source.GetMetadata().GetId()} in {_mod.GetMetadata().GetId()}");
             foreach (var sub in _subscriptions)
                 if (sub.EventName == null || sub.EventName == context.EventName)
                     sub.Callback(data);
@@ -36,6 +37,7 @@ namespace Nox.Mods.Assets
 
         public void Emit(EventContext context)
         {
+            Debug.Log($"Emitting event {context.EventName} from {_mod.GetMetadata().GetId()} at {context.Channel}");
             var ncontext = new RuntimeEventContext(context) { CurrentChannel = _channel, Source = _mod };
             var mod = context.Destination != null ? _mod.coreAPI.RuntimeModAPI.GetInternalMod(context.Destination) : null;
             if (mod != null)
@@ -92,6 +94,7 @@ namespace Nox.Mods.Assets
             }
             _subscriptions.Add(runtime);
             _subscriptions.Sort((a, b) => a.Weight.CompareTo(b.Weight));
+            Debug.Log($"Subscribing to event {runtime.EventName} in {_mod.GetMetadata().GetId()} at {_channel}");
             return eventSub;
         }
 

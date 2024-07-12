@@ -18,7 +18,7 @@ namespace api.nox.game
         internal HomeTileManager(GameClientSystem clientMod)
         {
             this.clientMod = clientMod;
-            this.widgetsub = clientMod.coreAPI.EventAPI.Subscribe("game.widget", OnWidget);
+            widgetsub = clientMod.coreAPI.EventAPI.Subscribe("game.widget", OnWidget);
         }
 
         internal void OnDispose()
@@ -61,7 +61,7 @@ namespace api.nox.game
             homeTile = tile;
             clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
         }
-        
+
         internal void UpdateWidgets()
         {
             if (homeTile == null) return;
@@ -72,13 +72,14 @@ namespace api.nox.game
                 Object.Destroy(child.gameObject);
             foreach (var widget in widgets.Values)
             {
-                Debug.Log("Adding widget to home tile");
+                Debug.Log("Adding widget to home tile" + widget.id);
                 var go = widget.GetContent(rect.transform);
                 var gi = go.GetComponent<MenuGridderItem>();
                 gi.size = new Vector2(widget.width, widget.height);
             }
 
-            UniTask.Create(async() => {
+            UniTask.Create(async () =>
+            {
                 await UniTask.DelayFrame(1);
                 rect.UpdateContent();
             }).Forget();

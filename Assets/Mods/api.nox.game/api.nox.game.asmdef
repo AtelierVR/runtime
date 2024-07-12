@@ -5,7 +5,8 @@
         "NoxCCK",
         "UniTask",
         "Unity.XR.Interaction.Toolkit.Samples.StarterAssets",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
