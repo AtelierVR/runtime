@@ -59,9 +59,18 @@ namespace api.nox.game
                 }
                 var thumb = Reference.GetReference("icon", btncontent).GetComponent<RawImage>();
                 if (!string.IsNullOrEmpty(user.thumbnail)) UpdateTexure(thumb, user.thumbnail).Forget();
+                var btnref = Reference.GetReference("button", btn).GetComponent<Button>();
+                btnref.onClick.AddListener(OnClickWidget);
                 return btn;
             };
             clientMod.coreAPI.EventAPI.Emit("game.widget", userMeWidget);
+        }
+
+        private void OnClickWidget()
+        {
+            var user = clientMod.coreAPI.NetworkAPI.GetCurrentUser();
+            if (user == null) return;
+            clientMod.GotoTile("game.user", user);
         }
 
         private async UniTask<bool> UpdateTexure(RawImage img, string url)
@@ -88,6 +97,7 @@ namespace api.nox.game
 
         internal void OnDispose()
         {
+            clientMod.coreAPI.EventAPI.Unsubscribe(eventUserUpdate);
         }
 
         internal void SendTile(EventData context)
@@ -97,18 +107,46 @@ namespace api.nox.game
                 clientMod.coreAPI.EventAPI.Emit("game.tile", this.tile);
                 return;
             }
+            var user = ((context.Data[1] as object[])[0] as ShareObject).Convert<User>();
             var tile = new TileObject();
             var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.user");
             tile.content = Object.Instantiate(pf);
+            UpdateContent(tile.content, user);
             tile.id = "api.nox.game.user";
             this.tile = tile;
             clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
         }
 
+        private void UpdateContent(GameObject tile, User user)
+        {
+            Reference.GetReference("title", tile).GetComponent<TextLanguage>().arguments = new string[] { user.display };
+
+            var withbanner = Reference.GetReference("withbanner", tile);
+            var nobanner = Reference.GetReference("nobanner", tile);
+            withbanner.SetActive(!string.IsNullOrEmpty(user.banner));
+            nobanner.SetActive(string.IsNullOrEmpty(user.banner));
+
+            var current = string.IsNullOrEmpty(user.banner) ? nobanner : withbanner;
+
+            Reference.GetReference("display", current).GetComponent<TextLanguage>().arguments = new string[] { user.display };
+
+            if (!string.IsNullOrEmpty(user.banner))
+            {
+                var thumb = Reference.GetReference("banner", current).GetComponent<RawImage>();
+                UpdateTexure(thumb, user.banner).Forget();
+            }
+
+            if (!string.IsNullOrEmpty(user.thumbnail))
+            {
+                var thumb = Reference.GetReference("icon", current).GetComponent<RawImage>();
+                UpdateTexure(thumb, user.thumbnail).Forget();
+            }
+        }
+
         private async UniTask Initialization()
         {
             var user = clientMod.coreAPI.NetworkAPI.GetCurrentUser();
-            user ??= await clientMod.coreAPI.NetworkAPI.UserAPI.FetchUserMe();
+            user ??= await clientMod.coreAPI.NetworkAPI.UserAPI.GetMyUser();
             if (user != null) OnUserConnect(user);
             else OnUserDisconnect();
         }

@@ -1526,6 +1526,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd717a86cdf0b0b429f2da53db1dee8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  defaultTile: default
   menuItemPrefab: {fileID: 5725803685141091912, guid: 691324638f2ec0644aa816acc6db079b, type: 3}
   centerMenu: {fileID: 1199729238044069113}
   leftMenu: {fileID: 1430416077985365222}
@@ -1534,43 +1535,67 @@ MonoBehaviour:
   - key: home
     icon: {fileID: 2800000, guid: b00e96ec1c24e4b4caf207222b9335da, type: 3}
     text: game.ui.menu.home
+    text_arguments: []
     tooltip: 
+    tooltip_arguments: []
+    gotoTile: game.home
     flags: -1
   - key: instance
     icon: {fileID: 2800000, guid: ed851a7404f93dd40b40a031712778a3, type: 3}
     text: game.ui.menu.instance
+    text_arguments: []
     tooltip: 
+    tooltip_arguments: []
+    gotoTile: game.instance
     flags: 2
   - key: navigation
     icon: {fileID: 2800000, guid: c418bafad32240c4fa710ca02d6b28ac, type: 3}
     text: game.ui.menu.navigation
+    text_arguments: []
     tooltip: 
+    tooltip_arguments: []
+    gotoTile: game.navigation
     flags: -1
   - key: applications
     icon: {fileID: 2800000, guid: 9977af2fb70c19f49805df4e66d47d72, type: 3}
-    text: game.ui.menu.navigation
+    text: game.ui.menu.application
+    text_arguments: []
     tooltip: 
+    tooltip_arguments: []
+    gotoTile: game.applications
     flags: -1
   - key: inventory
     icon: {fileID: 2800000, guid: bb86020f1e3bebe45899e3e4786608f9, type: 3}
     text: game.ui.menu.inventory
+    text_arguments: []
     tooltip: 
+    tooltip_arguments: []
+    gotoTile: game.inventory
     flags: -1
   - key: settings
     icon: {fileID: 2800000, guid: 450ec254436a6da42b07a3fa6ea22d0e, type: 3}
     text: game.ui.menu.settings
+    text_arguments: []
     tooltip: 
+    tooltip_arguments: []
+    gotoTile: game.settings
     flags: -1
   bottomLeftItems:
   - key: guide
     icon: {fileID: 2800000, guid: a414d3fc5fee3b4469ce2328e8cdfba4, type: 3}
     text: game.ui.menu.guide
-    tooltip: 
+    text_arguments: []
+    tooltip: game.guide
+    tooltip_arguments: []
+    gotoTile: 
     flags: -1
   - key: mic
     icon: {fileID: 2800000, guid: 90e715335b2e4c14a950fc1049f25600, type: 3}
     text: game.ui.menu.muted
+    text_arguments: []
     tooltip: 
+    tooltip_arguments: []
+    gotoTile: 
     flags: -1
   bottomRightItems: []
   notificationItemPrefab: {fileID: 2413591035654245413, guid: 575053b035bcb954d818444f9a385c5d, type: 3}
@@ -1579,17 +1604,26 @@ MonoBehaviour:
   - key: test
     icon: {fileID: 0}
     text: game.ui.notification.test
+    text_arguments: []
     tooltip: 
+    tooltip_arguments: []
+    gotoTile: 
     flags: -1
   - key: test
     icon: {fileID: 2800000, guid: e15f74c758b993a4599d01ab00906596, type: 3}
     text: game.ui.notification.friend_request
+    text_arguments: []
     tooltip: 
+    tooltip_arguments: []
+    gotoTile: 
     flags: -1
   - key: exit
     icon: {fileID: 2800000, guid: 067874d3557f41742baa6088723f4398, type: 3}
     text: 
+    text_arguments: []
     tooltip: 
+    tooltip_arguments: []
+    gotoTile: 
     flags: -1
   container: {fileID: 7781692705783650712}
 --- !u!114 &6483486491798769514

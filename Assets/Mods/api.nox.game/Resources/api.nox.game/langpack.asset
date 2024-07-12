@@ -23,6 +23,8 @@ MonoBehaviour:
       value: "Navigation"
     - key: game.ui.menu.inventory
       value: "Inventaire"
+    - key: game.ui.menu.application
+      value: "Application"
     - key: game.ui.menu.settings
       value: "Param\xE8tres"
     - key: game.ui.menu.guide
@@ -43,19 +45,29 @@ MonoBehaviour:
       value: '{1}:{2}'
     - key: dashboard.main.friends.title
       value: "Amis"
-    - key: dashboard.main.user.title
-      value: "A propos de {0}"
-    - key: dashboard.main.user.display
+    - key: dashboard.user.title
+      value: "À propos de {0}"
+    - key: dashboard.user.display
       value: "{0}"
-    - key: dashboard.main.user.badges
+    - key: dashboard.user.badges
       value: "Badges ({0})"
-    - key: dashboard.main.user.links
+    - key: dashboard.user.links
       value: "Liens ({0})"
-    - key: dashboard.main.user.languages
+    - key: dashboard.user.languages
       value: "Langues ({0})"
     - key: api.nox.game.widget.userme.title
       value: "Moi"
     - key: api.nox.game.widget.userme.display
+      value: "{0}"
+    - key: api.nox.game.widget.serverme.title
+      value: "Mon Serveur"
+    - key: api.nox.game.widget.serverme.display
+      value: "{0}"
+    - key: dashboard.server.title
+      value: "À propos de {0}"
+    - key: dashboard.server.display
+      value: "{0}"
+    - key: dashboard.server.address
       value: "{0}"
   - IETF: en-US
     entries:
@@ -67,6 +79,8 @@ MonoBehaviour:
       value: "Navigation"
     - key: game.ui.menu.inventory
       value: "Inventory"
+    - key: game.ui.menu.application
+      value: "Application"
     - key: game.ui.menu.settings
       value: "Settings"
     - key: game.ui.menu.guide
@@ -87,17 +101,27 @@ MonoBehaviour:
       value: '{0}:{2} {5}'
     - key: dashboard.main.friends.title
       value: "Friends"
-    - key: dashboard.main.user.title
+    - key: dashboard.user.title
       value: "About {0}"
-    - key: dashboard.main.user.display
+    - key: dashboard.user.display
       value: "{0}"
-    - key: dashboard.main.user.badges
+    - key: dashboard.user.badges
       value: "Badges ({0})"
-    - key: dashboard.main.user.links
+    - key: dashboard.user.links
       value: "Links ({0})"
-    - key: dashboard.main.user.languages
+    - key: dashboard.user.languages
       value: "Languages ({0})"
     - key: api.nox.game.widget.userme.title
       value: "Me"
     - key: api.nox.game.widget.userme.display
+      value: "{0}"
+    - key: api.nox.game.widget.serverme.title
+      value: "My Server"
+    - key: api.nox.game.widget.serverme.display
+      value: "{0}"
+    - key: dashboard.server.title
+      value: "About {0}"
+    - key: dashboard.server.display
+      value: "{0}"
+    - key: dashboard.server.address
       value: "{0}"

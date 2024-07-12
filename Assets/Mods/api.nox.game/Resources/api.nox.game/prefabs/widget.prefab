@@ -386,6 +386,7 @@ GameObject:
   - component: {fileID: 1526248974273188035}
   - component: {fileID: 4753002918135487021}
   - component: {fileID: 5768956117325462604}
+  - component: {fileID: 7674129245926720944}
   m_Layer: 5
   m_Name: MenuItem
   m_TagString: Untagged
@@ -421,7 +422,7 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9129143604686974747}
-  m_CullTransparentMesh: 0
+  m_CullTransparentMesh: 1
 --- !u!114 &4561607168043767915
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -631,3 +632,17 @@ MonoBehaviour:
   m_MinDistance: 0.15
   m_ClampToMaxDistance: 1
   m_MaxDistance: 10
+--- !u!114 &7674129245926720944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9129143604686974747}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52bad127038c8cf489f62e6161cd4f4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Key: button
+  Refrence: {fileID: 0}

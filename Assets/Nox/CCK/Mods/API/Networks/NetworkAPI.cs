@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Servers;
 using Nox.CCK.Users;
 using Nox.CCK.Worlds;
 using UnityEngine;
@@ -8,8 +9,10 @@ namespace Nox.CCK.Mods.Networks
     public interface NetworkAPI
     {
         public UserMe GetCurrentUser();
+        public Server GetCurrentServer();
         public NetworkAPIWorld WorldAPI { get; }
         public NetworkAPIUser UserAPI { get; }
+        public NetworkAPIServer ServerAPI { get; }
         public UniTask<Texture2D> FetchTexture(string url);
     }
 
@@ -27,21 +30,28 @@ namespace Nox.CCK.Mods.Networks
         public UniTask<World> UpdateWorld(UpdateWorldData world, bool withEmpty = false);
     }
 
-    public interface NetworkAPIUser
+    public interface NetworkAPIServer
     {
-        public UniTask<UserMe> FetchUserMe();
-        public UniTask<Response<bool>> FetchLogout();
-        public UniTask<Response<Login>> FetchLogin(string server, string username, string password);
+        public UniTask<Server> GetMyServer();
+        public UniTask<WellKnownServer> GetWellKnown(string address);
+        public UniTask<Server> GetServer(string address);
     }
 
-    
+    public interface NetworkAPIUser
+    {
+        public UniTask<UserMe> GetMyUser();
+        public UniTask<Response<bool>> GetLogout();
+        public UniTask<Response<Login>> PostLogin(string server, string username, string password);
+    }
+
+
     [System.Serializable]
     public class Login : ShareObject
     {
         public string token;
         public UserMe user;
     }
-    
+
     [System.Serializable]
     public class UpdateWorldData : ShareObject
     {

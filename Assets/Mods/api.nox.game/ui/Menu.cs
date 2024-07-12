@@ -9,6 +9,8 @@ namespace api.nox.game
 {
     public class Menu : MonoBehaviour
     {
+        internal GameClientSystem _gameClientSystem;
+        public string defaultTile;
         [Header("Menu bars")]
         public GameObject menuItemPrefab;
         public RectTransform centerMenu;
@@ -172,7 +174,7 @@ namespace api.nox.game
                     menuItem.name = $"menu-item-{i}-hidden";
                 }
 #else
-                    Destroy(menu.GetChild(i).gameObject);
+                Destroy(menu.GetChild(i).gameObject);
 #endif
             }
             // update items
@@ -183,8 +185,12 @@ namespace api.nox.game
                 menuItem.name = $"menu-item-{i}-{item.key}";
                 menuItem.GetComponentInChildren<RawImage>().texture = item.icon;
                 menuItem.GetComponentInChildren<TextLanguage>().UpdateText(item.text);
-                menuItem.GetComponent<Button>().interactable = item.flags.HasFlag(MenuItemActiveFlags.Interactable);
+                var btn = menuItem.GetComponent<Button>();
+                btn.interactable = item.flags.HasFlag(MenuItemActiveFlags.Interactable);
                 menuItem.gameObject.SetActive(item.flags.HasFlag(MenuItemActiveFlags.Enabled));
+                btn.onClick.RemoveAllListeners();
+                if (!string.IsNullOrEmpty(item.gotoTile) && _gameClientSystem != null)
+                    btn.onClick.AddListener(() => _gameClientSystem.GotoTile(item.gotoTile));
             }
         }
     }
@@ -204,7 +210,10 @@ namespace api.nox.game
         public string key;
         public Texture2D icon;
         public string text;
+        public string[] text_arguments;
         public string tooltip;
+        public string[] tooltip_arguments;
+        public string gotoTile;
         public MenuItemActiveFlags flags;
     }
 }

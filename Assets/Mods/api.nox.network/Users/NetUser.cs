@@ -16,7 +16,7 @@ namespace api.nox.network
 
         internal NetUser(NetworkSystem mod) => _mod = mod;
 
-        public async UniTask<UserMe> FetchUserMe()
+        public async UniTask<UserMe> GetMyUser()
         {
             var config = Config.Load();
             if (!config.Has("token") || !config.Has("gateway"))
@@ -41,7 +41,7 @@ namespace api.nox.network
             return response.data;
         }
 
-        public async UniTask<Response<bool>> FetchLogout()
+        public async UniTask<Response<bool>> GetLogout()
         {
             var config = Config.Load();
             if (!config.Has("token") || !config.Has("gateway")) return new Response<bool> { error = new ResponseError { code = 401, message = "Not logged in." } };
@@ -72,7 +72,7 @@ namespace api.nox.network
             };
         }
 
-        public async UniTask<Response<Login>> FetchLogin(string server, string username, string password)
+        public async UniTask<Response<Login>> PostLogin(string server, string username, string password)
         {
             Uri gateway = await Gateway.FindGatewayMaster(server);
             if (gateway == null)

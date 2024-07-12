@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
@@ -64,18 +65,23 @@ namespace api.nox.game
         internal void UpdateWidgets()
         {
             if (homeTile == null) return;
+            Debug.Log("Updating home tile");
             var rect = Reference.GetReference("game.home.widgets", homeTile.content).GetComponent<MenuGridder>();
             // remove to the parent all the children
             foreach (Transform child in rect.transform)
                 Object.Destroy(child.gameObject);
             foreach (var widget in widgets.Values)
             {
+                Debug.Log("Adding widget to home tile");
                 var go = widget.GetContent(rect.transform);
                 var gi = go.GetComponent<MenuGridderItem>();
                 gi.size = new Vector2(widget.width, widget.height);
             }
 
-            rect.UpdateContent();
+            UniTask.Create(async() => {
+                await UniTask.DelayFrame(1);
+                rect.UpdateContent();
+            }).Forget();
         }
 
         internal void OnOpen(EventData context, string previous)
