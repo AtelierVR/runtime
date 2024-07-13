@@ -29,6 +29,8 @@ namespace api.nox.game
     internal class NavigationResultData : ShareObject
     {
         public string title;
-        public Texture2D image;
+        public string imageUrl;
+        public string goto_id;
+        public object[] goto_data;
     }
 }

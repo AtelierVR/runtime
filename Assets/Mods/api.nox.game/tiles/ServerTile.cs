@@ -109,7 +109,12 @@ namespace api.nox.game
                 return;
             }
             var server = ((context.Data[1] as object[])[0] as ShareObject).Convert<Server>();
-            var tile = new TileObject();
+            var tile = new TileObject()
+            {
+                onRemove = () => { 
+                    this.tile = null;
+                }
+            };
             var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.server");
             tile.content = Object.Instantiate(pf);
             UpdateContent(tile.content, server);

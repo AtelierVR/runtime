@@ -2,6 +2,7 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Servers;
 using Nox.CCK.Users;
 using Nox.CCK.Worlds;
+using Nox.CCK.Instances;
 using UnityEngine;
 
 namespace Nox.CCK.Mods.Networks
@@ -13,6 +14,7 @@ namespace Nox.CCK.Mods.Networks
         public NetworkAPIWorld WorldAPI { get; }
         public NetworkAPIUser UserAPI { get; }
         public NetworkAPIServer ServerAPI { get; }
+        public NetworkAPIInstance InstanceAPI { get; }
         public UniTask<Texture2D> FetchTexture(string url);
     }
 
@@ -28,6 +30,9 @@ namespace Nox.CCK.Mods.Networks
         public UniTask<Asset> CreateAsset(CreateAssetData asset);
         public UniTask<World> CreateWorld(CreateWorldData world);
         public UniTask<World> UpdateWorld(UpdateWorldData world, bool withEmpty = false);
+        
+        public UniTask<World[]> GetWorlds(string server, uint[] worldIds);
+        public UniTask<WorldSearch> SearchWorlds(string server, string query, uint offset = 0, uint limit = 10);
     }
 
     public interface NetworkAPIServer
@@ -35,6 +40,13 @@ namespace Nox.CCK.Mods.Networks
         public UniTask<Server> GetMyServer();
         public UniTask<WellKnownServer> GetWellKnown(string address);
         public UniTask<Server> GetServer(string address);
+        public UniTask<ServerSearch> SearchServers(string server, string query, uint offset = 0, uint limit = 10);
+    }
+
+    public interface NetworkAPIInstance
+    {
+        public UniTask<Instance> GetInstance(string server, uint instanceId);
+        public UniTask<InstanceSearch> SearchInstances(string server, string query, uint offset = 0, uint limit = 10);
     }
 
     public interface NetworkAPIUser
@@ -42,7 +54,45 @@ namespace Nox.CCK.Mods.Networks
         public UniTask<UserMe> GetMyUser();
         public UniTask<Response<bool>> GetLogout();
         public UniTask<Response<Login>> PostLogin(string server, string username, string password);
+        public UniTask<UserSearch> SearchUsers(string server, string query, uint offset = 0, uint limit = 10);
     }
+
+    [System.Serializable]
+    public class UserSearch : ShareObject
+    {
+        public User[] users;
+        public uint total;
+        public uint limit;
+        public uint offset;
+    }
+
+    [System.Serializable]
+    public class WorldSearch : ShareObject
+    {
+        public World[] worlds;
+        public uint total;
+        public uint limit;
+        public uint offset;
+    }
+
+    [System.Serializable]
+    public class ServerSearch : ShareObject
+    {
+        public Server[] servers;
+        public uint total;
+        public uint limit;
+        public uint offset;
+    }
+
+    [System.Serializable]
+    public class InstanceSearch : ShareObject
+    {
+        public Instance[] instances;
+        public uint total;
+        public uint limit;
+        public uint offset;
+    }
+
 
 
     [System.Serializable]

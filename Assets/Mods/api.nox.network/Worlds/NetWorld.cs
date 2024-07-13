@@ -223,5 +223,40 @@ namespace api.nox.network
             await sourceStream.ReadAsync(buffer, 0, (int)sourceStream.Length);
             return buffer;
         }
+
+        public async UniTask<WorldSearch> SearchWorlds(string server, string query, uint offset = 0, uint limit = 10)
+        {
+            // GET /api/worlds/search?query={query}&offset={offset}&limit={limit}
+            var User = _mod._api.NetworkAPI.GetCurrentUser();
+            var config = Config.Load();
+            var gateway = server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
+            if (gateway == null) return null;
+            var req = new UnityWebRequest($"{gateway}/api/worlds/search?query={query}&offset={offset}&limit={limit}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
+            req.SetRequestHeader("Authorization", _mod.MostAuth(server));
+            try { await req.SendWebRequest(); }
+            catch { return null; }
+            if (req.responseCode != 200) return null;
+            var res = JsonUtility.FromJson<Response<WorldSearch>>(req.downloadHandler.text);
+            if (res.IsError) return null;
+            return res.data;
+        }
+
+        public async UniTask<World[]> GetWorlds(string server, uint[] worldIds)
+        {
+            var User = _mod._api.NetworkAPI.GetCurrentUser();
+            if (User == null) return new World[0];
+            Debug.Log("Getting worlds");
+            var config = Config.Load();
+            var gateway = server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
+            if (gateway == null) return new World[0];
+            var req = new UnityWebRequest($"{gateway}/api/worlds/search?id={string.Join("&id=", worldIds)}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
+            req.SetRequestHeader("Authorization", _mod.MostAuth(server));
+            try { await req.SendWebRequest(); }
+            catch { return new World[0]; }
+            if (req.responseCode != 200) return new World[0];
+            var res = JsonUtility.FromJson<Response<WorldSearch>>(req.downloadHandler.text);
+            if (res.IsError) return new World[0];
+            return res.data.worlds;
+        }
     }
 }

@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Nox.CCK.Mods;
 using Nox.CCK.Mods.Assets;
 using Nox.CCK.Mods.Chat;
 using Nox.CCK.Mods.Events;
@@ -34,7 +35,7 @@ namespace Nox.Mods
 
         public ChatAPI ChatAPI => throw new System.NotImplementedException();
         public GroupAPI GroupAPI => throw new System.NotImplementedException();
-        public NetworkAPI NetworkAPI => throw new System.NotImplementedException();
+        public NetworkAPI NetworkAPI => ModAPI.GetMod("network")?.GetMainClasses().OfType<NetworkAPI>().First();
         public EventAPI EventAPI => RuntimeEventAPI;
         public ModAPI ModAPI => RuntimeModAPI;
         public AssetAPI AssetAPI => RuntimeAssetAPI;

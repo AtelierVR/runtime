@@ -75,12 +75,38 @@ MonoBehaviour:
       value: "Rechercher..."
     - key: dashboard.navigation.user
       value: "Utilisateurs"
+    - key: dashboard.navigation.user.title
+      value: "Navigation par Utilisateur"
     - key: dashboard.navigation.world
       value: "Mondes"
     - key: dashboard.navigation.world.title
       value: "Navigation par Monde"
-    - key: dashboard.navigation.user.title
-      value: "Navigation par Utilisateur"
+    - key: dashboard.navigation.server
+      value: "Serveurs"
+    - key: dashboard.navigation.server.title
+      value: "Navigation par Serveur"
+    - key: dashboard.navigation.instance
+      value: "Instances"
+    - key: dashboard.navigation.instance.title
+      value: "Navigation par Instance"
+    - key: dashboard.navigation.error.unknown
+      value: "Une erreur inconnue s'est produite."
+    - key: dashboard.navigation.error.timeout
+      value: "Le serveur a mis trop de temps à répondre."
+    - key: dashboard.navigation.error
+      value: "Erreur: {0}"
+    - key: dashboard.navigation.empty
+      value: "Aucun résultat."
+    - key: dashboard.navigation.container.title
+      value: "{0}"
+    - key: dashboard.navigation.item.title
+      value: "{0}"
+    - key: dashboard.navigation.loading
+      value: "Chargement..."
+    - key: dashboard.world.title
+      value: "À propos de {0}"
+    - key: dashboard.world.display
+      value: "{0}"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home
@@ -149,4 +175,30 @@ MonoBehaviour:
       value: "Worlds"
     - key: dashboard.navigation.world.title
       value: "Navigation by World"
+    - key: dashboard.navigation.server  
+      value: "Servers"
+    - key: dashboard.navigation.server.title
+      value: "Navigation by Server"
+    - key: dashboard.navigation.instance
+      value: "Instances"
+    - key: dashboard.navigation.instance.title
+      value: "Navigation by Instance"
+    - key: dashboard.navigation.error.unknown
+      value: "An unknown error occurred."
+    - key: dashboard.navigation.error.timeout
+      value: "The server took too long to respond."
+    - key: dashboard.navigation.error
+      value: "Error: {0}"
+    - key: dashboard.navigation.empty
+      value: "No results."
+    - key: dashboard.navigation.container.title
+      value: "{0}"
+    - key: dashboard.navigation.item.title
+      value: "{0}"
+    - key: dashboard.navigation.loading
+      value: "Loading..."
+    - key: dashboard.world.title
+      value: "About {0}"
+    - key: dashboard.world.display
+      value: "{0}"
       

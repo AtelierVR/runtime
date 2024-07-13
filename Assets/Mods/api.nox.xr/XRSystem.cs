@@ -30,7 +30,7 @@ namespace api.nox.xr
             return devices.ToArray();
         }
 
-        public bool IsEnabled() => XRSettings.enabled && XRSettings.isDeviceActive;
+        public bool IsEnabled() => XRSettings.enabled;
         public InputDevice GetTracker() => InputDevices.GetDeviceAtXRNode(XRNode.TrackingReference);
         public InputDevice GetLeftHand() => InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
         public InputDevice GetRightHand() => InputDevices.GetDeviceAtXRNode(XRNode.RightHand);

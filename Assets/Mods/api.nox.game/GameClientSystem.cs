@@ -5,6 +5,7 @@ using api.nox.game.Controllers;
 using Nox.CCK;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
+using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -22,8 +23,11 @@ namespace api.nox.game
         private HomeTileManager homeTile;
         private UserTileManager userTile;
         private ServerTileManager serverTile;
+        private WorldTileManager worldTile;
         private NavigationTileManager navigationTile;
         private EventSystem eventSystem;
+        private EventSubscription tilesub;
+        private EventSubscription tilegotosub;
 
         public void OnInitializeClient(ClientModCoreAPI api)
         {
@@ -44,8 +48,9 @@ namespace api.nox.game
             userTile = new UserTileManager(this);
             serverTile = new ServerTileManager(this);
             navigationTile = new NavigationTileManager(this);
-            api.EventAPI.Subscribe("game.tile", OnTile);
-            api.EventAPI.Subscribe("game.tile.goto", OnGotoTile);
+            worldTile = new WorldTileManager(this);
+            tilesub = api.EventAPI.Subscribe("game.tile", OnTile);
+            tilegotosub = api.EventAPI.Subscribe("game.tile.goto", OnGotoTile);
             eventSystem = Reference.GetReference("game.eventsystem", m_controller)?.GetComponent<EventSystem>();
             eventSystem?.gameObject.SetActive(!coreAPI.XRAPI.IsEnabled());
         }
@@ -77,6 +82,9 @@ namespace api.nox.game
                     break;
                 case "game.navigation":
                     navigationTile.SendTile(context);
+                    break;
+                case "game.world":
+                    worldTile.SendTile(context);
                     break;
             }
         }
@@ -133,6 +141,12 @@ namespace api.nox.game
             Object.Destroy(m_controller);
             if (m_menu != null) Object.Destroy(m_menu.gameObject);
             homeTile.OnDispose();
+            userTile.OnDispose();
+            serverTile.OnDispose();
+            worldTile.OnDispose();
+            navigationTile.OnDispose();
+            coreAPI.EventAPI.Unsubscribe(tilesub);
+            coreAPI.EventAPI.Unsubscribe(tilegotosub);
         }
 
         private TileObject _currentTile;
@@ -147,14 +161,16 @@ namespace api.nox.game
             var oldtile = _currentTile?.id;
             if (_currentTile != null)
             {
-                _currentTile.onHide?.DynamicInvoke(oldtile);
-                _currentTile.content.transform.SetParent(null, false);
+                _currentTile.onHide?.DynamicInvoke(tile.id);
+                _currentTile.onRemove?.DynamicInvoke();
+                Object.Destroy(_currentTile.content);
             }
             tile.onOpen?.DynamicInvoke(oldtile);
             tile.content.transform.SetParent(container.transform, false);
             tile.content.name = tile.id;
             _currentTile = tile;
             tile.onDisplay?.DynamicInvoke(oldtile);
+            ForceUpdateLayout.UpdateManually(container);
         }
     }
 

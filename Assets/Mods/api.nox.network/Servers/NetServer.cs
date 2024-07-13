@@ -65,5 +65,22 @@ namespace api.nox.network
             var response = JsonUtility.FromJson<Response<WellKnownServer>>(req.downloadHandler.text);
             return response.data;
         }
+
+        public async UniTask<ServerSearch> SearchServers(string server, string query, uint offset = 0, uint limit = 10)
+        {
+            return new ServerSearch() { servers = new Server[0], total = 0, limit = limit, offset = offset };
+            // GET /api/servers/search?query={query}&offset={offset}&limit={limit}
+            // var User = _mod._api.NetworkAPI.GetCurrentUser();
+            // var config = Config.Load();
+            // var gateway = server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
+            // if (gateway == null) return null;
+            // var req = new UnityWebRequest($"{gateway}/api/servers/search?query={query}&offset={offset}&limit={limit}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
+            // req.SetRequestHeader("Authorization", _mod.MostAuth(server));
+            // try { await req.SendWebRequest(); }
+            // catch { return null; }
+            // if (req.responseCode != 200) return null;
+            // var response = JsonUtility.FromJson<Response<ServerSearch>>(req.downloadHandler.text);
+            // return response.data;
+        }
     }
 }

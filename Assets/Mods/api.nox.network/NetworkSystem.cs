@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
+using Nox.CCK.Instances;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Mods.Networks;
@@ -16,6 +17,7 @@ namespace api.nox.network
         public NetUser User;
         public NetWorld World;
         public NetServer Server;
+        public NetInstance Instance;
 
         public void OnInitialize(ModCoreAPI api)
         {
@@ -23,6 +25,7 @@ namespace api.nox.network
             User = new NetUser(this);
             World = new NetWorld(this);
             Server = new NetServer(this);
+            Instance = new NetInstance(this);
         }
 
         public void OnUpdate()
@@ -56,5 +59,6 @@ namespace api.nox.network
         public NetworkAPIWorld WorldAPI => World;
         public NetworkAPIUser UserAPI => User;
         public NetworkAPIServer ServerAPI => Server;
+        public NetworkAPIInstance InstanceAPI => Instance;
     }
 }

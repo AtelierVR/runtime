@@ -108,5 +108,23 @@ namespace api.nox.network
                 return new Response<Login> { error = new ResponseError { code = 500, message = "An error occured." } };
             }
         }
+
+
+        public async UniTask<UserSearch> SearchUsers(string server, string query, uint offset = 0, uint limit = 10)
+        {
+            // GET /api/users/search?query={query}&offset={offset}&limit={limit}
+            var User = _mod._api.NetworkAPI.GetCurrentUser();
+            var config = Config.Load();
+            var gateway = server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
+            if (gateway == null) return null;
+            var req = new UnityWebRequest($"{gateway}/api/users/search?query={query}&offset={offset}&limit={limit}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
+            req.SetRequestHeader("Authorization", _mod.MostAuth(server));
+            try { await req.SendWebRequest(); }
+            catch { return null; }
+            if (req.responseCode != 200) return null;
+            var res = JsonUtility.FromJson<Response<UserSearch>>(req.downloadHandler.text);
+            if (res.IsError) return null;
+            return res.data;
+        }
     }
 }

@@ -27,10 +27,12 @@ namespace Nox.Editor.Mods
         }
 
         public NetworkAPIWorld WorldAPI => GetNetworkAPI().WorldAPI;
-        public UserMe GetCurrentUser() => GetNetworkAPI().GetCurrentUser();
-        public Server GetCurrentServer() => GetNetworkAPI().GetCurrentServer();
         public NetworkAPIUser UserAPI => GetNetworkAPI().UserAPI;
         public NetworkAPIServer ServerAPI => GetNetworkAPI().ServerAPI;
+        public NetworkAPIInstance InstanceAPI => GetNetworkAPI().InstanceAPI;
+
+        public UserMe GetCurrentUser() => GetNetworkAPI().GetCurrentUser();
+        public Server GetCurrentServer() => GetNetworkAPI().GetCurrentServer();
         public async UniTask<Texture2D> FetchTexture(string url) => await GetNetworkAPI().FetchTexture(url);
     }
 }

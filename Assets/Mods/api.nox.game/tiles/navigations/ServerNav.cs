@@ -6,12 +6,12 @@ using UnityEngine.PlayerLoop;
 
 namespace api.nox.game
 {
-    internal class WorldNav
+    internal class ServerNav
     {
         internal NavigationTileManager navigationTile;
         private NavigationHandler _handler;
 
-        public WorldNav(NavigationTileManager navigationTile)
+        public ServerNav(NavigationTileManager navigationTile)
         {
             this.navigationTile = navigationTile;
             GenerateHandler();
@@ -28,38 +28,38 @@ namespace api.nox.game
         {
             _handler = new NavigationHandler
             {
-                id = "api.nox.game.navigation.world",
-                text_key = "dashboard.navigation.world",
-                title_key = "dashboard.navigation.world.title",
+                id = "api.nox.game.navigation.server",
+                text_key = "dashboard.navigation.server",
+                title_key = "dashboard.navigation.server.title",
                 GetWorkers = () =>
                 {
                     var config = Config.Load();
                     var servers = config.Get("navigation.servers", new WorkerInfo[0]);
                     return servers
-                        .Where(x => x.features.Contains("world"))
+                        .Where(x => x.features.Contains("server"))
                         .Select(x => new NavigationWorker
                         {
                             server_address = x.address,
                             server_title = x.title,
-                            Fetch = async (string query) => await FetchWorlds(x.address, query)
+                            Fetch = async (string query) => await FetchServers(x.address, query)
                         }).ToArray();
                 }
             };
         }
 
-        private async UniTask<NavigationResult> FetchWorlds(string server, string query)
+        private async UniTask<NavigationResult> FetchServers(string server, string query)
         {
-            Debug.Log("Fetching worlds");
-            var res = await navigationTile.clientMod.coreAPI.NetworkAPI.WorldAPI.SearchWorlds(server, query);
-            if (res == null) return new NavigationResult { error = "Error fetching worlds." };
-            Debug.Log("Fetched worlds " + res.worlds.Length);
+            Debug.Log("Fetching servers");
+            var res = await navigationTile.clientMod.coreAPI.NetworkAPI.ServerAPI.SearchServers(server, query);
+            if (res == null) return new NavigationResult { error = "Error fetching servers." };
+            Debug.Log("Fetched servers " + res.servers.Length);
             return new NavigationResult
             {
-                data = res.worlds.Select(x => new NavigationResultData
+                data = res.servers.Select(x => new NavigationResultData
                 {
                     title = x.title,
-                    imageUrl = x.thumbnail,
-                    goto_id = "game.world",
+                    imageUrl = x.icon,
+                    goto_id = "game.server",
                     goto_data = new object[] { x }
                 }).ToArray()
             };

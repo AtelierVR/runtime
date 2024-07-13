@@ -109,7 +109,13 @@ namespace api.nox.game
                 return;
             }
             var user = ((context.Data[1] as object[])[0] as ShareObject).Convert<User>();
-            var tile = new TileObject();
+            var tile = new TileObject()
+            {
+                onRemove = () =>
+                {
+                    this.tile = null;
+                }
+            };
             var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.user");
             tile.content = Object.Instantiate(pf);
             UpdateContent(tile.content, user);

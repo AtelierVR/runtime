@@ -1,9 +1,11 @@
+using System;
 using System.Linq;
+using Nox.CCK.Mods;
 
 namespace Nox.CCK.Worlds
 {
     [System.Serializable]
-    public class World
+    public class World : ShareObject
     {
         public uint id;
         public string title;
@@ -12,6 +14,7 @@ namespace Nox.CCK.Worlds
         public string[] tags;
         public string owner;
         public string server;
+        public string thumbnail;
 
         public Asset[] assets;
 
