@@ -116,6 +116,7 @@ namespace api.nox.game
                 }
             };
             var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.server");
+            pf.SetActive(false);
             tile.content = Object.Instantiate(pf);
             UpdateContent(tile.content, server);
             tile.id = "api.nox.game.server";

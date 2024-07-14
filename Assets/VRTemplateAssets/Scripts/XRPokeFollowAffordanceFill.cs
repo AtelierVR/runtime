@@ -154,6 +154,8 @@ namespace Unity.VRTemplate
         protected void Awake()
         {
             m_PokeDataProvider = GetComponentInParent<IPokeStateDataProvider>();
+            Debug.Assert(m_PokeDataProvider != null, $"Missing {nameof(IPokeStateDataProvider)} component in parent GameObjects of {this}.", this);
+            Debug.Log($"PokeDataProvider: {m_PokeDataProvider}");
         }
 
         /// <summary>

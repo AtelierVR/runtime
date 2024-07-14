@@ -106,7 +106,7 @@ namespace api.nox.game
                 );
                 var lookPos = m_headCamera.transform.position - menu.transform.position;
                 lookPos.y = 0;
-                var rotation = Quaternion.LookRotation(lookPos);
+                var rotation = Quaternion.LookRotation(lookPos) * Quaternion.Euler(0, 180, 0);
                 menu.transform.rotation = rotation;
             }
             menu.gameObject.SetActive(!menu.gameObject.activeSelf);
@@ -167,6 +167,7 @@ namespace api.nox.game
             }
             tile.onOpen?.DynamicInvoke(oldtile);
             tile.content.transform.SetParent(container.transform, false);
+            tile.content.SetActive(true);
             tile.content.name = tile.id;
             _currentTile = tile;
             tile.onDisplay?.DynamicInvoke(oldtile);

@@ -51,6 +51,7 @@ namespace api.nox.game
             }
             var tile = new TileObject();
             var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.home");
+            pf.SetActive(false);
             tile.content = Object.Instantiate(pf);
             tile.id = "api.nox.game.home";
             tile.onOpen = (string previous) => OnOpen(context, previous);

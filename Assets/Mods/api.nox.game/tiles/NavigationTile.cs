@@ -132,6 +132,7 @@ namespace api.nox.game
                 onDisplay = (string id) => tt = null
             };
             var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.navigation");
+            pf.SetActive(false);
             tile.content = Object.Instantiate(pf);
             UpdateContent(tile.content);
             tile.id = "api.nox.game.navigation";
@@ -196,6 +197,7 @@ namespace api.nox.game
                     var msg = Reference.GetReference("text", messageobj).GetComponent<TextLanguage>();
                     msg.key = "dashboard.navigation.error.unknown";
                     msg.UpdateText();
+                    ForceUpdateLayout.UpdateManually(tile.content);
                     return;
                 }
                 catch (Exception ex)
@@ -207,6 +209,7 @@ namespace api.nox.game
                     msg.key = "dashboard.navigation.error";
                     msg.arguments = new string[] { ex.Message };
                     msg.UpdateText();
+                    ForceUpdateLayout.UpdateManually(tile.content);
                     return;
                 }
             }
@@ -217,6 +220,7 @@ namespace api.nox.game
                 var msg = Reference.GetReference("text", messageobj).GetComponent<TextLanguage>();
                 msg.key = "dashboard.navigation.error.timeout";
                 msg.UpdateText();
+                ForceUpdateLayout.UpdateManually(tile.content);
                 return;
             }
             var res = await result;
@@ -227,6 +231,7 @@ namespace api.nox.game
                 var msg = Reference.GetReference("text", messageobj).GetComponent<TextLanguage>();
                 msg.key = "dashboard.navigation.error.unknown";
                 msg.UpdateText();
+                ForceUpdateLayout.UpdateManually(tile.content);
                 return;
             }
             else if (!string.IsNullOrEmpty(res.error))
@@ -237,6 +242,7 @@ namespace api.nox.game
                 msg.key = "dashboard.navigation.error";
                 msg.arguments = new string[] { res.error };
                 msg.UpdateText();
+                ForceUpdateLayout.UpdateManually(tile.content);
                 return;
             }
             else if (res.data == null || res.data.Length == 0)
@@ -246,6 +252,7 @@ namespace api.nox.game
                 var msg = Reference.GetReference("text", messageobj).GetComponent<TextLanguage>();
                 msg.key = "dashboard.navigation.empty";
                 msg.UpdateText();
+                ForceUpdateLayout.UpdateManually(tile.content);
                 return;
             }
             foundobj.SetActive(true);
