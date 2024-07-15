@@ -1,31 +1,30 @@
+using System;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using Nox.CCK.Instances;
+using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
-using Nox.CCK.Mods.Networks;
-using Nox.CCK.Servers;
-using Nox.CCK.Users;
 using UnityEngine;
 using UnityEngine.Networking;
 
 namespace api.nox.network
 {
-    public class NetworkSystem : NetworkAPI, ModInitializer
+    public class NetworkSystem : ShareObject, ModInitializer
     {
         internal ModCoreAPI _api;
-        public NetUser User;
-        public NetWorld World;
-        public NetServer Server;
-        public NetInstance Instance;
+        private NetUser _user;
+        private NetWorld _world;
+        private NetServer _server;
+        private NetInstance _instance;
+
 
         public void OnInitialize(ModCoreAPI api)
         {
             _api = api;
-            User = new NetUser(this);
-            World = new NetWorld(this);
-            Server = new NetServer(this);
-            Instance = new NetInstance(this);
+            _user = new NetUser(this);
+            _world = new NetWorld(this);
+            _server = new NetServer(this);
+            _instance = new NetInstance(this);
         }
 
         public void OnUpdate()
@@ -39,26 +38,47 @@ namespace api.nox.network
         public string MostAuth(string server)
         {
             var config = Config.Load();
-            if (_api.NetworkAPI.GetCurrentUser().server == server && config.Has("token"))
+            if (GetCurrentUser()?.server == server && config.Has("token"))
                 return $"Bearer {config.Get<string>("token")}";
             return null;
         }
 
-        public UserMe GetCurrentUser() => User.user;
-
-        public async UniTask<Texture2D> FetchTexture(string url)
+        [ShareObjectExport]
+        public Func<string, UniTask<Texture2D>> FetchTexture = async url =>
         {
             var req = new UnityWebRequest(url, "GET") { downloadHandler = new DownloadHandlerTexture() };
             try { await req.SendWebRequest(); } catch { }
             if (req.responseCode != 200) return null;
             return DownloadHandlerTexture.GetContent(req);
+        };
+
+        public UserMe GetCurrentUser() => _user.user;
+        [ShareObjectExport] public Func<ShareObject> GetSharedCurrentUser;
+        public Server GetCurrentServer() => _server.server;
+        [ShareObjectExport] public Func<ShareObject> GetSharedCurrentServer;
+        [ShareObjectExport] public NetInstance Instance;
+        [ShareObjectExport] public NetWorld World;
+        [ShareObjectExport] public NetServer Server;
+        [ShareObjectExport] public NetUser User;
+
+        public void BeforeExport()
+        {
+            GetSharedCurrentUser = () => GetCurrentUser();
+            GetSharedCurrentServer = () => GetCurrentServer();
+            Instance = _instance;
+            World = _world;
+            Server = _server;
+            User = _user;
         }
 
-        public Server GetCurrentServer() => Server.server;
-
-        public NetworkAPIWorld WorldAPI => World;
-        public NetworkAPIUser UserAPI => User;
-        public NetworkAPIServer ServerAPI => Server;
-        public NetworkAPIInstance InstanceAPI => Instance;
+        public void AfterExport()
+        {
+            GetSharedCurrentUser = null;
+            GetSharedCurrentServer = null;
+            Instance = null;
+            World = null;
+            Server = null;
+            User = null;
+        }
     }
 }

@@ -2,7 +2,6 @@
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
-using Nox.CCK.Users;
 using UnityEngine;
 using Nox.CCK;
 using UnityEngine.UI;
@@ -12,7 +11,7 @@ namespace api.nox.game
     internal class UserTileManager
     {
         internal GameClientSystem clientMod;
-        private TileObject tile;
+        private GameObject tile;
         private EventSubscription eventUserUpdate;
         private HomeWidget userMeWidget;
 
@@ -28,12 +27,12 @@ namespace api.nox.game
         private void OnUserUpdate(EventData context)
         {
             if (context.Data[1] as bool? ?? false) return;
-            var user = (context.Data[0] as ShareObject).Convert<UserMe>();
+            var user = (context.Data[0] as ShareObject).Convert<SimplyUserMe>();
             if (user == null) OnUserDisconnect();
             else OnUserConnect(user);
         }
 
-        private void OnUserConnect(UserMe user)
+        private void OnUserConnect(SimplyUserMe user)
         {
             Debug.Log("User connected: " + user.username);
             if (userMeWidget == null)
@@ -69,14 +68,14 @@ namespace api.nox.game
 
         private void OnClickWidget()
         {
-            var user = clientMod.coreAPI.NetworkAPI.GetCurrentUser();
+            var user = clientMod.NetworkAPI.GetCurrentUser();
             if (user == null) return;
             clientMod.GotoTile("game.user", user);
         }
 
         private async UniTask<bool> UpdateTexure(RawImage img, string url)
         {
-            var tex = await clientMod.coreAPI.NetworkAPI.FetchTexture(url);
+            var tex = await clientMod.NetworkAPI.FetchTexture(url);
             if (tex != null)
             {
                 img.texture = tex;
@@ -103,29 +102,24 @@ namespace api.nox.game
 
         internal void SendTile(EventData context)
         {
-            if (this.tile != null)
-            {
-                clientMod.coreAPI.EventAPI.Emit("game.tile", this.tile);
-                return;
-            }
-            var user = ((context.Data[1] as object[])[0] as ShareObject).Convert<User>();
+            var user = ((context.Data[1] as object[])[0] as ShareObject).Convert<SimplyUser>();
             var tile = new TileObject()
             {
-                onRemove = () =>
+                id = "api.nox.game.user",
+                onRemove = () => this.tile = null,
+                GetContent = (Transform tf) =>
                 {
-                    this.tile = null;
+                    var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.user");
+                    pf.SetActive(false);
+                    this.tile = Object.Instantiate(pf, tf);
+                    UpdateContent(this.tile, user);
+                    return this.tile;
                 }
             };
-            var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.user");
-            pf.SetActive(false);
-            tile.content = Object.Instantiate(pf);
-            UpdateContent(tile.content, user);
-            tile.id = "api.nox.game.user";
-            this.tile = tile;
             clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
         }
 
-        private void UpdateContent(GameObject tile, User user)
+        private void UpdateContent(GameObject tile, SimplyUser user)
         {
             Reference.GetReference("title", tile).GetComponent<TextLanguage>().arguments = new string[] { user.display };
 
@@ -153,8 +147,8 @@ namespace api.nox.game
 
         private async UniTask Initialization()
         {
-            var user = clientMod.coreAPI.NetworkAPI.GetCurrentUser();
-            user ??= await clientMod.coreAPI.NetworkAPI.UserAPI.GetMyUser();
+            var user = clientMod.NetworkAPI.GetCurrentUser();
+            user ??= await clientMod.NetworkAPI.User.GetMyUser();
             if (user != null) OnUserConnect(user);
             else OnUserDisconnect();
         }

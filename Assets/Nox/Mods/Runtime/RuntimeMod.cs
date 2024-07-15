@@ -1,12 +1,6 @@
-using System.Linq;
 using Nox.CCK.Mods;
-using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
-using Nox.CCK.Mods.Metadata;
-using Nox.CCK.Mods.Mods;
-using Nox.CCK.Mods.Networks;
 using Nox.Mods.Type;
-using NUnit.Framework;
 
 namespace Nox.Mods.Client
 {

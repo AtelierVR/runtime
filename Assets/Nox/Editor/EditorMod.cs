@@ -1,9 +1,7 @@
 using System;
 using System.IO;
 using Nox.CCK.Mods;
-using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
-using Nox.CCK.Mods.Networks;
 
 namespace Nox.Editor.Mods
 {

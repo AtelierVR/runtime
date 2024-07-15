@@ -50,7 +50,7 @@ namespace api.nox.game
         private async UniTask<NavigationResult> FetchServers(string server, string query)
         {
             Debug.Log("Fetching servers");
-            var res = await navigationTile.clientMod.coreAPI.NetworkAPI.ServerAPI.SearchServers(server, query);
+            var res = (await navigationTile.clientMod.NetworkAPI.Server.SearchServers(server, query, 0, 10)).Convert<SimplyServerSearch>();
             if (res == null) return new NavigationResult { error = "Error fetching servers." };
             Debug.Log("Fetched servers " + res.servers.Length);
             return new NavigationResult

@@ -2,10 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using Nox.CCK.Instances;
-using Nox.CCK.Worlds;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 namespace api.nox.game
 {
@@ -53,7 +50,7 @@ namespace api.nox.game
         private async UniTask<NavigationResult> FetchInstances(string server, string query)
         {
             Debug.Log("Fetching instances");
-            var res = await navigationTile.clientMod.coreAPI.NetworkAPI.InstanceAPI.SearchInstances(server, query);
+            var res = (await navigationTile.clientMod.NetworkAPI.Instance.SearchInstances(server, query, 0, 10)).Convert<SimplyInstanceSearch>();
             if (res == null) return new NavigationResult { error = "Error fetching instances." };
             Debug.Log("Fetched instances " + res.instances.Length);
             List<InstanceWithWorld> iww = new();
@@ -69,11 +66,10 @@ namespace api.nox.game
                     instance = instance
                 });
             }
+            var WorldAPI = navigationTile.clientMod.NetworkAPI.World;
             foreach (var address in iww.GroupBy(x => x.worldServer).ToDictionary(x => x.Key, x => x.Select(y => y.worldId)))
             {
-                var resWorld = await navigationTile.clientMod.coreAPI.NetworkAPI.WorldAPI.GetWorlds(
-                    address.Key, address.Value.ToArray().ToArray()
-                );
+                var resWorld = await WorldAPI.GetWorlds(address.Key, address.Value.ToArray().ToArray());
                 if (resWorld == null) continue;
                 foreach (var i in iww.Where(x => x.worldServer == address.Key))
                     i.world = resWorld.FirstOrDefault(x => x.id == i.worldId);
@@ -109,7 +105,7 @@ namespace api.nox.game
     {
         public uint worldId;
         public string worldServer;
-        public Instance instance;
-        public World world;
+        public SimplyInstance instance;
+        public SimplyWorld world;
     }
 }

@@ -1,4 +1,6 @@
 using Nox.CCK;
+using Nox.CCK.Mods;
+using UnityEngine;
 
 namespace api.nox.game
 {

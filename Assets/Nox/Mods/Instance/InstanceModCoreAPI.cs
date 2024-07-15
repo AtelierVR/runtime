@@ -5,7 +5,6 @@ using Nox.CCK.Mods.Chat;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Groups;
 using Nox.CCK.Mods.Mods;
-using Nox.CCK.Mods.Networks;
 using Nox.CCK.Mods.XR;
 using Nox.Mods.Client;
 
@@ -26,7 +25,6 @@ namespace Nox.Mods
         public ChatAPI ChatAPI => throw new System.NotImplementedException();
         public GroupAPI GroupAPI => throw new System.NotImplementedException();
         public EventAPI EventAPI => throw new System.NotImplementedException();
-        public NetworkAPI NetworkAPI => throw new System.NotImplementedException();
         public ModAPI ModAPI => throw new System.NotImplementedException();
         public AssetAPI AssetAPI => throw new System.NotImplementedException();
         public XRAPI XRAPI => throw new System.NotImplementedException();

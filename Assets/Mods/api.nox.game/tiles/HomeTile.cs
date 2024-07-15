@@ -13,7 +13,6 @@ namespace api.nox.game
     {
         internal GameClientSystem clientMod;
         private EventSubscription widgetsub;
-        private TileObject homeTile;
 
         internal HomeTileManager(GameClientSystem clientMod)
         {
@@ -42,32 +41,35 @@ namespace api.nox.game
             UpdateWidgets();
         }
 
+        private GameObject tile;
         internal void SendTile(EventData context)
         {
-            if (homeTile != null)
+            var tile = new TileObject()
             {
-                clientMod.coreAPI.EventAPI.Emit("game.tile", homeTile);
-                return;
+                id = "api.nox.game.home",
+                onOpen = (string previous) => OnOpen(context, previous),
+                onRemove = () => OnRemove(context),
+                onRestore = (string previous) => OnRestore(context, previous),
+                onDisplay = (string previous) => { },
+                onHide = (string next) => { },
+                GetContent = (Transform tf) =>
+            {
+                var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.home");
+                pf.SetActive(false);
+                this.tile = Object.Instantiate(pf, tf);
+                this.tile.name = "game.home";
+                UpdateWidgets();
+                return this.tile;
             }
-            var tile = new TileObject();
-            var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.home");
-            pf.SetActive(false);
-            tile.content = Object.Instantiate(pf);
-            tile.id = "api.nox.game.home";
-            tile.onOpen = (string previous) => OnOpen(context, previous);
-            tile.onRemove = () => OnRemove(context);
-            tile.onRestore = (string previous) => OnRestore(context, previous);
-            tile.onDisplay = (string previous) => { };
-            tile.onHide = (string next) => { };
-            homeTile = tile;
+            };
             clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
         }
 
         internal void UpdateWidgets()
         {
-            if (homeTile == null) return;
+            if (this.tile == null) return;
             Debug.Log("Updating home tile");
-            var rect = Reference.GetReference("game.home.widgets", homeTile.content).GetComponent<MenuGridder>();
+            var rect = Reference.GetReference("game.home.widgets", this.tile).GetComponent<MenuGridder>();
             // remove to the parent all the children
             foreach (Transform child in rect.transform)
                 Object.Destroy(child.gameObject);
@@ -101,7 +103,7 @@ namespace api.nox.game
         internal void OnRemove(EventData context)
         {
             Debug.Log("Removing home tile");
-            homeTile = null;
+            this.tile = null;
         }
     }
 }

@@ -1,15 +1,15 @@
-using System;
-using Cysharp.Threading.Tasks;
-using Nox.Worlds;
+// using System;
+// using Cysharp.Threading.Tasks;
+// using Nox.Worlds;
 
-namespace Nox.Users
-{
-    [Serializable]
-    public class UserMe : User
-    {
-        public string home;
+// namespace Nox.Users
+// {
+//     [Serializable]
+//     public class UserMe : User
+//     {
+//         public string home;
 
-        public UniTask<World> Home() => WorldManager.GetOrFetch(home, server);
-        public WorldPatern HomePatern() => new(home, server);
-    }
-}
+//         public UniTask<World> Home() => WorldManager.GetOrFetch(home, server);
+//         public WorldPatern HomePatern() => new(home, server);
+//     }
+// }

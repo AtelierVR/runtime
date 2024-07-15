@@ -12,7 +12,7 @@ namespace api.nox.game
     internal class WorldTileManager
     {
         internal GameClientSystem clientMod;
-        private TileObject tile;
+        private GameObject tile;
         private EventSubscription eventWorldUpdate;
         private HomeWidget worldMeWidget;
 
@@ -22,7 +22,7 @@ namespace api.nox.game
         }
         private async UniTask<bool> UpdateTexure(RawImage img, string url)
         {
-            var tex = await clientMod.coreAPI.NetworkAPI.FetchTexture(url);
+            var tex = await clientMod.NetworkAPI.FetchTexture(url);
             if (tex != null)
             {
                 img.texture = tex;
@@ -38,28 +38,24 @@ namespace api.nox.game
 
         internal void SendTile(EventData context)
         {
-            if (this.tile != null)
-            {
-                clientMod.coreAPI.EventAPI.Emit("game.tile", this.tile);
-                return;
-            }
-            var world = ((context.Data[1] as object[])[0] as ShareObject).Convert<World>();
+            var world = ((context.Data[1] as object[])[0] as ShareObject).Convert<SimplyWorld>();
             var tile = new TileObject()
             {
-                onRemove = () => { 
-                    this.tile = null;
+                id = "api.nox.game.world",
+                onRemove = () => this.tile = null,
+                GetContent = (Transform tf) =>
+                {
+                    var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.world");
+                    pf.SetActive(false);
+                    this.tile = Object.Instantiate(pf, tf);
+                    UpdateContent(this.tile, world);
+                    return this.tile;
                 }
             };
-            var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.world");
-            pf.SetActive(false);
-            tile.content = Object.Instantiate(pf);
-            UpdateContent(tile.content, world);
-            tile.id = "api.nox.game.world";
-            this.tile = tile;
             clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
         }
 
-        private void UpdateContent(GameObject tile, World world)
+        private void UpdateContent(GameObject tile, SimplyWorld world)
         {
             Reference.GetReference("display", tile).GetComponent<TextLanguage>().arguments = new string[] { world.title };
             Reference.GetReference("title", tile).GetComponent<TextLanguage>().arguments = new string[] { world.title };

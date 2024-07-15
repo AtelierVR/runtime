@@ -1,14 +1,13 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using Nox.CCK.Mods.Networks;
-using Nox.CCK.Users;
+using Nox.CCK.Mods;
 using UnityEngine;
 using UnityEngine.Networking;
 
 namespace api.nox.network
 {
-    public class NetUser : NetworkAPIUser
+    public class NetUser : ShareObject
     {
         private readonly NetworkSystem _mod;
 
@@ -16,7 +15,8 @@ namespace api.nox.network
 
         internal NetUser(NetworkSystem mod) => _mod = mod;
 
-        public async UniTask<UserMe> GetMyUser()
+        public async UniTask<ShareObject> GetMyUser() => await GetMyIUser();
+        private async UniTask<UserMe> GetMyIUser()
         {
             var config = Config.Load();
             if (!config.Has("token") || !config.Has("gateway"))
@@ -72,11 +72,12 @@ namespace api.nox.network
             };
         }
 
-        public async UniTask<Response<Login>> PostLogin(string server, string username, string password)
+        public async UniTask<ShareObject> GetLogin(string server, string username, string password) => await PostILogin(server, username, password);
+        private async UniTask<UserLogin> PostILogin(string server, string username, string password)
         {
             Uri gateway = await Gateway.FindGatewayMaster(server);
             if (gateway == null)
-                return new Response<Login> { error = new ResponseError { code = 404, message = "Server not found." } };
+                return new UserLogin { error = "Server not found." };
             var req = new UnityWebRequest(string.Format("{0}/api/auth/login", gateway.OriginalString), "POST") { downloadHandler = new DownloadHandlerBuffer() };
             req.SetRequestHeader("Content-Type", "application/json");
             req.uploadHandler = new UploadHandlerRaw(
@@ -86,8 +87,7 @@ namespace api.nox.network
             catch { }
             try
             {
-                var response = JsonUtility.FromJson<Response<Login>>(req.downloadHandler.text);
-                Debug.Log(req.downloadHandler.text);
+                var response = JsonUtility.FromJson<Response<UserLogin>>(req.downloadHandler.text);
                 if (response.error?.code == 0)
                 {
                     var config = Config.Load();
@@ -96,26 +96,28 @@ namespace api.nox.network
                     config.Set("gateway", gateway.OriginalString);
                     config.Save();
                 }
+                else response.data.error = response.error.message;
                 user = response.data.user;
                 _mod._api.EventAPI.Emit(new NetEventContext("network.user", user, true));
                 _mod._api.EventAPI.Emit(new NetEventContext("network.user.login", true, user));
-                return response;
+                return response.data;
             }
             catch
             {
                 _mod._api.EventAPI.Emit(new NetEventContext("network.user", user, true));
                 _mod._api.EventAPI.Emit(new NetEventContext("network.user.login", false, user));
-                return new Response<Login> { error = new ResponseError { code = 500, message = "An error occured." } };
+                return new UserLogin { error = "An error occured." };
             }
         }
 
 
-        public async UniTask<UserSearch> SearchUsers(string server, string query, uint offset = 0, uint limit = 10)
+        public async UniTask<ShareObject> SearchUsers(string server, string query, uint offset = 0, uint limit = 10) => await SearchIUsers(server, query, offset, limit);
+        private async UniTask<UserSearch> SearchIUsers(string server, string query, uint offset = 0, uint limit = 10)
         {
             // GET /api/users/search?query={query}&offset={offset}&limit={limit}
-            var User = _mod._api.NetworkAPI.GetCurrentUser();
+            var User = _mod.GetCurrentUser();
             var config = Config.Load();
-            var gateway = server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
+            var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/users/search?query={query}&offset={offset}&limit={limit}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
             req.SetRequestHeader("Authorization", _mod.MostAuth(server));

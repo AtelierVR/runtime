@@ -107,6 +107,28 @@ MonoBehaviour:
       value: "À propos de {0}"
     - key: dashboard.world.display
       value: "{0}"
+    - key: dashboard.world.description.title
+      value: "Description"
+    - key: dashboard.world.description
+      value: "{0}"
+    - key: dashboard.world.actions.title
+      value: "Actions"
+    - key: dashboard.world.actions.reset_home
+      value: "Retirer le Home"
+    - key: dashboard.world.actions.set_home
+      value: "Définir le Home"
+    - key: dashboard.world.actions.remove_favorites
+      value: "Retirer des Fav."
+    - key: dashboard.world.actions.add_favorites
+      value: "Ajouter aux Fav."
+    - key: dashboard.world.actions.download
+      value: "Télécharger"
+    - key: dashboard.world.actions.make_instance
+      value: "Nouvelle inst."
+    - key: dashboard.world.actions.teleport
+      value: "Rejoindre en off."
+    - key: dashboard.world.instances.title
+      value: "Instances"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home
@@ -201,4 +223,27 @@ MonoBehaviour:
       value: "About {0}"
     - key: dashboard.world.display
       value: "{0}"
+    - key: dashboard.world.description.title
+      value: "Description"
+    - key: dashboard.world.description
+      value: "{0}"
+    - key: dashboard.world.actions.title
+      value: "Actions"
+    - key: dashboard.world.actions.reset_home
+      value: "Reset Home"
+    - key: dashboard.world.actions.set_home
+      value: "Set Home"
+    - key: dashboard.world.actions.remove_favorites
+      value: "Remove from Favorites"
+    - key: dashboard.world.actions.add_favorites
+      value: "Add to Favorites"
+    - key: dashboard.world.actions.download
+      value: "Download World"
+    - key: dashboard.world.actions.make_instance
+      value: "Make Instance"
+    - key: dashboard.world.actions.teleport
+      value: "Offline teleport"
+    - key: dashboard.world.instances.title
+      value: "Instances"
+
       

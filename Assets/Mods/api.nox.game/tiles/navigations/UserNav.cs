@@ -52,7 +52,7 @@ namespace api.nox.game
         private async UniTask<NavigationResult> FetchUsers(string server, string query)
         {
             Debug.Log("Fetching users");
-            var res = await navigationTile.clientMod.coreAPI.NetworkAPI.UserAPI.SearchUsers(server, query);
+            var res = (await navigationTile.clientMod.NetworkAPI.User.SearchUsers(server, query, 0, 10)).Convert<SimplyUserSearch>();
             if (res == null) return new NavigationResult { error = "Error fetching users." };
             Debug.Log("Fetched users " + res.users.Length);
             return new NavigationResult

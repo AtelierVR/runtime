@@ -28,9 +28,18 @@ namespace api.nox.game
         private EventSystem eventSystem;
         private EventSubscription tilesub;
         private EventSubscription tilegotosub;
+        internal SimplyNetworkAPI NetworkAPI => coreAPI.ModAPI.GetMod("network")?.GetMainClasses().OfType<ShareObject>().FirstOrDefault()?.Convert<SimplyNetworkAPI>();
 
         public void OnInitializeClient(ClientModCoreAPI api)
         {
+            var network = api.ModAPI.GetMod("network")?.GetMainClasses().FirstOrDefault() as ShareObject;
+            Debug.Log("Signal to network: Hello from GameSystem!");
+            Debug.Assert(network != null, "Network mod not found!");
+            Debug.Log("Signal to network: " + network);
+            // var ee = network.CallMethod<string>("Debug", "Hello from GameSystem!");
+            // Debug.Log("Signal from network: " + ee);
+            Application.Quit();
+
             coreAPI = api;
             api.AssetAPI.LoadLocalWorld("default");
             var controller = api.AssetAPI.GetLocalAsset<GameObject>("prefabs/xr-controller");
@@ -137,7 +146,6 @@ namespace api.nox.game
 
         public void OnDispose()
         {
-
             Object.Destroy(m_controller);
             if (m_menu != null) Object.Destroy(m_menu.gameObject);
             homeTile.OnDispose();
@@ -153,11 +161,9 @@ namespace api.nox.game
         private void SetDisplayTile(TileObject tile)
         {
             if (tile == null) return;
-            Debug.Log($"Displaying tile {tile.id}");
             var menu = GetOrCreateMenu();
             if (menu == null) return;
             var container = Reference.GetReference("game.menu.container", menu.gameObject);
-            if (container == null) return;
             var oldtile = _currentTile?.id;
             if (_currentTile != null)
             {
@@ -166,7 +172,7 @@ namespace api.nox.game
                 Object.Destroy(_currentTile.content);
             }
             tile.onOpen?.DynamicInvoke(oldtile);
-            tile.content.transform.SetParent(container.transform, false);
+            tile.content = tile.GetContent(container.transform);
             tile.content.SetActive(true);
             tile.content.name = tile.id;
             _currentTile = tile;

@@ -4,7 +4,6 @@ using Nox.CCK.Mods.Chat;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Groups;
 using Nox.CCK.Mods.Mods;
-using Nox.CCK.Mods.Networks;
 using Nox.CCK.Mods.XR;
 
 namespace Nox.Editor.Mods
@@ -13,7 +12,6 @@ namespace Nox.Editor.Mods
     {
         private EditorMod _mod;
         internal EditorModPanelAPI EditorPanelAPI;
-        internal EditorNetworkAPI EditorNetworkAPI;
         internal EditorModAPI EditorModAPI;
         internal EditorLibsAPI EditorLibsAPI;
         internal EditorAssetAPI EditorAssetAPI;
@@ -23,14 +21,13 @@ namespace Nox.Editor.Mods
             _mod = mod;
             EditorPanelAPI = new EditorModPanelAPI(mod);
             EditorModAPI = new EditorModAPI(mod);
-            EditorNetworkAPI = new EditorNetworkAPI(mod);
             EditorLibsAPI = new EditorLibsAPI(mod);
             EditorAssetAPI = new EditorAssetAPI(mod);
         }
 
         public CCK.Mods.ModMetadata ModMetadata => _mod.GetMetadata();
         public Dictionary<string, object> Data => _data;
-        public NetworkAPI NetworkAPI => EditorNetworkAPI;
+        // public NetworkAPI NetworkAPI => EditorNetworkAPI;
         public ModAPI ModAPI => EditorModAPI;
 
         public ChatAPI ChatAPI => throw new System.NotImplementedException();

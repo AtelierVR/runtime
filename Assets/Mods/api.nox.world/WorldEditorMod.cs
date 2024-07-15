@@ -1,5 +1,7 @@
 #if UNITY_EDITOR
+using System.Linq;
 using Nox.CCK.Editor;
+using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using UnityEngine;
@@ -16,6 +18,7 @@ namespace api.nox.world
         internal EditorPanel _builderpanel;
         private EditorPanel _publisherpanel;
         internal EditorModCoreAPI _api;
+        internal SimplyNetworkAPI NetworkAPI => _api.ModAPI.GetMod("network")?.GetMainClasses().OfType<ShareObject>().FirstOrDefault()?.Convert<SimplyNetworkAPI>();
 
         public void OnInitializeEditor(EditorModCoreAPI api)
         {

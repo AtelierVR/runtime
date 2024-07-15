@@ -2,14 +2,15 @@ using System;
 using Nox.CCK.Mods;
 using UnityEngine;
 
-namespace api.nox.test {
+namespace api.nox.test
+{
     public class Widget : ShareObject
     {
-        public string id;
-        public uint width = 1;
-        public uint height = 1;
-        public Func<Transform, GameObject> GetContent;
-        public bool isInteractable = true;
-        public uint weight = 1;
+        [ShareObjectImport, ShareObjectExport] public string id;
+        [ShareObjectImport, ShareObjectExport] public uint width = 1;
+        [ShareObjectImport, ShareObjectExport] public uint height = 1;
+        [ShareObjectImport, ShareObjectExport] public Func<Transform, GameObject> GetContent;
+        [ShareObjectImport, ShareObjectExport] public bool isInteractable = true;
+        [ShareObjectImport, ShareObjectExport] public uint weight = 1;
     }
 }

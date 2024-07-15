@@ -1,16 +1,12 @@
-
-using System;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using Nox.CCK.Instances;
-using Nox.CCK.Mods.Networks;
-using Nox.CCK.Servers;
+using Nox.CCK.Mods;
 using UnityEngine;
 using UnityEngine.Networking;
 
 namespace api.nox.network
 {
-    public class NetInstance : NetworkAPIInstance
+    public class NetInstance : ShareObject
     {
         private readonly NetworkSystem _mod;
 
@@ -20,11 +16,11 @@ namespace api.nox.network
 
         public async UniTask<Instance> GetInstance(string server, uint instanceId)
         {
-            var User = _mod._api.NetworkAPI.GetCurrentUser();
+            var User = _mod.GetCurrentUser();
             if (User == null) return null;
             Debug.Log("Getting instance");
             var config = Config.Load();
-            var gateway = server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
+            var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/instances/{instanceId}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
             req.SetRequestHeader("Authorization", _mod.MostAuth(server));
@@ -40,9 +36,9 @@ namespace api.nox.network
         public async UniTask<InstanceSearch> SearchInstances(string server, string query, uint offset = 0, uint limit = 10)
         {
             // GET /api/instances/search?query={query}&offset={offset}&limit={limit}
-            var User = _mod._api.NetworkAPI.GetCurrentUser();
+            var User = _mod.GetCurrentUser();
             var config = Config.Load();
-            var gateway = server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
+            var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/instances/search?query={query}&offset={offset}&limit={limit}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
             req.SetRequestHeader("Authorization", _mod.MostAuth(server));

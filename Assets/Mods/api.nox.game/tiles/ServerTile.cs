@@ -12,7 +12,7 @@ namespace api.nox.game
     internal class ServerTileManager
     {
         internal GameClientSystem clientMod;
-        private TileObject tile;
+        private GameObject tile;
         private EventSubscription eventServerUpdate;
         private HomeWidget serverMeWidget;
 
@@ -28,14 +28,14 @@ namespace api.nox.game
         private void OnServerUpdate(EventData context)
         {
             if (context.Data[1] as bool? ?? false) return;
-            var server = (context.Data[0] as ShareObject).Convert<Server>();
+            var server = (context.Data[0] as ShareObject).Convert<SimplyServer>();
             if (server == null) OnServerDisconnect();
             else OnServerConnect(server);
         }
 
         private async UniTask<bool> UpdateTexure(RawImage img, string url)
         {
-            var tex = await clientMod.coreAPI.NetworkAPI.FetchTexture(url);
+            var tex = await clientMod.NetworkAPI.FetchTexture(url);
             if (tex != null)
             {
                 img.texture = tex;
@@ -56,7 +56,7 @@ namespace api.nox.game
         }
 
 
-        private void OnServerConnect(Server server)
+        private void OnServerConnect(SimplyServer server)
         {
             Debug.Log("Server connected: " + server.title);
             if (serverMeWidget == null)
@@ -91,7 +91,7 @@ namespace api.nox.game
 
         private void OnClickWidget()
         {
-            var server = clientMod.coreAPI.NetworkAPI.GetCurrentServer();
+            var server = clientMod.NetworkAPI.GetCurrentServer();
             if (server == null) return;
             clientMod.GotoTile("game.server", server);
         }
@@ -103,28 +103,24 @@ namespace api.nox.game
 
         internal void SendTile(EventData context)
         {
-            if (this.tile != null)
-            {
-                clientMod.coreAPI.EventAPI.Emit("game.tile", this.tile);
-                return;
-            }
-            var server = ((context.Data[1] as object[])[0] as ShareObject).Convert<Server>();
+            var server = ((context.Data[1] as object[])[0] as ShareObject).Convert<SimplyServer>();
             var tile = new TileObject()
             {
-                onRemove = () => { 
-                    this.tile = null;
+                id = "api.nox.game.server",
+                onRemove = () => this.tile = null,
+                GetContent = (Transform tf) =>
+                {
+                    var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.server");
+                    pf.SetActive(false);
+                    this.tile = Object.Instantiate(pf, tf);
+                    UpdateContent(this.tile, server);
+                    return this.tile;
                 }
             };
-            var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.server");
-            pf.SetActive(false);
-            tile.content = Object.Instantiate(pf);
-            UpdateContent(tile.content, server);
-            tile.id = "api.nox.game.server";
-            this.tile = tile;
             clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
         }
 
-        private void UpdateContent(GameObject tile, Server server)
+        private void UpdateContent(GameObject tile, SimplyServer server)
         {
             Reference.GetReference("display", tile).GetComponent<TextLanguage>().arguments = new string[] { server.title };
             Reference.GetReference("title", tile).GetComponent<TextLanguage>().arguments = new string[] { server.title };
@@ -137,8 +133,8 @@ namespace api.nox.game
 
         private async UniTask Initialization()
         {
-            var server = clientMod.coreAPI.NetworkAPI.GetCurrentServer();
-            server ??= await clientMod.coreAPI.NetworkAPI.ServerAPI.GetMyServer();
+            var server = clientMod.NetworkAPI.GetCurrentServer();
+            server ??= await clientMod.NetworkAPI.Server.GetMyServer();
             if (server != null) OnServerConnect(server);
             else OnServerDisconnect();
         }

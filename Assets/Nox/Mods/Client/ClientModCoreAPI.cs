@@ -5,7 +5,6 @@ using Nox.CCK.Mods.Chat;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Groups;
 using Nox.CCK.Mods.Mods;
-using Nox.CCK.Mods.Networks;
 using Nox.CCK.Mods.XR;
 using Nox.Mods.Assets;
 using Nox.Mods.Client;
@@ -35,7 +34,6 @@ namespace Nox.Mods
         public EventAPI EventAPI => RuntimeEventAPI;
         public ModAPI ModAPI => RuntimeModAPI;
         public AssetAPI AssetAPI => RuntimeAssetAPI;
-        public NetworkAPI NetworkAPI => ModAPI.GetMod("network")?.GetMainClasses().OfType<NetworkAPI>().First();
         public XRAPI XRAPI => ModAPI.GetMod("xr")?.GetMainClasses().OfType<XRAPI>().First();
     }
 }

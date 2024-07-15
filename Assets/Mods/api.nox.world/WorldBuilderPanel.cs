@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Nox.CCK;
 using Nox.CCK.Editor;
-using Nox.CCK.Users;
 using Nox.CCK.Worlds;
 using Nox.Editor.Worlds;
 using UnityEditor;
@@ -29,7 +28,7 @@ namespace api.nox.world
         {
             if (!_mod.HasOnePanelOpenned() || _root.childCount == 0) return;
             var descriptor = Descriptors.Length > 0 ? Descriptors[0] : null;
-            User user = _mod._api.NetworkAPI.GetCurrentUser();
+            SimplyUserMe user = _mod.NetworkAPI.GetCurrentUser();
 
             // Check if a scene has a world descriptor
             if (descriptor == null && !NotificationManager.Has("NoWorldDescriptor"))

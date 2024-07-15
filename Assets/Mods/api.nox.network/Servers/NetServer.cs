@@ -2,14 +2,13 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using Nox.CCK.Mods.Networks;
-using Nox.CCK.Servers;
+using Nox.CCK.Mods;
 using UnityEngine;
 using UnityEngine.Networking;
 
 namespace api.nox.network
 {
-    public class NetServer : NetworkAPIServer
+    public class NetServer : ShareObject
     {
         private readonly NetworkSystem _mod;
 
@@ -17,7 +16,9 @@ namespace api.nox.network
 
         internal NetServer(NetworkSystem mod) => _mod = mod;
 
-        public async UniTask<Server> GetMyServer()
+
+        public async UniTask<ShareObject> GetMyServer() => await GetMyIServer();
+        private async UniTask<Server> GetMyIServer()
         {
             var config = Config.Load();
             if (!config.Has("token") || !config.Has("gateway"))
@@ -42,7 +43,8 @@ namespace api.nox.network
             return response.data;
         }
 
-        public async UniTask<Server> GetServer(string address)
+        public async UniTask<ShareObject> GetServer(string address) => await GetIServer(address);
+        private async UniTask<Server> GetIServer(string address)
         {
             Uri gateway = await Gateway.FindGatewayMaster(address);
             if (gateway == null) return null;
@@ -54,7 +56,8 @@ namespace api.nox.network
             return response.data;
         }
 
-        public async UniTask<WellKnownServer> GetWellKnown(string address)
+        public async UniTask<ShareObject> GetWellKnown(string address) => await GetIWellKnown(address);
+        private async UniTask<WellKnownServer> GetIWellKnown(string address)
         {
             Uri gateway = await Gateway.FindGatewayMaster(address);
             if (gateway == null) return null;
@@ -66,7 +69,8 @@ namespace api.nox.network
             return response.data;
         }
 
-        public async UniTask<ServerSearch> SearchServers(string server, string query, uint offset = 0, uint limit = 10)
+        public async UniTask<ShareObject> SearchServers(string server, string query, uint offset = 0, uint limit = 10) => await SearchIServers(server, query, offset, limit);
+        private async UniTask<ServerSearch> SearchIServers(string server, string query, uint offset = 0, uint limit = 10)
         {
             return new ServerSearch() { servers = new Server[0], total = 0, limit = limit, offset = offset };
             // GET /api/servers/search?query={query}&offset={offset}&limit={limit}
