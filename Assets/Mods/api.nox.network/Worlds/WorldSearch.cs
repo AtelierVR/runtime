@@ -6,8 +6,22 @@ namespace api.nox.network
     public class WorldSearch : ShareObject
     {
         public World[] worlds;
-        public uint total;
-        public uint limit;
-        public uint offset;
+        [ShareObjectExport] public uint total;
+        [ShareObjectExport] public uint limit;
+        [ShareObjectExport] public uint offset;
+
+        [ShareObjectExport] public ShareObject[] SharedWorlds;
+
+        public void BeforeExport()
+        {
+            SharedWorlds = new ShareObject[worlds.Length];
+            for (int i = 0; i < worlds.Length; i++)
+                SharedWorlds[i] = worlds[i];
+        }
+
+        public void AfterExport()
+        {
+            SharedWorlds = null;
+        }
     }
 }

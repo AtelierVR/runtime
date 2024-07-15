@@ -4,13 +4,13 @@ namespace api.nox.game
 {
     public class SimplyServer : ShareObject
     {
-        public string id;
-        public string title;
-        public string description;
-        public string address;
-        public string version;
-        public long ready_at;
-        public string icon;
-        public string public_key;
+        [ShareObjectImport, ShareObjectExport] public string id;
+        [ShareObjectImport, ShareObjectExport] public string title;
+        [ShareObjectImport, ShareObjectExport] public string description;
+        [ShareObjectImport, ShareObjectExport] public string address;
+        [ShareObjectImport, ShareObjectExport] public string version;
+        [ShareObjectImport, ShareObjectExport] public long ready_at;
+        [ShareObjectImport, ShareObjectExport] public string icon;
+        [ShareObjectImport, ShareObjectExport] public string public_key;
     }
 }

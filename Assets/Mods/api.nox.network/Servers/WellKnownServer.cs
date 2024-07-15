@@ -5,9 +5,9 @@ namespace api.nox.network
     [System.Serializable]
     public class WellKnownServer : ShareObject
     {
-        public string version;
-        public string status;
-        public uint started_at;
-        public string[] features;
+        [ShareObjectExport] public string version;
+        [ShareObjectExport] public string status;
+        [ShareObjectExport] public uint started_at;
+       [ShareObjectExport]  public string[] features;
     }
 }

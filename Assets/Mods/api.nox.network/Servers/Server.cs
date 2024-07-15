@@ -5,14 +5,14 @@ namespace api.nox.network
     [System.Serializable]
     public class Server : ShareObject
     {
-        public string id;
-        public string title;
-        public string description;
-        public string address;
-        public string version;
-        public long ready_at;
-        public string icon;
-        public string public_key;
-        public ServerGateway gateways;
+        [ShareObjectExport] public string id;
+        [ShareObjectExport] public string title;
+        [ShareObjectExport] public string description;
+        [ShareObjectExport] public string address;
+        [ShareObjectExport] public string version;
+        [ShareObjectExport] public long ready_at;
+        [ShareObjectExport] public string icon;
+        [ShareObjectExport] public string public_key;
+        [ShareObjectExport] public ServerGateway gateways;
     }
 }

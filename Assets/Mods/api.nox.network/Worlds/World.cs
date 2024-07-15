@@ -5,14 +5,14 @@ namespace api.nox.network
     [System.Serializable]
     public class World : ShareObject
     {
-        public uint id;
-        public string title;
-        public string description;
-        public ushort capacity;
-        public string[] tags;
-        public string owner;
-        public string server;
-        public string thumbnail;
-        public WorldAsset[] assets;
+        [ShareObjectExport] public uint id;
+        [ShareObjectExport] public string title;
+        [ShareObjectExport] public string description;
+        [ShareObjectExport] public ushort capacity;
+        [ShareObjectExport] public string[] tags;
+        [ShareObjectExport] public string owner;
+        [ShareObjectExport] public string server;
+        [ShareObjectExport] public string thumbnail;
+        [ShareObjectExport] public WorldAsset[] assets;
     }
 }

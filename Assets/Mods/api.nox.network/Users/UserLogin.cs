@@ -5,8 +5,8 @@ namespace api.nox.network
     [System.Serializable]
     public class UserLogin : ShareObject
     {
-        public string error;
-        public string token;
-        public UserMe user;
+        [ShareObjectExport] public string error;
+        [ShareObjectExport] public string token;
+        [ShareObjectExport] public UserMe user;
     }
 }

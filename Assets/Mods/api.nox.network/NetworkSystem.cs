@@ -43,6 +43,12 @@ namespace api.nox.network
             return null;
         }
 
+        public bool TryMostAuth(string server, out string auth)
+        {
+            auth = MostAuth(server);
+            return auth != null;
+        }
+
         [ShareObjectExport]
         public Func<string, UniTask<Texture2D>> FetchTexture = async url =>
         {

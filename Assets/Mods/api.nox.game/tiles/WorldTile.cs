@@ -59,7 +59,7 @@ namespace api.nox.game
         {
             Reference.GetReference("display", tile).GetComponent<TextLanguage>().arguments = new string[] { world.title };
             Reference.GetReference("title", tile).GetComponent<TextLanguage>().arguments = new string[] { world.title };
-
+            Reference.GetReference("description", tile).GetComponent<TextLanguage>().arguments = new string[] { world.description };
             var icon = Reference.GetReference("icon", tile).GetComponent<RawImage>();
             if (!string.IsNullOrEmpty(world.thumbnail)) UpdateTexure(icon, world.thumbnail).Forget();
         }

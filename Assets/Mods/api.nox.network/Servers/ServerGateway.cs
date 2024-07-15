@@ -5,9 +5,9 @@ namespace api.nox.network
     [System.Serializable]
     public class ServerGateway : ShareObject
     {
-        public string http;
-        public string ws;
-        public string proxy;
-        public string cdn;
+        [ShareObjectExport] public string http;
+        [ShareObjectExport] public string ws;
+        [ShareObjectExport] public string proxy;
+        [ShareObjectExport] public string cdn;
     }
 }

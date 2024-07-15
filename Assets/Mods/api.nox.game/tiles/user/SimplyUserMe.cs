@@ -2,19 +2,10 @@ using Nox.CCK.Mods;
 
 namespace api.nox.game
 {
-    public class SimplyUserMe : ShareObject
+    public class SimplyUserMe : SimplyUser
     {
-        public uint id;
-        public string username;
-        public string display;
-        public string[] tags;
-        public string server;
-        public float rank;
-        public string[] links;
-        public string banner;
-        public string thumbnail;
-        public string email;
-        public uint createdAt;
-        public string home;
+        [ShareObjectImport, ShareObjectExport] public string email;
+        [ShareObjectImport, ShareObjectExport] public uint createdAt;
+        [ShareObjectImport, ShareObjectExport] public string home;
     }
 }

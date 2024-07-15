@@ -5,17 +5,17 @@ namespace api.nox.network
     [System.Serializable]
     public class UserMe : ShareObject
     {
-        public uint id;
-        public string username;
-        public string display;
-        public string[] tags;
-        public string server;
-        public float rank;
-        public string[] links;
-        public string banner;
-        public string thumbnail;
-        public string email;
-        public uint createdAt;
-        public string home;
+        [ShareObjectExport] public uint id;
+        [ShareObjectExport] public string username;
+        [ShareObjectExport] public string display;
+        [ShareObjectExport] public string[] tags;
+        [ShareObjectExport] public string server;
+        [ShareObjectExport] public float rank;
+        [ShareObjectExport] public string[] links;
+        [ShareObjectExport] public string banner;
+        [ShareObjectExport] public string thumbnail;
+        [ShareObjectExport] public string email;
+        [ShareObjectExport] public uint createdAt;
+        [ShareObjectExport] public string home;
     }
 }

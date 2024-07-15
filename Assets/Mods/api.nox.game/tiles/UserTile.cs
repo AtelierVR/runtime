@@ -102,6 +102,8 @@ namespace api.nox.game
 
         internal void SendTile(EventData context)
         {
+            Debug.Log("UserTileManager.SendTile");
+            Debug.Log("aaa" + (context.Data[1] as object[])[0]);
             var user = ((context.Data[1] as object[])[0] as ShareObject).Convert<SimplyUser>();
             var tile = new TileObject()
             {

@@ -4,14 +4,14 @@ namespace api.nox.game
 {
     public class SimplyWorld : ShareObject
     {
-        public uint id;
-        public string title;
-        public string description;
-        public ushort capacity;
-        public string[] tags;
-        public string owner;
-        public string server;
-        public string thumbnail;
+        [ShareObjectImport, ShareObjectExport] public uint id;
+        [ShareObjectImport, ShareObjectExport] public string title;
+        [ShareObjectImport, ShareObjectExport] public string description;
+        [ShareObjectImport, ShareObjectExport] public ushort capacity;
+        [ShareObjectImport, ShareObjectExport] public string[] tags;
+        [ShareObjectImport, ShareObjectExport] public string owner;
+        [ShareObjectImport, ShareObjectExport] public string server;
+        [ShareObjectImport, ShareObjectExport] public string thumbnail;
         // public WorldAsset[] assets;
     }
 }

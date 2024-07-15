@@ -79,12 +79,28 @@ namespace api.nox.network
             // var gateway = server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             // if (gateway == null) return null;
             // var req = new UnityWebRequest($"{gateway}/api/servers/search?query={query}&offset={offset}&limit={limit}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            // req.SetRequestHeader("Authorization", _mod.MostAuth(server));
+            // if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
             // try { await req.SendWebRequest(); }
             // catch { return null; }
             // if (req.responseCode != 200) return null;
             // var response = JsonUtility.FromJson<Response<ServerSearch>>(req.downloadHandler.text);
             // return response.data;
+        }
+
+        
+        [ShareObjectExport] public Func<string, string, uint, uint, UniTask<ShareObject>> SharedSearchServers;
+        [ShareObjectExport] public Func<UniTask<ShareObject>> SharedGetMyServer;
+
+        public void BeforeExport()
+        {
+            SharedSearchServers = async (server, query, offset, limit) =>await  SearchServers(server, query, offset, limit);
+            SharedGetMyServer = async () => await GetMyServer();
+        }
+
+        public void AfterExport()
+        {
+            SharedGetMyServer = null;
+            SharedSearchServers = null;
         }
     }
 }

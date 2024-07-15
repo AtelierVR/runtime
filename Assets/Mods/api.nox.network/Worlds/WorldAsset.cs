@@ -5,13 +5,13 @@ namespace api.nox.network
     [System.Serializable]
     public class WorldAsset : ShareObject
     {
-        public uint id;
-        public uint version;
-        public string engine;
-        public string platform;
-        public bool is_empty;
-        public string url;
-        public string hash;
-        public uint size;
+        [ShareObjectExport] public uint id;
+        [ShareObjectExport] public uint version;
+        [ShareObjectExport] public string engine;
+        [ShareObjectExport] public string platform;
+        [ShareObjectExport] public bool is_empty;
+        [ShareObjectExport] public string url;
+        [ShareObjectExport] public string hash;
+        [ShareObjectExport] public uint size;
     }
 }

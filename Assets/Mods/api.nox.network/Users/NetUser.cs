@@ -120,13 +120,28 @@ namespace api.nox.network
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/users/search?query={query}&offset={offset}&limit={limit}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            req.SetRequestHeader("Authorization", _mod.MostAuth(server));
+            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
             try { await req.SendWebRequest(); }
             catch { return null; }
             if (req.responseCode != 200) return null;
             var res = JsonUtility.FromJson<Response<UserSearch>>(req.downloadHandler.text);
             if (res.IsError) return null;
             return res.data;
+        }
+
+        [ShareObjectExport] public Func<string, string, uint, uint, UniTask<ShareObject>> SharedSearchUsers;
+        [ShareObjectExport] public Func<UniTask<ShareObject>> SharedGetMyUser;
+
+        public void BeforeExport()
+        {
+            SharedSearchUsers = async (server, query, offset, limit) => await SearchUsers(server, query, offset, limit);
+            SharedGetMyUser = async () => await GetMyUser();
+        }
+
+        public void AfterExport()
+        {
+            SharedGetMyUser = null;
+            SharedSearchUsers = null;
         }
     }
 }

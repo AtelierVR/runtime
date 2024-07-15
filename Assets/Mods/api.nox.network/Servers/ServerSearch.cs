@@ -7,8 +7,22 @@ namespace api.nox.network
     public class ServerSearch : ShareObject
     {
         public Server[] servers;
-        public uint total;
-        public uint limit;
-        public uint offset;
+        [ShareObjectExport] public uint total;
+        [ShareObjectExport] public uint limit;
+        [ShareObjectExport] public uint offset;
+        
+        [ShareObjectExport] public ShareObject[] SharedServers;
+
+        public void BeforeExport()
+        {
+            SharedServers = new ShareObject[servers.Length];
+            for (int i = 0; i < servers.Length; i++)
+                SharedServers[i] = servers[i];
+        }
+
+        public void AfterExport()
+        {
+            SharedServers = null;
+        }
     }
 }

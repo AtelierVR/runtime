@@ -6,8 +6,23 @@ namespace api.nox.network
     public class InstanceSearch : ShareObject
     {
         public Instance[] instances;
-        public uint total;
-        public uint limit;
-        public uint offset;
+        [ShareObjectExport] public uint total;
+        [ShareObjectExport] public uint limit;
+        [ShareObjectExport] public uint offset;
+
+        
+        [ShareObjectExport] public ShareObject[] SharedInstances;
+
+        public void BeforeExport()
+        {
+            SharedInstances = new ShareObject[instances.Length];
+            for (int i = 0; i < instances.Length; i++)
+                SharedInstances[i] = instances[i];
+        }
+
+        public void AfterExport()
+        {
+            SharedInstances = null;
+        }
     }
 }

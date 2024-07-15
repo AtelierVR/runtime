@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Mods;
@@ -23,7 +24,7 @@ namespace api.nox.network
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/instances/{instanceId}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            req.SetRequestHeader("Authorization", _mod.MostAuth(server));
+            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
             try { await req.SendWebRequest(); }
             catch { return null; }
             if (req.responseCode != 200) return null;
@@ -41,7 +42,7 @@ namespace api.nox.network
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/instances/search?query={query}&offset={offset}&limit={limit}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            req.SetRequestHeader("Authorization", _mod.MostAuth(server));
+            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
             try { await req.SendWebRequest(); }
             catch { return null; }
             Debug.Log(req.downloadHandler.text);
@@ -49,6 +50,19 @@ namespace api.nox.network
             var res = JsonUtility.FromJson<Response<InstanceSearch>>(req.downloadHandler.text);
             if (res.IsError) return null;
             return res.data;
+        }
+
+
+        [ShareObjectExport] public Func<string, string, uint, uint, UniTask<ShareObject>> SharedSearchInstances;
+
+        public void BeforeExport()
+        {
+            SharedSearchInstances = async (server, query, offset, limit) => await SearchInstances(server, query, offset, limit);
+        }
+
+        public void AfterExport()
+        {
+            SharedSearchInstances = null;
         }
     }
 }

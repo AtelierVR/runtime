@@ -5,13 +5,13 @@ namespace api.nox.network
     [System.Serializable]
     public class Instance : ShareObject
     {
-        public uint id;
-        public string title;
-        public string description;
-        public string server;
-        public string name;
-        public ushort capacity;
-        public string[] tags;
-        public string world;
+        [ShareObjectExport] public uint id;
+        [ShareObjectExport] public string title;
+        [ShareObjectExport] public string description;
+        [ShareObjectExport] public string server;
+        [ShareObjectExport] public string name;
+        [ShareObjectExport] public ushort capacity;
+        [ShareObjectExport] public string[] tags;
+        [ShareObjectExport] public string world;
     }
 }

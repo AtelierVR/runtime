@@ -13,7 +13,8 @@ namespace Nox.CCK
             {
                 string text = LanguageManager.Get(key);
                 if (arguments != null)
-                    text = string.Format(text, arguments);
+                    try { text = string.Format(text, arguments); }
+                    catch { }
                 return text;
             }
         }
