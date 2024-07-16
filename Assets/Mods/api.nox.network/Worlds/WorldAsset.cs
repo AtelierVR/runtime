@@ -5,6 +5,7 @@ namespace api.nox.network
     [System.Serializable]
     public class WorldAsset : ShareObject
     {
+        internal NetWorld netWorld;
         [ShareObjectExport] public uint id;
         [ShareObjectExport] public uint version;
         [ShareObjectExport] public string engine;

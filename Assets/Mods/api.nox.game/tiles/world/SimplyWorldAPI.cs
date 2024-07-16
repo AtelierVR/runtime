@@ -8,7 +8,7 @@ namespace api.nox.game
     {
         [ShareObjectImport] public Func<string, string, uint, uint, UniTask<ShareObject>> SharedSearchWorlds;
         public async UniTask<SimplyWorldSearch> SearchWorlds(string server, string query, uint offset = 0, uint limit = 10)
-            => (await SharedSearchWorlds(server, query, offset, limit)).Convert<SimplyWorldSearch>();
+            => (await SharedSearchWorlds(server, query, offset, limit))?.Convert<SimplyWorldSearch>();
         [ShareObjectImport] public Func<string, uint[], UniTask<ShareObject[]>> SharedGetWorlds;
         public async UniTask<SimplyWorld[]> GetWorlds(string server, params uint[] ids)
         {

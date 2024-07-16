@@ -16,10 +16,7 @@ namespace Nox.CCK.Mods
             BeforeExport();
             Dictionary<string, object> dict = new();
             foreach (var prop in GetType().GetFields().Where(f => f.GetCustomAttributes(typeof(ShareObjectExportAttribute), false).Length > 0))
-            {
-                Debug.Log($"Exporting {prop.Name} with value {prop.GetValue(this)}");
                 dict[prop.Name] = prop.GetValue(this);
-            }
             AfterExport();
             return dict;
         }
@@ -31,7 +28,6 @@ namespace Nox.CCK.Mods
                 if (dict.ContainsKey(prop.Name))
                 {
                     var value = dict[prop.Name];
-                    Debug.Log($"Importing {prop.Name} with value {value}");
                     if (value == null)
                         prop.SetValue(this, value);
                     else
@@ -49,7 +45,6 @@ namespace Nox.CCK.Mods
         public T Convert<T>() where T : ShareObject
         {
             T obj = (T)Activator.CreateInstance(typeof(T));
-            Debug.Log($"Converting {this} to {typeof(T)} (a)");
             obj.Import(Export());
             return obj;
         }
@@ -60,7 +55,6 @@ namespace Nox.CCK.Mods
             if (!typeof(ShareObject).IsAssignableFrom(target))
                 throw new ArgumentException($"Type {target} must implement ShareObject");
             var obj = (ShareObject)Activator.CreateInstance(target);
-            Debug.Log($"Converting {this} to {target} (b)");
             obj.Import(Export());
             return obj;
         }

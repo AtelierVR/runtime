@@ -129,6 +129,12 @@ MonoBehaviour:
       value: "Rejoindre en off."
     - key: dashboard.world.instances.title
       value: "Instances"
+    - key: dashboard.world.actions.downloading
+      value: "Annuler..."
+    - key: dashboard.world.actions.downloading.progress
+      value: "{0}%"
+    - key: dashboard.world.actions.downloaded
+      value: "Téléchargé"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home
@@ -245,5 +251,11 @@ MonoBehaviour:
       value: "Offline teleport"
     - key: dashboard.world.instances.title
       value: "Instances"
+    - key: dashboard.world.actions.downloading
+      value: "Downloading..."
+    - key: dashboard.world.actions.downloading.progress
+      value: "{0}%"
+    - key: dashboard.world.actions.downloaded
+      value: "Downloaded"
 
       

@@ -49,10 +49,8 @@ namespace api.nox.game
 
         private async UniTask<NavigationResult> FetchWorlds(string server, string query)
         {
-            Debug.Log("Fetching worlds");
             var res = await navigationTile.clientMod.NetworkAPI.World.SearchWorlds(server, query);
             if (res == null) return new NavigationResult { error = "Error fetching worlds." };
-            Debug.Log("Fetched worlds " + res.worlds.Length);
             return new NavigationResult
             {
                 data = res.worlds.Select(x => new NavigationResultData

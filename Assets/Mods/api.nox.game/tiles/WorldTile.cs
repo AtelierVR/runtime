@@ -6,6 +6,7 @@ using Nox.CCK.Worlds;
 using UnityEngine;
 using Nox.CCK;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 namespace api.nox.game
 {
@@ -62,6 +63,120 @@ namespace api.nox.game
             Reference.GetReference("description", tile).GetComponent<TextLanguage>().arguments = new string[] { world.description };
             var icon = Reference.GetReference("icon", tile).GetComponent<RawImage>();
             if (!string.IsNullOrEmpty(world.thumbnail)) UpdateTexure(icon, world.thumbnail).Forget();
+            CheckVersion(tile, world).Forget();
+            CheckHome(tile, world);
+        }
+
+        private async UniTask CheckVersion(GameObject tile, SimplyWorld world, uint[] versions = null)
+        {
+            var dlb = Reference.GetReference("download.button", tile).GetComponent<Button>();
+            dlb.interactable = false;
+            dlb.onClick.RemoveAllListeners();
+            var search = await world.SearchAssets(0, 1, versions, new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) }, new string[] { "unity" });
+            if (search == null || search.assets.Length == 0)
+            {
+                Debug.LogError("World not compatible with player");
+            }
+            else
+            {
+                var asset = search.assets[0];
+                dlb.interactable = true;
+                var type = WorldManager.HasWorldInCache(asset.hash) ? DownloadButtonType.Downloaded : DownloadButtonType.Download;
+                dlb.onClick.AddListener(() => OnClickDownload(dlb, tile, world, asset, type).Forget());
+                SetDownloadButton(type);
+            }
+        }
+
+        private void CheckHome(GameObject tile, SimplyWorld world)
+        {
+            var dlb = Reference.GetReference("home.button", tile).GetComponent<Button>();
+            dlb.interactable = false;
+            dlb.onClick.RemoveAllListeners();
+            var user = clientMod.NetworkAPI.GetCurrentUser();
+            WorldPatern wp = string.IsNullOrEmpty(user?.home) ? null : new WorldPatern(user.home, user.server);
+            var hasHome = wp?.id == world.id && wp.server == world.server;
+            SetHomeButton(hasHome);
+            dlb.interactable = true;
+            dlb.onClick.AddListener(() => OnClickHome(dlb, tile, world, hasHome).Forget());
+        }
+
+        private async UniTask OnClickDownload(Button dlb, GameObject tile, SimplyWorld world, SimplyWorldAsset asset, DownloadButtonType type)
+        {
+            if (!dlb.interactable) return;
+            if (type == DownloadButtonType.Download)
+            {
+                dlb.interactable = false;
+                SetDownloadButton(DownloadButtonType.Downloading, 0);
+                var res = await WorldManager.DownloadWorld(asset.hash, asset.url, (progress, size) => SetDownloadButton(DownloadButtonType.Downloading, progress * 100));
+                if (res.success) SetDownloadButton(DownloadButtonType.Downloading, 1);
+                dlb.interactable = true;
+                await CheckVersion(tile, world, new uint[] { asset.version });
+            }
+            else if (type == DownloadButtonType.Downloaded)
+            {
+                dlb.interactable = false;
+                WorldManager.DeleteWorldFromCache(asset.hash);
+                SetDownloadButton(DownloadButtonType.Download);
+                dlb.interactable = true;
+                await CheckVersion(tile, world, new uint[] { asset.version });
+            }
+        }
+
+        private async UniTask OnClickHome(Button dlb, GameObject tile, SimplyWorld world, bool hasHome)
+        {
+            if (!dlb.interactable) return;
+            if (hasHome)
+            {
+                dlb.interactable = false;
+                await clientMod.NetworkAPI.User.UpdateUser(new SimplyUserUpdate { home = "NULL" });
+                dlb.interactable = true;
+                CheckHome(tile, world);
+            }
+            else
+            {
+                dlb.interactable = false;
+                var wp = new WorldPatern() { id = world.id, server = world.server };
+                await clientMod.NetworkAPI.User.UpdateUser(new SimplyUserUpdate { home = wp.ToString() });
+                dlb.interactable = true;
+                CheckHome(tile, world);
+            }
+        }
+
+        internal void SetDownloadButton(DownloadButtonType type, float progress = 0)
+        {
+            if (tile == null) return;
+            var downloadbutton = Reference.GetReference("download.button", tile);
+            var start = Reference.GetReference("start", downloadbutton);
+            var downloaded = Reference.GetReference("downloaded", downloadbutton);
+            var downloading = Reference.GetReference("downloading", downloadbutton);
+            start.SetActive(type == DownloadButtonType.Download);
+            downloaded.SetActive(type == DownloadButtonType.Downloaded);
+            downloading.SetActive(type == DownloadButtonType.Downloading);
+            if (type == DownloadButtonType.Downloading)
+            {
+                var progressbar = Reference.GetReference("progress", downloading).GetComponent<RectTransform>();
+                var width = progressbar.transform.parent.GetComponent<RectTransform>().rect.width;
+                progressbar.sizeDelta = new Vector2(width * progress, 0);
+                var percent = Reference.GetReference("percent", downloading).GetComponent<TextLanguage>();
+                percent.arguments = new string[] { ((int)progress).ToString() };
+            }
+        }
+
+        internal void SetHomeButton(bool hasHome)
+        {
+            if (tile == null) return;
+            var homebutton = Reference.GetReference("home.button", tile);
+            var set = Reference.GetReference("no", homebutton);
+            var reset = Reference.GetReference("yes", homebutton);
+            set.SetActive(!hasHome);
+            reset.SetActive(hasHome);
+        }
+
+        internal enum DownloadButtonType
+        {
+            Download = 0,
+            Downloading = 1,
+            Downloaded = 2
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Mods;
@@ -12,13 +13,10 @@ namespace api.nox.network
     {
         private readonly NetworkSystem _mod;
         internal NetWorld(NetworkSystem mod) => _mod = mod;
-
-        public async UniTask<ShareObject> GetAsset(string server, uint worldId, uint assetId) => await GetIAsset(server, worldId, assetId);
-        private async UniTask<WorldAsset> GetIAsset(string server, uint worldId, uint assetId)
+        public async UniTask<WorldAsset> GetAsset(string server, uint worldId, uint assetId)
         {
             var User = _mod.GetCurrentUser();
             if (User == null) return null;
-            Debug.Log("Getting asset");
             var config = Config.Load();
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return null;
@@ -30,6 +28,7 @@ namespace api.nox.network
             Debug.Log(req.downloadHandler.text);
             var res = JsonUtility.FromJson<Response<WorldAsset>>(req.downloadHandler.text);
             if (res.IsError) return null;
+            res.data.netWorld = this;
             return res.data;
         }
 
@@ -59,7 +58,6 @@ namespace api.nox.network
         {
             var User = _mod.GetCurrentUser();
             if (User == null) return false;
-            Debug.Log("Deleting asset");
             var config = Config.Load();
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return false;
@@ -75,7 +73,6 @@ namespace api.nox.network
         {
             var User = _mod.GetCurrentUser();
             if (User == null) return false;
-            Debug.Log("Deleting world");
             var config = Config.Load();
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return false;
@@ -91,7 +88,6 @@ namespace api.nox.network
         {
             var User = _mod.GetCurrentUser();
             if (User == null) return false;
-            Debug.Log("Uploading asset file");
             var config = Config.Load();
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return false;
@@ -115,7 +111,6 @@ namespace api.nox.network
         {
             var User = _mod.GetCurrentUser();
             if (User == null) return false;
-            Debug.Log("Uploading world thumbnail");
             var config = Config.Load();
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return false;
@@ -130,7 +125,6 @@ namespace api.nox.network
             if (req.responseCode != 200) return false;
             return true;
         }
-
 
         // public async UniTask<ShareObject> CreateAsset(CreateAssetData asset) => await CreateIAsset(asset);
         // private async UniTask<WorldAsset> CreateIAsset(CreateAssetData asset)
@@ -177,12 +171,10 @@ namespace api.nox.network
         //     return res.data;
         // }
 
-        public async UniTask<ShareObject> GetWorld(string server, uint worldId) => await GetIWorld(server, worldId);
-        private async UniTask<World> GetIWorld(string server, uint worldId, bool withEmpty = false)
+        public async UniTask<World> GetWorld(string server, uint worldId, bool withEmpty = false)
         {
             var User = _mod.GetCurrentUser();
             if (User == null) return null;
-            Debug.Log("Getting world");
             var config = Config.Load();
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return null;
@@ -193,7 +185,7 @@ namespace api.nox.network
             if (req.responseCode != 200) return null;
             var res = JsonUtility.FromJson<Response<World>>(req.downloadHandler.text);
             if (res.IsError) return null;
-            Debug.Log(req.downloadHandler.text);
+            res.data.netWorld = this;
             return res.data;
         }
 
@@ -226,14 +218,11 @@ namespace api.nox.network
             return buffer;
         }
 
-        private async UniTask<WorldSearch> SearchIWorlds(string server, string query, uint offset = 0, uint limit = 10)
+        public async UniTask<WorldSearch> SearchWorlds(string server, string query, uint offset = 0, uint limit = 10)
         {
             // GET /api/worlds/search?query={query}&offset={offset}&limit={limit}
             var User = _mod.GetCurrentUser();
             var config = Config.Load();
-            Debug.Log("Searching worlds");
-            Debug.Log("User: " + User);
-            Debug.Log("Args: " + server + " " + query + " " + offset + " " + limit);
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/worlds/search?query={query}&offset={offset}&limit={limit}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
@@ -243,14 +232,14 @@ namespace api.nox.network
             if (req.responseCode != 200) return null;
             var res = JsonUtility.FromJson<Response<WorldSearch>>(req.downloadHandler.text);
             if (res.IsError) return null;
+            foreach (var world in res.data.worlds) world.netWorld = this;
             return res.data;
         }
 
-        private async UniTask<World[]> GetIWorlds(string server, uint[] worldIds)
+        public async UniTask<World[]> GetWorlds(string server, uint[] worldIds)
         {
             var User = _mod.GetCurrentUser();
             if (User == null) return new World[0];
-            Debug.Log("Getting worlds");
             var config = Config.Load();
             var gateway = server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return new World[0];
@@ -261,6 +250,7 @@ namespace api.nox.network
             if (req.responseCode != 200) return new World[0];
             var res = JsonUtility.FromJson<Response<WorldSearch>>(req.downloadHandler.text);
             if (res.IsError) return new World[0];
+            foreach (var world in res.data.worlds) world.netWorld = this;
             return res.data.worlds;
         }
 
@@ -270,14 +260,41 @@ namespace api.nox.network
 
         public void BeforeExport()
         {
-            SharedGetWorlds = async (server, worldIds) => await GetIWorlds(server, worldIds);
-            SharedSearchWorlds = async (server, query, offset, limit) => await SearchIWorlds(server, query, offset, limit);
+            SharedGetWorlds = async (server, worldIds) => await GetWorlds(server, worldIds);
+            SharedSearchWorlds = async (server, query, offset, limit) => await SearchWorlds(server, query, offset, limit);
         }
 
         public void AfterExport()
         {
             SharedSearchWorlds = null;
             SharedGetWorlds = null;
+        }
+
+        internal async UniTask<WorldAssetSearch> SearchAssets(string server, uint id, uint offset, uint limit, uint[] versions = null, string[] platforms = null, string[] engines = null)
+        {
+            // GET /api/worlds/{id}/assets/search?offset={offset}&limit={limit}&version={version[0]}&version={version[1]}&platform={platform[0]}&platform={platform[1]}&engine={engine[0]}&engine={engine[1]}
+            var User = _mod.GetCurrentUser();
+            var config = Config.Load();
+            var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
+            if (gateway == null) return null;
+            string url = $"{gateway}/api/worlds/{id}/assets?offset={offset}&limit={limit}";
+            if (versions != null) foreach (var version in versions) url += $"&version={version}";
+            if (platforms != null) foreach (var platform in platforms) url += $"&platform={platform}";
+            if (engines != null) foreach (var engine in engines) url += $"&engine={engine}";
+            var req = new UnityWebRequest(url, "GET") { downloadHandler = new DownloadHandlerBuffer() };
+            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            try { await req.SendWebRequest(); }
+            catch { return null; }
+            if (req.responseCode != 200) return null;
+            var res = JsonUtility.FromJson<Response<WorldAssetSearch>>(req.downloadHandler.text);
+            if (res.IsError) return null;
+            res.data.netWorld = this;
+            res.data.server = server;
+            res.data.world_id = id;
+            res.data.versions = versions;
+            res.data.platforms = platforms;
+            res.data.engines = engines;
+            return res.data;
         }
     }
 }

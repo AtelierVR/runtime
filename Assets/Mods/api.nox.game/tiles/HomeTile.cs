@@ -47,11 +47,7 @@ namespace api.nox.game
             var tile = new TileObject()
             {
                 id = "api.nox.game.home",
-                onOpen = (string previous) => OnOpen(context, previous),
                 onRemove = () => OnRemove(context),
-                onRestore = (string previous) => OnRestore(context, previous),
-                onDisplay = (string previous) => { },
-                onHide = (string next) => { },
                 GetContent = (Transform tf) =>
             {
                 var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.home");
@@ -67,15 +63,12 @@ namespace api.nox.game
 
         internal void UpdateWidgets()
         {
-            if (this.tile == null) return;
-            Debug.Log("Updating home tile");
+            if (tile == null) return;
             var rect = Reference.GetReference("game.home.widgets", this.tile).GetComponent<MenuGridder>();
-            // remove to the parent all the children
             foreach (Transform child in rect.transform)
                 Object.Destroy(child.gameObject);
             foreach (var widget in widgets.Values)
             {
-                Debug.Log("Adding widget to home tile" + widget.id);
                 var go = widget.GetContent(rect.transform);
                 var gi = go.GetComponent<MenuGridderItem>();
                 gi.size = new Vector2(widget.width, widget.height);
@@ -88,22 +81,9 @@ namespace api.nox.game
             }).Forget();
         }
 
-        internal void OnOpen(EventData context, string previous)
-        {
-            Debug.Log("Opening home tile");
-            UpdateWidgets();
-        }
-
-        internal void OnRestore(EventData context, string previous)
-        {
-            Debug.Log("Restoring home tile");
-            UpdateWidgets();
-        }
-
         internal void OnRemove(EventData context)
         {
-            Debug.Log("Removing home tile");
-            this.tile = null;
+            tile = null;
         }
     }
 }

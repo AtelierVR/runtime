@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Mods;
@@ -49,14 +50,53 @@ namespace api.nox.network
             return auth != null;
         }
 
-        [ShareObjectExport]
-        public Func<string, UniTask<Texture2D>> FetchTexture = async url =>
+        internal async UniTask<Texture2D> FetchTexture(string url, UnityWebRequest req = null)
         {
-            var req = new UnityWebRequest(url, "GET") { downloadHandler = new DownloadHandlerTexture() };
-            try { await req.SendWebRequest(); } catch { }
+            req ??= new UnityWebRequest(url, "GET");
+            req.url = url;
+            var dt = new DownloadHandlerTexture();
+            req.downloadHandler = dt;
+            try
+            {
+                var asynco = req.SendWebRequest();
+                await UniTask.WaitUntil(() =>
+                {
+                    _api.EventAPI.Emit(new NetEventContext("network.download", new { url, progress = req.downloadProgress }, true));
+                    return asynco.isDone;
+                });
+            }
+            catch { }
             if (req.responseCode != 200) return null;
-            return DownloadHandlerTexture.GetContent(req);
-        };
+            return dt.texture;
+        }
+
+        internal async UniTask<string> DownloadFile(string url, string hash, UnityWebRequest req = null)
+        {
+            req ??= new UnityWebRequest(url, "GET");
+            req.url = url;
+            req.downloadHandler = new DownloadHandlerBuffer();
+            try
+            {
+                var asynco = req.SendWebRequest();
+                await UniTask.WaitUntil(() =>
+                {
+                    _api.EventAPI.Emit(new NetEventContext("network.download", url, req.downloadProgress, req.downloadedBytes));
+                    return asynco.isDone;
+                });
+            }
+            catch { return null; }
+            if (req.responseCode != 200) return null;
+            var file = Path.Combine(Application.temporaryCachePath, hash);
+            if (!Directory.Exists(Path.GetDirectoryName(file)))
+                Directory.CreateDirectory(Path.GetDirectoryName(file));
+            File.WriteAllBytes(file, req.downloadHandler.data);
+            if (Hashing.HashFile(file) != hash)
+            {
+                File.Delete(file);
+                return null;
+            }
+            return file;
+        }
 
         public UserMe GetCurrentUser() => _user.user;
         [ShareObjectExport] public Func<ShareObject> GetSharedCurrentUser;
@@ -66,11 +106,15 @@ namespace api.nox.network
         [ShareObjectExport] public NetWorld World;
         [ShareObjectExport] public NetServer Server;
         [ShareObjectExport] public NetUser User;
+        [ShareObjectExport] public Func<string, UnityWebRequest, UniTask<Texture2D>> SharedFetchTexture;
+        [ShareObjectExport] public Func<string, string, UnityWebRequest, UniTask<string>> SharedDownloadFile;
 
         public void BeforeExport()
         {
             GetSharedCurrentUser = () => GetCurrentUser();
             GetSharedCurrentServer = () => GetCurrentServer();
+            SharedFetchTexture = async (url, req) => await FetchTexture(url, req);
+            SharedDownloadFile = async (url, hash, req) => await DownloadFile(url, hash, req);
             Instance = _instance;
             World = _world;
             Server = _server;
@@ -81,6 +125,8 @@ namespace api.nox.network
         {
             GetSharedCurrentUser = null;
             GetSharedCurrentServer = null;
+            SharedFetchTexture = null;
+            SharedDownloadFile = null;
             Instance = null;
             World = null;
             Server = null;

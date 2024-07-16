@@ -32,14 +32,7 @@ namespace api.nox.game
 
         public void OnInitializeClient(ClientModCoreAPI api)
         {
-            var network = api.ModAPI.GetMod("network")?.GetMainClasses().FirstOrDefault() as ShareObject;
-            Debug.Log("Signal to network: Hello from GameSystem!");
-            Debug.Assert(network != null, "Network mod not found!");
-            Debug.Log("Signal to network: " + network);
-            // var ee = network.CallMethod<string>("Debug", "Hello from GameSystem!");
-            // Debug.Log("Signal from network: " + ee);
-            Application.Quit();
-
+            WorldManager._gameClientSystem = this;
             coreAPI = api;
             api.AssetAPI.LoadLocalWorld("default");
             var controller = api.AssetAPI.GetLocalAsset<GameObject>("prefabs/xr-controller");
@@ -155,6 +148,8 @@ namespace api.nox.game
             navigationTile.OnDispose();
             coreAPI.EventAPI.Unsubscribe(tilesub);
             coreAPI.EventAPI.Unsubscribe(tilegotosub);
+            WorldManager.UnloadAllWorlds();
+            WorldManager._gameClientSystem = null;
         }
 
         private TileObject _currentTile;
