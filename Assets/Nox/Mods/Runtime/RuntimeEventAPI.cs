@@ -12,14 +12,13 @@ namespace Nox.Mods.Assets
         private RuntimeMod _mod;
         private EventEntryFlags _channel;
 
-        private List<RuntimeEventSubscription> _subscriptions = new();
-
         internal RuntimeEventAPI(RuntimeMod mod, EventEntryFlags channel)
         {
             _mod = mod;
             _channel = channel;
         }
 
+        private List<RuntimeEventSubscription> _subscriptions = new();
         internal void Receive(RuntimeEventContext context)
         {
             var data = new RuntimeEventData()

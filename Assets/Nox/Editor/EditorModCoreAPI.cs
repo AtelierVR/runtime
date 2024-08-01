@@ -5,6 +5,7 @@ using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Groups;
 using Nox.CCK.Mods.Mods;
 using Nox.CCK.Mods.XR;
+using Nox.Editor.Mods.Events;
 
 namespace Nox.Editor.Mods
 {
@@ -15,6 +16,7 @@ namespace Nox.Editor.Mods
         internal EditorModAPI EditorModAPI;
         internal EditorLibsAPI EditorLibsAPI;
         internal EditorAssetAPI EditorAssetAPI;
+        internal EditorEventAPI EditorEventAPI;
         internal Dictionary<string, object> _data = new();
         internal EditorModCoreAPI(EditorMod mod)
         {
@@ -23,6 +25,7 @@ namespace Nox.Editor.Mods
             EditorModAPI = new EditorModAPI(mod);
             EditorLibsAPI = new EditorLibsAPI(mod);
             EditorAssetAPI = new EditorAssetAPI(mod);
+            EditorEventAPI = new EditorEventAPI(mod, EventEntryFlags.Editor);
         }
 
         public CCK.Mods.ModMetadata ModMetadata => _mod.GetMetadata();
@@ -32,7 +35,7 @@ namespace Nox.Editor.Mods
 
         public ChatAPI ChatAPI => throw new System.NotImplementedException();
         public GroupAPI GroupAPI => throw new System.NotImplementedException();
-        public EventAPI EventAPI => throw new System.NotImplementedException();
+        public EventAPI EventAPI => EditorEventAPI;
         public AssetAPI AssetAPI => EditorAssetAPI;
         public CCK.Editor.EditorModPanelAPI PanelAPI => EditorPanelAPI;
         public CCK.Editor.EditorLibsAPI LibsAPI => EditorLibsAPI;

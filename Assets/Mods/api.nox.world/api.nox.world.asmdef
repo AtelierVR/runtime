@@ -3,9 +3,11 @@
     "rootNamespace": "",
     "references": [
         "NoxCCK",
-        "UniTask"
+        "UniTask",
+        "Nox.SimplyLibs"
     ],
     "includePlatforms": [],
+    "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],

@@ -7,6 +7,7 @@ using Nox.CCK;
 using Nox.CCK.Editor;
 using Nox.CCK.Worlds;
 using Nox.Editor.Worlds;
+using Nox.SimplyLibs;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -85,36 +86,30 @@ namespace api.nox.world
 
         private async UniTask<SimplyWorld> AttachWorld(string server, uint id, bool create = false)
         {
-            throw new NotImplementedException();
-            // var descriptor = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
-            // if (descriptor == null)
-            // {
-            //     SetDisplay(DisplayFlags.NoDescrpitor);
-            //     _world = null;
-            //     return null;
-            // }
-            // SetDisplay(DisplayFlags.Loading);
-            // var world = await _mod._api.NetworkAPI.WorldAPI.GetWorld(server, id, true);
-            // if (world == null && create)
-            //     world = await _mod._api.NetworkAPI.WorldAPI.CreateWorld(new CreateWorldData()
-            //     {
-            //         server = server,
-            //         id = id,
-            //     });
-
-            // if (world == null)
-            // {
-            //     SetDisplay(DisplayFlags.WorldNotFound);
-            //     _world = null;
-            //     return null;
-            // }
-            // SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
-            // descriptor.IdPublisher = world.id;
-            // descriptor.ServerPublisher = world.server;
-            // EditorUtility.SetDirty(descriptor);
-            // _world = world;
-            // UpdateWorld();
-            // return world;
+            var descriptor = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
+            if (descriptor == null)
+            {
+                SetDisplay(DisplayFlags.NoDescrpitor);
+                _world = null;
+                return null;
+            }
+            SetDisplay(DisplayFlags.Loading);
+            var world = await _mod.NetworkAPI.World.GetWorld(server, id);
+            if (world == null && create)
+                world = await _mod.NetworkAPI.World.CreateWorld(new SimplyCreateWorldData() { server = server, id = id });
+            if (world == null)
+            {
+                SetDisplay(DisplayFlags.WorldNotFound);
+                _world = null;
+                return null;
+            }
+            SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+            descriptor.IdPublisher = world.id;
+            descriptor.ServerPublisher = world.server;
+            EditorUtility.SetDirty(descriptor);
+            _world = world;
+            UpdateWorld();
+            return world;
         }
 
         private void UpdateWorld()
@@ -304,86 +299,96 @@ namespace api.nox.world
 
             Debug.Log("Checking world...");
             SetDisplay(DisplayFlags.Loading);
-            // _world = await _mod._api.NetworkAPI.WorldAPI.GetWorld(_world.server, _world.id, true);
-            throw new NotImplementedException();
-            // if (_world == null)
-            // {
-            //     Debug.LogError("An error occured while fetching the world.");
-            //     SetDisplay(DisplayFlags.WorldNotFound);
-            //     return;
-            // }
-            // foreach (var assetl in _world.assets)
-            //     Debug.Log(assetl);
+            _world = await _mod.NetworkAPI.World.GetWorld(_world.server, _world.id);
+            if (_world == null)
+            {
+                Debug.LogError("An error occured while fetching the world.");
+                SetDisplay(DisplayFlags.WorldNotFound);
+                return;
+            }
+            var config = Config.Load();
+            var autoVersion = config.Get("sdk.auto_version", true);
+            var strictVersion = config.Get("sdk.strict_version", true);
 
+            var search = await _mod.NetworkAPI.World.SearchAssets(_world.server, _world.id, 0, 1, new uint[] { version }, new string[] { SuppordTarget.GetTargetName(descriptor.target) }, new string[] { "unity" }, true);
+            if (search == null)
+            {
+                Debug.LogError("An error occured while fetching the assets.");
+                SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+                return;
+            }
+            var asset = search.assets.FirstOrDefault();
+            if (asset != null && autoVersion && !asset.IsEmpty())
+                while (asset != null && !asset.IsEmpty())
+                {
+                    version++;
+                    search = await _mod.NetworkAPI.World.SearchAssets(_world.server, _world.id, 0, 1, new uint[] { version }, new string[] { SuppordTarget.GetTargetName(descriptor.target) }, new string[] { "unity" }, true);
+                    if (search == null)
+                    {
+                        Debug.LogError("An error occured while fetching the assets.");
+                        SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+                        return;
+                    }
+                    asset = search.assets.FirstOrDefault();
+                }
+            _root.Q<UnsignedIntegerField>("asset-version").value = version;
+            if (asset != null && strictVersion && !asset.IsEmpty())
+            {
+                Debug.LogError("Asset already exists.");
+                Debug.LogError("Asset: " + asset);
+                SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+                return;
+            }
 
-            // var config = Config.Load();
-            // var autoVersion = config.Get("sdk.auto_version", true);
-            // var strictVersion = config.Get("sdk.strict_version", true);
-            // var asset = _world.GetAsset((ushort)version, descriptor.target);
-            // if (asset != null && autoVersion && !asset.IsEmpty())
-            //     while (asset != null && !asset.IsEmpty())
-            //     {
-            //         version++;
-            //         asset = _world.GetAsset((ushort)version, descriptor.target);
-            //     }
-            // _root.Q<UnsignedIntegerField>("asset-version").value = version;
-            // if (asset != null && strictVersion && !asset.IsEmpty())
-            // {
-            //     Debug.LogError("Asset already exists.");
-            //     Debug.LogError("Asset: " + asset);
-            //     SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
-            //     return;
-            // }
+            Debug.Log("Building world...");
+            var result = MainDescriptorEditor.BuildWorld(descriptor, descriptor.GetBuildPlatform(), false);
+            if (result == null || !result.Success || string.IsNullOrWhiteSpace(result.path))
+            {
+                Debug.LogError("An error occured while building the world.");
+                SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+                return;
+            }
 
-            // Debug.Log("Building world...");
-            // var result = MainDescriptorEditor.BuildWorld(descriptor, descriptor.GetBuildPlatform(), false);
-            // if (result == null || !result.Success || string.IsNullOrWhiteSpace(result.path))
-            // {
-            //     Debug.LogError("An error occured while building the world.");
-            //     SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
-            //     return;
-            // }
+            Debug.Log("Uploading asset...");
+            Debug.Log("Asset version: " + version);
+            Debug.Log("Asset platform: " + SuppordTarget.GetTargetName(descriptor.target));
 
-            // Debug.Log("Uploading asset...");
-            // Debug.Log("Asset version: " + version);
-            // Debug.Log("Asset platform: " + SuppordTarget.GetTargetName(descriptor.target));
+            if (asset == null)
+                asset = await _mod.NetworkAPI.World.CreateAsset(new SimplyCreateAssetData()
+                {
+                    worldId = _world.id,
+                    server = _world.server,
+                    version = (ushort)version,
+                    engine = "unity",
+                    platform = SuppordTarget.GetTargetName(descriptor.target),
+                });
 
-            // if (asset == null)
-            //     asset = await _mod._api.NetworkAPI.WorldAPI.CreateAsset(new CreateAssetData()
-            //     {
-            //         worldId = _world.id,
-            //         server = _world.server,
-            //         version = (ushort)version,
-            //         engine = "unity",
-            //         platform = SuppordTarget.GetTargetName(descriptor.target),
-            //     });
+            if (asset == null || !asset.IsEmpty())
+            {
+                Debug.LogError("An error occured while creating the asset.");
+                SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+                return;
+            }
 
-            // if (asset == null || !asset.IsEmpty())
-            // {
-            //     Debug.LogError("An error occured while creating the asset.");
-            //     SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
-            //     return;
-            // }
+            var res = await _mod.NetworkAPI.World.UploadAssetFile(_world.server, _world.id, asset.id, result.path);
+            if (!res)
+            {
+                Debug.LogError("An error occured while uploading the asset.");
+                SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+                return;
+            }
 
-            // var res = await _mod._api.NetworkAPI.WorldAPI.UploadAssetFile(_world.server, _world.id, asset.id, result.path);
-            // if (!res)
-            // {
-            //     Debug.LogError("An error occured while uploading the asset.");
-            //     SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
-            //     return;
-            // }
+            Debug.Log("Asset created successfully, Refreshing world...");
+            _world = await _mod.NetworkAPI.World.GetWorld(_world.server, _world.id);
+            if (_world == null)
+            {
+                Debug.LogError("An error occured while fetching the world.");
+                SetDisplay(DisplayFlags.WorldNotFound);
+                return;
+            }
 
-            // Debug.Log("Asset created successfully, Refreshing world...");
-            // _world = await _mod._api.NetworkAPI.WorldAPI.GetWorld(_world.server, _world.id, true);
-            // if (_world == null)
-            // {
-            //     Debug.LogError("An error occured while fetching the world.");
-            //     SetDisplay(DisplayFlags.WorldNotFound);
-            //     return;
-            // }
-
-            // Debug.Log("Asset created successfully.");
-            // SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+            Debug.Log("Asset created successfully.");
+            SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
         }
     }
 

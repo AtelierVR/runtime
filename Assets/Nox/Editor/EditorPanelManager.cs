@@ -56,6 +56,7 @@ namespace Nox.Editor
             dropdown.text = "Menu";
             dropdown.Clear();
             var panels = GetPanels();
+            Debug.Log("Panels: " + panels.Length);
             foreach (var panel in panels)
                 if (!panel.IsHidden())
                     dropdown.menu.AppendAction(panel.GetName(), a => Goto(panel.GetFullId()), a => DropdownMenuAction.Status.Normal);
@@ -137,6 +138,7 @@ namespace Nox.Editor
             List<EditorPanel> panels = new();
             if (Instance == null) return panels.ToArray();
             var mods = EditorModManager.GetMods();
+            Debug.Log("Mods: " + mods.Count);
             foreach (var mod in mods)
                 panels.AddRange(mod.coreAPI.EditorPanelAPI._panels);
             return panels.ToArray();

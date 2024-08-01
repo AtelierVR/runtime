@@ -1,0 +1,54 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/Mods/api.nox.world/Resources/Style.uss?fileID=7433441132597879392&amp;guid=e5801f130c21d4a43937749c0d48a9cd&amp;type=3#Style" />
+    <engine:VisualElement style="flex-grow: 1; padding-top: 4px; padding-bottom: 4px;">
+        <engine:GroupBox style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;">
+            <engine:VisualElement style="flex-grow: 1; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); border-bottom-width: 1px; padding-bottom: 4px; padding-top: 4px; flex-direction: row; padding-right: 8px; padding-left: 8px;">
+                <engine:Label text="User Profile" style="margin-right: 3px; margin-left: 3px; flex-grow: 1;" />
+                <engine:Label text="v0.0.0" name="version" />
+            </engine:VisualElement>
+        </engine:GroupBox>
+        <engine:GroupBox style="flex-grow: 1; justify-content: center; align-self: auto;">
+            <engine:VisualElement name="notifications" style="flex-grow: 0; align-items: center; justify-content: center; align-self: auto;">
+                <engine:VisualElement name="world-asset" style="flex-grow: 1; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-left-radius: 4px; border-top-right-radius: 4px; border-bottom-right-radius: 4px; border-bottom-left-radius: 4px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; margin-top: 2px; margin-bottom: 2px; width: 100%; max-width: 253px;">
+                    <engine:VisualElement name="with-banner" style="flex-grow: 1; align-items: stretch; align-self: center; margin-bottom: 25px; max-width: none; margin-top: 25px; display: none;">
+                        <engine:Image name="banner" enabled="true" style="flex-grow: 0; width: 192px; height: 128px; flex-shrink: 0; background-color: rgba(0, 0, 0, 0.89); border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px; display: flex;">
+                            <engine:Image name="thumbnail" style="flex-grow: 0; width: 64px; height: 64px; flex-shrink: 0; margin-top: auto; margin-right: auto; margin-bottom: auto; margin-left: auto; background-color: rgb(0, 0, 0); position: absolute; bottom: -32px; top: auto; left: 16px; right: auto; border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;" />
+                        </engine:Image>
+                        <engine:Label text="Display" name="display_name" style="margin-left: 88px; margin-top: 8px; margin-bottom: 8px;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement name="withnot-banner" style="flex-grow: 1; max-width: none; flex-direction: row; margin-bottom: 8px;">
+                        <engine:Image name="thumbnail" style="flex-grow: 0; width: 64px; height: 64px; flex-shrink: 0; background-color: rgb(0, 0, 0); position: relative; bottom: auto; top: auto; left: auto; right: auto; border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;" />
+                        <engine:Label text="Display" name="display_name" style="-unity-text-align: middle-left; margin-left: 8px; flex-grow: 1;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement name="VisualElement" style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
+                        <engine:Label text="Id" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
+                        <engine:UnsignedIntegerField name="id" readonly="true" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement name="VisualElement" style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
+                        <engine:Label text="Server" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
+                        <engine:UnsignedIntegerField name="server" readonly="true" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement name="VisualElement" style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
+                        <engine:Label text="Username&#10;" name="Label" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
+                        <engine:UnsignedIntegerField name="username" readonly="false" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement name="VisualElement" style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
+                        <engine:Label text="Display" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
+                        <engine:UnsignedIntegerField name="display" readonly="false" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+                    </engine:VisualElement>
+                    <engine:Foldout text="Advanced Options" value="true" style="margin-top: 4px; margin-bottom: 4px;">
+                        <engine:Button text="Delete Account" name="delete" />
+                    </engine:Foldout>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Button text="Refetch" name="refresh" style="flex-grow: 1;" />
+                    </engine:VisualElement>
+                </engine:VisualElement>
+            </engine:VisualElement>
+        </engine:GroupBox>
+        <engine:GroupBox name="logout" style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;">
+            <engine:VisualElement style="flex-grow: 0; padding-top: 4px; border-top-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); padding-bottom: 4px; flex-wrap: nowrap; padding-right: 8px; padding-left: 8px;">
+                <engine:Button text="Logout" name="logout-button" class="disable-on-error" />
+            </engine:VisualElement>
+        </engine:GroupBox>
+    </engine:VisualElement>
+</engine:UXML>

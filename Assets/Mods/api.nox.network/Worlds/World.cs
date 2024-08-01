@@ -18,21 +18,24 @@ namespace api.nox.network
         [ShareObjectExport] public string server;
         [ShareObjectExport] public string thumbnail;
 
-        [ShareObjectExport] public Func<uint, uint, uint[], string[], string[], UniTask<ShareObject>> SharedSearchAssets;
-        internal async UniTask<WorldAssetSearch> SearchAssets(uint offset = 0, uint limit = 10, uint[] versions = null, string[] platforms = null, string[] engines = null)
-            => await netWorld.SearchAssets(server, id, offset, limit, versions, platforms, engines);
+        [ShareObjectExport] public Func<uint, uint, uint[], string[], string[], bool, UniTask<ShareObject>> SharedSearchAssets;
+        internal async UniTask<WorldAssetSearch> SearchAssets(uint offset = 0, uint limit = 10, uint[] versions = null, string[] platforms = null, string[] engines = null, bool withEmpty = false)
+            => await netWorld.SearchAssets(server, id, offset, limit, versions, platforms, engines, withEmpty);
+
+        [ShareObjectExport] public Func<uint, UniTask<ShareObject>> SharedGetAsset;
+        internal async UniTask<WorldAsset> GetAsset(uint assetId)
+            => await netWorld.GetAsset(server, id, assetId);
 
         public void BeforeExport()
         {
-            Debug.Log("Exporting world " + id);
-            SharedSearchAssets = async (offset, limit, versions, platforms, engines) => await SearchAssets(offset, limit, versions, platforms, engines);
+            SharedSearchAssets = async (offset, limit, versions, platforms, engines, withEmpty) => await SearchAssets(offset, limit, versions, platforms, engines, withEmpty);
+            SharedGetAsset = async (assetId) => await GetAsset(assetId);
         }
 
         public void AfterImport()
         {
             SharedSearchAssets = null;
+            SharedGetAsset = null;
         }
-
-
     }
 }

@@ -36,10 +36,18 @@ namespace Nox.CCK.Mods
                         var v_interfaces = value.GetType().GetInterfaces();
                         if (p_interfaces.Contains(typeof(ShareObject)) && v_interfaces.Contains(typeof(ShareObject)))
                             prop.SetValue(this, (value as ShareObject).Convert(prop.FieldType));
-                        else prop.SetValue(this, value);
+                        else try
+                            {
+                                prop.SetValue(this, value);
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.LogError($"Failed to set {prop.Name} to {value} ({value.GetType()}) on {GetType()}");
+                                throw e;
+                            }
                     }
+                    AfterImport();
                 }
-            AfterImport();
         }
 
         public T Convert<T>() where T : ShareObject

@@ -7,6 +7,7 @@ using UnityEngine;
 using Nox.CCK;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Nox.SimplyLibs;
 
 namespace api.nox.game
 {
@@ -70,8 +71,11 @@ namespace api.nox.game
         private async UniTask CheckVersion(GameObject tile, SimplyWorld world, uint[] versions = null)
         {
             var dlb = Reference.GetReference("download.button", tile).GetComponent<Button>();
+            var gotob = Reference.GetReference("goto.button", tile).GetComponent<Button>();
             dlb.interactable = false;
+            gotob.interactable = false;
             dlb.onClick.RemoveAllListeners();
+            gotob.onClick.RemoveAllListeners();
             var search = await world.SearchAssets(0, 1, versions, new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) }, new string[] { "unity" });
             if (search == null || search.assets.Length == 0)
             {
@@ -84,6 +88,8 @@ namespace api.nox.game
                 var type = WorldManager.HasWorldInCache(asset.hash) ? DownloadButtonType.Downloaded : DownloadButtonType.Download;
                 dlb.onClick.AddListener(() => OnClickDownload(dlb, tile, world, asset, type).Forget());
                 SetDownloadButton(type);
+                gotob.interactable = true;
+                gotob.onClick.AddListener(() => WorldManager.LoadWorld(asset.hash, 0).Forget());
             }
         }
 

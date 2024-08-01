@@ -1,7 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods;
-using NUnit.Framework;
+using UnityEngine;
 
 namespace api.nox.network
 {
@@ -18,13 +18,13 @@ namespace api.nox.network
         [ShareObjectExport] public uint total;
         [ShareObjectExport] public uint limit;
         [ShareObjectExport] public uint offset;
-
+        [ShareObjectExport] public bool withEmpty;
         public bool HasPrevious() => offset > 0;
         public bool HasNext() => offset + limit < total;
         public async UniTask<WorldAssetSearch> Previous()
-            => HasPrevious() ? await netWorld.SearchAssets(server, world_id, offset - limit, limit, versions, platforms, engines) : null;
+            => HasPrevious() ? await netWorld.SearchAssets(server, world_id, offset - limit, limit, versions, platforms, engines, withEmpty) : null;
         public async UniTask<WorldAssetSearch> Next()
-            => HasNext() ? await netWorld.SearchAssets(server, world_id, offset + limit, limit, versions, platforms, engines) : null;
+            => HasNext() ? await netWorld.SearchAssets(server, world_id, offset + limit, limit, versions, platforms, engines, withEmpty) : null;
 
         [ShareObjectExport] public ShareObject[] SharedWorldAssets;
         [ShareObjectExport] public Func<bool> SharedHasPrevious;
@@ -35,8 +35,9 @@ namespace api.nox.network
         public void BeforeExport()
         {
             SharedWorldAssets = new ShareObject[assets.Length];
-            for (int i = 0; i < assets.Length; i++)
+            for (var i = 0; i < assets.Length; i++)
                 SharedWorldAssets[i] = assets[i];
+            Debug.Log("BeforeExport" + SharedWorldAssets + " " + assets.Length);
             SharedHasPrevious = HasPrevious;
             SharedHasNext = HasNext;
             SharedPrevious = async () => await Previous();

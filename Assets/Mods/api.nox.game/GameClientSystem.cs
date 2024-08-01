@@ -7,6 +7,7 @@ using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
+using Nox.SimplyLibs;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -18,8 +19,6 @@ namespace api.nox.game
     public class GameClientSystem : ClientModInitializer
     {
         internal ClientModCoreAPI coreAPI;
-
-        private GameObject controllerObject;
         private HomeTileManager homeTile;
         private UserTileManager userTile;
         private ServerTileManager serverTile;
@@ -57,7 +56,7 @@ namespace api.nox.game
             eventSystem?.gameObject.SetActive(!coreAPI.XRAPI.IsEnabled());
         }
 
-        public void OnTile(Nox.CCK.Mods.Events.EventData context)
+        public void OnTile(EventData context)
         {
             var tile = (context.Data[0] as ShareObject).Convert<TileObject>();
             if (_currentTile != null && _currentTile.isReforced && !tile.isReforced) return;
@@ -65,7 +64,7 @@ namespace api.nox.game
         }
 
 
-        public void OnGotoTile(Nox.CCK.Mods.Events.EventData context)
+        public void OnGotoTile(EventData context)
         {
             var page = context.Data[0] as string;
             var args = context.Data.Skip(1).ToArray();

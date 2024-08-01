@@ -6,7 +6,8 @@
         "UniTask",
         "Unity.XR.Interaction.Toolkit.Samples.StarterAssets",
         "Unity.InputSystem",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Nox.SimplyLibs"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

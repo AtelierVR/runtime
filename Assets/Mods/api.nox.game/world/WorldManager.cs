@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace api.nox.game
 {
@@ -93,13 +94,32 @@ namespace api.nox.game
             SaveWorldToCache(hash, res);
             return new DownloadWorldResult { success = true, hash = hash, url = url };
         }
-    }
 
-    public class DownloadWorldResult
-    {
-        public string url;
-        public string hash;
-        public bool success;
-        public string error;
+        public static async UniTask<Scene> LoadWorld(string hash, ushort id, LoadSceneMode mode = LoadSceneMode.Single)
+        {
+            if (!HasWorldInCache(hash))
+                return default;
+            var bundle = GetOrLoadWorld(hash);
+            var scenes = bundle.GetAllScenePaths();
+            var scene = scenes.Length > id ? scenes[id] : null;
+            if (scene == null)
+                return default;
+            var load = SceneManager.LoadSceneAsync(scene, mode);
+            await UniTask.WaitUntil(() =>
+            {
+                _gameClientSystem.coreAPI.EventAPI.Emit("world.loading", hash, id, mode, load.progress);
+                return load.isDone;
+            });
+            _gameClientSystem.coreAPI.EventAPI.Emit("world.loaded", hash, id, mode, scene);
+            return SceneManager.GetSceneByName(scene);
+        }
+
+        public class DownloadWorldResult
+        {
+            public string url;
+            public string hash;
+            public bool success;
+            public string error;
+        }
     }
 }
