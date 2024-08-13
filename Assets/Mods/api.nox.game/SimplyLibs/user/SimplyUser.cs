@@ -13,5 +13,7 @@ namespace Nox.SimplyLibs
         [ShareObjectImport, ShareObjectExport] public string[] links;
         [ShareObjectImport, ShareObjectExport] public string banner;
         [ShareObjectImport, ShareObjectExport] public string thumbnail;
+
+        public override string ToString() => $"{GetType().Name}[username={username}, display={display}]";
     }
 }

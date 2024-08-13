@@ -15,12 +15,15 @@ namespace api.nox.network
         internal string server;
         internal uint world_id;
         public WorldAsset[] assets;
+        
         [ShareObjectExport] public uint total;
         [ShareObjectExport] public uint limit;
         [ShareObjectExport] public uint offset;
         [ShareObjectExport] public bool withEmpty;
+
         public bool HasPrevious() => offset > 0;
         public bool HasNext() => offset + limit < total;
+
         public async UniTask<WorldAssetSearch> Previous()
             => HasPrevious() ? await netWorld.SearchAssets(server, world_id, offset - limit, limit, versions, platforms, engines, withEmpty) : null;
         public async UniTask<WorldAssetSearch> Next()

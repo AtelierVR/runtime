@@ -7,7 +7,19 @@ namespace api.nox.network
     {
         [ShareObjectExport] public string error;
         [ShareObjectExport] public string token;
-        [ShareObjectExport] public UserMe user;
+        public UserMe user;
+
+        [ShareObjectExport, ShareObjectImport] public ShareObject SharedUser;
+
+        public void BeforeExport()
+        {
+            SharedUser = user;
+        }
+
+        public void AfterImport()
+        {
+            SharedUser = null;
+        }
     }
 
     [System.Serializable]
@@ -21,5 +33,17 @@ namespace api.nox.network
         [ShareObjectImport] public string banner;
         [ShareObjectImport] public string[] links;
         [ShareObjectImport] public string home;
+    }
+
+    [System.Serializable]
+    internal class UserLoginRequest
+    {
+        public string identifier;
+        public string password;
+    }
+
+    [System.Serializable]
+    internal class UserLogout {
+        public bool success;
     }
 }

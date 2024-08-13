@@ -27,8 +27,10 @@ namespace Nox.SimplyLibs
         {
             Debug.Log("AfterImport" + SharedWorldAssets);
             assets = new SimplyWorldAsset[SharedWorldAssets.Length];
-            for (int i = 0; i < SharedWorldAssets.Length; i++){
-                assets[i] = SharedWorldAssets[i].Convert<SimplyWorldAsset>();}
+            for (int i = 0; i < SharedWorldAssets.Length; i++)
+            {
+                assets[i] = SharedWorldAssets[i].Convert<SimplyWorldAsset>();
+            }
             SharedWorldAssets = null;
         }
 
@@ -37,6 +39,7 @@ namespace Nox.SimplyLibs
             SharedWorldAssets = new ShareObject[assets.Length];
             for (int i = 0; i < assets.Length; i++)
                 SharedWorldAssets[i] = assets[i];
+            Debug.Log("BeforeExport" + SharedWorldAssets);
         }
     }
 }

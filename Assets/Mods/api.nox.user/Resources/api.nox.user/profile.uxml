@@ -16,7 +16,7 @@
                         </engine:Image>
                         <engine:Label text="Display" name="display_name" style="margin-left: 88px; margin-top: 8px; margin-bottom: 8px;" />
                     </engine:VisualElement>
-                    <engine:VisualElement name="withnot-banner" style="flex-grow: 1; max-width: none; flex-direction: row; margin-bottom: 8px;">
+                    <engine:VisualElement name="without-banner" style="flex-grow: 1; max-width: none; flex-direction: row; margin-bottom: 8px;">
                         <engine:Image name="thumbnail" style="flex-grow: 0; width: 64px; height: 64px; flex-shrink: 0; background-color: rgb(0, 0, 0); position: relative; bottom: auto; top: auto; left: auto; right: auto; border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom-right-radius: 8px; border-bottom-left-radius: 8px;" />
                         <engine:Label text="Display" name="display_name" style="-unity-text-align: middle-left; margin-left: 8px; flex-grow: 1;" />
                     </engine:VisualElement>
@@ -26,17 +26,17 @@
                     </engine:VisualElement>
                     <engine:VisualElement name="VisualElement" style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
                         <engine:Label text="Server" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:UnsignedIntegerField name="server" readonly="true" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+                        <engine:TextField name="server" readonly="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
                     </engine:VisualElement>
                     <engine:VisualElement name="VisualElement" style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
                         <engine:Label text="Username&#10;" name="Label" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:UnsignedIntegerField name="username" readonly="false" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+                        <engine:TextField name="username" readonly="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
                     </engine:VisualElement>
                     <engine:VisualElement name="VisualElement" style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
                         <engine:Label text="Display" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:UnsignedIntegerField name="display" readonly="false" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+                        <engine:TextField name="display" readonly="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
                     </engine:VisualElement>
-                    <engine:Foldout text="Advanced Options" value="true" style="margin-top: 4px; margin-bottom: 4px;">
+                    <engine:Foldout text="Advanced Options" value="false" style="margin-top: 4px; margin-bottom: 4px;">
                         <engine:Button text="Delete Account" name="delete" />
                     </engine:Foldout>
                     <engine:VisualElement style="flex-grow: 1; flex-direction: row;">

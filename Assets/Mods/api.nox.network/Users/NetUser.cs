@@ -15,8 +15,7 @@ namespace api.nox.network
 
         internal NetUser(NetworkSystem mod) => _mod = mod;
 
-        public async UniTask<ShareObject> GetMyUser() => await GetMyIUser();
-        private async UniTask<UserMe> GetMyIUser()
+        private async UniTask<UserMe> GetMyUser()
         {
             var config = Config.Load();
             if (!config.Has("token") || !config.Has("gateway"))
@@ -51,18 +50,20 @@ namespace api.nox.network
             catch { }
             try
             {
-                var response = JsonUtility.FromJson<Response<bool>>(req.downloadHandler.text);
-                if (response.error?.code == 0)
+                var response = JsonUtility.FromJson<Response<UserLogout>>(req.downloadHandler.text);
+                if (response.error?.code == 0 || response.data.success)
                 {
                     config.Remove("token");
                     config.Remove("user");
                     config.Remove("gateway");
                     config.Save();
+
+                    user = null;
+                    _mod._api.EventAPI.Emit(new NetEventContext("network.user", user, true));
+                    _mod._api.EventAPI.Emit(new NetEventContext("network.user.logout", true, user));
+                    return new Response<bool> { data = true };
                 }
-                user = null;
-                _mod._api.EventAPI.Emit(new NetEventContext("network.user", user, true));
-                _mod._api.EventAPI.Emit(new NetEventContext("network.user.logout", true, user));
-                return new Response<bool> { data = true };
+                else throw new Exception();
             }
             catch
             {
@@ -79,9 +80,11 @@ namespace api.nox.network
                 return new UserLogin { error = "Server not found." };
             var req = new UnityWebRequest(string.Format("{0}/api/auth/login", gateway.OriginalString), "POST") { downloadHandler = new DownloadHandlerBuffer() };
             req.SetRequestHeader("Content-Type", "application/json");
-            req.uploadHandler = new UploadHandlerRaw(
-                System.Text.Encoding.UTF8.GetBytes(string.Format("{{\"identifier\":\"{0}\",\"password\":\"{1}\"}}", username, Hashing.Sha256(password)))
-            );
+            req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(new UserLoginRequest
+            {
+                identifier = username,
+                password = Hashing.Sha256(password)
+            })));
             try { await req.SendWebRequest(); }
             catch { }
             try
@@ -146,12 +149,16 @@ namespace api.nox.network
         [ShareObjectExport] public Func<string, string, uint, uint, UniTask<ShareObject>> SharedSearchUsers;
         [ShareObjectExport] public Func<UniTask<ShareObject>> SharedGetMyUser;
         [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedUpdateUser;
+        [ShareObjectExport] public Func<UniTask<bool>> SharedGetLogout;
+        [ShareObjectExport] public Func<string, string, string, UniTask<ShareObject>> SharedPostLogin;
 
         public void BeforeExport()
         {
             SharedSearchUsers = async (server, query, offset, limit) => await SearchUsers(server, query, offset, limit);
             SharedUpdateUser = async (user) => await UpdateUser(user.Convert<UserUpdate>());
             SharedGetMyUser = async () => await GetMyUser();
+            SharedGetLogout = async () => (await GetLogout()).data == true;
+            SharedPostLogin = async (server, username, password) => await PostLogin(server, username, password);
         }
 
         public void AfterExport()

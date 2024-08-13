@@ -38,7 +38,7 @@ namespace Nox.CCK
                 if (uri.Port == -1) uri = new Uri($"tcp://{address}:{DefaultPortMaster}");
                 var fmg = await FindGM($"{uri.Host}:{uri.Port}");
                 if (fmg != null) return fmg;
-                var srv = await FindSRV($"{uri.Host}:{uri.Port}", SRVMaster);
+                var srv = await FindSRV(uri.Host, SRVMaster);
                 if (srv.Length > 0)
                     foreach (var answer in srv)
                     {

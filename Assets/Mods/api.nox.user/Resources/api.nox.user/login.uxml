@@ -23,7 +23,7 @@
                         <engine:Label text="Password" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
                         <engine:TextField name="password" password="true" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
                     </engine:VisualElement>
-                    <engine:Button text="Login" style="margin-top: 8px;" />
+                    <engine:Button text="Login" style="margin-top: 8px;" name="login-button" />
                 </engine:VisualElement>
             </engine:VisualElement>
         </engine:GroupBox>

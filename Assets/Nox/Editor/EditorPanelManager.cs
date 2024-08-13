@@ -28,7 +28,11 @@ namespace Nox.Editor
         [MenuItem("Nox/Restart")]
         public static void Restart()
         {
+            Debug.Log("Restarting...");
             AssetDatabase.Refresh();
+            if (Instance != null)
+                Instance.Close();
+            ShowWindow();
         }
 
         private void OnGUI()
@@ -46,7 +50,7 @@ namespace Nox.Editor
                 home.Add(new Label("Welcome to the Nox CCK."));
                 rootVisualElement.Q<VisualElement>("content").Add(home);
             }
-            rootVisualElement.Q<ToolbarButton>("restart").clicked += Restart;
+            rootVisualElement.Q<ToolbarButton>("restart").clickable.clicked += Restart;
         }
 
         public static void UpdateMenu()
