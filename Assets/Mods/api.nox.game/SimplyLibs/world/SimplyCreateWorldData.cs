@@ -10,5 +10,6 @@ namespace Nox.SimplyLibs
         [ShareObjectImport, ShareObjectExport] public string description;
         [ShareObjectImport, ShareObjectExport] public ushort capacity;
         [ShareObjectImport, ShareObjectExport] public string thumbnail;
+        [ShareObjectImport, ShareObjectExport] public bool custom_id;
     }
 }

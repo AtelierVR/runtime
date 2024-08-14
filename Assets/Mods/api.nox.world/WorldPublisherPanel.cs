@@ -86,6 +86,11 @@ namespace api.nox.world
 
         private async UniTask<SimplyWorld> AttachWorld(string server, uint id, bool create = false)
         {
+            return await AttachWorld(server, id.ToString(), create);
+        }
+
+        private async UniTask<SimplyWorld> AttachWorld(string server, string id, bool create = false)
+        {
             var descriptor = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
             if (descriptor == null)
             {
@@ -94,15 +99,31 @@ namespace api.nox.world
                 return null;
             }
             SetDisplay(DisplayFlags.Loading);
-            var world = await _mod.NetworkAPI.World.GetWorld(server, id);
+
+            SimplyWorld world = null;
+            if (!string.IsNullOrWhiteSpace(id) && uint.TryParse(id, out var idParsed))
+                world = await _mod.NetworkAPI.World.GetWorld(server, idParsed);
+
             if (world == null && create)
-                world = await _mod.NetworkAPI.World.CreateWorld(new SimplyCreateWorldData() { server = server, id = id });
+                world = await _mod.NetworkAPI.World.CreateWorld(!string.IsNullOrWhiteSpace(id) && uint.TryParse(id, out var id1)
+                    ? new SimplyCreateWorldData() { server = server, id = uint.Parse(id), custom_id = true }
+                    : new SimplyCreateWorldData() { server = server }
+                );
+
+            if (world != null)
+            {
+                var user = _mod.NetworkAPI.GetCurrentUser();
+                if (user == null || !user.Match(world.owner, world.server))
+                    world = null;
+            }
+
             if (world == null)
             {
                 SetDisplay(DisplayFlags.WorldNotFound);
                 _world = null;
                 return null;
             }
+            
             SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
             descriptor.IdPublisher = world.id;
             descriptor.ServerPublisher = world.server;
@@ -139,6 +160,7 @@ namespace api.nox.world
             _root.Clear();
             _root.Add(_mod._api.AssetAPI.GetLocalAsset<VisualTreeAsset>("publisher").CloneTree());
             _root.Q<Label>("version").text = "v" + _mod._api.ModMetadata.GetVersion();
+            _root.Q<Image>("assigned-icon").image = _mod._api.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/warning");
             var descriptor = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
             _root.Q<EnumField>("platform-field").Init(descriptor?.GetBuildPlatform() ?? SupportBuildTarget.NoTarget);
             _root.Q<ObjectField>("descriptor-field").value = descriptor;
@@ -157,14 +179,14 @@ namespace api.nox.world
                 container.style.display = DisplayStyle.None;
                 container.style.marginLeft = 2;
                 container.style.marginRight = 2;
-                container.name = "notfiication-container-" + type.ToString().ToLower();
+                container.name = "notification-container-" + type.ToString().ToLower();
                 container.Q<VisualElement>("content").Add(new Label(type.ToString()) { name = "notification-label-" + type.ToString().ToLower() });
                 container.Q<VisualElement>("actions").style.display = DisplayStyle.None;
                 container.Q<Image>("icon").image = _mod._api.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/" + type.ToString());
                 notifications.Add(container);
             }
             _lastDisplay = DisplayFlags.None;
-            var attachId = _root.Q<UnsignedIntegerField>("attach-id");
+            var attachId = _root.Q<TextField>("attach-id");
             var attachServer = _root.Q<TextField>("attach-server");
             var attachButton = _root.Q<Button>("attach-world");
             attachButton.clicked += async () =>

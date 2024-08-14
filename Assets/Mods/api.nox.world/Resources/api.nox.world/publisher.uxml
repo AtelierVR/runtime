@@ -31,7 +31,7 @@
                         </engine:VisualElement>
                         <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
                             <engine:Label text="World Id" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                            <engine:UnsignedIntegerField name="attach-id" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+                            <engine:TextField placeholder-text="(optional)" name="attach-id" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
                         </engine:VisualElement>
                     </engine:Foldout>
                     <engine:Button text="Attach" name="attach-world" />
@@ -40,11 +40,11 @@
                     <engine:Label text="World Informations" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px; white-space: normal;" />
                     <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
                         <engine:Label text="Server" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:TextField name="info-server" class="cannot-change" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+                        <engine:TextField name="info-server" readonly="true" class="cannot-change" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
                     </engine:VisualElement>
                     <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;">
                         <engine:Label text="World Id" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:UnsignedIntegerField name="info-id" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
+                        <engine:UnsignedIntegerField name="info-id" readonly="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
                     </engine:VisualElement>
                     <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
                         <engine:Label text="Title" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
@@ -62,7 +62,7 @@
                         <engine:Label text="Capacity" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
                         <engine:UnsignedIntegerField name="info-capacity" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
                     </engine:VisualElement>
-                    <engine:Foldout text="Advanced Options" style="margin-top: 4px; margin-bottom: 4px;">
+                    <engine:Foldout text="Advanced Options" value="false" style="margin-top: 4px; margin-bottom: 4px;">
                         <engine:Button text="Delete World" name="info-delete" />
                     </engine:Foldout>
                     <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
@@ -76,7 +76,7 @@
                     <engine:VisualElement template="api.nox.world.notification" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;">
                         <engine:GroupBox name="asset-file-assigned" style="margin-top: 2px; margin-right: 0; margin-left: 0; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-left-radius: 4px; border-top-right-radius: 4px; border-bottom-right-radius: 4px; border-bottom-left-radius: 4px; margin-bottom: 2px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; flex-direction: row;">
                             <engine:VisualElement name="typing" style="flex-grow: 0; padding-top: 8px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px; border-right-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
-                                <engine:Image name="icon" style="flex-grow: 0; width: 24px; height: 24px; flex-shrink: 0; margin-top: auto; margin-right: auto; margin-bottom: auto; margin-left: auto;" />
+                                <engine:Image name="assigned-icon" style="flex-grow: 0; width: 24px; height: 24px; flex-shrink: 0; margin-top: auto; margin-right: auto; margin-bottom: auto; margin-left: auto;" />
                             </engine:VisualElement>
                             <engine:VisualElement style="flex-grow: 1; padding-top: 8px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px; flex-wrap: wrap;">
                                 <engine:VisualElement name="content" style="flex-grow: 0; flex-shrink: 1; margin-top: auto; margin-right: 0; margin-bottom: auto; margin-left: 0;">
@@ -92,7 +92,7 @@
                         <engine:Label text="Version" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
                         <engine:UnsignedIntegerField name="asset-version" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
                     </engine:VisualElement>
-                    <engine:Foldout text="Advanced Options" value="true" style="margin-top: 4px; margin-bottom: 4px;">
+                    <engine:Foldout text="Advanced Options" value="false" style="margin-top: 4px; margin-bottom: 4px;">
                         <engine:Toggle label="Publication only if there is no assigned file to it" name="asset-strict" style="flex-direction: row-reverse;" />
                         <engine:Toggle label="Auto-increment, if asset has a file assigned to it" name="asset-auto-version" style="margin-bottom: 7px; flex-direction: row-reverse;" />
                         <engine:Button text="Delete Asset" name="asset-delete" />

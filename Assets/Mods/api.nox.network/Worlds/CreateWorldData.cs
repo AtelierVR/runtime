@@ -11,11 +11,12 @@ namespace api.nox.network
         [ShareObjectImport, ShareObjectExport] public string description;
         [ShareObjectImport, ShareObjectExport] public ushort capacity;
         [ShareObjectImport, ShareObjectExport] public string thumbnail;
+        [ShareObjectImport, ShareObjectExport] public bool custom_id;
 
         internal string ToJSON()
         {
             var obj = new JObject();
-            if (id > 0) obj["id"] = id;
+            if (custom_id) obj["id"] = id;
             if (!string.IsNullOrEmpty(title)) obj["title"] = title;
             if (!string.IsNullOrEmpty(description)) obj["description"] = description;
             if (capacity > 0) obj["capacity"] = capacity;
