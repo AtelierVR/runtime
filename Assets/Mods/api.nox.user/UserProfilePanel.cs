@@ -44,7 +44,10 @@ namespace api.nox.user
                 {
                     buttonlogout.SetEnabled(false);
                     if (await _mod.NetworkAPI.User.GetLogout())
+                    {
                         _mod._api.PanelAPI.SetActivePanel("api.nox.user.login");
+                        _mod._api.PanelAPI.UpdatePanelList();
+                    }
                     else
                     {
                         _mod.NetworkAPI.GetCurrentUser();

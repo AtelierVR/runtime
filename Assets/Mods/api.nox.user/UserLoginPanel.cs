@@ -51,7 +51,10 @@ namespace api.nox.user
                 identifier.isReadOnly = false;
                 server.isReadOnly = false;
                 if (string.IsNullOrEmpty(data.error) && _mod.NetworkAPI.GetCurrentUser() != null)
+                {
                     _mod._api.PanelAPI.SetActivePanel("api.nox.user.profile");
+                    _mod._api.PanelAPI.UpdatePanelList();
+                }
                 else Debug.Log(data);
             };
 
