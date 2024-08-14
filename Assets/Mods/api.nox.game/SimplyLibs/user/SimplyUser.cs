@@ -1,3 +1,4 @@
+using System;
 using Nox.CCK.Mods;
 
 namespace Nox.SimplyLibs
@@ -13,6 +14,10 @@ namespace Nox.SimplyLibs
         [ShareObjectImport, ShareObjectExport] public string[] links;
         [ShareObjectImport, ShareObjectExport] public string banner;
         [ShareObjectImport, ShareObjectExport] public string thumbnail;
+        
+        [ShareObjectImport, ShareObjectExport] public Func<string, string, bool> SharedMarch;
+        public bool Match(string reference, string default_server)
+            => SharedMarch(reference, default_server);
 
         public override string ToString() => $"{GetType().Name}[username={username}, display={display}]";
     }
