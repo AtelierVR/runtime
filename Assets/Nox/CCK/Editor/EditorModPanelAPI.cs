@@ -21,5 +21,7 @@ namespace Nox.CCK.Editor
 
         public EditorPanel GetLocalPanel(string panelId);
         public EditorPanel[] GetLocalPanels();
+
+        public void UpdatePanelList();
     }
 }

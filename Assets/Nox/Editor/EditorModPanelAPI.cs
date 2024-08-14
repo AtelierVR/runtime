@@ -41,5 +41,7 @@ namespace Nox.Editor
         public CCK.Editor.EditorPanel GetLocalPanel(string panelId) => GetEditorPanel(panelId);
         public CCK.Editor.EditorPanel[] GetLocalPanels() => _panels.ToArray();
         internal EditorPanel GetEditorPanel(string panelId) => _panels.FirstOrDefault(panel => panel.GetId() == panelId || panel.GetFullId() == panelId);
+
+        public void UpdatePanelList() => EditorPanelManager.UpdateMenu();
     }
 }
