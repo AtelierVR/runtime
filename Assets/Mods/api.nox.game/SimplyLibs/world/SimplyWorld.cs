@@ -22,5 +22,14 @@ namespace Nox.SimplyLibs
         [ShareObjectImport, ShareObjectExport] public Func<uint, UniTask<ShareObject>> SharedGetAsset;
         public async UniTask<SimplyWorldAsset> GetAsset(uint assetId)
             => (await SharedGetAsset(assetId))?.Convert<SimplyWorldAsset>();
+
+        [ShareObjectImport, ShareObjectExport] public Func<string, string, bool> SharedMatch;
+        public bool Match(string reference, string default_server) => SharedMatch(reference, default_server);
+
+        [ShareObjectImport, ShareObjectExport] public Func<string, string> SharedToMinimalString;
+        public string ToMinimalString(string default_server = null) => SharedToMinimalString(default_server);
+
+        [ShareObjectImport, ShareObjectExport] public Func<string, string> SharedToFullString;
+        public string ToFullString(string default_server = null) => SharedToFullString(default_server);
     }
 }

@@ -137,6 +137,40 @@ MonoBehaviour:
       value: "Téléchargé"
     - key: dashboard.instance.make.title
       value: "Créer une instance"
+    - key: dashboard.instance.make.exposition
+      value: "Exposition"
+    - key: dashboard.instance.make.capacity
+      value: "Capacité"
+    - key: dashboard.instance.make.capacity.range
+      value: "{0} - {1}"
+    - key: dashboard.instance.make.capacity.value
+      value: "{0}"
+    - key: dashboard.instance.make.global
+      value: "Général"
+    - key: dashboard.instance.make.where
+      value: "Où"
+    - key: dashboard.instance.make.where.server
+      value: "Serveur"
+    - key: dashboard.instance.make.where.server.value
+      value: "{0}"
+    - key: dashboard.instance.make.where.world
+      value: "Monde"
+    - key: dashboard.instance.make.where.world.value
+      value: "{0}"
+    - key: dashboard.instance.make.create
+      value: "Créer"
+    - key: dashboard.instance.make.password
+      value: "Protégé par mot de passe"
+    - key: dashboard.instance.make.password.value
+      value: "Mot de passe"
+    - key: dashboard.instance.make.advanced
+      value: "Paramètres avancés"
+    - key: dashboard.instance.make.world.version
+      value: "Version du monde"
+    - key: dashboard.instance.make.world.version.value
+      value: "{0}"
+    - key: dashboard.instance.make.notice
+      value: "Notes"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home
@@ -261,5 +295,41 @@ MonoBehaviour:
       value: "Downloaded"
     - key: dashboard.instance.make.title
       value: "Create Instance"
+    - key: dashboard.instance.make.exposition
+      value: "Exposition"
+    - key: dashboard.instance.make.capacity
+      value: "Capacity"
+    - key: dashboard.instance.make.capacity.range
+      value: "{0} - {1}"
+    - key: dashboard.instance.make.capacity.value
+      value: "{0}"
+    - key: dashboard.instance.make.global
+      value: "General"
+    - key: dashboard.instance.make.where
+      value: "Where"
+    - key: dashboard.instance.make.where.server
+      value: "Server"
+    - key: dashboard.instance.make.where.world
+      value: "World"
+    - key: dashboard.instance.make.create
+      value: "Create"
+    - key: dashboard.instance.make.password
+      value: "Password Protected"
+    - key: dashboard.instance.make.password.value
+      value: "Password"
+    - key: dashboard.instance.make.advanced
+      value: "Advanced Settings"
+    - key: dashboard.instance.make.world.version
+      value: "World Version"
+      value: "{0}"
+    - key: dashboard.instance.make.world.version.value
+      value: "{0}"
+    - key: dashboard.instance.make.where.server.value
+      value: "{0}"
+    - key: dashboard.instance.make.where.world.value
+      value: "{0}"
+    - key: dashboard.instance.make.notice
+      value: "Notes"
+
 
       

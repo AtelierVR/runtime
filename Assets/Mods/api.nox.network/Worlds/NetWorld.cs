@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Mods;
@@ -188,25 +187,23 @@ namespace api.nox.network
             return res.data;
         }
 
-        // private async UniTask<World> UpdateWorld(UpdateWorldData world, bool withEmpty = false)
-        // {
-        //     var User = _mod._api.NetworkAPI.CallMethod<User>("GetCurrentUser");
-        //     if (User == null) return null;
-        //     Debug.Log("Updating world");
-        //     var config = Config.Load();
-        //     var gateway = world.server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(world.server))?.OriginalString;
-        //     if (gateway == null) return null;
-        //     var req = new UnityWebRequest($"{gateway}/api/worlds/{world.id}{(withEmpty ? "?empty" : "")}", "POST") { downloadHandler = new DownloadHandlerBuffer() };
-        //     req.SetRequestHeader("Authorization", _mod.MostAuth(world.server));
-        //     req.SetRequestHeader("Content-Type", "application/json");
-        //     req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(world)));
-        //     try { await req.SendWebRequest(); }
-        //     catch { return null; }
-        //     if (req.responseCode != 200) return null;
-        //     var res = JsonUtility.FromJson<Response<World>>(req.downloadHandler.text);
-        //     if (res.IsError) return null;
-        //     return res.data;
-        // }
+        private async UniTask<World> UpdateWorld(UpdateWorldData world)
+        {
+            var User = _mod.GetCurrentUser();
+            var config = Config.Load();
+            var gateway = world.server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(world.server))?.OriginalString;
+            if (gateway == null) return null;
+            var req = new UnityWebRequest($"{gateway}/api/worlds/{world.worldId}", "POST") { downloadHandler = new DownloadHandlerBuffer() };
+            req.SetRequestHeader("Authorization", _mod.MostAuth(world.server));
+            req.SetRequestHeader("Content-Type", "application/json");
+            req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(world.ToJSON()));
+            try { await req.SendWebRequest(); }
+            catch { return null; }
+            if (req.responseCode != 200) return null;
+            var res = JsonUtility.FromJson<Response<World>>(req.downloadHandler.text);
+            if (res.IsError) return null;
+            return res.data;
+        }
 
         async UniTask<byte[]> ReadFileAsync(string path)
         {
@@ -294,6 +291,7 @@ namespace api.nox.network
         [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedCreateWorld;
         [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedCreateAsset;
         [ShareObjectExport] public Func<string, uint, uint, string, UniTask<bool>> SharedUploadAssetFile;
+        [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedUpdateWorld;
 
         public void BeforeExport()
         {
@@ -305,6 +303,7 @@ namespace api.nox.network
             SharedCreateWorld = async (world) => await CreateWorld(world?.Convert<CreateWorldData>());
             SharedCreateAsset = async (asset) => await CreateAsset(asset?.Convert<CreateAssetData>());
             SharedUploadAssetFile = async (server, worldId, assetId, path) => await UploadAssetFile(server, worldId, assetId, path);
+            SharedUpdateWorld = async (world) => await UpdateWorld(world?.Convert<UpdateWorldData>());
         }
 
         public void AfterExport()
@@ -317,6 +316,7 @@ namespace api.nox.network
             SharedCreateWorld = null;
             SharedCreateAsset = null;
             SharedUploadAssetFile = null;
+            SharedUpdateWorld = null;
         }
 
     }

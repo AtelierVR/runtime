@@ -220,25 +220,24 @@ namespace api.nox.world
                     return;
                 }
                 SetDisplay(DisplayFlags.Loading);
-                // var sucess = await _mod._api.NetworkAPI.WorldAPI.UpdateWorld(new UpdateWorldData()
-                // {
-                //     server = _world.server,
-                //     id = _world.id,
-                //     title = title,
-                //     description = description,
-                //     capacity = (ushort)capacity,
-                // }, true);
-                // if (sucess != null)
-                // {
-                //     EditorUtility.DisplayDialog("Success", "World updated successfully.", "Ok");
-                //     Debug.Log("World updated successfully.");
-                //     Debug.Log(sucess.description);
-                //     _world = sucess;
-                //     UpdateWorld();
-                //     SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
-                // }
-                // else EditorUtility.DisplayDialog("Error", "An error occured while updating the world.", "Ok");
-                throw new NotImplementedException();
+                var sucess = await _mod.NetworkAPI.World.UpdateWorld(new SimplyUpdateWorldData()
+                {
+                    server = _world.server,
+                    worldId = _world.id,
+                    title = title,
+                    description = description,
+                    capacity = (ushort)capacity,
+                });
+                if (sucess != null)
+                {
+                    EditorUtility.DisplayDialog("Success", "World updated successfully.", "Ok");
+                    Debug.Log("World updated successfully.");
+                    Debug.Log(sucess.description);
+                    _world = sucess;
+                    UpdateWorld();
+                    SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+                }
+                else EditorUtility.DisplayDialog("Error", "An error occured while updating the world.", "Ok");
             };
             var infodetach = _root.Q<Button>("info-detach");
             infodetach.clicked += () =>

@@ -8,6 +8,7 @@ using Nox.CCK;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using Nox.SimplyLibs;
+using System.Linq;
 
 namespace api.nox.game
 {
@@ -72,10 +73,13 @@ namespace api.nox.game
         {
             var dlb = Reference.GetReference("download.button", tile).GetComponent<Button>();
             var gotob = Reference.GetReference("goto.button", tile).GetComponent<Button>();
+            var instb = Reference.GetReference("instance.button", tile).GetComponent<Button>();
             dlb.interactable = false;
             gotob.interactable = false;
+            instb.interactable = false;
             dlb.onClick.RemoveAllListeners();
             gotob.onClick.RemoveAllListeners();
+            instb.onClick.RemoveAllListeners();
             var search = await world.SearchAssets(0, 1, versions, new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) }, new string[] { "unity" });
             if (search == null || search.assets.Length == 0)
             {
@@ -93,6 +97,14 @@ namespace api.nox.game
                 gotob.interactable = true;
                 gotob.onClick.AddListener(() => OnClickGoto(tile, world, asset).Forget());
             }
+
+            instb.interactable = true;
+            instb.onClick.AddListener(() =>
+            {
+                var server = clientMod.NetworkAPI.GetCurrentServer();
+                server = server != null && server.features.Contains("instance") ? server : null;
+                clientMod.GotoTile("game.instance.make", world, versions == null || versions.Length == 0 ? null : asset, server);
+            });
         }
 
         private async UniTask OnClickGoto(GameObject tile, SimplyWorld world, SimplyWorldAsset asset)

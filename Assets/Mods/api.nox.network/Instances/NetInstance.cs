@@ -52,17 +52,41 @@ namespace api.nox.network
             return res.data;
         }
 
+        public async UniTask<Instance> CreateInstance(CreateInstanceData data)
+        {
+            var User = _mod.GetCurrentUser();
+            if (User == null) return null;
+            var config = Config.Load();
+            var gateway = data.server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(data.server))?.OriginalString;
+            if (gateway == null) return null;
+            var req = new UnityWebRequest($"{gateway}/api/instances", "PUT") { downloadHandler = new DownloadHandlerBuffer() };
+            if (_mod.TryMostAuth(data.server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(data.ToJSON()));
+            req.uploadHandler.contentType = "application/json";
+            try { await req.SendWebRequest(); }
+            catch { return null; }
+            if (req.responseCode != 200) return null;
+            var res = JsonUtility.FromJson<Response<Instance>>(req.downloadHandler.text);
+            if (res.IsError) return null;
+            return res.data;
+        }
 
         [ShareObjectExport] public Func<string, string, uint, uint, UniTask<ShareObject>> SharedSearchInstances;
+        [ShareObjectExport] public Func<string, uint, UniTask<ShareObject>> SharedGetInstance;
+        [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedCreateInstance;
 
         public void BeforeExport()
         {
             SharedSearchInstances = async (server, query, offset, limit) => await SearchInstances(server, query, offset, limit);
+            SharedGetInstance = async (server, instanceId) => await GetInstance(server, instanceId);
+            SharedCreateInstance = async data => await CreateInstance(data.Convert<CreateInstanceData>());
         }
 
         public void AfterExport()
         {
             SharedSearchInstances = null;
+            SharedGetInstance = null;
+            SharedCreateInstance = null;
         }
     }
 }

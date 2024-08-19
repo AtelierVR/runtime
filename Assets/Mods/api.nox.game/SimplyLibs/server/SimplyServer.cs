@@ -12,5 +12,6 @@ namespace Nox.SimplyLibs
         [ShareObjectImport, ShareObjectExport] public long ready_at;
         [ShareObjectImport, ShareObjectExport] public string icon;
         [ShareObjectImport, ShareObjectExport] public string public_key;
+        [ShareObjectImport, ShareObjectExport] public string[] features;
     }
 }

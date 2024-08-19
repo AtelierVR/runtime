@@ -53,5 +53,6 @@ namespace api.nox.network
         public bool IsLocal() => string.IsNullOrEmpty(server) || server == UserIdentifier.LocalServer;
 
         public string ToMinimalString(string defaultserver = null) => $"{id}@{(IsLocal() ? (defaultserver ?? UserIdentifier.LocalServer) : server)}";
+        public string ToFullString(string defaultserver = null) => $"{id}{(tags.Count > 0 ? ";" : "")}{string.Join(';', tags)}@{(IsLocal() ? (defaultserver ?? UserIdentifier.LocalServer) : server)}";
     }
 }

@@ -30,16 +30,29 @@ namespace api.nox.network
         public bool Match(string reference, string default_server)
             => new WorldIdentifier(id, server).ToMinimalString() == WorldIdentifier.FromString(reference).ToMinimalString(default_server);
 
+        [ShareObjectExport] public Func<string, string> SharedToMinimalString;
+        public string ToMinimalString(string default_server = null) => new WorldIdentifier(id, server).ToMinimalString(default_server);
+
+        [ShareObjectExport] public Func<string, string> SharedToFullString;
+        public string ToFullString(string default_server = null) => new WorldIdentifier(id, server).ToFullString(default_server);
+
         public void BeforeExport()
         {
             SharedSearchAssets = async (offset, limit, versions, platforms, engines, withEmpty) => await SearchAssets(offset, limit, versions, platforms, engines, withEmpty);
             SharedGetAsset = async (assetId) => await GetAsset(assetId);
+            SharedMatch = (reference, default_server) => Match(reference, default_server);
+            SharedToMinimalString = (default_server) => ToMinimalString(default_server);
+            SharedToFullString = (default_server) => ToFullString(default_server);
         }
 
         public void AfterImport()
         {
             SharedSearchAssets = null;
             SharedGetAsset = null;
+            SharedMatch = null;
+            SharedToMinimalString = null;
+            SharedToFullString = null;
         }
+
     }
 }

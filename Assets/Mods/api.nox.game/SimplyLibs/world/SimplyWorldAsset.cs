@@ -5,19 +5,19 @@ namespace Nox.SimplyLibs
 {
     public class SimplyWorldAsset : ShareObject
     {
-        [ShareObjectImport] public uint id;
-        [ShareObjectImport] public uint version;
-        [ShareObjectImport] public string engine;
-        [ShareObjectImport] public string platform;
-        [ShareObjectImport] public bool is_empty;
-        [ShareObjectImport] public string url;
-        [ShareObjectImport] public string hash;
-        [ShareObjectImport] public uint size;
-        [ShareObjectImport] public string server;
+        [ShareObjectImport, ShareObjectExport] public uint id;
+        [ShareObjectImport, ShareObjectExport] public uint version;
+        [ShareObjectImport, ShareObjectExport] public string engine;
+        [ShareObjectImport, ShareObjectExport] public string platform;
+        [ShareObjectImport, ShareObjectExport] public bool is_empty;
+        [ShareObjectImport, ShareObjectExport] public string url;
+        [ShareObjectImport, ShareObjectExport] public string hash;
+        [ShareObjectImport, ShareObjectExport] public uint size;
+        [ShareObjectImport, ShareObjectExport] public string server;
 
-        [ShareObjectExport] public Func<bool> SharedIsEmpty;
+        [ShareObjectImport, ShareObjectExport] public Func<bool> SharedIsEmpty;
+        [ShareObjectImport, ShareObjectExport] public Func<string> SharedGetSID;
         public bool IsEmpty() => SharedIsEmpty();
-        [ShareObjectExport] public Func<string> SharedGetSID;
         public string GetSID() => SharedGetSID();
     }
 }

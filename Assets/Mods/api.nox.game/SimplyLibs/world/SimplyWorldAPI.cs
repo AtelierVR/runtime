@@ -14,6 +14,7 @@ namespace Nox.SimplyLibs
         [ShareObjectImport] public Func<ShareObject, UniTask<ShareObject>> SharedCreateWorld;
         [ShareObjectImport] public Func<ShareObject, UniTask<ShareObject>> SharedCreateAsset;
         [ShareObjectImport] public Func<string, uint, uint, string, UniTask<bool>> SharedUploadAssetFile;
+        [ShareObjectImport] public Func<ShareObject, UniTask<ShareObject>> SharedUpdateWorld;
 
         public async UniTask<SimplyWorldSearch> SearchWorlds(string server, string query, uint offset = 0, uint limit = 10)
             => (await SharedSearchWorlds(server, query, offset, limit))?.Convert<SimplyWorldSearch>();
@@ -38,6 +39,9 @@ namespace Nox.SimplyLibs
 
         public async UniTask<SimplyWorld> CreateWorld(SimplyCreateWorldData data)
             => (await SharedCreateWorld(data))?.Convert<SimplyWorld>();
+
+        public async UniTask<SimplyWorld> UpdateWorld(SimplyUpdateWorldData data)
+            => (await SharedUpdateWorld(data))?.Convert<SimplyWorld>();
 
         public async UniTask<SimplyWorldAsset> CreateAsset(SimplyCreateAssetData data)
             => (await SharedCreateAsset(data))?.Convert<SimplyWorldAsset>();

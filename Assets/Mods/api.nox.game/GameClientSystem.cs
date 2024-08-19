@@ -23,7 +23,9 @@ namespace api.nox.game
         private UserTileManager userTile;
         private ServerTileManager serverTile;
         private WorldTileManager worldTile;
+        private MakeInstanceTileManager makeinstance;
         private NavigationTileManager navigationTile;
+        private InstanceTileManager instance;
         private EventSystem eventSystem;
         private EventSubscription tilesub;
         private EventSubscription tilegotosub;
@@ -50,6 +52,8 @@ namespace api.nox.game
             serverTile = new ServerTileManager(this);
             navigationTile = new NavigationTileManager(this);
             worldTile = new WorldTileManager(this);
+            makeinstance = new MakeInstanceTileManager(this);
+            instance = new InstanceTileManager(this);
             tilesub = api.EventAPI.Subscribe("game.tile", OnTile);
             tilegotosub = api.EventAPI.Subscribe("game.tile.goto", OnGotoTile);
             eventSystem = Reference.GetReference("game.eventsystem", m_controller)?.GetComponent<EventSystem>();
@@ -67,7 +71,6 @@ namespace api.nox.game
         public void OnGotoTile(EventData context)
         {
             var page = context.Data[0] as string;
-            var args = context.Data.Skip(1).ToArray();
             switch (page)
             {
                 case "home":
@@ -86,6 +89,12 @@ namespace api.nox.game
                     break;
                 case "game.world":
                     worldTile.SendTile(context);
+                    break;
+                case "game.instance.make":
+                    makeinstance.SendTile(context);
+                    break;
+                case "game.instance":
+                    instance.SendTile(context);
                     break;
             }
         }

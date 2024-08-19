@@ -14,5 +14,6 @@ namespace api.nox.network
         [ShareObjectExport] public string icon;
         [ShareObjectExport] public string public_key;
         [ShareObjectExport] public ServerGateway gateways;
+        [ShareObjectExport] public string[] features;
     }
 }
