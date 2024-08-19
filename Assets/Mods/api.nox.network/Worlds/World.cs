@@ -8,7 +8,7 @@ namespace api.nox.network
     [System.Serializable]
     public class World : ShareObject
     {
-        internal NetWorld netWorld;
+        internal NetworkSystem networkSystem;
         [ShareObjectExport] public uint id;
         [ShareObjectExport] public string title;
         [ShareObjectExport] public string description;
@@ -20,11 +20,15 @@ namespace api.nox.network
 
         [ShareObjectExport] public Func<uint, uint, uint[], string[], string[], bool, UniTask<ShareObject>> SharedSearchAssets;
         internal async UniTask<WorldAssetSearch> SearchAssets(uint offset = 0, uint limit = 10, uint[] versions = null, string[] platforms = null, string[] engines = null, bool withEmpty = false)
-            => await netWorld.SearchAssets(server, id, offset, limit, versions, platforms, engines, withEmpty);
+            => await networkSystem._world.SearchAssets(server, id, offset, limit, versions, platforms, engines, withEmpty);
 
         [ShareObjectExport] public Func<uint, UniTask<ShareObject>> SharedGetAsset;
         internal async UniTask<WorldAsset> GetAsset(uint assetId)
-            => await netWorld.GetAsset(server, id, assetId);
+            => await networkSystem._world.GetAsset(server, id, assetId);
+
+        [ShareObjectExport] public Func<string, string, bool> SharedMatch;
+        public bool Match(string reference, string default_server)
+            => new WorldIdentifier(id, server).ToMinimalString() == WorldIdentifier.FromString(reference).ToMinimalString(default_server);
 
         public void BeforeExport()
         {

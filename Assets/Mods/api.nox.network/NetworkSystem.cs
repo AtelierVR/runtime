@@ -13,10 +13,10 @@ namespace api.nox.network
     public class NetworkSystem : ShareObject, ModInitializer
     {
         internal ModCoreAPI _api;
-        private NetUser _user;
-        private NetWorld _world;
-        private NetServer _server;
-        private NetInstance _instance;
+        internal NetUser _user;
+        internal NetWorld _world;
+        internal NetServer _server;
+        internal NetInstance _instance;
 
 
         public void OnInitialize(ModCoreAPI api)
@@ -80,6 +80,7 @@ namespace api.nox.network
                 var asynco = req.SendWebRequest();
                 await UniTask.WaitUntil(() =>
                 {
+                    Debug.Log($"Downloading {url} {req.downloadProgress * 100}%");
                     _api.EventAPI.Emit(new NetEventContext("network.download", url, req.downloadProgress, req.downloadedBytes));
                     return asynco.isDone;
                 });
@@ -98,7 +99,12 @@ namespace api.nox.network
             return file;
         }
 
-        public UserMe GetCurrentUser() => _user.user;
+        public UserMe GetCurrentUser() 
+        {
+            if(_user.user == null) return null;
+            _user.user.netSystem = this;
+            return _user.user;
+        }
         [ShareObjectExport] public Func<ShareObject> GetSharedCurrentUser;
         public Server GetCurrentServer() => _server.server;
         [ShareObjectExport] public Func<ShareObject> GetSharedCurrentServer;

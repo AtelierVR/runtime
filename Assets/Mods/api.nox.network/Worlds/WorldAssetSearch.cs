@@ -8,7 +8,7 @@ namespace api.nox.network
     [System.Serializable]
     public class WorldAssetSearch : ShareObject
     {
-        internal NetWorld netWorld;
+        internal NetworkSystem netSystem;
         internal uint[] versions;
         internal string[] platforms;
         internal string[] engines;
@@ -25,9 +25,9 @@ namespace api.nox.network
         public bool HasNext() => offset + limit < total;
 
         public async UniTask<WorldAssetSearch> Previous()
-            => HasPrevious() ? await netWorld.SearchAssets(server, world_id, offset - limit, limit, versions, platforms, engines, withEmpty) : null;
+            => HasPrevious() ? await netSystem.World.SearchAssets(server, world_id, offset - limit, limit, versions, platforms, engines, withEmpty) : null;
         public async UniTask<WorldAssetSearch> Next()
-            => HasNext() ? await netWorld.SearchAssets(server, world_id, offset + limit, limit, versions, platforms, engines, withEmpty) : null;
+            => HasNext() ? await netSystem.World.SearchAssets(server, world_id, offset + limit, limit, versions, platforms, engines, withEmpty) : null;
 
         [ShareObjectExport] public ShareObject[] SharedWorldAssets;
         [ShareObjectExport] public Func<bool> SharedHasPrevious;
