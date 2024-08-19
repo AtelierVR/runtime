@@ -235,86 +235,47 @@ namespace Nox.Editor.Worlds
             mods.showBoundCollectionSize = !descriptor.IsCompiled;
             mods.makeItem = () =>
             {
-                var item = new VisualElement();
-                item.style.paddingLeft = 2;
-                item.style.paddingRight = 8;
-                var foldout = new Foldout()
+                var item = new GroupBox();
+                item.style.paddingLeft = 0;
+                item.style.paddingRight = 0;
+                item.style.marginLeft = 0;
+                item.style.marginRight = 0;
+                item.style.flexDirection = FlexDirection.Row;
+                var text = new TextField() { label = "", isReadOnly = descriptor.IsCompiled, style = { flexGrow = 1 } };
+                var enumField = new EnumField(ModRequirmentFlags.None)
                 {
-                    text = "Tags",
                     focusable = !descriptor.IsCompiled,
                     style = { flexGrow = 1 }
                 };
-                foreach (var flag in Enum.GetValues(typeof(ModRequirmentFlags)).Cast<ModRequirmentFlags>())
-                {
-                    if (flag == ModRequirmentFlags.None) continue;
-                    var toggle = new Toggle(flag.ToString())
-                    {
-                        name = "flag-" + flag.ToString(),
-                        value = false,
-                        focusable = !descriptor.IsCompiled,
-                        style = { flexGrow = 1 }
-                    };
-                    if (!descriptor.IsCompiled)
-                        toggle.RegisterValueChangedCallback(evt =>
-                        {
-                            if (item.userData is int i && i >= 0 && i < descriptor.GetMods().Count)
-                            {
-                                if (evt.newValue)
-                                    descriptor.GetMods()[i].Flags |= flag;
-                                else
-                                    descriptor.GetMods()[i].Flags &= ~flag;
-                            }
-                        });
-                    else toggle.SetEnabled(false);
-                    foldout.Add(toggle);
-                }
-                var id = new TextField()
-                {
-                    label = "Id",
-                    focusable = !descriptor.IsCompiled
-                };
-                id.style.flexGrow = 1;
-                var version = new UnsignedIntegerField()
-                {
-                    label = "Version",
-                    focusable = !descriptor.IsCompiled
-                };
-                version.style.flexGrow = 1;
                 if (!descriptor.IsCompiled)
                 {
-                    id.RegisterValueChangedCallback(evt =>
+                    text.RegisterValueChangedCallback(evt =>
                     {
                         if (item.userData is int i && i >= 0 && i < descriptor.GetMods().Count)
                             descriptor.GetMods()[i].Id = evt.newValue;
                     });
-                    version.RegisterValueChangedCallback(evt =>
+                    enumField.RegisterValueChangedCallback(evt =>
                     {
                         if (item.userData is int i && i >= 0 && i < descriptor.GetMods().Count)
-                            descriptor.GetMods()[i].Version = (uint)evt.newValue;
+                            descriptor.GetMods()[i].Flags = (ModRequirmentFlags)evt.newValue;
                     });
                 }
                 else
                 {
-                    foldout.SetEnabled(false);
-                    id.SetEnabled(false);
-                    version.SetEnabled(false);
+                    text.SetEnabled(false);
+                    enumField.SetEnabled(false);
                 }
-                item.Add(id);
-                item.Add(version);
-                item.Add(foldout);
-
+                item.Add(text);
+                item.Add(enumField);
                 return item;
             };
             mods.bindItem = (e, i) =>
             {
                 var mod = descriptor.GetMods()[i];
-                var fold = e.Q<Foldout>();
-                foreach (var flag in Enum.GetValues(typeof(ModRequirmentFlags)).Cast<ModRequirmentFlags>())
-                    if (flag != ModRequirmentFlags.None)
-                        fold.Q<Toggle>("flag-" + flag.ToString()).value = mod != null && mod.Flags.HasFlag(flag);
-                e.Q<TextField>().value = mod != null ? mod.Id : "";
-                e.Q<UnsignedIntegerField>().value = mod != null ? mod.Version : 0;
                 e.userData = i;
+                if (mod == null) return;
+                e.Q<TextField>().value = mod.Id;
+                e.Q<EnumField>().Init(mod.Flags);
             };
             mods.itemsSource = descriptor.GetMods();
 

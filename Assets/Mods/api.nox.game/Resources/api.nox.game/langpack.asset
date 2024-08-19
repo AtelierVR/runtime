@@ -135,6 +135,8 @@ MonoBehaviour:
       value: "{0}%"
     - key: dashboard.world.actions.downloaded
       value: "Téléchargé"
+    - key: dashboard.instance.make.title
+      value: "Créer une instance"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home
@@ -257,5 +259,7 @@ MonoBehaviour:
       value: "{0}%"
     - key: dashboard.world.actions.downloaded
       value: "Downloaded"
+    - key: dashboard.instance.make.title
+      value: "Create Instance"
 
       

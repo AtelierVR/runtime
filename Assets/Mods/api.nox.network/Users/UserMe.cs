@@ -1,11 +1,14 @@
 using System;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods;
+using UnityEngine;
 
 namespace api.nox.network
 {
     [Serializable]
     public class UserMe : ShareObject
     {
+        internal NetworkSystem netSystem;
         [ShareObjectExport] public uint id;
         [ShareObjectExport] public string username;
         [ShareObjectExport] public string display;
@@ -32,16 +35,30 @@ namespace api.nox.network
             return false;
         }
 
+        /**
+         * @brief Get the user's home world.
+         */
+        public async UniTask<World> GetHome()
+        {
+            if (string.IsNullOrEmpty(home)) return null;
+            var worldref = WorldIdentifier.FromString(home);
+            Debug.Log($"GetHome {netSystem}.");
+            return await netSystem._world.GetWorld(worldref.server ?? server, worldref.id);
+        } 
+
         [ShareObjectExport] public Func<string, string, bool> SharedMarch;
+        [ShareObjectExport] public Func<UniTask<ShareObject>> SharedGetHome;
 
         public void BeforeExport()
         {
             SharedMarch = (reference, default_server) => Match(reference, default_server);
+            SharedGetHome = async () => await GetHome();
         }
 
         public void AfterExport()
         {
             SharedMarch = null;
+            SharedGetHome = null;
         }
     }
 }

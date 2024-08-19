@@ -165,8 +165,7 @@ MonoBehaviour:
   Features: []
   ModRequirements:
   - Id: 1@localhost:53032
-    Version: 0
-    Flags: 0
+    Flags: 4
   _target: -2
   ServerPublisher: localhost:53032
   IdPublisher: 0

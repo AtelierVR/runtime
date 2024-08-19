@@ -17,6 +17,7 @@ namespace api.nox.game
         public static string WorldPath(string hash) => Path.Combine(Constants.GameAppDataPath, "cache", "worlds", hash);
         public static bool HasWorldInCache(string hash) => File.Exists(WorldPath(hash));
         public static AssetBundle GetLoadedWorld(string hash) => _loadedWorlds.ContainsKey(hash) ? _loadedWorlds[hash] : null;
+        public static bool IsWorldLoaded(string hash) => _loadedWorlds.ContainsKey(hash);
         public static string[] GetLoaddedWorlds() => _loadedWorlds.Keys.ToArray();
 
         public static void SaveWorldToCache(string hash, byte[] data)
@@ -86,12 +87,16 @@ namespace api.nox.game
                 if (context.Data[0] as string != url) return;
                 progress?.Invoke((float)context.Data[1], (ulong)context.Data[2]);
             });
+            var t3 = DateTime.Now;
             var res = await _gameClientSystem.NetworkAPI.DownloadFile(url, hash);
             _gameClientSystem.coreAPI.EventAPI.Unsubscribe(eventsub);
+            var t4 = DateTime.Now;
             progress?.Invoke(1, 0);
             if (res == null)
                 return new DownloadWorldResult { success = false, hash = hash, url = url, error = "Download failed" };
+            var t1 = DateTime.Now;
             SaveWorldToCache(hash, res);
+            var t2 = DateTime.Now;
             return new DownloadWorldResult { success = true, hash = hash, url = url };
         }
 
@@ -101,17 +106,35 @@ namespace api.nox.game
                 return default;
             var bundle = GetOrLoadWorld(hash);
             var scenes = bundle.GetAllScenePaths();
-            var scene = scenes.Length > id ? scenes[id] : null;
-            if (scene == null)
+            var sceneId = scenes.Length > id ? scenes[id] : null;
+            if (string.IsNullOrEmpty(sceneId))
+            {
+                Debug.LogError($"Failed to load world {hash} {id}");
                 return default;
-            var load = SceneManager.LoadSceneAsync(scene, mode);
+            }
+            var load = SceneManager.LoadSceneAsync(sceneId, mode);
             await UniTask.WaitUntil(() =>
             {
                 _gameClientSystem.coreAPI.EventAPI.Emit("world.loading", hash, id, mode, load.progress);
                 return load.isDone;
             });
-            _gameClientSystem.coreAPI.EventAPI.Emit("world.loaded", hash, id, mode, scene);
-            return SceneManager.GetSceneByName(scene);
+            var scene = SceneManager.GetSceneByPath(sceneId);
+            if (!scene.IsValid())
+            {
+                Debug.LogError($"Failed to load world {hash} {id} {sceneId}");
+                return default;
+            }
+
+            var mainCamera = scene.GetRootGameObjects().FirstOrDefault(x => x.GetComponent<Camera>() != null);
+            Debug.Log($"Loaded world {hash} {id} {sceneId} {mainCamera}");
+            if (mainCamera != null)
+            {
+                Debug.Log("Disable main camera");
+                mainCamera.SetActive(false);
+            }
+
+            _gameClientSystem.coreAPI.EventAPI.Emit("world.loaded", hash, id, mode, sceneId);
+            return scene;
         }
 
         public class DownloadWorldResult

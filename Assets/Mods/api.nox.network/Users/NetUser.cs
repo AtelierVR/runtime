@@ -35,6 +35,8 @@ namespace api.nox.network
                 return null;
             }
             var response = JsonUtility.FromJson<Response<UserMe>>(req.downloadHandler.text);
+            if(response.IsError) return null;
+            response.data.netSystem = _mod;
             user = response.data;
             _mod._api.EventAPI.Emit(new NetEventContext("network.user", user, true));
             return response.data;
@@ -99,6 +101,7 @@ namespace api.nox.network
                     config.Save();
                 }
                 else response.data.error = response.error.message;
+                response.data.user.netSystem = _mod;
                 user = response.data.user;
                 _mod._api.EventAPI.Emit(new NetEventContext("network.user", user, true));
                 _mod._api.EventAPI.Emit(new NetEventContext("network.user.login", true, user));
@@ -142,6 +145,7 @@ namespace api.nox.network
             if (req.responseCode != 200) return null;
             var res = JsonUtility.FromJson<Response<UserMe>>(req.downloadHandler.text);
             if (res.IsError) return null;
+            res.data.netSystem = _mod;
             this.user = res.data;
             return res.data;
         }

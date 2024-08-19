@@ -42,7 +42,7 @@ namespace api.nox.network
          * @param username The username.
          * @return True if the username is valid.
          */
-        public bool TryByUsername(out string username)
+        public bool TryGetUsername(out string username)
         {
             if (!string.IsNullOrEmpty(identifier))
             {
@@ -58,7 +58,7 @@ namespace api.nox.network
          * @param id The id.
          * @return True if the id is valid.
          */
-        public bool TryById(out uint id)
+        public bool TryGetId(out uint id)
         {
             if (uint.TryParse(identifier, out id))
                 return true;

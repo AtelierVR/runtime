@@ -80,17 +80,33 @@ namespace api.nox.game
             if (search == null || search.assets.Length == 0)
             {
                 Debug.LogError("World not compatible with player");
+                return;
             }
-            else
+
+            var asset = search.assets[0];
+            if (!WorldManager.IsWorldLoaded(asset.hash))
             {
-                var asset = search.assets[0];
                 dlb.interactable = true;
                 var type = WorldManager.HasWorldInCache(asset.hash) ? DownloadButtonType.Downloaded : DownloadButtonType.Download;
                 dlb.onClick.AddListener(() => OnClickDownload(dlb, tile, world, asset, type).Forget());
                 SetDownloadButton(type);
                 gotob.interactable = true;
-                gotob.onClick.AddListener(() => WorldManager.LoadWorld(asset.hash, 0).Forget());
+                gotob.onClick.AddListener(() => OnClickGoto(tile, world, asset).Forget());
             }
+        }
+
+        private async UniTask OnClickGoto(GameObject tile, SimplyWorld world, SimplyWorldAsset asset)
+        {
+            var dlb = Reference.GetReference("download.button", tile).GetComponent<Button>();
+            var gotob = Reference.GetReference("goto.button", tile).GetComponent<Button>();
+            if (!gotob.interactable) return;
+            gotob.interactable = false;
+            if (!WorldManager.HasWorldInCache(asset.hash))
+                await OnClickDownload(dlb, tile, world, asset, DownloadButtonType.Download);
+            var scene = await WorldManager.LoadWorld(asset.hash, 0);
+            if (scene == default)
+                Debug.LogError("Failed to load world");
+            UpdateContent(tile, world);
         }
 
         private void CheckHome(GameObject tile, SimplyWorld world)
@@ -113,7 +129,7 @@ namespace api.nox.game
             {
                 dlb.interactable = false;
                 SetDownloadButton(DownloadButtonType.Downloading, 0);
-                var res = await WorldManager.DownloadWorld(asset.hash, asset.url, (progress, size) => SetDownloadButton(DownloadButtonType.Downloading, progress * 100));
+                var res = await WorldManager.DownloadWorld(asset.hash, asset.url, (progress, size) => SetDownloadButton(DownloadButtonType.Downloading, progress));
                 if (res.success) SetDownloadButton(DownloadButtonType.Downloading, 1);
                 dlb.interactable = true;
                 await CheckVersion(tile, world, new uint[] { asset.version });
@@ -150,6 +166,7 @@ namespace api.nox.game
 
         internal void SetDownloadButton(DownloadButtonType type, float progress = 0)
         {
+            Debug.Log("SetDownloadButton" + type + " " + progress);
             if (tile == null) return;
             var downloadbutton = Reference.GetReference("download.button", tile);
             var start = Reference.GetReference("start", downloadbutton);
@@ -164,7 +181,8 @@ namespace api.nox.game
                 var width = progressbar.transform.parent.GetComponent<RectTransform>().rect.width;
                 progressbar.sizeDelta = new Vector2(width * progress, 0);
                 var percent = Reference.GetReference("percent", downloading).GetComponent<TextLanguage>();
-                percent.arguments = new string[] { ((int)progress).ToString() };
+                percent.arguments = new string[] { ((float)progress * 100).ToString("0") };
+                percent.UpdateText();
             }
         }
 

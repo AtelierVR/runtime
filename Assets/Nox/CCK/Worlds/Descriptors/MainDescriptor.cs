@@ -130,7 +130,6 @@ namespace Nox.CCK.Worlds
     public class ModRequirement
     {
         public string Id;
-        public uint Version;
         public ModRequirmentFlags Flags;
     }
 
@@ -138,8 +137,10 @@ namespace Nox.CCK.Worlds
     public enum ModRequirmentFlags
     {
         None = 0,
-        IsRequired = 1,
-        CustomVersion = 2
+        IsRequiredForMaster = 2,
+        IsRequiredForBot = 4,
+        IsRequiredForPlayer = 8,
+        IsRequiredForAll = 14
     }
 
 }

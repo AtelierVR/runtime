@@ -28,7 +28,6 @@ namespace api.nox.network
             Debug.Log(req.downloadHandler.text);
             var res = JsonUtility.FromJson<Response<WorldAsset>>(req.downloadHandler.text);
             if (res.IsError) return null;
-            res.data.netWorld = this;
             res.data.server = server;
             return res.data;
         }
@@ -145,7 +144,6 @@ namespace api.nox.network
             if (req.responseCode != 200) return null;
             var res = JsonUtility.FromJson<Response<WorldAsset>>(req.downloadHandler.text);
             if (res.IsError) return null;
-            res.data.netWorld = this;
             res.data.server = asset.server;
             return res.data;
         }
@@ -186,7 +184,7 @@ namespace api.nox.network
             if (req.responseCode != 200) return null;
             var res = JsonUtility.FromJson<Response<World>>(req.downloadHandler.text);
             if (res.IsError) return null;
-            res.data.netWorld = this;
+            res.data.networkSystem = _mod;
             return res.data;
         }
 
@@ -232,7 +230,9 @@ namespace api.nox.network
             if (req.responseCode != 200) return null;
             var res = JsonUtility.FromJson<Response<WorldSearch>>(req.downloadHandler.text);
             if (res.IsError) return null;
-            foreach (var world in res.data.worlds) world.netWorld = this;
+            Debug.Log("Searched world: " + req.downloadHandler.text);
+            Debug.Log("Searched world: " + res.data);
+            foreach (var world in res.data.worlds) world.networkSystem = _mod;
             return res.data;
         }
 
@@ -250,7 +250,7 @@ namespace api.nox.network
             if (req.responseCode != 200) return new World[0];
             var res = JsonUtility.FromJson<Response<WorldSearch>>(req.downloadHandler.text);
             if (res.IsError) return new World[0];
-            foreach (var world in res.data.worlds) world.netWorld = this;
+            foreach (var world in res.data.worlds) world.networkSystem = _mod;
             return res.data.worlds;
         }
 
@@ -273,7 +273,7 @@ namespace api.nox.network
             if (req.responseCode != 200) return null;
             var res = JsonUtility.FromJson<Response<WorldAssetSearch>>(req.downloadHandler.text);
             if (res.IsError) return null;
-            res.data.netWorld = this;
+            res.data.netSystem = _mod;
             res.data.server = server;
             res.data.world_id = id;
             res.data.versions = versions;
@@ -281,10 +281,7 @@ namespace api.nox.network
             res.data.withEmpty = withEmpty;
             res.data.engines = engines;
             foreach (var asset in res.data.assets)
-            {
-                asset.netWorld = this;
                 asset.server = server;
-            }
             return res.data;
         }
 

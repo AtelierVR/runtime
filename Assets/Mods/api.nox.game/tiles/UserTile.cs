@@ -15,6 +15,7 @@ namespace api.nox.game
         private GameObject tile;
         private EventSubscription eventUserUpdate;
         private HomeWidget userMeWidget;
+        private HomeWidget homeWidget;
 
         internal UserTileManager(GameClientSystem clientMod)
         {
@@ -61,17 +62,45 @@ namespace api.nox.game
                 var thumb = Reference.GetReference("icon", btncontent).GetComponent<RawImage>();
                 if (!string.IsNullOrEmpty(user.thumbnail)) UpdateTexure(thumb, user.thumbnail).Forget();
                 var btnref = Reference.GetReference("button", btn).GetComponent<Button>();
-                btnref.onClick.AddListener(OnClickWidget);
+                btnref.onClick.AddListener(OnClickWidgetUser);
                 return btn;
             };
             clientMod.coreAPI.EventAPI.Emit("game.widget", userMeWidget);
+
+            if (homeWidget == null)
+                homeWidget = new HomeWidget
+                {
+                    id = "game.user.me.home",
+                    width = 1,
+                    height = 1,
+                };
+            homeWidget.GetContent = (Transform parent) =>
+            {
+                var baseprefab = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget");
+                var prefab = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget.userme.home");
+                var btn = Object.Instantiate(baseprefab, parent);
+                var btncontent = Object.Instantiate(prefab, Reference.GetReference("content", btn).transform);
+                var btnref = Reference.GetReference("button", btn).GetComponent<Button>();
+                btnref.onClick.AddListener(() => OnClickWidgetHome().Forget());
+                return btn;
+            };
+            clientMod.coreAPI.EventAPI.Emit("game.widget", homeWidget);
         }
 
-        private void OnClickWidget()
+        private void OnClickWidgetUser()
         {
             var user = clientMod.NetworkAPI.GetCurrentUser();
             if (user == null) return;
             clientMod.GotoTile("game.user", user);
+        }
+
+        private async UniTask OnClickWidgetHome()
+        {
+            var user = clientMod.NetworkAPI.GetCurrentUser();
+            if (user == null) return;
+            var home = await user.GetHome();
+            if (home == null) return;
+            clientMod.GotoTile("game.world", home);
         }
 
         private async UniTask<bool> UpdateTexure(RawImage img, string url)
@@ -93,6 +122,12 @@ namespace api.nox.game
                 userMeWidget.GetContent = null;
                 clientMod.coreAPI.EventAPI.Emit("game.widget", userMeWidget);
                 userMeWidget = null;
+            }
+            if (homeWidget != null)
+            {
+                homeWidget.GetContent = null;
+                clientMod.coreAPI.EventAPI.Emit("game.widget", homeWidget);
+                homeWidget = null;
             }
         }
 
