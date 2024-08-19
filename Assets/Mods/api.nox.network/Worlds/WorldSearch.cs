@@ -23,5 +23,7 @@ namespace api.nox.network
         {
             SharedWorlds = null;
         }
+
+        public override string ToString() => $"{GetType().Name}[total={total}, limit={limit}, offset={offset}, worlds={worlds?.Length}]";
     }
 }

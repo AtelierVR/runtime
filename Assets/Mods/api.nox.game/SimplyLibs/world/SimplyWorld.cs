@@ -15,7 +15,7 @@ namespace Nox.SimplyLibs
         [ShareObjectImport, ShareObjectExport] public string server;
         [ShareObjectImport, ShareObjectExport] public string thumbnail;
 
-        [ShareObjectExport] public Func<uint, uint, uint[], string[], string[], bool, UniTask<ShareObject>> SharedSearchAssets;
+        [ShareObjectImport, ShareObjectExport] public Func<uint, uint, uint[], string[], string[], bool, UniTask<ShareObject>> SharedSearchAssets;
         public async UniTask<SimplyWorldAssetSearch> SearchAssets(uint offset = 0, uint limit = 10, uint[] versions = null, string[] platforms = null, string[] engines = null, bool withEmpty = false)
             => (await SharedSearchAssets(offset, limit, versions, platforms, engines, withEmpty))?.Convert<SimplyWorldAssetSearch>();
 
