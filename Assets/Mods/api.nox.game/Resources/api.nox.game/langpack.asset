@@ -171,6 +171,10 @@ MonoBehaviour:
       value: "{0}"
     - key: dashboard.instance.make.notice
       value: "Notes"
+    - key: dashboard.world.instances.entry.title
+      value: "#{0} • {1}"
+    - key: dashboard.world.instances.entry.description
+      value: "{0}"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home
@@ -330,6 +334,10 @@ MonoBehaviour:
       value: "{0}"
     - key: dashboard.instance.make.notice
       value: "Notes"
+    - key: dashboard.world.instances.entry.title
+      value: "#{0} • {1}"
+    - key: dashboard.world.instances.entry.description
+      value: "{0}"
 
 
       

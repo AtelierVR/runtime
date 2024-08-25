@@ -166,9 +166,9 @@ MonoBehaviour:
   ModRequirements:
   - Id: 1@localhost:53032
     Flags: 4
-  _target: -2
+  _target: 19
   ServerPublisher: localhost:53032
-  IdPublisher: 5
+  IdPublisher: 1
   VersionPublisher: 0
 --- !u!4 &68164194
 Transform:
@@ -386,7 +386,7 @@ Transform:
   m_GameObject: {fileID: 771972941}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5891187, y: 1.509, z: -0.53727496}
+  m_LocalPosition: {x: 0.5891187, y: 1.509, z: 1.56}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

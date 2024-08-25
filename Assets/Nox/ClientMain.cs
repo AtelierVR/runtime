@@ -1,12 +1,7 @@
-﻿using Nox.Network;
-using Nox.Network.Instances;
-using Cysharp.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 using Nox.Events;
-using Nox.UI;
 using Nox.Mods;
 using System.Linq;
-using UnityEngine.UIElements;
 using System.IO;
 
 namespace Nox
@@ -21,6 +16,7 @@ namespace Nox
             DontDestroyOnLoad(gameObject);
             Instance = this;
             Init();
+            
         }
 
         public void Update()

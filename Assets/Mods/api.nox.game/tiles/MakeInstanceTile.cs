@@ -85,7 +85,9 @@ namespace api.nox.game
                 use_password = use_password,
                 capacity = capacity == 0 ? world.capacity : (capacity == world.capacity ? (ushort)0 : (ushort)capacity),
                 use_whitelist = false,
-                expose = expose.options[expose.value].text
+                expose = expose.options[expose.value].text,
+                title = world.title,
+                description = world.description
             };
             createbutton.interactable = false;
             var created = await clientMod.NetworkAPI.Instance.CreateInstance(instance);

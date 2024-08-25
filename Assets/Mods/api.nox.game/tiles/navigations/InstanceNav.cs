@@ -51,7 +51,7 @@ namespace api.nox.game
         private async UniTask<NavigationResult> FetchInstances(string server, string query)
         {
             Debug.Log("Fetching instances");
-            var res = await navigationTile.clientMod.NetworkAPI.Instance.SearchInstances(server, query);
+            var res = await navigationTile.clientMod.NetworkAPI.Instance.SearchInstances(new() { query = query, server = server });
             if (res == null) return new NavigationResult { error = "Error fetching instances." };
             Debug.Log("Fetched instances " + res.instances.Length);
             List<InstanceWithWorld> iww = new();

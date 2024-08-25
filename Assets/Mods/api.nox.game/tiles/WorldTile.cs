@@ -9,6 +9,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using Nox.SimplyLibs;
 using System.Linq;
+using System.Threading;
 
 namespace api.nox.game
 {
@@ -52,11 +53,64 @@ namespace api.nox.game
                     pf.SetActive(false);
                     this.tile = Object.Instantiate(pf, tf);
                     UpdateContent(this.tile, world);
+                    FetchInstancesWorker(this.tile, world).Forget();
                     return this.tile;
                 }
             };
             clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
         }
+
+        private async UniTask FetchInstancesWorker(GameObject tile, SimplyWorld world)
+        {
+            var config = Config.Load();
+            var servers = config.Get("navigation.servers", new WorkerInfo[0]);
+            var workers = servers.Where(x => x.features.Contains("instance")).ToArray();
+            List<UniTask> tasks = new();
+
+            var container = Reference.GetReference("instances", tile).GetComponent<RectTransform>();
+            for (int i = 0; i < container.childCount; i++)
+                Object.Destroy(container.GetChild(i).gameObject);
+
+            for (var i = 0; i < workers.Length; i++)
+            {
+                var worker = workers[i];
+                if (worker == null) continue;
+                var work = FetchWorkInstances(tile, world, worker.address);
+                tasks.Add(work);
+            }
+            await UniTask.WhenAll(tasks);
+        }
+
+        private async UniTask FetchWorkInstances(GameObject tile, SimplyWorld world, string address)
+        {
+            var res = await clientMod.NetworkAPI.Instance.SearchInstances(new()
+            {
+                world = world.ToMinimalString(),
+                server = address,
+                limit = 100
+            });
+            List<SimplyInstance> instances = new();
+            while (res != null && res.HasNext())
+            {
+                instances.AddRange(res.instances);
+                res = await res.Next();
+            }
+            if (res != null)
+                instances.AddRange(res.instances);
+            var container = Reference.GetReference("instances", tile);
+            var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/instance.entry");
+            foreach (var instance in instances)
+            {
+                var entry = Object.Instantiate(pf, container.transform);
+                Reference.GetReference("title", entry).GetComponent<TextLanguage>().arguments = new string[] { instance.name, instance.title };
+                Reference.GetReference("description", entry).GetComponent<TextLanguage>().arguments = new string[] { instance.description };
+                Reference.GetReference("button", entry).GetComponent<Button>().onClick
+                    .AddListener(() => clientMod.GotoTile("game.instance", instance));
+            }
+        }
+
+
+
 
         private void UpdateContent(GameObject tile, SimplyWorld world)
         {

@@ -113,7 +113,7 @@ namespace api.nox.world
             if (world != null)
             {
                 var user = _mod.NetworkAPI.GetCurrentUser();
-                if (user == null || !user.Match(world.owner, world.server))
+                if (user == null || !user.MatchRef(world.owner, world.server))
                     world = null;
             }
 

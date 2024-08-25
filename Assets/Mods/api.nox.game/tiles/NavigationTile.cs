@@ -17,7 +17,7 @@ namespace api.nox.game
     {
         internal GameClientSystem clientMod;
         private HomeWidget _widget;
-        private Dictionary<string, NavigationHandler> navigationHandlers = new();
+        internal Dictionary<string, NavigationHandler> navigationHandlers = new();
         private EventSubscription navigationsub;
         internal UserNav UserNav;
         internal WorldNav WorldNav;

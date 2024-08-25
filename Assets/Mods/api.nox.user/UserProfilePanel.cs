@@ -38,7 +38,6 @@ namespace api.nox.user
                 UpdateUser();
             };
             UpdateUser();
-
             var buttonlogout = _root.Q<Button>("logout-button");
             buttonlogout.clickable.clicked += () => UniTask.Create(async () =>
                 {

@@ -24,7 +24,7 @@ namespace api.nox.game
         private ServerTileManager serverTile;
         private WorldTileManager worldTile;
         private MakeInstanceTileManager makeinstance;
-        private NavigationTileManager navigationTile;
+        internal NavigationTileManager navigationTile;
         private InstanceTileManager instance;
         private EventSystem eventSystem;
         private EventSubscription tilesub;
@@ -58,6 +58,10 @@ namespace api.nox.game
             tilegotosub = api.EventAPI.Subscribe("game.tile.goto", OnGotoTile);
             eventSystem = Reference.GetReference("game.eventsystem", m_controller)?.GetComponent<EventSystem>();
             eventSystem?.gameObject.SetActive(!coreAPI.XRAPI.IsEnabled());
+            tilegotosub = api.EventAPI.Subscribe(null, (context) =>
+            {
+                Debug.Log("Event: " + context.EventName);
+            });
         }
 
         public void OnTile(EventData context)

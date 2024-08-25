@@ -13,19 +13,32 @@ namespace api.nox.network
     public class NetworkSystem : ShareObject, ModInitializer
     {
         internal ModCoreAPI _api;
-        internal NetUser _user;
-        internal NetWorld _world;
-        internal NetServer _server;
-        internal NetInstance _instance;
+        internal UserAPI _user;
+        internal WorldAPI _world;
+        internal ServerAPI _server;
+        internal InstanceAPI _instance;
+        internal RelayManager _relays;
 
 
         public void OnInitialize(ModCoreAPI api)
         {
             _api = api;
-            _user = new NetUser(this);
-            _world = new NetWorld(this);
-            _server = new NetServer(this);
-            _instance = new NetInstance(this);
+            _user = new UserAPI(this);
+            _world = new WorldAPI(this);
+            _server = new ServerAPI(this);
+            _instance = new InstanceAPI(this);
+            _relays = new RelayManager(this);
+            Connect().Forget();
+        }
+
+        async UniTask Connect()
+        {
+            var relay = RelayManager.New<TcpConnector>();
+            relay.OnRelayEventEvent += buffer => Debug.Log($"Received {buffer.length} bytes");
+            var success = relay.Connect("localhost", 53043);
+            Debug.Log($"Connected: {success}");
+            var hand = await relay.RequestHandshake();
+            Debug.Log($"Handshake: {hand}");
         }
 
         public void OnUpdate()
@@ -99,19 +112,19 @@ namespace api.nox.network
             return file;
         }
 
-        public UserMe GetCurrentUser() 
+        public UserMe GetCurrentUser()
         {
-            if(_user.user == null) return null;
+            if (_user.user == null) return null;
             _user.user.netSystem = this;
             return _user.user;
         }
         [ShareObjectExport] public Func<ShareObject> GetSharedCurrentUser;
         public Server GetCurrentServer() => _server.server;
         [ShareObjectExport] public Func<ShareObject> GetSharedCurrentServer;
-        [ShareObjectExport] public NetInstance Instance;
-        [ShareObjectExport] public NetWorld World;
-        [ShareObjectExport] public NetServer Server;
-        [ShareObjectExport] public NetUser User;
+        [ShareObjectExport] public InstanceAPI Instance;
+        [ShareObjectExport] public WorldAPI World;
+        [ShareObjectExport] public ServerAPI Server;
+        [ShareObjectExport] public UserAPI User;
         [ShareObjectExport] public Func<string, UnityWebRequest, UniTask<Texture2D>> SharedFetchTexture;
         [ShareObjectExport] public Func<string, string, UnityWebRequest, UniTask<string>> SharedDownloadFile;
 
