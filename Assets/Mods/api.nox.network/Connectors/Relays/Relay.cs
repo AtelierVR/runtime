@@ -210,5 +210,13 @@ namespace api.nox.network.Relays
             var relay = (Relay)obj;
             return Id == relay.Id;
         }
+
+        public void Dispose()
+        {
+            if (Status != ClientStatus.Disconnected)
+                SendDisconnect();
+            Connector.Close();
+            RelayManager.Remove(this);
+        }
     }
 }

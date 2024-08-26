@@ -8,6 +8,7 @@ namespace Nox.SimplyLibs
         [ShareObjectImport, ShareObjectExport] public uint id;
         [ShareObjectImport, ShareObjectExport] public string title;
         [ShareObjectImport, ShareObjectExport] public string description;
+        [ShareObjectImport, ShareObjectExport] public string thumbnail;
         [ShareObjectImport, ShareObjectExport] public string server;
         [ShareObjectImport, ShareObjectExport] public string name;
         [ShareObjectImport, ShareObjectExport] public ushort capacity;

@@ -14,6 +14,7 @@ namespace api.nox.game
             var rectTransform = rect.GetComponent<RectTransform>();
             var contentSizeFitter = rect.GetComponent<ContentSizeFitter>();
             var layoutGroup = rect.GetComponent<LayoutGroup>();
+            var fitter = rect.GetComponent<AutoFitter>();
 
             if (contentSizeFitter != null)
             {
@@ -28,6 +29,9 @@ namespace api.nox.game
                 layoutGroup.SetLayoutHorizontal();
                 layoutGroup.SetLayoutVertical();
             }
+            
+            foreach (Transform child in rect)
+                if (child.TryGetComponent<AutoFitter>(out var rec)) rec.Fit();
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
         }

@@ -16,5 +16,6 @@ namespace Nox.SimplyLibs
         [ShareObjectImport, ShareObjectExport] public string password;
         [ShareObjectImport, ShareObjectExport] public bool use_whitelist;
         [ShareObjectImport, ShareObjectExport] public string[] whitelist;
+        [ShareObjectImport, ShareObjectExport] public string thumbnail;
     }
 }

@@ -175,6 +175,28 @@ MonoBehaviour:
       value: "#{0} • {1}"
     - key: dashboard.world.instances.entry.description
       value: "{0}"
+    - key: dashboard.instance.title
+      value: "À propos de {0}"
+    - key: dashboard.instance.display
+      value: "{0}"
+    - key: dashboard.instance.players.title
+      value: "Joueurs ({0})"
+    - key: dashboard.instance.actions.title
+      value: Actions
+    - key: dashboard.instance.actions.join
+      value: Rejoindre
+    - key: dashboard.instance.actions.downloading
+      value: "Téléchargement..."
+    - key: dashboard.instance.actions.downloading.progress
+      value: "{0}%"
+    - key: dashboard.instance.actions.downloaded
+      value: "Téléchargé"
+    - key: dashboard.instance.actions.download
+      value: "Télécharger"
+    - key: dashboard.instance.players.entry.title
+      value: "{0}"
+    - key: dashboard.instance.players.entry.description
+      value: "{0}"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home

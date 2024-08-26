@@ -19,6 +19,7 @@ namespace api.nox.game
         {
             this.clientMod = clientMod;
         }
+
         private async UniTask<bool> UpdateTexure(RawImage img, string url)
         {
             var tex = await clientMod.NetworkAPI.FetchTexture(url);
@@ -58,6 +59,7 @@ namespace api.nox.game
         {
             Reference.GetReference("display", tile).GetComponent<TextLanguage>().arguments = new string[] { instance.title };
             Reference.GetReference("title", tile).GetComponent<TextLanguage>().arguments = new string[] { instance.title };
+            Reference.GetReference("description", tile).GetComponent<TextLanguage>().arguments = new string[] { instance.description };
         }
     }
 }

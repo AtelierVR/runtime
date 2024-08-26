@@ -87,7 +87,8 @@ namespace api.nox.game
                 use_whitelist = false,
                 expose = expose.options[expose.value].text,
                 title = world.title,
-                description = world.description
+                description = world.description,
+                thumbnail = world.thumbnail
             };
             createbutton.interactable = false;
             var created = await clientMod.NetworkAPI.Instance.CreateInstance(instance);
@@ -97,7 +98,7 @@ namespace api.nox.game
                 Debug.LogError("Failed to create instance");
                 return;
             }
-            clientMod.GotoTile("game.instance", created);
+            clientMod.GotoTile("game.instance", created, world);
         }
 
         private void SetWorldAsset(GameObject tile, SimplyWorldAsset asset)

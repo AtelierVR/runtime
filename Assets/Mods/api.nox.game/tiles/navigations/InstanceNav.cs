@@ -84,7 +84,7 @@ namespace api.nox.game
                     ) : x.instance.title,
                     imageUrl = x.world?.thumbnail,
                     goto_id = "game.instance",
-                    goto_data = new object[] { x.instance }
+                    goto_data = new object[] { x.instance, x.world }
                 }).ToArray()
             };
         }

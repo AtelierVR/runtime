@@ -105,7 +105,7 @@ namespace api.nox.game
                 Reference.GetReference("title", entry).GetComponent<TextLanguage>().arguments = new string[] { instance.name, instance.title };
                 Reference.GetReference("description", entry).GetComponent<TextLanguage>().arguments = new string[] { instance.description };
                 Reference.GetReference("button", entry).GetComponent<Button>().onClick
-                    .AddListener(() => clientMod.GotoTile("game.instance", instance));
+                    .AddListener(() => clientMod.GotoTile("game.instance", instance, world));
             }
         }
 

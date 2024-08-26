@@ -6,23 +6,18 @@ namespace api.nox.network
 {
     public class RelayManager : Manager<Relay>
     {
-        private NetworkSystem networkSystem;
-
-        public RelayManager(NetworkSystem networkSystem)
-        {
-            this.networkSystem = networkSystem;
-            foreach (var relay in Cache)
-                relay.Connector.Close();
-            Cache.Clear();
-        }
-
         public static Relay Get(ushort id) => Cache.Find(r => r.Id == id);
 
-        // ReSharper disable Unity.PerformanceAnalysis
         public static void Update()
         {
             foreach (var relay in Cache)
                 relay.Update();
+        }
+
+        public static void Dispose()
+        {
+            foreach (var relay in Cache)
+                relay.Dispose();
         }
 
         public static ushort NextId()

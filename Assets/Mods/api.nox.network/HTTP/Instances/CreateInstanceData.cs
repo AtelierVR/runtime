@@ -18,6 +18,7 @@ namespace api.nox.network
         [ShareObjectImport, ShareObjectExport] public string password;
         [ShareObjectImport, ShareObjectExport] public bool use_whitelist;
         [ShareObjectImport, ShareObjectExport] public string[] whitelist;
+        [ShareObjectImport, ShareObjectExport] public string thumbnail;
 
         internal string ToJSON()
         {
@@ -25,6 +26,7 @@ namespace api.nox.network
             if (!string.IsNullOrEmpty(name)) obj["name"] = name;
             if (!string.IsNullOrEmpty(title)) obj["title"] = title;
             if (!string.IsNullOrEmpty(description)) obj["description"] = description;
+            if (!string.IsNullOrEmpty(thumbnail)) obj["thumbnail"] = thumbnail;
             obj["expose"] = expose;
             obj["world"] = world;
             obj["capacity"] = capacity;

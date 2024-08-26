@@ -8,6 +8,7 @@ namespace api.nox.network
         [ShareObjectExport] public uint id;
         [ShareObjectExport] public string title;
         [ShareObjectExport] public string description;
+        [ShareObjectExport] public string thumbnail;
         [ShareObjectExport] public string server;
         [ShareObjectExport] public string name;
         [ShareObjectExport] public ushort capacity;

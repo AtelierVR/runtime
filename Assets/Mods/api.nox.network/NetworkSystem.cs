@@ -17,7 +17,7 @@ namespace api.nox.network
         internal WorldAPI _world;
         internal ServerAPI _server;
         internal InstanceAPI _instance;
-        internal RelayManager _relays;
+        internal RelayAPI _relays;
 
 
         public void OnInitialize(ModCoreAPI api)
@@ -27,26 +27,17 @@ namespace api.nox.network
             _world = new WorldAPI(this);
             _server = new ServerAPI(this);
             _instance = new InstanceAPI(this);
-            _relays = new RelayManager(this);
-            Connect().Forget();
-        }
-
-        async UniTask Connect()
-        {
-            var relay = RelayManager.New<TcpConnector>();
-            relay.OnRelayEventEvent += buffer => Debug.Log($"Received {buffer.length} bytes");
-            var success = relay.Connect("localhost", 53043);
-            Debug.Log($"Connected: {success}");
-            var hand = await relay.RequestHandshake();
-            Debug.Log($"Handshake: {hand}");
+            _relays = new RelayAPI(this);
         }
 
         public void OnUpdate()
         {
+            RelayManager.Update();
         }
 
         public void OnDispose()
         {
+            RelayManager.Dispose();
         }
 
         public string MostAuth(string server)
@@ -125,6 +116,7 @@ namespace api.nox.network
         [ShareObjectExport] public WorldAPI World;
         [ShareObjectExport] public ServerAPI Server;
         [ShareObjectExport] public UserAPI User;
+        [ShareObjectExport] public RelayAPI Relay;
         [ShareObjectExport] public Func<string, UnityWebRequest, UniTask<Texture2D>> SharedFetchTexture;
         [ShareObjectExport] public Func<string, string, UnityWebRequest, UniTask<string>> SharedDownloadFile;
 
@@ -138,6 +130,7 @@ namespace api.nox.network
             World = _world;
             Server = _server;
             User = _user;
+            Relay = _relays;
         }
 
         public void AfterExport()
@@ -150,6 +143,7 @@ namespace api.nox.network
             World = null;
             Server = null;
             User = null;
+            Relay = null;
         }
     }
 }
