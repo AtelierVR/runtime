@@ -14,5 +14,6 @@ namespace api.nox.network
         [ShareObjectExport] public ushort capacity;
         [ShareObjectExport] public string[] tags;
         [ShareObjectExport] public string world;
+        [ShareObjectExport] public string address;
     }
 }

@@ -1,9 +1,10 @@
 using System;
+using api.nox.network.Relays;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Nox.CCK
+namespace api.nox.network.Utils
 {
     public class Gateway
     {
@@ -46,6 +47,78 @@ namespace Nox.CCK
                         if (fmg2 != null) return fmg2;
                     }
             }
+            return null;
+        }
+
+        public const ushort DefaultPortRelay = 54032;
+        public const string SRVRelay = "_noxrelay._tcp.{0}";
+
+        public static async UniTask<Uri> FindGatewayRelay(string address)
+        {
+            if (string.IsNullOrEmpty(address)) return null;
+            var host = address.Split(':');
+            UriHostNameType uriType = Uri.CheckHostName(host[0]);
+            if (uriType == UriHostNameType.IPv4 || uriType == UriHostNameType.IPv6)
+            {
+                var uri = new Uri($"tcp://{address}");
+                if (uri.Port == -1) uri = new Uri($"tcp://{address}:{DefaultPortRelay}");
+                var fmg = await FindGR(uri.Host, (ushort)uri.Port);
+                if (fmg != null) return fmg;
+                return null;
+            }
+
+            if (host[0] == "localhost")
+            {
+                var uri = new Uri($"tcp://{address.Replace("localhost", "127.0.0.1")}");
+                if (uri.Port == -1) uri = new Uri($"tcp://{address}:{DefaultPortRelay}");
+                var fmg = await FindGR(uri.Host, (ushort)uri.Port);
+                if (fmg != null) return fmg;
+                return null;
+            }
+
+            else if (uriType == UriHostNameType.Dns)
+            {
+                var uri = new Uri($"tcp://{address}");
+                if (uri.Port == -1) uri = new Uri($"tcp://{address}:{DefaultPortRelay}");
+                var fmg = await FindGR(uri.Host, (ushort)uri.Port);
+                if (fmg != null) return fmg;
+                var srv = await FindSRV(uri.Host, SRVRelay);
+                if (srv.Length > 0)
+                    foreach (var answer in srv)
+                    {
+                        var fmg2 = await FindGR(answer.GetTarget(), answer.GetPort());
+                        if (fmg2 != null) return fmg2;
+                    }
+            }
+            return null;
+        }
+
+        public static async UniTask<Uri> FindGR(string host, ushort port, bool forceTCP = false)
+        {
+            var protos = forceTCP ? new[] { RelayProtocol.TCP } : new[] { RelayProtocol.UDP, RelayProtocol.TCP };
+            foreach (var protocol in protos)
+                try
+                {
+                    var connector = RelayAPI.ConnectorFromEnum(protocol);
+                    if (connector == null) return null;
+                    var relay = new Relay(connector);
+                    Debug.Log($"Connecting to {host}:{port} with {protocol}");
+                    if (relay.Connect(host, port))
+                    {
+                        var handshake = await relay.RequestHandshake();
+                        if (handshake != null)
+                        {
+                            relay.Dispose();
+                            return new Uri($"{protocol}://{host}:{port}");
+                        }
+                    }
+                }
+                catch (UriFormatException) { return null; }
+                catch (Exception e)
+                {
+                    Debug.Log(e);
+                    continue;
+                }
             return null;
         }
 

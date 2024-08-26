@@ -4,6 +4,7 @@ using System.Net;
 using api.nox.network.Instances;
 using api.nox.network.Relays.Base;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Mods;
 using UnityEngine;
 using Buffer = api.nox.network.Utils.Buffer;
 using Random = UnityEngine.Random;
@@ -11,7 +12,7 @@ using Random = UnityEngine.Random;
 namespace api.nox.network.Relays
 {
 #pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
-    public class Relay
+    public class Relay : ShareObject, IDisposable
 #pragma warning restore CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
     {
         public ushort Id;
@@ -19,6 +20,9 @@ namespace api.nox.network.Relays
         public ushort ClientId;
         public IPEndPoint EndPoint;
         public List<Instances.Instance> Instances => InstanceManager.Get(Id);
+
+        public string Address => EndPoint != null ? $"{EndPoint.Address}:{EndPoint.Port}" : null;
+        public object UserData;
 
         public ClientStatus Status => LastHandshake?.ClientStatus ?? ClientStatus.Disconnected;
 
@@ -32,8 +36,9 @@ namespace api.nox.network.Relays
         }
 
         public delegate void OnRelayEvent(Buffer buffer);
-
         public event OnRelayEvent OnRelayEventEvent;
+        public delegate void OnInstanceEvent(Buffer buffer);
+        public event OnInstanceEvent OnInstanceEventEvent;
 
         void OnReceived(Buffer buffer)
         {
@@ -143,6 +148,7 @@ namespace api.nox.network.Relays
             if (uid == ushort.MaxValue) return null;
             var response = await WaitForResponse<Handshakes.ResponseHandshake>(uid, ResponseType.Handshake);
             LastHandshake = response;
+
             return response;
         }
 
@@ -218,5 +224,38 @@ namespace api.nox.network.Relays
             Connector.Close();
             RelayManager.Remove(this);
         }
+
+
+
+        [ShareObjectExport] public Func<ushort> SharedGetId;
+        [ShareObjectExport] public Func<ushort> SharedGetClientId;
+        [ShareObjectExport] public Func<IPEndPoint> SharedGetEndPoint;
+        [ShareObjectExport] public Func<object> SharedGetUserData;
+        [ShareObjectExport] public Func<byte, UniTask<ShareObject>> SharedRequestStatus;
+        [ShareObjectExport] public Func<UniTask<ShareObject>> SharedRequestAllStatus;
+        [ShareObjectExport] public Func<UniTask<ShareObject>> SharedRequestLatency;
+
+        public void BeforeExport()
+        {
+            SharedGetId = () => Id;
+            SharedGetClientId = () => ClientId;
+            SharedGetEndPoint = () => EndPoint;
+            SharedGetUserData = () => UserData;
+            SharedRequestStatus = async (page) => await RequestStatus(page);
+            SharedRequestAllStatus = async () => await RequestStatus();
+            SharedRequestLatency = async () => await RequestLatency();
+        }
+
+        public void AfterExport()
+        {
+            SharedGetId = null;
+            SharedGetClientId = null;
+            SharedGetEndPoint = null;
+            SharedGetUserData = null;
+            SharedRequestStatus = null;
+            SharedRequestAllStatus = null;
+            SharedRequestLatency = null;
+        }
+
     }
 }

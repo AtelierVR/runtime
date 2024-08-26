@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Mods;
@@ -20,7 +21,8 @@ namespace api.nox.network
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/worlds/{worldId}/assets/{assetId}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            var token = await _mod._auth.GetToken(server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             try { await req.SendWebRequest(); }
             catch { return null; }
             if (req.responseCode != 200) return null;
@@ -62,7 +64,8 @@ namespace api.nox.network
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return false;
             var req = new UnityWebRequest($"{gateway}/api/worlds/{worldId}/assets/{assetId}", "DELETE") { downloadHandler = new DownloadHandlerBuffer() };
-            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            var token = await _mod._auth.GetToken(server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             try { await req.SendWebRequest(); }
             catch { return false; }
             if (req.responseCode != 200) return false;
@@ -78,7 +81,8 @@ namespace api.nox.network
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return false;
             var req = new UnityWebRequest($"{gateway}/api/worlds/{worldId}", "DELETE") { downloadHandler = new DownloadHandlerBuffer() };
-            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            var token = await _mod._auth.GetToken(server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             try { await req.SendWebRequest(); }
             catch { return false; }
             if (req.responseCode != 200) return false;
@@ -97,7 +101,8 @@ namespace api.nox.network
             var form = new WWWForm();
             form.AddBinaryData("file", fileBytes, Path.GetFileName(path));
             var req = UnityWebRequest.Post($"{gateway}/api/worlds/{worldId}/assets/{assetId}/file", form);
-            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            var token = await _mod._auth.GetToken(server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             req.SetRequestHeader("X-File-Hash", Hashing.HashFile(path));
             try { await req.SendWebRequest(); }
             catch
@@ -120,7 +125,8 @@ namespace api.nox.network
             var form = new WWWForm();
             form.AddBinaryData("file", fileBytes, Path.GetFileName(path));
             var req = UnityWebRequest.Post($"{gateway}/api/worlds/{worldId}/thumbnail", form);
-            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            var token = await _mod._auth.GetToken(server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             req.SetRequestHeader("X-File-Hash", Hashing.HashFile(path));
             try { await req.SendWebRequest(); }
             catch { return false; }
@@ -137,7 +143,8 @@ namespace api.nox.network
             var gateway = asset.server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(asset.server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/worlds/{asset.worldId}/assets", "PUT") { downloadHandler = new DownloadHandlerBuffer() };
-            req.SetRequestHeader("Authorization", _mod.MostAuth(asset.server));
+            var token = await _mod._auth.GetToken(asset.server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             req.SetRequestHeader("Content-Type", "application/json");
             req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(asset.ToJSON()));
             try { await req.SendWebRequest(); }
@@ -160,7 +167,8 @@ namespace api.nox.network
             var gateway = world.server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(world.server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/worlds", "PUT") { downloadHandler = new DownloadHandlerBuffer() };
-            req.SetRequestHeader("Authorization", _mod.MostAuth(world.server));
+            var token = await _mod._auth.GetToken(world.server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             req.SetRequestHeader("Content-Type", "application/json");
             req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(world.ToJSON()));
             try { await req.SendWebRequest(); }
@@ -183,7 +191,8 @@ namespace api.nox.network
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/worlds/{worldId}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            var token = await _mod._auth.GetToken(server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             try { await req.SendWebRequest(); }
             catch { return null; }
             if (req.responseCode != 200) return null;
@@ -201,7 +210,8 @@ namespace api.nox.network
             var gateway = world.server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(world.server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/worlds/{world.worldId}", "POST") { downloadHandler = new DownloadHandlerBuffer() };
-            req.SetRequestHeader("Authorization", _mod.MostAuth(world.server));
+            var token = await _mod._auth.GetToken(world.server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             req.SetRequestHeader("Content-Type", "application/json");
             req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(world.ToJSON()));
             try { await req.SendWebRequest(); }
@@ -230,7 +240,8 @@ namespace api.nox.network
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/worlds/search?query={query}&offset={offset}&limit={limit}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            var token = await _mod._auth.GetToken(server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             try { await req.SendWebRequest(); }
             catch { return null; }
             if (req.responseCode != 200) return null;
@@ -255,7 +266,8 @@ namespace api.nox.network
             var gateway = server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return new World[0];
             var req = new UnityWebRequest($"{gateway}/api/worlds/search?id={string.Join("&id=", worldIds)}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            var token = await _mod._auth.GetToken(server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             try { await req.SendWebRequest(); }
             catch { return new World[0]; }
             if (req.responseCode != 200) return new World[0];
@@ -282,7 +294,8 @@ namespace api.nox.network
             if (engines != null) foreach (var engine in engines) url += $"&engine={engine}";
             if (withEmpty) url += "&empty=true";
             var req = new UnityWebRequest(url, "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            var token = await _mod._auth.GetToken(server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             try { await req.SendWebRequest(); }
             catch { return null; }
             if (req.responseCode != 200) return null;

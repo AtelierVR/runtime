@@ -13,6 +13,7 @@ namespace Nox.SimplyLibs
         [ShareObjectImport] public SimplyServerAPI Server;
         [ShareObjectImport] public SimplyWorldAPI World;
         [ShareObjectImport] public SimplyRelayAPI Relay;
+        [ShareObjectImport] public SimplyAuthAPI Auth;
 
         [ShareObjectImport] public Func<string, UnityWebRequest, UniTask<Texture2D>> SharedFetchTexture;
         [ShareObjectImport] public Func<string, string, UnityWebRequest, UniTask<string>> SharedDownloadFile;

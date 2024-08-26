@@ -18,6 +18,7 @@ namespace api.nox.network
         internal ServerAPI _server;
         internal InstanceAPI _instance;
         internal RelayAPI _relays;
+        internal AuthAPI _auth;
 
 
         public void OnInitialize(ModCoreAPI api)
@@ -28,30 +29,23 @@ namespace api.nox.network
             _server = new ServerAPI(this);
             _instance = new InstanceAPI(this);
             _relays = new RelayAPI(this);
+            _auth = new AuthAPI(this);
         }
 
         public void OnUpdate()
         {
-            RelayManager.Update();
+            _relays.Update();
         }
 
         public void OnDispose()
         {
-            RelayManager.Dispose();
-        }
-
-        public string MostAuth(string server)
-        {
-            var config = Config.Load();
-            if (GetCurrentUser()?.server == server && config.Has("token"))
-                return $"Bearer {config.Get<string>("token")}";
-            return null;
-        }
-
-        public bool TryMostAuth(string server, out string auth)
-        {
-            auth = MostAuth(server);
-            return auth != null;
+            _relays.Dispose();
+            _user = null;
+            _world = null;
+            _server = null;
+            _instance = null;
+            _relays = null;
+            _auth = null;
         }
 
         internal async UniTask<Texture2D> FetchTexture(string url, UnityWebRequest req = null)
@@ -117,6 +111,7 @@ namespace api.nox.network
         [ShareObjectExport] public ServerAPI Server;
         [ShareObjectExport] public UserAPI User;
         [ShareObjectExport] public RelayAPI Relay;
+        [ShareObjectExport] public AuthAPI Auth;
         [ShareObjectExport] public Func<string, UnityWebRequest, UniTask<Texture2D>> SharedFetchTexture;
         [ShareObjectExport] public Func<string, string, UnityWebRequest, UniTask<string>> SharedDownloadFile;
 
@@ -131,6 +126,7 @@ namespace api.nox.network
             Server = _server;
             User = _user;
             Relay = _relays;
+            Auth = _auth;
         }
 
         public void AfterExport()
@@ -144,6 +140,7 @@ namespace api.nox.network
             Server = null;
             User = null;
             Relay = null;
+            Auth = null;
         }
     }
 }

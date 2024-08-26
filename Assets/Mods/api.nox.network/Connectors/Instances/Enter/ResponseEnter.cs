@@ -1,21 +1,22 @@
 ﻿using System;
 using api.nox.network.Instances.Base;
 using api.nox.network.Utils;
+using Nox.CCK.Mods;
 using Buffer = api.nox.network.Utils.Buffer;
 
 namespace api.nox.network.Instances.Enter
 {
-    public class ResponseEnter : InstanceResponse
+    public class ResponseEnter : InstanceResponse, ShareObject
     {
         public EnterResult Result;
 
         // if Result == Blacklisted
-        public string Reason;
-        public DateTime Expiration;
+        [ShareObjectExport] public string Reason;
+        [ShareObjectExport] public DateTime Expiration;
 
         // if Result in {Success, AlreadyConnected, PasswordRequired}
         public LocalPlayer Player;
-        public byte MaxTps;
+        [ShareObjectExport] public byte MaxTps;
 
         public override bool FromBuffer(Buffer buffer)
         {
@@ -56,5 +57,20 @@ namespace api.nox.network.Instances.Enter
         public override string ToString() => $"{GetType().Name}[Result={Result}, Player={Player}]";
 
         public bool IsSuccess => Result == EnterResult.Success;
+
+        [ShareObjectExport] public byte SharedResult;
+        [ShareObjectExport] public Func<bool> SharedIsSuccess;
+
+        public void BeforeExport()
+        {
+            SharedResult = (byte)Result;
+            SharedIsSuccess = () => IsSuccess;
+        }
+
+        public void AfterImport()
+        {
+            Result = (EnterResult)SharedResult;
+        }
+
     }
 }

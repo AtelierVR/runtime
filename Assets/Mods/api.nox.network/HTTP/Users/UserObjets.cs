@@ -46,4 +46,10 @@ namespace api.nox.network
     internal class UserLogout {
         public bool success;
     }
+
+    [System.Serializable]
+    internal class UserIntegrityRequest
+    {
+        public string address;
+    }
 }

@@ -11,7 +11,7 @@ namespace Nox.SimplyLibs
         [ShareObjectExport, ShareObjectImport] public Func<string, uint, UniTask<ShareObject>> SharedGetInstance;
         [ShareObjectExport, ShareObjectImport] public Func<ShareObject, UniTask<ShareObject>> SharedCreateInstance;
         public async UniTask<SimplyInstanceSearch> SearchInstances(SimplySearchInstanceData data)
-            => (await SharedSearchInstances(data)).Convert<SimplyInstanceSearch>();
+            => (await SharedSearchInstances(data))?.Convert<SimplyInstanceSearch>();
         public async UniTask<SimplyInstance> GetInstance(string server, uint instanceId)
             => (await SharedGetInstance(server, instanceId))?.Convert<SimplyInstance>();
         public async UniTask<SimplyInstance> CreateInstance(SimplyCreateInstanceData data)

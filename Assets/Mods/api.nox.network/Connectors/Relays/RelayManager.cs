@@ -7,6 +7,7 @@ namespace api.nox.network
     public class RelayManager : Manager<Relay>
     {
         public static Relay Get(ushort id) => Cache.Find(r => r.Id == id);
+        public static bool Has(ushort id) => Cache.Exists(r => r.Id == id);
 
         public static void Update()
         {

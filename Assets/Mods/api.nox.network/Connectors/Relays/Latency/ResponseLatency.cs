@@ -1,10 +1,11 @@
 ﻿using System;
 using api.nox.network.Relays.Base;
+using Nox.CCK.Mods;
 using Buffer = api.nox.network.Utils.Buffer;
 
 namespace api.nox.network.Relays.Latency
 {
-    public class ResponseLatency : RelayResponse
+    public class ResponseLatency : RelayResponse, ShareObject
     {
         public DateTime InitialTime;
         public DateTime IntermediateTime;

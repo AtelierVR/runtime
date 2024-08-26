@@ -14,5 +14,7 @@ namespace Nox.SimplyLibs
         [ShareObjectImport, ShareObjectExport] public ushort capacity;
         [ShareObjectImport, ShareObjectExport] public string[] tags;
         [ShareObjectImport, ShareObjectExport] public string world;
+        [ShareObjectImport, ShareObjectExport] public string address;
+
     }
 }

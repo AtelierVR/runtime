@@ -6,23 +6,26 @@ using Cysharp.Threading.Tasks;
 using api.nox.network.Instances.Transform;
 using api.nox.network.Utils;
 using api.nox.network.Instances.Base;
+using Nox.CCK.Mods;
+using System;
+using Buffer = api.nox.network.Utils.Buffer;
 
 // ReSharper disable All
 
 namespace api.nox.network.Instances
 {
 #pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
-    public class Instance
+    public class Instance : ShareObject
 #pragma warning restore CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
     {
-        public uint Id;
-        public ushort InternalId;
+        [ShareObjectExport] public uint Id;
+        [ShareObjectExport] public ushort InternalId;
+        [ShareObjectExport] public string ServerAdress;
+        [ShareObjectExport] public ushort RelayId;
+        [ShareObjectExport] public ushort PlayerCount;
+        [ShareObjectExport] public ushort MaxPlayerCount;
         public InstanceFlags Flags;
-        public string ServerAdress;
-        public ushort RelayId;
         public Relay Relay => RelayManager.Get(RelayId);
-        public ushort PlayerCount;
-        public ushort MaxPlayerCount;
 
         public delegate void OnInstanceEvent(Buffer buffer);
         public event OnInstanceEvent OnInstanceEventEvent;
@@ -129,6 +132,29 @@ namespace api.nox.network.Instances
                 return false;
             var instance = (Instance)obj;
             return InternalId == instance.InternalId && RelayId == instance.RelayId;
+        }
+
+        public void Dispose()
+        {
+            InstanceManager.Remove(this);
+            OnInstanceEventEvent = null;
+        }
+
+
+        [ShareObjectExport] public uint SharedFlags;
+        [ShareObjectExport] public Func<ShareObject> SharedGetRelay;
+        [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedEnter;
+        public void BeforeExport()
+        {
+            SharedFlags = (uint)Flags;
+            SharedGetRelay = () => Relay;
+            SharedEnter = async (obj) => await Enter(obj.Convert<RequestEnter>());
+        }
+
+        public void AfterExport()
+        {
+            SharedFlags = 0;
+            SharedGetRelay = null;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Mods;
@@ -24,7 +25,8 @@ namespace api.nox.network
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/instances/{instanceId}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            var token = await _mod._auth.GetToken(server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             try { await req.SendWebRequest(); }
             catch { return null; }
             if (req.responseCode != 200) return null;
@@ -42,13 +44,15 @@ namespace api.nox.network
             var gateway = data.server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(data.server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/instances/search?{data.ToParams()}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            if (_mod.TryMostAuth(data.server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            var token = await _mod._auth.GetToken(data.server);
+            if(token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             try { await req.SendWebRequest(); }
             catch { return null; }
             Debug.Log(req.downloadHandler.text);
             if (req.responseCode != 200) return null;
             var res = JsonUtility.FromJson<Response<InstanceSearch>>(req.downloadHandler.text);
             if (res.IsError) return null;
+            res.data.netSystem = _mod;
             _mod._api.EventAPI.Emit(new NetEventContext("network.search.instances", server, res.data));
             foreach (var instance in res.data.instances)
                 _mod._api.EventAPI.Emit(new NetEventContext("network.get.instance", server, instance.id, instance));
@@ -63,7 +67,8 @@ namespace api.nox.network
             var gateway = data.server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(data.server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/instances", "PUT") { downloadHandler = new DownloadHandlerBuffer() };
-            if (_mod.TryMostAuth(data.server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            var token = await _mod._auth.GetToken(data.server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(data.ToJSON()));
             req.uploadHandler.contentType = "application/json";
             try { await req.SendWebRequest(); }

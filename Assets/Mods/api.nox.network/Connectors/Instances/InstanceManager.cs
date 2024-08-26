@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using api.nox.network.Utils;
 
@@ -10,11 +11,18 @@ namespace api.nox.network.Instances
             .FirstOrDefault(instance => instance.InternalId == internalId && instance.RelayId == relayId);
         public static List<Instance> Get(ushort relayId) => Cache
             .Where(instance => instance.RelayId == relayId).ToList();
-        
+
         public static void Update()
         {
             foreach (var instance in Cache)
                 instance.Update();
+        }
+
+        public static void Dispose()
+        {
+            foreach (var instance in Cache)
+                instance.Dispose();
+            Cache.Clear();
         }
     }
 }

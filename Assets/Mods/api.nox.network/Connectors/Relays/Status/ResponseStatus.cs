@@ -1,22 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using api.nox.network.Instances;
 using api.nox.network.Relays.Base;
 using api.nox.network.Utils;
+using Nox.CCK.Mods;
 using UnityEngine;
 
 namespace api.nox.network.Relays.Status
 {
-    public class ResponseStatus : RelayResponse
+    public class ResponseStatus : RelayResponse, ShareObject
     {
         public RelayFlags Flags;
-        public string MasterAddress;
         public List<Instances.Instance> Instances = new();
-        public byte Page;
-        public byte PageCount;
+        [ShareObjectExport] public string MasterAddress;
+        [ShareObjectExport] public byte Page;
+        [ShareObjectExport] public byte PageCount;
 
-        public RequestStatus NextPage() => Page + 1 >= PageCount ? null : new RequestStatus { Page = (byte)(Page + 1) };
-
-        public override bool FromBuffer(Buffer buffer)
+        public override bool FromBuffer(Utils.Buffer buffer)
         {
             Flags = buffer.ReadEnum<RelayFlags>();
             MasterAddress = buffer.ReadString();
@@ -33,12 +33,27 @@ namespace api.nox.network.Relays.Status
                 });
             Page = buffer.ReadByte();
             PageCount = buffer.ReadByte();
-            Debug.Log("Page=" + Page + ", PageCount=" + PageCount);
             return true;
         }
 
-
         public override string ToString() =>
             $"{GetType().Name}[Flags={Flags}, MasterAddress={MasterAddress}, Instances={Instances.Count}, Page={Page}/{PageCount}]";
+
+        [ShareObjectExport] public byte SharedFlags;
+        [ShareObjectExport] public ShareObject[] SharedInstances;
+
+        public void BeforeExport()
+        {
+            SharedFlags = (byte)Flags;
+            SharedInstances = new ShareObject[Instances.Count];
+            for (var i = 0; i < Instances.Count; i++)
+                SharedInstances[i] = Instances[i];
+        }
+
+        public void AfterExport()
+        {
+            SharedFlags = 0;
+            SharedInstances = null;
+        }
     }
 }

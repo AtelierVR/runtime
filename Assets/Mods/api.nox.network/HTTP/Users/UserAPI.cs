@@ -1,4 +1,5 @@
 using System;
+using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Mods;
@@ -49,6 +50,28 @@ namespace api.nox.network
             return new Response<bool> { data = true };
         }
 
+        public async UniTask<UserIntegrity> CreateIntegrity(string address)
+        {
+            var config = Config.Load();
+            if (!config.Has("token") || !config.Has("gateway")) return null;
+            var req = new UnityWebRequest(string.Format("{0}/api/users/@me/integrity", config.Get<string>("gateway")), "GET") { downloadHandler = new DownloadHandlerBuffer() };
+            req.SetRequestHeader("Content-Type", "application/json");
+            req.SetRequestHeader("Authorization", string.Format("Bearer {0}", config.Get<string>("token")));
+            req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(new UserIntegrityRequest
+            {
+                address = address
+            })));
+            try { await req.SendWebRequest(); }
+            catch { }
+            if (req.responseCode != 200) return null;
+            var response = JsonUtility.FromJson<Response<UserIntegrity>>(req.downloadHandler.text);
+            if (response.IsError) return response.data;
+            config.Set($"servers.{address}.integrity.token", response.data.token);
+            config.Set($"servers.{address}.integrity.expires", response.data.expires);
+            config.Save();
+            return response.data;
+        }
+
         public async UniTask<UserLogin> PostLogin(string server, string username, string password)
         {
             Uri gateway = await Gateway.FindGatewayMaster(server);
@@ -85,7 +108,8 @@ namespace api.nox.network
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/users/search?query={query}&offset={offset}&limit={limit}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
+            var token = await _mod._auth.GetToken(server);
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             try { await req.SendWebRequest(); }
             catch { }
             if (req.responseCode != 200) return null;
