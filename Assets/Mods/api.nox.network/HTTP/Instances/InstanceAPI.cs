@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
@@ -8,7 +9,7 @@ using UnityEngine.Networking;
 
 namespace api.nox.network
 {
-    public class InstanceAPI : ShareObject
+    public class InstanceAPI : ShareObject, IDisposable
     {
         private readonly NetworkSystem _mod;
 
@@ -32,6 +33,8 @@ namespace api.nox.network
             if (req.responseCode != 200) return null;
             var res = JsonUtility.FromJson<Response<Instance>>(req.downloadHandler.text);
             if (res.IsError) return null;
+            res.data.networkSystem = _mod;
+            SetOrAddInstance(res.data);
             _mod._api.EventAPI.Emit(new NetEventContext("network.get.instance", server, instanceId, res.data));
             return res.data;
         }
@@ -45,7 +48,7 @@ namespace api.nox.network
             if (gateway == null) return null;
             var req = new UnityWebRequest($"{gateway}/api/instances/search?{data.ToParams()}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
             var token = await _mod._auth.GetToken(data.server);
-            if(token != null) req.SetRequestHeader("Authorization", token.ToHeader());
+            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             try { await req.SendWebRequest(); }
             catch { return null; }
             Debug.Log(req.downloadHandler.text);
@@ -53,6 +56,11 @@ namespace api.nox.network
             var res = JsonUtility.FromJson<Response<InstanceSearch>>(req.downloadHandler.text);
             if (res.IsError) return null;
             res.data.netSystem = _mod;
+            foreach (var instance in res.data.instances)
+            {
+                instance.networkSystem = _mod;
+                SetOrAddInstance(instance);
+            }
             _mod._api.EventAPI.Emit(new NetEventContext("network.search.instances", server, res.data));
             foreach (var instance in res.data.instances)
                 _mod._api.EventAPI.Emit(new NetEventContext("network.get.instance", server, instance.id, instance));
@@ -76,20 +84,35 @@ namespace api.nox.network
             if (req.responseCode != 200) return null;
             var res = JsonUtility.FromJson<Response<Instance>>(req.downloadHandler.text);
             if (res.IsError) return null;
+            res.data.networkSystem = _mod;
             _mod._api.EventAPI.Emit(new NetEventContext("network.create.instance", data.server, res.data.id, res.data));
             _mod._api.EventAPI.Emit(new NetEventContext("network.get.instance", data.server, res.data.id, res.data));
+            SetOrAddInstance(res.data);
             return res.data;
         }
+
+        internal List<Instance> instances = new();
+
+        internal void SetOrAddInstance(Instance instance)
+        {
+            var i = instances.FindIndex(i => i.server == instance.server && i.id == instance.id);
+            if (i == -1) instances.Add(instance);
+            else instances[i] = instance;
+        }
+
+        public Instance GetInstanceInCache(string server, uint instanceId) => instances.Find(i => i.server == server && i.id == instanceId);
 
         [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedSearchInstances;
         [ShareObjectExport] public Func<string, uint, UniTask<ShareObject>> SharedGetInstance;
         [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedCreateInstance;
+        [ShareObjectExport] public Func<string, uint, ShareObject> SharedGetInstanceInCache;
 
         public void BeforeExport()
         {
             SharedSearchInstances = async (data) => await SearchInstances(data.Convert<SearchInstanceData>());
             SharedGetInstance = async (server, instanceId) => await GetInstance(server, instanceId);
             SharedCreateInstance = async data => await CreateInstance(data.Convert<CreateInstanceData>());
+            SharedGetInstanceInCache = (server, instanceId) => GetInstanceInCache(server, instanceId);
         }
 
         public void AfterExport()
@@ -97,6 +120,13 @@ namespace api.nox.network
             SharedSearchInstances = null;
             SharedGetInstance = null;
             SharedCreateInstance = null;
+            SharedGetInstanceInCache = null;
+
+        }
+
+        public void Dispose()
+        {
+            instances.Clear();
         }
     }
 }

@@ -4,7 +4,8 @@ namespace Nox.SimplyLibs
 {
     public class SimplyMakeRelayConnectionData : ShareObject
     {
-
+        public string password;
+        public string display_name;
         // address who will be connected to the relay
         [ShareObjectExport] public string relay_address;
 

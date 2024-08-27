@@ -1,15 +1,16 @@
+using Nox.CCK.Mods;
 using UnityEngine;
 
 namespace api.nox.network.Utils
 {
-    public class Transform
+    public class Transform : ShareObject
     {
-        public Vector3 position;
-        public Quaternion rotation;
-        public Vector3 scale;
+        [ShareObjectExport, ShareObjectImport] public Vector3 position;
+        [ShareObjectExport, ShareObjectImport] public Quaternion rotation;
+        [ShareObjectExport, ShareObjectImport] public Vector3 scale;
 
-        public Vector3 velocity = Vector3.zero;
-        public Vector3 angularVelocity = Vector3.zero;
+        [ShareObjectExport, ShareObjectImport] public Vector3 velocity = Vector3.zero;
+        [ShareObjectExport, ShareObjectImport] public Vector3 angularVelocity = Vector3.zero;
 
         public Transform(UnityEngine.Transform transform, Rigidbody rigidbody = null)
         {

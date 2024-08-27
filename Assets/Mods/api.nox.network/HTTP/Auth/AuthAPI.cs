@@ -27,13 +27,13 @@ namespace api.nox.network
             if (config.Has($"servers.{address}.integrity.token"))
             {
                 var token = config.Get($"servers.{address}.integrity.expires", ulong.MinValue);
-                if (token != ulong.MinValue && token > (ulong)System.DateTimeOffset.Now.ToUnixTimeMilliseconds())
+                if (token != ulong.MinValue && token > (ulong)DateTimeOffset.Now.ToUnixTimeMilliseconds())
                     return new AuthToken() { token = config.Get<string>($"servers.{address}.integrity.token"), isIntegrity = true };
             }
 
             var result = await _netSystem._user.CreateIntegrity(address);
-            if (result != null && !result.IsExpirated())
-                return new AuthToken() { token = result.token, isIntegrity = true };
+            if (result != null && !result.IsExpirated()){
+                return new AuthToken() { token = result.token, isIntegrity = true };}
 
             return null;
         }

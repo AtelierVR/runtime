@@ -40,6 +40,7 @@ namespace api.nox.network
         public void OnDispose()
         {
             _relays.Dispose();
+            _instance.Dispose();
             _user = null;
             _world = null;
             _server = null;

@@ -7,6 +7,7 @@ using Nox.CCK;
 using UnityEngine.UI;
 using Nox.SimplyLibs;
 using NUnit.Framework.Constraints;
+using api.nox.game.sessions;
 
 namespace api.nox.game
 {
@@ -79,10 +80,10 @@ namespace api.nox.game
             }
 
             if (gotobtn.interactable)
-                gotobtn.onClick.AddListener(() => JoinInstance(tile, instance).Forget());
+                gotobtn.onClick.AddListener(() => JoinOnlineSession(tile, instance).Forget());
         }
 
-        private async UniTask JoinInstance(GameObject tile, SimplyInstance instance)
+        private async UniTask JoinOnlineSession(GameObject tile, SimplyInstance instance)
         {
             var gotobtn = Reference.GetReference("goto.button", tile).GetComponent<Button>();
             if (!gotobtn.interactable) return;
@@ -91,87 +92,45 @@ namespace api.nox.game
             var user = clientMod.NetworkAPI.GetCurrentUser();
             if (user == null)
             {
-                Debug.LogError("User not found");
                 gotobtn.interactable = true;
                 return;
             }
 
-            var auth = await clientMod.NetworkAPI.Auth.GetToken(instance.server);
-            if (auth == null)
+            var session = GameSystem.instance.sessionManager.GetSession(instance.server, instance.id);
+            if (session != null)
             {
-                Debug.LogError("Failed to get auth token");
+                session.SetCurrent();
+                return;
+            }
+            var token = await clientMod.NetworkAPI.Auth.GetToken(instance.server);
+            if (token == null)
+            {
                 gotobtn.interactable = true;
                 return;
             }
 
-            var result = await clientMod.NetworkAPI.Relay.MakeConnection(new()
+            var controller = new OnlineController(instance)
             {
-                protocol = SimplyRelayProtocol.UDP,
-                relay_address = instance.address,
-                master_address = instance.server,
-                authentificate = new()
+                connectionData = new()
                 {
-                    token = auth.token,
-                    use_integrity_token = auth.isIntegrity,
-                    user_id = user.id,
-                    server_address = user.server
+                    relay_address = instance.address,
+                    master_address = instance.server,
+                    authentificate = new()
+                    {
+                        token = token.token,
+                        server_address = user.server,
+                        use_integrity_token = token.isIntegrity,
+                        user_id = user.id
+                    }
                 }
-            });
+            };
+            session = GameSystem.instance.sessionManager.New(controller, instance.server, instance.id);
+            var pre = await controller.Prepare();
+            if (!pre)
+                session.Dispose();
 
-            if (result == null || !result.IsSuccess)
-            {
-                Debug.LogError("Failed to connect to relay");
-                gotobtn.interactable = true;
-                return;
-            }
-
-            var status = await result.Relay.RequestStatus();
-            if (status == null)
-            {
-                Debug.LogError("Failed to get relay status");
-                gotobtn.interactable = true;
-                return;
-            }
-
-            SimplyRelayInstance currentInstance = null; 
-            foreach (var inst in status.Instances)
-                if (inst.Id == instance.id)
-                {
-                    currentInstance = inst;
-                    break;
-                }
-
-            if (currentInstance == null)
-            {
-                Debug.LogError("Instance not found");
-                gotobtn.interactable = true;
-                return;
-            }
-
-            Debug.Log("Joining instance: " + instance.id + " with internal id: " + currentInstance.InternalId);
-
-            var enter = await currentInstance.Enter(new()
-            {
-                DisplayName = user.username,
-                Password = ""
-            });
-
-            if (enter == null || !enter.IsSuccess)
-            {
-                Debug.LogError("Failed to enter instance");
-                gotobtn.interactable = true;
-                return;
-            }
-
-            Debug.Log("Entered instance: " + instance.id + " with internal id: " + currentInstance.InternalId);
-
-
-
-
-
-
+            gotobtn.interactable = true;
+            return;
         }
-
-
     }
 }

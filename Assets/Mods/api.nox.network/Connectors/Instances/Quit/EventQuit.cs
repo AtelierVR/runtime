@@ -1,12 +1,14 @@
 ﻿using api.nox.network.Instances.Base;
 using api.nox.network.Utils;
+using Nox.CCK.Mods;
 
 namespace api.nox.network.Instances.Quit
 {
-    public class EventQuit : InstanceResponse
+    public class EventQuit : InstanceResponse, ShareObject
     {
         public QuitType Type;
-        public string Reason;
+        [ShareObjectExport] public string Reason;
+        [ShareObjectExport] public byte SharedType;
 
         public override bool FromBuffer(Buffer buffer)
         {
@@ -17,5 +19,15 @@ namespace api.nox.network.Instances.Quit
         }
 
         public override string ToString() => $"{GetType().Name}[Type={Type}, Reason={Reason}]";
+
+        public void BeforeExport()
+        {
+            SharedType = (byte)Type;
+        }
+
+        public void AfterExport()
+        {
+            SharedType = 0;
+        }
     }
 }

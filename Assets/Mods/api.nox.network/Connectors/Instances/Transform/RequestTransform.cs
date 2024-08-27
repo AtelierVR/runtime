@@ -1,19 +1,20 @@
 using api.nox.network.Instances.Base;
 using api.nox.network.Players;
 using api.nox.network.Utils;
+using Nox.CCK.Mods;
 
 namespace api.nox.network.Instances.Transform
 {
-    public class RequestTransform : InstanceRequest
+    public class RequestTransform : InstanceRequest, ShareObject
     {
         public TransformType Type;
         public Utils.Transform Transform;
         public TransformFlags Flags;
 
-        public string Path;
-        public ushort PlayerId;
+        [ShareObjectImport] public string Path;
+        [ShareObjectImport] public ushort PlayerId;
         public PlayerRig PlayerRig;
-        public ushort ObjectId;
+        [ShareObjectImport] public ushort ObjectId;
 
         public override Buffer ToBuffer()
         {
@@ -73,6 +74,24 @@ namespace api.nox.network.Instances.Transform
                 tr = tr.parent;
             }
             Transform = new Utils.Transform(transform);
+        }
+
+
+        [ShareObjectImport] public byte SharedType;
+        [ShareObjectImport] public ShareObject SharedTransform;
+        [ShareObjectImport] public byte SharedFlags;
+        [ShareObjectImport] public ushort SharedPlayerRig;
+
+        public void AfterImport()
+        {
+            Type = (TransformType)SharedType;
+            Transform = SharedTransform?.Convert<Utils.Transform>();
+            Flags = (TransformFlags)SharedFlags;
+            PlayerRig = (PlayerRig)SharedPlayerRig;
+            SharedType = 0;
+            SharedTransform = null;
+            SharedFlags = 0;
+            SharedPlayerRig = 0;
         }
     }
 }

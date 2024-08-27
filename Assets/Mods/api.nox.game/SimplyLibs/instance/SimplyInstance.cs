@@ -1,3 +1,4 @@
+using System;
 using Nox.CCK.Mods;
 
 namespace Nox.SimplyLibs
@@ -15,6 +16,9 @@ namespace Nox.SimplyLibs
         [ShareObjectImport, ShareObjectExport] public string[] tags;
         [ShareObjectImport, ShareObjectExport] public string world;
         [ShareObjectImport, ShareObjectExport] public string address;
+
+        [ShareObjectImport, ShareObjectExport] public Func<ShareObject> SharedGetRelay;
+        public SimplyRelay GetRelay() => SharedGetRelay()?.Convert<SimplyRelay>();
 
     }
 }

@@ -1,15 +1,16 @@
 
 using api.nox.network.Instances.Base;
 using api.nox.network.Utils;
+using Nox.CCK.Mods;
 
 namespace api.nox.network.Instances.Config
 {
 
-    public class ResponseConfigWorldData : InstanceResponse
+    public class ResponseConfigWorldData : InstanceResponse, ShareObject
     {
-        public uint MasterId;
-        public string Address;
-        public ushort Version;
+        [ShareObjectExport] public uint MasterId;
+        [ShareObjectExport] public string Address;
+        [ShareObjectExport] public ushort Version;
 
         public override bool FromBuffer(Buffer buffer)
         {

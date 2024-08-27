@@ -144,17 +144,32 @@ namespace api.nox.network.Instances
         [ShareObjectExport] public uint SharedFlags;
         [ShareObjectExport] public Func<ShareObject> SharedGetRelay;
         [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedEnter;
+        [ShareObjectExport] public Func<UniTask<ShareObject>> SharedQuit;
+        [ShareObjectExport] public Func<UniTask<ShareObject>> SharedRequestConfigWorldData;
+        [ShareObjectExport] public Func<bool> SharedSendConfigWorldLoaded;
+        [ShareObjectExport] public Func<bool> SharedSendConfigReady;
+        [ShareObjectExport] public Func<ShareObject, bool> SharedSendTransform;
         public void BeforeExport()
         {
             SharedFlags = (uint)Flags;
             SharedGetRelay = () => Relay;
             SharedEnter = async (obj) => await Enter(obj.Convert<RequestEnter>());
+            SharedQuit = async () => await Quit();
+            SharedRequestConfigWorldData = async () => await RequestConfigWorldData();
+            SharedSendConfigWorldLoaded = () => SendConfigWorldLoaded();
+            SharedSendConfigReady = () => SendConfigReady();
+            SharedSendTransform = (obj) => SendTransform(obj.Convert<RequestTransform>());
         }
 
         public void AfterExport()
         {
             SharedFlags = 0;
             SharedGetRelay = null;
+            SharedEnter = null;
+            SharedQuit = null;
+            SharedRequestConfigWorldData = null;
+            SharedSendConfigWorldLoaded = null;
+            SharedSendConfigReady = null;
         }
     }
 }
