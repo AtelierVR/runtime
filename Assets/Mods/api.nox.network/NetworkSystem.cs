@@ -19,6 +19,7 @@ namespace api.nox.network
         internal InstanceAPI _instance;
         internal RelayAPI _relays;
         internal AuthAPI _auth;
+        internal WebSocketAPI _ws;
 
 
         public void OnInitialize(ModCoreAPI api)
@@ -30,6 +31,7 @@ namespace api.nox.network
             _instance = new InstanceAPI(this);
             _relays = new RelayAPI(this);
             _auth = new AuthAPI(this);
+            _ws = new WebSocketAPI(this);
         }
 
         public void OnUpdate()
@@ -41,12 +43,14 @@ namespace api.nox.network
         {
             _relays.Dispose();
             _instance.Dispose();
+            _ws.Dispose();
             _user = null;
             _world = null;
             _server = null;
             _instance = null;
             _relays = null;
             _auth = null;
+            _ws = null;
         }
 
         internal async UniTask<Texture2D> FetchTexture(string url, UnityWebRequest req = null)
@@ -113,6 +117,7 @@ namespace api.nox.network
         [ShareObjectExport] public UserAPI User;
         [ShareObjectExport] public RelayAPI Relay;
         [ShareObjectExport] public AuthAPI Auth;
+        [ShareObjectExport] public WebSocketAPI WebSocket;
         [ShareObjectExport] public Func<string, UnityWebRequest, UniTask<Texture2D>> SharedFetchTexture;
         [ShareObjectExport] public Func<string, string, UnityWebRequest, UniTask<string>> SharedDownloadFile;
 
@@ -125,6 +130,7 @@ namespace api.nox.network
             Instance = _instance;
             World = _world;
             Server = _server;
+            WebSocket = _ws;
             User = _user;
             Relay = _relays;
             Auth = _auth;
@@ -139,6 +145,7 @@ namespace api.nox.network
             Instance = null;
             World = null;
             Server = null;
+            WebSocket = null;
             User = null;
             Relay = null;
             Auth = null;

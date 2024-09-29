@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Controller_Grey
-  m_Shader: {fileID: 4800000, guid: 4d4635b48d6948d497b9ef656f379555, type: 3}
+  m_Shader: {fileID: 4800000, guid: 710465ab05b7495f95a4002a12092ec1, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:

@@ -197,6 +197,14 @@ MonoBehaviour:
       value: "{0}"
     - key: dashboard.instance.players.entry.description
       value: "{0}"
+    - key: dashboard.instance.advanced_informations
+      value: "Informations avancées"
+    - key: dashboard.instance.advanced_informations.id
+      value: "ID: {0}"
+    - key: dashboard.instance.advanced_informations.address
+      value: "Adresse: {0}"
+    - key: dashboard.instance.advanced_informations.relay_address
+      value: "Relai: {0}"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home
@@ -360,6 +368,8 @@ MonoBehaviour:
       value: "#{0} • {1}"
     - key: dashboard.world.instances.entry.description
       value: "{0}"
+    - key: dashboard.instance.advanced_informations
+      value: "Advanced Informations"
 
 
       

@@ -4,6 +4,13 @@ namespace api.nox.game.sessions
 {
     public class OfflineController : SessionController
     {
+        public Session _session;
+        public Session session
+        {
+            get => _session;
+            set => _session = value;
+        }
+
         public void Dispose()
         {
         }

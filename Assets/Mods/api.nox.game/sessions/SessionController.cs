@@ -5,6 +5,7 @@ namespace api.nox.game.sessions
 {
     public interface SessionController : IDisposable
     {
+        Session session { get; set; }
         public UniTask<bool> Prepare();
     }
 }

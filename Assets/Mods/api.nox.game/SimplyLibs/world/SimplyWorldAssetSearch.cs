@@ -41,5 +41,7 @@ namespace Nox.SimplyLibs
                 SharedWorldAssets[i] = assets[i];
             Debug.Log("BeforeExport" + SharedWorldAssets);
         }
+
+        public override string ToString() => $"{GetType().Name}[total={total}, limit={limit}, offset={offset}, withEmpty={withEmpty}, hasPrevious={HasPrevious()}, hasNext={HasNext()}]";
     }
 }

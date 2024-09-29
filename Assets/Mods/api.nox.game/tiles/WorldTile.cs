@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using Nox.SimplyLibs;
 using System.Linq;
 using System.Threading;
+using api.nox.game.sessions;
 
 namespace api.nox.game
 {
@@ -81,6 +82,7 @@ namespace api.nox.game
             await UniTask.WhenAll(tasks);
         }
 
+        private bool goto_instance = false;
         private async UniTask FetchWorkInstances(GameObject tile, SimplyWorld world, string address)
         {
             var res = await clientMod.NetworkAPI.Instance.SearchInstances(new()
@@ -105,8 +107,40 @@ namespace api.nox.game
                 Reference.GetReference("title", entry).GetComponent<TextLanguage>().arguments = new string[] { instance.name, instance.title };
                 Reference.GetReference("description", entry).GetComponent<TextLanguage>().arguments = new string[] { instance.description };
                 Reference.GetReference("button", entry).GetComponent<Button>().onClick
-                    .AddListener(() => clientMod.GotoTile("game.instance", instance, world));
+                    .AddListener(() => OnClickInstance(instance).Forget());
             }
+            goto_instance = false;
+        }
+
+        private async UniTask OnClickInstance(SimplyInstance instance)
+        {
+            if (goto_instance) return;
+            goto_instance = true;
+
+            var worldref = new WorldPatern(instance.world, instance.server);
+            var world = await clientMod.NetworkAPI.World.GetWorld(worldref.server, worldref.id);
+            if (world == null)
+            {
+                Debug.LogError("World not found");
+                goto_instance = false;
+                return;
+            }
+
+            var search = await world.SearchAssets(0, 1,
+                worldref.Version == ushort.MaxValue ? null : new uint[] { worldref.Version },
+                new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) },
+                new string[] { "unity" }
+            );
+
+            if (search == null || search.assets.Length == 0)
+            {
+                Debug.LogError("World not compatible with player");
+                goto_instance = false;
+                return;
+            }
+            var asset = search.assets[0];
+            clientMod.GotoTile("game.instance", instance, world, asset);
+            goto_instance = false; 
         }
 
 
@@ -169,9 +203,22 @@ namespace api.nox.game
             gotob.interactable = false;
             if (!WorldManager.HasWorldInCache(asset.hash))
                 await OnClickDownload(dlb, tile, world, asset, DownloadButtonType.Download);
-            var scene = await WorldManager.LoadWorld(asset.hash, 0);
-            if (scene == default)
-                Debug.LogError("Failed to load world");
+
+            var session = GameSystem.instance.sessionManager.GetSession(world.server, world.id);
+            if (session != null)
+            {
+                session.SetCurrent();
+                return;
+            }
+
+            var controller = new OfflineController();
+            session = GameSystem.instance.sessionManager.New(controller, world.server, world.id);
+            session.world = world;
+            session.worldAsset = asset;
+            if (await controller.Prepare())
+                session.SetCurrent();
+            else session.Dispose();
+
             UpdateContent(tile, world);
         }
 
@@ -232,7 +279,6 @@ namespace api.nox.game
 
         internal void SetDownloadButton(DownloadButtonType type, float progress = 0)
         {
-            Debug.Log("SetDownloadButton" + type + " " + progress);
             if (tile == null) return;
             var downloadbutton = Reference.GetReference("download.button", tile);
             var start = Reference.GetReference("start", downloadbutton);

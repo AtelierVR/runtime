@@ -11,7 +11,6 @@ using Nox.SimplyLibs;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace api.nox.game
@@ -36,17 +35,24 @@ namespace api.nox.game
             WorldManager._gameClientSystem = this;
             coreAPI = api;
             api.AssetAPI.LoadLocalWorld("default");
-            var controller = api.AssetAPI.GetLocalAsset<GameObject>("prefabs/xr-controller");
+
+            // Load the XR controller prefab
+            var controller = api.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.controller.xr");
             m_controller = Object.Instantiate(controller);
             m_controller.name = "game.controller";
             GameObject.DontDestroyOnLoad(m_controller);
-            var XRControllerComponent = m_controller.AddComponent<XRController>();
-            XRControllerComponent.enabled = false;
-            var DesktopControllerComponent = m_controller.AddComponent<DesktopController>();
-            DesktopControllerComponent.enabled = false;
-            XRControllerComponent.SetupControllerAtStartup(api);
-            m_bindLeftMenu.action.performed += ctx => OnMenuClick(true);
-            m_bindRightMenu.action.performed += ctx => OnMenuClick(false);
+            BaseController.SetupControllerAtStartup(api, m_controller);
+
+            // Bind the menu buttons
+            BaseController.CurrentController.OpenMenuAction.action.started += (context) =>Debug.Log("Menu Click Started");
+            BaseController.CurrentController.OpenMenuAction.action.performed += (context) => Debug.Log("Menu Click Performed");
+            BaseController.CurrentController.OpenMenuAction.action.canceled += (context) => Debug.Log("Menu Click Canceled");
+
+            Debug.Log($"{BaseController.CurrentController}:{BaseController.CurrentController.OpenMenuAction}:");
+            
+            Debug.Log("GameClientSystem Initialized");
+
+            // Initialize the tile managers
             homeTile = new HomeTileManager(this);
             userTile = new UserTileManager(this);
             serverTile = new ServerTileManager(this);
@@ -54,14 +60,12 @@ namespace api.nox.game
             worldTile = new WorldTileManager(this);
             makeinstance = new MakeInstanceTileManager(this);
             instance = new InstanceTileManager(this);
+
+            // Subscribe to the tile events
             tilesub = api.EventAPI.Subscribe("game.tile", OnTile);
             tilegotosub = api.EventAPI.Subscribe("game.tile.goto", OnGotoTile);
             eventSystem = Reference.GetReference("game.eventsystem", m_controller)?.GetComponent<EventSystem>();
             eventSystem?.gameObject.SetActive(!coreAPI.XRAPI.IsEnabled());
-            tilegotosub = api.EventAPI.Subscribe(null, (context) =>
-            {
-                Debug.Log("Event: " + context.EventName);
-            });
         }
 
         public void OnTile(EventData context)
@@ -104,8 +108,10 @@ namespace api.nox.game
         }
 
 
-        private void OnMenuClick(bool isLeft)
+        private void OnMenuClick(InputAction.CallbackContext context)
         {
+            Debug.Log("Menu Clicked");
+
             if (!coreAPI.XRAPI.IsEnabled() && eventSystem?.currentSelectedGameObject != null) return;
             var menu = GetOrCreateMenu();
             if (!menu.gameObject.activeSelf)
@@ -129,12 +135,11 @@ namespace api.nox.game
         public void GotoTile(string page, params object[] args) => coreAPI.EventAPI.Emit("game.tile.goto", page, args);
 
         private GameObject m_controller;
-        private InputActionReference m_bindLeftMenu => Binding.GetBinding("game.lefthand.menu", m_controller);
-        private InputActionReference m_bindRightMenu => Binding.GetBinding("game.righthand.menu", m_controller);
         private Camera m_headCamera => Reference.GetReference("game.camera", m_controller).GetComponent<Camera>();
         private Menu m_menu;
         private Menu GetOrCreateMenu()
         {
+            Debug.Log("GetOrCreateMenu");
             if (m_menu != null) return m_menu;
             var menuPrefab = coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/xr-menu");
             var menuObject = Object.Instantiate(menuPrefab);

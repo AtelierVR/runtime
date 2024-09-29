@@ -28,6 +28,7 @@ namespace api.nox.network
             if (req.responseCode != 200) return null;
             var response = JsonUtility.FromJson<Response<Server>>(req.downloadHandler.text);
             if (response.IsError) return null;
+            response.data._mod = _mod;
             server = response.data;
             _mod._api.EventAPI.Emit(new NetEventContext("network.get.server.me", server, true));
             _mod._api.EventAPI.Emit(new NetEventContext("network.get.server", server));
@@ -44,6 +45,7 @@ namespace api.nox.network
             if (req.responseCode != 200) return null;
             var response = JsonUtility.FromJson<Response<Server>>(req.downloadHandler.text);
             if (response.IsError) return null;
+            response.data._mod = _mod;
             _mod._api.EventAPI.Emit(new NetEventContext("network.get.server", address, response.data));
             return response.data;
         }
@@ -64,18 +66,6 @@ namespace api.nox.network
         private async UniTask<ServerSearch> SearchServers(string server, string query, uint offset = 0, uint limit = 10)
         {
             return new ServerSearch() { servers = new Server[0], total = 0, limit = limit, offset = offset };
-            // GET /api/servers/search?query={query}&offset={offset}&limit={limit}
-            // var User = _mod._api.NetworkAPI.GetCurrentUser();
-            // var config = Config.Load();
-            // var gateway = server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
-            // if (gateway == null) return null;
-            // var req = new UnityWebRequest($"{gateway}/api/servers/search?query={query}&offset={offset}&limit={limit}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            // if (_mod.TryMostAuth(server, out var auth)) req.SetRequestHeader("Authorization", auth);
-            // try { await req.SendWebRequest(); }
-            // catch { return null; }
-            // if (req.responseCode != 200) return null;
-            // var response = JsonUtility.FromJson<Response<ServerSearch>>(req.downloadHandler.text);
-            // return response.data;
         }
 
         

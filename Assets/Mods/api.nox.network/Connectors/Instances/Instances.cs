@@ -9,6 +9,9 @@ using api.nox.network.Instances.Base;
 using Nox.CCK.Mods;
 using System;
 using Buffer = api.nox.network.Utils.Buffer;
+using UnityEngine;
+using System.Threading;
+using Codice.Utils;
 
 // ReSharper disable All
 
@@ -41,9 +44,16 @@ namespace api.nox.network.Instances
             var buffer = new Buffer();
             buffer.Write(InternalId);
             buffer.Write(request.ToBuffer());
-            var uid = Relay.Send(buffer, RequestType.Enter);
-            if (uid == ushort.MaxValue) return null;
-            var response = await WaitForResponse<ResponseEnter>(uid, ResponseType.Enter);
+            var uid = Relay.NextState();
+            var source = new CancellationTokenSource();
+            var wait = WaitForResponse<ResponseEnter>(uid, ResponseType.Enter, timeout: 20, cancellationToken: source.Token);
+            uid = Relay.Send(buffer, RequestType.Enter, uid);
+            if (uid == ushort.MaxValue)
+            {
+                source.Cancel();
+                return null;
+            }
+            var response = await wait;
             LastEnter = response;
             return response;
         }
@@ -100,9 +110,10 @@ namespace api.nox.network.Instances
         {
         }
 
-        private async UniTask<T> WaitForResponse<T>(ushort uid, ResponseType type, byte timeout = 5)
+        private async UniTask<T> WaitForResponse<T>(ushort uid, ResponseType type, byte timeout = 5, CancellationToken cancellationToken = default)
             where T : InstanceResponse, new()
         {
+            Debug.Log($"WaitForResponse: {uid} {type} {timeout}");
             T res = null;
             var rec = new IConnector.OnReceived((buffer) =>
             {
@@ -112,14 +123,25 @@ namespace api.nox.network.Instances
                 var ruid = buffer.ReadUShort();
                 var rtype = buffer.ReadEnum<ResponseType>();
                 var riid = buffer.ReadUShort();
-                if (rtype != type || riid != InternalId) return;
-                if (uid != ushort.MaxValue && ruid != uid) return;
+                if (rtype != ResponseType.Latency)
+                    Debug.Log($"WaitForResponse response: {uid} {type} {rtype} {riid} {ruid} {length}");
+                if (rtype != type || riid != InternalId)
+                {
+                    Debug.Log($"WaitForResponse not match: {uid} {type} {rtype} {riid} {ruid} {length}");
+                    return;
+                }
+                if (uid != ushort.MaxValue && ruid != uid)
+                {
+                    Debug.Log($"WaitForResponse not match uid: {uid} {type} {rtype} {riid} {ruid} {length}");
+                    return;
+                }
                 var rres = new T { RelayId = RelayId, UId = uid, InternalId = InternalId };
+                Debug.Log($"WaitForResponse ok: {uid} {type} {rtype} {riid} {ruid} {length} {rres}");
                 res = rres.FromBuffer(buffer.Clone(5, length)) ? rres : null;
             });
             Relay.Connector.OnReceivedEvent += rec;
-            var time = System.DateTime.Now;
-            await UniTask.WaitUntil(() => (System.DateTime.Now - time).TotalSeconds > timeout || res != null);
+            var time = DateTime.Now;
+            await UniTask.WaitUntil(() => (DateTime.Now - time).TotalSeconds > timeout || res != null || cancellationToken.IsCancellationRequested);
             Relay.Connector.OnReceivedEvent -= rec;
             return res;
         }

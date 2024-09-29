@@ -31,5 +31,7 @@ namespace Nox.SimplyLibs
 
         [ShareObjectImport, ShareObjectExport] public Func<string, string> SharedToFullString;
         public string ToFullString(string default_server = null) => SharedToFullString(default_server);
+
+        public override string ToString() => $"{GetType().Name}[id={id}, owner={owner}, server={server}]";
     }
 }

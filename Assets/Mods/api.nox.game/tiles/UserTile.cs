@@ -44,6 +44,7 @@ namespace api.nox.game
                     width = 3,
                     height = 2,
                 };
+            
             userMeWidget.GetContent = (Transform parent) =>
             {
                 var baseprefab = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget");
@@ -65,6 +66,7 @@ namespace api.nox.game
                 btnref.onClick.AddListener(OnClickWidgetUser);
                 return btn;
             };
+
             clientMod.coreAPI.EventAPI.Emit("game.widget", userMeWidget);
 
             if (homeWidget == null)
@@ -74,6 +76,7 @@ namespace api.nox.game
                     width = 1,
                     height = 1,
                 };
+
             homeWidget.GetContent = (Transform parent) =>
             {
                 var baseprefab = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget");
@@ -84,6 +87,7 @@ namespace api.nox.game
                 btnref.onClick.AddListener(() => OnClickWidgetHome().Forget());
                 return btn;
             };
+
             clientMod.coreAPI.EventAPI.Emit("game.widget", homeWidget);
         }
 

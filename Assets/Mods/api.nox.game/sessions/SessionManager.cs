@@ -9,9 +9,9 @@ namespace api.nox.game.sessions
         public List<Session> sessions = new();
         public ushort currentSessionUid;
 
-        public ushort NextId()
+        public byte NextId()
         {
-            ushort id = 0;
+            byte id = 0;
             while (sessions.Exists(session => session.id == id))
                 id++;
             return id;
@@ -48,10 +48,10 @@ namespace api.nox.game.sessions
             var session = new Session
             {
                 uid = NextId(),
-                id = (ushort)id,
-                group = group,
-                controller = controller
+                id = id,
+                group = group
             };
+            session.controller = controller;
             sessions.Add(session);
             return session;
         }

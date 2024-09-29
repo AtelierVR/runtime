@@ -16,6 +16,7 @@ namespace api.nox.game
         private GameObject tile;
         private EventSubscription eventServerUpdate;
         private HomeWidget serverMeWidget;
+        internal SimplyWebSocket ws;
 
         internal ServerTileManager(GameClientSystem clientMod)
         {
@@ -31,7 +32,7 @@ namespace api.nox.game
             if (context.Data[1] as bool? ?? false) return;
             var server = (context.Data[0] as ShareObject).Convert<SimplyServer>();
             if (server == null) OnServerDisconnect();
-            else OnServerConnect(server);
+            else OnServerConnect(server).Forget();
         }
 
         private async UniTask<bool> UpdateTexure(RawImage img, string url)
@@ -45,7 +46,7 @@ namespace api.nox.game
             else return false;
         }
 
-        private void OnServerDisconnect()
+        private async void OnServerDisconnect()
         {
             Debug.Log("Server disconnected.");
             if (serverMeWidget != null)
@@ -54,10 +55,15 @@ namespace api.nox.game
                 clientMod.coreAPI.EventAPI.Emit("game.widget", serverMeWidget);
                 serverMeWidget = null;
             }
+            if (ws != null)
+            {
+                await ws.Close();
+                ws = null;
+            }
         }
 
 
-        private void OnServerConnect(SimplyServer server)
+        private async UniTask OnServerConnect(SimplyServer server)
         {
             Debug.Log("Server connected: " + server.title);
             if (serverMeWidget == null)
@@ -88,6 +94,14 @@ namespace api.nox.game
                 return btn;
             };
             clientMod.coreAPI.EventAPI.Emit("game.widget", serverMeWidget);
+
+            ws = await server.GetOrConnect();
+            if (ws != null)
+            {
+                Debug.Log("Server connected: " + server.title);
+                ws.OnMessage += (msg) => Debug.Log("Server message: " + msg);
+                ws.OnClose += () => Debug.Log("Server closed.");
+            }
         }
 
         private void OnClickWidget()
@@ -136,7 +150,7 @@ namespace api.nox.game
         {
             var server = clientMod.NetworkAPI.GetCurrentServer();
             server ??= await clientMod.NetworkAPI.Server.GetMyServer();
-            if (server != null) OnServerConnect(server);
+            if (server != null) await OnServerConnect(server);
             else OnServerDisconnect();
         }
     }

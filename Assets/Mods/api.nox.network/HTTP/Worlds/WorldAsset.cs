@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods;
 
 namespace api.nox.network
@@ -6,6 +7,7 @@ namespace api.nox.network
     [System.Serializable]
     public class WorldAsset : ShareObject
     {
+        internal NetworkSystem _networkSystem;
         [ShareObjectExport] public uint id;
         [ShareObjectExport] public uint version;
         [ShareObjectExport] public string engine;

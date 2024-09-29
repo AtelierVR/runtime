@@ -8,6 +8,8 @@ using UnityEngine.UI;
 using Nox.SimplyLibs;
 using NUnit.Framework.Constraints;
 using api.nox.game.sessions;
+using static api.nox.game.WorldTileManager;
+using api.nox.game.LocationIP;
 
 namespace api.nox.game
 {
@@ -24,6 +26,7 @@ namespace api.nox.game
 
         private async UniTask<bool> UpdateTexure(RawImage img, string url)
         {
+            Debug.Log("UpdateTexure: " + url);
             var tex = await clientMod.NetworkAPI.FetchTexture(url);
             if (tex != null)
             {
@@ -41,6 +44,8 @@ namespace api.nox.game
         internal void SendTile(EventData context)
         {
             var instance = ((context.Data[1] as object[])[0] as ShareObject).Convert<SimplyInstance>();
+            var world = ((context.Data[1] as object[])[1] as ShareObject).Convert<SimplyWorld>();
+            var asset = ((context.Data[1] as object[])[2] as ShareObject).Convert<SimplyWorldAsset>();
             var tile = new TileObject()
             {
                 id = "api.nox.game.instance",
@@ -50,44 +55,62 @@ namespace api.nox.game
                     var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.instance");
                     pf.SetActive(false);
                     this.tile = Object.Instantiate(pf, tf);
-                    UpdateContent(this.tile, instance);
+                    UpdateContent(this.tile, instance, world, asset);
                     return this.tile;
                 }
             };
             clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
         }
 
-        private void UpdateContent(GameObject tile, SimplyInstance instance)
+        private void UpdateContent(GameObject tile, SimplyInstance instance, SimplyWorld world, SimplyWorldAsset asset, IPData location = null)
         {
             Reference.GetReference("display", tile).GetComponent<TextLanguage>().arguments = new string[] { instance.title };
             Reference.GetReference("title", tile).GetComponent<TextLanguage>().arguments = new string[] { instance.title };
             Reference.GetReference("description", tile).GetComponent<TextLanguage>().arguments = new string[] { instance.description };
+            Reference.GetReference("ai.address", tile).GetComponent<TextLanguage>().arguments = new string[] { instance.server };
+            Reference.GetReference("ai.id", tile).GetComponent<TextLanguage>().arguments = new string[] { instance.id.ToString() };
+            Reference.GetReference("ai.relay", tile).GetComponent<TextLanguage>().arguments = new string[] { instance.address ?? "Not openned" };
+
+
 
             var icon = Reference.GetReference("icon", tile).GetComponent<RawImage>();
             if (!string.IsNullOrEmpty(instance.thumbnail)) UpdateTexure(icon, instance.thumbnail).Forget();
 
             var gotobtn = Reference.GetReference("goto.button", tile).GetComponent<Button>();
             gotobtn.onClick.RemoveAllListeners();
-            gotobtn.interactable = true;
-            if (instance.address == null) gotobtn.interactable = false;
-            else
+            gotobtn.interactable = false;
+            if (!string.IsNullOrEmpty(instance.address))
             {
+                UpdateLocation(tile, instance).Forget();
+                gotobtn.interactable = true;
                 var relay = clientMod.NetworkAPI.Relay.GetRelay(instance.address);
                 if (relay != null)
                 {
-                    Debug.Log("Relay found: " + instance.address);
+                    
+
                 }
             }
+            else Debug.Log("Instance not openned: " + instance.title);
 
             if (gotobtn.interactable)
-                gotobtn.onClick.AddListener(() => JoinOnlineSession(tile, instance).Forget());
+                gotobtn.onClick.AddListener(() => JoinOnlineSession(tile, instance, world, asset).Forget());
         }
 
-        private async UniTask JoinOnlineSession(GameObject tile, SimplyInstance instance)
+        private async UniTask UpdateLocation(GameObject tile, SimplyInstance instance)
         {
+            var location = await LocationIP.LocationIP.FetchLocation(instance.address.Split(':')[0]);
+            if (location == null || !location.success) return;
+            var flag = Reference.GetReference("flag", tile).GetComponent<RawImage>();
+            if (!string.IsNullOrEmpty(location.GetFlagImg())) UpdateTexure(flag, location.GetFlagImg()).Forget();
+        }
+
+        private async UniTask JoinOnlineSession(GameObject tile, SimplyInstance instance, SimplyWorld world, SimplyWorldAsset asset)
+        {
+            Debug.Log("JoinOnlineSession: " + instance.title);
             var gotobtn = Reference.GetReference("goto.button", tile).GetComponent<Button>();
             if (!gotobtn.interactable) return;
             gotobtn.interactable = false;
+
 
             var user = clientMod.NetworkAPI.GetCurrentUser();
             if (user == null)
@@ -125,9 +148,11 @@ namespace api.nox.game
                 }
             };
             session = GameSystem.instance.sessionManager.New(controller, instance.server, instance.id);
-            var pre = await controller.Prepare();
-            if (!pre)
-                session.Dispose();
+            session.world = world;
+            session.worldAsset = asset;
+            if (await controller.Prepare())
+                session.SetCurrent();
+            else session.Dispose();
 
             gotobtn.interactable = true;
             return;

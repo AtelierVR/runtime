@@ -41,7 +41,6 @@ namespace api.nox.game
         {
             var handler = (context.Data[0] as ShareObject).Convert<NavigationHandler>();
             if (handler == null) return;
-            Debug.Log("Navigation handler received: " + handler.id);
             if (navigationHandlers.ContainsKey(handler.id) && handler.GetWorkers == null)
             {
                 navigationHandlers.Remove(handler.id);

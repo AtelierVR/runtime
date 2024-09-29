@@ -44,5 +44,32 @@ namespace Nox.CCK
             if (go == null) return default;
             return go.GetComponent<T>();
         }
+
+        public static T FindComponent<T>(GameObject parent)
+        {
+            var component = parent.GetComponent<T>();
+            if (component != null)
+                return component;
+            foreach (Transform child in parent.transform)
+            {
+                component = FindComponent<T>(child.gameObject);
+                if (component != null)
+                    return component;
+            }
+            return default;
+        }
+
+        public static T FindComponent<T>(Scene scene = default)
+        {
+            if (scene == default)
+                scene = SceneManager.GetActiveScene();
+            foreach (var gameObject in scene.GetRootGameObjects())
+            {
+                var component = FindComponent<T>(gameObject);
+                if (component != null)
+                    return component;
+            }
+            return default;
+        }
     }
 }

@@ -16,7 +16,7 @@ namespace Nox
             DontDestroyOnLoad(gameObject);
             Instance = this;
             Init();
-            
+
         }
 
         public void Update()
@@ -41,8 +41,6 @@ namespace Nox
             Debug.Log("Initializing Nox...");
             ModManager.Init();
             var results = ModManager.LoadAllClientMods();
-            foreach (var result in results)
-                Debug.Log($"Infos: {result.Success} {result.Path} {result.Message}");
             if (results.Where(r => r.IsError).Count() > 0)
             {
                 var path = Path.Combine(CCK.Constants.GameAppDataPath, "error-" + System.DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".txt");

@@ -95,9 +95,6 @@ namespace Nox.Editor.Mods
                     continue;
                 }
                 modSearchers.Add(mod);
-                Debug.Log("Found mod " + mod.Metadata.GetId() + " v" + mod.Metadata.GetVersion());
-                if (mod.Metadata.GetProvides().Length > 0)
-                    Debug.Log("Provides: " + string.Join(", ", mod.Metadata.GetProvides()));
             }
             var platformEngine = new List<ModSource>();
             foreach (var mod in modSearchers)
@@ -124,7 +121,6 @@ namespace Nox.Editor.Mods
             // check if the mod has no breaks depends conflicts
             foreach (var mod in ckeckedMods)
             {
-                Debug.Log("Checking mod " + mod.Metadata.GetId());
                 var broken = false;
                 foreach (var required in mod.Metadata.GetBreaks())
                 {
@@ -217,13 +213,10 @@ namespace Nox.Editor.Mods
                     }
                 }
 
-                Debug.Log("Mod " + mod.Metadata.GetId() + " v" + mod.Metadata.GetVersion() + (broken ? " is broken" : " is ready"));
                 if (broken)
                     breakMods.Add(mod);
                 else readyMods.Add(mod);
             }
-
-            Debug.Log("Mods: " + readyMods.Count + " ready, " + breakMods.Count + " broken");
 
             // sort by dependencies
             readyMods.Sort((a, b) =>
@@ -237,10 +230,6 @@ namespace Nox.Editor.Mods
                         i--;
                 return i;
             });
-
-            for (var i = 0; i < readyMods.Count; i++)
-                Debug.Log("Loading mod " + readyMods[i].Metadata.GetId() + " v" + readyMods[i].Metadata.GetVersion() + " (" + (i + 1) + "/" + readyMods.Count + ")");
-
 
             // load mods with entry points
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -269,7 +258,6 @@ namespace Nox.Editor.Mods
                 // create the mod
                 try
                 {
-                    Debug.Log("Loading mod " + mod.Metadata.GetId());
                     var modInstance = new EditorMod(mod.Metadata, mc.ToArray(), ec.ToArray(), mod.Path);
                     AddMod(modInstance);
                     if (!modInstance.SetEnabled(true))
@@ -282,6 +270,7 @@ namespace Nox.Editor.Mods
                     break;
                 }
             }
+
             if (!success)
                 foreach (var modsearch in readyMods)
                 {

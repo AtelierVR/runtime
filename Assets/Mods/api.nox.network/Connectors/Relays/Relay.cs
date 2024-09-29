@@ -48,6 +48,9 @@ namespace api.nox.network.Relays
             var state = buffer.ReadUShort();
             var type = (ResponseType)buffer.ReadByte();
             if (length < 5 || length > buffer.length) return;
+            if (type != ResponseType.Latency)
+                Debug.Log($"Received {state} {type} from {EndPoint}");
+            OnRelayEventEvent?.Invoke(buffer);
             OnRelayEventEvent?.Invoke(buffer);
             if (length >= 6)
                 switch (type)
@@ -85,11 +88,13 @@ namespace api.nox.network.Relays
             }
         }
 
-        public ushort Send(Buffer data, RequestType type = RequestType.None)
+        public ushort NextState() => (ushort)Random.Range(ushort.MinValue, ushort.MaxValue);
+
+        public ushort Send(Buffer data, RequestType type = RequestType.None, ushort state = ushort.MaxValue)
         {
             if (!Connector.IsConnected()) return ushort.MaxValue;
             var buffer = new Buffer();
-            var state = (ushort)Random.Range(ushort.MinValue, ushort.MaxValue);
+            if (state == ushort.MaxValue) state = NextState();
             buffer.Write((ushort)(data.length + 4));
             buffer.Write(state);
             buffer.Write(type);

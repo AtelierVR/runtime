@@ -287,7 +287,11 @@ namespace api.nox.network
             var User = _mod.GetCurrentUser();
             var config = Config.Load();
             var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
-            if (gateway == null) return null;
+            if (gateway == null)
+            {
+                Debug.Log("Gateway is null");
+                return null;
+            }
             string url = $"{gateway}/api/worlds/{id}/assets?offset={offset}&limit={limit}";
             if (versions != null) foreach (var version in versions) url += $"&version={version}";
             if (platforms != null) foreach (var platform in platforms) url += $"&platform={platform}";
@@ -297,10 +301,22 @@ namespace api.nox.network
             var token = await _mod._auth.GetToken(server);
             if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             try { await req.SendWebRequest(); }
-            catch { return null; }
-            if (req.responseCode != 200) return null;
+            catch
+            {
+                Debug.Log("Error: " + req.downloadHandler.text);
+                return null;
+            }
+            if (req.responseCode != 200)
+            {
+                Debug.Log("Error: " + req.downloadHandler.text);
+                return null;
+            }
             var res = JsonUtility.FromJson<Response<WorldAssetSearch>>(req.downloadHandler.text);
-            if (res.IsError) return null;
+            if (res.IsError)
+            {
+                Debug.Log("Error: " + req.downloadHandler.text);
+                return null;
+            }
             res.data.netSystem = _mod;
             res.data.server = server;
             res.data.world_id = id;

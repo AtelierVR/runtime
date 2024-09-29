@@ -1,14 +1,25 @@
+using api.nox.game.Controllers;
 using Cysharp.Threading.Tasks;
+using Nox.CCK;
 using Nox.SimplyLibs;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace api.nox.game.sessions
 {
     public class OnlineController : SessionController
     {
+        public Session _session;
+        public Session session
+        {
+            get => _session;
+            set => _session = value;
+        }
+
         internal SimplyMakeRelayConnectionData connectionData;
         private string server;
         private uint instanceId;
+
         internal SimplyInstance GetInstance() => GameSystem.instance.NetworkAPI.Instance.GetInstanceInCache(server, instanceId);
         internal SimplyRelay GetRelay() => GetInstance().GetRelay();
 
@@ -58,7 +69,7 @@ namespace api.nox.game.sessions
 
             if (enter == null)
             {
-                Debug.Log("Enter failed");
+                Debug.Log("Enter failed (timeout)");
                 return false;
             }
 
@@ -70,6 +81,50 @@ namespace api.nox.game.sessions
 
             Debug.Log("Enter success");
 
+            var configworld = await instance.RequestConfigWorldData();
+            if (configworld == null)
+            {
+                Debug.Log("ConfigWorldData failed");
+                return false;
+            }
+
+            Debug.Log("ConfigWorldData: " + configworld.Address + " " + configworld.MasterId + " " + configworld.Version);
+            var world = await GameSystem.instance.NetworkAPI.World.GetWorld(configworld.Address, configworld.MasterId);
+            var search = world != null ? await world.SearchAssets(0, 1,
+                configworld.Version == ushort.MaxValue ? null : new uint[] { configworld.Version },
+                new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) },
+                new string[] { "unity" }
+            ) : null;
+            Debug.Log("Search: " + world + "f" + search);
+            var asset = search?.assets[0];
+            if (world == null || asset == null)
+            {
+                Debug.Log("World or Asset is null");
+                return false;
+            }
+
+            if (!WorldManager.HasWorldInCache(asset.hash))
+            {
+                var res = await WorldManager.DownloadWorld(asset.hash, asset.url);
+                if (!res.success) return false;
+            }
+
+            var scene = await WorldManager.LoadWorld(asset.hash, 0, LoadSceneMode.Additive);
+            if (scene == default || !scene.IsValid())
+            {
+                Debug.Log("Scene is null");
+                return false;
+            }
+            session.scenes.Add(scene);
+
+            var indexMainDescriptor = session.IndexOfMainDescriptor(out var descriptor);
+            Debug.Log("IndexMainDescriptor: " + indexMainDescriptor + " " + descriptor);
+            var spawn = descriptor.ChoiceSpawn();
+
+            BaseController.CurrentController.Teleport(spawn.transform);
+
+            Debug.Log("Teleport success");
+            
             return true;
         }
 

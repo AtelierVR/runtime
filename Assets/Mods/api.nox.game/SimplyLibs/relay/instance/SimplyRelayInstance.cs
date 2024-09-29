@@ -29,6 +29,9 @@ namespace Nox.SimplyLibs
         [ShareObjectImport] public Func<ShareObject, bool> SharedSendTransform;
         public bool SendTransform(SimplyRelayRequestTransform request)
             => SharedSendTransform(request);
+        [ShareObjectImport] public Func<UniTask<ShareObject>> SharedRequestConfigWorldData;
+        public async UniTask<SimplyRelayResponseConfigWorldData> RequestConfigWorldData()
+            => (await SharedRequestConfigWorldData())?.Convert<SimplyRelayResponseConfigWorldData>();
 
         public void AfterImport()
         {

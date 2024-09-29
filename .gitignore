@@ -73,3 +73,4 @@ crashlytics-build.properties
 # Custom Build Output folder
 /[Aa]ssets/BuildOutput/
 /[Aa]ssets/Output/
+/[Aa]ssets/Autohand/

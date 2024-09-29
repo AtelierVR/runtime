@@ -54,7 +54,7 @@ namespace api.nox.network
         {
             var config = Config.Load();
             if (!config.Has("token") || !config.Has("gateway")) return null;
-            var req = new UnityWebRequest(string.Format("{0}/api/users/@me/integrity", config.Get<string>("gateway")), "GET") { downloadHandler = new DownloadHandlerBuffer() };
+            var req = new UnityWebRequest(string.Format("{0}/api/users/@me/integrity", config.Get<string>("gateway")), "PUT") { downloadHandler = new DownloadHandlerBuffer() };
             req.SetRequestHeader("Content-Type", "application/json");
             req.SetRequestHeader("Authorization", string.Format("Bearer {0}", config.Get<string>("token")));
             req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(new UserIntegrityRequest
@@ -64,10 +64,11 @@ namespace api.nox.network
             try { await req.SendWebRequest(); }
             catch { }
             if (req.responseCode != 200) return null;
+            Debug.Log("oui: " + req.downloadHandler.text);
             var response = JsonUtility.FromJson<Response<UserIntegrity>>(req.downloadHandler.text);
             if (response.IsError) return response.data;
-            config.Set($"servers.{address}.integrity.token", response.data.token);
-            config.Set($"servers.{address}.integrity.expires", response.data.expires);
+            config.Set($"servers.{Animator.StringToHash(address)}.integrity.token", response.data.token);
+            config.Set($"servers.{Animator.StringToHash(address)}.integrity.expires", response.data.expires);
             config.Save();
             return response.data;
         }

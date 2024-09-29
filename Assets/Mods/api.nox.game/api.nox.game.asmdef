@@ -7,7 +7,8 @@
         "Unity.XR.Interaction.Toolkit.Samples.StarterAssets",
         "Unity.InputSystem",
         "Unity.TextMeshPro",
-        "Nox.SimplyLibs"
+        "Nox.SimplyLibs",
+        "AutoHandAssembly"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

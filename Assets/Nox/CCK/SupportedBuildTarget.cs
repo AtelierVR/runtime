@@ -9,7 +9,10 @@ namespace Nox.CCK
         Windows = BuildTarget.StandaloneWindows64,
         Linux = BuildTarget.StandaloneLinux64,
         OSX = BuildTarget.StandaloneOSX,
-        Android = BuildTarget.Android
+        VisionOS = BuildTarget.VisionOS,
+        Android = BuildTarget.Android,
+        iOS = BuildTarget.iOS,
+        WebGL = BuildTarget.WebGL
     }
 
     public class SuppordTarget
@@ -26,6 +29,13 @@ namespace Nox.CCK
                     return "macos";
                 case SupportBuildTarget.Android:
                     return "android";
+                case SupportBuildTarget.iOS:
+                    return "ios";
+                case SupportBuildTarget.WebGL:
+                    return "webgl";
+                case SupportBuildTarget.VisionOS:
+                    return "visionos";
+                case SupportBuildTarget.NoTarget:
                 default:
                     return "unknown";
             }
@@ -43,6 +53,13 @@ namespace Nox.CCK
                     return SupportBuildTarget.OSX;
                 case "android":
                     return SupportBuildTarget.Android;
+                case "ios":
+                    return SupportBuildTarget.iOS;
+                case "webgl":
+                    return SupportBuildTarget.WebGL;
+                case "visionos":
+                    return SupportBuildTarget.VisionOS;
+                case "unknown":
                 default:
                     return SupportBuildTarget.NoTarget;
             }

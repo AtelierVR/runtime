@@ -98,7 +98,7 @@ namespace api.nox.game
                 Debug.LogError("Failed to create instance");
                 return;
             }
-            clientMod.GotoTile("game.instance", created, world);
+            clientMod.GotoTile("game.instance", created, world, asset);
         }
 
         private void SetWorldAsset(GameObject tile, SimplyWorldAsset asset)

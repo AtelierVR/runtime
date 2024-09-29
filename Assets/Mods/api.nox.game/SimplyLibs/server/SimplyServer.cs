@@ -1,3 +1,5 @@
+using System;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods;
 
 namespace Nox.SimplyLibs
@@ -13,5 +15,14 @@ namespace Nox.SimplyLibs
         [ShareObjectImport, ShareObjectExport] public string icon;
         [ShareObjectImport, ShareObjectExport] public string public_key;
         [ShareObjectImport, ShareObjectExport] public string[] features;
+
+        [ShareObjectImport, ShareObjectExport] public Func<UniTask<ShareObject>> SharedGetToken;
+        [ShareObjectImport, ShareObjectExport] public Func<UniTask<ShareObject>> SharedGetOrConnect;
+
+        public async UniTask<SimplyAuthToken> GetToken() 
+            => (await SharedGetToken())?.Convert<SimplyAuthToken>();
+            
+        public async UniTask<SimplyWebSocket> GetOrConnect()
+            => (await SharedGetOrConnect())?.Convert<SimplyWebSocket>();
     }
 }
