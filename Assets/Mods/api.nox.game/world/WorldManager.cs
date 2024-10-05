@@ -34,15 +34,21 @@ namespace api.nox.game
             File.Copy(path, WorldPath(hash));
         }
 
-        public static AssetBundle GetOrLoadWorld(string hash)
+        public static async UniTask<AssetBundle> GetOrLoadWorld(string hash)
         {
             if (_loadedWorlds.ContainsKey(hash))
                 return _loadedWorlds[hash];
             if (!HasWorldInCache(hash))
                 return null;
-            var bundle = AssetBundle.LoadFromFile(WorldPath(hash));
-            _loadedWorlds[hash] = bundle;
-            return bundle;
+            var load = AssetBundle.LoadFromFileAsync(WorldPath(hash));
+            _gameClientSystem.coreAPI.EventAPI.Emit("world.assetbundle.loading", hash, 0f);
+            await UniTask.WaitUntil(() =>
+            {
+                _gameClientSystem.coreAPI.EventAPI.Emit("world.assetbundle.loading", hash, load.progress);
+                return load.isDone;
+            });
+            _gameClientSystem.coreAPI.EventAPI.Emit("world.assetbundle.loading", hash, 1f);
+            return _loadedWorlds[hash] = load.assetBundle;
         }
 
         public static void DeleteWorldFromCache(string hash)
@@ -104,7 +110,7 @@ namespace api.nox.game
         {
             if (!HasWorldInCache(hash))
                 return default;
-            var bundle = GetOrLoadWorld(hash);
+            var bundle = await GetOrLoadWorld(hash);
             var scenes = bundle.GetAllScenePaths();
             var sceneId = scenes.Length > id ? scenes[id] : null;
             if (string.IsNullOrEmpty(sceneId))
@@ -113,11 +119,13 @@ namespace api.nox.game
                 return default;
             }
             var load = SceneManager.LoadSceneAsync(sceneId, mode);
+            _gameClientSystem.coreAPI.EventAPI.Emit("world.loading", hash, id, mode, 0f);
             await UniTask.WaitUntil(() =>
             {
                 _gameClientSystem.coreAPI.EventAPI.Emit("world.loading", hash, id, mode, load.progress);
                 return load.isDone;
             });
+            _gameClientSystem.coreAPI.EventAPI.Emit("world.loading", hash, id, mode, 1f);
             var scene = SceneManager.GetSceneByPath(sceneId);
             if (!scene.IsValid())
             {

@@ -25,7 +25,7 @@ namespace api.nox.game.sessions
                     _controller.session = this;
             }
         }
-        
+
         public List<Scene> scenes = new();
 
         public SimplyWorld world;
@@ -61,5 +61,15 @@ namespace api.nox.game.sessions
         }
 
         public void SetCurrent() => GameSystem.instance.sessionManager.CurrentSession = this;
+
+        public void OnSelectedCurrent(Session old)
+        {
+            
+        }
+
+        public void OnDeselectedCurrent(Session current)
+        {
+
+        }
     }
 }

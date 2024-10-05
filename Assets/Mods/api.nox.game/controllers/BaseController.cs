@@ -20,9 +20,28 @@ namespace api.nox.game.Controllers
         }
 
         // run when the controller is enabled
-        public void OnEnable()
+        public virtual void OnEnable()
         {
             CurrentController = this;
+
+            OpenMenuAction?.action.Enable();
+            if (OpenMenuAction != null)
+                OpenMenuAction.action.performed += (context) => Debug.Log("Menu Clicked");
+            JumpAction?.action.Enable();
+            if (JumpAction != null)
+                JumpAction.action.performed += (context) => Debug.Log("Jump Performed");
+            CrouchAction?.action.Enable();
+            if (CrouchAction != null)
+                CrouchAction.action.performed += (context) => Debug.Log("Crouch Performed");
+            MicrophoneAction?.action.Enable();
+            if (MicrophoneAction != null)
+                MicrophoneAction.action.performed += (context) => Debug.Log("Microphone Performed");
+            UI_SelectInput?.action.Enable();
+            if (UI_SelectInput != null)
+                UI_SelectInput.action.performed += (context) => Debug.Log("UI Select Performed");
+            UI_PressInput?.action.Enable();
+            if (UI_PressInput != null)
+                UI_PressInput.action.performed += (context) => Debug.Log("UI Press Performed");
         }
 
         // run when the controller is disabled
@@ -115,6 +134,17 @@ namespace api.nox.game.Controllers
         }
 
         public bool IsGrounded() => Player.IsGrounded();
+
         public InputActionReference OpenMenuAction;
+        public InputActionReference JumpAction;
+        public InputActionReference CrouchAction;
+        public InputActionReference MicrophoneAction;
+
+        // ui interaction
+        public InputActionReference UI_SelectInput;
+        public InputActionReference UI_PressInput;
+
+
+
     }
 }

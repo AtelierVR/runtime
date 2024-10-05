@@ -1,4 +1,7 @@
 using Autohand;
+using Cysharp.Threading.Tasks;
+using UnityEngine.InputSystem;
+using UnityEngine.XR.Interaction.Toolkit.Inputs;
 
 namespace api.nox.game.Controllers
 {
@@ -10,6 +13,23 @@ namespace api.nox.game.Controllers
 
     public class XRController : BaseController
     {
+        public InputActionManager inputAction;
+
+        public void Start()
+        {
+            inputAction.enabled = false;
+            UniTask.RunOnThreadPool(async () =>
+            {
+                await UniTask.WaitForSeconds(.1f);
+                inputAction.enabled = true;
+            }).Forget();
+        }
+
+        public override void OnEnable()
+        {
+            base.OnEnable();
+        }
+
         private void SetRotationType(XRRotationType type) => Player.rotationType = type switch
         {
             XRRotationType.Smooth => Autohand.RotationType.smooth,

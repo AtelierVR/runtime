@@ -324,7 +324,14 @@ namespace api.nox.world
             {
                 var descriptor = Descriptors.Length > 0 ? Descriptors[0] : null;
                 if (descriptor == null) return;
-                descriptor.target = (SupportBuildTarget)e.newValue;
+                if (SuppordTarget.IsBuildTargetSupported((SupportBuildTarget)e.newValue))
+                    descriptor.target = (SupportBuildTarget)e.newValue;
+                else
+                {
+                    EditorUtility.DisplayDialog("Error", "Unsupported build target.", "Ok");
+                    Debug.LogError("Unsupported build target.");
+                    _root.Q<EnumField>("platform-field").value = e.previousValue;
+                }
             });
 
             _root.Q<Button>("build-button").RegisterCallback<ClickEvent>(e =>
@@ -332,15 +339,39 @@ namespace api.nox.world
                 var descriptor = Descriptors.Length > 0 ? Descriptors[0] : null;
                 if (descriptor == null)
                 {
+
+                    EditorUtility.DisplayDialog("Error", "No world descriptor found.", "Ok");
                     Debug.LogError("No world descriptor found.");
                     return;
                 }
-                var result = MainDescriptorEditor.BuildWorld(descriptor, descriptor.GetBuildPlatform(), false);
+
+                var target = descriptor.GetBuildPlatform();
+                if (target == SupportBuildTarget.NoTarget)
+                {
+                    EditorUtility.DisplayDialog("Error", "No build platform selected.", "Ok");
+                    Debug.LogError("No build platform selected.");
+                    return;
+                }
+
+                if (!SuppordTarget.IsBuildTargetSupported(target))
+                {
+                    EditorUtility.DisplayDialog("Error", "Unsupported build target.", "Ok");
+                    Debug.LogError("Unsupported build target.");
+                    return;
+                }
+
+                var result = MainDescriptorEditor.BuildWorld(descriptor, target, false);
                 if (result.Success)
                 {
+                    EditorUtility.DisplayDialog("Success", "Build success.", "Ok");
                     Debug.Log("Build success.");
                 }
-                else Debug.LogError(result.ErrorMessage);
+                else
+                {
+                    EditorUtility.DisplayDialog("Error", result.ErrorMessage, "Ok");
+                    Debug.LogError(result.ErrorMessage);
+                    return;
+                }
             });
             return _root;
         }

@@ -12,7 +12,7 @@ namespace api.nox.network
 
         public void Dispose()
         {
-            foreach (var socket in _sockets)
+            foreach (var socket in _sockets.ToArray())
                 socket.Dispose();
             _sockets.Clear();
         }

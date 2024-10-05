@@ -1,6 +1,7 @@
 using api.nox.game.Controllers;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
+using Nox.CCK.Worlds;
 using Nox.SimplyLibs;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -119,12 +120,23 @@ namespace api.nox.game.sessions
 
             var indexMainDescriptor = session.IndexOfMainDescriptor(out var descriptor);
             Debug.Log("IndexMainDescriptor: " + indexMainDescriptor + " " + descriptor);
-            var spawn = descriptor.ChoiceSpawn();
 
-            BaseController.CurrentController.Teleport(spawn.transform);
+            if (indexMainDescriptor == byte.MaxValue)
+            {
+                Debug.Log("MainDescriptor is null");
+                return false;
+            }
+
+            if (descriptor.GetSpawnType() != SpawnType.None)
+            {
+                var spawn = descriptor.ChoiceSpawn();
+                BaseController.CurrentController.Teleport(spawn.transform);
+            }
+
+
 
             Debug.Log("Teleport success");
-            
+
             return true;
         }
 

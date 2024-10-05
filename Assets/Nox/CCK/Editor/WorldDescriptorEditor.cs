@@ -155,6 +155,7 @@ namespace Nox.Editor.Worlds
             scenes.allowAdd = !descriptor.IsCompiled;
             scenes.allowRemove = !descriptor.IsCompiled;
             scenes.showBoundCollectionSize = !descriptor.IsCompiled;
+
             scenes.makeItem = () =>
             {
                 var item = new VisualElement();
@@ -164,23 +165,48 @@ namespace Nox.Editor.Worlds
                 if (!descriptor.IsCompiled)
                     obj.RegisterValueChangedCallback(evt =>
                     {
-                        Debug.Log("zzzzzzzzz:" + item.userData + ":ggggggg");
-                        if (item.userData is int j)
-                            Debug.Log("azertyu" + j);
-                        if (item.userData is int i && i >= 0 && i < descriptor.GetScenes().Count)
+                        if (item.userData is int i && i >= 0 && i < descriptor.Scenes.Count)
                             descriptor.Scenes[i] = evt.newValue as SceneAsset;
                     });
                 else obj.SetEnabled(false);
                 item.Add(obj);
                 return item;
             };
+
             scenes.bindItem = (e, i) =>
             {
                 e.Q<ObjectField>().label = "#" + i;
-                var scene = descriptor.GetScenes()[i];
+                var scenes = descriptor.GetScenes();
+                var scene = scenes.Count > i ? scenes[i] : null;
                 e.Q<ObjectField>().value = scene != null ? AssetDatabase.LoadAssetAtPath<SceneAsset>(scene) : null;
                 e.userData = i;
             };
+
+            scenes.itemsAdded += e =>
+            {
+                if (descriptor.IsCompiled) return;
+                descriptor.Scenes.Add(null);
+                scenes.itemsSource = descriptor.GetScenes();
+            };
+
+            scenes.itemsRemoved += e =>
+            {
+                if (descriptor.IsCompiled) return;
+                descriptor.Scenes = descriptor.Scenes.Where((_, i) => !e.Contains(i)).ToList();
+                scenes.itemsSource = descriptor.GetScenes();
+            };
+
+            scenes.itemIndexChanged += (i, j) =>
+            {
+                if (descriptor.IsCompiled) return;
+                var sc = descriptor.Scenes;
+                if (i < 0 || i >= sc.Count) return;
+                if (j < 0 || j >= sc.Count) return;
+                (sc[j], sc[i]) = (sc[i], sc[j]);
+                descriptor.Scenes = sc;
+                scenes.itemsSource = descriptor.GetScenes();
+            };
+
             scenes.itemsSource = descriptor.GetScenes();
             if (!descriptor.IsCompiled)
                 root.Q<Button>("scenes-normalize").clicked += () =>
@@ -190,6 +216,30 @@ namespace Nox.Editor.Worlds
                     scenes.itemsSource = descriptor.GetScenes();
                 };
             else root.Q<Button>("scenes-normalize").SetEnabled(false);
+
+            root.Q<Button>("open-scenes").clicked += () =>
+            {
+                foreach (var scene in descriptor.GetScenes())
+                    EditorSceneManager.OpenScene(scene, OpenSceneMode.Additive);
+            };
+
+            if (!descriptor.IsCompiled)
+                root.Q<Button>("detect-scenes").clicked += () =>
+                {
+                    var descriptors = BaseDescriptor.GetDescriptors();
+                    Debug.Log("Detected " + descriptors.Length + " descriptors");
+                    var sc = new List<SceneAsset>();
+                    foreach (var desc in descriptors)
+                        if (desc is SubDescriptor mD)
+                        {
+                            var scene = AssetDatabase.LoadAssetAtPath<SceneAsset>(mD.gameObject.scene.path);
+                            if (scene != null && !sc.Contains(scene))
+                                sc.Add(scene);
+                        }
+                    descriptor.Scenes = sc;
+                    scenes.itemsSource = descriptor.GetScenes();
+                };
+            else root.Q<Button>("detect-scenes").SetEnabled(false);
 
             var features = root.Q<ListView>("features");
             features.showAddRemoveFooter = !descriptor.IsCompiled;
@@ -218,7 +268,9 @@ namespace Nox.Editor.Worlds
                 e.Q<TextField>().value = descriptor.Features[i];
                 e.userData = i;
             };
+
             features.itemsSource = descriptor.GetFeatures();
+
             if (!descriptor.IsCompiled)
                 root.Q<Button>("features-normalize").clicked += () =>
                 {
@@ -233,51 +285,87 @@ namespace Nox.Editor.Worlds
             mods.allowAdd = !descriptor.IsCompiled;
             mods.allowRemove = !descriptor.IsCompiled;
             mods.showBoundCollectionSize = !descriptor.IsCompiled;
+
             mods.makeItem = () =>
             {
-                var item = new GroupBox();
-                item.style.paddingLeft = 0;
-                item.style.paddingRight = 0;
-                item.style.marginLeft = 0;
-                item.style.marginRight = 0;
-                item.style.flexDirection = FlexDirection.Row;
-                var text = new TextField() { label = "", isReadOnly = descriptor.IsCompiled, style = { flexGrow = 1 } };
-                var enumField = new EnumField(ModRequirmentFlags.None)
-                {
-                    focusable = !descriptor.IsCompiled,
-                    style = { flexGrow = 1 }
-                };
+                var item = new VisualElement();
+                item.style.paddingLeft = 2;
+                item.style.paddingRight = 8;
+                var obj = new TextField() { label = "#-", focusable = !descriptor.IsCompiled };
                 if (!descriptor.IsCompiled)
-                {
-                    text.RegisterValueChangedCallback(evt =>
+                    obj.RegisterValueChangedCallback(evt =>
                     {
-                        if (item.userData is int i && i >= 0 && i < descriptor.GetMods().Count)
-                            descriptor.GetMods()[i].Id = evt.newValue;
+                        if (item.userData is int i && i >= 0 && i < descriptor.ModRequirements.Count)
+                        {
+                            Debug.Log("Changed mod" + item.userData + " (value) to " + evt.newValue);
+                            descriptor.ModRequirements[i].Id = evt.newValue;
+                        }
                     });
-                    enumField.RegisterValueChangedCallback(evt =>
+                else obj.SetEnabled(false);
+                item.Add(obj);
+                var e = new EnumField() { label = "Flags", focusable = !descriptor.IsCompiled };
+                if (!descriptor.IsCompiled)
+                    e.RegisterValueChangedCallback(evt =>
                     {
-                        if (item.userData is int i && i >= 0 && i < descriptor.GetMods().Count)
-                            descriptor.GetMods()[i].Flags = (ModRequirmentFlags)evt.newValue;
+                        if (item.userData is int i && i >= 0 && i < descriptor.ModRequirements.Count)
+                        {
+                            Debug.Log("Changed mod " + item.userData + " (flag) to " + evt.newValue);
+                            descriptor.ModRequirements[i].Flags = (ModRequirmentFlags)evt.newValue;
+                        }
                     });
-                }
-                else
-                {
-                    text.SetEnabled(false);
-                    enumField.SetEnabled(false);
-                }
-                item.Add(text);
-                item.Add(enumField);
+                else e.SetEnabled(false);
+                item.Add(e);
                 return item;
             };
+
             mods.bindItem = (e, i) =>
             {
-                var mod = descriptor.GetMods()[i];
+                var mod = descriptor.GetRequirementMods()[i];
+                e.Q<TextField>().label = "#" + i;
+                e.Q<TextField>().value = mod?.Id ?? "";
+                if (mod != null) e.Q<EnumField>().Init(mod.Flags);
+                else e.Q<EnumField>().Init(ModRequirmentFlags.None);
                 e.userData = i;
-                if (mod == null) return;
-                e.Q<TextField>().value = mod.Id;
-                e.Q<EnumField>().Init(mod.Flags);
             };
-            mods.itemsSource = descriptor.GetMods();
+
+            mods.itemsAdded += e =>
+            {
+                if (descriptor.IsCompiled) return;
+                descriptor.ModRequirements.Add(new ModRequirement()
+                {
+                    Id = "",
+                    Flags = ModRequirmentFlags.None
+                });
+                mods.itemsSource = descriptor.GetRequirementMods();
+            };
+
+            mods.itemsRemoved += e =>
+            {
+                if (descriptor.IsCompiled) return;
+                descriptor.ModRequirements = descriptor.ModRequirements.Where((_, i) => !e.Contains(i)).ToList();
+                mods.itemsSource = descriptor.GetRequirementMods();
+            };
+
+            mods.itemIndexChanged += (i, j) =>
+            {
+                if (descriptor.IsCompiled) return;
+                var m = descriptor.ModRequirements;
+                if (i < 0 || i >= m.Count) return;
+                if (j < 0 || j >= m.Count) return;
+                (m[j], m[i]) = (m[i], m[j]);
+                mods.itemsSource = descriptor.GetRequirementMods();
+            };
+
+            if (!descriptor.IsCompiled)
+                root.Q<Button>("mods-normalize").clicked += () =>
+                {
+                    var o = descriptor.EstimateMods();
+                    descriptor.ModRequirements = o.Values.ToList();
+                    mods.itemsSource = descriptor.GetRequirementMods();
+                };
+            else root.Q<Button>("mods-normalize").SetEnabled(false);
+
+            mods.itemsSource = descriptor.GetRequirementMods();
 
             return root;
         }
@@ -524,6 +612,7 @@ namespace Nox.Editor.Worlds
             {
                 outputPath = assetBundleDirectory,
                 targetPlatform = buildTarget,
+
                 options = BuildAssetBundleOptions.None,
                 bundleDefinitions = new AssetBundleBuild[] { definition }
             };
@@ -544,6 +633,15 @@ namespace Nox.Editor.Worlds
             return manifest != null;
         }
 
+        // check BuildTarget buildTarget is disponible
+        public static bool IsBuildTargetSupported(BuildTarget buildTarget)
+        {
+            return BuildPipeline.IsBuildTargetSupported(
+                BuildPipeline.GetBuildTargetGroup(buildTarget),
+                buildTarget
+            );
+        }
+
         [MenuItem("Nox/CCK/World/Make Descriptor")]
         public static MainDescriptor MakeWorldDescriptor()
         {
@@ -551,37 +649,6 @@ namespace Nox.Editor.Worlds
             var descriptor = root.AddComponent<MainDescriptor>();
             Selection.activeObject = descriptor;
             return descriptor;
-        }
-
-        // gizmo
-        private void OnSceneGUI()
-        {
-            if (_building) return;
-            var descriptor = target as MainDescriptor;
-
-            var tr = descriptor.gameObject.transform;
-            var spawns = descriptor.GetSpawns().ToList();
-            if (spawns.Count == 0)
-                spawns.Add(descriptor.gameObject);
-            for (int i = 0; i < spawns.Count; i++)
-            {
-                if (spawns[i] == null) continue;
-                Handles.color = Color.magenta;
-                var trt = spawns[i].transform;
-                Handles.DrawLine(tr.position, trt.position);
-            }
-            Handles.color = Color.blue;
-            Handles.SphereHandleCap(0, tr.position, tr.rotation, .1f, EventType.Repaint);
-
-            for (int i = 0; i < spawns.Count; i++)
-            {
-                if (spawns[i] == null) continue;
-                Handles.color = Color.green;
-                var trt = spawns[i].transform;
-                Handles.DrawLine(trt.position, trt.position + trt.forward);
-                Handles.color = Color.red;
-                Handles.SphereHandleCap(0, trt.position, trt.rotation, .05f, EventType.Repaint);
-            }
         }
     }
     public class BuildResult

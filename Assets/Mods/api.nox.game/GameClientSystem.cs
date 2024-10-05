@@ -43,14 +43,8 @@ namespace api.nox.game
             GameObject.DontDestroyOnLoad(m_controller);
             BaseController.SetupControllerAtStartup(api, m_controller);
 
-            // Bind the menu buttons
-            BaseController.CurrentController.OpenMenuAction.action.started += (context) =>Debug.Log("Menu Click Started");
-            BaseController.CurrentController.OpenMenuAction.action.performed += (context) => Debug.Log("Menu Click Performed");
-            BaseController.CurrentController.OpenMenuAction.action.canceled += (context) => Debug.Log("Menu Click Canceled");
-
-            Debug.Log($"{BaseController.CurrentController}:{BaseController.CurrentController.OpenMenuAction}:");
-            
-            Debug.Log("GameClientSystem Initialized");
+            BaseController.CurrentController.OpenMenuAction.action?.Enable();
+            BaseController.CurrentController.OpenMenuAction.action.performed += (context) => OnMenuClick(context);
 
             // Initialize the tile managers
             homeTile = new HomeTileManager(this);

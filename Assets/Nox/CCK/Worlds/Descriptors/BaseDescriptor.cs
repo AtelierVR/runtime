@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
 
 namespace Nox.CCK.Worlds
 {
@@ -14,6 +15,18 @@ namespace Nox.CCK.Worlds
         [SerializeField] private GameObject[] data_Spawns;
         [SerializeField] private double data_RespawnHeight;
         [SerializeField] protected DescriptorType data_Type = DescriptorType.None;
+
+        public static BaseDescriptor[] GetDescriptors()
+        {
+            var descriptors = new List<BaseDescriptor>();
+            for (var i = 0; i < SceneManager.sceneCount; i++)
+            {
+                var scene = SceneManager.GetSceneAt(i);
+                var descriptor = GetDescriptor(scene);
+                if (descriptor != null) descriptors.Add(descriptor);
+            }
+            return descriptors.ToArray();
+        }
 
         public static BaseDescriptor GetDescriptor(Scene scene)
         {
@@ -38,7 +51,6 @@ namespace Nox.CCK.Worlds
                 SpawnType.Random => spawns[Random.Range(0, spawns.Count)],
                 SpawnType.Free => spawns.FirstOrDefault(spawn => !spawn.activeSelf),
                 SpawnType.Sequential => spawns[(int)(SequentialIndex++ % spawns.Count)],
-                SpawnType.Custom => null,
                 _ => null,
             };
             return gameobject == null ? gameObject : gameobject;
@@ -121,6 +133,54 @@ namespace Nox.CCK.Worlds
             if (IsCompiled) return data_RespawnHeight;
             return RespawnHeight;
         }
+
+        public virtual void OnDrawGizmos()
+        {
+            if (UnityEditor.Selection.activeGameObject != gameObject
+                && !InputSystem.GetDevice<Keyboard>().leftShiftKey.isPressed)
+            {
+                var isSpawnSelected = false;
+                foreach (var spawn in Spawns)
+                    if (UnityEditor.Selection.activeGameObject == spawn)
+                    {
+                        isSpawnSelected = true;
+                        break;
+                    }
+                if (!isSpawnSelected) return;
+            }
+
+            Gizmos.color = Color.gray;
+            Gizmos.DrawWireSphere(transform.position, 0.1f);
+
+            Gizmos.color = new Color(
+                Color.yellow.r,
+                Color.yellow.g,
+                Color.yellow.b,
+                0.1f
+            );
+            var cameraPosition = UnityEditor.SceneView.currentDrawingSceneView.camera.transform.position;
+            var size = 10;
+            Gizmos.DrawCube(
+                new Vector3(
+                cameraPosition.x,
+                (float)RespawnHeight,
+                cameraPosition.z
+            ), new Vector3(size, 0, size));
+
+            var spawns = GetSpawns();
+            foreach (var spawn in spawns)
+            {
+                if (spawn == null) continue;
+                Gizmos.color = Color.white;
+                Gizmos.DrawLine(transform.position, spawn.transform.position);
+
+                Gizmos.color = Color.blue;
+                Gizmos.DrawWireSphere(spawn.transform.position, 0.5f);
+
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawLine(spawn.transform.position, spawn.transform.position + spawn.transform.forward);
+            }
+        }
 #else
         public List<NetworkObject> GetNetworkObjects() => ( data_NetworkObjects ?? new NetworkObject[0]).ToList();
         public List<GameObject> GetSpawns() => ( data_Spawns ?? new GameObject[0]).ToList();
@@ -135,8 +195,7 @@ namespace Nox.CCK.Worlds
         First = 1,
         Random = 2,
         Free = 3,
-        Sequential = 4,
-        Custom = 5
+        Sequential = 4
     }
 
     public enum DescriptorType

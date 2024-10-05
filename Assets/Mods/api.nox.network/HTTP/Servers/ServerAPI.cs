@@ -65,6 +65,12 @@ namespace api.nox.network
         }
         private async UniTask<ServerSearch> SearchServers(string server, string query, uint offset = 0, uint limit = 10)
         {
+            var User = _mod.GetCurrentUser();
+            var config = Config.Load();
+            var gateway = server == User?.server 
+                ? config.Get<string>("gateway") 
+                : (await Gateway.FindGatewayMaster(server))?.OriginalString;
+            if (gateway == null) return null;
             return new ServerSearch() { servers = new Server[0], total = 0, limit = limit, offset = offset };
         }
 

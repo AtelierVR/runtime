@@ -11,7 +11,6 @@ using System;
 using Buffer = api.nox.network.Utils.Buffer;
 using UnityEngine;
 using System.Threading;
-using Codice.Utils;
 
 // ReSharper disable All
 

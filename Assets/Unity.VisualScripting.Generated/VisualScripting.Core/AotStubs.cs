@@ -659,6 +659,9 @@ namespace Unity.VisualScripting.Generated.Aot
 	// Unity.VRTemplate.XRPokeFollowAffordanceFill.op_Implicit
 	// Unity.VRTemplate.XRPokeFollowAffordanceFill.op_Equality
 	// Unity.VRTemplate.XRPokeFollowAffordanceFill.op_Inequality
+	// Autohand.HandDesktopControllerLink.op_Implicit
+	// Autohand.HandDesktopControllerLink.op_Equality
+	// Autohand.HandDesktopControllerLink.op_Inequality
 	// UnityEngine.InputSystem.InputActionAsset.op_Implicit
 	// UnityEngine.InputSystem.InputActionAsset.op_Equality
 	// UnityEngine.InputSystem.InputActionAsset.op_Inequality
@@ -979,6 +982,31 @@ namespace Unity.VisualScripting.Generated.Aot
 	// UnityEngine.Time.deltaTime
 	// UnityEngine.Quaternion.eulerAngles
 	// UnityEngine.Vector3..ctor
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
+	// --------------- Scene Stubs
 	// --------------- Scene Stubs
 	// --------------- Scene Stubs
 	// --------------- Scene Stubs
@@ -8528,6 +8556,41 @@ namespace Unity.VisualScripting.Generated.Aot
 		// Unity.VRTemplate.XRPokeFollowAffordanceFill.op_Inequality
 		[global::UnityEngine.Scripting.PreserveAttribute()]
 		public static void Unity_VRTemplate_XRPokeFollowAffordanceFill_op_Inequality()
+		{
+			global::UnityEngine.Object arg0 = default(global::UnityEngine.Object);
+			global::UnityEngine.Object arg1 = default(global::UnityEngine.Object);
+			bool @operator = (arg0 != arg1);
+			global::Unity.VisualScripting.StaticFunctionInvoker<UnityEngine.Object, UnityEngine.Object, bool> optimized = new global::Unity.VisualScripting.StaticFunctionInvoker<UnityEngine.Object, UnityEngine.Object, bool>(default(global::System.Reflection.MethodInfo));
+			optimized.Invoke(null, arg0, arg1);
+			optimized.Invoke(default(object[]));
+		}
+		
+		// Autohand.HandDesktopControllerLink.op_Implicit
+		[global::UnityEngine.Scripting.PreserveAttribute()]
+		public static void Autohand_HandDesktopControllerLink_op_Implicit()
+		{
+			global::UnityEngine.Object arg0 = default(global::UnityEngine.Object);
+			bool conversion = ((bool)(arg0));
+			global::Unity.VisualScripting.StaticFunctionInvoker<UnityEngine.Object, bool> optimized = new global::Unity.VisualScripting.StaticFunctionInvoker<UnityEngine.Object, bool>(default(global::System.Reflection.MethodInfo));
+			optimized.Invoke(null, arg0);
+			optimized.Invoke(default(object[]));
+		}
+		
+		// Autohand.HandDesktopControllerLink.op_Equality
+		[global::UnityEngine.Scripting.PreserveAttribute()]
+		public static void Autohand_HandDesktopControllerLink_op_Equality()
+		{
+			global::UnityEngine.Object arg0 = default(global::UnityEngine.Object);
+			global::UnityEngine.Object arg1 = default(global::UnityEngine.Object);
+			bool @operator = (arg0 == arg1);
+			global::Unity.VisualScripting.StaticFunctionInvoker<UnityEngine.Object, UnityEngine.Object, bool> optimized = new global::Unity.VisualScripting.StaticFunctionInvoker<UnityEngine.Object, UnityEngine.Object, bool>(default(global::System.Reflection.MethodInfo));
+			optimized.Invoke(null, arg0, arg1);
+			optimized.Invoke(default(object[]));
+		}
+		
+		// Autohand.HandDesktopControllerLink.op_Inequality
+		[global::UnityEngine.Scripting.PreserveAttribute()]
+		public static void Autohand_HandDesktopControllerLink_op_Inequality()
 		{
 			global::UnityEngine.Object arg0 = default(global::UnityEngine.Object);
 			global::UnityEngine.Object arg1 = default(global::UnityEngine.Object);

@@ -39,7 +39,10 @@ namespace api.nox.game.sessions
                 var session = GetSession(value.group, value.id);
                 if (session == null)
                     sessions.Add(value);
+                var old = CurrentSession;
+                old?.OnDeselectedCurrent(value);
                 currentSessionUid = value.uid;
+                value.OnSelectedCurrent(old);
             }
         }
 

@@ -123,7 +123,7 @@ namespace api.nox.world
                 _world = null;
                 return null;
             }
-            
+
             SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
             descriptor.IdPublisher = world.id;
             descriptor.ServerPublisher = world.server;
@@ -168,7 +168,14 @@ namespace api.nox.world
             {
                 var descriptor = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
                 if (descriptor == null) return;
-                descriptor.target = (SupportBuildTarget)e.newValue;
+                if (SuppordTarget.IsBuildTargetSupported((SupportBuildTarget)e.newValue))
+                    descriptor.target = (SupportBuildTarget)e.newValue;
+                else
+                {
+                    EditorUtility.DisplayDialog("Error", "Unsupported build target.", "Ok");
+                    Debug.LogError("Unsupported build target.");
+                    _root.Q<EnumField>("platform-field").value = e.previousValue;
+                }
             });
             _root.Q<Button>("goto-builder").clicked += () => _mod._api.PanelAPI.SetActivePanel("api.nox.world.builder");
             _root.Q<Button>("goto-login").clicked += () => _mod._api.PanelAPI.SetActivePanel("api.nox.user.login");
@@ -312,6 +319,22 @@ namespace api.nox.world
                 Debug.LogError("No descriptor found.");
                 return;
             }
+
+            var target = descriptor.GetBuildPlatform();
+            if (target == SupportBuildTarget.NoTarget)
+            {
+                EditorUtility.DisplayDialog("Error", "No build platform selected.", "Ok");
+                Debug.LogError("No build platform selected.");
+                return;
+            }
+
+            if (!SuppordTarget.IsBuildTargetSupported(target))
+            {
+                EditorUtility.DisplayDialog("Error", "Unsupported build target.", "Ok");
+                Debug.LogError("Unsupported build target.");
+                return;
+            }
+            
             var version = _root.Q<UnsignedIntegerField>("asset-version").value;
             if (version > ushort.MaxValue)
             {
@@ -334,7 +357,7 @@ namespace api.nox.world
             var autoVersion = config.Get("sdk.auto_version", true);
             var strictVersion = config.Get("sdk.strict_version", true);
 
-            var search = await _mod.NetworkAPI.World.SearchAssets(_world.server, _world.id, 0, 1, new uint[] { version }, new string[] { SuppordTarget.GetTargetName(descriptor.target) }, new string[] { "unity" }, true);
+            var search = await _mod.NetworkAPI.World.SearchAssets(_world.server, _world.id, 0, 1, new uint[] { version }, new string[] { SuppordTarget.GetTargetName(target) }, new string[] { "unity" }, true);
             if (search == null)
             {
                 EditorUtility.DisplayDialog("Error", "An error occured while fetching the assets.", "Ok");
@@ -347,7 +370,7 @@ namespace api.nox.world
                 while (asset != null && !asset.IsEmpty())
                 {
                     version++;
-                    search = await _mod.NetworkAPI.World.SearchAssets(_world.server, _world.id, 0, 1, new uint[] { version }, new string[] { SuppordTarget.GetTargetName(descriptor.target) }, new string[] { "unity" }, true);
+                    search = await _mod.NetworkAPI.World.SearchAssets(_world.server, _world.id, 0, 1, new uint[] { version }, new string[] { SuppordTarget.GetTargetName(target) }, new string[] { "unity" }, true);
                     if (search == null)
                     {
                         EditorUtility.DisplayDialog("Error", "An error occured while fetching the assets.", "Ok");
@@ -368,7 +391,7 @@ namespace api.nox.world
             }
 
             Debug.Log("Building world...");
-            var result = MainDescriptorEditor.BuildWorld(descriptor, descriptor.GetBuildPlatform(), false);
+            var result = MainDescriptorEditor.BuildWorld(descriptor, target, false);
             if (result == null || !result.Success || string.IsNullOrWhiteSpace(result.path))
             {
                 EditorUtility.DisplayDialog("Error", "An error occured while building the world.", "Ok");
@@ -379,7 +402,7 @@ namespace api.nox.world
 
             Debug.Log("Uploading asset...");
             Debug.Log("Asset version: " + version);
-            Debug.Log("Asset platform: " + SuppordTarget.GetTargetName(descriptor.target));
+            Debug.Log("Asset platform: " + SuppordTarget.GetTargetName(target));
 
             if (asset == null)
                 asset = await _mod.NetworkAPI.World.CreateAsset(new SimplyCreateAssetData()
@@ -388,7 +411,7 @@ namespace api.nox.world
                     server = _world.server,
                     version = (ushort)version,
                     engine = "unity",
-                    platform = SuppordTarget.GetTargetName(descriptor.target),
+                    platform = SuppordTarget.GetTargetName(target),
                 });
 
             if (asset == null || !asset.IsEmpty())

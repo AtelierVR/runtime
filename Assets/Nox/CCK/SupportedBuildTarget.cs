@@ -65,6 +65,10 @@ namespace Nox.CCK
             }
         }
 
+        public static bool IsBuildTargetSupported(SupportBuildTarget target) 
+            => BuildPipeline.IsBuildTargetSupported(BuildPipeline.GetBuildTargetGroup((BuildTarget)target), (BuildTarget)target);
+
+
         public static SupportBuildTarget GetCurrentTarget() => (SupportBuildTarget)EditorUserBuildSettings.activeBuildTarget;
     }
 }

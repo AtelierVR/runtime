@@ -256,12 +256,8 @@ namespace Nox.Mods
                     if (b.GetMetadata().Match(required.GetId())) i++;
                 foreach (var required in b.GetMetadata().GetDepends())
                     if (a.GetMetadata().Match(required.GetId())) i--;
-                Debug.Log($"Sort {a.GetMetadata().GetId()} {b.GetMetadata().GetId()} {i}");
                 return i;
             });
-
-            foreach (var mod in mods)
-                Debug.Log($"Sorted mod {mod.GetMetadata().GetId()}");
 
             // load assemblies
             foreach (var mod in mods)
@@ -332,7 +328,6 @@ namespace Nox.Mods
             // load mods
             foreach (var mod in mods)
             {
-                Debug.Log($"Loading mod {mod.GetMetadata().GetId()}");
                 mod.EnableMain();
                 mod.EnableClient();
                 Add(mod);

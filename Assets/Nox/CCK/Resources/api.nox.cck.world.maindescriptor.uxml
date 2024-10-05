@@ -19,6 +19,16 @@
                 </engine:VisualElement>
             </engine:VisualElement>
             <engine:TabView enabled="true" style="margin-top: 4px; display: flex;">
+                <engine:Tab label="General" closeable="false" name="general">
+                    <engine:VisualElement style="flex-grow: 1; margin-top: 4px; margin-bottom: 0; margin-right: 0; margin-left: 0; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
+                        <engine:ListView header-title="Spawns" show-foldout-header="true" show-add-remove-footer="true" reorder-mode="Animated" virtualization-method="DynamicHeight" show-border="true" name="spawns" show-bound-collection-size="true" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;" />
+                        <engine:Button text="Normalize" name="spawns-normalize" style="margin-top: 4px;" />
+                        <engine:EnumField label="Spawn Type" type="Nox.CCK.Worlds.SpawnType, NoxCCK" name="spawn-type" style="margin-right: 4px;" />
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; margin-top: 0; margin-bottom: 0; margin-right: 0; margin-left: 0; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; border-top-width: 0; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
+                        <engine:DoubleField label="Respawn height" value="-100" name="respawn-height" style="margin-right: 4px;" />
+                    </engine:VisualElement>
+                </engine:Tab>
                 <engine:Tab label="Advanced" focusable="false" name="advanced">
                     <engine:VisualElement style="flex-grow: 1; margin-top: 4px; margin-bottom: 0; margin-right: 0; margin-left: 0; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
                         <engine:ListView header-title="Network objets" show-foldout-header="true" show-add-remove-footer="true" reorder-mode="Animated" virtualization-method="DynamicHeight" show-border="true" name="network-objects" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;" />
@@ -30,7 +40,7 @@
                         <engine:ListView header-title="Additional scenes" show-foldout-header="true" show-add-remove-footer="true" reorder-mode="Animated" virtualization-method="DynamicHeight" show-border="true" name="scenes" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;" />
                         <engine:Button text="Normalize" name="scenes-normalize" style="margin-top: 4px;" />
                         <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
-                            <engine:Button text="Open" name="open-scenes" style="flex-grow: 1;" />
+                            <engine:Button text="Open All Scenes" name="open-scenes" style="flex-grow: 1;" />
                             <engine:Button text="Detect" name="detect-scenes" style="flex-grow: 1;" />
                         </engine:VisualElement>
                     </engine:VisualElement>
@@ -41,16 +51,6 @@
                     <engine:VisualElement style="flex-grow: 1; margin-top: 0; margin-bottom: 0; margin-right: 0; margin-left: 0; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; border-top-width: 0; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
                         <engine:ListView header-title="Modding" show-foldout-header="true" show-add-remove-footer="true" reorder-mode="Animated" virtualization-method="DynamicHeight" show-border="true" name="mods" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;" />
                         <engine:Button text="Normalize" name="mods-normalize" style="margin-top: 4px;" />
-                    </engine:VisualElement>
-                </engine:Tab>
-                <engine:Tab label="General" closeable="false" name="general">
-                    <engine:VisualElement style="flex-grow: 1; margin-top: 4px; margin-bottom: 0; margin-right: 0; margin-left: 0; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
-                        <engine:ListView header-title="Spawns" show-foldout-header="true" show-add-remove-footer="true" reorder-mode="Animated" virtualization-method="DynamicHeight" show-border="true" name="spawns" show-bound-collection-size="true" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;" />
-                        <engine:Button text="Normalize" name="spawns-normalize" style="margin-top: 4px;" />
-                        <engine:EnumField label="Spawn Type" type="Nox.CCK.Worlds.SpawnType, NoxCCK" name="spawn-type" style="margin-right: 4px;" />
-                    </engine:VisualElement>
-                    <engine:VisualElement style="flex-grow: 1; margin-top: 0; margin-bottom: 0; margin-right: 0; margin-left: 0; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; border-top-width: 0; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
-                        <engine:DoubleField label="Respawn height" value="-100" name="respawn-height" style="margin-right: 4px;" />
                     </engine:VisualElement>
                 </engine:Tab>
             </engine:TabView>

@@ -15,7 +15,7 @@ namespace Nox.CCK.Worlds
 
         [SerializeField] private string[] data_Scenes;
         [SerializeField] private string[] data_Features;
-        [SerializeField] private ModRequirement[] data_Mods;
+        [SerializeField] private string[] data_Mods;
 
 
 #if UNITY_EDITOR
@@ -48,6 +48,8 @@ namespace Nox.CCK.Worlds
                 lscenes.Add(AssetDatabase.GetAssetPath(scene));
             data_Scenes = lscenes.ToArray();
             data_Type = DescriptorType.Main;
+            data_Features = EstimateFeatures().Values.ToArray();
+            data_Mods = EstimateMods().Values.Select(mod => mod.Id).ToArray();
             EditorUtility.SetDirty(this);
         }
 
@@ -111,17 +113,23 @@ namespace Nox.CCK.Worlds
             return Features;
         }
 
-        public List<ModRequirement> GetMods()
+        public List<ModRequirement> GetRequirementMods()
         {
-            if (IsCompiled) return (data_Mods ?? new ModRequirement[0]).ToList();
+            if (IsCompiled) return (data_Mods?.Select(s => new ModRequirement { Id = s }) ?? new ModRequirement[0]).ToList();
             return ModRequirements;
+        }
+
+        public List<string> GetMods()
+        {
+            if (IsCompiled) return (data_Mods ?? new string[0]).ToList();
+            return ModRequirements.Select(mod => mod?.Id).ToList();
         }
 
         public SupportBuildTarget GetBuildPlatform() => target;
 #else
         public List<string> GetScenes() => ( data_Scenes ?? new string[0]).ToList();
         public List<string> GetFeatures() => ( data_Features ?? new string[0]).ToList();
-        public List<ModRequirement> GetMods() => ( data_Mods ?? new ModRequirement[0]).ToList();
+        public List<string> GetMods() => ( data_Mods ?? new string[0]).ToList();
 #endif
     }
 

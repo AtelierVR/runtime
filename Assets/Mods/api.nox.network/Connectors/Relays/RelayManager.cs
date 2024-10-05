@@ -17,7 +17,7 @@ namespace api.nox.network
 
         public static void Dispose()
         {
-            foreach (var relay in Cache)
+            foreach (var relay in Cache.ToArray())
                 relay.Dispose();
         }
 

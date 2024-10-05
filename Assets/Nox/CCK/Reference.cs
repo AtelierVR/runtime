@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Nox.CCK
@@ -22,6 +24,24 @@ namespace Nox.CCK
                     if (reference.Key == key) return reference.GetReference();
             }
             return null;
+        }
+
+        public static GameObject[] GetReferences(string key, GameObject origin = null)
+        {
+            var references = new HashSet<GameObject>();
+            if (origin == null)
+            {
+                foreach (var reference in FindObjectsByType<Reference>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                    if (reference.Key == key) references.Add(reference.GetReference());
+            }
+            else if (origin != null)
+            {
+                foreach (var reference in origin.GetComponents<Reference>())
+                    if (reference.Key == key) references.Add(reference.GetReference());
+                foreach (var reference in origin.GetComponentsInChildren<Reference>(true))
+                    if (reference.Key == key) references.Add(reference.GetReference());
+            }
+            return references.ToArray();
         }
     }
 }
