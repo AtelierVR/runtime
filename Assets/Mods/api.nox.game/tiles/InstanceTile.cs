@@ -10,6 +10,7 @@ using NUnit.Framework.Constraints;
 using api.nox.game.sessions;
 using static api.nox.game.WorldTileManager;
 using api.nox.game.LocationIP;
+using api.nox.game.UI;
 
 namespace api.nox.game
 {
@@ -59,7 +60,7 @@ namespace api.nox.game
                     return this.tile;
                 }
             };
-            clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
+            MenuManager.Instance.SendTile(context.Data[0] as int? ?? 0, tile);
         }
 
         private void UpdateContent(GameObject tile, SimplyInstance instance, SimplyWorld world, SimplyWorldAsset asset, IPData location = null)
@@ -86,14 +87,42 @@ namespace api.nox.game
                 var relay = clientMod.NetworkAPI.Relay.GetRelay(instance.address);
                 if (relay != null)
                 {
-                    
-
+                    var currentSession = GameSystem.instance.sessionManager.CurrentSession;
+                    if (currentSession != null && currentSession.controller is OnlineController controller)
+                    {
+                        var ins = controller.GetInstance();
+                        if (ins == null || ins.id != instance.id || ins.server != instance.server)
+                            gotobtn.interactable = true;
+                    }
+                    else gotobtn.interactable = true;
                 }
+
+                UpdatePlayers(tile, instance);
             }
             else Debug.Log("Instance not openned: " + instance.title);
 
+            Debug.Log("InstanceTileManager: " + instance.title + " " + instance.address + " " + instance.server + " " + instance.players.Length);
+
             if (gotobtn.interactable)
                 gotobtn.onClick.AddListener(() => JoinOnlineSession(tile, instance, world, asset).Forget());
+        }
+
+        private void UpdatePlayers(GameObject tile, SimplyInstance instance)
+        {
+            var player_node = Reference.GetReference("players", tile);
+            Reference.GetReference("players.title", tile).GetComponent<TextLanguage>().arguments = new string[] { instance.players.Length.ToString() };
+            var player_prefab = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.instance.player");
+            player_prefab.SetActive(false);
+            foreach (Transform child in player_node.transform)
+                Object.Destroy(child.gameObject);
+            foreach (var player in instance.players)
+            {
+                var player_tile = Object.Instantiate(player_prefab, player_node.transform);
+                Reference.GetReference("title", tile).GetComponent<TextLanguage>().arguments = new string[] { player.display };
+                player_tile.SetActive(true);
+                // Reference.GetReference("display", player_tile).GetComponent<TextLanguage>().arguments = new string[] { player.display };
+                // Reference.GetReference("user", player_tile).GetComponent<TextLanguage>().arguments = new string[] { player.user };
+            }
         }
 
         private async UniTask UpdateLocation(GameObject tile, SimplyInstance instance)

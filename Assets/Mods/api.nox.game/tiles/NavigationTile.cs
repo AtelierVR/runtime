@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading;
 using System;
 using Object = UnityEngine.Object;
+using api.nox.game.UI;
 
 namespace api.nox.game
 {
@@ -104,7 +105,10 @@ namespace api.nox.game
             clientMod.coreAPI.EventAPI.Emit("game.widget", _widget);
         }
 
-        private void OnClickWidget() { clientMod.GotoTile("game.navigation"); }
+        private void OnClickWidget()
+        {
+            // clientMod.GotoTile("game.navigation"); 
+        }
 
         internal void OnDispose()
         {
@@ -140,7 +144,7 @@ namespace api.nox.game
                     return this.tile;
                 }
             };
-            clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
+            MenuManager.Instance.SendTile(context.Data[0] as int? ?? 0, tile);
         }
 
         private List<CancellationTokenSource> IsFetching = new();
@@ -282,7 +286,7 @@ namespace api.nox.game
                     });
                 }
                 var button = Reference.GetReference("button", go).GetComponent<Button>();
-                button.onClick.AddListener(() => clientMod.GotoTile(data.goto_id, data.goto_data));
+                // button.onClick.AddListener(() => clientMod.GotoTile(data.goto_id, data.goto_data));
             }
             ForceUpdateLayout.UpdateManually(this.tile);
         }

@@ -21,6 +21,7 @@ namespace Nox.Mods.Assets
         private List<RuntimeEventSubscription> _subscriptions = new();
         internal void Receive(RuntimeEventContext context)
         {
+            Debug.Log($"Receiving event {context.EventName} in {_mod.GetMetadata().GetId()} at {_channel}");
             var data = new RuntimeEventData()
             {
                 EventName = context.EventName,
@@ -35,6 +36,7 @@ namespace Nox.Mods.Assets
 
         public void Emit(EventContext context)
         {
+            Debug.Log($"Emitting event {context.EventName} in {_mod.GetMetadata().GetId()} at {_channel}");
             var ncontext = new RuntimeEventContext(context) { CurrentChannel = _channel, Source = _mod };
             var mod = context.Destination != null ? _mod.coreAPI.RuntimeModAPI.GetInternalMod(context.Destination) : null;
             if (mod != null)
@@ -50,6 +52,7 @@ namespace Nox.Mods.Assets
 
         public void Emit(string eventName, params object[] data)
         {
+
             if (data.Length > 0 && data[data.Length - 1] is EventCallback callback)
                 Emit(new RuntimeEventContext()
                 {

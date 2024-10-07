@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace api.nox.game.sessions
 {
@@ -7,7 +8,7 @@ namespace api.nox.game.sessions
     {
         public GameSystem gameSystem;
         public List<Session> sessions = new();
-        public ushort currentSessionUid;
+        public ushort currentSessionUid = ushort.MaxValue;
 
         public byte NextId()
         {
@@ -25,7 +26,7 @@ namespace api.nox.game.sessions
 
         public void Dispose()
         {
-            foreach (var session in sessions)
+            foreach (var session in sessions.ToArray())
                 session.Dispose();
             sessions.Clear();
         }
@@ -33,16 +34,28 @@ namespace api.nox.game.sessions
         internal Session GetSession(string group, uint id) => sessions.Find(session => session.group == group && session.id == id);
         internal Session CurrentSession
         {
-            get => sessions.Find(session => session.uid == currentSessionUid);
+            get => currentSessionUid == ushort.MaxValue ? null : sessions.Find(session => session.uid == currentSessionUid);
             set
             {
-                var session = GetSession(value.group, value.id);
-                if (session == null)
-                    sessions.Add(value);
-                var old = CurrentSession;
-                old?.OnDeselectedCurrent(value);
-                currentSessionUid = value.uid;
-                value.OnSelectedCurrent(old);
+                if (value == null)
+                {
+                    var old = CurrentSession;
+                    old?.OnDeselectedCurrent(null);
+                    currentSessionUid = ushort.MaxValue;
+                    gameSystem.OnSessionChanged(old, null);
+
+                }
+                else
+                {
+                    var session = GetSession(value.group, value.id);
+                    if (session == null)
+                        sessions.Add(value);
+                    var old = CurrentSession;
+                    old?.OnDeselectedCurrent(value);
+                    currentSessionUid = value.uid;
+                    value.OnSelectedCurrent(old);
+                    gameSystem.OnSessionChanged(old, value);
+                }
             }
         }
 

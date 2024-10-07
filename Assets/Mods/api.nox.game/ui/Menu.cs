@@ -1,129 +1,66 @@
 using System;
-using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using UnityEditor;
+using Nox.CCK.Mods;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
-namespace api.nox.game
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
+namespace api.nox.game.UI
 {
-    public class Menu : MonoBehaviour
+    public class Menu : MonoBehaviour, ShareObject, IDisposable
     {
-        internal GameClientSystem _gameClientSystem;
-        public string defaultTile;
-        [Header("Menu bars")]
-        public GameObject menuItemPrefab;
-        public RectTransform centerMenu;
-        public RectTransform leftMenu;
-        public RectTransform rightMenu;
-        [Header("Content", order = 2)]
-        public MenuItem[] bottomCenterItems;
-        public MenuItem[] bottomLeftItems;
-        public MenuItem[] bottomRightItems;
-
-        [Header("Notification bar")]
-        public GameObject notificationItemPrefab;
-        public RectTransform notificationMenu;
-        [Header("Content", order = 2)]
-        public MenuItem[] notificationItems;
-
-        [Header("Container")]
+        public int Id => GetInstanceID();
+        public string initTile = "default";
+        public NavigationMenu[] navigationMenus;
         public RectTransform container;
+        internal MenuHistory History;
+
+        public virtual bool IsVisible
+        {
+            get => gameObject.activeSelf;
+            set => gameObject.SetActive(value);
+        }
+
+        void Awake()
+        {
+            if (container == null)
+                container = GetComponent<RectTransform>();
+            History = new MenuHistory(this);
+        }
 
         void Start() => UpdateMenu();
+        void OnValidate() => UpdateMenu();
+        public virtual void Dispose() { }
 
+
+        /// <summary>
+        /// Update the menu
+        /// </summary>
         void UpdateMenu()
         {
 #if UNITY_EDITOR
             if (EditorUtility.IsPersistent(gameObject)) return;
 #endif
-            UpdateContent(centerMenu, bottomCenterItems);
-            UpdateContent(leftMenu, bottomLeftItems);
-            UpdateContent(rightMenu, bottomRightItems);
-
-            UpdatePosition(centerMenu, Vector2.down);
-            UpdatePosition(leftMenu, Vector2.left + Vector2.down);
-            UpdatePosition(rightMenu, Vector2.right + Vector2.down);
-
-            UpdateNotification();
-        }
-
-        private void UpdateNotification()
-        {
-            if (notificationMenu == null) return;
-            if (notificationItems.Length == 0)
+            foreach (var nav in navigationMenus)
             {
-                notificationMenu.gameObject.SetActive(false);
-                return;
-            }
-            else notificationMenu.gameObject.SetActive(true);
-            // hide unused items
-            for (int i = notificationItems.Length; i < notificationMenu.childCount; i++)
-            {
-#if UNITY_EDITOR
-                if (Application.isPlaying)
-                    Destroy(notificationMenu.GetChild(i).gameObject);
-                else
-                {
-                    var menuItem = notificationMenu.GetChild(i);
-                    menuItem.gameObject.SetActive(false);
-                    menuItem.name = $"notification-item-{i}-hidden";
-                }
-#else
-                    Destroy(notificationMenu.GetChild(i).gameObject);
-#endif
-            }
-            // update items
-            for (int i = 0; i < notificationItems.Length; i++)
-            {
-                var item = notificationItems[i];
-                var menuItem = notificationMenu.childCount > i ? notificationMenu.GetChild(i) : Instantiate(notificationItemPrefab, notificationMenu).transform;
-                menuItem.name = $"notification-item-{i}-{item.key}";
-                var ri = menuItem.GetComponentInChildren<RawImage>();
-                var tl = menuItem.GetComponentInChildren<TextLanguage>();
-                if (ri != null)
-                {
-                    if (item.icon != null)
-                        ri.texture = item.icon;
-                    ri.gameObject.SetActive(item.icon != null);
-                }
-                if (tl != null)
-                {
-                    if (!string.IsNullOrEmpty(item.text))
-                        tl.UpdateText(item.text);
-                    tl.gameObject.SetActive(!string.IsNullOrEmpty(item.text));
-                }
-                menuItem.GetComponent<Button>().interactable = item.flags.HasFlag(MenuItemActiveFlags.Interactable);
-                menuItem.gameObject.SetActive(item.flags.HasFlag(MenuItemActiveFlags.Enabled));
-                UpdateSize(menuItem).Forget();
-            }
-            UpdateSize(null).Forget();
-        }
-
-        private async UniTask UpdateSize(Transform menuItem)
-        {
-            if (menuItem == null)
-            {
-                await UniTask.DelayFrame(10);
-                notificationMenu.gameObject.SetActive(false);
-                await UniTask.DelayFrame(1);
-                notificationMenu.gameObject.SetActive(true);
-                return;
-            }
-            var refi = Reference.GetReference("nav.sizeref", menuItem.gameObject);
-            if (refi != null)
-            {
-                await UniTask.DelayFrame(10);
-                var rec = menuItem.GetComponent<RectTransform>();
-                var reci = refi.GetComponent<RectTransform>();
-                var csf = refi.GetComponent<HorizontalOrVerticalLayoutGroup>();
-                rec.sizeDelta = new Vector2(csf.preferredWidth, csf.preferredHeight);
+                UpdateContent(nav);
+                UpdatePosition(nav.container, nav.anchor);
             }
         }
 
+
+        /// <summary>
+        /// Update the position of the navigation menu
+        /// </summary>
+        /// <param name="menu"></param>
+        /// <param name="direction"></param>
         private void UpdatePosition(RectTransform menu, Vector2 direction)
         {
-            if (menu == null) return;
             // bottom center
             if (direction == Vector2.down)
             {
@@ -150,70 +87,67 @@ namespace api.nox.game
             }
         }
 
-        private void UpdateContent(RectTransform menu, MenuItem[] items)
-        {
-            if (menu == null || items == null) return;
 
-            if (items.Length == 0)
+        /// <summary>
+        /// Update the content of the navigation menu
+        /// </summary>
+        /// <param name="nav"></param>
+        private void UpdateContent(NavigationMenu nav)
+        {
+            if (nav.items.Length == 0)
             {
-                menu.gameObject.SetActive(false);
+                nav.container.gameObject.SetActive(false);
                 return;
             }
-            else menu.gameObject.SetActive(true);
-
-            // hide unused items
-            for (int i = items.Length; i < menu.childCount; i++)
-            {
+            else nav.container.gameObject.SetActive(true);
+            for (int i = nav.items.Length; i < nav.container.childCount; i++)
 #if UNITY_EDITOR
                 if (Application.isPlaying)
-                    Destroy(menu.GetChild(i).gameObject);
+                    Destroy(nav.container.GetChild(i).gameObject);
                 else
                 {
-                    var menuItem = menu.GetChild(i);
+                    var menuItem = nav.container.GetChild(i);
                     menuItem.gameObject.SetActive(false);
                     menuItem.name = $"menu-item-{i}-hidden";
                 }
 #else
-                Destroy(menu.GetChild(i).gameObject);
+                Destroy(nav.container.GetChild(i).gameObject);
 #endif
-            }
-            // update items
-            for (int i = 0; i < items.Length; i++)
+            for (int i = 0; i < nav.items.Length; i++)
             {
-                var item = items[i];
-                var menuItem = menu.childCount > i ? menu.GetChild(i) : Instantiate(menuItemPrefab, menu).transform;
+                var item = nav.items[i];
+                var menuItem = nav.container.childCount > i
+                    ? nav.container.GetChild(i)
+                    : Instantiate(nav.itemPrefab, nav.container).transform;
                 menuItem.name = $"menu-item-{i}-{item.key}";
                 menuItem.GetComponentInChildren<RawImage>().texture = item.icon;
                 menuItem.GetComponentInChildren<TextLanguage>().UpdateText(item.text);
                 var btn = menuItem.GetComponent<Button>();
-                btn.interactable = item.flags.HasFlag(MenuItemActiveFlags.Interactable);
-                menuItem.gameObject.SetActive(item.flags.HasFlag(MenuItemActiveFlags.Enabled));
+                btn.interactable = item.flags.HasFlag(NavigationMenuItemActiveFlags.Interactable);
+                menuItem.gameObject.SetActive(item.flags.HasFlag(NavigationMenuItemActiveFlags.Enabled));
                 btn.onClick.RemoveAllListeners();
-                if (!string.IsNullOrEmpty(item.gotoTile) && _gameClientSystem != null)
-                    btn.onClick.AddListener(() => _gameClientSystem.GotoTile(item.gotoTile));
+                // if (!string.IsNullOrEmpty(item.gotoTile))
+                //     btn.onClick.AddListener(() => _gameClientSystem.GotoTile(item.gotoTile));
             }
         }
-    }
 
-    [Flags]
-    public enum MenuItemActiveFlags
-    {
-        None = 0,
-        Interactable = 1,
-        Enabled = 2
-    }
+        public void SetTile(TileObject tile, TileObject oldTile = null)
+        {
+            if (oldTile != null)
+            {
+                oldTile.onHide?.DynamicInvoke(tile.id);
+                oldTile.onRemove?.DynamicInvoke();
+                Destroy(oldTile.content);
+            }
 
-
-    [Serializable]
-    public class MenuItem
-    {
-        public string key;
-        public Texture2D icon;
-        public string text;
-        public string[] text_arguments;
-        public string tooltip;
-        public string[] tooltip_arguments;
-        public string gotoTile;
-        public MenuItemActiveFlags flags;
+            if (tile != null)
+            {
+                tile.onOpen?.DynamicInvoke(oldTile);
+                tile.content = tile.GetContent(container);
+                tile.content.SetActive(true);
+                tile.content.name = tile.id;
+            }
+            else Debug.LogWarning("No tile to display");
+        }
     }
 }

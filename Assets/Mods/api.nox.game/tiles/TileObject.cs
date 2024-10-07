@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace api.nox.game
 {
-    public class TileObject : ShareObject
+    public class TileObject : ShareObject, IDisposable
     {
         [ShareObjectImport, ShareObjectExport] public bool showNavigation = true;
         [ShareObjectImport, ShareObjectExport] public bool isReforced = false; // If true, the tile can't be removed, except by an other renforced tile
@@ -23,5 +23,17 @@ namespace api.nox.game
         // on restore: [onRestore] -> [onDisplay] -> (display shown)
         // on remove (no history): (display hidded) -> [onHide] -> [onRemove]
         // on hide (history): (display hidded) -> [onHide]
+
+        public virtual void Dispose()
+        {
+            onRemove?.Invoke();
+            content = null;
+            GetContent = null;
+            onOpen = null;
+            onRestore = null;
+            onRemove = null;
+            onDisplay = null;
+            onHide = null;
+        }
     }
 }

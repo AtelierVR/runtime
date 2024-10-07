@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using api.nox.game.UI;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Mods;
@@ -44,21 +45,22 @@ namespace api.nox.game
         private GameObject tile;
         internal void SendTile(EventData context)
         {
+            Debug.Log("HomeTileManager.SendTile");
             var tile = new TileObject()
             {
                 id = "api.nox.game.home",
                 onRemove = () => OnRemove(context),
                 GetContent = (Transform tf) =>
-            {
-                var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.home");
-                pf.SetActive(false);
-                this.tile = Object.Instantiate(pf, tf);
-                this.tile.name = "game.home";
-                UpdateWidgets();
-                return this.tile;
-            }
+                {
+                    var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.home");
+                    pf.SetActive(false);
+                    this.tile = Object.Instantiate(pf, tf);
+                    this.tile.name = "game.home";
+                    UpdateWidgets();
+                    return this.tile;
+                }
             };
-            clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
+            MenuManager.Instance.SendTile(context.Data[0] as int? ?? 0, tile);
         }
 
         internal void UpdateWidgets()

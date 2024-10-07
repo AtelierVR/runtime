@@ -14,7 +14,7 @@ namespace Nox.Mods
     {
         private static string[] _originalPaths = new string[]
         {
-            Path.Combine(CCK.Constants.GameAppDataPath, "mods"),
+            Path.Combine(Constants.GameAppDataPath, "mods"),
             Path.Combine(Application.dataPath, "..", "Library", "NoxMods"),
         };
 

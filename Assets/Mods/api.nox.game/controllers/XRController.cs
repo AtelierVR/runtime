@@ -1,33 +1,60 @@
+using System.Runtime.InteropServices;
 using Autohand;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit.Inputs;
 
 namespace api.nox.game.Controllers
 {
-    public enum XRRotationType
-    {
-        Smooth,
-        Snap
-    }
 
     public class XRController : BaseController
     {
-        public InputActionManager inputAction;
+        [Header("XR Settings")]
 
-        public void Start()
+        public InputActionReference ToggleMenuAction;
+        public InputActionReference ToggleMiniMenuAction;
+        public InputActionReference JumpAction;
+        public InputActionReference CrouchAction;
+        public InputActionReference MicrophoneAction;
+        public InputActionManager InputAction;
+
+        public override uint Priority => (uint)(GameSystem.instance.coreAPI.XRAPI.IsEnabled() ? 2 : 0);
+
+
+        public override void OnControllerEnable(BaseController last)
         {
-            inputAction.enabled = false;
+            base.OnControllerEnable(last);
+            ToggleMenuAction.action.Enable();
+            ToggleMiniMenuAction.action.Enable();
+            JumpAction.action.Enable();
+            CrouchAction.action.Enable();
+            MicrophoneAction.action.Enable();
+            InputAction.enabled = false;
             UniTask.RunOnThreadPool(async () =>
             {
                 await UniTask.WaitForSeconds(.1f);
-                inputAction.enabled = true;
+                InputAction.enabled = true;
             }).Forget();
         }
 
-        public override void OnEnable()
+        public override void OnControllerDisable(BaseController next)
         {
-            base.OnEnable();
+            base.OnControllerDisable(next);
+            ToggleMenuAction.action.Disable();
+            ToggleMiniMenuAction.action.Disable();
+            JumpAction.action.Disable();
+            CrouchAction.action.Disable();
+            MicrophoneAction.action.Disable();
+            InputAction.enabled = false;
+        }
+
+        public override void OnInitialize()
+        {
+            base.OnInitialize();
+            JumpAction.action.performed += _ => Jump();
+            CrouchAction.action.performed += _ => IsCrounching = !IsCrounching;
+            MicrophoneAction.action.performed += _ => UseMicrophone = !UseMicrophone;
         }
 
         private void SetRotationType(XRRotationType type) => Player.rotationType = type switch
@@ -60,5 +87,11 @@ namespace api.nox.game.Controllers
             get => Player.snapTurnAngle;
             set => Player.snapTurnAngle = value;
         }
+    }
+
+    public enum XRRotationType
+    {
+        Smooth,
+        Snap
     }
 }

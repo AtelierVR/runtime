@@ -11,6 +11,7 @@ using Nox.SimplyLibs;
 using System.Linq;
 using System.Threading;
 using api.nox.game.sessions;
+using api.nox.game.UI;
 
 namespace api.nox.game
 {
@@ -58,7 +59,7 @@ namespace api.nox.game
                     return this.tile;
                 }
             };
-            clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
+            MenuManager.Instance.SendTile(context.Data[0] as int? ?? 0, tile);
         }
 
         private async UniTask FetchInstancesWorker(GameObject tile, SimplyWorld world)
@@ -139,7 +140,7 @@ namespace api.nox.game
                 return;
             }
             var asset = search.assets[0];
-            clientMod.GotoTile("game.instance", instance, world, asset);
+            // clientMod.GotoTile("game.instance", instance, world, asset);
             goto_instance = false; 
         }
 
@@ -191,7 +192,7 @@ namespace api.nox.game
             {
                 var server = clientMod.NetworkAPI.GetCurrentServer();
                 server = server != null && server.features.Contains("instance") ? server : null;
-                clientMod.GotoTile("game.instance.make", world, versions == null || versions.Length == 0 ? null : asset, server);
+                // clientMod.GotoTile("game.instance.make", world, versions == null || versions.Length == 0 ? null : asset, server);
             });
         }
 

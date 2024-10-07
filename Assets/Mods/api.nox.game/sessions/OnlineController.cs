@@ -89,14 +89,13 @@ namespace api.nox.game.sessions
                 return false;
             }
 
-            Debug.Log("ConfigWorldData: " + configworld.Address + " " + configworld.MasterId + " " + configworld.Version);
             var world = await GameSystem.instance.NetworkAPI.World.GetWorld(configworld.Address, configworld.MasterId);
             var search = world != null ? await world.SearchAssets(0, 1,
                 configworld.Version == ushort.MaxValue ? null : new uint[] { configworld.Version },
                 new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) },
                 new string[] { "unity" }
             ) : null;
-            Debug.Log("Search: " + world + "f" + search);
+
             var asset = search?.assets[0];
             if (world == null || asset == null)
             {
@@ -110,7 +109,11 @@ namespace api.nox.game.sessions
                 if (!res.success) return false;
             }
 
-            var scene = await WorldManager.LoadWorld(asset.hash, 0, LoadSceneMode.Additive);
+            var scene = await WorldManager.LoadWorld(
+                asset.hash, 0,
+                GameSystem.instance.sessionManager.CurrentSession == null ? LoadSceneMode.Single : LoadSceneMode.Additive
+            );
+
             if (scene == default || !scene.IsValid())
             {
                 Debug.Log("Scene is null");
@@ -119,7 +122,6 @@ namespace api.nox.game.sessions
             session.scenes.Add(scene);
 
             var indexMainDescriptor = session.IndexOfMainDescriptor(out var descriptor);
-            Debug.Log("IndexMainDescriptor: " + indexMainDescriptor + " " + descriptor);
 
             if (indexMainDescriptor == byte.MaxValue)
             {
@@ -130,12 +132,18 @@ namespace api.nox.game.sessions
             if (descriptor.GetSpawnType() != SpawnType.None)
             {
                 var spawn = descriptor.ChoiceSpawn();
-                BaseController.CurrentController.Teleport(spawn.transform);
+                PlayerController.Instance.CurrentController.Teleport(spawn.transform);
             }
 
+            if (!instance.SendConfigReady())
+            {
+                Debug.Log("SendConfigReady failed");
+                return false;
+            }
 
+            
 
-            Debug.Log("Teleport success");
+            Debug.Log("World loaded");
 
             return true;
         }

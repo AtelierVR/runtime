@@ -269,12 +269,12 @@ GameObject:
   - component: {fileID: 6944280325566088115}
   - component: {fileID: 8028629213680620372}
   m_Layer: 5
-  m_Name: player.entry
+  m_Name: game.instance.player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &188368356754578507
 RectTransform:
   m_ObjectHideFlags: 0

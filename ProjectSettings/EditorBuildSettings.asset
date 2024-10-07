@@ -39,98 +39,32 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleScene 1.unity
     guid: dd42824573f5a2e4d82cef7afeff5ac3
   - enabled: 1
-    path: Assets/BuildOutput/2024-09-04-18-10-48-oui/0.unity
-    guid: f0ca699ded004f18a112d5e4b83b341f
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-04-23-20-34-oui/0.unity
-    guid: f15ab8e2d05540aaa12cd4f6b4456e80
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-04-23-22-56-oui/0.unity
-    guid: 487ff0bc772042f4b87aa5f2f938fc46
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-04-23-28-03-oui/0.unity
-    guid: d696cf3e1353484592b304002b786e57
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-00-08-19-oui/0.unity
-    guid: 36e4a552ed004c87a6bbe5d9ea56a271
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-00-55-49-oui/0.unity
-    guid: a43d74a2a75b46428b01a52c5f4b9e95
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-01-14-02-oui/0.unity
-    guid: 2ecb8339d427449e9b4b82d9832aaa7d
-  - enabled: 1
     path: Assets/Worlds/indev/SubOui.unity
     guid: efdf8731a322de84cb0a6047279e2c6e
   - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-02-00-39-oui/0.unity
-    guid: 73bbbf68fe7e4872a4100ec7e1b35042
+    path: Assets/BuildOutput/2024-10-05-17-25-48-oui/1.unity
+    guid: 54aad6f30f704e3398509594a8ea0271
   - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-02-48-08-oui/1.unity
-    guid: 4f00aa507bac422ba58d46e1bc5860c6
+    path: Assets/BuildOutput/2024-10-05-17-25-48-oui/0.unity
+    guid: 3f18474b48f84ef2af6e9d0ad4f6a628
   - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-02-48-08-oui/0.unity
-    guid: 22bbffce8fc047e8b4c09e8d1d412bc1
+    path: Assets/BuildOutput/2024-10-05-17-27-14-oui/1.unity
+    guid: 09fa41988ea94b5d911039023689492b
   - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-02-53-09-oui/1.unity
-    guid: 76d356364fb84c1fbecd97852a352bbf
+    path: Assets/BuildOutput/2024-10-05-17-27-14-oui/0.unity
+    guid: f3704aa8d0e04105aee8f52f12a09dc8
   - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-02-53-09-oui/0.unity
-    guid: 12ffad70ab4240809d19df1d476084bc
+    path: Assets/BuildOutput/2024-10-05-17-29-22-oui/0.unity
+    guid: 4faba62b6ff847b2bb211c5ba6b6c990
   - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-04-26-00-oui/1.unity
-    guid: 5a5fb4d920184f25bb932a80ed454671
+    path: Assets/BuildOutput/2024-10-05-17-29-22-oui/1.unity
+    guid: a577a7d798f944d98d4315b732ed311c
   - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-04-26-00-oui/0.unity
-    guid: 415ed6106440440d8c864e0e8a17cd21
+    path: Assets/BuildOutput/2024-10-05-17-29-51-oui/0.unity
+    guid: 51aa4443ae2c4bf2a36125e25a8c3a8d
   - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-04-30-41-oui/0.unity
-    guid: cfc86a59d39248929dc94a469fff5d25
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-04-30-41-oui/1.unity
-    guid: 6bcf6814284241e9be027a4c253189ed
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-05-30-34-oui/1.unity
-    guid: f46b544148014f8ba34e75d158d38375
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-05-30-34-oui/0.unity
-    guid: 35989952b74a4134bc8014a03539de37
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-05-44-33-oui/0.unity
-    guid: 6303ae21fd1544cc929dd7312d2e35e1
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-05-44-33-oui/1.unity
-    guid: bbb9072796e94295977f3dff6411f01c
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-05-48-21-oui/0.unity
-    guid: c8c4b380414d498eb78a816f1dc5754f
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-05-48-21-oui/1.unity
-    guid: b67cdf39ea7742e086122ab3a4e35512
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-05-51-04-oui/0.unity
-    guid: 5e54d11bbaa94bf3b2cd1cacb376a595
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-05-51-04-oui/1.unity
-    guid: 94b765cb131b48a0add63b19888fa3c6
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-05-58-32-oui/0.unity
-    guid: 0534b23d616845219813d3e25ee5537f
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-05-58-32-oui/1.unity
-    guid: fb5ed5086da345bdb3936e3be588e118
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-06-01-31-oui/0.unity
-    guid: fd44121a9e14445b9dfd594867db304e
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-06-01-31-oui/1.unity
-    guid: 81e6fdc698c9442c8b3db0c62e94d782
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-06-01-54-oui/0.unity
-    guid: 53842f8d80754ab29c05e10991afc1d2
-  - enabled: 1
-    path: Assets/BuildOutput/2024-10-05-06-01-54-oui/1.unity
-    guid: 0fcfcb3f31334d0184838190f74c9f9d
+    path: Assets/BuildOutput/2024-10-05-17-29-51-oui/1.unity
+    guid: 61951fcece7a4d6cb484804e10e1c63c
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: bfa1182bd221b4ca89619141f66f1260, type: 2}
     Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: dc5a169419fa04987b057f65238cf3ba, type: 2}

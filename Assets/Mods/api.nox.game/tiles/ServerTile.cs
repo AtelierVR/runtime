@@ -7,6 +7,7 @@ using UnityEngine;
 using Nox.CCK;
 using UnityEngine.UI;
 using Nox.SimplyLibs;
+using api.nox.game.UI;
 
 namespace api.nox.game
 {
@@ -108,7 +109,7 @@ namespace api.nox.game
         {
             var server = clientMod.NetworkAPI.GetCurrentServer();
             if (server == null) return;
-            clientMod.GotoTile("game.server", server);
+            // clientMod.GotoTile("game.server", server);
         }
 
         internal void OnDispose()
@@ -132,7 +133,8 @@ namespace api.nox.game
                     return this.tile;
                 }
             };
-            clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
+            
+            MenuManager.Instance.SendTile(context.Data[0] as int? ?? 0, tile);
         }
 
         private void UpdateContent(GameObject tile, SimplyServer server)

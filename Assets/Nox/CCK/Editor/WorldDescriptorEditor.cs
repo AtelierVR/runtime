@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Nox.CCK;
 using Nox.CCK.Worlds;
 using UnityEditor;
@@ -482,13 +483,38 @@ namespace Nox.Editor.Worlds
                 {
                     string text = File.ReadAllText(asset);
                     foreach (var guid in initialGUIDs)
-                        text = text.Replace(guid.Value, endGUIDs[guid.Key]);
+                        text = new Regex(guid.Value).Replace(text, endGUIDs[guid.Key]);
                     File.WriteAllText(asset, text);
                 }
                 string meta = File.ReadAllText(asset + ".meta");
                 foreach (var guid in initialGUIDs)
-                    meta = meta.Replace(guid.Value, endGUIDs[guid.Key]);
+                    meta = new Regex(guid.Value).Replace(meta, endGUIDs[guid.Key]);
                 File.WriteAllText(asset + ".meta", meta);
+            }
+
+            AssetDatabase.Refresh();
+
+            // get all new uids
+            var newGUIDs = new Dictionary<string, string>();
+            foreach (var asset in assets)
+                if (asset.StartsWith(dependencyPath))
+                {
+                    var fileName = Path.GetFileNameWithoutExtension(asset);
+                    newGUIDs.Add(fileName, AssetDatabase.AssetPathToGUID(asset));
+                    Debug.Log("Dependency: " + fileName + " -> " + newGUIDs[fileName]);
+                }
+
+            // set updated uids
+            foreach (var asset in assets)
+            {
+                if (!new[] {
+                    ".unity", ".prefab",  ".asset",
+                    ".mat", ".anim", ".controller"
+                }.Contains(Path.GetExtension(asset))) continue;
+                string text = File.ReadAllText(asset);
+                foreach (var guid in newGUIDs)
+                    text = new Regex(guid.Key).Replace(text, guid.Value);
+                File.WriteAllText(asset, text);
             }
 
             AssetDatabase.Refresh();

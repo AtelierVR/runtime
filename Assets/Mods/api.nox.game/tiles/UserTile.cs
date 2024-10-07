@@ -6,6 +6,7 @@ using UnityEngine;
 using Nox.CCK;
 using UnityEngine.UI;
 using Nox.SimplyLibs;
+using api.nox.game.UI;
 
 namespace api.nox.game
 {
@@ -95,7 +96,7 @@ namespace api.nox.game
         {
             var user = clientMod.NetworkAPI.GetCurrentUser();
             if (user == null) return;
-            clientMod.GotoTile("game.user", user);
+            // clientMod.GotoTile("game.user", user);
         }
 
         private async UniTask OnClickWidgetHome()
@@ -104,7 +105,7 @@ namespace api.nox.game
             if (user == null) return;
             var home = await user.GetHome();
             if (home == null) return;
-            clientMod.GotoTile("game.world", home);
+            // MenuManager.Instance.SendGotoTile("game.world", home);
         }
 
         private async UniTask<bool> UpdateTexure(RawImage img, string url)
@@ -158,7 +159,7 @@ namespace api.nox.game
                     return this.tile;
                 }
             };
-            clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
+            MenuManager.Instance.SendTile(context.Data[0] as int? ?? 0, tile);
         }
 
         private void UpdateContent(GameObject tile, SimplyUser user)

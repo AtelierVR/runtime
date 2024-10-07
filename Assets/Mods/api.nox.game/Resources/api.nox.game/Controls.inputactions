@@ -15,24 +15,6 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Select",
-                    "type": "Button",
-                    "id": "70db20a4-9812-42e0-b6b5-5db1e139e2e0",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Press",
-                    "type": "Button",
-                    "id": "2a2f32d2-13dc-4218-a57d-1ca0192731a5",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Microphone",
                     "type": "Button",
                     "id": "78cb9e14-c1ba-43b8-ac4a-d44ecc110cc6",
@@ -45,89 +27,12 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "0b26e613-a4c0-4859-9f86-84daba8c662c",
-                    "path": "<XRController>/{SecondaryButton}",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "ToggleMenu",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "4ad3805e-b3bb-453c-aa74-192d61d6de72",
                     "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "ToggleMenu",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "64e2f152-00a3-4075-90d3-b3e604f2011c",
-                    "path": "<XRController>/{GripButton}",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Select",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "03ea2526-91eb-4798-9a6a-fe263687a743",
-                    "path": "<MetaAimHand>/indexPressed",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Select",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "db1324e8-b59c-4393-be03-54c542c36cbe",
-                    "path": "<XRController>/{TriggerButton}",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Press",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "8896cc91-40c4-4276-958f-9c498a7d63d3",
-                    "path": "<MetaAimHand>/indexPressed",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Press",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "a5792ef5-cd71-4eb0-948e-6ba01fef2a13",
-                    "path": "<XRController>{LeftHand}/{PrimaryButton}",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Microphone",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "c10003b8-be82-459d-93ef-613784ee2970",
-                    "path": "<Keyboard>/v",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Microphone",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -159,17 +64,6 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "16962ed8-e3e3-4e24-ae7e-21108db1c3da",
-                    "path": "<XRController>{RightController}/{PrimaryButton}",
-                    "interactions": "Tap",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Jump",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "9a4e67c5-95b0-40f8-949a-afe146a2d7e4",
                     "path": "<Keyboard>/space",
                     "interactions": "",
@@ -181,23 +75,60 @@
                 },
                 {
                     "name": "",
-                    "id": "9d7371d4-035c-421a-b464-29971e59616c",
-                    "path": "<XRController>{RightController}/{PrimaryButton}",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Crounch",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "e9938a75-1bbb-487a-9e2b-4e0b4dbc7882",
                     "path": "<Keyboard>/z",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Crounch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Default",
+            "id": "1d47ad75-37e5-4746-8df2-2c5580778bc2",
+            "actions": [
+                {
+                    "name": "Empty",
+                    "type": "Button",
+                    "id": "72da1eb9-74b5-488c-809f-f343715d4c4d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Test",
+                    "type": "Button",
+                    "id": "5e50ab34-c63b-4623-8259-ec3c629c09dd",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "fd1ed3b3-7ffd-4c26-91e1-79ec18079eda",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Empty",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8a11f955-c18b-45f1-ba35-31bbc0163757",
+                    "path": "<Keyboard>/backslash",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Test",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

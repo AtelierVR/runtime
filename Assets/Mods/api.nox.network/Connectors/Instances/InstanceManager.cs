@@ -20,7 +20,7 @@ namespace api.nox.network.Instances
 
         public static void Dispose()
         {
-            foreach (var instance in Cache)
+            foreach (var instance in Cache.ToList())
                 instance.Dispose();
             Cache.Clear();
         }

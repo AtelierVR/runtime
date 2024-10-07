@@ -1,12 +1,12 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using api.nox.game.Controllers;
+using api.nox.game.UI;
 using Nox.CCK;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Worlds;
 using Nox.SimplyLibs;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -17,6 +17,12 @@ namespace api.nox.game
 {
     public class GameClientSystem : ClientModInitializer
     {
+        internal static GameClientSystem Instance;
+        internal static ClientModCoreAPI CoreAPI => Instance.coreAPI;
+
+
+
+
         internal ClientModCoreAPI coreAPI;
         private HomeTileManager homeTile;
         private UserTileManager userTile;
@@ -25,26 +31,32 @@ namespace api.nox.game
         private MakeInstanceTileManager makeinstance;
         internal NavigationTileManager navigationTile;
         private InstanceTileManager instance;
-        private EventSystem eventSystem;
         private EventSubscription tilesub;
         private EventSubscription tilegotosub;
+        private EventSubscription sessionchangedsub;
         internal SimplyNetworkAPI NetworkAPI => coreAPI.ModAPI.GetMod("network")?.GetMainClasses().OfType<ShareObject>().FirstOrDefault()?.Convert<SimplyNetworkAPI>();
 
         public void OnInitializeClient(ClientModCoreAPI api)
         {
-            WorldManager._gameClientSystem = this;
+            Instance = this;
             coreAPI = api;
-            api.AssetAPI.LoadLocalWorld("default");
 
-            // Load the XR controller prefab
-            var controller = api.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.controller.xr");
-            m_controller = Object.Instantiate(controller);
-            m_controller.name = "game.controller";
-            GameObject.DontDestroyOnLoad(m_controller);
-            BaseController.SetupControllerAtStartup(api, m_controller);
+            var world = coreAPI.AssetAPI.LoadLocalWorld("default");
 
-            BaseController.CurrentController.OpenMenuAction.action?.Enable();
-            BaseController.CurrentController.OpenMenuAction.action.performed += (context) => OnMenuClick(context);
+            // Initialize the game controller
+            var controller = Object.Instantiate(api.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.controller"));
+            controller.name = "game.controller";
+            GameObject.DontDestroyOnLoad(controller);
+            PlayerController.GetCurrentController().IsFlying = true;
+
+            // Teleport the player to the spawn point
+            try
+            {
+                var descriptor = BaseDescriptor.GetDescriptor(world);
+                if (descriptor != null)
+                    PlayerController.GetCurrentController().Teleport(descriptor.ChoiceSpawn().transform);
+            }
+            catch (System.Exception e) { Debug.LogWarning(e); }
 
             // Initialize the tile managers
             homeTile = new HomeTileManager(this);
@@ -56,23 +68,22 @@ namespace api.nox.game
             instance = new InstanceTileManager(this);
 
             // Subscribe to the tile events
-            tilesub = api.EventAPI.Subscribe("game.tile", OnTile);
-            tilegotosub = api.EventAPI.Subscribe("game.tile.goto", OnGotoTile);
-            eventSystem = Reference.GetReference("game.eventsystem", m_controller)?.GetComponent<EventSystem>();
-            eventSystem?.gameObject.SetActive(!coreAPI.XRAPI.IsEnabled());
+            tilesub = api.EventAPI.Subscribe("game.tile", context => MenuManager.Instance.OnTile(context));
+            tilegotosub = api.EventAPI.Subscribe("game.tile.goto", context => OnGotoTile(context));
+            MenuManager.Instance.GetViewPortMenu().IsVisible = false;
         }
-
-        public void OnTile(EventData context)
-        {
-            var tile = (context.Data[0] as ShareObject).Convert<TileObject>();
-            if (_currentTile != null && _currentTile.isReforced && !tile.isReforced) return;
-            SetDisplayTile(tile);
-        }
-
 
         public void OnGotoTile(EventData context)
         {
-            var page = context.Data[0] as string;
+            Debug.Log("GotoTile");
+            var menuId = context.Data[0] as uint?;
+            if (menuId == null || menuId == 0)
+            {
+                Debug.Log("GotoTile: MenuId is null or 0");
+                return;
+            }
+            var page = context.Data[1] as string;
+            Debug.Log($"GotoTile: {menuId} {page}");
             switch (page)
             {
                 case "home":
@@ -101,57 +112,32 @@ namespace api.nox.game
             }
         }
 
+        // private void OnOldMenuClick(InputAction.CallbackContext context)
+        // {
+        //     Debug.Log("OldMenu Clicked");
 
-        private void OnMenuClick(InputAction.CallbackContext context)
-        {
-            Debug.Log("Menu Clicked");
-
-            if (!coreAPI.XRAPI.IsEnabled() && eventSystem?.currentSelectedGameObject != null) return;
-            var menu = GetOrCreateMenu();
-            if (!menu.gameObject.activeSelf)
-            {
-                var forw = m_headCamera.transform.forward + m_controller.transform.forward / 2;
-                menu.transform.position = m_headCamera.transform.position + forw * (coreAPI.XRAPI.IsEnabled() ? .5f : .4f);
-                var rect = Reference.GetReference("game.menu.canvas", menu.gameObject).GetComponent<RectTransform>();
-                menu.transform.position = new Vector3(
-                    menu.transform.position.x,
-                    m_headCamera.transform.position.y - rect.sizeDelta.y * rect.lossyScale.y / 2,
-                    menu.transform.position.z
-                );
-                var lookPos = m_headCamera.transform.position - menu.transform.position;
-                lookPos.y = 0;
-                var rotation = Quaternion.LookRotation(lookPos) * Quaternion.Euler(0, 180, 0);
-                menu.transform.rotation = rotation;
-            }
-            menu.gameObject.SetActive(!menu.gameObject.activeSelf);
-        }
-
-        public void GotoTile(string page, params object[] args) => coreAPI.EventAPI.Emit("game.tile.goto", page, args);
-
-        private GameObject m_controller;
-        private Camera m_headCamera => Reference.GetReference("game.camera", m_controller).GetComponent<Camera>();
-        private Menu m_menu;
-        private Menu GetOrCreateMenu()
-        {
-            Debug.Log("GetOrCreateMenu");
-            if (m_menu != null) return m_menu;
-            var menuPrefab = coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/xr-menu");
-            var menuObject = Object.Instantiate(menuPrefab);
-            menuObject.name = "game.menu";
-            menuObject.gameObject.SetActive(false);
-            GameObject.DontDestroyOnLoad(menuObject);
-            m_menu = menuObject.GetComponent<Menu>();
-            m_menu._gameClientSystem = this;
-            GotoTile(m_menu.defaultTile);
-            return m_menu;
-        }
-
-
+        //     if (!coreAPI.XRAPI.IsEnabled() && eventSystem?.currentSelectedGameObject != null) return;
+        //     var menu = GetOrCreateOldMenu();
+        //     if (!menu.gameObject.activeSelf)
+        //     {
+        //         var forw = m_headCamera.transform.forward + m_controller.transform.forward / 2;
+        //         menu.transform.position = m_headCamera.transform.position + forw * (coreAPI.XRAPI.IsEnabled() ? .5f : .4f);
+        //         var rect = Reference.GetReference("game.menu.canvas", menu.gameObject).GetComponent<RectTransform>();
+        //         menu.transform.position = new Vector3(
+        //             menu.transform.position.x,
+        //             m_headCamera.transform.position.y - rect.sizeDelta.y * rect.lossyScale.y / 2,
+        //             menu.transform.position.z
+        //         );
+        //         var lookPos = m_headCamera.transform.position - menu.transform.position;
+        //         lookPos.y = 0;
+        //         var rotation = Quaternion.LookRotation(lookPos) * Quaternion.Euler(0, 180, 0);
+        //         menu.transform.rotation = rotation;
+        //     }
+        //     menu.gameObject.SetActive(!menu.gameObject.activeSelf);
+        // }
 
         public void OnDispose()
         {
-            Object.Destroy(m_controller);
-            if (m_menu != null) Object.Destroy(m_menu.gameObject);
             homeTile.OnDispose();
             userTile.OnDispose();
             serverTile.OnDispose();
@@ -159,32 +145,13 @@ namespace api.nox.game
             navigationTile.OnDispose();
             coreAPI.EventAPI.Unsubscribe(tilesub);
             coreAPI.EventAPI.Unsubscribe(tilegotosub);
+            coreAPI.EventAPI.Unsubscribe(sessionchangedsub);
+            PlayerController.Instance.Dispose();
+            MenuManager.Instance.Dispose();
             WorldManager.UnloadAllWorlds();
-            WorldManager._gameClientSystem = null;
         }
 
         private TileObject _currentTile;
-        private void SetDisplayTile(TileObject tile)
-        {
-            if (tile == null) return;
-            var menu = GetOrCreateMenu();
-            if (menu == null) return;
-            var container = Reference.GetReference("game.menu.container", menu.gameObject);
-            var oldtile = _currentTile?.id;
-            if (_currentTile != null)
-            {
-                _currentTile.onHide?.DynamicInvoke(tile.id);
-                _currentTile.onRemove?.DynamicInvoke();
-                Object.Destroy(_currentTile.content);
-            }
-            tile.onOpen?.DynamicInvoke(oldtile);
-            tile.content = tile.GetContent(container.transform);
-            tile.content.SetActive(true);
-            tile.content.name = tile.id;
-            _currentTile = tile;
-            tile.onDisplay?.DynamicInvoke(oldtile);
-            ForceUpdateLayout.UpdateManually(container);
-        }
     }
 
 

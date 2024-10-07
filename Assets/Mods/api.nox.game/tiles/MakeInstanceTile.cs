@@ -1,4 +1,5 @@
 using System.Linq;
+using api.nox.game.UI;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Mods;
@@ -52,7 +53,7 @@ namespace api.nox.game
                 }
             };
 
-            clientMod.coreAPI.EventAPI.Emit("game.tile", tile);
+            MenuManager.Instance.SendTile(context.Data[0] as int? ?? 0, tile);
         }
 
         private void UpdateContent(GameObject tile, SimplyWorld world, SimplyWorldAsset asset, SimplyServer server)
@@ -98,7 +99,7 @@ namespace api.nox.game
                 Debug.LogError("Failed to create instance");
                 return;
             }
-            clientMod.GotoTile("game.instance", created, world, asset);
+            // clientMod.GotoTile("game.instance", created, world, asset);
         }
 
         private void SetWorldAsset(GameObject tile, SimplyWorldAsset asset)

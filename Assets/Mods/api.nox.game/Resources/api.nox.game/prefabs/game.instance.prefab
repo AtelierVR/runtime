@@ -2640,7 +2640,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52bad127038c8cf489f62e6161cd4f4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Key: instances
+  Key: players
   Refrence: {fileID: 0}
 --- !u!1 &2759050323476437503
 GameObject:
@@ -6792,6 +6792,7 @@ GameObject:
   - component: {fileID: 7840075774001514928}
   - component: {fileID: 6264450142470320508}
   - component: {fileID: 5728778240173107516}
+  - component: {fileID: 2997959174664388882}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -6932,6 +6933,20 @@ MonoBehaviour:
   key: dashboard.instance.players.title
   arguments:
   - 0
+--- !u!114 &2997959174664388882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7115396367271646887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52bad127038c8cf489f62e6161cd4f4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Key: players.title
+  Refrence: {fileID: 0}
 --- !u!1 &7129838727715848629
 GameObject:
   m_ObjectHideFlags: 0

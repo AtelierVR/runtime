@@ -414,7 +414,7 @@ namespace api.nox.world
                     platform = SuppordTarget.GetTargetName(target),
                 });
 
-            if (asset == null || !asset.IsEmpty())
+            if (asset == null)
             {
                 EditorUtility.DisplayDialog("Error", "An error occured while creating the asset.", "Ok");
                 Debug.LogError("An error occured while creating the asset.");
