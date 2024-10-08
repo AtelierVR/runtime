@@ -85,11 +85,11 @@ namespace api.nox.game
                 id = "api.nox.game.navigation",
                 width = 1,
                 height = 1,
-                GetContent = (Transform tf) => GenerateWidgetContent(_widget, tf)
+                GetContent = (int menuId, Transform tf) => GenerateWidgetContent(menuId, _widget, tf)
             };
         }
 
-        private GameObject GenerateWidgetContent(HomeWidget data, Transform parent)
+        private GameObject GenerateWidgetContent(int menuId, HomeWidget data, Transform parent)
         {
             var baseprefab = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget");
             var prefab = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget.navigation");
@@ -144,7 +144,7 @@ namespace api.nox.game
                     return this.tile;
                 }
             };
-            MenuManager.Instance.SendTile(context.Data[0] as int? ?? 0, tile);
+            MenuManager.Instance.SendTile((context.Data[0] as int?) ?? 0, tile);
         }
 
         private List<CancellationTokenSource> IsFetching = new();

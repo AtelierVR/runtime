@@ -34,6 +34,9 @@ namespace api.nox.xr
         public InputDevice GetTracker() => InputDevices.GetDeviceAtXRNode(XRNode.TrackingReference);
         public InputDevice GetLeftHand() => InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
         public InputDevice GetRightHand() => InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
-        public void SetEnabled(bool enabled) =>  XRSettings.enabled = enabled;
+        public void SetEnabled(bool enabled) 
+        {
+            XRSettings.enabled = enabled;
+        }
     }
 }

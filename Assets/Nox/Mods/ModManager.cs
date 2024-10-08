@@ -342,10 +342,23 @@ namespace Nox.Mods
                 };
                 return results.ToArray();
             }
-            
-            return mods
-                .Select(mod => new ModLoadResult(mod.GetMetadata().GetId(), ModLoadResultType.Success, "Mod loaded"))
-                .ToArray();
+
+
+            foreach (var mod in mods)
+            {
+                try
+                {
+                    mod.PostMain();
+                    mod.PostClient();
+                    results.Add(new ModLoadResult(mod.GetMetadata().GetId(), ModLoadResultType.Success, "Mod loaded"));
+                }
+                catch (Exception e)
+                {
+                    results.Add(new ModLoadResult(mod.GetMetadata().GetId(), ModLoadResultType.Warning, e.Message));
+                }
+            }
+
+            return results.ToArray();
         }
 
         public static RuntimeMod GetMod(string id) => Cache.FirstOrDefault(m => m.GetMetadata().Match(id));

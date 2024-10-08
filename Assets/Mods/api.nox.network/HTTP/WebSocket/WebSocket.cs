@@ -2,6 +2,7 @@ using System;
 using WS = System.Net.WebSockets.ClientWebSocket;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods;
+using UnityEngine;
 
 namespace api.nox.network
 {
@@ -27,9 +28,14 @@ namespace api.nox.network
         {
             if (url != null) this.url = url;
             if (string.IsNullOrEmpty(this.url)) return false;
+            Debug.Log($"Connecting to {this.url}");
             driver = initial ?? new WS();
             if (driver.State != System.Net.WebSockets.WebSocketState.Open)
-                await driver.ConnectAsync(new Uri(this.url), default);
+                try
+                {
+                    await driver.ConnectAsync(new Uri(this.url), default);
+                }
+                catch { return false; }
             if (driver.State == System.Net.WebSockets.WebSocketState.Open)
             {
                 Receive().Forget();
@@ -67,7 +73,8 @@ namespace api.nox.network
         public async UniTask Close()
         {
             isRunning = false;
-            await driver?.CloseAsync(System.Net.WebSockets.WebSocketCloseStatus.NormalClosure, "Closed", default);
+            try { await driver?.CloseAsync(System.Net.WebSockets.WebSocketCloseStatus.NormalClosure, "Closed", default); }
+            catch { }
             driver?.Dispose();
             driver = null;
         }

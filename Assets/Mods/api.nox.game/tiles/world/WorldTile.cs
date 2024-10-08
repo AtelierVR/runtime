@@ -2,65 +2,121 @@
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
-using Nox.CCK.Worlds;
 using UnityEngine;
 using Nox.CCK;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using Nox.SimplyLibs;
 using System.Linq;
-using System.Threading;
 using api.nox.game.sessions;
 using api.nox.game.UI;
 
-namespace api.nox.game
+namespace api.nox.game.Tiles
 {
-    internal class WorldTileManager
+    internal class WorldTileManager : TileManager
     {
-        internal GameClientSystem clientMod;
-        private GameObject tile;
-        private EventSubscription eventWorldUpdate;
-        private HomeWidget worldMeWidget;
-
-        internal WorldTileManager(GameClientSystem clientMod)
-        {
-            this.clientMod = clientMod;
-        }
-        private async UniTask<bool> UpdateTexure(RawImage img, string url)
-        {
-            var tex = await clientMod.NetworkAPI.FetchTexture(url);
-            if (tex != null)
-            {
-                img.texture = tex;
-                return true;
-            }
-            else return false;
-        }
-
-        internal void OnDispose()
-        {
-            clientMod.coreAPI.EventAPI.Unsubscribe(eventWorldUpdate);
-        }
-
+        /// <summary>
+        /// Send a tile to the menu system
+        /// </summary>
+        /// <param name="context"></param>
         internal void SendTile(EventData context)
         {
-            var world = ((context.Data[1] as object[])[0] as ShareObject).Convert<SimplyWorld>();
-            var tile = new TileObject()
-            {
-                id = "api.nox.game.world",
-                onRemove = () => this.tile = null,
-                GetContent = (Transform tf) =>
-                {
-                    var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.world");
-                    pf.SetActive(false);
-                    this.tile = Object.Instantiate(pf, tf);
-                    UpdateContent(this.tile, world);
-                    FetchInstancesWorker(this.tile, world).Forget();
-                    return this.tile;
-                }
-            };
-            MenuManager.Instance.SendTile(context.Data[0] as int? ?? 0, tile);
+            Debug.Log("WorldTileManager.SendTile");
+            var tile = new TileObject() { id = "api.nox.game.world", context = context };
+            tile.GetContent = (Transform tf) => OnGetContent(tile, tf);
+            tile.onDisplay = (str, gameObject) => OnDisplay(tile, gameObject);
+            tile.onOpen = (str) => OnOpen(tile, tile.content);
+            tile.onHide = (str) => OnHide(tile, tile.content);
+            MenuManager.Instance.SendTile(tile.MenuId, tile);
         }
+
+        /// <summary>
+        /// Get the content of the tile
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <param name="tf"></param>
+        /// <returns>Content of the tile</returns>
+        internal GameObject OnGetContent(TileObject tile, Transform tf)
+        {
+            Debug.Log("WorldTileManager.GetTileContent");
+            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.world");
+            pf.SetActive(false);
+            var content = Object.Instantiate(pf, tf);
+            content.name = "game.world";
+            return content;
+        }
+
+        /// <summary>
+        /// Handle the display of the tile
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <param name="content"></param>
+        internal void OnDisplay(TileObject tile, GameObject content)
+        {
+            Debug.Log("WorldTileManager.OnDisplay");
+            var world = (tile.context.Data[1] as ShareObject)?.Convert<SimplyWorld>();
+            var asset = (tile.context.Data[2] as ShareObject)?.Convert<SimplyWorldAsset>();
+            UpdateContent(content, world, asset);
+        }
+
+        /// <summary>
+        /// Handle the opening of the tile
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <param name="content"></param>
+        internal void OnOpen(TileObject tile, GameObject content)
+        {
+            Debug.Log("WorldTileManager.OnOpen");
+        }
+
+        /// <summary>
+        /// Handle the hiding of the tile
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <param name="content"></param>
+        internal void OnHide(TileObject tile, GameObject content)
+        {
+            Debug.Log("WorldTileManager.OnHide");
+        }
+
+
+        private void UpdateContent(GameObject tile, SimplyWorld world, SimplyWorldAsset asset)
+        {
+            Reference.GetReference("display", tile).GetComponent<TextLanguage>().arguments = new string[] { world.title };
+            Reference.GetReference("title", tile).GetComponent<TextLanguage>().arguments = new string[] { world.title };
+            Reference.GetReference("description", tile).GetComponent<TextLanguage>().arguments = new string[] { world.description };
+            var icon = Reference.GetReference("icon", tile).GetComponent<RawImage>();
+            if (!string.IsNullOrEmpty(world.thumbnail)) UpdateTexure(icon, world.thumbnail).Forget();
+            // CheckVersion(tile, world).Forget();
+            // CheckHome(tile, world);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         private async UniTask FetchInstancesWorker(GameObject tile, SimplyWorld world)
         {
@@ -86,7 +142,7 @@ namespace api.nox.game
         private bool goto_instance = false;
         private async UniTask FetchWorkInstances(GameObject tile, SimplyWorld world, string address)
         {
-            var res = await clientMod.NetworkAPI.Instance.SearchInstances(new()
+            var res = await GameClientSystem.Instance.NetworkAPI.Instance.SearchInstances(new()
             {
                 world = world.ToMinimalString(),
                 server = address,
@@ -101,7 +157,7 @@ namespace api.nox.game
             if (res != null)
                 instances.AddRange(res.instances);
             var container = Reference.GetReference("instances", tile);
-            var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/instance.entry");
+            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/instance.entry");
             foreach (var instance in instances)
             {
                 var entry = Object.Instantiate(pf, container.transform);
@@ -119,7 +175,7 @@ namespace api.nox.game
             goto_instance = true;
 
             var worldref = new WorldPatern(instance.world, instance.server);
-            var world = await clientMod.NetworkAPI.World.GetWorld(worldref.server, worldref.id);
+            var world = await GameClientSystem.Instance.NetworkAPI.World.GetWorld(worldref.server, worldref.id);
             if (world == null)
             {
                 Debug.LogError("World not found");
@@ -141,21 +197,7 @@ namespace api.nox.game
             }
             var asset = search.assets[0];
             // clientMod.GotoTile("game.instance", instance, world, asset);
-            goto_instance = false; 
-        }
-
-
-
-
-        private void UpdateContent(GameObject tile, SimplyWorld world)
-        {
-            Reference.GetReference("display", tile).GetComponent<TextLanguage>().arguments = new string[] { world.title };
-            Reference.GetReference("title", tile).GetComponent<TextLanguage>().arguments = new string[] { world.title };
-            Reference.GetReference("description", tile).GetComponent<TextLanguage>().arguments = new string[] { world.description };
-            var icon = Reference.GetReference("icon", tile).GetComponent<RawImage>();
-            if (!string.IsNullOrEmpty(world.thumbnail)) UpdateTexure(icon, world.thumbnail).Forget();
-            CheckVersion(tile, world).Forget();
-            CheckHome(tile, world);
+            goto_instance = false;
         }
 
         private async UniTask CheckVersion(GameObject tile, SimplyWorld world, uint[] versions = null)
@@ -190,7 +232,7 @@ namespace api.nox.game
             instb.interactable = true;
             instb.onClick.AddListener(() =>
             {
-                var server = clientMod.NetworkAPI.GetCurrentServer();
+                var server = GameClientSystem.Instance.NetworkAPI.GetCurrentServer();
                 server = server != null && server.features.Contains("instance") ? server : null;
                 // clientMod.GotoTile("game.instance.make", world, versions == null || versions.Length == 0 ? null : asset, server);
             });
@@ -220,7 +262,7 @@ namespace api.nox.game
                 session.SetCurrent();
             else session.Dispose();
 
-            UpdateContent(tile, world);
+            // UpdateContent(tile, world);
         }
 
         private void CheckHome(GameObject tile, SimplyWorld world)
@@ -228,7 +270,7 @@ namespace api.nox.game
             var dlb = Reference.GetReference("home.button", tile).GetComponent<Button>();
             dlb.interactable = false;
             dlb.onClick.RemoveAllListeners();
-            var user = clientMod.NetworkAPI.GetCurrentUser();
+            var user = GameClientSystem.Instance.NetworkAPI.GetCurrentUser();
             WorldPatern wp = string.IsNullOrEmpty(user?.home) ? null : new WorldPatern(user.home, user.server);
             var hasHome = wp?.id == world.id && wp.server == world.server;
             SetHomeButton(hasHome);
@@ -264,7 +306,7 @@ namespace api.nox.game
             if (hasHome)
             {
                 dlb.interactable = false;
-                await clientMod.NetworkAPI.User.UpdateUser(new SimplyUserUpdate { home = "NULL" });
+                await GameClientSystem.Instance.NetworkAPI.User.UpdateUser(new SimplyUserUpdate { home = "NULL" });
                 dlb.interactable = true;
                 CheckHome(tile, world);
             }
@@ -272,7 +314,7 @@ namespace api.nox.game
             {
                 dlb.interactable = false;
                 var wp = new WorldPatern() { id = world.id, server = world.server };
-                await clientMod.NetworkAPI.User.UpdateUser(new SimplyUserUpdate { home = wp.ToString() });
+                await GameClientSystem.Instance.NetworkAPI.User.UpdateUser(new SimplyUserUpdate { home = wp.ToString() });
                 dlb.interactable = true;
                 CheckHome(tile, world);
             }
@@ -280,33 +322,31 @@ namespace api.nox.game
 
         internal void SetDownloadButton(DownloadButtonType type, float progress = 0)
         {
-            if (tile == null) return;
-            var downloadbutton = Reference.GetReference("download.button", tile);
-            var start = Reference.GetReference("start", downloadbutton);
-            var downloaded = Reference.GetReference("downloaded", downloadbutton);
-            var downloading = Reference.GetReference("downloading", downloadbutton);
-            start.SetActive(type == DownloadButtonType.Download);
-            downloaded.SetActive(type == DownloadButtonType.Downloaded);
-            downloading.SetActive(type == DownloadButtonType.Downloading);
-            if (type == DownloadButtonType.Downloading)
-            {
-                var progressbar = Reference.GetReference("progress", downloading).GetComponent<RectTransform>();
-                var width = progressbar.transform.parent.GetComponent<RectTransform>().rect.width;
-                progressbar.sizeDelta = new Vector2(width * progress, 0);
-                var percent = Reference.GetReference("percent", downloading).GetComponent<TextLanguage>();
-                percent.arguments = new string[] { ((float)progress * 100).ToString("0") };
-                percent.UpdateText();
-            }
+            // var downloadbutton = Reference.GetReference("download.button", tile);
+            // var start = Reference.GetReference("start", downloadbutton);
+            // var downloaded = Reference.GetReference("downloaded", downloadbutton);
+            // var downloading = Reference.GetReference("downloading", downloadbutton);
+            // start.SetActive(type == DownloadButtonType.Download);
+            // downloaded.SetActive(type == DownloadButtonType.Downloaded);
+            // downloading.SetActive(type == DownloadButtonType.Downloading);
+            // if (type == DownloadButtonType.Downloading)
+            // {
+            //     var progressbar = Reference.GetReference("progress", downloading).GetComponent<RectTransform>();
+            //     var width = progressbar.transform.parent.GetComponent<RectTransform>().rect.width;
+            //     progressbar.sizeDelta = new Vector2(width * progress, 0);
+            //     var percent = Reference.GetReference("percent", downloading).GetComponent<TextLanguage>();
+            //     percent.arguments = new string[] { ((float)progress * 100).ToString("0") };
+            //     percent.UpdateText();
+            // }
         }
 
         internal void SetHomeButton(bool hasHome)
         {
-            if (tile == null) return;
-            var homebutton = Reference.GetReference("home.button", tile);
-            var set = Reference.GetReference("no", homebutton);
-            var reset = Reference.GetReference("yes", homebutton);
-            set.SetActive(!hasHome);
-            reset.SetActive(hasHome);
+            // var homebutton = Reference.GetReference("home.button", tile);
+            // var set = Reference.GetReference("no", homebutton);
+            // var reset = Reference.GetReference("yes", homebutton);
+            // set.SetActive(!hasHome);
+            // reset.SetActive(hasHome);
         }
 
         internal enum DownloadButtonType
@@ -314,6 +354,13 @@ namespace api.nox.game
             Download = 0,
             Downloading = 1,
             Downloaded = 2
+        }
+        private EventSubscription eventWorldUpdate;
+        private HomeWidget worldMeWidget;
+
+        internal void OnDispose()
+        {
+            GameClientSystem.CoreAPI.EventAPI.Unsubscribe(eventWorldUpdate);
         }
     }
 }

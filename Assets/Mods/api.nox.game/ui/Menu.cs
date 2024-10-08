@@ -126,28 +126,42 @@ namespace api.nox.game.UI
                 btn.interactable = item.flags.HasFlag(NavigationMenuItemActiveFlags.Interactable);
                 menuItem.gameObject.SetActive(item.flags.HasFlag(NavigationMenuItemActiveFlags.Enabled));
                 btn.onClick.RemoveAllListeners();
-                // if (!string.IsNullOrEmpty(item.gotoTile))
-                //     btn.onClick.AddListener(() => _gameClientSystem.GotoTile(item.gotoTile));
+                if (!string.IsNullOrEmpty(item.goto_tile))
+                    btn.onClick.AddListener(() => MenuManager.Instance.SendGotoTile(Id, item.goto_tile));
             }
         }
 
-        public void SetTile(TileObject tile, TileObject oldTile = null)
+        public void SetTile(TileObject tile, TileObject oldTile = null, SetTileFlags flags = SetTileFlags.None)
         {
+            if (tile.content == null && tile.GetContent == null)
+                throw new Exception("Tile content is null");
+
             if (oldTile != null)
             {
                 oldTile.onHide?.DynamicInvoke(tile.id);
-                oldTile.onRemove?.DynamicInvoke();
-                Destroy(oldTile.content);
+                oldTile.content.SetActive(false);
             }
 
             if (tile != null)
             {
-                tile.onOpen?.DynamicInvoke(oldTile);
-                tile.content = tile.GetContent(container);
+                if (tile.content == null)
+                    tile.content = tile.GetContent(container);
+                if (flags.HasFlag(SetTileFlags.IsNew))
+                    tile.onOpen?.DynamicInvoke(oldTile?.id);
+                if (flags.HasFlag(SetTileFlags.IsRestore))
+                    tile.onRestore?.DynamicInvoke(oldTile?.id);
+                tile.onDisplay?.DynamicInvoke(oldTile?.id, tile.content);
                 tile.content.SetActive(true);
                 tile.content.name = tile.id;
             }
             else Debug.LogWarning("No tile to display");
         }
+    }
+
+    public enum SetTileFlags : byte
+    {
+        None = 0,
+        IsNew = 1,
+        IsRestore = 2
     }
 }

@@ -6,5 +6,6 @@ namespace Nox.CCK.Mods.Initializers
     {
         public void OnInitializeClient(ClientModCoreAPI api) { }
         public void OnUpdateClient() { }
+        public void OnPostInitializeClient() { }
     }
 }

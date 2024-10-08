@@ -53,7 +53,7 @@ namespace api.nox.game
                 }
             };
 
-            MenuManager.Instance.SendTile(context.Data[0] as int? ?? 0, tile);
+            MenuManager.Instance.SendTile((context.Data[0] as int?) ?? 0, tile);
         }
 
         private void UpdateContent(GameObject tile, SimplyWorld world, SimplyWorldAsset asset, SimplyServer server)

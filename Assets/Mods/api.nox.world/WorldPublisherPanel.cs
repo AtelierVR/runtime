@@ -119,6 +119,11 @@ namespace api.nox.world
 
             if (world == null)
             {
+                if (create)
+                {
+                    EditorUtility.DisplayDialog("Error", "An error occured while creating the world.", "Ok");
+                    Debug.LogError("An error occured while creating the world, please check the server and your permissions.");
+                }
                 SetDisplay(DisplayFlags.WorldNotFound);
                 _world = null;
                 return null;
@@ -334,7 +339,7 @@ namespace api.nox.world
                 Debug.LogError("Unsupported build target.");
                 return;
             }
-            
+
             var version = _root.Q<UnsignedIntegerField>("asset-version").value;
             if (version > ushort.MaxValue)
             {

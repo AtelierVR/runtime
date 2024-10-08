@@ -1,4 +1,5 @@
 using Nox.CCK;
+using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ namespace api.nox.test {
                 id = "api.nox.test.calendar",
                 width = 4,
                 height = 2,
-                GetContent = (Transform tf) => GenerateWidgetContent(_widget, tf),
+                GetContent = (int o, Transform tf) => GenerateWidgetContent(_widget, tf),
             };
         }
 

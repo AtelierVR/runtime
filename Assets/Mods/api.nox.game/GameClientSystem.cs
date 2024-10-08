@@ -1,7 +1,7 @@
 using System.Linq;
 using api.nox.game.Controllers;
+using api.nox.game.Tiles;
 using api.nox.game.UI;
-using Nox.CCK;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
@@ -9,8 +9,6 @@ using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Worlds;
 using Nox.SimplyLibs;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 using Object = UnityEngine.Object;
 
 namespace api.nox.game
@@ -59,29 +57,38 @@ namespace api.nox.game
             catch (System.Exception e) { Debug.LogWarning(e); }
 
             // Initialize the tile managers
-            homeTile = new HomeTileManager(this);
-            userTile = new UserTileManager(this);
+            homeTile = new HomeTileManager();
+            worldTile = new WorldTileManager();
+            instance = new InstanceTileManager();
+            userTile = new UserTileManager();
             serverTile = new ServerTileManager(this);
             navigationTile = new NavigationTileManager(this);
-            worldTile = new WorldTileManager(this);
             makeinstance = new MakeInstanceTileManager(this);
-            instance = new InstanceTileManager(this);
 
             // Subscribe to the tile events
             tilesub = api.EventAPI.Subscribe("game.tile", context => MenuManager.Instance.OnTile(context));
             tilegotosub = api.EventAPI.Subscribe("game.tile.goto", context => OnGotoTile(context));
+        }
+
+        public void OnPostInitializeClient()
+        {
+            Debug.Log("GameClientSystem PostInitialize");
             MenuManager.Instance.GetViewPortMenu().IsVisible = false;
         }
 
         public void OnGotoTile(EventData context)
         {
             Debug.Log("GotoTile");
-            var menuId = context.Data[0] as uint?;
-            if (menuId == null || menuId == 0)
+            for (int i = 0; i < context.Data.Length; i++)
+                Debug.Log($"Data[{i}]: {context.Data[i]}");
+
+            var menuId = (context.Data[0] as int?) ?? 0;
+            if (menuId == 0)
             {
-                Debug.Log("GotoTile: MenuId is null or 0");
+                Debug.Log("GotoTile: MenuId is 0");
                 return;
             }
+
             var page = context.Data[1] as string;
             Debug.Log($"GotoTile: {menuId} {page}");
             switch (page)

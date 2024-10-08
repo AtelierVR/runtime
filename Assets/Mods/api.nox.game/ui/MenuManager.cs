@@ -37,7 +37,7 @@ namespace api.nox.game.UI
 
         internal void SendGotoTile(int menuId, string page, params object[] args)
             => GameClientSystem.CoreAPI.EventAPI.Emit("game.tile.goto", menuId, page, args);
-            
+
         internal void SendTile(int menuId, TileObject tile)
             => GameClientSystem.CoreAPI.EventAPI.Emit("game.tile", menuId, tile);
 
@@ -47,24 +47,26 @@ namespace api.nox.game.UI
             foreach (var m in _menus)
                 if (m is ViewPortMenu viewPortMenu)
                     return viewPortMenu;
-            Debug.Log("Creating ViewPortMenu");
             var menu = Object.Instantiate(
                 GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/ui/viewport"),
                 PlayerController.Instance.Container
             ).GetComponent<ViewPortMenu>();
             Register(menu);
+            Debug.Log($"Creating ViewPortMenu as {menu.Id}");
             SendGotoTile(menu.Id, menu.initTile);
             return menu;
         }
 
         internal void OnTile(EventData context)
         {
-            var menuId = (context.Data[0] as uint?) ?? 0;
+            var menuId = (context.Data[0] as int?) ?? 0;
             if (menuId == 0) return;
             var menu = _menus.FirstOrDefault(m => m.Id == menuId);
             if (menu == null) return;
             var tile = (context.Data[1] as ShareObject).Convert<TileObject>();
             menu.History.Add((tile as ShareObject).Convert<HistoryTile>());
         }
+
+        internal Menu[] GetMenus() => _menus.ToArray();
     }
 }

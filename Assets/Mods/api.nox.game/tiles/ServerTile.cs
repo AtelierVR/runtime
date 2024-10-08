@@ -74,7 +74,7 @@ namespace api.nox.game
                     width = 3,
                     height = 2,
                 };
-            serverMeWidget.GetContent = (Transform parent) =>
+            serverMeWidget.GetContent = (int menuId, Transform parent) =>
             {
                 var baseprefab = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget");
                 var prefab = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget.serverme");
@@ -134,7 +134,7 @@ namespace api.nox.game
                 }
             };
             
-            MenuManager.Instance.SendTile(context.Data[0] as int? ?? 0, tile);
+            MenuManager.Instance.SendTile((context.Data[0] as int?) ?? 0, tile);
         }
 
         private void UpdateContent(GameObject tile, SimplyServer server)

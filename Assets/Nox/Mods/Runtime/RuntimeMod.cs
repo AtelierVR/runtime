@@ -1,3 +1,4 @@
+using System;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Initializers;
 using Nox.Mods.Type;
@@ -93,6 +94,7 @@ namespace Nox.Mods.Client
                 main.OnDispose();
             _mainIsEnable = false;
         }
+
         public void DisableClient()
         {
             if (!_clientIsEnable) return;
@@ -100,6 +102,7 @@ namespace Nox.Mods.Client
                 client.OnDispose();
             _clientIsEnable = false;
         }
+
         public void DisableInstance()
         {
             if (!_instanceIsEnable) return;
@@ -137,6 +140,24 @@ namespace Nox.Mods.Client
             _clientInitializers = new ClientModInitializer[0];
             _instanceInitializers = new InstanceModInitializer[0];
             GetModType().Destroy();
+        }
+
+        internal void PostMain()
+        {
+            foreach (var main in _mainClasses)
+                main.OnPostInitialize();
+        }
+
+        internal void PostClient()
+        {
+            foreach (var client in _clientInitializers)
+                client.OnPostInitializeClient();
+        }
+
+        internal void PostInstance()
+        {
+            foreach (var instance in _instanceInitializers)
+                instance.OnPostInitializeInstance();
         }
     }
 }

@@ -17,7 +17,7 @@ namespace api.nox.game.UI
                 RemoveRange(current + 1, history.Count - current - 1);
             history.Add(tile);
             current = history.Count - 1;
-            _menu.SetTile(tile, ot);
+            _menu.SetTile(tile, ot, SetTileFlags.IsNew);
         }
 
         public void GoBack()
@@ -25,7 +25,7 @@ namespace api.nox.game.UI
             var ot = GetCurrent();
             if (current > 0)
                 current--;
-            _menu.SetTile(history[current], ot);
+            _menu.SetTile(history[current], ot, SetTileFlags.IsRestore);
         }
 
         public void GoForward()
@@ -33,7 +33,7 @@ namespace api.nox.game.UI
             var ot = GetCurrent();
             if (current < history.Count - 1)
                 current++;
-            _menu.SetTile(history[current], ot);
+            _menu.SetTile(history[current], ot, SetTileFlags.IsRestore);
         }
 
         public HistoryTile GetCurrent()
@@ -45,6 +45,7 @@ namespace api.nox.game.UI
 
         private void RemoveRange(int v1, int v2)
         {
+            var old = GetCurrent();
             while (v2-- > 0)
             {
                 history[v1].Dispose();
@@ -52,6 +53,10 @@ namespace api.nox.game.UI
                 if (current > v1)
                     current--;
             }
+
+            var cur = GetCurrent();
+            if (old != cur)
+                _menu.SetTile(cur, old, SetTileFlags.IsRestore);
         }
 
         public void Clear()
@@ -59,7 +64,7 @@ namespace api.nox.game.UI
             var ot = GetCurrent();
             RemoveRange(0, history.Count);
             current = -1;
-            _menu.SetTile(null, ot);
+            _menu.SetTile(null, ot, SetTileFlags.None);
         }
     }
 }

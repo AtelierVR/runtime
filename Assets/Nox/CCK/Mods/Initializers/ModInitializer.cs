@@ -5,6 +5,7 @@ namespace Nox.CCK.Mods.Initializers
     public interface ModInitializer
     {
         public void OnInitialize(ModCoreAPI api) { }
+        public void OnPostInitialize() { }
         public void OnUpdate() { }
         public void OnLateUpdate() { }
         public void OnFixedUpdate() { }

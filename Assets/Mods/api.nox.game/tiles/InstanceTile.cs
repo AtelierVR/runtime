@@ -6,62 +6,82 @@ using UnityEngine;
 using Nox.CCK;
 using UnityEngine.UI;
 using Nox.SimplyLibs;
-using NUnit.Framework.Constraints;
 using api.nox.game.sessions;
-using static api.nox.game.WorldTileManager;
 using api.nox.game.LocationIP;
 using api.nox.game.UI;
 
-namespace api.nox.game
+namespace api.nox.game.Tiles
 {
-    internal class InstanceTileManager
+    internal class InstanceTileManager : TileManager
     {
-        internal GameClientSystem clientMod;
-        private GameObject tile;
-        private EventSubscription eventInstanceUpdate;
-
-        internal InstanceTileManager(GameClientSystem clientMod)
-        {
-            this.clientMod = clientMod;
-        }
-
-        private async UniTask<bool> UpdateTexure(RawImage img, string url)
-        {
-            Debug.Log("UpdateTexure: " + url);
-            var tex = await clientMod.NetworkAPI.FetchTexture(url);
-            if (tex != null)
-            {
-                img.texture = tex;
-                return true;
-            }
-            else return false;
-        }
-
-        internal void OnDispose()
-        {
-            clientMod.coreAPI.EventAPI.Unsubscribe(eventInstanceUpdate);
-        }
-
+        /// <summary>
+        /// Send a tile to the menu manager
+        /// </summary>
+        /// <param name="context"></param>
         internal void SendTile(EventData context)
         {
-            var instance = ((context.Data[1] as object[])[0] as ShareObject).Convert<SimplyInstance>();
-            var world = ((context.Data[1] as object[])[1] as ShareObject).Convert<SimplyWorld>();
-            var asset = ((context.Data[1] as object[])[2] as ShareObject).Convert<SimplyWorldAsset>();
-            var tile = new TileObject()
-            {
-                id = "api.nox.game.instance",
-                onRemove = () => this.tile = null,
-                GetContent = (Transform tf) =>
-                {
-                    var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.instance");
-                    pf.SetActive(false);
-                    this.tile = Object.Instantiate(pf, tf);
-                    UpdateContent(this.tile, instance, world, asset);
-                    return this.tile;
-                }
-            };
-            MenuManager.Instance.SendTile(context.Data[0] as int? ?? 0, tile);
+            var tile = new TileObject() { id = "api.nox.game.instance", context = context };
+            tile.GetContent = (Transform tf) => OnGetContent(tile, tf);
+            tile.onDisplay = (str, gameObject) => OnDisplay(tile, gameObject);
+            tile.onOpen = (str) => OnOpen(tile, tile.content);
+            tile.onHide = (str) => OnHide(tile, tile.content);
+            MenuManager.Instance.SendTile((context.Data[0] as int?) ?? 0, tile);
         }
+
+        /// <summary>
+        /// Get the content of the tile
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <param name="tf"></param>
+        /// <returns>Content of the tile</returns>
+        internal GameObject OnGetContent(TileObject tile, Transform tf)
+        {
+            Debug.Log("InstanceTileManager.GetTileContent");
+            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.instance");
+            pf.SetActive(false);
+            var content = Object.Instantiate(pf, tf);
+            content.name = "game.instance";
+            return content;
+        }
+
+        /// <summary>
+        /// Handle the display of the tile
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <param name="content"></param>
+        internal void OnDisplay(TileObject tile, GameObject content)
+        {
+            Debug.Log("InstanceTileManager.OnDisplay");
+            var instance = (tile.context.Data[1] as ShareObject).Convert<SimplyInstance>();
+            var world = (tile.context.Data[2] as ShareObject).Convert<SimplyWorld>();
+            var asset = (tile.context.Data[3] as ShareObject).Convert<SimplyWorldAsset>();
+            UpdateContent(content, instance, world, asset);
+        }
+
+        /// <summary>
+        /// Handle the opening of the tile
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <param name="content"></param>
+        internal void OnOpen(TileObject tile, GameObject content)
+        {
+            Debug.Log("InstanceTileManager.OnOpen");
+        }
+
+        /// <summary>
+        /// Handle the hiding of the tile
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <param name="content"></param>
+        internal void OnHide(TileObject tile, GameObject content)
+        {
+            Debug.Log("InstanceTileManager.OnHide");
+        }
+
+
+
+
+
 
         private void UpdateContent(GameObject tile, SimplyInstance instance, SimplyWorld world, SimplyWorldAsset asset, IPData location = null)
         {
@@ -71,8 +91,6 @@ namespace api.nox.game
             Reference.GetReference("ai.address", tile).GetComponent<TextLanguage>().arguments = new string[] { instance.server };
             Reference.GetReference("ai.id", tile).GetComponent<TextLanguage>().arguments = new string[] { instance.id.ToString() };
             Reference.GetReference("ai.relay", tile).GetComponent<TextLanguage>().arguments = new string[] { instance.address ?? "Not openned" };
-
-
 
             var icon = Reference.GetReference("icon", tile).GetComponent<RawImage>();
             if (!string.IsNullOrEmpty(instance.thumbnail)) UpdateTexure(icon, instance.thumbnail).Forget();
@@ -84,7 +102,7 @@ namespace api.nox.game
             {
                 UpdateLocation(tile, instance).Forget();
                 gotobtn.interactable = true;
-                var relay = clientMod.NetworkAPI.Relay.GetRelay(instance.address);
+                var relay = GameClientSystem.Instance.NetworkAPI.Relay.GetRelay(instance.address);
                 if (relay != null)
                 {
                     var currentSession = GameSystem.instance.sessionManager.CurrentSession;
@@ -111,7 +129,7 @@ namespace api.nox.game
         {
             var player_node = Reference.GetReference("players", tile);
             Reference.GetReference("players.title", tile).GetComponent<TextLanguage>().arguments = new string[] { instance.players.Length.ToString() };
-            var player_prefab = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.instance.player");
+            var player_prefab = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.instance.player");
             player_prefab.SetActive(false);
             foreach (Transform child in player_node.transform)
                 Object.Destroy(child.gameObject);
@@ -141,7 +159,7 @@ namespace api.nox.game
             gotobtn.interactable = false;
 
 
-            var user = clientMod.NetworkAPI.GetCurrentUser();
+            var user = GameClientSystem.Instance.NetworkAPI.GetCurrentUser();
             if (user == null)
             {
                 gotobtn.interactable = true;
@@ -154,7 +172,7 @@ namespace api.nox.game
                 session.SetCurrent();
                 return;
             }
-            var token = await clientMod.NetworkAPI.Auth.GetToken(instance.server);
+            var token = await GameClientSystem.Instance.NetworkAPI.Auth.GetToken(instance.server);
             if (token == null)
             {
                 gotobtn.interactable = true;

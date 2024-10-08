@@ -55,6 +55,7 @@ namespace api.nox.network
 
         internal async UniTask<Texture2D> FetchTexture(string url, UnityWebRequest req = null)
         {
+            Debug.Log($"Fetching {url}");
             req ??= new UnityWebRequest(url, "GET");
             req.url = url;
             var dt = new DownloadHandlerTexture();
@@ -75,6 +76,7 @@ namespace api.nox.network
 
         internal async UniTask<string> DownloadFile(string url, string hash, UnityWebRequest req = null)
         {
+            Debug.Log($"Downloading {url}");
             req ??= new UnityWebRequest(url, "GET");
             req.url = url;
             req.downloadHandler = new DownloadHandlerBuffer();
