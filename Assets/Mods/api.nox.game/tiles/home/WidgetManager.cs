@@ -24,7 +24,6 @@ namespace api.nox.game.Tiles
 
         internal void UpdateWidgets(int menuId, GameObject content)
         {
-            Debug.Log("HomeTileManager.UpdateWidgets");
             var rect = Reference.GetReference("game.home.widgets", content).GetComponent<MenuGridder>();
             foreach (Transform child in rect.transform)
                 UnityEngine.Object.Destroy(child.gameObject);
@@ -41,10 +40,9 @@ namespace api.nox.game.Tiles
 
         private void OnWidget(EventData context)
         {
-            Debug.Log("HomeTileManager.OnWidget");
-            for (int i = 0; i < context.Data.Length; i++)
-                Debug.Log($"context.Data[{i}]: {context.Data[i]}");
-            var widget = (context.Data[0] as ShareObject).Convert<HomeWidget>();
+            if(widgets == null) return;
+            var widget = (context.Data[0] as ShareObject)?.Convert<HomeWidget>();
+            if (widget == null || string.IsNullOrEmpty(widget.id)) return;
             if (widgets.ContainsKey(widget.id) && widget.GetContent == null)
             {
                 widgets.Remove(widget.id);

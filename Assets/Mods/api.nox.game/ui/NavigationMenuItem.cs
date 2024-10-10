@@ -12,7 +12,9 @@ namespace api.nox.game.UI
         public string[] text_arguments;
         public string tooltip;
         public string[] tooltip_arguments;
-        public string goto_tile;
+        public NavigationMenuItemExecutionEnum execution_type;
+        public string execution;
+        public object[] execution_arguments;
         public NavigationMenuItemActiveFlags flags;
     }
 
@@ -22,5 +24,13 @@ namespace api.nox.game.UI
         None = 0,
         Interactable = 1,
         Enabled = 2
+    }
+
+    public enum NavigationMenuItemExecutionEnum
+    {
+        None,
+        GotoTile,
+        SendEvent,
+        MenuAction
     }
 }

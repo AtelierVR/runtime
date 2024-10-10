@@ -7,6 +7,7 @@ namespace api.nox.game.UI
     [Serializable]
     public class NavigationMenu
     {
+        public string key;
         public NavigationMenuItem[] items;
         public RectTransform container;
         public GameObject itemPrefab;

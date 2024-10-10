@@ -11,31 +11,27 @@ using System.Threading;
 using System;
 using Object = UnityEngine.Object;
 using api.nox.game.UI;
+using api.nox.game.Tiles;
 
 namespace api.nox.game
 {
-    internal class NavigationTileManager
+    internal class NavigationTileManager : TileManager
     {
-        internal GameClientSystem clientMod;
-        private HomeWidget _widget;
         internal Dictionary<string, NavigationHandler> navigationHandlers = new();
-        private EventSubscription navigationsub;
+        private EventSubscription _sub;
         internal UserNav UserNav;
         internal WorldNav WorldNav;
         internal ServerNav ServerNav;
         internal InstanceNav InstanceNav;
         private string selectedHandler;
 
-        internal NavigationTileManager(GameClientSystem clientMod)
+        internal NavigationTileManager()
         {
-            this.clientMod = clientMod;
-            navigationsub = clientMod.coreAPI.EventAPI.Subscribe("game.navigation", OnNavigationHandler);
+            _sub = GameClientSystem.CoreAPI.EventAPI.Subscribe("game.navigation", OnNavigationHandler);
             UserNav = new UserNav(this);
             WorldNav = new WorldNav(this);
             ServerNav = new ServerNav(this);
             InstanceNav = new InstanceNav(this);
-            GenerateWidget();
-            Initialization().Forget();
         }
 
         private void OnNavigationHandler(EventData context)
@@ -45,9 +41,9 @@ namespace api.nox.game
             if (navigationHandlers.ContainsKey(handler.id) && handler.GetWorkers == null)
             {
                 navigationHandlers.Remove(handler.id);
-                if (tile != null) UpdateContent(tile);
-                if (selectedHandler == handler.id)
-                    OnSelectHandler(null);
+                // // if (tile != null) UpdateContent(tile);
+                // if (selectedHandler == handler.id)
+                //     OnSelectHandler(null, null, null);
                 return;
             }
             if (handler.GetWorkers == null) return;
@@ -56,100 +52,84 @@ namespace api.nox.game
             else navigationHandlers.Add(handler.id, handler);
         }
 
-        private void OnSelectHandler(string id)
+        private void OnSelectHandler(TileObject tile, GameObject content, string id)
         {
-            var tl = Reference.GetReference("tile.title", tile).GetComponent<TextLanguage>();
+            var tl = Reference.GetReference("tile.title", content).GetComponent<TextLanguage>();
             if (selectedHandler == id) return;
             else if (id == null)
             {
                 selectedHandler = null;
-                tl.key = "dashboard.navigation.title";
-                tl.UpdateText();
-                foreach (Transform child in Reference.GetReference("resultats", tile).transform)
+                tl.UpdateText("dashboard.navigation.title");
+                foreach (Transform child in Reference.GetReference("resultats", content).transform)
                     Object.Destroy(child.gameObject);
                 return;
             }
             if (!navigationHandlers.ContainsKey(id)) return;
             var handler = navigationHandlers[id];
-            tl.key = handler.title_key;
-            tl.UpdateText();
-            foreach (Transform child in Reference.GetReference("resultats", tile).transform)
+            tl.UpdateText(handler.title_key);
+            foreach (Transform child in Reference.GetReference("resultats", content).transform)
                 Object.Destroy(child.gameObject);
             selectedHandler = id;
         }
 
-        private void GenerateWidget()
-        {
-            _widget = new HomeWidget
-            {
-                id = "api.nox.game.navigation",
-                width = 1,
-                height = 1,
-                GetContent = (int menuId, Transform tf) => GenerateWidgetContent(menuId, _widget, tf)
-            };
-        }
-
-        private GameObject GenerateWidgetContent(int menuId, HomeWidget data, Transform parent)
-        {
-            var baseprefab = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget");
-            var prefab = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget.navigation");
-            var btn = Object.Instantiate(baseprefab, parent);
-            Object.Instantiate(prefab, Reference.GetReference("content", btn).transform);
-            Reference.GetReference("button", btn).GetComponent<Button>().onClick.AddListener(OnClickWidget);
-            return btn;
-        }
-
-        private void UpdateWidget()
-        {
-            if (_widget == null) return;
-            clientMod.coreAPI.EventAPI.Emit("game.widget", _widget);
-        }
-
-        private void OnClickWidget()
-        {
-            // clientMod.GotoTile("game.navigation"); 
-        }
-
         internal void OnDispose()
         {
-            _widget.GetContent = null;
-            UpdateWidget();
-            _widget = null;
             UserNav.OnDispose();
             WorldNav.OnDispose();
             ServerNav.OnDispose();
             InstanceNav.OnDispose();
-            clientMod.coreAPI.EventAPI.Unsubscribe(navigationsub);
+            GameClientSystem.CoreAPI.EventAPI.Unsubscribe(_sub);
             navigationHandlers = null;
         }
 
-        private GameObject tile = null;
         internal void SendTile(EventData context)
         {
-            var tile = new TileObject()
-            {
-                id = "api.nox.game.navigation",
-                onRemove = () => this.tile = null,
-                GetContent = (Transform tf) =>
-                {
-                    var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.navigation");
-                    pf.SetActive(false);
-                    this.tile = Object.Instantiate(pf, tf);
-                    this.tile.name = "api.nox.game.navigation";
-                    UpdateContent(this.tile);
-                    if (navigationHandlers.Count > 0)
-                        OnSelectHandler(navigationHandlers.First().Value.id);
-                    Reference.GetReference("submit", this.tile).GetComponent<Button>().onClick
-                        .AddListener(() => SubmitSearch(Reference.GetReference("searchbar", this.tile).GetComponent<TMPro.TMP_InputField>().text));
-                    return this.tile;
-                }
-            };
-            MenuManager.Instance.SendTile((context.Data[0] as int?) ?? 0, tile);
+            var tile = new TileObject() { id = "api.nox.game.navigation", context = context };
+            tile.GetContent = (Transform tf) => OnGetContent(tile, tf);
+            tile.onDisplay = (str, gameObject) => OnDisplay(tile, gameObject);
+            tile.onOpen = (str) => OnOpen(tile, tile.content);
+            tile.onHide = (str) => OnHide(tile, tile.content);
+            MenuManager.Instance.SendTile(tile.MenuId, tile);
+        }
+
+        internal GameObject OnGetContent(TileObject tile, Transform tf)
+        {
+            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.navigation");
+            pf.SetActive(false);
+            var content = Object.Instantiate(pf, tf);
+            content.name = "api.nox.game.navigation";
+            return content;
+        }
+
+        internal void OnDisplay(TileObject tile, GameObject content)
+        {
+            Debug.Log("NavigationTileManager.OnDisplay");
+            UpdateContent(tile, content);
+            if (navigationHandlers.Count > 0)
+                OnSelectHandler(tile, content, navigationHandlers.First().Value.id);
+            var btn = Reference.GetReference("submit", content).GetComponent<Button>();
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(() => SubmitSearch(
+                tile, content,
+                Reference.GetReference("searchbar", content).GetComponent<TMPro.TMP_InputField>().text
+            ));
+        }
+
+        internal void OnOpen(TileObject tile, GameObject content)
+        {
+            Debug.Log("NavigationTileManager.OnOpen");
+        }
+
+        internal void OnHide(TileObject tile, GameObject content)
+        {
+            Debug.Log("NavigationTileManager.OnHide");
         }
 
         private List<CancellationTokenSource> IsFetching = new();
-        private void SubmitSearch(string text)
+
+        private void SubmitSearch(TileObject tile, GameObject content, string text)
         {
+            Debug.Log($"NavigationTileManager.SubmitSearch({selectedHandler}, {text})");
             if (selectedHandler == null) return;
             if (!navigationHandlers.ContainsKey(selectedHandler)) return;
             var handler = navigationHandlers[selectedHandler];
@@ -158,8 +138,10 @@ namespace api.nox.game
             var workers = handler.GetWorkers();
             if (workers.Length == 0) return;
             IsFetching = new List<CancellationTokenSource>();
-            var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/navigation.container");
-            var res = Reference.GetReference("resultats", this.tile);
+            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/navigation.container");
+            var res = Reference.GetReference("resultats", content);
+            foreach(var c in IsFetching)
+                c.Cancel();
             foreach (Transform child in res.transform)
                 Object.Destroy(child.gameObject);
             for (var i = 0; i < workers.Length; i++)
@@ -173,12 +155,12 @@ namespace api.nox.game
                 var ct = Reference.GetReference("title", go).GetComponent<TextLanguage>();
                 ct.arguments = new string[] { worker.server_title ?? worker.server_address };
                 ct.UpdateText();
-                SearchResult(worker, text, go, cancel).Forget();
+                SearchResult(tile, content, worker, text, go, cancel).Forget();
             }
-            ForceUpdateLayout.UpdateManually(this.tile);
+            ForceUpdateLayout.UpdateManually(content);
         }
 
-        private async UniTask SearchResult(NavigationWorker worker, string text, GameObject obj, CancellationTokenSource cancel)
+        private async UniTask SearchResult(TileObject tile, GameObject content, NavigationWorker worker, string text, GameObject obj, CancellationTokenSource cancel)
         {
             if (cancel.Token.IsCancellationRequested) return;
             var time = DateTime.Now;
@@ -200,7 +182,7 @@ namespace api.nox.game
                     var msg = Reference.GetReference("text", messageobj).GetComponent<TextLanguage>();
                     msg.key = "dashboard.navigation.error.unknown";
                     msg.UpdateText();
-                    ForceUpdateLayout.UpdateManually(this.tile);
+                    ForceUpdateLayout.UpdateManually(content);
                     return;
                 }
                 catch (Exception ex)
@@ -212,7 +194,7 @@ namespace api.nox.game
                     msg.key = "dashboard.navigation.error";
                     msg.arguments = new string[] { ex.Message };
                     msg.UpdateText();
-                    ForceUpdateLayout.UpdateManually(this.tile);
+                    ForceUpdateLayout.UpdateManually(content);
                     return;
                 }
             }
@@ -223,7 +205,7 @@ namespace api.nox.game
                 var msg = Reference.GetReference("text", messageobj).GetComponent<TextLanguage>();
                 msg.key = "dashboard.navigation.error.timeout";
                 msg.UpdateText();
-                ForceUpdateLayout.UpdateManually(this.tile);
+                ForceUpdateLayout.UpdateManually(content);
                 return;
             }
             var res = await result;
@@ -234,7 +216,7 @@ namespace api.nox.game
                 var msg = Reference.GetReference("text", messageobj).GetComponent<TextLanguage>();
                 msg.key = "dashboard.navigation.error.unknown";
                 msg.UpdateText();
-                ForceUpdateLayout.UpdateManually(this.tile);
+                ForceUpdateLayout.UpdateManually(content);
                 return;
             }
             else if (!string.IsNullOrEmpty(res.error))
@@ -245,7 +227,7 @@ namespace api.nox.game
                 msg.key = "dashboard.navigation.error";
                 msg.arguments = new string[] { res.error };
                 msg.UpdateText();
-                ForceUpdateLayout.UpdateManually(this.tile);
+                ForceUpdateLayout.UpdateManually(content);
                 return;
             }
             else if (res.data == null || res.data.Length == 0)
@@ -255,12 +237,12 @@ namespace api.nox.game
                 var msg = Reference.GetReference("text", messageobj).GetComponent<TextLanguage>();
                 msg.key = "dashboard.navigation.empty";
                 msg.UpdateText();
-                ForceUpdateLayout.UpdateManually(this.tile);
+                ForceUpdateLayout.UpdateManually(content);
                 return;
             }
             foundobj.SetActive(true);
             messageobj.SetActive(false);
-            var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/navigation.result");
+            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/navigation.result");
             var refs = Reference.GetReference("results", obj);
             foreach (Transform child in refs.transform)
                 Object.Destroy(child.gameObject);
@@ -275,8 +257,7 @@ namespace api.nox.game
                 var img = Reference.GetReference("image", go).GetComponent<RawImage>();
                 img.gameObject.SetActive(false);
                 if (!string.IsNullOrEmpty(data.imageUrl))
-                {
-                    UniTask uniTask = UpdateTexure(img, data.imageUrl).ContinueWith(_ =>
+                    _ = UpdateTexure(img, data.imageUrl).ContinueWith(_ =>
                     {
                         img.gameObject.SetActive(true);
                         var rt = img.transform.parent.GetComponent<RectTransform>();
@@ -284,51 +265,39 @@ namespace api.nox.game
                             new Vector2(rt.rect.width, rt.rect.width * img.texture.height / img.texture.width) :
                             new Vector2(rt.rect.height * img.texture.width / img.texture.height, rt.rect.height);
                     });
-                }
                 var button = Reference.GetReference("button", go).GetComponent<Button>();
-                // button.onClick.AddListener(() => clientMod.GotoTile(data.goto_id, data.goto_data));
+                button.onClick.AddListener(() =>
+                {
+                    Debug.Log($"Sending goto tile {tile.MenuId} with {data.goto_id}");
+                    foreach (var c in IsFetching)
+                        c.Cancel();
+                    for (int i = 0; i < data.goto_data.Length; i++)
+                        Debug.Log($"data.goto_data[{i}]: {data.goto_data[i]}");
+                    MenuManager.Instance.SendGotoTile(tile.MenuId, data.goto_id, data.goto_data);
+                });
             }
-            ForceUpdateLayout.UpdateManually(this.tile);
-        }
-
-
-        private async UniTask<bool> UpdateTexure(RawImage img, string url)
-        {
-            var tex = await clientMod.NetworkAPI.FetchTexture(url);
-            if (tex != null)
-            {
-                img.texture = tex;
-                return true;
-            }
-            else return false;
+            ForceUpdateLayout.UpdateManually(content);
         }
 
 
 
-        private void UpdateContent(GameObject tile)
+        private void UpdateContent(TileObject tile, GameObject content)
         {
             Debug.Log("Updating navigation tile");
-            var searcher = Reference.GetReference("searcher", tile);
+            var searcher = Reference.GetReference("searcher", content);
             foreach (Transform child in searcher.transform)
                 Object.Destroy(child.gameObject);
-            var pf = clientMod.coreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/navigation.searcher");
+            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/navigation.searcher");
             foreach (var handler in navigationHandlers.Values)
             {
                 var id = handler.id;
                 Debug.Log("Adding navigation handler to navigation tile" + handler.id);
                 var go = Object.Instantiate(pf, searcher.transform);
                 var button = Reference.GetReference("button", go).GetComponent<Button>();
-                button.onClick.AddListener(() => OnSelectHandler(id));
+                button.onClick.AddListener(() => OnSelectHandler(tile, content, id));
                 var title = Reference.GetReference("title", go).GetComponent<TextLanguage>();
                 title.key = handler.text_key;
             }
-        }
-
-
-        private async UniTask Initialization()
-        {
-            await UniTask.DelayFrame(1);
-            UpdateWidget();
         }
     }
 }

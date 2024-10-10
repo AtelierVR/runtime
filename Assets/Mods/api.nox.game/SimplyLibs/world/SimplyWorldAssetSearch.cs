@@ -25,7 +25,6 @@ namespace Nox.SimplyLibs
 
         public void AfterImport()
         {
-            Debug.Log("AfterImport" + SharedWorldAssets);
             assets = new SimplyWorldAsset[SharedWorldAssets.Length];
             for (int i = 0; i < SharedWorldAssets.Length; i++)
             {

@@ -12,32 +12,32 @@ namespace api.nox.game
     public class GameSystem : ModInitializer
     {
         private LanguagePack langpack;
-        internal static GameSystem instance;
-        internal SessionManager sessionManager;
-        internal ModCoreAPI coreAPI;
-        internal SimplyNetworkAPI NetworkAPI => coreAPI.ModAPI.GetMod("network")?.GetMainClasses().OfType<ShareObject>().FirstOrDefault()?.Convert<SimplyNetworkAPI>();
+        internal static GameSystem Instance;
+        internal SessionManager SessionManager;
+        internal ModCoreAPI CoreAPI;
+        internal SimplyNetworkAPI NetworkAPI => CoreAPI.ModAPI.GetMod("network")?.GetMainClasses().OfType<ShareObject>().FirstOrDefault()?.Convert<SimplyNetworkAPI>();
 
         public void OnInitialize(ModCoreAPI api)
         {
-            coreAPI = api;
-            instance = this;
+            CoreAPI = api;
+            Instance = this;
             langpack = api.AssetAPI.GetLocalAsset<LanguagePack>("langpack");
             LanguageManager.LanguagePacks.Add(langpack);
-            sessionManager = new SessionManager(this);
+            SessionManager = new SessionManager(this);
         }
 
         public void OnDispose()
         {
             LanguageManager.LanguagePacks.Remove(langpack);
             langpack = null;
-            instance = null;
-            sessionManager.Dispose();
-            sessionManager = null;
+            Instance = null;
+            SessionManager.Dispose();
+            SessionManager = null;
         }
 
         public void OnSessionChanged(Session old, Session value)
         {
-            coreAPI.EventAPI.Emit(new EventSessionChanged(old, value));
+            CoreAPI.EventAPI.Emit(new EventSessionChanged(old, value));
         }
 
 

@@ -12,12 +12,11 @@ namespace api.nox.game
 {
     internal class WorldManager
     {
-        internal static GameClientSystem _gameClientSystem;
         internal static Dictionary<string, AssetBundle> _loadedWorlds = new();
         public static string WorldPath(string hash) => Path.Combine(Constants.GameAppDataPath, "cache", "worlds", hash);
         public static bool HasWorldInCache(string hash) => File.Exists(WorldPath(hash));
         public static AssetBundle GetLoadedWorld(string hash) => _loadedWorlds.ContainsKey(hash) ? _loadedWorlds[hash] : null;
-        public static bool IsWorldLoaded(string hash) => _loadedWorlds.ContainsKey(hash);
+        public static bool IsWorldLoaded(string hash) => _loadedWorlds != null && _loadedWorlds.ContainsKey(hash);
         public static string[] GetLoaddedWorlds() => _loadedWorlds.Keys.ToArray();
 
         public static void SaveWorldToCache(string hash, byte[] data)
@@ -41,13 +40,13 @@ namespace api.nox.game
             if (!HasWorldInCache(hash))
                 return null;
             var load = AssetBundle.LoadFromFileAsync(WorldPath(hash));
-            _gameClientSystem.coreAPI.EventAPI.Emit("world.assetbundle.loading", hash, 0f);
+            GameClientSystem.CoreAPI.EventAPI.Emit("world.assetbundle.loading", hash, 0f);
             await UniTask.WaitUntil(() =>
             {
-                _gameClientSystem.coreAPI.EventAPI.Emit("world.assetbundle.loading", hash, load.progress);
+                GameClientSystem.CoreAPI.EventAPI.Emit("world.assetbundle.loading", hash, load.progress);
                 return load.isDone;
             });
-            _gameClientSystem.coreAPI.EventAPI.Emit("world.assetbundle.loading", hash, 1f);
+            GameClientSystem.CoreAPI.EventAPI.Emit("world.assetbundle.loading", hash, 1f);
             return _loadedWorlds[hash] = load.assetBundle;
         }
 
@@ -88,14 +87,14 @@ namespace api.nox.game
         {
             if (HasWorldInCache(hash))
                 return new DownloadWorldResult { success = true, hash = hash, url = url };
-            var eventsub = _gameClientSystem.coreAPI.EventAPI.Subscribe("network.download", (context) =>
+            var eventsub = GameClientSystem.CoreAPI.EventAPI.Subscribe("network.download", (context) =>
             {
                 if (context.Data[0] as string != url) return;
                 progress?.Invoke((float)context.Data[1], (ulong)context.Data[2]);
             });
             var t3 = DateTime.Now;
-            var res = await _gameClientSystem.NetworkAPI.DownloadFile(url, hash);
-            _gameClientSystem.coreAPI.EventAPI.Unsubscribe(eventsub);
+            var res = await GameClientSystem.Instance.NetworkAPI.DownloadFile(url, hash);
+            GameClientSystem.CoreAPI.EventAPI.Unsubscribe(eventsub);
             var t4 = DateTime.Now;
             progress?.Invoke(1, 0);
             if (res == null)
@@ -119,13 +118,13 @@ namespace api.nox.game
                 return default;
             }
             var load = SceneManager.LoadSceneAsync(sceneId, mode);
-            _gameClientSystem.coreAPI.EventAPI.Emit("world.loading", hash, id, mode, 0f);
+            GameClientSystem.CoreAPI.EventAPI.Emit("world.loading", hash, id, mode, 0f);
             await UniTask.WaitUntil(() =>
             {
-                _gameClientSystem.coreAPI.EventAPI.Emit("world.loading", hash, id, mode, load.progress);
+                GameClientSystem.CoreAPI.EventAPI.Emit("world.loading", hash, id, mode, load.progress);
                 return load.isDone;
             });
-            _gameClientSystem.coreAPI.EventAPI.Emit("world.loading", hash, id, mode, 1f);
+            GameClientSystem.CoreAPI.EventAPI.Emit("world.loading", hash, id, mode, 1f);
             var scene = SceneManager.GetSceneByPath(sceneId);
             if (!scene.IsValid())
             {
@@ -141,7 +140,7 @@ namespace api.nox.game
                 mainCamera.SetActive(false);
             }
 
-            _gameClientSystem.coreAPI.EventAPI.Emit("world.loaded", hash, id, mode, sceneId);
+            GameClientSystem.CoreAPI.EventAPI.Emit("world.loaded", hash, id, mode, sceneId);
             return scene;
         }
 

@@ -52,7 +52,7 @@ namespace api.nox.game
         private async UniTask<NavigationResult> FetchUsers(string server, string query)
         {
             Debug.Log("Fetching users");
-            var res = await navigationTile.clientMod.NetworkAPI.User.SearchUsers(server, query);
+            var res = await GameClientSystem.Instance.NetworkAPI.User.SearchUsers(server, query);
             if (res == null) return new NavigationResult { error = "Error fetching users." };
             Debug.Log("Fetched users " + res.users.Length);
             return new NavigationResult
@@ -69,7 +69,7 @@ namespace api.nox.game
 
         private void UpdateHandler()
         {
-            navigationTile.clientMod.coreAPI.EventAPI.Emit("game.navigation", _handler);
+            GameClientSystem.CoreAPI.EventAPI.Emit("game.navigation", _handler);
         }
 
         internal void OnDispose()

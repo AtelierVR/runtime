@@ -8,24 +8,52 @@ using UnityEngine.UI;
 using Nox.SimplyLibs;
 using api.nox.game.UI;
 using api.nox.game.Tiles;
+using UnityEngine.Events;
+using System;
+using Object = UnityEngine.Object;
 
 namespace api.nox.game
 {
     internal class UserTileManager : TileManager
     {
+        internal class UserTileObject : TileObject
+        {
+            public UnityAction<SimplyUser> OnUserUpdated;
+            public SimplyUser User
+            {
+                get => GetData<ShareObject>(0)?.Convert<SimplyUser>();
+                set => SetData(0, value);
+            }
+        }
         /// <summary>
         /// Send a tile to the menu system
         /// </summary>
         /// <param name="context"></param>
         internal void SendTile(EventData context)
         {
-            Debug.Log("UserTileManager.SendTile");
-            var tile = new TileObject() { id = "api.nox.game.user", context = context };
+            var tile = new UserTileObject() { id = "api.nox.game.user", context = context };
             tile.GetContent = (Transform tf) => OnGetContent(tile, tf);
             tile.onDisplay = (str, gameObject) => OnDisplay(tile, gameObject);
             tile.onOpen = (str) => OnOpen(tile, tile.content);
             tile.onHide = (str) => OnHide(tile, tile.content);
+            tile.onRemove = () => OnRemove(tile);
             MenuManager.Instance.SendTile(tile.MenuId, tile);
+        }
+
+        internal void OnUserTileUpdate(UserTileObject tile, GameObject content, SimplyUser user)
+        {
+            var cUser = tile.User;
+            if (cUser == null) return;
+            if (cUser.id != user.id) return;
+            if (cUser.server != user.server) return;
+            tile.User = user;
+            UpdateContent(content, user);
+        }
+
+        internal void OnRemove(UserTileObject tile)
+        {
+            if (tile.OnUserUpdated != null)
+                OnUserUpdated.RemoveListener(tile.OnUserUpdated);
         }
 
         /// <summary>
@@ -34,13 +62,18 @@ namespace api.nox.game
         /// <param name="tile"></param>
         /// <param name="tf"></param>
         /// <returns></returns>
-        internal GameObject OnGetContent(TileObject tile, Transform tf)
+        internal GameObject OnGetContent(UserTileObject tile, Transform tf)
         {
-            Debug.Log("UserTileManager.GetTileContent");
             var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.user");
             pf.SetActive(false);
             var content = Object.Instantiate(pf, tf);
             content.name = "game.user";
+
+            if (tile.OnUserUpdated != null)
+                OnUserUpdated.RemoveListener(tile.OnUserUpdated);
+            tile.OnUserUpdated = (user) => OnUserTileUpdate(tile, content, user);
+            OnUserUpdated.AddListener(tile.OnUserUpdated);
+
             return content;
         }
 
@@ -49,11 +82,9 @@ namespace api.nox.game
         /// </summary>
         /// <param name="tile"></param>
         /// <param name="content"></param>
-        internal void OnDisplay(TileObject tile, GameObject content)
+        internal void OnDisplay(UserTileObject tile, GameObject content)
         {
-            Debug.Log("UserTileManager.OnDisplay");
-            var user = tile.GetData<ShareObject>(0)?.Convert<SimplyUser>();
-            UpdateContent(content, user);
+            UpdateContent(content, tile.User);
         }
 
         /// <summary>
@@ -61,9 +92,8 @@ namespace api.nox.game
         /// </summary>
         /// <param name="tile"></param>
         /// <param name="content"></param>
-        internal void OnOpen(TileObject tile, GameObject content)
+        internal void OnOpen(UserTileObject tile, GameObject content)
         {
-            Debug.Log("UserTileManager.OnOpen");
         }
 
         /// <summary>
@@ -71,27 +101,53 @@ namespace api.nox.game
         /// </summary>
         /// <param name="tile"></param>
         /// <param name="content"></param>
-        internal void OnHide(TileObject tile, GameObject content)
+        internal void OnHide(UserTileObject tile, GameObject content)
         {
-            Debug.Log("UserTileManager.OnHide");
         }
 
         private UserWidget _widget;
+        private EventSubscription UserUpdateSub;
+        private EventSubscription UserFetchSub;
+
+        // make unity event to invoke when user is updated
+        [Serializable] public class UserUpdatedEvent : UnityEvent<SimplyUser> { }
+        public UserUpdatedEvent OnUserUpdated;
+
         internal UserTileManager()
         {
             _widget = new UserWidget();
+            OnUserUpdated = new UserUpdatedEvent();
+            UserUpdateSub = GameClientSystem.CoreAPI.EventAPI.Subscribe("user_update", OnUserUpdate);
+            UserFetchSub = GameClientSystem.CoreAPI.EventAPI.Subscribe("user_fetch", OnUserFetch);
         }
+
+        private void OnUserFetch(EventData data)
+        {
+            var user = (data.Data[0] as ShareObject)?.Convert<SimplyUser>();
+            if (user == null) return;
+            OnUserUpdated?.Invoke(user);
+        }
+
+        private void OnUserUpdate(EventData data)
+        {
+            var user = (data.Data[0] as ShareObject)?.Convert<SimplyUser>();
+            if (user == null) return;
+            OnUserUpdated?.Invoke(user);
+        }
+
 
         internal void OnDispose()
         {
             _widget.Dispose();
+            GameClientSystem.CoreAPI.EventAPI.Unsubscribe(UserUpdateSub);
+            GameClientSystem.CoreAPI.EventAPI.Unsubscribe(UserFetchSub);
+            OnUserUpdated?.RemoveAllListeners();
             _widget = null;
         }
 
         private void UpdateContent(GameObject content, SimplyUser user)
         {
-            Debug.Log($"UserTileManager.UpdateContent({content}, {user})");
-            Reference.GetReference("title", content).GetComponent<TextLanguage>().arguments = new string[] { user.display };
+            Reference.GetReference("title", content).GetComponent<TextLanguage>().UpdateText(new string[] { user.display });
 
             var withbanner = Reference.GetReference("withbanner", content);
             var nobanner = Reference.GetReference("nobanner", content);
@@ -100,7 +156,7 @@ namespace api.nox.game
 
             var current = string.IsNullOrEmpty(user.banner) ? nobanner : withbanner;
 
-            Reference.GetReference("display", current).GetComponent<TextLanguage>().arguments = new string[] { user.display };
+            Reference.GetReference("display", current).GetComponent<TextLanguage>().UpdateText(new string[] { user.display });
 
             if (!string.IsNullOrEmpty(user.banner))
             {

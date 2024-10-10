@@ -17,6 +17,7 @@ namespace api.nox.network
         [ShareObjectExport] public string hash;
         [ShareObjectExport] public uint size;
         [ShareObjectExport] public string server;
+        [ShareObjectExport] public uint world_id;
 
         public bool IsEmpty() => is_empty || string.IsNullOrEmpty(url) || string.IsNullOrEmpty(hash) || size == 0;
         public string GetSID() => $"{id};v={version};e={engine};p={platform}@{server}";

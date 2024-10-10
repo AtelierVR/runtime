@@ -29,7 +29,7 @@ namespace api.nox.network
             if (response.IsError) return null;
             response.data.netSystem = _mod;
             user = response.data;
-            _mod._api.EventAPI.Emit(new NetEventContext("network.get.user.me", user, true));
+            _mod._api.EventAPI.Emit(new NetEventContext("user_update", user));
             return response.data;
         }
 
@@ -41,7 +41,7 @@ namespace api.nox.network
             req.SetRequestHeader("Authorization", string.Format("Bearer {0}", config.Get<string>("token")));
             try { await req.SendWebRequest(); }
             catch { }
-            _mod._api.EventAPI.Emit(new NetEventContext("network.logout.user.me", user, true));
+            _mod._api.EventAPI.Emit(new NetEventContext("user_disconnect", user));
             config.Remove("token");
             config.Remove("user");
             config.Remove("gateway");
@@ -95,9 +95,9 @@ namespace api.nox.network
             config.Set("gateway", gateway.OriginalString);
             config.Save();
             response.data.user.netSystem = _mod;
-            user = response.data.user;
-            _mod._api.EventAPI.Emit(new NetEventContext("network.login.user.me", user.server, user.id, user));
-            _mod._api.EventAPI.Emit(new NetEventContext("network.get.user.me", user.server, user.id, user));
+            this.user = response.data.user;
+            _mod._api.EventAPI.Emit(new NetEventContext("user_connect", user));
+            _mod._api.EventAPI.Emit(new NetEventContext("user_update", user));
             return response.data;
         }
 
@@ -137,7 +137,7 @@ namespace api.nox.network
             if (res.IsError) return null;
             res.data.netSystem = _mod;
             this.user = res.data;
-            _mod._api.EventAPI.Emit(new NetEventContext("network.get.user.me", res.data.server, res.data.id, res.data));
+            _mod._api.EventAPI.Emit(new NetEventContext("user_update", res.data));
             return res.data;
         }
 

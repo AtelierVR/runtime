@@ -10,7 +10,6 @@ namespace api.nox.game.UI
         public override void Dispose()
         {
             base.Dispose();
-            Object.Destroy(gameObject);
         }
     }
 }

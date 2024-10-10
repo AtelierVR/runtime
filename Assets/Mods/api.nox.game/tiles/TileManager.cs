@@ -9,11 +9,13 @@ namespace api.nox.game.Tiles
         {
             var tex = await GameClientSystem.Instance.NetworkAPI.FetchTexture(url);
             if (tex != null)
-            {
-                img.texture = tex;
-                return true;
-            }
-            else return false;
+                try
+                {
+                    img.texture = tex;
+                    return true;
+                }
+                catch { }
+            return false;
         }
     }
 }

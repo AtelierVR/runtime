@@ -14,10 +14,13 @@ namespace Nox.SimplyLibs
         [ShareObjectImport, ShareObjectExport] public string hash;
         [ShareObjectImport, ShareObjectExport] public uint size;
         [ShareObjectImport, ShareObjectExport] public string server;
+        [ShareObjectImport, ShareObjectExport] public uint world_id;
 
         [ShareObjectImport, ShareObjectExport] public Func<bool> SharedIsEmpty;
         [ShareObjectImport, ShareObjectExport] public Func<string> SharedGetSID;
         public bool IsEmpty() => SharedIsEmpty();
         public string GetSID() => SharedGetSID();
+
+        public override string ToString() => $"{GetType().Name}[id={id}, world_id={world_id}, version={version}, engine={engine}, platform={platform}, server={server}]";
     }
 }

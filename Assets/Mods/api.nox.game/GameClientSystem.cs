@@ -61,8 +61,8 @@ namespace api.nox.game
             worldTile = new WorldTileManager();
             instance = new InstanceTileManager();
             userTile = new UserTileManager();
-            serverTile = new ServerTileManager(this);
-            navigationTile = new NavigationTileManager(this);
+            serverTile = new ServerTileManager();
+            navigationTile = new NavigationTileManager();
             makeinstance = new MakeInstanceTileManager(this);
 
             // Subscribe to the tile events

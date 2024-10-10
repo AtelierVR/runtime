@@ -51,9 +51,10 @@ namespace api.nox.game
         private async UniTask<NavigationResult> FetchInstances(string server, string query)
         {
             Debug.Log("Fetching instances");
-            var res = await navigationTile.clientMod.NetworkAPI.Instance.SearchInstances(new() { query = query, server = server });
+            var res = await GameClientSystem.Instance.NetworkAPI.Instance.SearchInstances(new() { query = query, server = server });
             if (res == null) return new NavigationResult { error = "Error fetching instances." };
             Debug.Log("Fetched instances " + res.instances.Length);
+            
             List<InstanceWithWorld> iww = new();
             foreach (var instance in res.instances)
             {
@@ -67,7 +68,8 @@ namespace api.nox.game
                     instance = instance
                 });
             }
-            var WorldAPI = navigationTile.clientMod.NetworkAPI.World;
+
+            var WorldAPI = GameClientSystem.Instance.NetworkAPI.World;
             foreach (var address in iww.GroupBy(x => x.worldServer).ToDictionary(x => x.Key, x => x.Select(y => y.worldId)))
             {
                 var resWorld = await WorldAPI.GetWorlds(address.Key, address.Value.ToArray().ToArray());
@@ -75,6 +77,14 @@ namespace api.nox.game
                 foreach (var i in iww.Where(x => x.worldServer == address.Key))
                     i.world = resWorld.FirstOrDefault(x => x.id == i.worldId);
             }
+
+            foreach (var i in iww.Where(x => x.world != null))
+            {
+                var resAsset = await i.world.SearchAssets(0, 1, null, new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) }, new string[] { "unity" });
+                if (resAsset == null || resAsset.assets.Length == 0) continue;
+                i.asset = resAsset.assets[0];
+            }
+
             return new NavigationResult
             {
                 data = iww.Select(x => new NavigationResultData
@@ -84,14 +94,14 @@ namespace api.nox.game
                     ) : x.instance.title,
                     imageUrl = x.world?.thumbnail,
                     goto_id = "game.instance",
-                    goto_data = new object[] { x.instance, x.world }
+                    goto_data = new object[] { x.instance, x.world, x.asset }
                 }).ToArray()
             };
         }
 
         private void UpdateHandler()
         {
-            navigationTile.clientMod.coreAPI.EventAPI.Emit("game.navigation", _handler);
+            GameClientSystem.CoreAPI.EventAPI.Emit("game.navigation", _handler);
         }
 
         internal void OnDispose()
@@ -105,8 +115,10 @@ namespace api.nox.game
     internal class InstanceWithWorld
     {
         public uint worldId;
+        public uint worldAssetId;
         public string worldServer;
         public SimplyInstance instance;
         public SimplyWorld world;
+        public SimplyWorldAsset asset;
     }
 }

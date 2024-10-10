@@ -56,6 +56,8 @@ namespace api.nox.game
                 {
                     var x = (uint)pos.x + i % (uint)item.size.x;
                     var y = (uint)pos.y + i / (uint)item.size.x;
+
+                    if (x >= dimensions.x || y >= dimensions.y) continue;
                     calculated[x][y] = item.index;
                 }
 

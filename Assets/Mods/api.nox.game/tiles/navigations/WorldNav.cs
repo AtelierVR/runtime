@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
@@ -49,23 +50,28 @@ namespace api.nox.game
 
         private async UniTask<NavigationResult> FetchWorlds(string server, string query)
         {
-            var res = await navigationTile.clientMod.NetworkAPI.World.SearchWorlds(server, query);
+            var res = await GameClientSystem.Instance.NetworkAPI.World.SearchWorlds(server, query);
             if (res == null) return new NavigationResult { error = "Error fetching worlds." };
-            return new NavigationResult
+            var data = new List<NavigationResultData>();
+            for (var i = 0; i < res.worlds.Length; i++)
             {
-                data = res.worlds.Select(x => new NavigationResultData
+                var world = res.worlds[i];
+                var asset = await world.SearchAssets(0, 1, null, new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) }, new string[] { "unity" });
+                if (asset == null || asset.assets.Length == 0) continue;
+                data.Add(new NavigationResultData
                 {
-                    title = x.title,
-                    imageUrl = x.thumbnail,
+                    title = world.title,
+                    imageUrl = world.thumbnail,
                     goto_id = "game.world",
-                    goto_data = new object[] { x }
-                }).ToArray()
-            };
+                    goto_data = new object[] { world, asset.assets[0] }
+                });
+            }
+            return new NavigationResult { data = data.ToArray() };
         }
 
         private void UpdateHandler()
         {
-            navigationTile.clientMod.coreAPI.EventAPI.Emit("game.navigation", _handler);
+            GameClientSystem.CoreAPI.EventAPI.Emit("game.navigation", _handler);
         }
 
         internal void OnDispose()

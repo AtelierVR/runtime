@@ -40,7 +40,6 @@ namespace api.nox.network
             SharedWorldAssets = new ShareObject[assets.Length];
             for (var i = 0; i < assets.Length; i++)
                 SharedWorldAssets[i] = assets[i];
-            Debug.Log("BeforeExport" + SharedWorldAssets + " " + assets.Length);
             SharedHasPrevious = HasPrevious;
             SharedHasNext = HasNext;
             SharedPrevious = async () => await Previous();

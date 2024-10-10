@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 namespace api.nox.game
@@ -9,12 +10,12 @@ namespace api.nox.game
         public static void UpdateManually(RectTransform rect)
         {
             if (rect == null || !rect.gameObject.activeInHierarchy) return;
+
             foreach (Transform child in rect)
                 if (child.TryGetComponent<RectTransform>(out var rec)) UpdateManually(rec);
             var rectTransform = rect.GetComponent<RectTransform>();
             var contentSizeFitter = rect.GetComponent<ContentSizeFitter>();
             var layoutGroup = rect.GetComponent<LayoutGroup>();
-            var fitter = rect.GetComponent<AutoFitter>();
 
             if (contentSizeFitter != null)
             {
@@ -29,11 +30,21 @@ namespace api.nox.game
                 layoutGroup.SetLayoutHorizontal();
                 layoutGroup.SetLayoutVertical();
             }
-            
+
             foreach (Transform child in rect)
                 if (child.TryGetComponent<AutoFitter>(out var rec)) rec.Fit();
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
+
+            if (rect.TryGetComponent<MenuGridder>(out var menugridder))
+            {
+                rect.gameObject.SetActive(false);
+                UniTask.DelayFrame(1).ContinueWith(() =>
+                {
+                    rect.gameObject.SetActive(true);
+                    menugridder.UpdateContent();
+                }).Forget();
+            }
         }
     }
 }

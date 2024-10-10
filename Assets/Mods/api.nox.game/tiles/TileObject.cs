@@ -1,8 +1,10 @@
 
 using System;
+using System.Collections;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace api.nox.game
 {
@@ -17,6 +19,16 @@ namespace api.nox.game
         internal int MenuId => (context.Data[0] as int?) ?? 0;
         internal object[] Data => (context.Data[2] as object[]) ?? new object[0];
         internal T GetData<T>(int index) => Data.Length > index && Data[index] != null ? (T)Data[index] : default;
+        internal void SetData(int index, object value) 
+        {
+            if (Data.Length <= index)
+            {
+                var newData = new object[index + 1];
+                Data.CopyTo(newData, 0);
+                context.Data[2] = newData;
+            }
+            (context.Data[2] as object[])[index] = value;
+        }
 
         [ShareObjectImport, ShareObjectExport] public Func<Transform, GameObject> GetContent;
         [ShareObjectImport, ShareObjectExport] public Action<string> onOpen = null; // Called when the tile is opened at the first time (before reading the content) (the string is the previous tile id)
@@ -32,6 +44,8 @@ namespace api.nox.game
 
         public virtual void Dispose()
         {
+            Debug.Log($"Tile Dispose {id}");
+            Object.Destroy(content);
             onRemove?.Invoke();
             content = null;
             GetContent = null;
@@ -41,5 +55,6 @@ namespace api.nox.game
             onDisplay = null;
             onHide = null;
         }
+
     }
 }

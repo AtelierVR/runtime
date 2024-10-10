@@ -62,7 +62,7 @@ namespace api.nox.game.sessions
             scenes.Clear();
         }
 
-        public void SetCurrent() => GameSystem.instance.sessionManager.CurrentSession = this;
+        public void SetCurrent() => GameSystem.Instance.SessionManager.CurrentSession = this;
 
         public void OnSelectedCurrent(Session old)
         {

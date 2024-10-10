@@ -40,6 +40,7 @@ namespace api.nox.network
          */
         public async UniTask<World> GetHome()
         {
+            Debug.Log($"aa GetHome {netSystem}.");
             if (string.IsNullOrEmpty(home)) return null;
             var worldref = WorldIdentifier.FromString(home);
             Debug.Log($"GetHome {netSystem}.");

@@ -35,7 +35,7 @@ namespace api.nox.network
             if (res.IsError) return null;
             res.data.networkSystem = _mod;
             SetOrAddInstance(res.data);
-            _mod._api.EventAPI.Emit(new NetEventContext("network.get.instance", server, instanceId, res.data));
+            _mod._api.EventAPI.Emit(new NetEventContext("instance_fetch", res.data));
             return res.data;
         }
 
@@ -63,7 +63,7 @@ namespace api.nox.network
             }
             _mod._api.EventAPI.Emit(new NetEventContext("network.search.instances", server, res.data));
             foreach (var instance in res.data.instances)
-                _mod._api.EventAPI.Emit(new NetEventContext("network.get.instance", server, instance.id, instance));
+                _mod._api.EventAPI.Emit(new NetEventContext("instance_fetch", instance));
             return res.data;
         }
 
@@ -86,7 +86,7 @@ namespace api.nox.network
             if (res.IsError) return null;
             res.data.networkSystem = _mod;
             _mod._api.EventAPI.Emit(new NetEventContext("network.create.instance", data.server, res.data.id, res.data));
-            _mod._api.EventAPI.Emit(new NetEventContext("network.get.instance", data.server, res.data.id, res.data));
+            _mod._api.EventAPI.Emit(new NetEventContext("instance_fetch", res.data));
             SetOrAddInstance(res.data);
             return res.data;
         }

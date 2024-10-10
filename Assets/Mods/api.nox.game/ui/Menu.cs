@@ -18,6 +18,7 @@ namespace api.nox.game.UI
         public string initTile = "default";
         public NavigationMenu[] navigationMenus;
         public RectTransform container;
+
         internal MenuHistory History;
 
         public virtual bool IsVisible
@@ -121,14 +122,52 @@ namespace api.nox.game.UI
                     : Instantiate(nav.itemPrefab, nav.container).transform;
                 menuItem.name = $"menu-item-{i}-{item.key}";
                 menuItem.GetComponentInChildren<RawImage>().texture = item.icon;
-                menuItem.GetComponentInChildren<TextLanguage>().UpdateText(item.text);
+                menuItem.GetComponentInChildren<TextLanguage>()?.UpdateText(item.text);
                 var btn = menuItem.GetComponent<Button>();
                 btn.interactable = item.flags.HasFlag(NavigationMenuItemActiveFlags.Interactable);
                 menuItem.gameObject.SetActive(item.flags.HasFlag(NavigationMenuItemActiveFlags.Enabled));
                 btn.onClick.RemoveAllListeners();
-                if (!string.IsNullOrEmpty(item.goto_tile))
-                    btn.onClick.AddListener(() => MenuManager.Instance.SendGotoTile(Id, item.goto_tile));
+                if (item.execution_type != NavigationMenuItemExecutionEnum.None)
+                    btn.onClick.AddListener(() => OnNavifationClick(item));
             }
+        }
+
+        private void OnNavifationClick(NavigationMenuItem item)
+        {
+            switch (item.execution_type)
+            {
+                case NavigationMenuItemExecutionEnum.GotoTile:
+                    MenuManager.Instance.SendGotoTile(Id, item.execution, item.execution_arguments);
+                    break;
+                case NavigationMenuItemExecutionEnum.SendEvent:
+                    GameClientSystem.CoreAPI.EventAPI.Emit(item.execution, item.execution_arguments);
+                    break;
+                case NavigationMenuItemExecutionEnum.MenuAction:
+                    OnActionExecuted(item.execution, item.execution_arguments);
+                    break;
+                default:
+                    Debug.LogWarning("Unknown execution type");
+                    break;
+            }
+        }
+
+        private void OnActionExecuted(string action, object[] args)
+        {
+            if (action == "history.backward")
+                History.GoBack();
+            else if (action == "history.forward")
+                History.GoForward();
+            else if (action == "history.restore")
+                History.Restore();
+            else if (action == "history.clear")
+                History.Clear();
+            else if (action == "menu.close")
+                IsVisible = false;
+            else if (action == "menu.open")
+                IsVisible = true;
+            else if (action == "menu.toggle")
+                IsVisible = !IsVisible;
+            else Debug.LogWarning("Unknown action");
         }
 
         public void SetTile(TileObject tile, TileObject oldTile = null, SetTileFlags flags = SetTileFlags.None)
@@ -138,6 +177,7 @@ namespace api.nox.game.UI
 
             if (oldTile != null)
             {
+                Debug.Log($"Hiding old tile {oldTile.id}");
                 oldTile.onHide?.DynamicInvoke(tile.id);
                 oldTile.content.SetActive(false);
             }
@@ -147,12 +187,20 @@ namespace api.nox.game.UI
                 if (tile.content == null)
                     tile.content = tile.GetContent(container);
                 if (flags.HasFlag(SetTileFlags.IsNew))
+                {
+                    Debug.Log($"Opening new tile {tile.id}");
                     tile.onOpen?.DynamicInvoke(oldTile?.id);
+                }
                 if (flags.HasFlag(SetTileFlags.IsRestore))
+                {
+                    Debug.Log($"Restoring tile {tile.id}");
                     tile.onRestore?.DynamicInvoke(oldTile?.id);
+                }
+                Debug.Log($"Displaying tile {tile.id}");
                 tile.onDisplay?.DynamicInvoke(oldTile?.id, tile.content);
-                tile.content.SetActive(true);
                 tile.content.name = tile.id;
+                tile.content.SetActive(true);
+                ForceUpdateLayout.UpdateManually(tile.content.GetComponent<RectTransform>());
             }
             else Debug.LogWarning("No tile to display");
         }
@@ -162,6 +210,8 @@ namespace api.nox.game.UI
     {
         None = 0,
         IsNew = 1,
-        IsRestore = 2
+        IsRestore = 2,
+        IsBack = 4,
+        IsForward = 8
     }
 }

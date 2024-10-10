@@ -19,7 +19,7 @@ namespace api.nox.game.Controllers
         public InputActionReference MicrophoneAction;
         public InputActionManager InputAction;
 
-        public override uint Priority => (uint)(GameSystem.instance.coreAPI.XRAPI.IsEnabled() ? 2 : 0);
+        public override uint Priority => (uint)(GameSystem.Instance.CoreAPI.XRAPI.IsEnabled() ? 2 : 0);
 
 
         public override void OnControllerEnable(BaseController last)

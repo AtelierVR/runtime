@@ -30,7 +30,8 @@ namespace api.nox.network
             var res = JsonUtility.FromJson<Response<WorldAsset>>(req.downloadHandler.text);
             if (res.IsError) return null;
             res.data.server = server;
-            _mod._api.EventAPI.Emit(new NetEventContext("network.get.world.asset", server, worldId, assetId, res.data));
+            res.data.world_id = worldId;
+            _mod._api.EventAPI.Emit(new NetEventContext("world_asset_fetch", res.data));
             return res.data;
         }
 
@@ -154,7 +155,8 @@ namespace api.nox.network
             var res = JsonUtility.FromJson<Response<WorldAsset>>(req.downloadHandler.text);
             if (res.IsError) return null;
             res.data.server = asset.server;
-            _mod._api.EventAPI.Emit(new NetEventContext("network.create.world.asset", asset.server, asset.worldId, res.data));
+            res.data.world_id = asset.worldId;
+            _mod._api.EventAPI.Emit(new NetEventContext("world_asset_fetch", res.data));
             return res.data;
         }
 
@@ -179,7 +181,7 @@ namespace api.nox.network
             var res = JsonUtility.FromJson<Response<World>>(req.downloadHandler.text);
             if (res.IsError) return null;
             res.data.networkSystem = _mod;
-            _mod._api.EventAPI.Emit(new NetEventContext("network.create.world", world.server, res.data));
+            _mod._api.EventAPI.Emit(new NetEventContext("world_fetch", res.data));
             return res.data;
         }
 
@@ -199,7 +201,7 @@ namespace api.nox.network
             var res = JsonUtility.FromJson<Response<World>>(req.downloadHandler.text);
             if (res.IsError) return null;
             res.data.networkSystem = _mod;
-            _mod._api.EventAPI.Emit(new NetEventContext("network.get.world", server, worldId, res.data));
+            _mod._api.EventAPI.Emit(new NetEventContext("world_fetch", res.data));
             return res.data;
         }
 
@@ -220,7 +222,7 @@ namespace api.nox.network
             var res = JsonUtility.FromJson<Response<World>>(req.downloadHandler.text);
             if (res.IsError) return null;
             res.data.networkSystem = _mod;
-            _mod._api.EventAPI.Emit(new NetEventContext("network.update.world", world.server, world.worldId, res.data));
+            _mod._api.EventAPI.Emit(new NetEventContext("world_fetch", res.data));
             return res.data;
         }
 
@@ -252,7 +254,7 @@ namespace api.nox.network
             foreach (var world in res.data.worlds)
             {
                 world.networkSystem = _mod;
-                _mod._api.EventAPI.Emit(new NetEventContext("network.get.world", server, world.id, world));
+                _mod._api.EventAPI.Emit(new NetEventContext("world_fetch", res.data));
             }
             _mod._api.EventAPI.Emit(new NetEventContext("network.search.world", server, query, offset, limit, res.data));
             return res.data;
@@ -276,7 +278,7 @@ namespace api.nox.network
             foreach (var world in res.data.worlds)
             {
                 world.networkSystem = _mod;
-                _mod._api.EventAPI.Emit(new NetEventContext("network.get.world", server, world.id, world));
+                _mod._api.EventAPI.Emit(new NetEventContext("world_fetch", res.data));
             }
             return res.data.worlds;
         }
@@ -327,7 +329,8 @@ namespace api.nox.network
             foreach (var asset in res.data.assets)
             {
                 asset.server = server;
-                _mod._api.EventAPI.Emit(new NetEventContext("network.get.world.asset", server, id, asset.id, asset));
+                asset.world_id = id;
+                _mod._api.EventAPI.Emit(new NetEventContext("world_asset_fetch", res.data));
             }
             _mod._api.EventAPI.Emit(new NetEventContext("network.search.world.asset", server, id, offset, limit, versions, platforms, engines, withEmpty, res.data));
             return res.data;

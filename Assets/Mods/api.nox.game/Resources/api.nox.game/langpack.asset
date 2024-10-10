@@ -205,6 +205,8 @@ MonoBehaviour:
       value: "Adresse: {0}"
     - key: dashboard.instance.advanced_informations.relay_address
       value: "Relai: {0}"
+    - key: dashboard.world.actions.no_disponible
+      value: "Indisponible"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home
@@ -370,6 +372,8 @@ MonoBehaviour:
       value: "{0}"
     - key: dashboard.instance.advanced_informations
       value: "Advanced Informations"
+    - key: dashboard.world.actions.no_disponible
+      value: "Unavailable"
 
 
       
