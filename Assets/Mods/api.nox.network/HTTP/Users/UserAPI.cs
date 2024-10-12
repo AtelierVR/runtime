@@ -12,7 +12,7 @@ namespace api.nox.network
     {
         private readonly NetworkSystem _mod;
 
-        internal UserMe user;
+        internal UserMe currentUser;
 
         internal UserAPI(NetworkSystem mod) => _mod = mod;
 
@@ -28,8 +28,9 @@ namespace api.nox.network
             var response = JsonUtility.FromJson<Response<UserMe>>(req.downloadHandler.text);
             if (response.IsError) return null;
             response.data.netSystem = _mod;
-            user = response.data;
-            _mod._api.EventAPI.Emit(new NetEventContext("user_update", user));
+            currentUser = response.data;
+            _mod._api.EventAPI.Emit(new NetEventContext("user_update", currentUser));
+            _mod._api.EventAPI.Emit(new NetEventContext("user_fetch", currentUser));
             return response.data;
         }
 
@@ -41,12 +42,12 @@ namespace api.nox.network
             req.SetRequestHeader("Authorization", string.Format("Bearer {0}", config.Get<string>("token")));
             try { await req.SendWebRequest(); }
             catch { }
-            _mod._api.EventAPI.Emit(new NetEventContext("user_disconnect", user));
+            _mod._api.EventAPI.Emit(new NetEventContext("user_disconnect", currentUser));
             config.Remove("token");
             config.Remove("user");
             config.Remove("gateway");
             config.Save();
-            user = null;
+            currentUser = null;
             return new Response<bool> { data = true };
         }
 
@@ -95,30 +96,31 @@ namespace api.nox.network
             config.Set("gateway", gateway.OriginalString);
             config.Save();
             response.data.user.netSystem = _mod;
-            this.user = response.data.user;
-            _mod._api.EventAPI.Emit(new NetEventContext("user_connect", user));
-            _mod._api.EventAPI.Emit(new NetEventContext("user_update", user));
+            currentUser = response.data.user;
+            _mod._api.EventAPI.Emit(new NetEventContext("user_connect", currentUser));
+            _mod._api.EventAPI.Emit(new NetEventContext("user_update", currentUser));
+            _mod._api.EventAPI.Emit(new NetEventContext("user_fetch", currentUser));
             return response.data;
         }
 
-        public async UniTask<UserSearch> SearchUsers(string server, string query, uint offset = 0, uint limit = 10)
+        public async UniTask<UserSearch> SearchUsers(SearchUserData data)
         {
             // GET /api/users/search?query={query}&offset={offset}&limit={limit}
             var User = _mod.GetCurrentUser();
             var config = Config.Load();
-            var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
+            var gateway = data.server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(data.server))?.OriginalString;
             if (gateway == null) return null;
-            var req = new UnityWebRequest($"{gateway}/api/users/search?query={query}&offset={offset}&limit={limit}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            var token = await _mod._auth.GetToken(server);
+            var req = new UnityWebRequest($"{gateway}/api/users/search?{data.ToParams()}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
+            var token = await _mod._auth.GetToken(data.server);
             if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
             try { await req.SendWebRequest(); }
             catch { }
             if (req.responseCode != 200) return null;
             var res = JsonUtility.FromJson<Response<UserSearch>>(req.downloadHandler.text);
             if (res.IsError) return null;
-            _mod._api.EventAPI.Emit(new NetEventContext("network.search.user", server, query, offset, limit, res.data));
+            _mod._api.EventAPI.Emit(new NetEventContext("network.search.user", data, res.data));
             foreach (var user in res.data.users)
-                _mod._api.EventAPI.Emit(new NetEventContext("network.get.user", user.server, user.id, user));
+                _mod._api.EventAPI.Emit(new NetEventContext("user_fetch", user));
             return res.data;
         }
 
@@ -136,12 +138,13 @@ namespace api.nox.network
             var res = JsonUtility.FromJson<Response<UserMe>>(req.downloadHandler.text);
             if (res.IsError) return null;
             res.data.netSystem = _mod;
-            this.user = res.data;
-            _mod._api.EventAPI.Emit(new NetEventContext("user_update", res.data));
+            currentUser = res.data;
+            _mod._api.EventAPI.Emit(new NetEventContext("user_update", currentUser));
+            _mod._api.EventAPI.Emit(new NetEventContext("user_fetch", currentUser));
             return res.data;
         }
 
-        [ShareObjectExport] public Func<string, string, uint, uint, UniTask<ShareObject>> SharedSearchUsers;
+        [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedSearchUsers;
         [ShareObjectExport] public Func<UniTask<ShareObject>> SharedGetMyUser;
         [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedUpdateUser;
         [ShareObjectExport] public Func<UniTask<bool>> SharedGetLogout;
@@ -149,7 +152,7 @@ namespace api.nox.network
 
         public void BeforeExport()
         {
-            SharedSearchUsers = async (server, query, offset, limit) => await SearchUsers(server, query, offset, limit);
+            SharedSearchUsers = async (data) => await SearchUsers(data.Convert<SearchUserData>());
             SharedUpdateUser = async (user) => await UpdateUser(user.Convert<UserUpdate>());
             SharedGetMyUser = async () => await GetMyUser();
             SharedGetLogout = async () => (await GetLogout()).data == true;

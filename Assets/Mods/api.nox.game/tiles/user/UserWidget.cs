@@ -119,12 +119,14 @@ namespace api.nox.game.Tiles
             var gban = ban.gameObject;
             gban.SetActive(false);
             if (!string.IsNullOrEmpty(user.banner))
-                _ = TileManager.UpdateTexure(ban, user.banner).ContinueWith((bool a) => gban.SetActive(a));
+                try { _ = TileManager.UpdateTexure(ban, user.banner).ContinueWith((bool a) => gban.SetActive(a)); }
+                catch (Exception e) { Debug.LogError(e); }
             var thumb = Reference.GetReference("icon", btncontent).GetComponent<RawImage>();
             var iconmask = Reference.GetReference("iconmask", btncontent);
             iconmask.SetActive(false);
             if (!string.IsNullOrEmpty(user.thumbnail))
-                _ = TileManager.UpdateTexure(thumb, user.thumbnail).ContinueWith((bool a) => iconmask.SetActive(a));
+                try { _ = TileManager.UpdateTexure(thumb, user.thumbnail).ContinueWith((bool a) => iconmask.SetActive(a)); }
+                catch (Exception e) { Debug.LogError(e); }
             var btnref = Reference.GetReference("button", btn).GetComponent<Button>();
             btnref.onClick.AddListener(() => OnClickWidgetUser(menuId, widget, user));
             return btn;

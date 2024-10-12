@@ -13,7 +13,7 @@ using System;
 using Object = UnityEngine.Object;
 using Newtonsoft.Json.Linq;
 
-namespace api.nox.game
+namespace api.nox.game.Tiles
 {
     internal class ServerTileManager : TileManager
     {

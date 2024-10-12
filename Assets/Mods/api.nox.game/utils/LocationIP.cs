@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -66,6 +67,19 @@ namespace api.nox.game.LocationIP
     {
         public static async UniTask<IPData> FetchLocation(string ip)
         {
+            UriHostNameType uriType = Uri.CheckHostName(ip);
+            switch (uriType)
+            {
+                case UriHostNameType.IPv4:
+                case UriHostNameType.IPv6:
+                    break;
+                case UriHostNameType.Dns:
+                    ip = System.Net.Dns.GetHostAddresses(ip)[0].ToString();
+                    break;
+                default:
+                    return null;
+            }
+
             var url = $"https://ipwho.is/{ip}";
             var request = new UnityEngine.Networking.UnityWebRequest(url)
             { downloadHandler = new UnityEngine.Networking.DownloadHandlerBuffer() };

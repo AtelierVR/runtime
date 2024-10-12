@@ -7,11 +7,12 @@ using Nox.CCK;
 using UnityEngine.UI;
 using Nox.SimplyLibs;
 using api.nox.game.sessions;
-using api.nox.game.LocationIP;
 using api.nox.game.UI;
 using UnityEngine.Events;
 using System;
 using Object = UnityEngine.Object;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace api.nox.game.Tiles
 {
@@ -110,7 +111,8 @@ namespace api.nox.game.Tiles
         internal void OnOpen(InstanceTileObject tile, GameObject content)
         {
             Debug.Log("InstanceTileManager.OnOpen");
-            UpdateLocation(tile, content).Forget();
+            FetchLocation(tile, content).Forget();
+            OnClickRefreshPlayers(tile, content).Forget();
         }
 
         /// <summary>
@@ -165,26 +167,32 @@ namespace api.nox.game.Tiles
 
             var refresh_instance = Reference.GetReference("refresh_instance", content).GetComponent<Button>();
             refresh_instance.onClick.RemoveAllListeners();
-            refresh_instance.onClick.AddListener(() => OnClickRefreshInstance(tile, refresh_instance, content).Forget());
+            refresh_instance.onClick.AddListener(() => OnClickRefreshInstance(tile, content).Forget());
+
+            var refresh_players = Reference.GetReference("refresh_players", content).GetComponent<Button>();
+            refresh_players.onClick.RemoveAllListeners();
+            refresh_players.onClick.AddListener(() => OnClickRefreshPlayers(tile, content, true).Forget());
 
             UpdateRelay(tile, content);
-            UpdatePlayers(tile, content);
-
         }
 
-        private async UniTask UpdateLocation(InstanceTileObject tile, GameObject content)
+        private async UniTask FetchLocation(InstanceTileObject tile, GameObject content)
         {
             var instance = tile.Instance;
             var location = await LocationIP.LocationIP.FetchLocation(instance.address.Split(':')[0]);
-            if (location == null || !location.success) return;
-            var flag = Reference.GetReference("flag", content).GetComponent<RawImage>();
-            if (!string.IsNullOrEmpty(location.GetFlagImg())) UpdateTexure(flag, location.GetFlagImg()).Forget();
+            var flag = Reference.GetReference("flag", content);
+            var flag_img = Reference.GetReference("flagimg", flag).GetComponent<RawImage>();
+            flag.SetActive(false);
+            if (location != null && location.success && !string.IsNullOrEmpty(location.GetFlagImg()))
+                try { _ = UpdateTexure(flag_img, location.GetFlagImg()).ContinueWith((bool a) => flag.SetActive(a)); }
+                catch (Exception e) { Debug.LogError(e); }
         }
 
-        private async UniTask OnClickRefreshInstance(InstanceTileObject tile, Button dlb, GameObject content)
+        private async UniTask OnClickRefreshInstance(InstanceTileObject tile, GameObject content)
         {
-            if (!dlb.interactable) return;
-            dlb.interactable = false;
+            var refresh_instance = Reference.GetReference("refresh_instance", content).GetComponent<Button>();
+            if (!refresh_instance.interactable) return;
+            refresh_instance.interactable = false;
             var instance = tile.Instance;
             if (instance == null)
             {
@@ -200,9 +208,12 @@ namespace api.nox.game.Tiles
             }
 
             tile.Instance = instance;
+            FetchLocation(tile, content).Forget();
 
-            dlb.interactable = true;
+            refresh_instance.interactable = true;
             UpdateContent(tile, content);
+
+            ForceUpdateLayout.UpdateManually(content);
         }
 
         private void UpdateRelay(InstanceTileObject tile, GameObject content)
@@ -244,26 +255,6 @@ namespace api.nox.game.Tiles
             if (gotobtn.interactable)
                 gotobtn.onClick.AddListener(() => JoinOnlineSession(tile, content).Forget());
         }
-
-        private void UpdatePlayers(InstanceTileObject tile, GameObject content)
-        {
-            var instance = tile.Instance;
-            var player_node = Reference.GetReference("players", content);
-            Reference.GetReference("players.title", content).GetComponent<TextLanguage>().UpdateText(new string[] { instance.players.Length.ToString() });
-            var player_prefab = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.instance.player");
-            player_prefab.SetActive(false);
-            foreach (Transform child in player_node.transform)
-                Object.Destroy(child.gameObject);
-            foreach (var player in instance.players)
-            {
-                var player_tile = Object.Instantiate(player_prefab, player_node.transform);
-                Reference.GetReference("title", content).GetComponent<TextLanguage>().UpdateText(new string[] { player.display });
-                player_tile.SetActive(true);
-                // Reference.GetReference("display", player_tile).GetComponent<TextLanguage>().arguments = new string[] { player.display };
-                // Reference.GetReference("user", player_tile).GetComponent<TextLanguage>().arguments = new string[] { player.user };
-            }
-        }
-
 
         private async UniTask JoinOnlineSession(InstanceTileObject tile, GameObject content)
         {
@@ -335,5 +326,91 @@ namespace api.nox.game.Tiles
 
             UpdateRelay(tile, content);
         }
+
+
+        private async UniTask OnClickRefreshPlayers(InstanceTileObject tile, GameObject content, bool isButton = false)
+        {
+            var refresh_players = Reference.GetReference("refresh_players", content).GetComponent<Button>();
+            if (!refresh_players.interactable) return;
+            refresh_players.interactable = false;
+
+            if (isButton)
+            {
+                var refresh_instance = Reference.GetReference("refresh_instance", content).GetComponent<Button>();
+                if (!refresh_instance.interactable)
+                {
+                    refresh_players.interactable = true;
+                    return;
+                }
+
+                await OnClickRefreshInstance(tile, content);
+            }
+
+            List<UniTask> tasks = new();
+
+            var container = Reference.GetReference("players", content).GetComponent<RectTransform>();
+            foreach (Transform child in container.transform)
+                Object.Destroy(child.gameObject);
+
+            var players = tile.Instance.players;
+            Reference.GetReference("players.title", content).GetComponent<TextLanguage>().UpdateText(new string[] { players.Length.ToString() });
+
+            Dictionary<string, List<string>> requests = new();
+            foreach (var player in players)
+            {
+                var identifier = UserIdentifier.FromString(player.user);
+                var server = identifier.IsLocal() ? tile.Instance.server : identifier.server;
+                if (!requests.ContainsKey(server))
+                    requests[server] = new List<string>();
+                requests[server].Add(player.user);
+            }
+
+            foreach (var server in requests.Keys)
+                tasks.Add(FetchWorkPlayers(tile, content, server, requests[server].ToArray()));
+            await UniTask.WhenAll(tasks);
+
+            refresh_players.interactable = true;
+        }
+
+
+        private async UniTask FetchWorkPlayers(InstanceTileObject tile, GameObject content, string address, string[] players)
+        {
+            var res = await GameClientSystem.Instance.NetworkAPI.User.SearchUsers(new SimplySearchUserData()
+            {
+                user_ids = players,
+                server = address,
+                limit = 100
+            });
+
+            List<SimplyUser> users = new();
+            while (res != null && res.HasNext())
+            {
+                users.AddRange(res.users);
+                res = await res.Next();
+            }
+
+            if (res != null)
+                users.AddRange(res.users);
+
+            var container = Reference.GetReference("players", content);
+            var user_prefab = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.instance.player");
+            user_prefab.SetActive(false);
+
+            foreach (var user in users)
+            {
+                var user_tile = Object.Instantiate(user_prefab, container.transform);
+                Reference.GetReference("title", user_tile).GetComponent<TextLanguage>().UpdateText(new string[] { user.display });
+                user_tile.SetActive(true);
+                var thumbnail = Reference.GetReference("thumbnail", user_tile).GetComponent<RawImage>();
+                if (!string.IsNullOrEmpty(user.thumbnail))
+                    UpdateTexure(thumbnail, user.thumbnail).Forget();
+                var button = Reference.GetReference("button", user_tile).GetComponent<Button>();
+                button.onClick.RemoveAllListeners();
+                button.onClick.AddListener(() => MenuManager.Instance.SendGotoTile(tile.MenuId, "game.user", user));
+            }
+
+            ForceUpdateLayout.UpdateManually(container);
+        }
+
     }
 }

@@ -63,7 +63,7 @@ namespace api.nox.game
             userTile = new UserTileManager();
             serverTile = new ServerTileManager();
             navigationTile = new NavigationTileManager();
-            makeinstance = new MakeInstanceTileManager(this);
+            makeinstance = new MakeInstanceTileManager();
 
             // Subscribe to the tile events
             tilesub = api.EventAPI.Subscribe("game.tile", context => MenuManager.Instance.OnTile(context));

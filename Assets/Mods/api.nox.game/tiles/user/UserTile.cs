@@ -12,7 +12,7 @@ using UnityEngine.Events;
 using System;
 using Object = UnityEngine.Object;
 
-namespace api.nox.game
+namespace api.nox.game.Tiles
 {
     internal class UserTileManager : TileManager
     {

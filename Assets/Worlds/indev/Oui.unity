@@ -169,8 +169,8 @@ MonoBehaviour:
   ModRequirements:
   - Id: 1@localhost:53032
     Flags: 14
-  _target: 24
-  ServerPublisher: localhost:53032
+  _target: 19
+  ServerPublisher: 8ca5-2a01-e0a-86-2960-80a2-b93f-791-e16e.ngrok-free.app:443
   IdPublisher: 1
   VersionPublisher: 0
 --- !u!4 &68164194

@@ -106,9 +106,9 @@ namespace api.nox.network
 
         public UserMe GetCurrentUser()
         {
-            if (_user.user == null) return null;
-            _user.user.netSystem = this;
-            return _user.user;
+            if (_user.currentUser == null) return null;
+            _user.currentUser.netSystem = this;
+            return _user.currentUser;
         }
         [ShareObjectExport] public Func<ShareObject> GetSharedCurrentUser;
         public Server GetCurrentServer() => _server.server;

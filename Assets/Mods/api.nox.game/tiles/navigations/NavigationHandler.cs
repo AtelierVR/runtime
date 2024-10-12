@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods;
 using UnityEngine;
 
-namespace api.nox.game
+namespace api.nox.game.Tiles
 {
     internal class NavigationHandler : ShareObject
     {

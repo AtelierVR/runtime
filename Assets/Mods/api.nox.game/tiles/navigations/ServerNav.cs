@@ -4,7 +4,7 @@ using Nox.CCK;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 
-namespace api.nox.game
+namespace api.nox.game.Tiles
 {
     internal class ServerNav
     {

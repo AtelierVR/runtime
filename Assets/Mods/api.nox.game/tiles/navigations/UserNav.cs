@@ -2,10 +2,11 @@ using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
+using Nox.SimplyLibs;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 
-namespace api.nox.game
+namespace api.nox.game.Tiles
 {
     internal class UserNav
     {
@@ -52,7 +53,7 @@ namespace api.nox.game
         private async UniTask<NavigationResult> FetchUsers(string server, string query)
         {
             Debug.Log("Fetching users");
-            var res = await GameClientSystem.Instance.NetworkAPI.User.SearchUsers(server, query);
+            var res = await GameClientSystem.Instance.NetworkAPI.User.SearchUsers(new SimplySearchUserData { server = server, query = query });
             if (res == null) return new NavigationResult { error = "Error fetching users." };
             Debug.Log("Fetched users " + res.users.Length);
             return new NavigationResult

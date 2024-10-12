@@ -172,37 +172,45 @@ namespace api.nox.game.UI
 
         public void SetTile(TileObject tile, TileObject oldTile = null, SetTileFlags flags = SetTileFlags.None)
         {
-            if (tile.content == null && tile.GetContent == null)
-                throw new Exception("Tile content is null");
-
-            if (oldTile != null)
+            try
             {
-                Debug.Log($"Hiding old tile {oldTile.id}");
-                oldTile.onHide?.DynamicInvoke(tile.id);
-                oldTile.content.SetActive(false);
-            }
+                if (tile.content == null && tile.GetContent == null)
+                    return;
 
-            if (tile != null)
-            {
-                if (tile.content == null)
-                    tile.content = tile.GetContent(container);
-                if (flags.HasFlag(SetTileFlags.IsNew))
+                if (oldTile != null)
                 {
-                    Debug.Log($"Opening new tile {tile.id}");
-                    tile.onOpen?.DynamicInvoke(oldTile?.id);
+                    Debug.Log($"Hiding old tile {oldTile.id}");
+                    oldTile.onHide?.DynamicInvoke(tile.id);
+                    oldTile.content.SetActive(false);
                 }
-                if (flags.HasFlag(SetTileFlags.IsRestore))
+
+                if (tile != null)
                 {
-                    Debug.Log($"Restoring tile {tile.id}");
-                    tile.onRestore?.DynamicInvoke(oldTile?.id);
+                    if (tile.content == null)
+                        tile.content = tile.GetContent(container);
+                    if (flags.HasFlag(SetTileFlags.IsNew))
+                    {
+                        Debug.Log($"Opening new tile {tile.id}");
+                        tile.onOpen?.DynamicInvoke(oldTile?.id);
+                    }
+                    if (flags.HasFlag(SetTileFlags.IsRestore))
+                    {
+                        Debug.Log($"Restoring tile {tile.id}");
+                        tile.onRestore?.DynamicInvoke(oldTile?.id);
+                    }
+                    Debug.Log($"Displaying tile {tile.id}");
+                    tile.onDisplay?.DynamicInvoke(oldTile?.id, tile.content);
+                    tile.content.name = tile.id;
+                    tile.content.SetActive(true);
+                    
+                    ForceUpdateLayout.UpdateManually(tile.content);
                 }
-                Debug.Log($"Displaying tile {tile.id}");
-                tile.onDisplay?.DynamicInvoke(oldTile?.id, tile.content);
-                tile.content.name = tile.id;
-                tile.content.SetActive(true);
-                ForceUpdateLayout.UpdateManually(tile.content.GetComponent<RectTransform>());
             }
-            else Debug.LogWarning("No tile to display");
+            catch (Exception e)
+            {
+                Debug.LogWarning("Error setting tile");
+                Debug.LogError(e);
+            }
         }
     }
 

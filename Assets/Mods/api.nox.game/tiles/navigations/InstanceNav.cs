@@ -5,7 +5,7 @@ using Nox.CCK;
 using Nox.SimplyLibs;
 using UnityEngine;
 
-namespace api.nox.game
+namespace api.nox.game.Tiles
 {
     internal class InstanceNav
     {

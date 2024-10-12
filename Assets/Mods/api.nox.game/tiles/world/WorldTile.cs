@@ -322,14 +322,29 @@ namespace api.nox.game.Tiles
                 }
 
                 instb.interactable = true;
-                // instb.onClick.AddListener(() =>
-                // {
-                //     var server = GameClientSystem.Instance.NetworkAPI.GetCurrentServer();
-                //     server = server != null && server.features.Contains("instance") ? server : null;
-                //     // clientMod.GotoTile("game.instance.make", world, versions == null || versions.Length == 0 ? null : asset, server);
-                // });
+                instb.onClick.AddListener(() => OnClickMakeInstance(tile, content).Forget());
             }
             else SetDownloadButton(content, DownloadButtonType.Unavailable);
+        }
+
+        private async UniTask OnClickMakeInstance(WorldTileObject tile, GameObject content)
+        {
+            var instb = Reference.GetReference("instance.button", content).GetComponent<Button>();
+            if (!instb.interactable) return;
+            instb.interactable = false;
+
+            var server = GameClientSystem.Instance.NetworkAPI.GetCurrentServer();
+            server ??= await GameClientSystem.Instance.NetworkAPI.Server.GetMyServer();
+            server = server != null && server.features.Contains("instance") ? server : null;
+            if (server == null)
+            {
+                instb.interactable = true;
+                return;
+            }
+
+            MenuManager.Instance.SendGotoTile(tile.MenuId, "game.instance.make", server, tile.World);
+
+            instb.interactable = true;
         }
 
         private async UniTask OnClickHome(WorldTileObject tile, GameObject content, SimplyUserMe user, Button dlb, bool hasHome)

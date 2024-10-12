@@ -9,6 +9,7 @@ namespace api.nox.network
     {
         internal NetworkSystem netSystem;
         public Instance[] instances;
+        internal string query;
         internal string world;
         internal string owner;
         [ShareObjectExport] public uint total;
@@ -21,6 +22,7 @@ namespace api.nox.network
         public async UniTask<InstanceSearch> Next()
             => HasNext() ? await netSystem.Instance.SearchInstances(new SearchInstanceData()
             {
+                query = query,
                 world = world,
                 owner = owner,
                 offset = offset + limit,
@@ -30,6 +32,7 @@ namespace api.nox.network
         public async UniTask<InstanceSearch> Previous()
             => HasPrevious() ? await netSystem.Instance.SearchInstances(new SearchInstanceData()
             {
+                query = query,
                 world = world,
                 owner = owner,
                 offset = offset - limit,
