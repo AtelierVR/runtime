@@ -1,10 +1,11 @@
 using System;
 using api.nox.game.UI;
+using api.nox.network.Servers;
+using api.nox.network.Users;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
-using Nox.SimplyLibs;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -35,11 +36,11 @@ namespace api.nox.game.Tiles
         private HomeWidget homeWidget;
         private HomeWidget serverMeWidget;
 
-        private void OnUserUpdate(EventData context) => OnUpdateUserWidget((context.Data[0] as ShareObject).Convert<SimplyUserMe>(), true);
-        private void OnUserConnect(EventData context) => OnUpdateUserWidget((context.Data[0] as ShareObject).Convert<SimplyUserMe>(), true);
+        private void OnUserUpdate(EventData context) => OnUpdateUserWidget(context.Data[0] as UserMe, true);
+        private void OnUserConnect(EventData context) => OnUpdateUserWidget(context.Data[0] as UserMe, true);
         private void OnUserDisconnect(EventData context) => OnUpdateUserWidget(null, false);
 
-        private void OnUpdateUserWidget(SimplyUserMe user, bool connected)
+        private void OnUpdateUserWidget(UserMe user, bool connected)
         {
             if (connected)
             {
@@ -67,7 +68,7 @@ namespace api.nox.game.Tiles
             }
         }
 
-        private void OnUpdateServerWidget(SimplyServer server, bool connected)
+        private void OnUpdateServerWidget(Server server, bool connected)
         {
             if (connected)
             {
@@ -92,9 +93,9 @@ namespace api.nox.game.Tiles
         /// <returns></returns>
         private async UniTask Initialization()
         {
-            var user = GameClientSystem.Instance.NetworkAPI.GetCurrentUser();
+            var user = GameClientSystem.Instance.NetworkAPI.User.CurrentUser;
             user ??= await GameClientSystem.Instance.NetworkAPI.User.GetMyUser();
-            var server = GameClientSystem.Instance.NetworkAPI.GetCurrentServer();
+            var server = GameClientSystem.Instance.NetworkAPI.Server.CurrentServer;
             server ??= await GameClientSystem.Instance.NetworkAPI.Server.GetMyServer();
             OnUpdateUserWidget(user, user != null);
             OnUpdateServerWidget(server, server != null);
@@ -108,7 +109,7 @@ namespace api.nox.game.Tiles
         /// <param name="user"></param>
         /// <param name="tf"></param>
         /// <returns></returns>
-        private GameObject OnGetContentUserMe(int menuId, HomeWidget widget, SimplyUserMe user, Transform tf)
+        private GameObject OnGetContentUserMe(int menuId, HomeWidget widget, UserMe user, Transform tf)
         {
             var baseprefab = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget");
             var prefab = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget.userme");
@@ -139,7 +140,7 @@ namespace api.nox.game.Tiles
         /// <param name="user"></param>
         /// <param name="tf"></param>
         /// <returns></returns>
-        private GameObject OnGetContentHome(int menuId, HomeWidget widget, SimplyUserMe user, Transform tf)
+        private GameObject OnGetContentHome(int menuId, HomeWidget widget, UserMe user, Transform tf)
         {
             var baseprefab = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget");
             var prefab = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget.userme.home");
@@ -157,7 +158,7 @@ namespace api.nox.game.Tiles
         /// <param name="menuId"></param>
         /// <param name="widget"></param>
         /// <param name="server"></param>
-        private GameObject OnGetContentServerMe(int menuId, HomeWidget widget, SimplyServer server, Transform tf)
+        private GameObject OnGetContentServerMe(int menuId, HomeWidget widget, Server server, Transform tf)
         {
             var baseprefab = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget");
             var prefab = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/widget.serverme");
@@ -175,13 +176,13 @@ namespace api.nox.game.Tiles
         }
 
 
-        private void OnClickWidgetUser(int menuId, HomeWidget widget, SimplyUserMe user)
+        private void OnClickWidgetUser(int menuId, HomeWidget widget, UserMe user)
         {
             if (user == null) return;
             MenuManager.Instance.SendGotoTile(menuId, "game.user", user);
         }
 
-        private async UniTask OnClickWidgetHome(int menuId, HomeWidget widget, SimplyUserMe user)
+        private async UniTask OnClickWidgetHome(int menuId, HomeWidget widget, UserMe user)
         {
             if (user == null)
             {
@@ -195,10 +196,15 @@ namespace api.nox.game.Tiles
                 return;
             }
 
-            var asset = await home.SearchAssets(0, 1, null,
-                new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) },
-                new string[] { "unity" }
-            );
+            var asset = await GameClientSystem.Instance.NetworkAPI.World.Asset.SearchAssets(new()
+            {
+                server = home.server,
+                world_id = home.id,
+                limit = 1,
+                platforms = new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) },
+                engines = new string[] { "unity" },
+                offset = 0
+            });
 
             if (asset == null || asset.assets.Length == 0)
             {
@@ -209,7 +215,7 @@ namespace api.nox.game.Tiles
             MenuManager.Instance.SendGotoTile(menuId, "game.world", home, asset.assets[0]);
         }
 
-        private void OnClickWidgetServer(int menuId, HomeWidget widget, SimplyServer server)
+        private void OnClickWidgetServer(int menuId, HomeWidget widget, Server server)
         {
             if (server == null) return;
             MenuManager.Instance.SendGotoTile(menuId, "game.server", server);

@@ -1,4 +1,4 @@
-namespace api.nox.network.Instances.Config
+namespace api.nox.network.RelayInstances.Config
 {
     public enum ConfigurationAction : byte
     {

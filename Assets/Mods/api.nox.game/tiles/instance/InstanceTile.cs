@@ -5,21 +5,24 @@ using Nox.CCK.Mods.Events;
 using UnityEngine;
 using Nox.CCK;
 using UnityEngine.UI;
-using Nox.SimplyLibs;
 using api.nox.game.sessions;
 using api.nox.game.UI;
 using UnityEngine.Events;
 using System;
 using Object = UnityEngine.Object;
 using System.Collections.Generic;
-using System.Linq;
+using api.nox.network.Instances;
+using api.nox.network.Worlds;
+using api.nox.network.Worlds.Assets;
+using api.nox.network;
+using api.nox.network.Users;
 
 namespace api.nox.game.Tiles
 {
     internal class InstanceTileManager : TileManager
     {
         private EventSubscription InstanceFetchSub;
-        [Serializable] public class InstanceFetchedEvent : UnityEvent<SimplyInstance> { }
+        [Serializable] public class InstanceFetchedEvent : UnityEvent<Instance> { }
         public InstanceFetchedEvent OnInstanceFetched;
 
         internal InstanceTileManager()
@@ -37,22 +40,22 @@ namespace api.nox.game.Tiles
 
         internal class InstanceTileObject : TileObject
         {
-            public UnityAction<SimplyInstance> OnInstanceFetched;
-            public SimplyInstance Instance
+            public UnityAction<Instance> OnInstanceFetched;
+            public Instance Instance
             {
-                get => GetData<ShareObject>(0)?.Convert<SimplyInstance>();
+                get => GetData<Instance>(0);
                 set => SetData(0, value);
             }
 
-            public SimplyWorld World
+            public World World
             {
-                get => GetData<ShareObject>(1)?.Convert<SimplyWorld>();
+                get => GetData<World>(1);
                 set => SetData(1, value);
             }
 
-            public SimplyWorldAsset Asset
+            public WorldAsset Asset
             {
-                get => GetData<ShareObject>(2)?.Convert<SimplyWorldAsset>();
+                get => GetData<WorldAsset>(2);
                 set => SetData(2, value);
             }
         }
@@ -68,7 +71,15 @@ namespace api.nox.game.Tiles
             tile.onDisplay = (str, gameObject) => OnDisplay(tile, gameObject);
             tile.onOpen = (str) => OnOpen(tile, tile.content);
             tile.onHide = (str) => OnHide(tile, tile.content);
+            tile.onRemove = () => OnRemove(tile);
             MenuManager.Instance.SendTile(tile.MenuId, tile);
+        }
+
+        internal void OnRemove(InstanceTileObject tile)
+        {
+            if (tile.OnInstanceFetched != null)
+                OnInstanceFetched.RemoveListener(tile.OnInstanceFetched);
+            tile.OnInstanceFetched = null;
         }
 
         /// <summary>
@@ -127,11 +138,11 @@ namespace api.nox.game.Tiles
 
         private void OnFetchInstance(EventData context)
         {
-            var instance = (context.Data[0] as ShareObject).Convert<SimplyInstance>();
+            var instance = context.Data[0] as Instance;
             OnInstanceFetched?.Invoke(instance);
         }
 
-        private void OnInstanceTileUpdate(InstanceTileObject tile, GameObject content, SimplyInstance instance)
+        private void OnInstanceTileUpdate(InstanceTileObject tile, GameObject content, Instance instance)
         {
             var cInstance = tile.Instance;
             if (cInstance == null) return;
@@ -197,6 +208,7 @@ namespace api.nox.game.Tiles
             if (instance == null)
             {
                 Debug.LogError("Instance is null");
+                refresh_instance.interactable = true;
                 return;
             }
 
@@ -271,7 +283,7 @@ namespace api.nox.game.Tiles
             if (!gotobtn.interactable) return;
             gotobtn.interactable = false;
 
-            var user = GameClientSystem.Instance.NetworkAPI.GetCurrentUser();
+            var user = GameClientSystem.Instance.NetworkAPI.User.CurrentUser;
             if (user == null)
             {
                 gotobtn.interactable = true;
@@ -375,14 +387,14 @@ namespace api.nox.game.Tiles
 
         private async UniTask FetchWorkPlayers(InstanceTileObject tile, GameObject content, string address, string[] players)
         {
-            var res = await GameClientSystem.Instance.NetworkAPI.User.SearchUsers(new SimplySearchUserData()
+            var res = await GameClientSystem.Instance.NetworkAPI.User.SearchUsers(new()
             {
                 user_ids = players,
                 server = address,
                 limit = 100
             });
 
-            List<SimplyUser> users = new();
+            List<User> users = new();
             while (res != null && res.HasNext())
             {
                 users.AddRange(res.users);

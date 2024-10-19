@@ -6,13 +6,16 @@ using UnityEngine;
 using Nox.CCK;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using Nox.SimplyLibs;
 using System.Linq;
-using api.nox.game.sessions;
 using api.nox.game.UI;
 using UnityEngine.Events;
 using System;
 using Object = UnityEngine.Object;
+using api.nox.network.Users;
+using api.nox.network.Worlds;
+using api.nox.network.Worlds.Assets;
+using api.nox.network;
+using api.nox.network.Instances;
 
 namespace api.nox.game.Tiles
 {
@@ -21,9 +24,9 @@ namespace api.nox.game.Tiles
         private EventSubscription WorldFetchSub;
         private EventSubscription WorldAssetFetchSub;
         private EventSubscription UserUpdateSub;
-        [Serializable] public class UserUpdatedEvent : UnityEvent<SimplyUserMe> { }
-        [Serializable] public class WorldFetchedEvent : UnityEvent<SimplyWorld> { }
-        [Serializable] public class WorldAssetFetchedEvent : UnityEvent<SimplyWorldAsset> { }
+        [Serializable] public class UserUpdatedEvent : UnityEvent<UserMe> { }
+        [Serializable] public class WorldFetchedEvent : UnityEvent<World> { }
+        [Serializable] public class WorldAssetFetchedEvent : UnityEvent<WorldAsset> { }
         public UserUpdatedEvent OnUserUpdated;
         public WorldFetchedEvent OnWorldFetched;
         public WorldAssetFetchedEvent OnWorldAssetFetched;
@@ -54,39 +57,39 @@ namespace api.nox.game.Tiles
         internal class WorldTileObject : TileObject
         {
             public bool IsFetchingInstances = false;
-            public UnityAction<SimplyWorld> OnWorldFetched;
-            public UnityAction<SimplyWorldAsset> OnWorldAssetFetched;
-            public UnityAction<SimplyUserMe> OnUserUpdated;
+            public UnityAction<World> OnWorldFetched;
+            public UnityAction<WorldAsset> OnWorldAssetFetched;
+            public UnityAction<UserMe> OnUserUpdated;
 
-            public SimplyWorld World
+            public World World
             {
-                get => GetData<ShareObject>(0)?.Convert<SimplyWorld>();
+                get => GetData<World>(0);
                 set => SetData(0, value);
             }
-            public SimplyWorldAsset Asset
+            public WorldAsset Asset
             {
-                get => GetData<ShareObject>(1)?.Convert<SimplyWorldAsset>();
+                get => GetData<WorldAsset>(1);
                 set => SetData(1, value);
             }
         }
 
         private void OnFetchWorld(EventData context)
         {
-            var world = (context.Data[0] as ShareObject).Convert<SimplyWorld>();
+            var world = context.Data[0] as World;
             if (world == null) return;
             OnWorldFetched?.Invoke(world);
         }
 
         private void OnFetchWorldAsset(EventData context)
         {
-            var asset = (context.Data[0] as ShareObject).Convert<SimplyWorldAsset>();
+            var asset = context.Data[0] as WorldAsset;
             if (asset == null) return;
             OnWorldAssetFetched?.Invoke(asset);
         }
 
         private void OnUserUpdate(EventData context)
         {
-            var user = (context.Data[0] as ShareObject).Convert<SimplyUserMe>();
+            var user = context.Data[0] as UserMe;
             if (user == null) return;
             OnUserUpdated?.Invoke(user);
         }
@@ -103,6 +106,7 @@ namespace api.nox.game.Tiles
             tile.onDisplay = (str, gameObject) => OnDisplay(tile, gameObject);
             tile.onOpen = (str) => OnOpen(tile, tile.content);
             tile.onHide = (str) => OnHide(tile, tile.content);
+            tile.onRemove = () => OnRemove(tile);
             MenuManager.Instance.SendTile(tile.MenuId, tile);
         }
 
@@ -138,6 +142,20 @@ namespace api.nox.game.Tiles
             return content;
         }
 
+        internal void OnRemove(WorldTileObject tile)
+        {
+            Debug.Log("WorldTileManager.OnRemove");
+            if (tile.OnUserUpdated != null)
+                OnUserUpdated.RemoveListener(tile.OnUserUpdated);
+            if (tile.OnWorldFetched != null)
+                OnWorldFetched.RemoveListener(tile.OnWorldFetched);
+            if (tile.OnWorldAssetFetched != null)
+                OnWorldAssetFetched.RemoveListener(tile.OnWorldAssetFetched);
+            tile.OnUserUpdated = null;
+            tile.OnWorldFetched = null;
+            tile.OnWorldAssetFetched = null;
+        }
+
         /// <summary>
         /// Handle the display of the tile
         /// </summary>
@@ -170,7 +188,7 @@ namespace api.nox.game.Tiles
             Debug.Log("WorldTileManager.OnHide");
         }
 
-        internal void OnWorldTileUpdate(WorldTileObject tile, GameObject content, SimplyWorld world)
+        internal void OnWorldTileUpdate(WorldTileObject tile, GameObject content, World world)
         {
             var cWorld = tile.World;
             if (cWorld == null) return;
@@ -185,7 +203,7 @@ namespace api.nox.game.Tiles
             UpdateContent(tile, content);
         }
 
-        internal void OnWorldAssetTileUpdate(WorldTileObject tile, GameObject content, SimplyWorldAsset asset)
+        internal void OnWorldAssetTileUpdate(WorldTileObject tile, GameObject content, WorldAsset asset)
         {
             var cAsset = tile.Asset;
             if (cAsset != null)
@@ -203,9 +221,9 @@ namespace api.nox.game.Tiles
             UpdateContent(tile, content);
         }
 
-        internal void OnUserTileUpdate(WorldTileObject tile, GameObject content, SimplyUserMe user)
+        internal void OnUserTileUpdate(WorldTileObject tile, GameObject content, UserMe user)
         {
-            var cUser = GameClientSystem.Instance.NetworkAPI.GetCurrentUser();
+            var cUser = GameClientSystem.Instance.NetworkAPI.User.CurrentUser;
             if (cUser == null) return;
             if (cUser.id != user.id) return;
             if (cUser.server != user.server) return;
@@ -237,7 +255,7 @@ namespace api.nox.game.Tiles
             if (!string.IsNullOrEmpty(world.thumbnail))
                 UpdateTexure(icon, world.thumbnail).Forget();
 
-            CheckHome(tile, content, GameClientSystem.Instance.NetworkAPI.GetCurrentUser());
+            CheckHome(tile, content, GameClientSystem.Instance.NetworkAPI.User.CurrentUser);
             CheckVersion(tile, content);
 
             var refresh_world = Reference.GetReference("refresh_world", content).GetComponent<Button>();
@@ -258,6 +276,7 @@ namespace api.nox.game.Tiles
             if (world == null)
             {
                 Debug.LogError("World is null");
+                dlb.interactable = true;
                 return;
             }
 
@@ -271,11 +290,17 @@ namespace api.nox.game.Tiles
             }
 
             Debug.Log($"World fetched: {world}");
-            var search = await world.SearchAssets(0, 1,
-                asset == null || asset.version == ushort.MaxValue ? null : new uint[] { asset.version },
-                new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) },
-                new string[] { "unity" }
-            );
+            var search = await GameClientSystem.Instance.NetworkAPI.World.Asset.SearchAssets(new()
+            {
+                server = world.server,
+                world_id = world.id,
+                limit = 1,
+                offset = 0,
+                platforms = new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) },
+                engines = new string[] { "unity" },
+                versions = asset == null || asset.version == ushort.MaxValue
+                    ? null : new ushort[] { asset.version }
+            });
 
             tile.World = world;
             tile.Asset = search?.assets[0];
@@ -284,12 +309,12 @@ namespace api.nox.game.Tiles
             UpdateContent(tile, content);
         }
 
-        internal void CheckHome(WorldTileObject tile, GameObject content, SimplyUserMe user)
+        internal void CheckHome(WorldTileObject tile, GameObject content, UserMe user)
         {
             Debug.Log("WorldTileManager.CheckHome");
             var dlb = Reference.GetReference("home.button", content).GetComponent<Button>();
             dlb.onClick.RemoveAllListeners();
-            WorldPatern wp = string.IsNullOrEmpty(user?.home) ? null : new WorldPatern(user.home, user.server);
+            var wp = string.IsNullOrEmpty(user?.home) ? null : WorldIdentifier.FromString(user.home);
             var hasHome = wp?.id == tile.World.id && wp.server == tile.World.server;
             SetHomeButton(hasHome, content);
             dlb.onClick.AddListener(() => OnClickHome(tile, content, user, dlb, hasHome).Forget());
@@ -333,7 +358,7 @@ namespace api.nox.game.Tiles
             if (!instb.interactable) return;
             instb.interactable = false;
 
-            var server = GameClientSystem.Instance.NetworkAPI.GetCurrentServer();
+            var server = GameClientSystem.Instance.NetworkAPI.Server.CurrentServer;
             server ??= await GameClientSystem.Instance.NetworkAPI.Server.GetMyServer();
             server = server != null && server.features.Contains("instance") ? server : null;
             if (server == null)
@@ -347,22 +372,25 @@ namespace api.nox.game.Tiles
             instb.interactable = true;
         }
 
-        private async UniTask OnClickHome(WorldTileObject tile, GameObject content, SimplyUserMe user, Button dlb, bool hasHome)
+        private async UniTask OnClickHome(WorldTileObject tile, GameObject content, UserMe user, Button dlb, bool hasHome)
         {
             Debug.Log("WorldTileManager.OnClickHome");
             if (!dlb.interactable) return;
             if (hasHome)
             {
                 dlb.interactable = false;
-                user = await GameClientSystem.Instance.NetworkAPI.User.UpdateUser(new SimplyUserUpdate { home = "NULL" });
+                user = await GameClientSystem.Instance.NetworkAPI.User.UpdateMyUser(new() { home = "NULL" });
                 dlb.interactable = true;
                 CheckHome(tile, content, user);
             }
             else
             {
                 dlb.interactable = false;
-                var wp = new WorldPatern() { id = tile.World.id, server = tile.World.server };
-                user = await GameClientSystem.Instance.NetworkAPI.User.UpdateUser(new SimplyUserUpdate { home = wp.ToString() });
+                Debug.Log($"Setting home to {tile.World.ToIdentifier().ToFullString(tile.World.server)}");
+                user = await GameClientSystem.Instance.NetworkAPI.User.UpdateMyUser(new()
+                {
+                    home = tile.World.ToIdentifier().ToFullString(tile.World.server)
+                });
                 dlb.interactable = true;
                 CheckHome(tile, content, user);
             }
@@ -376,8 +404,12 @@ namespace api.nox.game.Tiles
             refresh_instances.interactable = false;
 
             var config = Config.Load();
-            var servers = config.Get("navigation.servers", new WorkerInfo[0]);
-            var workers = servers.Where(x => x.features.Contains("instance")).ToArray();
+            var servers_t = config.Get("servers");
+            if (servers_t == null) return;
+            var server_d = servers_t.ToObject<Dictionary<string, NavigationWorkerInfo>>();
+            var servers = server_d.Values.ToArray();
+            var workers = servers.Where(x => x.navigation && x.features.Contains("instance")).ToArray();
+
             List<UniTask> tasks = new();
 
             var container = Reference.GetReference("instances", content).GetComponent<RectTransform>();
@@ -400,11 +432,11 @@ namespace api.nox.game.Tiles
         {
             var res = await GameClientSystem.Instance.NetworkAPI.Instance.SearchInstances(new()
             {
-                world = tile.World.ToMinimalString(),
+                world = tile.World.ToIdentifier().ToFullString(tile.World.server),
                 server = address,
                 limit = 100
             });
-            List<SimplyInstance> instances = new();
+            List<Instance> instances = new();
             while (res != null && res.HasNext())
             {
                 instances.AddRange(res.instances);
@@ -425,7 +457,7 @@ namespace api.nox.game.Tiles
             ForceUpdateLayout.UpdateManually(container);
         }
 
-        // private async UniTask OnClickGoto(GameObject tile, SimplyWorld world, SimplyWorldAsset asset)
+        // private async UniTask OnClickGoto(GameObject tile, World world, WorldAsset asset)
         // {
         //     var dlb = Reference.GetReference("download.button", tile).GetComponent<Button>();
         //     var gotob = Reference.GetReference("goto.button", tile).GetComponent<Button>();

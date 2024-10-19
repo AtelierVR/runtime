@@ -5,12 +5,11 @@ using Nox.CCK.Mods.Events;
 using UnityEngine;
 using Nox.CCK;
 using UnityEngine.UI;
-using Nox.SimplyLibs;
 using api.nox.game.UI;
-using api.nox.game.Tiles;
 using UnityEngine.Events;
 using System;
 using Object = UnityEngine.Object;
+using api.nox.network.Users;
 
 namespace api.nox.game.Tiles
 {
@@ -18,10 +17,10 @@ namespace api.nox.game.Tiles
     {
         internal class UserTileObject : TileObject
         {
-            public UnityAction<SimplyUser> OnUserUpdated;
-            public SimplyUser User
+            public UnityAction<User> OnUserUpdated;
+            public User User
             {
-                get => GetData<ShareObject>(0)?.Convert<SimplyUser>();
+                get => GetData<User>(0);
                 set => SetData(0, value);
             }
         }
@@ -40,20 +39,21 @@ namespace api.nox.game.Tiles
             MenuManager.Instance.SendTile(tile.MenuId, tile);
         }
 
-        internal void OnUserTileUpdate(UserTileObject tile, GameObject content, SimplyUser user)
+        internal void OnUserTileUpdate(UserTileObject tile, GameObject content, User user)
         {
             var cUser = tile.User;
             if (cUser == null) return;
             if (cUser.id != user.id) return;
             if (cUser.server != user.server) return;
             tile.User = user;
-            UpdateContent(content, user);
+            UpdateContent(tile, content);
         }
 
         internal void OnRemove(UserTileObject tile)
         {
             if (tile.OnUserUpdated != null)
                 OnUserUpdated.RemoveListener(tile.OnUserUpdated);
+            tile.OnUserUpdated = null;
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace api.nox.game.Tiles
         /// <param name="content"></param>
         internal void OnDisplay(UserTileObject tile, GameObject content)
         {
-            UpdateContent(content, tile.User);
+            UpdateContent(tile, content);
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace api.nox.game.Tiles
         private EventSubscription UserFetchSub;
 
         // make unity event to invoke when user is updated
-        [Serializable] public class UserUpdatedEvent : UnityEvent<SimplyUser> { }
+        [Serializable] public class UserUpdatedEvent : UnityEvent<User> { }
         public UserUpdatedEvent OnUserUpdated;
 
         internal UserTileManager()
@@ -123,14 +123,14 @@ namespace api.nox.game.Tiles
 
         private void OnUserFetch(EventData data)
         {
-            var user = (data.Data[0] as ShareObject)?.Convert<SimplyUser>();
+            var user = data.Data[0] as User;
             if (user == null) return;
             OnUserUpdated?.Invoke(user);
         }
 
         private void OnUserUpdate(EventData data)
         {
-            var user = (data.Data[0] as ShareObject)?.Convert<SimplyUser>();
+            var user = data.Data[0] as User;
             if (user == null) return;
             OnUserUpdated?.Invoke(user);
         }
@@ -145,8 +145,15 @@ namespace api.nox.game.Tiles
             _widget = null;
         }
 
-        private void UpdateContent(GameObject content, SimplyUser user)
+        private void UpdateContent(UserTileObject tile, GameObject content)
         {
+            var user = tile.User;
+            if (user == null)
+            {
+                Debug.LogError("User is null");
+                return;
+            }
+
             Reference.GetReference("title", content).GetComponent<TextLanguage>().UpdateText(new string[] { user.display });
 
             var withbanner = Reference.GetReference("withbanner", content);
@@ -169,7 +176,40 @@ namespace api.nox.game.Tiles
                 var thumb = Reference.GetReference("icon", current).GetComponent<RawImage>();
                 UpdateTexure(thumb, user.thumbnail).Forget();
             }
+
+            
+            var refresh_user = Reference.GetReference("refresh_user", content).GetComponent<Button>();
+            refresh_user.onClick.RemoveAllListeners();
+            refresh_user.onClick.AddListener(() => OnClickRefreshUser(tile, content).Forget());
         }
 
+
+        private async UniTask OnClickRefreshUser(UserTileObject tile, GameObject content)
+        {
+            var dlb = Reference.GetReference("refresh_user", content).GetComponent<Button>();
+            if (!dlb.interactable) return;
+            dlb.interactable = false;
+            var user = tile.User;
+            if (user == null)
+            {
+                Debug.LogError("User is null");
+                dlb.interactable = true;
+                return;
+            }
+
+            user = await GameClientSystem.Instance.NetworkAPI.User.GetUser(user.server, user.id);
+
+            if (user == null)
+            {
+                Debug.LogError("User not found");
+                dlb.interactable = true;
+                return;
+            }
+
+            tile.User = user;
+            dlb.interactable = true;
+
+            UpdateContent(tile, content);
+        }
     }
 }

@@ -5903,7 +5903,7 @@ MonoBehaviour:
       tooltip: 
       tooltip_arguments: []
       execution_type: 1
-      execution: game.settingsg
+      execution: game.settings
       flags: -1
     container: {fileID: 8618905972261965340}
     itemPrefab: {fileID: 5725803685141091912, guid: 691324638f2ec0644aa816acc6db079b, type: 3}

@@ -1,4 +1,4 @@
-﻿namespace api.nox.network.Instances
+﻿namespace api.nox.network.RelayInstances
 {
     public enum InstanceFlags: uint
     {

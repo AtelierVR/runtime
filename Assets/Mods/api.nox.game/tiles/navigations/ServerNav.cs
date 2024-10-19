@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
@@ -34,9 +35,12 @@ namespace api.nox.game.Tiles
                 GetWorkers = () =>
                 {
                     var config = Config.Load();
-                    var servers = config.Get("navigation.servers", new WorkerInfo[0]);
+                    var servers_t = config.Get("servers");
+                    if (servers_t == null) return new NavigationWorker[0];
+                    var server_d = servers_t.ToObject<Dictionary<string, NavigationWorkerInfo>>();
+                    var servers = server_d.Values.ToArray();
                     return servers
-                        .Where(x => x.features.Contains("server"))
+                        .Where(x => (x.navigation || x.address == config.Get("server", "")) && x.features.Contains("server"))
                         .Select(x => new NavigationWorker
                         {
                             server_address = x.address,
@@ -50,7 +54,7 @@ namespace api.nox.game.Tiles
         private async UniTask<NavigationResult> FetchServers(string server, string query)
         {
             Debug.Log("Fetching servers");
-            var res = await GameClientSystem.Instance.NetworkAPI.Server.SearchServers(server, query);
+            var res = await GameClientSystem.Instance.NetworkAPI.Server.SearchServers(new() { server = server, query = query });
             if (res == null) return new NavigationResult { error = "Error fetching servers." };
             Debug.Log("Fetched servers " + res.servers.Length);
             return new NavigationResult

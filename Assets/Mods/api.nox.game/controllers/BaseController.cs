@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
 using Autohand;
-using Nox.CCK.Mods.Cores;
-using Nox.SimplyLibs;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
 
 namespace api.nox.game.Controllers
 {
@@ -98,6 +92,8 @@ namespace api.nox.game.Controllers
         {
             Debug.Log($"Controller initialized: {GetType().Name}");
         }
+
+        public virtual void Dispose() { }
 
         public bool IsFlying
         {

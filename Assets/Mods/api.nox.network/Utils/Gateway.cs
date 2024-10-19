@@ -134,7 +134,7 @@ namespace api.nox.network.Utils
                     Debug.Log(req.downloadHandler.text);
                     var srv = JsonUtility.FromJson<SRV>(req.downloadHandler.text);
                     if (srv.Status != 0) return new SRVAnswer[0];
-                    return srv.Answer;
+                    return srv.Answer ?? new SRVAnswer[0];
                 }
             }
             catch (UriFormatException) { return new SRVAnswer[0]; }

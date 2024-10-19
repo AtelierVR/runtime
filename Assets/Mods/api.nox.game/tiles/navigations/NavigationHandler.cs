@@ -1,36 +1,44 @@
 using System;
 using Cysharp.Threading.Tasks;
-using Nox.CCK.Mods;
-using UnityEngine;
 
 namespace api.nox.game.Tiles
 {
-    internal class NavigationHandler : ShareObject
+    public class NavigationHandler 
     {
-        [ShareObjectImport, ShareObjectExport] public string id;
-        [ShareObjectImport, ShareObjectExport] public string text_key;
-        [ShareObjectImport, ShareObjectExport] public string title_key;
-        [ShareObjectImport, ShareObjectExport] public Func<NavigationWorker[]> GetWorkers;
+        public string id;
+        public string text_key;
+        public string title_key;
+        public Func<NavigationWorker[]> GetWorkers;
     }
 
-    internal class NavigationWorker : ShareObject
+    public class NavigationWorker
     {
-        [ShareObjectImport, ShareObjectExport] public string server_address;
-        [ShareObjectImport, ShareObjectExport] public string server_title;
-        [ShareObjectImport, ShareObjectExport] public Func<string, UniTask<NavigationResult>> Fetch;
+        public string server_address;
+        public string server_title;
+        public Func<string, UniTask<NavigationResult>> Fetch;
     }
 
-    internal class NavigationResult : ShareObject
+    public class NavigationResult
     {
-        [ShareObjectImport, ShareObjectExport] public string error;
-        [ShareObjectImport, ShareObjectExport] public NavigationResultData[] data;
+        public string error;
+        public NavigationResultData[] data;
     }
 
-    internal class NavigationResultData : ShareObject
+    public class NavigationResultData
     {
-        [ShareObjectImport, ShareObjectExport] public string title;
-        [ShareObjectImport, ShareObjectExport] public string imageUrl;
-        [ShareObjectImport, ShareObjectExport] public string goto_id;
-        [ShareObjectImport, ShareObjectExport] public object[] goto_data;
+        public string title;
+        public string imageUrl;
+        public string goto_id;
+        public object[] goto_data;
+    }
+
+    
+    [Serializable]
+    public class NavigationWorkerInfo
+    {
+        public string address;
+        public string title;
+        public string[] features;
+        public bool navigation;
     }
 }

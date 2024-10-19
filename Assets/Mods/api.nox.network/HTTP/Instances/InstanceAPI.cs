@@ -1,132 +1,83 @@
 using System;
 using System.Collections.Generic;
+using api.nox.network.HTTP;
 using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
-using Nox.CCK;
-using Nox.CCK.Mods;
-using UnityEngine;
-using UnityEngine.Networking;
 
-namespace api.nox.network
+namespace api.nox.network.Instances
 {
-    public class InstanceAPI : ShareObject, IDisposable
+    public class InstanceAPI
     {
-        private readonly NetworkSystem _mod;
-
-        internal Server server;
-
-        internal InstanceAPI(NetworkSystem mod) => _mod = mod;
-
         public async UniTask<Instance> GetInstance(string server, uint instanceId)
         {
-            var User = _mod.GetCurrentUser();
-            if (User == null) return null;
-            Debug.Log("Getting instance");
-            var config = Config.Load();
-            var gateway = server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(server))?.OriginalString;
+            if (NetworkSystem.ModInstance == null) throw new AccessViolationException("NetworkSystem not initialized");
+            // GET /api/instances/{instanceId}
+            var gateway = await Discover.GetGateway(server);
             if (gateway == null) return null;
-            var req = new UnityWebRequest($"{gateway}/api/instances/{instanceId}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            var token = await _mod._auth.GetToken(server);
-            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
-            try { await req.SendWebRequest(); }
-            catch { return null; }
-            if (req.responseCode != 200) return null;
-            var res = JsonUtility.FromJson<Response<Instance>>(req.downloadHandler.text);
-            if (res.IsError) return null;
-            res.data.networkSystem = _mod;
-            SetOrAddInstance(res.data);
-            _mod._api.EventAPI.Emit(new NetEventContext("instance_fetch", res.data));
-            return res.data;
+
+            var request = new Request(Method.GET, Request.MergeUrl(gateway, $"/api/instances/{instanceId}"));
+
+            var token = await NetworkSystem.ModInstance.Auth.GetToken(server);
+            var header = new Dictionary<string, string> { };
+            if (token != null) header.Add("Authorization", token.ToHeader());
+
+            var response = await request.Send<string, Response<Instance>>(null, header);
+            if (request.IsError || response.IsError) return null;
+
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("instance_fetch", response.data));
+            NetCache.Set(response.data);
+
+            return response.data;
         }
 
-        public async UniTask<InstanceSearch> SearchInstances(SearchInstanceData data)
+        public async UniTask<SearchResponse> SearchInstances(SearchRequest data)
         {
-            // GET /api/instances/search?query={query}&offset={offset}&limit={limit}
-            var User = _mod.GetCurrentUser();
-            var config = Config.Load();
-            var gateway = data.server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(data.server))?.OriginalString;
+            if (NetworkSystem.ModInstance == null) throw new AccessViolationException("NetworkSystem not initialized");
+            // GET /api/instances/search?{data.ToParams()}
+            var gateway = await Discover.GetGateway(data.server);
             if (gateway == null) return null;
-            var req = new UnityWebRequest($"{gateway}/api/instances/search?{data.ToParams()}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            var token = await _mod._auth.GetToken(data.server);
-            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
-            try { await req.SendWebRequest(); }
-            catch { return null; }
-            Debug.Log(req.downloadHandler.text);
-            if (req.responseCode != 200) return null;
-            var res = JsonUtility.FromJson<Response<InstanceSearch>>(req.downloadHandler.text);
-            if (res.IsError) return null;
-            res.data.netSystem = _mod;
-            foreach (var instance in res.data.instances)
+
+            var request = new Request(Method.GET, Request.MergeUrl(gateway, $"/api/instances/search?{data.ToParams()}"));
+
+            var token = await NetworkSystem.ModInstance.Auth.GetToken(data.server);
+            var header = new Dictionary<string, string> { };
+            if (token != null) header.Add("Authorization", token.ToHeader());
+
+            var response = await request.Send<string, Response<SearchResponse>>(null, header);
+            if (request.IsError || response.IsError) return null;
+
+            foreach (var instance in response.data.instances)
             {
-                instance.networkSystem = _mod;
-                SetOrAddInstance(instance);
+                NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("instance_fetch", instance));
+                NetCache.Set(instance);
             }
-            _mod._api.EventAPI.Emit(new NetEventContext("network.search.instances", server, res.data));
-            foreach (var instance in res.data.instances)
-                _mod._api.EventAPI.Emit(new NetEventContext("instance_fetch", instance));
-            return res.data;
+
+            return response.data;
         }
 
-        public async UniTask<Instance> CreateInstance(CreateInstanceData data)
+        public async UniTask<Instance> CreateInstance(CreateRequest data)
         {
-            var User = _mod.GetCurrentUser();
-            if (User == null) return null;
-            var config = Config.Load();
-            var gateway = data.server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(data.server))?.OriginalString;
+            if (NetworkSystem.ModInstance == null) throw new AccessViolationException("NetworkSystem not initialized");
+            // PUT /api/instances
+            var gateway = await Discover.GetGateway(data.server);
             if (gateway == null) return null;
-            var req = new UnityWebRequest($"{gateway}/api/instances", "PUT") { downloadHandler = new DownloadHandlerBuffer() };
-            var token = await _mod._auth.GetToken(data.server);
-            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
-            req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(data.ToJSON()));
-            req.uploadHandler.contentType = "application/json";
-            try { await req.SendWebRequest(); }
-            catch { return null; }
-            if (req.responseCode != 200) return null;
-            var res = JsonUtility.FromJson<Response<Instance>>(req.downloadHandler.text);
-            if (res.IsError) return null;
-            res.data.networkSystem = _mod;
-            _mod._api.EventAPI.Emit(new NetEventContext("network.create.instance", data.server, res.data.id, res.data));
-            _mod._api.EventAPI.Emit(new NetEventContext("instance_fetch", res.data));
-            SetOrAddInstance(res.data);
-            return res.data;
-        }
 
-        internal List<Instance> instances = new();
+            var token = await NetworkSystem.ModInstance.Auth.GetToken(data.server);
+            if (token == null) return null;
 
-        internal void SetOrAddInstance(Instance instance)
-        {
-            var i = instances.FindIndex(i => i.server == instance.server && i.id == instance.id);
-            if (i == -1) instances.Add(instance);
-            else instances[i] = instance;
-        }
+            var request = new Request(Method.PUT, Request.MergeUrl(gateway, "/api/instances"));
 
-        public Instance GetInstanceInCache(string server, uint instanceId) => instances.Find(i => i.server == server && i.id == instanceId);
+            var response = await request.Send<string, Response<Instance>>(data.ToJSON(), new() {
+                { "Authorization", token.ToHeader() },
+                { "Content-Type", "application/json" }
+            });
+            if (request.IsError || response.IsError) return null;
 
-        [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedSearchInstances;
-        [ShareObjectExport] public Func<string, uint, UniTask<ShareObject>> SharedGetInstance;
-        [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedCreateInstance;
-        [ShareObjectExport] public Func<string, uint, ShareObject> SharedGetInstanceInCache;
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("instance_fetch", response.data));
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("instance_created", response.data));
+            NetCache.Set(response.data);
 
-        public void BeforeExport()
-        {
-            SharedSearchInstances = async (data) => await SearchInstances(data.Convert<SearchInstanceData>());
-            SharedGetInstance = async (server, instanceId) => await GetInstance(server, instanceId);
-            SharedCreateInstance = async data => await CreateInstance(data.Convert<CreateInstanceData>());
-            SharedGetInstanceInCache = (server, instanceId) => GetInstanceInCache(server, instanceId);
-        }
-
-        public void AfterExport()
-        {
-            SharedSearchInstances = null;
-            SharedGetInstance = null;
-            SharedCreateInstance = null;
-            SharedGetInstanceInCache = null;
-
-        }
-
-        public void Dispose()
-        {
-            instances.Clear();
+            return response.data;
         }
     }
 }

@@ -1,27 +1,22 @@
 using System;
-using Nox.CCK.Mods;
+using api.nox.network.HTTP;
 
-namespace api.nox.network
+namespace api.nox.network.Users
 {
     [Serializable]
-    public class User : ShareObject
+    public class User : ICached
     {
-        [ShareObjectExport] public uint id;
-        [ShareObjectExport] public string username;
-        [ShareObjectExport] public string display;
-        [ShareObjectExport] public string[] tags;
-        [ShareObjectExport] public string server;
-        [ShareObjectExport] public float rank;
-        [ShareObjectExport] public string[] links;
-        [ShareObjectExport] public string banner;
-        [ShareObjectExport] public string thumbnail;
+        public uint id;
+        public string username;
+        public string display;
+        public string[] tags;
+        public string server;
+        public float rank;
+        public string[] links;
+        public string banner;
+        public string thumbnail;
 
-        /**
-         * @brief Check if the user matches the given reference.
-         * @param reference The reference to check against.
-         * @param default_server The default server to use if the reference does not specify one.
-         */
-        public bool MatchRef(string reference, string default_server)
+        public virtual bool MatchRef(string reference, string default_server)
         {
             var identifier = UserIdentifier.FromString(reference);
             if (new UserIdentifier(id.ToString(), server).ToMinimalString() == identifier.ToMinimalString(default_server)) return true;
@@ -29,16 +24,7 @@ namespace api.nox.network
             return false;
         }
 
-        [ShareObjectExport] public Func<string, string, bool> SharedMatchRef;
-
-        public void BeforeExport()
-        {
-            SharedMatchRef = (reference, default_server) => MatchRef(reference, default_server);
-        }
-
-        public void AfterExport()
-        {
-            SharedMatchRef = null;
-        }
+        public string GetCacheKey() => $"user.{id}.{server}";
+        public UserIdentifier ToIdentifier() => new(id.ToString(), server);
     }
 }

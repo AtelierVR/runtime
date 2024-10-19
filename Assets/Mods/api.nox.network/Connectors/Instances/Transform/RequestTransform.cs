@@ -1,9 +1,9 @@
-using api.nox.network.Instances.Base;
+using api.nox.network.RelayInstances.Base;
 using api.nox.network.Players;
 using api.nox.network.Utils;
 using Nox.CCK.Mods;
 
-namespace api.nox.network.Instances.Transform
+namespace api.nox.network.RelayInstances.Transform
 {
     public class RequestTransform : InstanceRequest, ShareObject
     {

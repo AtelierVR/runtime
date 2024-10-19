@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using api.nox.network.Instances;
+using api.nox.network.RelayInstances;
 using api.nox.network.Relays.Base;
 using Cysharp.Threading.Tasks;
-using Nox.CCK.Mods;
 using UnityEngine;
 using Buffer = api.nox.network.Utils.Buffer;
 using Random = UnityEngine.Random;
@@ -12,14 +11,14 @@ using Random = UnityEngine.Random;
 namespace api.nox.network.Relays
 {
 #pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
-    public class Relay : ShareObject, IDisposable
+    public class Relay : IDisposable
 #pragma warning restore CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
     {
         public ushort Id;
         public IConnector Connector;
         public ushort ClientId;
         public IPEndPoint EndPoint;
-        public List<Instances.Instance> Instances => InstanceManager.Get(Id);
+        public List<RelayInstance> Instances => RelayInstanceManager.Get(Id);
 
         public string Address => EndPoint != null ? $"{EndPoint.Address}:{EndPoint.Port}" : null;
         public object UserData;
@@ -63,7 +62,7 @@ namespace api.nox.network.Relays
                     case ResponseType.Transform:
                     case ResponseType.CustomDataPacket:
                         var iid = buffer.ReadUShort();
-                        var instance = InstanceManager.Get(iid, Id);
+                        var instance = RelayInstanceManager.Get(iid, Id);
                         instance?.OnInstanceEventInvoke(buffer.Clone(5, (ushort)(length - 5)));
                         break;
                     case ResponseType.Disconnect:
@@ -229,38 +228,5 @@ namespace api.nox.network.Relays
             Connector.Close();
             RelayManager.Remove(this);
         }
-
-
-
-        [ShareObjectExport] public Func<ushort> SharedGetId;
-        [ShareObjectExport] public Func<ushort> SharedGetClientId;
-        [ShareObjectExport] public Func<IPEndPoint> SharedGetEndPoint;
-        [ShareObjectExport] public Func<object> SharedGetUserData;
-        [ShareObjectExport] public Func<byte, UniTask<ShareObject>> SharedRequestStatus;
-        [ShareObjectExport] public Func<UniTask<ShareObject>> SharedRequestAllStatus;
-        [ShareObjectExport] public Func<UniTask<ShareObject>> SharedRequestLatency;
-
-        public void BeforeExport()
-        {
-            SharedGetId = () => Id;
-            SharedGetClientId = () => ClientId;
-            SharedGetEndPoint = () => EndPoint;
-            SharedGetUserData = () => UserData;
-            SharedRequestStatus = async (page) => await RequestStatus(page);
-            SharedRequestAllStatus = async () => await RequestStatus();
-            SharedRequestLatency = async () => await RequestLatency();
-        }
-
-        public void AfterExport()
-        {
-            SharedGetId = null;
-            SharedGetClientId = null;
-            SharedGetEndPoint = null;
-            SharedGetUserData = null;
-            SharedRequestStatus = null;
-            SharedRequestAllStatus = null;
-            SharedRequestLatency = null;
-        }
-
     }
 }

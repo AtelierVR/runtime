@@ -77,6 +77,18 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/BuildOutput/2024-10-11-19-32-01-oui/1.unity
     guid: a4bd81d25345454aa9e7bb19f197fd4a
+  - enabled: 1
+    path: Assets/BuildOutput/2024-10-13-03-10-34-oui/0.unity
+    guid: 780dbc1348734592a66be6a5a6a5b1c0
+  - enabled: 1
+    path: Assets/BuildOutput/2024-10-13-03-10-34-oui/1.unity
+    guid: 45a82fcc32ff4642b2905aeafd8db5cf
+  - enabled: 1
+    path: Assets/BuildOutput/2024-10-13-03-11-57-oui/1.unity
+    guid: be76fd2611434759b7cc93e6e3e856d5
+  - enabled: 1
+    path: Assets/BuildOutput/2024-10-13-03-11-57-oui/0.unity
+    guid: e4da7b0892584264a4e2118bb778314f
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: bfa1182bd221b4ca89619141f66f1260, type: 2}
     Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: dc5a169419fa04987b057f65238cf3ba, type: 2}

@@ -1,15 +1,14 @@
 ﻿
-using api.nox.network.Instances.Base;
+using api.nox.network.RelayInstances.Base;
 using api.nox.network.Utils;
-using Nox.CCK.Mods;
 
-namespace api.nox.network.Instances.Enter
+namespace api.nox.network.RelayInstances.Enter
 {
-    public class RequestEnter : InstanceRequest, ShareObject
+    public class RequestEnter : InstanceRequest
     {
         public EnterFlags Flags;
-        [ShareObjectExport] public string DisplayName;
-        [ShareObjectExport] public string Password;
+        public string DisplayName;
+        public string Password;
 
         public override Buffer ToBuffer()
         {
@@ -26,18 +25,6 @@ namespace api.nox.network.Instances.Enter
             if (Flags.HasFlag(EnterFlags.UsePassword))
                 buffer.Write(Password);
             return buffer;
-        }
-
-        [ShareObjectExport] public byte SharedFlags;
-
-        public void BeforeExport()
-        {
-            SharedFlags = (byte)Flags;
-        }
-
-        public void AfterExport()
-        {
-            SharedFlags = 0;
         }
     }
 }

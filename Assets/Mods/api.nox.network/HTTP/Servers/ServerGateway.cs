@@ -1,13 +1,11 @@
-using Nox.CCK.Mods;
-
-namespace api.nox.network
+namespace api.nox.network.Servers
 {
     [System.Serializable]
-    public class ServerGateway : ShareObject
+    public class ServerGateway
     {
-        [ShareObjectExport] public string http;
-        [ShareObjectExport] public string ws;
-        [ShareObjectExport] public string proxy;
-        [ShareObjectExport] public string cdn;
+        public string http;
+        public string ws;
+        public string proxy;
+        public string cdn;
     }
 }

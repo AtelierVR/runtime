@@ -1,11 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using api.nox.game.UI;
+using api.nox.network.Instances;
+using api.nox.network.Servers;
+using api.nox.network.Worlds;
+using api.nox.network.Worlds.Assets;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
-using Nox.SimplyLibs;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -18,9 +22,9 @@ namespace api.nox.game.Tiles
         private EventSubscription WorldFetchSub;
         private EventSubscription WorldAssetFetchSub;
         private EventSubscription ServerFetchSub;
-        [Serializable] public class WorldFetchedEvent : UnityEvent<SimplyWorld> { }
-        [Serializable] public class WorldAssetFetchedEvent : UnityEvent<SimplyWorldAsset> { }
-        [Serializable] public class ServerFetchedEvent : UnityEvent<SimplyServer> { }
+        [Serializable] public class WorldFetchedEvent : UnityEvent<World> { }
+        [Serializable] public class WorldAssetFetchedEvent : UnityEvent<WorldAsset> { }
+        [Serializable] public class ServerFetchedEvent : UnityEvent<Server> { }
         public WorldFetchedEvent OnWorldFetched;
         public WorldAssetFetchedEvent OnWorldAssetFetched;
         public ServerFetchedEvent OnServerFetched;
@@ -51,43 +55,43 @@ namespace api.nox.game.Tiles
 
         internal class MakeInstanceTileObject : TileObject
         {
-            public UnityAction<SimplyWorld> OnWorldFetched;
-            public UnityAction<SimplyWorldAsset> OnWorldAssetFetched;
-            public UnityAction<SimplyServer> OnServerFetched;
-            public SimplyServer Server
+            public UnityAction<World> OnWorldFetched;
+            public UnityAction<WorldAsset> OnWorldAssetFetched;
+            public UnityAction<Server> OnServerFetched;
+            public Server Server
             {
-                get => GetData<ShareObject>(0)?.Convert<SimplyServer>();
+                get => GetData<Server>(0);
                 set => SetData(0, value);
             }
-            public SimplyWorld World
+            public World World
             {
-                get => GetData<ShareObject>(1)?.Convert<SimplyWorld>();
+                get => GetData<World>(1);
                 set => SetData(1, value);
             }
-            public SimplyWorldAsset Asset
+            public WorldAsset Asset
             {
-                get => GetData<ShareObject>(2)?.Convert<SimplyWorldAsset>();
+                get => GetData<WorldAsset>(2);
                 set => SetData(2, value);
             }
         }
 
         private void OnFetchWorld(EventData context)
         {
-            var world = (context.Data[0] as ShareObject).Convert<SimplyWorld>();
+            var world = context.Data[0] as World;
             if (world == null) return;
             OnWorldFetched?.Invoke(world);
         }
 
         private void OnFetchWorldAsset(EventData context)
         {
-            var asset = (context.Data[0] as ShareObject).Convert<SimplyWorldAsset>();
+            var asset = context.Data[0] as WorldAsset;
             if (asset == null) return;
             OnWorldAssetFetched?.Invoke(asset);
         }
 
         private void OnFetchServer(EventData context)
         {
-            var server = (context.Data[0] as ShareObject).Convert<SimplyServer>();
+            var server = context.Data[0] as Server;
             if (server == null) return;
             OnServerFetched?.Invoke(server);
         }
@@ -170,7 +174,7 @@ namespace api.nox.game.Tiles
             capacity.onValueChanged.RemoveAllListeners();
             capacity.onValueChanged.AddListener((value) => UpdateCapacity(tile, content));
 
-            
+
             var toggle = Reference.GetReference("password_toggle", content).GetComponent<Toggle>();
             toggle.onValueChanged.RemoveAllListeners();
             toggle.onValueChanged.AddListener((value) => SetPasswordRequired(tile, content, value));
@@ -316,9 +320,9 @@ namespace api.nox.game.Tiles
             var capacity = Reference.GetReference("capacity_slider", content).GetComponent<Slider>().value;
             var expose = Reference.GetReference("expose_dropdown", content).GetComponent<TMPro.TMP_Dropdown>();
 
-            var instance = new SimplyCreateInstanceData()
+            var instance = new CreateRequest()
             {
-                world = tile.World.ToMinimalString(tile.Server?.address),
+                world = tile.World.ToIdentifier().ToFullString(tile.World.server),
                 server = tile.Server?.address ?? GetHosts().FirstOrDefault(),
                 password = password,
                 use_password = use_password,
@@ -341,7 +345,7 @@ namespace api.nox.game.Tiles
             MenuManager.Instance.SendGotoTile(tile.MenuId, "game.instance", created, tile.World, tile.Asset);
         }
 
-        private void OnWorldTileUpdate(MakeInstanceTileObject tile, GameObject content, SimplyWorld world)
+        private void OnWorldTileUpdate(MakeInstanceTileObject tile, GameObject content, World world)
         {
             var cWorld = tile.World;
             if (cWorld == null) return;
@@ -352,7 +356,7 @@ namespace api.nox.game.Tiles
             UpdateWorld(tile, content);
         }
 
-        private void OnWorldAssetTileUpdate(MakeInstanceTileObject tile, GameObject content, SimplyWorldAsset asset)
+        private void OnWorldAssetTileUpdate(MakeInstanceTileObject tile, GameObject content, WorldAsset asset)
         {
             var cAsset = tile.Asset;
             if (cAsset == null) return;
@@ -364,7 +368,7 @@ namespace api.nox.game.Tiles
             UpdateWorldAsset(tile, content);
         }
 
-        private void OnServerTileUpdate(MakeInstanceTileObject tile, GameObject content, SimplyServer server)
+        private void OnServerTileUpdate(MakeInstanceTileObject tile, GameObject content, Server server)
         {
             var cServer = tile.Server;
             if (cServer == null) return;
@@ -377,8 +381,12 @@ namespace api.nox.game.Tiles
         private string[] GetHosts()
         {
             var config = Config.Load();
-            var servers = config.Get("navigation.servers", new WorkerInfo[0]);
-            return servers.Where(x => x.features.Contains("instance")).Select(x => x.address).ToArray();
+            var servers_t = config.Get("servers");
+            if (servers_t == null) return new string[0];
+            var server_d = servers_t.ToObject<Dictionary<string, NavigationWorkerInfo>>();
+            var servers = server_d.Values.ToArray();
+            return servers.Where(x => (x.navigation || x.address == config.Get("server", "")) && x.features.Contains("instance"))
+                .Select(x => x.address).ToArray();
         }
     }
 }

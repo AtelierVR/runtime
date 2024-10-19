@@ -1,99 +1,106 @@
 
 using System;
+using System.Collections.Generic;
+using api.nox.network.HTTP;
 using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using Nox.CCK.Mods;
 using UnityEngine;
-using UnityEngine.Networking;
 
-namespace api.nox.network
+namespace api.nox.network.Servers
 {
-    public class ServerAPI : ShareObject
+    public class ServerAPI
     {
-        private readonly NetworkSystem _mod;
+        public Server CurrentServer { get; internal set; }
 
-        internal Server server;
-
-        internal ServerAPI(NetworkSystem mod) => _mod = mod;
-
-        private async UniTask<Server> GetMyServer()
+        public async UniTask<Server> GetMyServer()
         {
+            if (NetworkSystem.ModInstance == null) throw new AccessViolationException("NetworkSystem not initialized");
+            // GET /api/server
+            var address = NetworkSystem.ModInstance.Auth.CurrentServerAddress;
+            if (address == null) return null;
+
+            var data = await GetServer(address);
+            if (data == null) return null;
+
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("server_update", data));
+            CurrentServer = data;
+
+            var serverhash = Animator.StringToHash(data.address);
             var config = Config.Load();
-            if (!config.Has("token") || !config.Has("gateway")) return null;
-            var req = new UnityWebRequest(string.Format("{0}/api/server", config.Get<string>("gateway")), "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            req.SetRequestHeader("Authorization", string.Format("Bearer {0}", config.Get<string>("token")));
-            try { await req.SendWebRequest(); }
-            catch { }
-            if (req.responseCode != 200) return null;
-            var response = JsonUtility.FromJson<Response<Server>>(req.downloadHandler.text);
-            if (response.IsError) return null;
-            response.data._mod = _mod;
-            server = response.data;
-            _mod._api.EventAPI.Emit(new NetEventContext("network.get.server.me", server, true));
-            _mod._api.EventAPI.Emit(new NetEventContext("network.get.server", server));
-            return response.data;
+            config.Set($"servers.{serverhash}.title", data.title);
+            config.Set($"servers.{serverhash}.address", data.address);
+            config.Set($"servers.{serverhash}.features", data.features);
+            if (!config.Has($"servers.{serverhash}.navigation"))
+                config.Set($"servers.{serverhash}.navigation", false);
+            config.Save();
+
+            return data;
         }
 
-        private async UniTask<Server> GetServer(string address)
+        public async UniTask<Server> GetServer(string address)
         {
-            Uri gateway = await Gateway.FindGatewayMaster(address);
+            if (NetworkSystem.ModInstance == null) throw new AccessViolationException("NetworkSystem not initialized");
+            // GET /api/server
+            var gateway = await Gateway.FindGatewayMaster(address);
             if (gateway == null) return null;
-            var req = new UnityWebRequest(string.Format("{0}/api/server", gateway), "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            try { await req.SendWebRequest(); }
-            catch { }
-            if (req.responseCode != 200) return null;
-            var response = JsonUtility.FromJson<Response<Server>>(req.downloadHandler.text);
-            if (response.IsError) return null;
-            response.data._mod = _mod;
-            _mod._api.EventAPI.Emit(new NetEventContext("network.get.server", address, response.data));
-            return response.data;
-        }
 
-        private async UniTask<WellKnownServer> GetWellKnown(string address)
-        {
-            Uri gateway = await Gateway.FindGatewayMaster(address);
-            if (gateway == null) return null;
-            var req = new UnityWebRequest(string.Format("{0}/.well-known/nox", gateway), "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            try { await req.SendWebRequest(); }
-            catch { }
-            if (req.responseCode != 200) return null;
-            var response = JsonUtility.FromJson<Response<WellKnownServer>>(req.downloadHandler.text);
-            if (response.IsError) return null;
-            _mod._api.EventAPI.Emit(new NetEventContext("network.get.wellknown", address, response.data));
-            return response.data;
-        }
-        private async UniTask<ServerSearch> SearchServers(string server, string query, uint offset = 0, uint limit = 10)
-        {
-            var User = _mod.GetCurrentUser();
+            var request = new Request(Method.GET, Request.MergeUrl(gateway, "/api/server"));
+
+            var token = await NetworkSystem.ModInstance.Auth.GetToken(address);
+            var header = new Dictionary<string, string> { };
+            if (token != null) header.Add("Authorization", token.ToHeader());
+
+            var response = await request.Send<string, Response<Server>>(null, header);
+            if (request.IsError || response.IsError) return null;
+
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("server_fetch", response.data));
+            NetCache.Set(response.data);
+
+            var serverhash = Animator.StringToHash(response.data.address);
             var config = Config.Load();
-            var gateway = server == User?.server 
-                ? config.Get<string>("gateway") 
-                : (await Gateway.FindGatewayMaster(server))?.OriginalString;
+            config.Set($"servers.{serverhash}.title", response.data.title);
+            config.Set($"servers.{serverhash}.address", response.data.address);
+            config.Set($"servers.{serverhash}.features", response.data.features);
+            if (!config.Has($"servers.{serverhash}.navigation"))
+                config.Set($"servers.{serverhash}.navigation", false);
+            config.Save();
+
+            return response.data;
+        }
+
+        public async UniTask<SearchResponse> SearchServers(SearchRequest data)
+        {
+            if (NetworkSystem.ModInstance == null) throw new AccessViolationException("NetworkSystem not initialized");
+            // GET /api/servers/search?{data.ToParams()}
+            var gateway = await Discover.GetGateway(data.server);
             if (gateway == null) return null;
-            return new ServerSearch() { servers = new Server[0], total = 0, limit = limit, offset = offset };
-        }
 
-        
-        [ShareObjectExport] public Func<string, string, uint, uint, UniTask<ShareObject>> SharedSearchServers;
-        [ShareObjectExport] public Func<UniTask<ShareObject>> SharedGetMyServer;
-        [ShareObjectExport] public Func<string, UniTask<ShareObject>> SharedGetServer;
-        [ShareObjectExport] public Func<string, UniTask<ShareObject>> SharedGetWellKnown;
+            var request = new Request(Method.GET, Request.MergeUrl(gateway, $"/api/servers/search?{data.ToParams()}"));
 
-        public void BeforeExport()
-        {
-            SharedSearchServers = async (server, query, offset, limit) =>await  SearchServers(server, query, offset, limit);
-            SharedGetMyServer = async () => await GetMyServer();
-            SharedGetServer = async (address) => await GetServer(address);
-            SharedGetWellKnown = async (address) => await GetWellKnown(address);
-        }
+            var token = await NetworkSystem.ModInstance.Auth.GetToken(data.server);
+            var header = new Dictionary<string, string> { };
+            if (token != null) header.Add("Authorization", token.ToHeader());
 
-        public void AfterExport()
-        {
-            SharedGetMyServer = null;
-            SharedSearchServers = null;
-            SharedGetServer = null;
-            SharedGetWellKnown = null;
+            var response = await request.Send<string, Response<SearchResponse>>(null, header);
+            if (request.IsError || response.IsError) return null;
+
+            var config = Config.Load();
+            foreach (var server in response.data.servers)
+            {
+                NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("server_fetch", server));
+                NetCache.Set(server);
+
+                var serverhash = Animator.StringToHash(server.address);
+                config.Set($"servers.{serverhash}.title", server.title);
+                config.Set($"servers.{serverhash}.address", server.address);
+                config.Set($"servers.{serverhash}.features", server.features);
+                if (!config.Has($"servers.{serverhash}.navigation"))
+                    config.Set($"servers.{serverhash}.navigation", false);
+            }
+            config.Save();
+
+            return response.data;
         }
     }
 }

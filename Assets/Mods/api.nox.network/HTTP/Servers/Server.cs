@@ -1,44 +1,42 @@
 using System;
+using api.nox.network.HTTP;
+using api.nox.network.WebSockets;
 using Cysharp.Threading.Tasks;
-using WS = System.Net.WebSockets.ClientWebSocket;
-using Nox.CCK.Mods;
+using UnityEngine;
 
-namespace api.nox.network
+namespace api.nox.network.Servers
 {
-    [System.Serializable]
-    public class Server : ShareObject
+    [Serializable]
+    public class Server : ICached
     {
-        internal NetworkSystem _mod;
-        [ShareObjectExport] public string id;
-        [ShareObjectExport] public string title;
-        [ShareObjectExport] public string description;
-        [ShareObjectExport] public string address;
-        [ShareObjectExport] public string version;
-        [ShareObjectExport] public long ready_at;
-        [ShareObjectExport] public string icon;
-        [ShareObjectExport] public string public_key;
-        [ShareObjectExport] public ServerGateway gateways;
-        [ShareObjectExport] public string[] features;
+        public string id;
+        public string title;
+        public string description;
+        public string address;
+        public string version;
+        public ulong ready_at;
+        public string icon;
+        public string public_key;
+        public ServerGateway gateways;
+        public string[] features;
 
-        [ShareObjectExport] public Func<UniTask<ShareObject>> SharedGetToken;
-        [ShareObjectExport] public Func<UniTask<ShareObject>> SharedGetOrConnect;
+        public async UniTask<Auths.AuthToken> GetToken() => await NetworkSystem.ModInstance.Auth.GetToken(address);
 
-
-        private async UniTask<AuthToken> GetToken() => await _mod._auth.GetToken(address);
-        private async UniTask<WebSocket> GetOrConnect()
+        public async UniTask<WebSocket> GetOrConnect()
         {
             if (gateways.ws == null) return null;
-            var socket = _mod._ws.GetWebSocket(address);
+            var socket = NetworkSystem.ModInstance.WebSocket.GetWebSocket(address);
             if (socket == null)
             {
                 var token = await GetToken();
                 if (token == null) return null;
-                socket = _mod._ws.CreateWebSocket(address, null);
-                var ws = new WS();
+                socket = NetworkSystem.ModInstance.WebSocket.CreateWebSocket(address, null);
+                var ws = new System.Net.WebSockets.ClientWebSocket();
                 ws.Options.SetRequestHeader("Authorization", token.ToHeader());
                 var result = await socket.Connect(gateways.ws, ws);
                 if (!result)
                 {
+                    Debug.LogError($"Failed to connect to {gateways.ws}");
                     socket.Dispose();
                     return null;
                 }
@@ -46,10 +44,6 @@ namespace api.nox.network
             return socket;
         }
 
-        public void BeforeExport()
-        {
-            SharedGetToken = async () => await GetToken();
-            SharedGetOrConnect = async () => await GetOrConnect();
-        }
+        public string GetCacheKey() => $"server.{address}";
     }
 }

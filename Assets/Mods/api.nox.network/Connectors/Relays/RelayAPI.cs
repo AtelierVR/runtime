@@ -1,27 +1,23 @@
 using System;
-using api.nox.network.Instances;
-using api.nox.network.Relays;
+using api.nox.network.RelayInstances;
 using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods;
 using UnityEngine;
 
-namespace api.nox.network
+namespace api.nox.network.Relays
 {
     public class RelayAPI : ShareObject
     {
-        private readonly NetworkSystem _mod;
-        internal RelayAPI(NetworkSystem mod) => _mod = mod;
-
         internal void Update()
         {
             RelayManager.Update();
-            InstanceManager.Update();
+            RelayInstanceManager.Update();
         }
         internal void Dispose()
         {
             RelayManager.Dispose();
-            InstanceManager.Dispose();
+            RelayInstanceManager.Dispose();
         }
 
         public Relay GetRelay(ushort id) => RelayManager.Get(id);
@@ -30,7 +26,7 @@ namespace api.nox.network
         public Relay GetRelay(string address) => RelayManager.Cache.Find(r => r.UserData is int i && i == Animator.StringToHash(address));
         public bool HasRelay(string address) => GetRelay(address) != null;
 
-        public Instances.Instance GetInstance(ushort relayId, ushort instanceId) => InstanceManager.Get(instanceId, relayId);
+        public RelayInstance GetInstance(ushort relayId, ushort instanceId) => RelayInstanceManager.Get(instanceId, relayId);
 
         public async UniTask<MakeRelayConnectionResponse> MakeConnection(MakeRelayConnectionData data)
         {
@@ -94,31 +90,5 @@ namespace api.nox.network
             RelayProtocol.UDP => new UdpConnector(),
             _ => null,
         };
-
-        [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedMakeConnection;
-        [ShareObjectExport] public Func<string, ShareObject> SharedGetRelay;
-        [ShareObjectExport] public Func<ushort, ShareObject> SharedGetRelayById;
-        [ShareObjectExport] public Func<string, bool> SharedHasRelay;
-        [ShareObjectExport] public Func<ushort, bool> SharedHasRelayById;
-
-        public void BeforeExport()
-        {
-            SharedMakeConnection = async (data) => await MakeConnection(data.Convert<MakeRelayConnectionData>());
-            SharedGetRelay = (address) => GetRelay(address);
-            SharedGetRelayById = (id) => GetRelay(id);
-            SharedHasRelay = (address) => HasRelay(address);
-            SharedHasRelayById = (id) => HasRelay(id);
-        }
-
-        public void AfterExport()
-        {
-            SharedMakeConnection = null;
-            SharedGetRelay = null;
-            SharedGetRelayById = null;
-            SharedHasRelay = null;
-            SharedHasRelayById = null;
-        }
-
-
     }
 }

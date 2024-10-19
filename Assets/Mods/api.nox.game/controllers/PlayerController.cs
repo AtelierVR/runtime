@@ -1,9 +1,8 @@
-using System;
 using UnityEngine;
 
 namespace api.nox.game.Controllers
 {
-    public class PlayerController : MonoBehaviour, IDisposable
+    public class PlayerController : MonoBehaviour
     {
         internal static PlayerController Instance;
         public static BaseController GetCurrentController() => Instance.CurrentController;
@@ -85,9 +84,13 @@ namespace api.nox.game.Controllers
         }
 
         void OnDestroy() => Instance = Instance == this ? null : Instance;
+
         public void Dispose()
         {
             Destroy(gameObject);
         }
+
+        public void Jump() => GetCurrentController().Jump();
+        public void Teleport(Transform target) => GetCurrentController().Teleport(target);
     }
 }

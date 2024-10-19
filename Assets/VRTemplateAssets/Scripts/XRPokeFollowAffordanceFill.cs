@@ -161,19 +161,23 @@ namespace Unity.VRTemplate
         /// </summary>
         protected void Start()
         {
-            if (m_PokeFollowTransform != null)
+            try
             {
-                m_InitialPosition = m_PokeFollowTransform.localPosition;
-                m_MaxDistance = m_MaxDistance > 0f ? Mathf.Min(m_InitialPosition.magnitude, m_MaxDistance) : m_InitialPosition.magnitude;
-                m_BindingsGroup.AddBinding(m_TransformTweenableVariable.Subscribe(OnTransformTweenableVariableUpdated));
-                m_BindingsGroup.AddBinding(m_PokeStrengthTweenableVariable.Subscribe(OnPokeStrengthChanged));
-                m_BindingsGroup.AddBinding(m_PokeDataProvider.pokeStateData.SubscribeAndUpdate(OnPokeStateDataUpdated));
+                if (m_PokeFollowTransform != null)
+                {
+                    m_InitialPosition = m_PokeFollowTransform.localPosition;
+                    m_MaxDistance = m_MaxDistance > 0f ? Mathf.Min(m_InitialPosition.magnitude, m_MaxDistance) : m_InitialPosition.magnitude;
+                    m_BindingsGroup.AddBinding(m_TransformTweenableVariable.Subscribe(OnTransformTweenableVariableUpdated));
+                    m_BindingsGroup.AddBinding(m_PokeStrengthTweenableVariable.Subscribe(OnPokeStrengthChanged));
+                    m_BindingsGroup.AddBinding(m_PokeDataProvider.pokeStateData.SubscribeAndUpdate(OnPokeStateDataUpdated));
+                }
+                else
+                {
+                    enabled = false;
+                    Debug.LogWarning($"Missing Poke Follow Transform assignment on {this}. Disabling component.", this);
+                }
             }
-            else
-            {
-                enabled = false;
-                Debug.LogWarning($"Missing Poke Follow Transform assignment on {this}. Disabling component.", this);
-            }
+            catch { }
         }
 
         /// <summary>

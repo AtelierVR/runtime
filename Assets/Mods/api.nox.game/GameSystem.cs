@@ -1,11 +1,11 @@
 using System.Linq;
 using api.nox.game.sessions;
+using api.nox.network;
 using Nox.CCK;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
-using Nox.SimplyLibs;
 
 namespace api.nox.game
 {
@@ -15,7 +15,9 @@ namespace api.nox.game
         internal static GameSystem Instance;
         internal SessionManager SessionManager;
         internal ModCoreAPI CoreAPI;
-        internal SimplyNetworkAPI NetworkAPI => CoreAPI.ModAPI.GetMod("network")?.GetMainClasses().OfType<ShareObject>().FirstOrDefault()?.Convert<SimplyNetworkAPI>();
+        internal NetworkSystem NetworkAPI => CoreAPI.ModAPI.GetMod("network")?.GetMainClasses().OfType<NetworkSystem>().FirstOrDefault();
+
+
 
         public void OnInitialize(ModCoreAPI api)
         {

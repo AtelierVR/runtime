@@ -2,12 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using api.nox.network;
+using api.nox.network.Worlds;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Editor;
 using Nox.CCK.Worlds;
 using Nox.Editor.Worlds;
-using Nox.SimplyLibs;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -27,7 +28,7 @@ namespace api.nox.world
         internal WorldPublisherPanel(WorldEditorMod mod) => _mod = mod;
         private DisplayFlags _displayFlags;
         private DisplayFlags _lastDisplay;
-        private SimplyWorld _world;
+        private World _world;
         public void SetDisplay(DisplayFlags flags) => _displayFlags = flags;
 
         public void OnClosed()
@@ -38,9 +39,9 @@ namespace api.nox.world
         internal void OnUpdate()
         {
             if (!_mod.HasOnePanelOpenned() || _root.childCount == 0) return;
-            if (_lastDisplay == DisplayFlags.NotLogged && _mod.NetworkAPI.GetCurrentUser() != null)
+            if (_lastDisplay == DisplayFlags.NotLogged && _mod.NetworkAPI.User.CurrentUser != null)
                 OnLogged().Forget();
-            if (_lastDisplay != DisplayFlags.NotLogged && _mod.NetworkAPI.GetCurrentUser() == null)
+            if (_lastDisplay != DisplayFlags.NotLogged && _mod.NetworkAPI.User.CurrentUser == null)
                 SetDisplay(DisplayFlags.NotLogged);
             var descriptor = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
             _root.Q<ObjectField>("descriptor-field").value = descriptor;
@@ -84,12 +85,13 @@ namespace api.nox.world
             await AttachWorld(serverAddress, worldId, false);
         }
 
-        private async UniTask<SimplyWorld> AttachWorld(string server, uint id, bool create = false)
+        private async UniTask<World> AttachWorld(string server, uint id, bool create = false)
         {
             return await AttachWorld(server, id.ToString(), create);
         }
 
-        private async UniTask<SimplyWorld> AttachWorld(string server, string id, bool create = false)
+
+        private async UniTask<World> AttachWorld(string server, string id, bool create = false)
         {
             var descriptor = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
             if (descriptor == null)
@@ -100,19 +102,20 @@ namespace api.nox.world
             }
             SetDisplay(DisplayFlags.Loading);
 
-            SimplyWorld world = null;
+            World world = null;
             if (!string.IsNullOrWhiteSpace(id) && uint.TryParse(id, out var idParsed))
                 world = await _mod.NetworkAPI.World.GetWorld(server, idParsed);
 
             if (world == null && create)
-                world = await _mod.NetworkAPI.World.CreateWorld(!string.IsNullOrWhiteSpace(id) && uint.TryParse(id, out var id1)
-                    ? new SimplyCreateWorldData() { server = server, id = uint.Parse(id), custom_id = true }
-                    : new SimplyCreateWorldData() { server = server }
+                world = await _mod.NetworkAPI.World.CreateWorld(
+                    !string.IsNullOrWhiteSpace(id) && uint.TryParse(id, out var id1)
+                    ? new() { server = server, id = uint.Parse(id), custom_id = true }
+                    : new() { server = server }
                 );
 
             if (world != null)
             {
-                var user = _mod.NetworkAPI.GetCurrentUser();
+                var user = _mod.NetworkAPI.User.CurrentUser;
                 if (user == null || !user.MatchRef(world.owner, world.server))
                     world = null;
             }
@@ -206,7 +209,7 @@ namespace api.nox.world
                 var id = attachId.value;
                 var server = attachServer.value;
                 if (string.IsNullOrWhiteSpace(server))
-                    server = _mod.NetworkAPI.GetCurrentUser()?.server;
+                    server = _mod.NetworkAPI.User.CurrentUser?.server;
                 await AttachWorld(server, id, true);
             };
             var infofetch = _root.Q<Button>("info-fetch");
@@ -232,7 +235,7 @@ namespace api.nox.world
                     return;
                 }
                 SetDisplay(DisplayFlags.Loading);
-                var sucess = await _mod.NetworkAPI.World.UpdateWorld(new SimplyUpdateWorldData()
+                var sucess = await _mod.NetworkAPI.World.UpdateWorld(new UpdateWorldData()
                 {
                     server = _world.server,
                     worldId = _world.id,
@@ -340,7 +343,7 @@ namespace api.nox.world
                 return;
             }
 
-            var version = _root.Q<UnsignedIntegerField>("asset-version").value;
+            ushort version = (ushort)_root.Q<UnsignedIntegerField>("asset-version").value;
             if (version > ushort.MaxValue)
             {
                 EditorUtility.DisplayDialog("Error", "Version must be less than " + ushort.MaxValue, "Ok");
@@ -362,7 +365,18 @@ namespace api.nox.world
             var autoVersion = config.Get("sdk.auto_version", true);
             var strictVersion = config.Get("sdk.strict_version", true);
 
-            var search = await _mod.NetworkAPI.World.SearchAssets(_world.server, _world.id, 0, 1, new uint[] { version }, new string[] { SuppordTarget.GetTargetName(target) }, new string[] { "unity" }, true);
+            var search = await _mod.NetworkAPI.World.Asset.SearchAssets(new()
+            {
+                server = _world.server,
+                world_id = _world.id,
+                versions = new ushort[] { version },
+                platforms = new string[] { SuppordTarget.GetTargetName(target) },
+                engines = new string[] { "unity" },
+                with_empty = true,
+                limit = 1,
+                offset = 0
+            });
+
             if (search == null)
             {
                 EditorUtility.DisplayDialog("Error", "An error occured while fetching the assets.", "Ok");
@@ -370,12 +384,23 @@ namespace api.nox.world
                 SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
                 return;
             }
+
             var asset = search.assets.FirstOrDefault();
             if (asset != null && autoVersion && !asset.IsEmpty())
                 while (asset != null && !asset.IsEmpty())
                 {
                     version++;
-                    search = await _mod.NetworkAPI.World.SearchAssets(_world.server, _world.id, 0, 1, new uint[] { version }, new string[] { SuppordTarget.GetTargetName(target) }, new string[] { "unity" }, true);
+                    search = await _mod.NetworkAPI.World.Asset.SearchAssets(new()
+                    {
+                        server = _world.server,
+                        world_id = _world.id,
+                        versions = new ushort[] { version },
+                        platforms = new string[] { SuppordTarget.GetTargetName(target) },
+                        engines = new string[] { "unity" },
+                        with_empty = true,
+                        limit = 1,
+                        offset = 0
+                    });
                     if (search == null)
                     {
                         EditorUtility.DisplayDialog("Error", "An error occured while fetching the assets.", "Ok");
@@ -410,7 +435,7 @@ namespace api.nox.world
             Debug.Log("Asset platform: " + SuppordTarget.GetTargetName(target));
 
             if (asset == null)
-                asset = await _mod.NetworkAPI.World.CreateAsset(new SimplyCreateAssetData()
+                asset = await _mod.NetworkAPI.World.Asset.CreateAsset(new CreateAssetData()
                 {
                     worldId = _world.id,
                     server = _world.server,
@@ -427,7 +452,7 @@ namespace api.nox.world
                 return;
             }
 
-            var res = await _mod.NetworkAPI.World.UploadAssetFile(_world.server, _world.id, asset.id, result.path);
+            var res = await _mod.NetworkAPI.World.Asset.UploadAssetFile(_world.server, _world.id, asset.id, result.path);
             if (!res)
             {
                 EditorUtility.DisplayDialog("Error", "An error occured while uploading the asset.", "Ok");

@@ -34,19 +34,23 @@ namespace Nox.CCK
             return current[split[^1]] != null;
         }
 
-        public T Get<T>(string propertyName, T defaultValue = default(T))
+        public JToken Get(string propertyName)
         {
             var split = propertyName.Split('.');
             var current = _jsonObject;
             for (var i = 0; i < split.Length - 1; i++)
             {
                 if (current[split[i]] == null)
-                    return defaultValue;
+                    return null;
                 current = (JObject)current[split[i]];
             }
-            if (current[split[^1]] == null)
-                return defaultValue;
-            return current[split[^1]].ToObject<T>();
+            return current[split[^1]];
+        }
+        
+        public T Get<T>(string propertyName, T defaultValue = default)
+        {
+            var token = Get(propertyName);
+            return token == null ? defaultValue : token.ToObject<T>();
         }
 
         public void Set<T>(string propertyName, T value)

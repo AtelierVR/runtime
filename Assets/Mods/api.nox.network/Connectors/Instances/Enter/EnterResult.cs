@@ -1,4 +1,4 @@
-﻿namespace api.nox.network.Instances.Enter
+﻿namespace api.nox.network.RelayInstances.Enter
 {
     public enum EnterResult : byte
 {

@@ -56,8 +56,7 @@
     ],
     "editor": [
       "api.nox.game.GameEditorSystem"
-    ],
-    "instance": []
+    ]
   },
   "side": [
     "editor"

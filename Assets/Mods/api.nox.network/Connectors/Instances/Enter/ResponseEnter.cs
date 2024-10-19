@@ -1,10 +1,10 @@
 ﻿using System;
-using api.nox.network.Instances.Base;
+using api.nox.network.RelayInstances.Base;
 using api.nox.network.Utils;
 using Nox.CCK.Mods;
 using Buffer = api.nox.network.Utils.Buffer;
 
-namespace api.nox.network.Instances.Enter
+namespace api.nox.network.RelayInstances.Enter
 {
     public class ResponseEnter : InstanceResponse, ShareObject
     {

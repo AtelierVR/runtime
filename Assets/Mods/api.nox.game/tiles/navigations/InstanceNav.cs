@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using api.nox.network.Instances;
+using api.nox.network.Worlds;
+using api.nox.network.Worlds.Assets;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using Nox.SimplyLibs;
 using UnityEngine;
 
 namespace api.nox.game.Tiles
@@ -35,9 +37,12 @@ namespace api.nox.game.Tiles
                 GetWorkers = () =>
                 {
                     var config = Config.Load();
-                    var servers = config.Get("navigation.servers", new WorkerInfo[0]);
+                    var servers_t = config.Get("servers");
+                    if (servers_t == null) return new NavigationWorker[0];
+                    var server_d = servers_t.ToObject<Dictionary<string, NavigationWorkerInfo>>();
+                    var servers = server_d.Values.ToArray();
                     return servers
-                        .Where(x => x.features.Contains("instance"))
+                        .Where(x => (x.navigation || x.address == config.Get("server", "")) && x.features.Contains("instance"))
                         .Select(x => new NavigationWorker
                         {
                             server_address = x.address,
@@ -54,7 +59,7 @@ namespace api.nox.game.Tiles
             var res = await GameClientSystem.Instance.NetworkAPI.Instance.SearchInstances(new() { query = query, server = server });
             if (res == null) return new NavigationResult { error = "Error fetching instances." };
             Debug.Log("Fetched instances " + res.instances.Length);
-            
+
             List<InstanceWithWorld> iww = new();
             foreach (var instance in res.instances)
             {
@@ -72,15 +77,24 @@ namespace api.nox.game.Tiles
             var WorldAPI = GameClientSystem.Instance.NetworkAPI.World;
             foreach (var address in iww.GroupBy(x => x.worldServer).ToDictionary(x => x.Key, x => x.Select(y => y.worldId)))
             {
-                var resWorld = await WorldAPI.GetWorlds(address.Key, address.Value.ToArray().ToArray());
+                var resWorld = await GameClientSystem.Instance.NetworkAPI.World.SearchWorlds(new() { server = address.Key, world_ids = address.Value.ToArray() });
                 if (resWorld == null) continue;
                 foreach (var i in iww.Where(x => x.worldServer == address.Key))
-                    i.world = resWorld.FirstOrDefault(x => x.id == i.worldId);
+                    i.world = resWorld.worlds.FirstOrDefault(x => x.id == i.worldId);
             }
 
             foreach (var i in iww.Where(x => x.world != null))
             {
-                var resAsset = await i.world.SearchAssets(0, 1, null, new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) }, new string[] { "unity" });
+                var resAsset = await GameClientSystem.Instance.NetworkAPI.World.Asset.SearchAssets(new()
+                {
+                    server = i.worldServer,
+                    world_id = i.worldId,
+                    offset = 0,
+                    limit = 1,
+                    platforms = new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) },
+                    engines = new string[] { "unity" }
+
+                });
                 if (resAsset == null || resAsset.assets.Length == 0) continue;
                 i.asset = resAsset.assets[0];
             }
@@ -117,8 +131,8 @@ namespace api.nox.game.Tiles
         public uint worldId;
         public uint worldAssetId;
         public string worldServer;
-        public SimplyInstance instance;
-        public SimplyWorld world;
-        public SimplyWorldAsset asset;
+        public Instance instance;
+        public World world;
+        public WorldAsset asset;
     }
 }

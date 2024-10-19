@@ -1,8 +1,8 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
+using api.nox.network;
 using Nox.CCK.Editor;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using UnityEngine.UIElements;
 
 namespace api.nox.user
@@ -22,10 +22,7 @@ namespace api.nox.user
             Debug.Log("Panel Example closed!");
         }
 
-        internal void OnUpdate()
-        {
-
-        }
+        internal void OnUpdate() { }
 
         public VisualElement OnOpenned(Dictionary<string, object> data)
         {
@@ -45,12 +42,12 @@ namespace api.nox.user
                 password.isReadOnly = true;
                 identifier.isReadOnly = true;
                 server.isReadOnly = true;
-                var data = await _mod.NetworkAPI.User.PostLogin(server.value, identifier.value, password.value);
+                var data = await _mod.NetworkAPI.Auth.Login(server.value, identifier.value, password.value);
                 buttonlogin.SetEnabled(true);
                 password.isReadOnly = false;
                 identifier.isReadOnly = false;
                 server.isReadOnly = false;
-                if (string.IsNullOrEmpty(data.error) && _mod.NetworkAPI.GetCurrentUser() != null)
+                if (string.IsNullOrEmpty(data.error) && _mod.NetworkAPI.User.CurrentUser != null)
                 {
                     _mod._api.PanelAPI.SetActivePanel("api.nox.user.profile");
                     _mod._api.PanelAPI.UpdatePanelList();

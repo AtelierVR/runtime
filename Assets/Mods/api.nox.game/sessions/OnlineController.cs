@@ -1,8 +1,12 @@
 using api.nox.game.Controllers;
+using api.nox.network;
+using api.nox.network.Instances;
+using api.nox.network.RelayInstances;
+using api.nox.network.RelayInstances.Enter;
+using api.nox.network.Relays;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Worlds;
-using Nox.SimplyLibs;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -17,17 +21,27 @@ namespace api.nox.game.sessions
             set => _session = value;
         }
 
-        internal SimplyMakeRelayConnectionData connectionData;
+        internal MakeRelayConnectionData connectionData;
         private string server;
         private uint instanceId;
+        private bool isReady = false;
 
-        internal SimplyInstance GetInstance() => GameSystem.Instance.NetworkAPI.Instance.GetInstanceInCache(server, instanceId);
-        internal SimplyRelay GetRelay() => GetInstance().GetRelay();
+        internal Instance GetInstance() => NetCache.Get<Instance>($"instance.{server}.{instanceId}");
+        internal Relay GetRelay() => GetInstance()?.GetRelay();
 
-        public OnlineController(SimplyInstance instance)
+        public OnlineController(Instance instance)
         {
             server = instance.server;
             instanceId = instance.id;
+        }
+
+        public void Update()
+        {
+            var player = PlayerController.Instance.CurrentController;
+            if (isReady && player != null)
+            {
+
+            }
         }
 
         public void Dispose() { }
@@ -47,7 +61,7 @@ namespace api.nox.game.sessions
             }
 
             var status = await relay.RequestStatus();
-            SimplyRelayInstance instance = null;
+            RelayInstance instance = null;
             foreach (var i in status.Instances)
                 if (i.Id == instanceId)
                 {
@@ -59,13 +73,13 @@ namespace api.nox.game.sessions
                 Debug.Log("Instance is null");
                 return false;
             }
-            var enter = await instance.Enter(new SimplyRelayRequestEnter
+            var enter = await instance.Enter(new RequestEnter
             {
-                DisplayName = GameSystem.Instance.NetworkAPI.GetCurrentUser().display,
+                DisplayName = GameSystem.Instance.NetworkAPI.User.CurrentUser.display,
                 Password = connectionData.password,
-                Flags = SimplyRelayEnterFlags.None
-                    | (instance.Flags.HasFlag(SimplyRelayInstanceFlags.UsePassword) ? SimplyRelayEnterFlags.UsePassword : SimplyRelayEnterFlags.None)
-                    | (string.IsNullOrEmpty(connectionData.display_name) ? SimplyRelayEnterFlags.UsePseudonyme : SimplyRelayEnterFlags.None)
+                Flags = EnterFlags.None
+                    | (instance.Flags.HasFlag(InstanceFlags.UsePassword) ? EnterFlags.UsePassword : EnterFlags.None)
+                    | (string.IsNullOrEmpty(connectionData.display_name) ? EnterFlags.UsePseudonyme : EnterFlags.None)
             });
 
             if (enter == null)
@@ -92,11 +106,14 @@ namespace api.nox.game.sessions
             }
 
             var world = await GameSystem.Instance.NetworkAPI.World.GetWorld(configworld.Address, configworld.MasterId);
-            var search = world != null ? await world.SearchAssets(0, 1,
-                configworld.Version == ushort.MaxValue ? null : new uint[] { configworld.Version },
-                new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) },
-                new string[] { "unity" }
-            ) : null;
+            var search = world != null ? await GameSystem.Instance.NetworkAPI.World.Asset.SearchAssets(new() {
+                versions = configworld.Version == ushort.MaxValue ? null : new ushort[] { configworld.Version },
+                platforms = new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) },
+                engines = new string[] { "unity" },
+                limit = 1,
+                offset = 0
+            }) : null;
+            
 
             var asset = search?.assets[0];
             if (world == null || asset == null)
@@ -131,6 +148,9 @@ namespace api.nox.game.sessions
                 return false;
             }
 
+            // var player = new LocalPlayer(null);
+            // session.SpawnPlayer(player);
+
             if (descriptor.GetSpawnType() != SpawnType.None)
             {
                 var spawn = descriptor.ChoiceSpawn();
@@ -143,6 +163,7 @@ namespace api.nox.game.sessions
                 catch (System.Exception e) { Debug.LogWarning(e); }
             }
 
+
             Debug.Log("Player spawned");
 
             if (!instance.SendConfigReady())
@@ -153,7 +174,7 @@ namespace api.nox.game.sessions
 
 
 
-            Debug.Log("World loaded");
+            isReady = true;
 
             return true;
         }

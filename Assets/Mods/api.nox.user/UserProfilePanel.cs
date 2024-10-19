@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
+using api.nox.network;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Editor;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace api.nox.user
     {
         public string Id { get; } = "profile";
         public string Name { get; } = "User/Profile";
-        public bool Hidded { get => _mod.NetworkAPI.GetCurrentUser() == null; }
+        public bool Hidded { get => _mod.NetworkAPI.User.CurrentUser == null; }
         internal VisualElement _root = new();
 
         internal UserEditorMod _mod;
@@ -42,14 +43,14 @@ namespace api.nox.user
             buttonlogout.clickable.clicked += () => UniTask.Create(async () =>
                 {
                     buttonlogout.SetEnabled(false);
-                    if (await _mod.NetworkAPI.User.GetLogout())
+                    if (await _mod.NetworkAPI.Auth.Logout())
                     {
                         _mod._api.PanelAPI.SetActivePanel("api.nox.user.login");
                         _mod._api.PanelAPI.UpdatePanelList();
                     }
                     else
                     {
-                        _mod.NetworkAPI.GetCurrentUser();
+                        await _mod.NetworkAPI.User.GetMyUser();
                         UpdateUser();
                         buttonlogout.SetEnabled(true);
                     }
@@ -66,7 +67,7 @@ namespace api.nox.user
 
         private void UpdateUser()
         {
-            var user = _mod.NetworkAPI.GetCurrentUser();
+            var user = _mod.NetworkAPI.User.CurrentUser;
             if (user == null) return;
             _root.Q<TextField>("username").value = user.username;
             _root.Q<TextField>("server").value = user.server;

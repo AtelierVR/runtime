@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -98,10 +97,17 @@ namespace api.nox.game
             var t4 = DateTime.Now;
             progress?.Invoke(1, 0);
             if (res == null)
+            {
+                Debug.LogError($"Failed to download world {hash} {url}");
                 return new DownloadWorldResult { success = false, hash = hash, url = url, error = "Download failed" };
+            }
+
             var t1 = DateTime.Now;
             SaveWorldToCache(hash, res);
+            File.Delete(res);
             var t2 = DateTime.Now;
+
+            Debug.Log($"Downloaded world {hash} {url} {res.Length} bytes in {(t2 - t1).TotalMilliseconds}ms {(t4 - t3).TotalMilliseconds}ms");
             return new DownloadWorldResult { success = true, hash = hash, url = url };
         }
 

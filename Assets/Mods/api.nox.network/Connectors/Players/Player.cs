@@ -1,5 +1,5 @@
 ﻿using System;
-using api.nox.network.Instances;
+using api.nox.network.RelayInstances;
 using api.nox.network.Players;
 using api.nox.network.Relays;
 
@@ -17,7 +17,7 @@ namespace api.nox.network
         public ushort RelayId;
         public ushort InternalId;
         public Relay Relay => RelayManager.Get(RelayId);
-        public Instances.Instance Instance => InstanceManager.Get(InternalId, RelayId);
+        public RelayInstance Instance => RelayInstanceManager.Get(InternalId, RelayId);
 
         public override string ToString() => $"{GetType().Name}[Id={Id}, DisplayName={DisplayName}]";
         public Utils.Transform GetPart(PlayerRig rig) => Transfroms.TryGetValue((ushort)rig, out var part) ? part : null;

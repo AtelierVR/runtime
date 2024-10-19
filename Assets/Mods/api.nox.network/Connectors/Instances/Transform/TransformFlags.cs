@@ -1,4 +1,4 @@
-namespace api.nox.network.Instances.Transform
+namespace api.nox.network.RelayInstances.Transform
 {
     [System.Flags]
     public enum TransformFlags : byte

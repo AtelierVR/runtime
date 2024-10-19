@@ -1,4 +1,4 @@
-﻿namespace api.nox.network.Instances.Quit
+﻿namespace api.nox.network.RelayInstances.Quit
 {
     public enum QuitType : byte
     {

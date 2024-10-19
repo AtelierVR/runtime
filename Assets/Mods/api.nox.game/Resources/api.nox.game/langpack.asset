@@ -207,6 +207,10 @@ MonoBehaviour:
       value: "Relai: {0}"
     - key: dashboard.world.actions.no_disponible
       value: "Indisponible"
+    - key: dashboard.settings.title
+      value: "Paramètres"
+    - key: dashboard.settings.subtitle
+      value: "Exemple de paramètres"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home
@@ -374,6 +378,10 @@ MonoBehaviour:
       value: "Advanced Informations"
     - key: dashboard.world.actions.no_disponible
       value: "Unavailable"
+    - key: dashboard.settings.title
+      value: "Settings"
+    - key: dashboard.settings.subtitle
+      value: "Example settings"
 
 
       

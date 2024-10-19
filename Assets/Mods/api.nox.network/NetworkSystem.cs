@@ -1,8 +1,8 @@
 using System;
 using System.IO;
+using api.nox.network.HTTP;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using UnityEngine;
@@ -10,52 +10,64 @@ using UnityEngine.Networking;
 
 namespace api.nox.network
 {
-    public class NetworkSystem : ShareObject, ModInitializer
+    public class NetworkSystem : ModInitializer
     {
-        internal ModCoreAPI _api;
-        internal UserAPI _user;
-        internal WorldAPI _world;
-        internal ServerAPI _server;
-        internal InstanceAPI _instance;
-        internal RelayAPI _relays;
-        internal AuthAPI _auth;
-        internal WebSocketAPI _ws;
+        internal static ModCoreAPI CoreAPI;
+        internal static NetworkSystem ModInstance;
+        public Instances.InstanceAPI Instance;
+        public Auths.AuthAPI Auth;
+        public Users.UserAPI User;
+        public Servers.ServerAPI Server;
+        public Worlds.WorldAPI World;
+        public WebSockets.WebSocketAPI WebSocket;
+
+        public Relays.RelayAPI Relay;
 
 
         public void OnInitialize(ModCoreAPI api)
         {
-            _api = api;
-            _user = new UserAPI(this);
-            _world = new WorldAPI(this);
-            _server = new ServerAPI(this);
-            _instance = new InstanceAPI(this);
-            _relays = new RelayAPI(this);
-            _auth = new AuthAPI(this);
-            _ws = new WebSocketAPI(this);
+            CoreAPI = api;
+            ModInstance = this;
+            NetCache.Clear();
+
+            Auth = new Auths.AuthAPI();
+            Instance = new Instances.InstanceAPI();
+            Server = new Servers.ServerAPI();
+            WebSocket = new WebSockets.WebSocketAPI();
+            User = new Users.UserAPI();
+            World = new Worlds.WorldAPI();
+            Relay = new Relays.RelayAPI();
+
+            Debug.Log("NetworkSystem initialized");
         }
 
         public void OnUpdate()
         {
-            _relays.Update();
+            Relay.Update();
         }
 
         public void OnDispose()
         {
-            _relays.Dispose();
-            _instance.Dispose();
-            _ws.Dispose();
-            _user = null;
-            _world = null;
-            _server = null;
-            _instance = null;
-            _relays = null;
-            _auth = null;
-            _ws = null;
+            Relay.Dispose();
+            World.Dispose();
+            WebSocket.Dispose();
+            NetCache.Clear();
+
+            User = null;
+            World = null;
+            Server = null;
+            Instance = null;
+            Relay = null;
+            Auth = null;
+            WebSocket = null;
+            ModInstance = null;
+
+            Debug.Log("NetworkSystem disposed");
         }
 
-        internal async UniTask<Texture2D> FetchTexture(string url, UnityWebRequest req = null)
+        public async UniTask<Texture2D> FetchTexture(string url, UnityWebRequest req = null)
         {
-            Debug.Log($"Fetching {url}");
+            Debug.Log($"Fetching [TEXTURE] {url}...");
             req ??= new UnityWebRequest(url, "GET");
             req.url = url;
             var dt = new DownloadHandlerTexture();
@@ -65,7 +77,7 @@ namespace api.nox.network
                 var asynco = req.SendWebRequest();
                 await UniTask.WaitUntil(() =>
                 {
-                    _api.EventAPI.Emit(new NetEventContext("network.download", new { url, progress = req.downloadProgress }, true));
+                    CoreAPI.EventAPI.Emit(new NetEventContext("network.download", new { url, progress = req.downloadProgress }, true));
                     return asynco.isDone;
                 });
             }
@@ -74,9 +86,9 @@ namespace api.nox.network
             return dt.texture;
         }
 
-        internal async UniTask<string> DownloadFile(string url, string hash, UnityWebRequest req = null)
+        public async UniTask<string> DownloadFile(string url, string hash, UnityWebRequest req = null)
         {
-            Debug.Log($"Downloading {url}");
+            Debug.Log($"Fetching [FILE] {url}...");
             req ??= new UnityWebRequest(url, "GET");
             req.url = url;
             req.downloadHandler = new DownloadHandlerBuffer();
@@ -86,7 +98,7 @@ namespace api.nox.network
                 await UniTask.WaitUntil(() =>
                 {
                     Debug.Log($"Downloading {url} {req.downloadProgress * 100}%");
-                    _api.EventAPI.Emit(new NetEventContext("network.download", url, req.downloadProgress, req.downloadedBytes));
+                    CoreAPI.EventAPI.Emit(new NetEventContext("network.download", url, req.downloadProgress, req.downloadedBytes));
                     return asynco.isDone;
                 });
             }
@@ -102,55 +114,6 @@ namespace api.nox.network
                 return null;
             }
             return file;
-        }
-
-        public UserMe GetCurrentUser()
-        {
-            if (_user.currentUser == null) return null;
-            _user.currentUser.netSystem = this;
-            return _user.currentUser;
-        }
-        [ShareObjectExport] public Func<ShareObject> GetSharedCurrentUser;
-        public Server GetCurrentServer() => _server.server;
-        [ShareObjectExport] public Func<ShareObject> GetSharedCurrentServer;
-        [ShareObjectExport] public InstanceAPI Instance;
-        [ShareObjectExport] public WorldAPI World;
-        [ShareObjectExport] public ServerAPI Server;
-        [ShareObjectExport] public UserAPI User;
-        [ShareObjectExport] public RelayAPI Relay;
-        [ShareObjectExport] public AuthAPI Auth;
-        [ShareObjectExport] public WebSocketAPI WebSocket;
-        [ShareObjectExport] public Func<string, UnityWebRequest, UniTask<Texture2D>> SharedFetchTexture;
-        [ShareObjectExport] public Func<string, string, UnityWebRequest, UniTask<string>> SharedDownloadFile;
-
-        public void BeforeExport()
-        {
-            GetSharedCurrentUser = () => GetCurrentUser();
-            GetSharedCurrentServer = () => GetCurrentServer();
-            SharedFetchTexture = async (url, req) => await FetchTexture(url, req);
-            SharedDownloadFile = async (url, hash, req) => await DownloadFile(url, hash, req);
-            Instance = _instance;
-            World = _world;
-            Server = _server;
-            WebSocket = _ws;
-            User = _user;
-            Relay = _relays;
-            Auth = _auth;
-        }
-
-        public void AfterExport()
-        {
-            GetSharedCurrentUser = null;
-            GetSharedCurrentServer = null;
-            SharedFetchTexture = null;
-            SharedDownloadFile = null;
-            Instance = null;
-            World = null;
-            Server = null;
-            WebSocket = null;
-            User = null;
-            Relay = null;
-            Auth = null;
         }
     }
 }

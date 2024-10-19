@@ -1,10 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using Nox.SimplyLibs;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 namespace api.nox.game.Tiles
 {
@@ -37,9 +36,12 @@ namespace api.nox.game.Tiles
                 GetWorkers = () =>
                 {
                     var config = Config.Load();
-                    var servers = config.Get("navigation.servers", new WorkerInfo[0]);
+                    var servers_t = config.Get("servers");
+                    if (servers_t == null) return new NavigationWorker[0];
+                    var server_d = servers_t.ToObject<Dictionary<string, NavigationWorkerInfo>>();
+                    var servers = server_d.Values.ToArray();
                     return servers
-                        .Where(x => x.features.Contains("user"))
+                        .Where(x => (x.navigation || x.address == config.Get("server", "")) && x.features.Contains("user"))
                         .Select(x => new NavigationWorker
                         {
                             server_address = x.address,
@@ -53,7 +55,7 @@ namespace api.nox.game.Tiles
         private async UniTask<NavigationResult> FetchUsers(string server, string query)
         {
             Debug.Log("Fetching users");
-            var res = await GameClientSystem.Instance.NetworkAPI.User.SearchUsers(new SimplySearchUserData { server = server, query = query });
+            var res = await GameClientSystem.Instance.NetworkAPI.User.SearchUsers(new() { server = server, query = query });
             if (res == null) return new NavigationResult { error = "Error fetching users." };
             Debug.Log("Fetched users " + res.users.Length);
             return new NavigationResult
@@ -81,11 +83,4 @@ namespace api.nox.game.Tiles
         }
     }
 
-    [Serializable]
-    internal class WorkerInfo
-    {
-        public string address;
-        public string title;
-        public string[] features;
-    }
 }

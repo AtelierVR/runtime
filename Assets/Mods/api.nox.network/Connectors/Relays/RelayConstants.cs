@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Net;
-
-namespace api.nox.network.Relays
+﻿namespace api.nox.network.Relays
 {
     public enum RequestType : byte
     {

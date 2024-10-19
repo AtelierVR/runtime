@@ -4,7 +4,8 @@
     "references": [
         "NoxCCK",
         "UniTask",
-        "Nox.SimplyLibs"
+        "api.nox.network",
+        "api.nox.game"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

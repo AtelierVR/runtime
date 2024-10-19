@@ -7,9 +7,10 @@
         "Unity.XR.Interaction.Toolkit.Samples.StarterAssets",
         "Unity.InputSystem",
         "Unity.TextMeshPro",
-        "Nox.SimplyLibs",
         "AutoHandAssembly",
-        "Unity.XR.Interaction.Toolkit"
+        "Unity.XR.Interaction.Toolkit",
+        "api.nox.network",
+        "api.nox.xr"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,51 +1,26 @@
 using System;
+using api.nox.network.HTTP;
 using api.nox.network.Relays;
-using Nox.CCK.Mods;
 
-namespace api.nox.network
+namespace api.nox.network.Instances
 {
     [Serializable]
-    public class Instance : ShareObject
+    public class Instance : ICached
     {
-        internal NetworkSystem networkSystem;
-        [ShareObjectExport] public uint id;
-        [ShareObjectExport] public string title;
-        [ShareObjectExport] public string description;
-        [ShareObjectExport] public string thumbnail;
-        [ShareObjectExport] public string server;
-        [ShareObjectExport] public string name;
-        [ShareObjectExport] public ushort capacity;
-        [ShareObjectExport] public string[] tags;
-        [ShareObjectExport] public string world;
-        [ShareObjectExport] public string address;
-        [ShareObjectExport] public ushort client_count;
-
-        public Relay GetRelay() => networkSystem._relays.GetRelay(address);
-
-        [ShareObjectExport] public Func<ShareObject> SharedGetRelay;
-        [ShareObjectExport] public ShareObject[] SharedPlayers;
+        public uint id;
+        public string title;
+        public string description;
+        public string thumbnail;
+        public string server;
+        public string name;
+        public ushort capacity;
+        public string[] tags;
+        public string world;
+        public string address;
+        public ushort client_count;
         public InstancePlayer[] players;
 
-
-        public void BeforeExport()
-        {
-            SharedGetRelay = () => GetRelay();
-            SharedPlayers = new ShareObject[players.Length];
-            for (int i = 0; i < players.Length; i++)
-                SharedPlayers[i] = players[i];
-        }
-
-        public void AfterExport()
-        {
-            SharedGetRelay = null;
-            SharedPlayers = null;
-        }
-    }
-
-    [Serializable]
-    public class InstancePlayer : ShareObject
-    {
-        [ShareObjectExport] public string user;
-        [ShareObjectExport] public string display;
+        public string GetCacheKey() => $"instance.{id}.{server}";
+        public Relay GetRelay() => NetworkSystem.ModInstance.Relay.GetRelay(address);
     }
 }

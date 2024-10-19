@@ -2,16 +2,16 @@
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
-using Nox.CCK.Servers;
 using UnityEngine;
 using Nox.CCK;
 using UnityEngine.UI;
-using Nox.SimplyLibs;
 using api.nox.game.UI;
-using api.nox.game.Tiles;
 using System;
 using Object = UnityEngine.Object;
 using Newtonsoft.Json.Linq;
+using api.nox.network.Servers;
+using api.nox.network.WebSockets;
+using api.nox.network.Users;
 
 namespace api.nox.game.Tiles
 {
@@ -66,7 +66,7 @@ namespace api.nox.game.Tiles
         internal void OnOpen(TileObject tile, GameObject content)
         {
             Debug.Log("ServerTileManager.OnOpen");
-            var server = tile.GetData<ShareObject>(0)?.Convert<SimplyServer>();
+            var server = tile.GetData<Server>(0);
             UpdateContent(content, server);
         }
 
@@ -80,7 +80,7 @@ namespace api.nox.game.Tiles
             Debug.Log("ServerTileManager.OnHide");
         }
 
-        private void UpdateContent(GameObject tile, SimplyServer server)
+        private void UpdateContent(GameObject tile, Server server)
         {
             Reference.GetReference("display", tile).GetComponent<TextLanguage>().UpdateText(new string[] { server.title });
             Reference.GetReference("title", tile).GetComponent<TextLanguage>().UpdateText(new string[] { server.title });
@@ -89,7 +89,7 @@ namespace api.nox.game.Tiles
             if (!string.IsNullOrEmpty(server.icon)) UpdateTexure(icon, server.icon).Forget();
         }
 
-        internal SimplyWebSocket ws;
+        internal WebSocket ws;
 
         internal ServerTileManager()
         {
@@ -107,7 +107,7 @@ namespace api.nox.game.Tiles
             }
         }
 
-        private async UniTask OnServerConnect(SimplyServer server)
+        private async UniTask OnServerConnect(Server server)
         {
             Debug.Log("Server connected: " + server.title);
             ws = await server.GetOrConnect();
@@ -141,7 +141,7 @@ namespace api.nox.game.Tiles
 
         private async UniTask Initialization()
         {
-            var server = GameClientSystem.Instance.NetworkAPI.GetCurrentServer();
+            var server = GameClientSystem.Instance.NetworkAPI.Server.CurrentServer;
             server ??= await GameClientSystem.Instance.NetworkAPI.Server.GetMyServer();
             if (server != null) await OnServerConnect(server);
             else OnServerDisconnect();
@@ -155,7 +155,7 @@ namespace api.nox.game.Tiles
 
         private void OnUserUpdate(JObject data)
         {
-            var user = JsonUtility.FromJson<SimplyUserMe>(data.ToString());
+            var user = JsonUtility.FromJson<UserMe>(data.ToString());
             GameSystem.Instance.CoreAPI.EventAPI.Emit(new NetEventContext("user_update", user));
         }
 

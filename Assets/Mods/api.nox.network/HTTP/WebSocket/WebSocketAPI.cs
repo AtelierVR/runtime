@@ -1,57 +1,27 @@
 using System;
 using System.Collections.Generic;
-using Nox.CCK.Mods;
 
-namespace api.nox.network
+namespace api.nox.network.WebSockets
 {
-    public class WebSocketAPI : ShareObject, IDisposable
+    public class WebSocketAPI : IDisposable
     {
-        private readonly NetworkSystem _mod;
-        internal WebSocketAPI(NetworkSystem mod) => _mod = mod;
-        internal List<WebSocket> _sockets = new();
-
+        internal List<WebSocket> Sockets = new();
         public void Dispose()
         {
-            foreach (var socket in _sockets.ToArray())
+            foreach (var socket in Sockets.ToArray())
                 socket.Dispose();
-            _sockets.Clear();
+            Sockets.Clear();
+            Sockets = null;
         }
 
-        internal WebSocket GetWebSocket(string address) => _sockets.Find(socket => socket.address == address);
-
-        internal WebSocket CreateWebSocket(string address, string ws)
-        {
-            var socket = new WebSocket(address, ws, _mod);
-            return socket;
-        }
-
-        internal void SetWebSocket(WebSocket socket) => _sockets.Add(socket);
-
+        public WebSocket GetWebSocket(string address) => Sockets?.Find(socket => socket.Address == address);
+        public WebSocket CreateWebSocket(string address, string ws) => new(address, ws);
+        internal void SetWebSocket(WebSocket socket) => Sockets?.Add(socket);
         internal void RemoveWebSocket(WebSocket socket)
         {
-            if (_sockets.Contains(socket))
-                _sockets.Remove(socket);
-        }
-
-        [ShareObjectExport] public Func<string, string, ShareObject> SharedCreateWebSocket;
-        [ShareObjectExport] public Action<ShareObject> SharedSetWebSocket;
-        [ShareObjectExport] public Action<ShareObject> SharedRemoveWebSocket;
-        [ShareObjectExport] public Func<string, ShareObject> SharedGetWebSocket;
-
-        public void BeforeExport()
-        {
-            SharedCreateWebSocket = (address, ws) => SharedCreateWebSocket(address, ws);
-            SharedSetWebSocket = socket => SetWebSocket(socket.Convert<WebSocket>());
-            SharedRemoveWebSocket = socket => RemoveWebSocket(socket.Convert<WebSocket>());
-            SharedGetWebSocket = address => GetWebSocket(address);
-        }
-
-        public void AfterExport()
-        {
-            SharedCreateWebSocket = null;
-            SharedSetWebSocket = null;
-            SharedRemoveWebSocket = null;
-            SharedGetWebSocket = null;
+            if (socket == null) return;
+            if (Sockets.Contains(socket))
+                Sockets.Remove(socket);
         }
     }
 }

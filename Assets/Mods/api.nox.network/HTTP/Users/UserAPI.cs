@@ -1,169 +1,118 @@
 using System;
+using System.Collections.Generic;
+using api.nox.network.HTTP;
 using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
-using Nox.CCK;
-using Nox.CCK.Mods;
-using UnityEngine;
-using UnityEngine.Networking;
 
-namespace api.nox.network
+namespace api.nox.network.Users
 {
-    public class UserAPI : ShareObject
+    public class UserAPI
     {
-        private readonly NetworkSystem _mod;
+        public UserMe CurrentUser { get; internal set; }
 
-        internal UserMe currentUser;
-
-        internal UserAPI(NetworkSystem mod) => _mod = mod;
-
-        private async UniTask<UserMe> GetMyUser()
+        public async UniTask<UserMe> GetMyUser()
         {
-            var config = Config.Load();
-            if (!config.Has("token") || !config.Has("gateway")) return null;
-            var req = new UnityWebRequest(string.Format("{0}/api/users/@me", config.Get<string>("gateway")), "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            req.SetRequestHeader("Authorization", string.Format("Bearer {0}", config.Get<string>("token")));
-            try { await req.SendWebRequest(); }
-            catch { }
-            if (req.responseCode != 200) return null;
-            var response = JsonUtility.FromJson<Response<UserMe>>(req.downloadHandler.text);
-            if (response.IsError) return null;
-            response.data.netSystem = _mod;
-            currentUser = response.data;
-            _mod._api.EventAPI.Emit(new NetEventContext("user_update", currentUser));
-            _mod._api.EventAPI.Emit(new NetEventContext("user_fetch", currentUser));
-            return response.data;
-        }
+            if (NetworkSystem.ModInstance == null) throw new AccessViolationException("NetworkSystem not initialized");
+            // GET /api/users/@me
+            var address = NetworkSystem.ModInstance.Auth.CurrentServerAddress;
+            if (address == null) return null;
 
-        public async UniTask<Response<bool>> GetLogout()
-        {
-            var config = Config.Load();
-            if (!config.Has("token") || !config.Has("gateway")) return new Response<bool> { error = new ResponseError { code = 401, message = "Not logged in." } };
-            var req = new UnityWebRequest(string.Format("{0}/api/auth/logout", config.Get<string>("gateway")), "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            req.SetRequestHeader("Authorization", string.Format("Bearer {0}", config.Get<string>("token")));
-            try { await req.SendWebRequest(); }
-            catch { }
-            _mod._api.EventAPI.Emit(new NetEventContext("user_disconnect", currentUser));
-            config.Remove("token");
-            config.Remove("user");
-            config.Remove("gateway");
-            config.Save();
-            currentUser = null;
-            return new Response<bool> { data = true };
-        }
-
-        public async UniTask<UserIntegrity> CreateIntegrity(string address)
-        {
-            var config = Config.Load();
-            if (!config.Has("token") || !config.Has("gateway")) return null;
-            var req = new UnityWebRequest(string.Format("{0}/api/users/@me/integrity", config.Get<string>("gateway")), "PUT") { downloadHandler = new DownloadHandlerBuffer() };
-            req.SetRequestHeader("Content-Type", "application/json");
-            req.SetRequestHeader("Authorization", string.Format("Bearer {0}", config.Get<string>("token")));
-            req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(new UserIntegrityRequest
-            {
-                address = address
-            })));
-            try { await req.SendWebRequest(); }
-            catch { }
-            if (req.responseCode != 200) return null;
-            Debug.Log("oui: " + req.downloadHandler.text);
-            var response = JsonUtility.FromJson<Response<UserIntegrity>>(req.downloadHandler.text);
-            if (response.IsError) return response.data;
-            config.Set($"servers.{Animator.StringToHash(address)}.integrity.token", response.data.token);
-            config.Set($"servers.{Animator.StringToHash(address)}.integrity.expires", response.data.expires);
-            config.Save();
-            return response.data;
-        }
-
-        public async UniTask<UserLogin> PostLogin(string server, string username, string password)
-        {
-            Uri gateway = await Gateway.FindGatewayMaster(server);
-            if (gateway == null) return new UserLogin { error = "Server not found." };
-            var req = new UnityWebRequest(string.Format("{0}/api/auth/login", gateway.OriginalString), "POST") { downloadHandler = new DownloadHandlerBuffer() };
-            req.SetRequestHeader("Content-Type", "application/json");
-            req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(new UserLoginRequest
-            {
-                identifier = username,
-                password = Hashing.Sha256(password)
-            })));
-            try { await req.SendWebRequest(); }
-            catch { }
-            if (req.responseCode != 200) return new UserLogin { error = "An error occured." };
-            var response = JsonUtility.FromJson<Response<UserLogin>>(req.downloadHandler.text);
-            if (response.IsError) return response.data;
-            var config = Config.Load();
-            config.Set("token", response.data.token);
-            config.Set("user", response.data.user);
-            config.Set("gateway", gateway.OriginalString);
-            config.Save();
-            response.data.user.netSystem = _mod;
-            currentUser = response.data.user;
-            _mod._api.EventAPI.Emit(new NetEventContext("user_connect", currentUser));
-            _mod._api.EventAPI.Emit(new NetEventContext("user_update", currentUser));
-            _mod._api.EventAPI.Emit(new NetEventContext("user_fetch", currentUser));
-            return response.data;
-        }
-
-        public async UniTask<UserSearch> SearchUsers(SearchUserData data)
-        {
-            // GET /api/users/search?query={query}&offset={offset}&limit={limit}
-            var User = _mod.GetCurrentUser();
-            var config = Config.Load();
-            var gateway = data.server == User?.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(data.server))?.OriginalString;
+            var gateway = await Gateway.FindGatewayMaster(address);
             if (gateway == null) return null;
-            var req = new UnityWebRequest($"{gateway}/api/users/search?{data.ToParams()}", "GET") { downloadHandler = new DownloadHandlerBuffer() };
-            var token = await _mod._auth.GetToken(data.server);
-            if (token != null) req.SetRequestHeader("Authorization", token.ToHeader());
-            try { await req.SendWebRequest(); }
-            catch { }
-            if (req.responseCode != 200) return null;
-            var res = JsonUtility.FromJson<Response<UserSearch>>(req.downloadHandler.text);
-            if (res.IsError) return null;
-            _mod._api.EventAPI.Emit(new NetEventContext("network.search.user", data, res.data));
-            foreach (var user in res.data.users)
-                _mod._api.EventAPI.Emit(new NetEventContext("user_fetch", user));
-            return res.data;
+
+            var request = new Request(Method.GET, Request.MergeUrl(gateway, "/api/users/@me"));
+
+            var token = await NetworkSystem.ModInstance.Auth.GetToken(address);
+            if (token == null) return null;
+
+            var response = await request.Send<string, Response<UserMe>>(null, new() { { "Authorization", token.ToHeader() } });
+            if (request.IsError || response.IsError) return null;
+
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("user_fetch", response.data));
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("user_update", response.data));
+            NetCache.Set(response.data);
+            CurrentUser = response.data;
+
+            return response.data;
         }
 
-        public async UniTask<UserMe> UpdateUser(UserUpdate user)
+        public async UniTask<User> GetUser(string server, uint id) => await GetUser(server, id.ToString());
+        public async UniTask<User> GetUser(string server, string identifier)
         {
-            var config = Config.Load();
-            if (!config.Has("token") || !config.Has("gateway")) return null;
-            var req = new UnityWebRequest($"{config.Get<string>("gateway")}/api/users/@me", "POST") { downloadHandler = new DownloadHandlerBuffer() };
-            req.SetRequestHeader("Authorization", string.Format("Bearer {0}", config.Get<string>("token")));
-            req.SetRequestHeader("Content-Type", "application/json");
-            req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(user)));
-            try { await req.SendWebRequest(); }
-            catch { return null; }
-            if (req.responseCode != 200) return null;
-            var res = JsonUtility.FromJson<Response<UserMe>>(req.downloadHandler.text);
-            if (res.IsError) return null;
-            res.data.netSystem = _mod;
-            currentUser = res.data;
-            _mod._api.EventAPI.Emit(new NetEventContext("user_update", currentUser));
-            _mod._api.EventAPI.Emit(new NetEventContext("user_fetch", currentUser));
-            return res.data;
+            if (NetworkSystem.ModInstance == null) throw new AccessViolationException("NetworkSystem not initialized");
+            // GET /api/users/{identifier}
+            var gateway = await Discover.GetGateway(server);
+            if (gateway == null) return null;
+
+            var request = new Request(Method.GET, Request.MergeUrl(gateway, $"/api/users/{identifier}"));
+
+            var token = await NetworkSystem.ModInstance.Auth.GetToken(server);
+            var header = new Dictionary<string, string> { };
+            if (token != null) header.Add("Authorization", token.ToHeader());
+
+            var response = await request.Send<string, Response<User>>(null, header);
+            if (request.IsError || response.IsError) return null;
+
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("user_fetch", response.data));
+            NetCache.Set(response.data);
+
+            return response.data;
         }
 
-        [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedSearchUsers;
-        [ShareObjectExport] public Func<UniTask<ShareObject>> SharedGetMyUser;
-        [ShareObjectExport] public Func<ShareObject, UniTask<ShareObject>> SharedUpdateUser;
-        [ShareObjectExport] public Func<UniTask<bool>> SharedGetLogout;
-        [ShareObjectExport] public Func<string, string, string, UniTask<ShareObject>> SharedPostLogin;
 
-        public void BeforeExport()
+
+        public async UniTask<UserResponse> SearchUsers(SearchRequest data)
         {
-            SharedSearchUsers = async (data) => await SearchUsers(data.Convert<SearchUserData>());
-            SharedUpdateUser = async (user) => await UpdateUser(user.Convert<UserUpdate>());
-            SharedGetMyUser = async () => await GetMyUser();
-            SharedGetLogout = async () => (await GetLogout()).data == true;
-            SharedPostLogin = async (server, username, password) => await PostLogin(server, username, password);
+            if (NetworkSystem.ModInstance == null) throw new AccessViolationException("NetworkSystem not initialized");
+            // GET /api/users/search?{data.ToParams()}
+            var gateway = await Discover.GetGateway(data.server);
+            if (gateway == null) return null;
+
+            var request = new Request(Method.GET, Request.MergeUrl(gateway, $"/api/users/search?{data.ToParams()}"));
+
+            var token = await NetworkSystem.ModInstance.Auth.GetToken(data.server);
+            var header = new Dictionary<string, string> { };
+            if (token != null) header.Add("Authorization", token.ToHeader());
+
+            var response = await request.Send<string, Response<UserResponse>>(null, header);
+            if (request.IsError || response.IsError) return null;
+
+            foreach (var user in response.data.users)
+            {
+                NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("user_fetch", user));
+                NetCache.Set(user);
+            }
+
+            return response.data;
         }
 
-        public void AfterExport()
+        public async UniTask<UserMe> UpdateMyUser(UserUpdate user)
         {
-            SharedGetMyUser = null;
-            SharedSearchUsers = null;
-            SharedUpdateUser = null;
+            if (NetworkSystem.ModInstance == null) throw new AccessViolationException("NetworkSystem not initialized");
+            // POST /api/users/@me
+            var server = NetworkSystem.ModInstance.Auth.CurrentServerAddress;
+            if (server == null) return null;
+
+            var gateway = await Discover.GetGateway(server);
+            if (gateway == null) return null;
+
+            var token = await NetworkSystem.ModInstance.Auth.GetToken(server);
+            if (token == null) return null;
+
+            var request = new Request(Method.POST, Request.MergeUrl(gateway, "/api/users/@me"));
+
+            var response = await request.Send<string, Response<UserMe>>(user.ToJson(), new() {
+                { "Authorization", token.ToHeader() },
+                { "Content-Type", "application/json" }
+            });
+            if (request.IsError || response.IsError) return null;
+
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("user_update", response.data));
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("user_fetch", response.data));
+            NetCache.Set(response.data);
+            CurrentUser = response.data;
+
+            return response.data;
         }
     }
 }

@@ -1,27 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using api.nox.network.Utils;
 
-namespace api.nox.network.Instances
+namespace api.nox.network.RelayInstances
 {
-    public class InstanceManager : Manager<Instance>
+    public class RelayInstanceManager : Manager<RelayInstance>
     {
-        public static Instance Get(ushort internalId, ushort relayId) => Cache
+        public static RelayInstance Get(ushort internalId, ushort relayId) => Cache
             .FirstOrDefault(instance => instance.InternalId == internalId && instance.RelayId == relayId);
-        public static List<Instance> Get(ushort relayId) => Cache
+        public static List<RelayInstance> Get(ushort relayId) => Cache
             .Where(instance => instance.RelayId == relayId).ToList();
 
         public static void Update()
         {
-            foreach (var instance in Cache)
-                instance.Update();
+            foreach (var RelayInstance in Cache)
+                RelayInstance.Update();
         }
 
         public static void Dispose()
         {
-            foreach (var instance in Cache.ToList())
-                instance.Dispose();
+            foreach (var RelayInstance in Cache.ToList())
+                RelayInstance.Dispose();
             Cache.Clear();
         }
     }

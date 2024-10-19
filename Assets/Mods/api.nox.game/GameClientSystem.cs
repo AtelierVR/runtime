@@ -7,9 +7,9 @@ using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Worlds;
-using Nox.SimplyLibs;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using api.nox.network;
 
 namespace api.nox.game
 {
@@ -18,9 +18,6 @@ namespace api.nox.game
         internal static GameClientSystem Instance;
         internal static ClientModCoreAPI CoreAPI => Instance.coreAPI;
 
-
-
-
         internal ClientModCoreAPI coreAPI;
         private HomeTileManager homeTile;
         private UserTileManager userTile;
@@ -28,11 +25,13 @@ namespace api.nox.game
         private WorldTileManager worldTile;
         private MakeInstanceTileManager makeinstance;
         internal NavigationTileManager navigationTile;
+        private SettingTileManager settingTile;
         private InstanceTileManager instance;
         private EventSubscription tilesub;
         private EventSubscription tilegotosub;
         private EventSubscription sessionchangedsub;
-        internal SimplyNetworkAPI NetworkAPI => coreAPI.ModAPI.GetMod("network")?.GetMainClasses().OfType<ShareObject>().FirstOrDefault()?.Convert<SimplyNetworkAPI>();
+        
+        internal NetworkSystem NetworkAPI => coreAPI.ModAPI.GetMod("network")?.GetMainClasses().OfType<NetworkSystem>().FirstOrDefault();
 
         public void OnInitializeClient(ClientModCoreAPI api)
         {
@@ -63,6 +62,7 @@ namespace api.nox.game
             userTile = new UserTileManager();
             serverTile = new ServerTileManager();
             navigationTile = new NavigationTileManager();
+            settingTile = new SettingTileManager();
             makeinstance = new MakeInstanceTileManager();
 
             // Subscribe to the tile events
@@ -116,6 +116,9 @@ namespace api.nox.game
                 case "game.instance":
                     instance.SendTile(context);
                     break;
+                case "game.settings":
+                    settingTile.SendTile(context);
+                    break;
             }
         }
 
@@ -150,6 +153,7 @@ namespace api.nox.game
             serverTile.OnDispose();
             worldTile.OnDispose();
             navigationTile.OnDispose();
+            settingTile.OnDispose();
             coreAPI.EventAPI.Unsubscribe(tilesub);
             coreAPI.EventAPI.Unsubscribe(tilegotosub);
             coreAPI.EventAPI.Unsubscribe(sessionchangedsub);
