@@ -65,9 +65,10 @@ namespace api.nox.game.LocationIP
 
     public class LocationIP
     {
-        public static async UniTask<IPData> FetchLocation(string ip)
+        public static async UniTask<IPData> FetchLocation(string uri)
         {
-            UriHostNameType uriType = Uri.CheckHostName(ip);
+            var ip = uri;
+            UriHostNameType uriType = Uri.CheckHostName(uri);
             switch (uriType)
             {
                 case UriHostNameType.IPv4:
@@ -79,6 +80,8 @@ namespace api.nox.game.LocationIP
                 default:
                     return null;
             }
+
+            Debug.Log("Locatize [IP]: " + ip + " from [URI]: " + uri);
 
             var url = $"https://ipwho.is/{ip}";
             var request = new UnityEngine.Networking.UnityWebRequest(url)

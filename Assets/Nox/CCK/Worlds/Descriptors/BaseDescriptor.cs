@@ -15,6 +15,7 @@ namespace Nox.CCK.Worlds
         [SerializeField] private GameObject[] data_Spawns;
         [SerializeField] private double data_RespawnHeight;
         [SerializeField] protected DescriptorType data_Type = DescriptorType.None;
+        [SerializeField] private AudioChannelDescriptor[] data_audios;
 
         public static BaseDescriptor[] GetDescriptors()
         {
@@ -37,6 +38,30 @@ namespace Nox.CCK.Worlds
                 if (descriptor != null) break;
             }
             return descriptor;
+        }
+
+        public static AudioChannel[] GetAudioChannels()
+        {
+            List<AudioChannel> channels = new();
+            for (var i = 0; i < SceneManager.sceneCount; i++)
+            {
+                var scene = SceneManager.GetSceneAt(i);
+                var fcs = GetAudioChannels(scene);
+                foreach (var fc in fcs)
+                    channels.Add(fc);
+            }
+            return channels.ToArray();
+        }
+
+        public static AudioChannel[] GetAudioChannels(Scene scene)
+        {
+            List<AudioChannel> channels = new();
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                var channel = Finder.FindComponent<AudioChannel>(root);
+                if (channel != null) channels.Add(channel);
+            }
+            return channels.ToArray();
         }
 
         public uint SequentialIndex = 0;
@@ -65,17 +90,18 @@ namespace Nox.CCK.Worlds
             foreach (var entry in netSet)
                 entry.Value.networkId = entry.Key;
             NetworkObjects = netSet.Values.ToList();
-            var spawnSet = EstimateSpawns();
-            Spawns = spawnSet.Values.ToList();
             data_Type = DescriptorType.Main;
             data_NetworkObjects = NetworkObjects.ToArray();
-            data_Spawns = Spawns.ToArray();
+            data_Spawns = EstimateSpawns().Values.ToArray();
             data_SpawnType = SpawnType;
             data_RespawnHeight = RespawnHeight;
+
+            data_audios = EstimateAudioChannels().Values.ToArray();
         }
 
         public List<NetworkObject> NetworkObjects = new();
         public List<GameObject> Spawns = new();
+        public List<AudioChannelDescriptor> AudioChannels = new();
         public SpawnType SpawnType = SpawnType.First;
         public double RespawnHeight = -100;
 
@@ -110,6 +136,21 @@ namespace Nox.CCK.Worlds
             return spawnsDict;
         }
 
+        public Dictionary<string, AudioChannelDescriptor> EstimateAudioChannels()
+        {
+            var audioSet = new HashSet<AudioChannelDescriptor>();
+            foreach (var audio in AudioChannels)
+                if (audio != null && !audioSet.Contains(audio)) audioSet.Add(audio);
+            var audioDict = new Dictionary<string, AudioChannelDescriptor>();
+            for (byte i = 0; i < audioSet.Count; i++)
+            {
+                string estimatedId = choice(audioSet.ToArray()[i].id, i.ToString());
+                while (audioDict.ContainsKey(estimatedId)) estimatedId += "_";
+                audioDict.Add(estimatedId, audioSet.ToArray()[i]);
+            }
+            return audioDict;
+        }
+
         public List<NetworkObject> GetNetworkObjects()
         {
             if (IsCompiled) return (data_NetworkObjects ?? new NetworkObject[0]).ToList();
@@ -132,6 +173,12 @@ namespace Nox.CCK.Worlds
         {
             if (IsCompiled) return data_RespawnHeight;
             return RespawnHeight;
+        }
+
+        public List<AudioChannelDescriptor> GetAudioChannelDescriptors()
+        {
+            if (IsCompiled) return (data_audios ?? new AudioChannelDescriptor[0]).ToList();
+            return AudioChannels;
         }
 
         public virtual void OnDrawGizmos()
@@ -186,6 +233,7 @@ namespace Nox.CCK.Worlds
         public List<GameObject> GetSpawns() => ( data_Spawns ?? new GameObject[0]).ToList();
         public SpawnType GetSpawnType() => data_SpawnType == SpawnType.None ? SpawnType.First : data_SpawnType;
         public double GetRespawnHeight() => data_RespawnHeight;
+        public List<AudioChannelDescriptor> GetAudioChannelDescriptors() => (data_audios ?? new AudioChannelDescriptor[0]).ToList();
 #endif
     }
 
@@ -203,5 +251,12 @@ namespace Nox.CCK.Worlds
         None = 0,
         Main = 1,
         Sub = 2
+    }
+
+    public class AudioChannelDescriptor
+    {
+        public string id;
+        public string title_key;
+        public bool is_world_channel;
     }
 }

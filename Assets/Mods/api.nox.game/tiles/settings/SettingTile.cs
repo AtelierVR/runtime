@@ -1,25 +1,31 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using api.nox.game.Settings;
 using api.nox.game.UI;
 using Nox.CCK;
 using Nox.CCK.Mods.Events;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace api.nox.game.Tiles {
-    
+namespace api.nox.game.Tiles
+{
+
     internal class SettingTileManager : TileManager
     {
         internal Dictionary<string, SettingHandler> settingHandlers = new();
         private EventSubscription _sub;
+        private GraphicSettings graphic;
 
         internal SettingTileManager()
         {
             _sub = GameClientSystem.CoreAPI.EventAPI.Subscribe("game.setting", OnSettingHandler);
+            graphic = new GraphicSettings();
+            graphic.LoadFromConfig();
+            graphic.SaveToConfig();
         }
 
-        
+
         private void OnSettingHandler(EventData context)
         {
             if (context.Data[0] is not SettingHandler handler) return;
@@ -43,7 +49,7 @@ namespace api.nox.game.Tiles {
             settingHandlers = null;
         }
 
-        
+
         internal void SendTile(EventData context)
         {
             var tile = new TileObject() { id = "api.nox.game.settings", context = context };
@@ -54,7 +60,7 @@ namespace api.nox.game.Tiles {
             MenuManager.Instance.SendTile(tile.MenuId, tile);
         }
 
-        
+
         internal GameObject OnGetContent(TileObject tile, Transform tf)
         {
             var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.settings");
@@ -64,7 +70,7 @@ namespace api.nox.game.Tiles {
             return content;
         }
 
-        
+
         internal void OnDisplay(TileObject tile, GameObject content)
         {
             Debug.Log("NavigationTileManager.OnDisplay");
@@ -75,7 +81,7 @@ namespace api.nox.game.Tiles {
 
         private void UpdateContent(TileObject tile, GameObject content)
         {
-            
+
         }
 
         private void OnSelectHandler(TileObject tile, GameObject content, string id)

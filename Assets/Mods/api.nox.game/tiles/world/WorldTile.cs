@@ -399,6 +399,7 @@ namespace api.nox.game.Tiles
 
         private async UniTask OnClickRefreshInstances(WorldTileObject tile, GameObject content)
         {
+            Debug.Log("WorldTileManager.OnClickRefreshInstances");
             var refresh_instances = Reference.GetReference("refresh_instances", content).GetComponent<Button>();
             if (!refresh_instances.interactable) return;
             refresh_instances.interactable = false;
@@ -408,7 +409,7 @@ namespace api.nox.game.Tiles
             if (servers_t == null) return;
             var server_d = servers_t.ToObject<Dictionary<string, NavigationWorkerInfo>>();
             var servers = server_d.Values.ToArray();
-            var workers = servers.Where(x => x.navigation && x.features.Contains("instance")).ToArray();
+            var workers = servers.Where(x => (x.navigation || x.address == config.Get("server", "")) && x.features.Contains("instance")).ToArray();
 
             List<UniTask> tasks = new();
 

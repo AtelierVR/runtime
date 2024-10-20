@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace api.nox.game.Tiles
+namespace api.nox.game.Settings
 {
     
     public class SettingHandler 
