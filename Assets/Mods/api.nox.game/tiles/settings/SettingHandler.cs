@@ -3,12 +3,15 @@ using UnityEngine;
 
 namespace api.nox.game.Settings
 {
-    
-    public class SettingHandler 
+
+    public abstract class SettingHandler
     {
         public string id;
         public string text_key;
         public string title_key;
+        public string description_key;
+        public Texture2D icon;
+
         public Func<SettingPage[]> GetPages;
     }
 
@@ -20,7 +23,7 @@ namespace api.nox.game.Settings
 
         public SettingGroup[] groups;
     }
-    
+
 
     public class SettingGroup
     {

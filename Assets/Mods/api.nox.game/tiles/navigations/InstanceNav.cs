@@ -18,13 +18,6 @@ namespace api.nox.game.Tiles
         {
             this.navigationTile = navigationTile;
             GenerateHandler();
-            Initialization().Forget();
-        }
-
-        private async UniTask Initialization()
-        {
-            await UniTask.DelayFrame(1);
-            UpdateHandler();
         }
 
         private void GenerateHandler()
@@ -113,7 +106,7 @@ namespace api.nox.game.Tiles
             };
         }
 
-        private void UpdateHandler()
+        internal void UpdateHandler()
         {
             GameClientSystem.CoreAPI.EventAPI.Emit("game.navigation", _handler);
         }

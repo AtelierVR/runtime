@@ -2,7 +2,6 @@ using System.Linq;
 using api.nox.game.Controllers;
 using api.nox.game.Tiles;
 using api.nox.game.UI;
-using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
@@ -74,6 +73,8 @@ namespace api.nox.game
         {
             Debug.Log("GameClientSystem PostInitialize");
             MenuManager.Instance.GetViewPortMenu().IsVisible = false;
+            navigationTile.PostInitialize();
+            settingTile.PostInitialize();
         }
 
         public void OnGotoTile(EventData context)
@@ -161,8 +162,6 @@ namespace api.nox.game
             MenuManager.Instance.Dispose();
             WorldManager.UnloadAllWorlds();
         }
-
-        private TileObject _currentTile;
     }
 
 

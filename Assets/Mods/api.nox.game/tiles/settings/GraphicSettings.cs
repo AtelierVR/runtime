@@ -6,6 +6,19 @@ namespace api.nox.game.Settings
 {
     public class GraphicSettings : SettingHandler
     {
+        internal GraphicSettings()
+        {
+            id = "game.graphic";
+            text_key = "settings.graphic";
+            title_key = "settings.graphic";
+            GetPages = GetInternalPages;
+        }
+
+        private SettingPage[] GetInternalPages()
+        {
+            return new SettingPage[0];
+        }
+
         int TargetFrameRate
         {
             get
@@ -231,11 +244,19 @@ namespace api.nox.game.Settings
             // Level of detail
             config.Set("settings.graphic.lod_bias", LevelOfDetail);
 
-
-
-
-
             config.Save();
+        }
+
+        internal void UpdateHandler()
+        {
+            Debug.Log("GraphicSettings.UpdateHandler");
+            GameClientSystem.CoreAPI.EventAPI.Emit("game.setting", this);
+        }
+
+        public void OnDispose()
+        {
+            GetPages = null;
+            UpdateHandler();
         }
 
     }

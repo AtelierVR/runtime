@@ -11,12 +11,13 @@ using System.Threading;
 using System;
 using Object = UnityEngine.Object;
 using api.nox.game.UI;
+using api.nox.network.Users;
 
 namespace api.nox.game.Tiles
 {
     internal class NavigationTileManager : TileManager
     {
-        internal Dictionary<string, NavigationHandler> navigationHandlers = new();
+        internal Dictionary<string, NavigationHandler> navigationHandlers = null;
         private EventSubscription _sub;
         internal UserNav UserNav;
         internal WorldNav WorldNav;
@@ -31,6 +32,16 @@ namespace api.nox.game.Tiles
             WorldNav = new WorldNav(this);
             ServerNav = new ServerNav(this);
             InstanceNav = new InstanceNav(this);
+            navigationHandlers = new Dictionary<string, NavigationHandler>();
+        }
+        
+        internal void PostInitialize()
+        {
+            Debug.Log("NavigationTileManager.PostInitialize");
+            UserNav.UpdateHandler();
+            WorldNav.UpdateHandler();
+            ServerNav.UpdateHandler();
+            InstanceNav.UpdateHandler();
         }
 
         private void OnNavigationHandler(EventData context)
