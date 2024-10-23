@@ -211,6 +211,86 @@ MonoBehaviour:
       value: "Paramètres"
     - key: dashboard.settings.subtitle
       value: "Exemple de paramètres"
+    - key: setting.range.value
+      value: "{0}"
+    - key: setting.range.value.float
+      value: "{1}"
+    - key: setting.range.value.percent
+      value: "{2}%"
+    - key: setting.range.value.percent.float
+      value: "{3}%"
+    - key: setting.range.value.binary
+      value: "0b{4}"
+    - key: setting.range.value.hex
+      value: "0x{5}"
+    - key: setting.volume.value
+      value: "{0}%"
+    - key: setting.graphic.text
+      value: "Graphismes"
+    - key: setting.graphic.title
+      value: "Paramètres graphiques"
+    - key: setting.graphic.basic.title
+      value: "Général"
+    - key: setting.graphic.quality.title
+      value: "Qualité"
+    - key: setting.graphic.anti_aliasing.title
+      value: "Anti-aliasing"
+    - key: setting.graphic.shadow.title
+      value: "Ombres"
+    - key: setting.graphic.shadow_distance.title
+      value: "Distance des ombres"
+    - key: setting.graphic.shadow.distance.value
+      value: "{1} m"
+    - key: setting.graphic.shadow_quality.title
+      value: "Qualité des ombres"
+    - key: setting.graphic.shadow_projection.title
+      value: "Projection des ombres"
+    - key: setting.graphic.shadow_cascades.title
+      value: "Cascades des ombres"
+    - key: setting.graphic.advanced.title
+      value: "Avancé"
+    - key: setting.graphic.lodbias.title
+      value: "Niveau de détail"
+    - key: setting.graphic.particule_raycast_budget.title
+      value: "Budget de raycast des particules"
+    - key: setting.graphic.pixel_light_count.title
+      value: "Nombre de lumières par pixel"
+    - key: setting.graphic.anisotropic_filtering.title
+      value: "Filtrage anisotrope"
+    - key: setting.graphic.global_texture_mipmap_limit.title
+      value: "Limite de mipmaps des textures"
+    - key: setting.audio.text
+      value: "Audio"
+    - key: setting.audio.title
+      value: "Paramètres audio"
+    - key: setting.audio.volume.title
+      value: "Volumes"
+    - key: audio.master
+      value: "Principal"
+    - key: audio.music
+      value: "Musique"
+    - key: audio.effects
+      value: "Effets"
+    - key: audio.voice
+      value: "Voix"
+    - key: audio.ambient
+      value: "Ambiance"
+    - key: audio.sfx
+      value: "SFX"
+    - key: audio.ui
+      value: "UI"
+    - key: audio.player
+      value: "Joueur"
+    - key: audio.world
+      value: "Monde"
+    - key: setting.audio.microphone.title
+      value: "Microphone"
+    - key: setting.audio.microphone.volume.title
+      value: "Volume de sortie"
+    - key: setting.audio.microphone.current_device.title
+      value: "Périphérique actuel"
+    - key: setting.audio.microphone.noise_suppression.title
+      value: "Suppression de bruit"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home
@@ -382,6 +462,22 @@ MonoBehaviour:
       value: "Settings"
     - key: dashboard.settings.subtitle
       value: "Example settings"
+    - key: setting.range.value
+      value: "{0}"
+    - key: setting.range.value.float
+      value: "{1}"
+    - key: setting.range.value.percent
+      value: "{2}%"
+    - key: setting.range.value.percent.float
+      value: "{3}%"
+    - key: setting.range.value.binary
+      value: "0b{4}"
+    - key: setting.range.value.hex
+      value: "0x{5}"
+    - key: setting.graphic.shadow.distance.value
+      value: "{1}m"
+    - key: setting.volume.value
+      value: "{0}%"
 
 
       

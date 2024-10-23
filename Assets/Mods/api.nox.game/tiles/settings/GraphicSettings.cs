@@ -1,3 +1,4 @@
+using System;
 using Nox.CCK;
 using UnityEngine;
 
@@ -9,14 +10,132 @@ namespace api.nox.game.Settings
         internal GraphicSettings()
         {
             id = "game.graphic";
-            text_key = "settings.graphic";
-            title_key = "settings.graphic";
             GetPages = GetInternalPages;
         }
 
         private SettingPage[] GetInternalPages()
         {
-            return new SettingPage[0];
+            return new SettingPage[]
+            {
+                new() {
+                    id = "",
+                    text_key = "setting.graphic.text",
+                    title_key = "setting.graphic.title",
+                    description_key = "setting.graphic.description",
+                    groups = new SettingGroup[] {
+                        new() {
+                            id = "basic",
+                            title_key = "setting.graphic.basic.title",
+                            description_key = "setting.graphic.basic.description",
+                            entries = new SettingEntry[] {
+                                new SelectSettingEntry() {
+                                    id = "quality" ,
+                                    title_key = "setting.graphic.quality.title",
+                                    description_key = "setting.graphic.quality.description",
+                                    value = Quality,
+                                    options = QualityNames
+                                },
+                                new SelectSettingEntry() {
+                                    id = "anti_aliasing",
+                                    title_key = "setting.graphic.anti_aliasing.title",
+                                    description_key = "setting.graphic.anti_aliasing.description",
+                                    value = AntiAliasing,
+                                    options = AntiAliasingNames
+                                }
+                            }
+                        },
+                        new() {
+                            id = "shadow",
+                            title_key = "setting.graphic.shadow.title",
+                            description_key = "setting.graphic.shadow.description",
+                            entries = new SettingEntry[] {
+                                new SelectSettingEntry() {
+                                    id = "quality",
+                                    title_key = "setting.graphic.shadow_quality.title",
+                                    description_key = "setting.graphic.shadow_quality.description",
+                                    value = (int)ShadowQuality,
+                                    options = Enum.GetNames(typeof(ShadowQuality))
+                                },
+                                new RangeSettingEntry() {
+                                    id = "distance",
+                                    title_key = "setting.graphic.shadow_distance.title",
+                                    description_key = "setting.graphic.shadow_distance.description",
+                                    value = ShadowDistance,
+                                    value_key = "setting.graphic.shadow.distance.value",
+                                    min = 0f,
+                                    max = 200f
+                                },
+                                new SelectSettingEntry() {
+                                    id = "projection",
+                                    title_key = "setting.graphic.shadow_projection.title",
+                                    description_key = "setting.graphic.shadow_projection.description",
+                                    value = (int)ShadowProjection,
+                                    options = Enum.GetNames(typeof(ShadowProjection))
+                                },
+                                new RangeSettingEntry() {
+                                    id = "cascades",
+                                    title_key = "setting.graphic.shadow_cascades.title",
+                                    description_key = "setting.graphic.shadow_cascades.description",
+                                    value = ShadowCascades,
+                                    min = 0f,
+                                    max = 4f,
+                                    step = 1f
+                                }
+                            }
+                        },
+                        new() {
+                            id = "advanced",
+                            title_key = "setting.graphic.advanced.title",
+                            description_key = "setting.graphic.advanced.description",
+                            entries = new SettingEntry[] {
+                                new RangeSettingEntry() {
+                                    id = "lodbias",
+                                    title_key = "setting.graphic.lodbias.title",
+                                    description_key = "setting.graphic.lodbias.description",
+                                    value = LodBias,
+                                    value_key = "setting.range.value.percent.float",
+                                    min = 0.1f,
+                                    max = 2f
+                                },
+                                new RangeSettingEntry() {
+                                    id = "particule_raycast_budget",
+                                    title_key = "setting.graphic.particule_raycast_budget.title",
+                                    description_key = "setting.graphic.particule_raycast_budget.description",
+                                    value = ParticleRaycastBudget,
+                                    min = 0f,
+                                    max = 4096f,
+                                    step = 32f
+                                },
+                                new RangeSettingEntry() {
+                                    id = "pixel_light_count",
+                                    title_key = "setting.graphic.pixel_light_count.title",
+                                    description_key = "setting.graphic.pixel_light_count.description",
+                                    value = PixelLightCount,
+                                    min = 0f,
+                                    max = 8f,
+                                    step = 1f
+                                },
+                                new SelectSettingEntry() {
+                                    id = "anisotropic_filtering",
+                                    title_key = "setting.graphic.anisotropic_filtering.title",
+                                    description_key = "setting.graphic.anisotropic_filtering.description",
+                                    value = (int)AnisotropicFiltering,
+                                    options = Enum.GetNames(typeof(AnisotropicFiltering))
+                                },
+                                new RangeSettingEntry() {
+                                    id = "global_texture_mipmap_limit",
+                                    title_key = "setting.graphic.global_texture_mipmap_limit.title",
+                                    description_key = "setting.graphic.global_texture_mipmap_limit.description",
+                                    value = GlobalTextureMipmapLimit,
+                                    min = -2f,
+                                    max = 4f,
+                                    step = 1f
+                                }
+                            }
+                        }
+                    }
+                }
+            };
         }
 
         int TargetFrameRate
@@ -59,6 +178,8 @@ namespace api.nox.game.Settings
             set => QualitySettings.antiAliasing = value;
         }
 
+        string[] AntiAliasingNames => new string[] { "Off", "2x", "4x", "8x" };
+
         int ResolutionWidth
         {
             get => Screen.width;
@@ -82,6 +203,8 @@ namespace api.nox.game.Settings
             get => QualitySettings.GetQualityLevel();
             set => QualitySettings.SetQualityLevel(value);
         }
+
+        string[] QualityNames => QualitySettings.names;
 
         float ShadowDistance
         {
@@ -144,7 +267,7 @@ namespace api.nox.game.Settings
         //     set => Camera.main.nearClipPlane = value;
         // }
 
-        float LevelOfDetail
+        float LodBias
         {
             get => QualitySettings.lodBias;
             set => QualitySettings.lodBias = value;
@@ -197,7 +320,7 @@ namespace api.nox.game.Settings
             // NearDistance = config.Get("settings.graphic.near_distance", NearDistance);
 
             // Level of detail
-            LevelOfDetail = config.Get("settings.graphic.lod_bias", LevelOfDetail);
+            LodBias = config.Get("settings.graphic.lodbias", LodBias);
 
         }
 
@@ -242,7 +365,7 @@ namespace api.nox.game.Settings
             // config.Set("settings.graphic.near_distance", NearDistance);
 
             // Level of detail
-            config.Set("settings.graphic.lod_bias", LevelOfDetail);
+            config.Set("settings.graphic.lodbias", LodBias);
 
             config.Save();
         }

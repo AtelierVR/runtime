@@ -103,7 +103,7 @@ namespace api.nox.game.Tiles
 
         internal GameObject OnGetContent(TileObject tile, Transform tf)
         {
-            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.navigation");
+            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/navigation/content");
             pf.SetActive(false);
             var content = Object.Instantiate(pf, tf);
             content.name = "api.nox.game.navigation";
@@ -147,7 +147,7 @@ namespace api.nox.game.Tiles
             var workers = handler.GetWorkers();
             if (workers.Length == 0) return;
             IsFetching = new List<CancellationTokenSource>();
-            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/navigation.container");
+            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/navigation/container");
             var res = Reference.GetReference("resultats", content);
             foreach(var c in IsFetching)
                 c.Cancel();
@@ -251,7 +251,7 @@ namespace api.nox.game.Tiles
             }
             foundobj.SetActive(true);
             messageobj.SetActive(false);
-            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/navigation.result");
+            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/navigation/result");
             var refs = Reference.GetReference("results", obj);
             foreach (Transform child in refs.transform)
                 Object.Destroy(child.gameObject);
@@ -292,11 +292,10 @@ namespace api.nox.game.Tiles
 
         private void UpdateContent(TileObject tile, GameObject content)
         {
-            Debug.Log("Updating navigation tile");
             var searcher = Reference.GetReference("searcher", content);
             foreach (Transform child in searcher.transform)
                 Object.Destroy(child.gameObject);
-            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/navigation.searcher");
+            var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/navigation/list");
             foreach (var handler in navigationHandlers.Values)
             {
                 var id = handler.id;
@@ -304,8 +303,7 @@ namespace api.nox.game.Tiles
                 var go = Object.Instantiate(pf, searcher.transform);
                 var button = Reference.GetReference("button", go).GetComponent<Button>();
                 button.onClick.AddListener(() => OnSelectHandler(tile, content, id));
-                var title = Reference.GetReference("title", go).GetComponent<TextLanguage>();
-                title.key = handler.text_key;
+                Reference.GetReference("text", go).GetComponent<TextLanguage>().UpdateText(handler.text_key);
             }
         }
     }

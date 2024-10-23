@@ -438,7 +438,7 @@ GameObject:
   - component: {fileID: 4752869434114202145}
   - component: {fileID: 906689383654602686}
   m_Layer: 5
-  m_Name: navigation.searcher
+  m_Name: searcher
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using Nox.CCK;
 using UnityEngine;
@@ -55,8 +56,6 @@ namespace api.nox.game.Settings
         internal AudioSettings()
         {
             id = "game.audio";
-            text_key = "settings.audio";
-            title_key = "settings.audio";
             GetPages = GetInternalPages;
 
             Volume = new AudioGroup
@@ -76,8 +75,8 @@ namespace api.nox.game.Settings
                     },
                     new AudioGroup
                     {
-                        Id = "sfx",
-                        Name_Key = "audio.sfx",
+                        Id = "world",
+                        Name_Key = "audio.world",
                         Value = 1,
                         IsMuted = false
                     },
@@ -87,19 +86,56 @@ namespace api.nox.game.Settings
                         Name_Key = "audio.voice",
                         Value = 1,
                         IsMuted = false
+                    },
+                    new AudioGroup
+                    {
+                        Id = "ambient",
+                        Name_Key = "audio.ambient",
+                        Value = 1,
+                        IsMuted = false
+                    },
+                    new AudioGroup
+                    {
+                        Id = "sfx",
+                        Name_Key = "audio.sfx",
+                        Value = 1,
+                        IsMuted = false
+                    },
+                    new AudioGroup
+                    {
+                        Id = "ui",
+                        Name_Key = "audio.ui",
+                        Value = 1,
+                        IsMuted = false
+                    },
+                    new AudioGroup
+                    {
+                        Id = "player",
+                        Name_Key = "audio.player",
+                        Value = 1,
+                        IsMuted = false
                     }
                 }
             };
         }
+
+        public float MicrophoneVolume = 1;
+        public bool MicrophoneMuted = false;
+        public bool NoiseSuppression = false;
 
 
         public void LoadFromConfig()
         {
             var config = Config.Load();
 
-            var audio = config.Get("settings.audio")?.ToObject<JObject>();
+            var audio = config.Get("settings.audio.volumes")?.ToObject<JObject>();
             if (audio == null)
                 return;
+
+            MicrophoneVolume = config.Get("settings.audio.microphone.volume", MicrophoneVolume);
+            MicrophoneMuted = config.Get("settings.audio.microphone.muted", MicrophoneMuted);
+            NoiseSuppression = config.Get("settings.audio.microphone.noise_suppression", NoiseSuppression);
+
 
             LoadFromConfig(Volume, audio);
         }
@@ -127,7 +163,11 @@ namespace api.nox.game.Settings
 
             var audio = new JObject();
             SaveToConfig(Volume, audio);
-            config.Set("settings.audio", audio);
+            config.Set("settings.audio.volumes", audio);
+            config.Set("settings.audio.microphone.volume", MicrophoneVolume);
+            config.Set("settings.audio.microphone.muted", MicrophoneMuted);
+            config.Set("settings.audio.microphone.noise_suppression", NoiseSuppression);
+        
             config.Save();
         }
 
@@ -150,7 +190,70 @@ namespace api.nox.game.Settings
 
         private SettingPage[] GetInternalPages()
         {
-            return new SettingPage[0];
+            return new SettingPage[]
+            {
+                new() {
+                    id = "",
+                    text_key = "setting.audio.text",
+                    title_key = "setting.audio.title",
+                    description_key = "setting.audio.description",
+                    groups = new SettingGroup[] {
+                        new() {
+                            id = "volume",
+                            title_key = "setting.audio.volume.title",
+                            description_key = "setting.audio.volume.description",
+                            entries = GenerateEntries()
+                        },
+                        new() {
+                            id = "microphone",
+                            title_key = "setting.audio.microphone.title",
+                            description_key = "setting.audio.microphone.description",
+                            entries = new SettingEntry[] {
+                                new SelectSettingEntry() {
+                                    id = "current_device",
+                                    title_key = "setting.audio.microphone.current_device.title",
+                                    description_key = "setting.audio.microphone.current_device.description",
+                                    value = 0,
+                                    options = new[] { "Default" }
+                                },
+                                new VolumeSettingEntry() {
+                                    id = "volume",
+                                    title_key = "setting.audio.microphone.volume.title",
+                                    description_key = "setting.audio.microphone.volume.description",
+                                    value = 1f,
+                                    muted = false
+                                },
+                                new ToggleSettingEntry() {
+                                    id = "noise_suppression",
+                                    title_key = "setting.audio.microphone.noise_suppression.title",
+                                    description_key = "setting.audio.microphone.noise_suppression.description",
+                                    value = false
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+        private SettingEntry[] GenerateEntries() => GenerateEntries(Volume);
+        private SettingEntry[] GenerateEntries(AudioGroup group)
+        {
+            var entries = new List<SettingEntry>
+            {
+                new VolumeSettingEntry
+                {
+                    id = group.Id,
+                    title_key = group.Name_Key,
+                    description_key = group.Name_Key,
+                    value = group.Value,
+                    muted = group.IsMuted
+                }
+            };
+            if (group.SubVolumes != null)
+                foreach (var sub in group.SubVolumes)
+                    entries.AddRange(GenerateEntries(sub));
+            return entries.ToArray();
         }
 
         internal void UpdateHandler()
