@@ -1,5 +1,6 @@
 using api.nox.game.UI;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 namespace api.nox.game.Controllers
@@ -13,6 +14,7 @@ namespace api.nox.game.Controllers
         public InputActionReference JumpAction;
         public InputActionReference CrouchAction;
         public InputActionReference MicrophoneAction;
+        public EventSystem eventSystem;
 
         public override uint Priority => 1;
 
@@ -44,6 +46,12 @@ namespace api.nox.game.Controllers
             MicrophoneAction.action.performed += _ => UseMicrophone = !UseMicrophone;
             ToggleMenuAction.action.performed += _ =>
             {
+                // check if a input firld is selected
+                if (eventSystem.currentSelectedGameObject != null) 
+                {
+                    Debug.Log("Input field selected");
+                    return;
+                }
                 var menu = MenuManager.Instance.GetViewPortMenu();
                 if (menu != null) menu.IsVisible = !menu.IsVisible;
             };

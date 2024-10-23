@@ -4976,6 +4976,7 @@ MonoBehaviour:
   JumpAction: {fileID: -115000762091627606, guid: eb30b0e162631434a84a75e18ac43992, type: 3}
   CrouchAction: {fileID: 7729136310342392098, guid: eb30b0e162631434a84a75e18ac43992, type: 3}
   MicrophoneAction: {fileID: -4756688239605842865, guid: eb30b0e162631434a84a75e18ac43992, type: 3}
+  eventSystem: {fileID: 7972359627360120996}
 --- !u!1 &4165658530368054759
 GameObject:
   m_ObjectHideFlags: 0
