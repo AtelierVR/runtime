@@ -17,8 +17,8 @@ MonoBehaviour:
     entries:
     - key: game.ui.menu.home
       value: "Accueil"
-    - key: game.ui.menu.instance
-      value: "Menu Ins."
+    - key: game.ui.menu.world
+      value: "Me. Monde"
     - key: game.ui.menu.navigation
       value: "Navigation"
     - key: game.ui.menu.inventory
@@ -291,12 +291,14 @@ MonoBehaviour:
       value: "Périphérique actuel"
     - key: setting.audio.microphone.noise_suppression.title
       value: "Suppression de bruit"
+    - key: game.ui.menu.session
+      value: "Session"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home
       value: "Home"
-    - key: game.ui.menu.instance
-      value: "Ins. Menu"
+    - key: game.ui.menu.world
+      value: "Wrl. Menu"
     - key: game.ui.menu.navigation
       value: "Navigation"
     - key: game.ui.menu.inventory

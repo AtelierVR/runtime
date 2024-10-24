@@ -18,5 +18,7 @@ namespace api.nox.network.Worlds
         public string GetCacheKey() => $"world.{id}.{server}";
 
         public WorldIdentifier ToIdentifier() => new(id, server);
+
+        public override string ToString() => $"{GetType().Name}[id={id}, server={server}]";
     }
 }

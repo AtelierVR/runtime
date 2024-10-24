@@ -1,9 +1,12 @@
+using System;
 using api.nox.game.Controllers;
 using api.nox.network;
 using api.nox.network.Instances;
+using api.nox.network.Players;
 using api.nox.network.RelayInstances;
 using api.nox.network.RelayInstances.Enter;
 using api.nox.network.Relays;
+using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Worlds;
@@ -12,35 +15,49 @@ using UnityEngine.SceneManagement;
 
 namespace api.nox.game.sessions
 {
-    public class OnlineController : SessionController
+    public class OnlineController : ISessionController
     {
         public Session _session;
-        public Session session
-        {
-            get => _session;
-            set => _session = value;
-        }
+        public Session GetSession() => _session;
+        internal void SetSession(Session session) => _session = session;
+        void ISessionController.SetSession(Session session) => SetSession(session);
 
         internal MakeRelayConnectionData connectionData;
-        private string server;
-        private uint instanceId;
+        internal string Server { get; private set; }
+        internal uint InstanceId { get; private set; }
+        internal ushort InternalId { get; private set; }
         private bool isReady = false;
 
-        internal Instance GetInstance() => NetCache.Get<Instance>($"instance.{server}.{instanceId}");
-        internal Relay GetRelay() => GetInstance()?.GetRelay();
+        private byte MaxTps = 4;
 
-        public OnlineController(Instance instance)
+        internal Instance GetInstance() => NetCache.Get<Instance>(Instance.GetCacheKey(InstanceId, Server));
+        internal Relay GetRelay() => GetInstance()?.GetRelay();
+        internal RelayInstance GetRelayInstance() => RelayInstanceManager.Get(InternalId, GetRelay().Id);
+        internal OnlineController(Instance instance)
         {
-            server = instance.server;
-            instanceId = instance.id;
+            Server = instance.server;
+            InstanceId = instance.id;
         }
+
+        private DateTime lastUpdate = DateTime.Now;
 
         public void Update()
         {
-            var player = PlayerController.Instance.CurrentController;
-            if (isReady && player != null)
+            var relayinstance = GetRelayInstance();
+            var session = GetSession();
+            if (isReady && (DateTime.Now - lastUpdate).TotalMilliseconds > 1000 / MaxTps)
             {
-
+                lastUpdate = DateTime.Now;
+                foreach (var player in session.abstractPlayers)
+                {
+                    player.TickUpdate();
+                    foreach (var part in player.GetParts())
+                        if (part != null && part.Transform != null) // && part.Transform.deleveryType == TransformDeleveryType.LocalModified
+                        {
+                            relayinstance.SendTransform(new(player.GetId(), part));
+                            part.Transform.deleveryType = TransformDeleveryType.None;
+                        }
+                }
             }
         }
 
@@ -61,24 +78,27 @@ namespace api.nox.game.sessions
             }
 
             var status = await relay.RequestStatus();
-            RelayInstance instance = null;
+            RelayInstance relayinstance = null;
             foreach (var i in status.Instances)
-                if (i.Id == instanceId)
+                if (i.Id == InstanceId)
                 {
-                    instance = i;
+                    relayinstance = i;
                     break;
                 }
-            if (instance == null)
+            if (relayinstance == null)
             {
-                Debug.Log("Instance is null");
+                Debug.Log("RelayInstance is null");
                 return false;
             }
-            var enter = await instance.Enter(new RequestEnter
+
+            InternalId = relayinstance.InternalId;
+
+            var enter = await relayinstance.Enter(new RequestEnter
             {
                 DisplayName = GameSystem.Instance.NetworkAPI.User.CurrentUser.display,
                 Password = connectionData.password,
                 Flags = EnterFlags.None
-                    | (instance.Flags.HasFlag(InstanceFlags.UsePassword) ? EnterFlags.UsePassword : EnterFlags.None)
+                    | (relayinstance.Flags.HasFlag(InstanceFlags.UsePassword) ? EnterFlags.UsePassword : EnterFlags.None)
                     | (string.IsNullOrEmpty(connectionData.display_name) ? EnterFlags.UsePseudonyme : EnterFlags.None)
             });
 
@@ -87,6 +107,8 @@ namespace api.nox.game.sessions
                 Debug.Log("Enter failed (timeout)");
                 return false;
             }
+
+            MaxTps = enter.MaxTps;
 
             Debug.Log("Enter success");
 
@@ -98,7 +120,7 @@ namespace api.nox.game.sessions
 
             Debug.Log("Enter success");
 
-            var configworld = await instance.RequestConfigWorldData();
+            var configworld = await relayinstance.RequestConfigWorldData();
             if (configworld == null)
             {
                 Debug.Log("ConfigWorldData failed");
@@ -106,19 +128,29 @@ namespace api.nox.game.sessions
             }
 
             var world = await GameSystem.Instance.NetworkAPI.World.GetWorld(configworld.Address, configworld.MasterId);
-            var search = world != null ? await GameSystem.Instance.NetworkAPI.World.Asset.SearchAssets(new() {
+            Debug.Log("World: " + world);
+
+            if (world == null)
+            {
+                Debug.Log("World is null");
+                return false;
+            }
+
+            var search = await GameSystem.Instance.NetworkAPI.World.Asset.SearchAssets(new()
+            {
+                server = world.server,
+                world_id = world.id,
                 versions = configworld.Version == ushort.MaxValue ? null : new ushort[] { configworld.Version },
                 platforms = new string[] { PlatfromExtensions.GetPlatformName(Constants.CurrentPlatform) },
                 engines = new string[] { "unity" },
                 limit = 1,
                 offset = 0
-            }) : null;
-            
+            });
 
             var asset = search?.assets[0];
-            if (world == null || asset == null)
+            if (asset == null)
             {
-                Debug.Log("World or Asset is null");
+                Debug.Log("Asset is null");
                 return false;
             }
 
@@ -138,9 +170,9 @@ namespace api.nox.game.sessions
                 Debug.Log("Scene is null");
                 return false;
             }
-            session.scenes.Add(scene);
+            GetSession().scenes.Add(scene);
 
-            var indexMainDescriptor = session.IndexOfMainDescriptor(out var descriptor);
+            var indexMainDescriptor = GetSession().IndexOfMainDescriptor(out var descriptor);
 
             if (indexMainDescriptor == byte.MaxValue)
             {
@@ -148,37 +180,39 @@ namespace api.nox.game.sessions
                 return false;
             }
 
-            // var player = new LocalPlayer(null);
-            // session.SpawnPlayer(player);
-
-            if (descriptor.GetSpawnType() != SpawnType.None)
-            {
-                var spawn = descriptor.ChoiceSpawn();
-
-                Debug.Log("Teleporting to spawn");
-                try
-                {
-                    PlayerController.Instance.CurrentController.Teleport(spawn.transform);
-                }
-                catch (System.Exception e) { Debug.LogWarning(e); }
-            }
-
-
-            Debug.Log("Player spawned");
-
-            if (!instance.SendConfigReady())
+            if (!relayinstance.SendConfigReady())
             {
                 Debug.Log("SendConfigReady failed");
                 return false;
             }
 
+            RegisterPlayer(enter.Player);
 
+            var abstractPlayer = GetSession().GetAbstractPlayer(enter.Player.Id);
+            if (abstractPlayer == null)
+            {
+                Debug.Log("AbstractPlayer is null");
+                return false;
+            }
+
+            if (descriptor != null && descriptor.SpawnType != SpawnType.None)
+            {
+                var spawn = descriptor.ChoiceSpawn();
+                if (spawn != null)
+                    abstractPlayer.Teleport(spawn.transform);
+                Debug.Log("Teleport success");
+            }
 
             isReady = true;
 
             return true;
         }
 
+        public void RegisterPlayer(NetPlayer player)
+            => new NetAbstractPlayer(player, GetSession()).Register();
+
+        public void UnRegisterPlayer(NetPlayer player)
+            => GetSession().GetAbstractPlayer(player.Id)?.Unregister();
 
     }
 }

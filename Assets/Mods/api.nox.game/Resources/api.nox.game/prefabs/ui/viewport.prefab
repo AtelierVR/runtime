@@ -230,7 +230,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Menu Ins.
+  m_text: '[game.ui.menu.instance]'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: fbb7c6a04be6d8341934b839f24b42e1, type: 2}
   m_sharedMaterial: {fileID: 4687939059374929122, guid: fbb7c6a04be6d8341934b839f24b42e1, type: 2}
@@ -5860,24 +5860,15 @@ MonoBehaviour:
       execution_type: 1
       execution: game.home
       flags: -1
-    - key: instance
-      icon: {fileID: 2800000, guid: ed851a7404f93dd40b40a031712778a3, type: 3}
-      text: game.ui.menu.instance
+    - key: world
+      icon: {fileID: 2800000, guid: fb29e558f4e9f1540acfdafe422cfe3b, type: 3}
+      text: game.ui.menu.world
       text_arguments: []
       tooltip: 
       tooltip_arguments: []
       execution_type: 1
-      execution: game.instance
-      flags: 2
-    - key: navigation
-      icon: {fileID: 2800000, guid: c418bafad32240c4fa710ca02d6b28ac, type: 3}
-      text: game.ui.menu.navigation
-      text_arguments: []
-      tooltip: 
-      tooltip_arguments: []
-      execution_type: 1
-      execution: game.navigation
-      flags: -1
+      execution: game.world.custom_menu
+      flags: 0
     - key: applications
       icon: {fileID: 2800000, guid: 9977af2fb70c19f49805df4e66d47d72, type: 3}
       text: game.ui.menu.application
@@ -5887,6 +5878,15 @@ MonoBehaviour:
       execution_type: 1
       execution: game.applications
       flags: -1
+    - key: session
+      icon: {fileID: 2800000, guid: ed851a7404f93dd40b40a031712778a3, type: 3}
+      text: game.ui.menu.session
+      text_arguments: []
+      tooltip: 
+      tooltip_arguments: []
+      execution_type: 1
+      execution: game.session
+      flags: -1
     - key: inventory
       icon: {fileID: 2800000, guid: bb86020f1e3bebe45899e3e4786608f9, type: 3}
       text: game.ui.menu.inventory
@@ -5895,6 +5895,15 @@ MonoBehaviour:
       tooltip_arguments: []
       execution_type: 1
       execution: game.inventory
+      flags: -1
+    - key: navigation
+      icon: {fileID: 2800000, guid: c418bafad32240c4fa710ca02d6b28ac, type: 3}
+      text: game.ui.menu.navigation
+      text_arguments: []
+      tooltip: 
+      tooltip_arguments: []
+      execution_type: 1
+      execution: game.navigation
       flags: -1
     - key: settings
       icon: {fileID: 2800000, guid: 450ec254436a6da42b07a3fa6ea22d0e, type: 3}

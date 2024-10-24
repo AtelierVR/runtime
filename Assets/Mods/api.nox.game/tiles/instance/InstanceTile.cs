@@ -242,20 +242,12 @@ namespace api.nox.game.Tiles
                 if (relay != null)
                 {
                     var currentSession = GameSystem.Instance.SessionManager.CurrentSession;
-                    if (currentSession != null && currentSession.controller is OnlineController controller)
+                    if (currentSession != null && currentSession.Controller is OnlineController controller)
                     {
-                        var ins = controller.GetInstance();
-                        if (ins == null || ins.id != instance.id || ins.server != instance.server)
-                        {
-                            Debug.Log("Current session is not the same as the instance");
+                        if (controller.InstanceId != instance.id || controller.Server != instance.server)
                             gotobtn.interactable = true;
-                        }
                     }
-                    else
-                    {
-                        Debug.Log($"No current session {currentSession} {currentSession?.controller}");
-                        gotobtn.interactable = true;
-                    }
+                    else gotobtn.interactable = true;
                 }
                 else
                 {

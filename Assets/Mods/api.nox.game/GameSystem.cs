@@ -42,7 +42,10 @@ namespace api.nox.game
             CoreAPI.EventAPI.Emit(new EventSessionChanged(old, value));
         }
 
-
+        public void OnUpdate()
+        {
+            SessionManager.Update();
+        }
     }
 }
 

@@ -1,22 +1,20 @@
 ﻿using System;
 using api.nox.network.RelayInstances.Base;
-using api.nox.network.Utils;
-using Nox.CCK.Mods;
 using Buffer = api.nox.network.Utils.Buffer;
 
 namespace api.nox.network.RelayInstances.Enter
 {
-    public class ResponseEnter : InstanceResponse, ShareObject
+    public class ResponseEnter : InstanceResponse
     {
         public EnterResult Result;
 
         // if Result == Blacklisted
-        [ShareObjectExport] public string Reason;
-        [ShareObjectExport] public DateTime Expiration;
+        public string Reason;
+        public DateTime Expiration;
 
         // if Result in {Success, AlreadyConnected, PasswordRequired}
-        public LocalPlayer Player;
-        [ShareObjectExport] public byte MaxTps;
+        public NetLocalPlayer Player;
+        public byte MaxTps;
 
         public override bool FromBuffer(Buffer buffer)
         {
@@ -36,7 +34,7 @@ namespace api.nox.network.RelayInstances.Enter
                     Expiration = buffer.ReadDateTime();
                     break;
                 case EnterResult.Success:
-                    Player = new LocalPlayer
+                    Player = new NetLocalPlayer
                     {
                         RelayId = RelayId,
                         InternalId = InternalId,
@@ -57,20 +55,5 @@ namespace api.nox.network.RelayInstances.Enter
         public override string ToString() => $"{GetType().Name}[Result={Result}, Player={Player}]";
 
         public bool IsSuccess => Result == EnterResult.Success;
-
-        [ShareObjectExport] public byte SharedResult;
-        [ShareObjectExport] public Func<bool> SharedIsSuccess;
-
-        public void BeforeExport()
-        {
-            SharedResult = (byte)Result;
-            SharedIsSuccess = () => IsSuccess;
-        }
-
-        public void AfterImport()
-        {
-            Result = (EnterResult)SharedResult;
-        }
-
     }
 }

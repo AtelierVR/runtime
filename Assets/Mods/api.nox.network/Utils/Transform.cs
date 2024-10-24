@@ -3,14 +3,15 @@ using UnityEngine;
 
 namespace api.nox.network.Utils
 {
-    public class Transform : ShareObject
+    public class Transform
     {
-        [ShareObjectExport, ShareObjectImport] public Vector3 position;
-        [ShareObjectExport, ShareObjectImport] public Quaternion rotation;
-        [ShareObjectExport, ShareObjectImport] public Vector3 scale;
+        public TransformDeleveryType deleveryType;
+        public Vector3 position;
+        public Quaternion rotation;
+        public Vector3 scale;
 
-        [ShareObjectExport, ShareObjectImport] public Vector3 velocity = Vector3.zero;
-        [ShareObjectExport, ShareObjectImport] public Vector3 angularVelocity = Vector3.zero;
+        public Vector3 velocity = Vector3.zero;
+        public Vector3 angularVelocity = Vector3.zero;
 
         public Transform(UnityEngine.Transform transform, Rigidbody rigidbody = null)
         {
@@ -32,5 +33,14 @@ namespace api.nox.network.Utils
                     Vector3.Distance(velocity, transform.velocity) < threshold &&
                     Vector3.Distance(angularVelocity, transform.angularVelocity) < threshold;
         }
+
+        public override string ToString() => $"Transform[position={position}, rotation={rotation}, scale={scale}, velocity={velocity}, angularVelocity={angularVelocity}]";
+    }
+
+    public enum TransformDeleveryType
+    {
+        None,
+        LocalModified,
+        RemoteModified
     }
 }

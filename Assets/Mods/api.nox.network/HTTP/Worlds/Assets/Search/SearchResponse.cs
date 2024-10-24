@@ -45,5 +45,7 @@ namespace api.nox.network.Worlds
                 with_empty = with_empty,
                 versions = versions
             }) : null;
+
+        public override string ToString() => $"{GetType().Name}[world_id={world_id}, server={server}]";
     }
 }

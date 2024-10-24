@@ -5,16 +5,16 @@ using Nox.CCK.Mods;
 
 namespace api.nox.network.RelayInstances.Transform
 {
-    public class RequestTransform : InstanceRequest, ShareObject
+    public class RequestTransform : InstanceRequest
     {
         public TransformType Type;
         public Utils.Transform Transform;
         public TransformFlags Flags;
 
-        [ShareObjectImport] public string Path;
-        [ShareObjectImport] public ushort PlayerId;
+        public string Path;
+        public ushort PlayerId;
         public PlayerRig PlayerRig;
-        [ShareObjectImport] public ushort ObjectId;
+        public ushort ObjectId;
 
         public override Buffer ToBuffer()
         {
@@ -35,10 +35,11 @@ namespace api.nox.network.RelayInstances.Transform
                 default:
                     return null;
             }
+            buffer.Write(Flags);
             if (Flags.HasFlag(TransformFlags.Position))
                 buffer.Write(Transform.position);
             if (Flags.HasFlag(TransformFlags.Rotation))
-                buffer.Write(Transform.rotation);
+                buffer.Write(Transform.rotation);   
             if (Flags.HasFlag(TransformFlags.Scale))
                 buffer.Write(Transform.scale);
             if (Flags.HasFlag(TransformFlags.Velocity))
@@ -48,6 +49,7 @@ namespace api.nox.network.RelayInstances.Transform
             return buffer;
         }
 
+        public RequestTransform(ushort playerId, PlayerPart part) => Set(playerId, part);
         public void Set(ushort playerId, PlayerPart part)
         {
             Type = TransformType.OnPlayer;
@@ -56,13 +58,7 @@ namespace api.nox.network.RelayInstances.Transform
             Transform = part.Transform;
         }
 
-        public void Set(Object obj)
-        {
-            Type = TransformType.OnObject;
-            ObjectId = obj.Id;
-            Transform = obj.GetObjectTransform();
-        }
-
+        public RequestTransform(UnityEngine.Transform transform) => Set(transform);
         public void Set(UnityEngine.Transform transform)
         {
             Type = TransformType.ByPath;
@@ -74,24 +70,6 @@ namespace api.nox.network.RelayInstances.Transform
                 tr = tr.parent;
             }
             Transform = new Utils.Transform(transform);
-        }
-
-
-        [ShareObjectImport] public byte SharedType;
-        [ShareObjectImport] public ShareObject SharedTransform;
-        [ShareObjectImport] public byte SharedFlags;
-        [ShareObjectImport] public ushort SharedPlayerRig;
-
-        public void AfterImport()
-        {
-            Type = (TransformType)SharedType;
-            Transform = SharedTransform?.Convert<Utils.Transform>();
-            Flags = (TransformFlags)SharedFlags;
-            PlayerRig = (PlayerRig)SharedPlayerRig;
-            SharedType = 0;
-            SharedTransform = null;
-            SharedFlags = 0;
-            SharedPlayerRig = 0;
         }
     }
 }

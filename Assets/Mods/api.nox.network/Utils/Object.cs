@@ -10,15 +10,10 @@ namespace api.nox.network
 
         public ObjectTransfertType TransfertType;
 
-        private Rigidbody _rb => _transform?.GetComponent<Rigidbody>();
-        private Transform _transform => RealTransfroms.ContainsKey(0) ? RealTransfroms[0] : null;
-
         public void SetOwner(ushort newOwnerId)
         {
 
         }
-
-        public NTransform GetObjectTransform() => new(_transform, _rb);
     }
 
     public enum ObjectTransfertType

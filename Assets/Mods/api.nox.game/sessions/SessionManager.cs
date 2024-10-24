@@ -24,6 +24,12 @@ namespace api.nox.game.sessions
 
         }
 
+        internal void Update()
+        {
+            foreach (var session in sessions)
+                session.Controller.Update();
+        }
+
         public void Dispose()
         {
             foreach (var session in sessions.ToArray())
@@ -59,7 +65,7 @@ namespace api.nox.game.sessions
             }
         }
 
-        internal Session New(SessionController controller, string group, uint id)
+        internal Session New(ISessionController controller, string group, uint id)
         {
             var session = new Session
             {
@@ -67,7 +73,7 @@ namespace api.nox.game.sessions
                 id = id,
                 group = group
             };
-            session.controller = controller;
+            session.Controller = controller;
             sessions.Add(session);
             return session;
         }

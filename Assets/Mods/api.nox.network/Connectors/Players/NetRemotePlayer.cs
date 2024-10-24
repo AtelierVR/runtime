@@ -1,6 +1,6 @@
 ﻿namespace api.nox.network
 {
-    public class RemotePlayer : Player
+    public class RemotePlayer : NetPlayer
     {
     }
 }

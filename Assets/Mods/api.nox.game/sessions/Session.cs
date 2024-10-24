@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using api.nox.network.Worlds;
 using api.nox.network.Worlds.Assets;
 using Nox.CCK;
-using Nox.CCK.Mods;
 using Nox.CCK.Worlds;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -12,23 +11,33 @@ namespace api.nox.game.sessions
 {
     public class Session : IDisposable
     {
-        [ShareObjectExport, ShareObjectImport] public byte uid;
-        [ShareObjectExport, ShareObjectImport] public uint id;
-        [ShareObjectExport, ShareObjectImport] public string group;
+        public byte uid;
+        public uint id;
+        public string group;
 
-        private SessionController _controller;
-        public SessionController controller
+        private ISessionController _controller;
+        public ISessionController Controller
         {
             get => _controller;
             set
             {
                 _controller = value;
                 if (_controller != null)
-                    _controller.session = this;
+                    _controller.SetSession(this);
             }
         }
 
         public List<Scene> scenes = new();
+
+        public List<IAbstractPlayer> abstractPlayers = new();
+
+        public IAbstractPlayer GetAbstractPlayer(ushort id)
+        {
+            foreach (var player in abstractPlayers)
+                if (player.GetId() == id)
+                    return player;
+            return null;
+        }
 
         public World world;
         public WorldAsset worldAsset;
@@ -57,9 +66,12 @@ namespace api.nox.game.sessions
 
         public void Dispose()
         {
-            controller.Dispose();
-            controller = null;
+            Controller.Dispose();
+            Controller = null;
             scenes.Clear();
+            abstractPlayers.Clear();
+            world = null;
+            worldAsset = null;
         }
 
         public void SetCurrent() => GameSystem.Instance.SessionManager.CurrentSession = this;
@@ -86,19 +98,22 @@ namespace api.nox.game.sessions
             }
         }
 
-        // public void SpawnPlayer<T>(T player) where T : Player {
-        //     player.OnPreSpawn(this);
-        //     players.Add(player);
-        //     player.OnSpawn(this);
-        // }
+        public void RegisterPlayer(IAbstractPlayer player)
+        {
+            player.SetSession(this);
+            abstractPlayers.Add(player);
+            Debug.Log("Player registered");
+        }
 
-        // public void DestroyPlayer<T>(T player) where T : Player
-        // {
-        //     player.OnPreDestroy(this);
-        //     players.Remove(player);
-        //     player.OnDestroy(this);
-        //     player.Dispose();
-        // }
+        public void UnregisterPlayer(IAbstractPlayer player)
+        {
+            if (!abstractPlayers.Contains(player))
+                return;
+            abstractPlayers.Remove(player);
+            Debug.Log("Player unregistered");
+        }
+
+
 
     }
 }

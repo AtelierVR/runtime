@@ -3,9 +3,11 @@ using Cysharp.Threading.Tasks;
 
 namespace api.nox.game.sessions
 {
-    public interface SessionController : IDisposable
+    public interface ISessionController : IDisposable
     {
-        Session session { get; set; }
+        public Session GetSession();
+        internal void SetSession(Session session);
         public UniTask<bool> Prepare();
+        public void Update() { }
     }
 }

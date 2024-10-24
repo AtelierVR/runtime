@@ -1,6 +1,6 @@
 ﻿namespace api.nox.network
 {
-    public class LocalPlayer : Player
+    public class NetLocalPlayer : NetPlayer
     {
     }
 }
