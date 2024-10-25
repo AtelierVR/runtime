@@ -1,8 +1,7 @@
 using System;
-using api.nox.network.HTTP;
 using api.nox.network.WebSockets;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.network.Servers
 {
@@ -24,19 +23,20 @@ namespace api.nox.network.Servers
 
         public async UniTask<WebSocket> GetOrConnect()
         {
-            if (gateways.ws == null) return null;
+            if (gateways.ws == null)
+                return null;
             var socket = NetworkSystem.ModInstance.WebSocket.GetWebSocket(address);
             if (socket == null)
             {
                 var token = await GetToken();
                 if (token == null) return null;
-                socket = NetworkSystem.ModInstance.WebSocket.CreateWebSocket(address, null);
+                socket = NetworkSystem.ModInstance.WebSocket.CreateWebSocket(address, gateways.ws);
                 var ws = new System.Net.WebSockets.ClientWebSocket();
                 ws.Options.SetRequestHeader("Authorization", token.ToHeader());
-                var result = await socket.Connect(gateways.ws, ws);
+                var result = await socket.Connect(null, ws);
                 if (!result)
                 {
-                    Debug.LogError($"Failed to connect to {gateways.ws}");
+                    Logger.LogError($"Failed to connect to {gateways.ws}");
                     socket.Dispose();
                     return null;
                 }

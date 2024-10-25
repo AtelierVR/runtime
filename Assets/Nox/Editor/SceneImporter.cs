@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine.SceneManagement;
+using Nox.CCK;
 
 namespace Nox.Editor
 {
@@ -14,7 +15,7 @@ namespace Nox.Editor
             foreach (var asset in importedAssets)
                 if (asset.EndsWith(".unity"))
                 {
-                    Debug.Log("Scene imported: " + asset);
+                    Logger.Log("Scene imported: " + asset);
                     var scene = SceneManager.GetSceneByPath(asset);
                     List<EditorBuildSettingsScene> originalScenes = EditorBuildSettings.scenes.ToList();
                     if (originalScenes.All(s => s.path != asset))
@@ -27,7 +28,7 @@ namespace Nox.Editor
             foreach (var asset in deletedAssets)
                 if (asset.EndsWith(".unity"))
                 {
-                    Debug.Log("Scene deleted: " + asset);
+                    Logger.Log("Scene deleted: " + asset);
                     List<EditorBuildSettingsScene> originalScenes = EditorBuildSettings.scenes.ToList();
                     originalScenes.RemoveAll(s => s.path == asset);
                     EditorBuildSettings.scenes = originalScenes.ToArray();
@@ -36,7 +37,7 @@ namespace Nox.Editor
             foreach (var asset in movedAssets)
                 if (asset.EndsWith(".unity"))
                 {
-                    Debug.Log("Scene moved: " + asset);
+                    Logger.Log("Scene moved: " + asset);
                     var scene = SceneManager.GetSceneByPath(asset);
                     List<EditorBuildSettingsScene> originalScenes = EditorBuildSettings.scenes.ToList();
                     originalScenes.RemoveAll(s => s.path == asset);
@@ -47,7 +48,7 @@ namespace Nox.Editor
             foreach (var asset in movedFromAssetPaths)
                 if (asset.EndsWith(".unity"))
                 {
-                    Debug.Log("Scene moved from: " + asset);
+                    Logger.Log("Scene moved from: " + asset);
                     List<EditorBuildSettingsScene> originalScenes = EditorBuildSettings.scenes.ToList();
                     originalScenes.RemoveAll(s => s.path == asset);
                     EditorBuildSettings.scenes = originalScenes.ToArray();

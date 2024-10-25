@@ -9,6 +9,7 @@ using Nox.CCK.Worlds;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using api.nox.network;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game
 {
@@ -52,7 +53,7 @@ namespace api.nox.game
                 if (descriptor != null)
                     PlayerController.GetCurrentController().Teleport(descriptor.ChoiceSpawn().transform);
             }
-            catch (System.Exception e) { Debug.LogWarning(e); }
+            catch (System.Exception e) { Logger.LogWarning(e); }
 
             // Initialize the tile managers
             homeTile = new HomeTileManager();
@@ -71,7 +72,7 @@ namespace api.nox.game
 
         public void OnPostInitializeClient()
         {
-            Debug.Log("GameClientSystem PostInitialize");
+            Logger.Log("GameClientSystem PostInitialize");
             MenuManager.Instance.GetViewPortMenu().IsVisible = false;
             navigationTile.PostInitialize();
             settingTile.PostInitialize();
@@ -79,19 +80,19 @@ namespace api.nox.game
 
         public void OnGotoTile(EventData context)
         {
-            Debug.Log("GotoTile");
+            Logger.Log("GotoTile");
             for (int i = 0; i < context.Data.Length; i++)
-                Debug.Log($"Data[{i}]: {context.Data[i]}");
+                Logger.Log($"Data[{i}]: {context.Data[i]}");
 
             var menuId = (context.Data[0] as int?) ?? 0;
             if (menuId == 0)
             {
-                Debug.Log("GotoTile: MenuId is 0");
+                Logger.Log("GotoTile: MenuId is 0");
                 return;
             }
 
             var page = context.Data[1] as string;
-            Debug.Log($"GotoTile: {menuId} {page}");
+            Logger.Log($"GotoTile: {menuId} {page}");
             switch (page)
             {
                 case "home":
@@ -125,7 +126,7 @@ namespace api.nox.game
 
         // private void OnOldMenuClick(InputAction.CallbackContext context)
         // {
-        //     Debug.Log("OldMenu Clicked");
+        //     Logger.Log("OldMenu Clicked");
 
         //     if (!coreAPI.XRAPI.IsEnabled() && eventSystem?.currentSelectedGameObject != null) return;
         //     var menu = GetOrCreateOldMenu();

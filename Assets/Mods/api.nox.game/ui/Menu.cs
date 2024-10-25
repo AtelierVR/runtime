@@ -3,7 +3,7 @@ using Nox.CCK;
 using Nox.CCK.Mods;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
+using Logger = Nox.CCK.Logger;
 
 
 #if UNITY_EDITOR
@@ -146,7 +146,7 @@ namespace api.nox.game.UI
                     OnActionExecuted(item.execution, item.execution_arguments);
                     break;
                 default:
-                    Debug.LogWarning("Unknown execution type");
+                    Logger.LogWarning("Unknown execution type");
                     break;
             }
         }
@@ -167,7 +167,7 @@ namespace api.nox.game.UI
                 IsVisible = true;
             else if (action == "menu.toggle")
                 IsVisible = !IsVisible;
-            else Debug.LogWarning("Unknown action");
+            else Logger.LogWarning("Unknown action");
         }
 
         public void SetTile(TileObject tile, TileObject oldTile = null, SetTileFlags flags = SetTileFlags.None)
@@ -179,7 +179,7 @@ namespace api.nox.game.UI
 
                 if (oldTile != null)
                 {
-                    Debug.Log($"Hiding old tile {oldTile.id}");
+                    Logger.Log($"Hiding old tile {oldTile.id}");
                     oldTile.onHide?.DynamicInvoke(tile.id);
                     oldTile.content.SetActive(false);
                 }
@@ -190,15 +190,15 @@ namespace api.nox.game.UI
                         tile.content = tile.GetContent(container);
                     if (flags.HasFlag(SetTileFlags.IsNew))
                     {
-                        Debug.Log($"Opening new tile {tile.id}");
+                        Logger.Log($"Opening new tile {tile.id}");
                         tile.onOpen?.DynamicInvoke(oldTile?.id);
                     }
                     if (flags.HasFlag(SetTileFlags.IsRestore))
                     {
-                        Debug.Log($"Restoring tile {tile.id}");
+                        Logger.Log($"Restoring tile {tile.id}");
                         tile.onRestore?.DynamicInvoke(oldTile?.id);
                     }
-                    Debug.Log($"Displaying tile {tile.id}");
+                    Logger.Log($"Displaying tile {tile.id}");
                     tile.onDisplay?.DynamicInvoke(oldTile?.id, tile.content);
                     tile.content.name = tile.id;
                     tile.content.SetActive(true);
@@ -208,8 +208,8 @@ namespace api.nox.game.UI
             }
             catch (Exception e)
             {
-                Debug.LogWarning("Error setting tile");
-                Debug.LogError(e);
+                Logger.LogWarning("Error setting tile");
+                Logger.LogError(e);
             }
         }
     }

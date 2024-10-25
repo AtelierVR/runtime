@@ -1,9 +1,9 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
-using api.nox.network;
 using Nox.CCK.Editor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.user
 {
@@ -19,7 +19,7 @@ namespace api.nox.user
 
         public void OnClosed()
         {
-            Debug.Log("Panel Example closed!");
+            Logger.Log("Panel Example closed!");
         }
 
         internal void OnUpdate() { }
@@ -52,7 +52,7 @@ namespace api.nox.user
                     _mod._api.PanelAPI.SetActivePanel("api.nox.user.profile");
                     _mod._api.PanelAPI.UpdatePanelList();
                 }
-                else Debug.Log(data);
+                else Logger.Log(data);
             };
 
             return _root;

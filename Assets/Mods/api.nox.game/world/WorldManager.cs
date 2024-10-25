@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game
 {
@@ -98,7 +99,7 @@ namespace api.nox.game
             progress?.Invoke(1, 0);
             if (res == null)
             {
-                Debug.LogError($"Failed to download world {hash} {url}");
+                Logger.LogError($"Failed to download world {hash} {url}");
                 return new DownloadWorldResult { success = false, hash = hash, url = url, error = "Download failed" };
             }
 
@@ -107,7 +108,7 @@ namespace api.nox.game
             File.Delete(res);
             var t2 = DateTime.Now;
 
-            Debug.Log($"Downloaded world {hash} {url} {res.Length} bytes in {(t2 - t1).TotalMilliseconds}ms {(t4 - t3).TotalMilliseconds}ms");
+            Logger.Log($"Downloaded world {hash} {url} {res.Length} bytes in {(t2 - t1).TotalMilliseconds}ms {(t4 - t3).TotalMilliseconds}ms");
             return new DownloadWorldResult { success = true, hash = hash, url = url };
         }
 
@@ -120,7 +121,7 @@ namespace api.nox.game
             var sceneId = scenes.Length > id ? scenes[id] : null;
             if (string.IsNullOrEmpty(sceneId))
             {
-                Debug.LogError($"Failed to load world {hash} {id}");
+                Logger.LogError($"Failed to load world {hash} {id}");
                 return default;
             }
             var load = SceneManager.LoadSceneAsync(sceneId, mode);
@@ -134,15 +135,15 @@ namespace api.nox.game
             var scene = SceneManager.GetSceneByPath(sceneId);
             if (!scene.IsValid())
             {
-                Debug.LogError($"Failed to load world {hash} {id} {sceneId}");
+                Logger.LogError($"Failed to load world {hash} {id} {sceneId}");
                 return default;
             }
 
             var mainCamera = scene.GetRootGameObjects().FirstOrDefault(x => x.GetComponent<Camera>() != null);
-            Debug.Log($"Loaded world {hash} {id} {sceneId} {mainCamera}");
+            Logger.Log($"Loaded world {hash} {id} {sceneId} {mainCamera}");
             if (mainCamera != null)
             {
-                Debug.Log("Disable main camera");
+                Logger.Log("Disable main camera");
                 mainCamera.SetActive(false);
             }
 

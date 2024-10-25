@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using api.nox.game.UI;
-using Nox.CCK;
-using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
 using UnityEngine;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.Tiles
 {
@@ -15,7 +14,7 @@ namespace api.nox.game.Tiles
         /// <param name="context"></param>
         internal void SendTile(EventData context)
         {
-            Debug.Log("HomeTileManager.SendTile");
+            Logger.Log("HomeTileManager.SendTile");
             var menuId = (context.Data[0] as int?) ?? 0;
             var tile = new TileObject() { id = "api.nox.game.home", context = context };
             tile.GetContent = (Transform tf) => OnGetContent(tile, tf);
@@ -34,7 +33,7 @@ namespace api.nox.game.Tiles
         /// <returns>Content of the tile</returns>
         internal GameObject OnGetContent(TileObject tile, Transform tf)
         {
-            Debug.Log("HomeTileManager.GetTileContent");
+            Logger.Log("HomeTileManager.GetTileContent");
             var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.home");
             pf.SetActive(false);
             var content = Object.Instantiate(pf, tf);
@@ -49,7 +48,7 @@ namespace api.nox.game.Tiles
         /// <param name="content"></param>
         internal void OnDisplay(int menuId, TileObject tile, GameObject content)
         {
-            Debug.Log("HomeTileManager.OnDisplay");
+            Logger.Log("HomeTileManager.OnDisplay");
             _widgets.UpdateWidgets(menuId, content);
         }
 
@@ -60,7 +59,7 @@ namespace api.nox.game.Tiles
         /// <param name="content"></param>
         internal void OnOpen(TileObject tile, GameObject content)
         {
-            Debug.Log("HomeTileManager.OnOpen");
+            Logger.Log("HomeTileManager.OnOpen");
         }
 
         /// <summary>
@@ -70,7 +69,7 @@ namespace api.nox.game.Tiles
         /// <param name="content"></param>
         internal void OnHide(TileObject tile, GameObject content)
         {
-            Debug.Log("HomeTileManager.OnHide");
+            Logger.Log("HomeTileManager.OnHide");
         }
 
         /// <summary>
@@ -80,7 +79,7 @@ namespace api.nox.game.Tiles
         /// <param name="content"></param>
         internal void OnRemove(TileObject tile)
         {
-            Debug.Log("HomeTileManager.OnRemove");
+            Logger.Log("HomeTileManager.OnRemove");
         }
 
         private List<HomeWithMenu> GetMenuWithHome()

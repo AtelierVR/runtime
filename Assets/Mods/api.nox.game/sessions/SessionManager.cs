@@ -77,5 +77,12 @@ namespace api.nox.game.sessions
             sessions.Add(session);
             return session;
         }
+
+        internal void Remove(Session session)
+        {
+            if (session == CurrentSession)
+                CurrentSession = null;
+            sessions.Remove(session);
+        }
     }
 }

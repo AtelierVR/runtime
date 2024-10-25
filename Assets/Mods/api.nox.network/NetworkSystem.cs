@@ -7,6 +7,7 @@ using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using UnityEngine;
 using UnityEngine.Networking;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.network
 {
@@ -38,7 +39,7 @@ namespace api.nox.network
             World = new Worlds.WorldAPI();
             Relay = new Relays.RelayAPI();
 
-            Debug.Log("NetworkSystem initialized");
+            Logger.Log("NetworkSystem initialized");
         }
 
         public void OnUpdate()
@@ -62,12 +63,12 @@ namespace api.nox.network
             WebSocket = null;
             ModInstance = null;
 
-            Debug.Log("NetworkSystem disposed");
+            Logger.Log("NetworkSystem disposed");
         }
 
         public async UniTask<Texture2D> FetchTexture(string url, UnityWebRequest req = null)
         {
-            Debug.Log($"Fetching [TEXTURE] {url}...");
+            Logger.Log($"Fetching [TEXTURE] {url}...");
             req ??= new UnityWebRequest(url, "GET");
             req.url = url;
             var dt = new DownloadHandlerTexture();
@@ -88,7 +89,7 @@ namespace api.nox.network
 
         public async UniTask<string> DownloadFile(string url, string hash, UnityWebRequest req = null)
         {
-            Debug.Log($"Fetching [FILE] {url}...");
+            Logger.Log($"Fetching [FILE] {url}...");
             req ??= new UnityWebRequest(url, "GET");
             req.url = url;
             req.downloadHandler = new DownloadHandlerBuffer();
@@ -97,7 +98,7 @@ namespace api.nox.network
                 var asynco = req.SendWebRequest();
                 await UniTask.WaitUntil(() =>
                 {
-                    Debug.Log($"Downloading {url} {req.downloadProgress * 100}%");
+                    Logger.Log($"Downloading {url} {req.downloadProgress * 100}%");
                     CoreAPI.EventAPI.Emit(new NetEventContext("network.download", url, req.downloadProgress, req.downloadedBytes));
                     return asynco.isDone;
                 });

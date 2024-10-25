@@ -8,12 +8,12 @@ using api.nox.network.Worlds;
 using api.nox.network.Worlds.Assets;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.Tiles
 {
@@ -102,7 +102,7 @@ namespace api.nox.game.Tiles
         /// <param name="context"></param>
         internal void SendTile(EventData context)
         {
-            Debug.Log("MakeInstanceTileManager.SendTile");
+            Logger.Log("MakeInstanceTileManager.SendTile");
             var tile = new MakeInstanceTileObject() { id = "api.nox.game.instance.make", context = context };
             tile.GetContent = (Transform tf) => OnGetContent(tile, tf);
             tile.onDisplay = (str, gameObject) => OnDisplay(tile, gameObject);
@@ -113,7 +113,7 @@ namespace api.nox.game.Tiles
 
         private GameObject OnGetContent(MakeInstanceTileObject tile, Transform tf)
         {
-            Debug.Log("MakeInstanceTileManager.OnGetContent");
+            Logger.Log("MakeInstanceTileManager.OnGetContent");
             var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.instance.make");
             pf.SetActive(false);
             var content = Object.Instantiate(pf, tf);
@@ -138,19 +138,19 @@ namespace api.nox.game.Tiles
 
         private void OnHide(MakeInstanceTileObject tile, GameObject content)
         {
-            Debug.Log("MakeInstanceTileManager.OnHide");
+            Logger.Log("MakeInstanceTileManager.OnHide");
         }
 
         private void OnOpen(MakeInstanceTileObject tile, GameObject content)
         {
-            Debug.Log("MakeInstanceTileManager.OnOpen");
+            Logger.Log("MakeInstanceTileManager.OnOpen");
             var world = tile.World;
             var server = tile.Server;
             var asset = tile.Asset;
 
             if (world == null)
             {
-                Debug.LogError("World is null");
+                Logger.LogError("World is null");
                 return;
             }
 
@@ -162,13 +162,13 @@ namespace api.nox.game.Tiles
 
         private void OnDisplay(MakeInstanceTileObject tile, GameObject content)
         {
-            Debug.Log("MakeInstanceTileManager.OnDisplay");
+            Logger.Log("MakeInstanceTileManager.OnDisplay");
             UpdateContent(tile, content);
         }
 
         private void UpdateContent(MakeInstanceTileObject tile, GameObject content)
         {
-            Debug.Log("MakeInstanceTileManager.UpdateContent");
+            Logger.Log("MakeInstanceTileManager.UpdateContent");
 
             var capacity = Reference.GetReference("capacity_slider", content).GetComponent<Slider>();
             capacity.onValueChanged.RemoveAllListeners();
@@ -293,7 +293,7 @@ namespace api.nox.game.Tiles
 
         private void SetPasswordVisibility(MakeInstanceTileObject tile, GameObject content, bool visible)
         {
-            Debug.Log("MakeInstanceTileManager.SetPasswordVisibility " + visible);
+            Logger.Log("MakeInstanceTileManager.SetPasswordVisibility " + visible);
             var input = Reference.GetReference("password_input", content).GetComponent<TMPro.TMP_InputField>();
             var show = Reference.GetReference("password_visibility", content);
 
@@ -338,7 +338,7 @@ namespace api.nox.game.Tiles
             if (created == null)
             {
                 createbutton.interactable = true;
-                Debug.LogError("Failed to create instance");
+                Logger.LogError("Failed to create instance");
                 return;
             }
 

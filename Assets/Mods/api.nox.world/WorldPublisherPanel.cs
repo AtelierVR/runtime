@@ -13,6 +13,7 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.world
 {
@@ -33,7 +34,7 @@ namespace api.nox.world
 
         public void OnClosed()
         {
-            Debug.Log("Panel Example closed!");
+            Logger.Log("Panel Example closed!");
         }
 
         internal void OnUpdate()
@@ -125,7 +126,7 @@ namespace api.nox.world
                 if (create)
                 {
                     EditorUtility.DisplayDialog("Error", "An error occured while creating the world.", "Ok");
-                    Debug.LogError("An error occured while creating the world, please check the server and your permissions.");
+                    Logger.LogError("An error occured while creating the world, please check the server and your permissions.");
                 }
                 SetDisplay(DisplayFlags.WorldNotFound);
                 _world = null;
@@ -181,7 +182,7 @@ namespace api.nox.world
                 else
                 {
                     EditorUtility.DisplayDialog("Error", "Unsupported build target.", "Ok");
-                    Debug.LogError("Unsupported build target.");
+                    Logger.LogError("Unsupported build target.");
                     _root.Q<EnumField>("platform-field").value = e.previousValue;
                 }
             });
@@ -223,9 +224,9 @@ namespace api.nox.world
             var infoupdate = _root.Q<Button>("info-update");
             infoupdate.clicked += async () =>
             {
-                Debug.Log("Update" + _world);
+                Logger.Log("Update" + _world);
                 if (_world == null || !_lastDisplay.HasFlag(DisplayFlags.World)) return;
-                Debug.Log("Update1" + _world);
+                Logger.Log("Update1" + _world);
                 var title = _root.Q<TextField>("info-title").value;
                 var description = _root.Q<TextField>("info-description").value;
                 var capacity = _root.Q<UnsignedIntegerField>("info-capacity").value;
@@ -246,8 +247,8 @@ namespace api.nox.world
                 if (sucess != null)
                 {
                     EditorUtility.DisplayDialog("Success", "World updated successfully.", "Ok");
-                    Debug.Log("World updated successfully.");
-                    Debug.Log(sucess.description);
+                    Logger.Log("World updated successfully.");
+                    Logger.Log(sucess.description);
                     _world = sucess;
                     UpdateWorld();
                     SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
@@ -324,7 +325,7 @@ namespace api.nox.world
             if (descriptor == null)
             {
                 EditorUtility.DisplayDialog("Error", "No descriptor found.", "Ok");
-                Debug.LogError("No descriptor found.");
+                Logger.LogError("No descriptor found.");
                 return;
             }
 
@@ -332,14 +333,14 @@ namespace api.nox.world
             if (target == SupportBuildTarget.NoTarget)
             {
                 EditorUtility.DisplayDialog("Error", "No build platform selected.", "Ok");
-                Debug.LogError("No build platform selected.");
+                Logger.LogError("No build platform selected.");
                 return;
             }
 
             if (!SuppordTarget.IsBuildTargetSupported(target))
             {
                 EditorUtility.DisplayDialog("Error", "Unsupported build target.", "Ok");
-                Debug.LogError("Unsupported build target.");
+                Logger.LogError("Unsupported build target.");
                 return;
             }
 
@@ -347,17 +348,17 @@ namespace api.nox.world
             if (version > ushort.MaxValue)
             {
                 EditorUtility.DisplayDialog("Error", "Version must be less than " + ushort.MaxValue, "Ok");
-                Debug.LogError("Version must be less than " + ushort.MaxValue);
+                Logger.LogError("Version must be less than " + ushort.MaxValue);
                 return;
             }
 
-            Debug.Log("Checking world...");
+            Logger.Log("Checking world...");
             SetDisplay(DisplayFlags.Loading);
             _world = await _mod.NetworkAPI.World.GetWorld(_world.server, _world.id);
             if (_world == null)
             {
                 EditorUtility.DisplayDialog("Error", "An error occured while fetching the world.", "Ok");
-                Debug.LogError("An error occured while fetching the world.");
+                Logger.LogError("An error occured while fetching the world.");
                 SetDisplay(DisplayFlags.WorldNotFound);
                 return;
             }
@@ -380,7 +381,7 @@ namespace api.nox.world
             if (search == null)
             {
                 EditorUtility.DisplayDialog("Error", "An error occured while fetching the assets.", "Ok");
-                Debug.LogError("An error occured while fetching the assets.");
+                Logger.LogError("An error occured while fetching the assets.");
                 SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
                 return;
             }
@@ -404,7 +405,7 @@ namespace api.nox.world
                     if (search == null)
                     {
                         EditorUtility.DisplayDialog("Error", "An error occured while fetching the assets.", "Ok");
-                        Debug.LogError("An error occured while fetching the assets.");
+                        Logger.LogError("An error occured while fetching the assets.");
                         SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
                         return;
                     }
@@ -414,25 +415,25 @@ namespace api.nox.world
             if (asset != null && strictVersion && !asset.IsEmpty())
             {
                 EditorUtility.DisplayDialog("Error", "Asset already exists.", "Ok");
-                Debug.LogError("Asset already exists.");
-                Debug.LogError("Asset: " + asset);
+                Logger.LogError("Asset already exists.");
+                Logger.LogError("Asset: " + asset);
                 SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
                 return;
             }
 
-            Debug.Log("Building world...");
+            Logger.Log("Building world...");
             var result = MainDescriptorEditor.BuildWorld(descriptor, target, false);
             if (result == null || !result.Success || string.IsNullOrWhiteSpace(result.path))
             {
                 EditorUtility.DisplayDialog("Error", "An error occured while building the world.", "Ok");
-                Debug.LogError("An error occured while building the world.");
+                Logger.LogError("An error occured while building the world.");
                 SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
                 return;
             }
 
-            Debug.Log("Uploading asset...");
-            Debug.Log("Asset version: " + version);
-            Debug.Log("Asset platform: " + SuppordTarget.GetTargetName(target));
+            Logger.Log("Uploading asset...");
+            Logger.Log("Asset version: " + version);
+            Logger.Log("Asset platform: " + SuppordTarget.GetTargetName(target));
 
             if (asset == null)
                 asset = await _mod.NetworkAPI.World.Asset.CreateAsset(new CreateAssetData()
@@ -447,7 +448,7 @@ namespace api.nox.world
             if (asset == null)
             {
                 EditorUtility.DisplayDialog("Error", "An error occured while creating the asset.", "Ok");
-                Debug.LogError("An error occured while creating the asset.");
+                Logger.LogError("An error occured while creating the asset.");
                 SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
                 return;
             }
@@ -456,23 +457,23 @@ namespace api.nox.world
             if (!res)
             {
                 EditorUtility.DisplayDialog("Error", "An error occured while uploading the asset.", "Ok");
-                Debug.LogError("An error occured while uploading the asset.");
+                Logger.LogError("An error occured while uploading the asset.");
                 SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
                 return;
             }
 
-            Debug.Log("Asset created successfully, Refreshing world...");
+            Logger.Log("Asset created successfully, Refreshing world...");
             _world = await _mod.NetworkAPI.World.GetWorld(_world.server, _world.id);
             if (_world == null)
             {
                 EditorUtility.DisplayDialog("Error", "An error occured while fetching the world.", "Ok");
-                Debug.LogError("An error occured while fetching the world.");
+                Logger.LogError("An error occured while fetching the world.");
                 SetDisplay(DisplayFlags.WorldNotFound);
                 return;
             }
 
             EditorUtility.DisplayDialog("Success", "Asset created successfully.", "Ok");
-            Debug.Log("Asset created successfully.");
+            Logger.Log("Asset created successfully.");
             SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
         }
     }

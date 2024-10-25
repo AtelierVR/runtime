@@ -2,13 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Nox.CCK.Editor;
-using Nox.CCK.Mods;
 using Nox.Editor.Mods;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Logger = Nox.CCK.Logger;
 
 namespace Nox.Editor
 {
@@ -28,7 +27,7 @@ namespace Nox.Editor
         [MenuItem("Nox/Restart")]
         public static void Restart()
         {
-            Debug.Log("Restarting...");
+            Logger.Log("Restarting...");
             AssetDatabase.Refresh();
             if (Instance != null)
                 Instance.Close();

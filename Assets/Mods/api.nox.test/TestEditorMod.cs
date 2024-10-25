@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using Nox.CCK.Editor;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
-using UnityEngine;
 using UnityEngine.UIElements;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.test
 {
@@ -12,7 +12,7 @@ namespace api.nox.test
 
         public void OnInitializeEditor(EditorModCoreAPI api)
         {
-            Debug.Log("Hello from TestEditorMod!");
+            Logger.Log("Hello from TestEditorMod!");
             api.PanelAPI.AddLocalPanel(new PanelExample());
         }
 
@@ -40,7 +40,7 @@ namespace api.nox.test
 
         public void OnClosed()
         {
-            Debug.Log("Panel Example closed!");
+            Logger.Log("Panel Example closed!");
         }
     }
 }

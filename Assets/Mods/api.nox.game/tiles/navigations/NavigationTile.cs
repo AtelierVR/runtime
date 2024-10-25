@@ -1,6 +1,5 @@
 
 using Cysharp.Threading.Tasks;
-using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
 using UnityEngine;
 using Nox.CCK;
@@ -11,7 +10,7 @@ using System.Threading;
 using System;
 using Object = UnityEngine.Object;
 using api.nox.game.UI;
-using api.nox.network.Users;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.Tiles
 {
@@ -37,7 +36,7 @@ namespace api.nox.game.Tiles
         
         internal void PostInitialize()
         {
-            Debug.Log("NavigationTileManager.PostInitialize");
+            Logger.Log("NavigationTileManager.PostInitialize");
             UserNav.UpdateHandler();
             WorldNav.UpdateHandler();
             ServerNav.UpdateHandler();
@@ -112,7 +111,7 @@ namespace api.nox.game.Tiles
 
         internal void OnDisplay(TileObject tile, GameObject content)
         {
-            Debug.Log("NavigationTileManager.OnDisplay");
+            Logger.Log("NavigationTileManager.OnDisplay");
             if (navigationHandlers.Count > 0)
                 OnSelectHandler(tile, content, navigationHandlers.First().Value.id);
             UpdateContent(tile, content);
@@ -126,24 +125,24 @@ namespace api.nox.game.Tiles
 
         internal void OnOpen(TileObject tile, GameObject content)
         {
-            Debug.Log("NavigationTileManager.OnOpen");
+            Logger.Log("NavigationTileManager.OnOpen");
         }
 
         internal void OnHide(TileObject tile, GameObject content)
         {
-            Debug.Log("NavigationTileManager.OnHide");
+            Logger.Log("NavigationTileManager.OnHide");
         }
 
         private List<CancellationTokenSource> IsFetching = new();
 
         private void SubmitSearch(TileObject tile, GameObject content, string text)
         {
-            Debug.Log($"NavigationTileManager.SubmitSearch({selectedHandler}, {text})");
+            Logger.Log($"NavigationTileManager.SubmitSearch({selectedHandler}, {text})");
             if (selectedHandler == null) return;
             if (!navigationHandlers.ContainsKey(selectedHandler)) return;
             var handler = navigationHandlers[selectedHandler];
             if (handler.GetWorkers == null) return;
-            Debug.Log("Submitting search to navigation handler: " + handler.id + " with text: " + text);
+            Logger.Log("Submitting search to navigation handler: " + handler.id + " with text: " + text);
             var workers = handler.GetWorkers();
             if (workers.Length == 0) return;
             IsFetching = new List<CancellationTokenSource>();
@@ -175,12 +174,12 @@ namespace api.nox.game.Tiles
             var time = DateTime.Now;
             var result = worker.Fetch(text).AttachExternalCancellation(cancel.Token);
             await UniTask.WaitUntil(() => result.Status != UniTaskStatus.Pending || (DateTime.Now - time).TotalSeconds > 10);
-            Debug.Log("Search result for " + worker.server_title + " in " + (DateTime.Now - time).TotalSeconds + " seconds");
+            Logger.Log("Search result for " + worker.server_title + " in " + (DateTime.Now - time).TotalSeconds + " seconds");
             if (cancel.Token.IsCancellationRequested || tile == null) return;
             if (result.Status != UniTaskStatus.Pending) cancel.Cancel();
             var foundobj = Reference.GetReference("found", obj);
             var messageobj = Reference.GetReference("message", obj);
-            Debug.Log("Search result for " + worker.server_title + " status: " + result.Status);
+            Logger.Log("Search result for " + worker.server_title + " status: " + result.Status);
             if (result.Status == UniTaskStatus.Faulted)
             {
                 try
@@ -196,7 +195,7 @@ namespace api.nox.game.Tiles
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogException(ex);
+                    Logger.LogException(ex);
                     foundobj.SetActive(false);
                     messageobj.SetActive(true);
                     var msg = Reference.GetReference("text", messageobj).GetComponent<TextLanguage>();
@@ -277,11 +276,11 @@ namespace api.nox.game.Tiles
                 var button = Reference.GetReference("button", go).GetComponent<Button>();
                 button.onClick.AddListener(() =>
                 {
-                    Debug.Log($"Sending goto tile {tile.MenuId} with {data.goto_id}");
+                    Logger.Log($"Sending goto tile {tile.MenuId} with {data.goto_id}");
                     foreach (var c in IsFetching)
                         c.Cancel();
                     for (int i = 0; i < data.goto_data.Length; i++)
-                        Debug.Log($"data.goto_data[{i}]: {data.goto_data[i]}");
+                        Logger.Log($"data.goto_data[{i}]: {data.goto_data[i]}");
                     MenuManager.Instance.SendGotoTile(tile.MenuId, data.goto_id, data.goto_data);
                 });
             }
@@ -299,7 +298,7 @@ namespace api.nox.game.Tiles
             foreach (var handler in navigationHandlers.Values)
             {
                 var id = handler.id;
-                Debug.Log("Adding navigation handler to navigation tile" + handler.id);
+                Logger.Log("Adding navigation handler to navigation tile" + handler.id);
                 var go = Object.Instantiate(pf, searcher.transform);
                 var button = Reference.GetReference("button", go).GetComponent<Button>();
                 button.onClick.AddListener(() => OnSelectHandler(tile, content, id));

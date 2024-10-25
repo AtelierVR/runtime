@@ -1,6 +1,5 @@
 
 using Cysharp.Threading.Tasks;
-using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
 using UnityEngine;
 using Nox.CCK;
@@ -16,6 +15,7 @@ using api.nox.network.Worlds;
 using api.nox.network.Worlds.Assets;
 using api.nox.network;
 using api.nox.network.Users;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.Tiles
 {
@@ -110,7 +110,7 @@ namespace api.nox.game.Tiles
         /// <param name="content"></param>
         internal void OnDisplay(InstanceTileObject tile, GameObject content)
         {
-            Debug.Log("InstanceTileManager.OnDisplay");
+            Logger.Log("InstanceTileManager.OnDisplay");
             UpdateContent(tile, content);
         }
 
@@ -121,7 +121,7 @@ namespace api.nox.game.Tiles
         /// <param name="content"></param>
         internal void OnOpen(InstanceTileObject tile, GameObject content)
         {
-            Debug.Log("InstanceTileManager.OnOpen");
+            Logger.Log("InstanceTileManager.OnOpen");
             FetchLocation(tile, content).Forget();
             OnClickRefreshPlayers(tile, content).Forget();
         }
@@ -133,7 +133,7 @@ namespace api.nox.game.Tiles
         /// <param name="content"></param>
         internal void OnHide(InstanceTileObject tile, GameObject content)
         {
-            Debug.Log("InstanceTileManager.OnHide");
+            Logger.Log("InstanceTileManager.OnHide");
         }
 
         private void OnFetchInstance(EventData context)
@@ -162,7 +162,7 @@ namespace api.nox.game.Tiles
             var instance = tile.Instance;
             if (instance == null)
             {
-                Debug.LogError("Instance is null");
+                Logger.LogError("Instance is null");
                 return;
             }
             Reference.GetReference("display", content).GetComponent<TextLanguage>().UpdateText(new string[] { instance.title });
@@ -196,7 +196,7 @@ namespace api.nox.game.Tiles
             flag.SetActive(false);
             if (location != null && location.success && !string.IsNullOrEmpty(location.GetFlagImg()))
                 try { _ = UpdateTexure(flag_img, location.GetFlagImg()).ContinueWith((bool a) => flag.SetActive(a)); }
-                catch (Exception e) { Debug.LogError(e); }
+                catch (Exception e) { Logger.LogError(e); }
         }
 
         private async UniTask OnClickRefreshInstance(InstanceTileObject tile, GameObject content)
@@ -207,7 +207,7 @@ namespace api.nox.game.Tiles
             var instance = tile.Instance;
             if (instance == null)
             {
-                Debug.LogError("Instance is null");
+                Logger.LogError("Instance is null");
                 refresh_instance.interactable = true;
                 return;
             }
@@ -215,7 +215,7 @@ namespace api.nox.game.Tiles
             instance = await GameClientSystem.Instance.NetworkAPI.Instance.GetInstance(instance.server, instance.id);
             if (instance == null)
             {
-                Debug.LogError("Instance is null");
+                Logger.LogError("Instance is null");
                 return;
             }
 
@@ -251,7 +251,7 @@ namespace api.nox.game.Tiles
                 }
                 else
                 {
-                    Debug.Log("Relay is null");
+                    Logger.Log("Relay is null");
                     gotobtn.interactable = true;
                 }
             }
@@ -267,7 +267,7 @@ namespace api.nox.game.Tiles
             var asset = tile.Asset;
             if (instance == null || world == null || asset == null)
             {
-                Debug.LogError("Instance, World or Asset is null");
+                Logger.LogError("Instance, World or Asset is null");
                 return;
             }
 
@@ -317,12 +317,13 @@ namespace api.nox.game.Tiles
 
             if (await controller.Prepare())
             {
-                Debug.Log("Session set current");
+                Logger.Log("Session set current");
                 session.SetCurrent();
             }
             else
             {
-                Debug.Log("Session disposed");
+                Logger.Log("Session disposed");
+                GameSystem.Instance.SessionManager.Remove(session);
                 session.Dispose();
             }
 

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using UnityEngine;
-using api.nox.network.Utils;
 using Buffer = api.nox.network.Utils.Buffer;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.network
 {
@@ -34,7 +33,7 @@ namespace api.nox.network
             }
             catch (SocketException e)
             {
-                Debug.LogError($"Failed to connect to {address}:{port} ({e.Message})");
+                Logger.LogError($"Failed to connect to {address}:{port} ({e.Message})");
                 return false;
             }
         }
@@ -64,7 +63,7 @@ namespace api.nox.network
             }
             catch (Exception e)
             {
-                Debug.LogError("Error sending data to server: " + e.Message);
+                Logger.LogError("Error sending data to server: " + e.Message);
                 Close();
             }
 

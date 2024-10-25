@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Nox.CCK;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
 
@@ -88,7 +89,7 @@ namespace Nox.Editor.Mods.Events
             }
             _subscriptions.Add(editor);
             _subscriptions.Sort((a, b) => a.Weight.CompareTo(b.Weight));
-            Debug.Log($"Subscribing to event {editor.EventName} in {_mod.GetMetadata().GetId()} at {_channel}");
+            Logger.Log($"Subscribing to event {editor.EventName} in {_mod.GetMetadata().GetId()} at {_channel}");
             return eventSub;
         }
 

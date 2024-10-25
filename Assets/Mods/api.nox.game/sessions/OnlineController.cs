@@ -1,8 +1,6 @@
 using System;
-using api.nox.game.Controllers;
 using api.nox.network;
 using api.nox.network.Instances;
-using api.nox.network.Players;
 using api.nox.network.RelayInstances;
 using api.nox.network.RelayInstances.Enter;
 using api.nox.network.Relays;
@@ -10,8 +8,8 @@ using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Worlds;
-using UnityEngine;
 using UnityEngine.SceneManagement;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.sessions
 {
@@ -32,7 +30,7 @@ namespace api.nox.game.sessions
 
         internal Instance GetInstance() => NetCache.Get<Instance>(Instance.GetCacheKey(InstanceId, Server));
         internal Relay GetRelay() => GetInstance()?.GetRelay();
-        internal RelayInstance GetRelayInstance() => RelayInstanceManager.Get(InternalId, GetRelay().Id);
+        internal RelayInstance GetRelayInstance() => GetRelay() != null ? RelayInstanceManager.Get(InternalId, GetRelay().Id) : null;
         internal OnlineController(Instance instance)
         {
             Server = instance.server;
@@ -73,7 +71,7 @@ namespace api.nox.game.sessions
             }
             if (relay == null)
             {
-                Debug.Log("Relay is null");
+                Logger.Log("Relay is null");
                 return false;
             }
 
@@ -87,7 +85,7 @@ namespace api.nox.game.sessions
                 }
             if (relayinstance == null)
             {
-                Debug.Log("RelayInstance is null");
+                Logger.Log("RelayInstance is null");
                 return false;
             }
 
@@ -104,35 +102,35 @@ namespace api.nox.game.sessions
 
             if (enter == null)
             {
-                Debug.Log("Enter failed (timeout)");
+                Logger.Log("Enter failed (timeout)");
                 return false;
             }
 
             MaxTps = enter.MaxTps;
 
-            Debug.Log("Enter success");
+            Logger.Log("Enter success");
 
             if (!enter.IsSuccess)
             {
-                Debug.Log("Enter failed: " + enter.Result + " " + enter.Reason);
+                Logger.Log("Enter failed: " + enter.Result + " " + enter.Reason);
                 return false;
             }
 
-            Debug.Log("Enter success");
+            Logger.Log("Enter success");
 
             var configworld = await relayinstance.RequestConfigWorldData();
             if (configworld == null)
             {
-                Debug.Log("ConfigWorldData failed");
+                Logger.Log("ConfigWorldData failed");
                 return false;
             }
 
             var world = await GameSystem.Instance.NetworkAPI.World.GetWorld(configworld.Address, configworld.MasterId);
-            Debug.Log("World: " + world);
+            Logger.Log("World: " + world);
 
             if (world == null)
             {
-                Debug.Log("World is null");
+                Logger.Log("World is null");
                 return false;
             }
 
@@ -150,7 +148,7 @@ namespace api.nox.game.sessions
             var asset = search?.assets[0];
             if (asset == null)
             {
-                Debug.Log("Asset is null");
+                Logger.Log("Asset is null");
                 return false;
             }
 
@@ -167,7 +165,7 @@ namespace api.nox.game.sessions
 
             if (scene == default || !scene.IsValid())
             {
-                Debug.Log("Scene is null");
+                Logger.Log("Scene is null");
                 return false;
             }
             GetSession().scenes.Add(scene);
@@ -176,13 +174,13 @@ namespace api.nox.game.sessions
 
             if (indexMainDescriptor == byte.MaxValue)
             {
-                Debug.Log("MainDescriptor is null");
+                Logger.Log("MainDescriptor is null");
                 return false;
             }
 
             if (!relayinstance.SendConfigReady())
             {
-                Debug.Log("SendConfigReady failed");
+                Logger.Log("SendConfigReady failed");
                 return false;
             }
 
@@ -191,16 +189,16 @@ namespace api.nox.game.sessions
             var abstractPlayer = GetSession().GetAbstractPlayer(enter.Player.Id);
             if (abstractPlayer == null)
             {
-                Debug.Log("AbstractPlayer is null");
+                Logger.Log("AbstractPlayer is null");
                 return false;
             }
 
-            if (descriptor != null && descriptor.SpawnType != SpawnType.None)
+            if (descriptor != null && descriptor.GetSpawnType() != SpawnType.None)
             {
                 var spawn = descriptor.ChoiceSpawn();
                 if (spawn != null)
                     abstractPlayer.Teleport(spawn.transform);
-                Debug.Log("Teleport success");
+                Logger.Log("Teleport success");
             }
 
             isReady = true;

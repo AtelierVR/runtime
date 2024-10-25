@@ -3,6 +3,7 @@ using api.nox.network.Relays;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.network.Utils
 {
@@ -102,7 +103,7 @@ namespace api.nox.network.Utils
                     var connector = RelayAPI.ConnectorFromEnum(protocol);
                     if (connector == null) return null;
                     var relay = new Relay(connector);
-                    Debug.Log($"Connecting to {host}:{port} with {protocol}");
+                    Logger.Log($"Connecting to {host}:{port} with {protocol}");
                     if (relay.Connect(host, port))
                     {
                         var handshake = await relay.RequestHandshake();
@@ -116,7 +117,7 @@ namespace api.nox.network.Utils
                 catch (UriFormatException) { return null; }
                 catch (Exception e)
                 {
-                    Debug.Log(e);
+                    Logger.Log(e);
                     continue;
                 }
             return null;
@@ -126,12 +127,12 @@ namespace api.nox.network.Utils
         {
             try
             {
-                Debug.Log($"https://dns.google/resolve?name={string.Format(service, domain)}&type=SRV");
+                Logger.Log($"https://dns.google/resolve?name={string.Format(service, domain)}&type=SRV");
                 var req = new UnityWebRequest($"https://dns.google/resolve?name={string.Format(service, domain)}&type=SRV", UnityWebRequest.kHttpVerbGET) { downloadHandler = new DownloadHandlerBuffer() };
                 await req.SendWebRequest();
                 if (req.result == UnityWebRequest.Result.Success)
                 {
-                    Debug.Log(req.downloadHandler.text);
+                    Logger.Log(req.downloadHandler.text);
                     var srv = JsonUtility.FromJson<SRV>(req.downloadHandler.text);
                     if (srv.Status != 0) return new SRVAnswer[0];
                     return srv.Answer ?? new SRVAnswer[0];
@@ -158,7 +159,7 @@ namespace api.nox.network.Utils
                 catch (UriFormatException) { return null; }
                 catch (Exception e)
                 {
-                    Debug.Log(e);
+                    Logger.Log(e);
                     continue;
                 }
             return null;

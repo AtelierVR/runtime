@@ -1,17 +1,16 @@
 
 using Cysharp.Threading.Tasks;
-using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
 using UnityEngine;
 using Nox.CCK;
 using UnityEngine.UI;
 using api.nox.game.UI;
-using System;
 using Object = UnityEngine.Object;
 using Newtonsoft.Json.Linq;
 using api.nox.network.Servers;
 using api.nox.network.WebSockets;
 using api.nox.network.Users;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.Tiles
 {
@@ -23,7 +22,7 @@ namespace api.nox.game.Tiles
         /// <param name="context"></param>
         internal void SendTile(EventData context)
         {
-            Debug.Log("ServerTileManager.SendTile");
+            Logger.Log("ServerTileManager.SendTile");
             var tile = new TileObject() { id = "api.nox.game.server", context = context };
             tile.GetContent = (Transform tf) => OnGetContent(tile, tf);
             tile.onDisplay = (str, gameObject) => OnDisplay(tile, gameObject);
@@ -40,7 +39,7 @@ namespace api.nox.game.Tiles
         /// <returns>Content of the tile</returns>
         internal GameObject OnGetContent(TileObject tile, Transform tf)
         {
-            Debug.Log("ServerTileManager.GetTileContent");
+            Logger.Log("ServerTileManager.GetTileContent");
             var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.server");
             pf.SetActive(false);
             var content = Object.Instantiate(pf, tf);
@@ -55,7 +54,7 @@ namespace api.nox.game.Tiles
         /// <param name="content"></param>
         internal void OnDisplay(TileObject tile, GameObject content)
         {
-            Debug.Log("ServerTileManager.OnDisplay");
+            Logger.Log("ServerTileManager.OnDisplay");
         }
 
         /// <summary>
@@ -65,7 +64,7 @@ namespace api.nox.game.Tiles
         /// <param name="content"></param>
         internal void OnOpen(TileObject tile, GameObject content)
         {
-            Debug.Log("ServerTileManager.OnOpen");
+            Logger.Log("ServerTileManager.OnOpen");
             var server = tile.GetData<Server>(0);
             UpdateContent(content, server);
         }
@@ -77,7 +76,7 @@ namespace api.nox.game.Tiles
         /// <param name="content"></param>
         internal void OnHide(TileObject tile, GameObject content)
         {
-            Debug.Log("ServerTileManager.OnHide");
+            Logger.Log("ServerTileManager.OnHide");
         }
 
         private void UpdateContent(GameObject tile, Server server)
@@ -93,13 +92,13 @@ namespace api.nox.game.Tiles
 
         internal ServerTileManager()
         {
-            Debug.Log("ServerTileManager initializing.");
+            Logger.Log("ServerTileManager initializing.");
             Initialization().Forget();
         }
 
         private async void OnServerDisconnect()
         {
-            Debug.Log("Server disconnected.");
+            Logger.Log("Server disconnected.");
             if (ws != null)
             {
                 await ws.Close();
@@ -109,32 +108,32 @@ namespace api.nox.game.Tiles
 
         private async UniTask OnServerConnect(Server server)
         {
-            Debug.Log("Server connected: " + server.title);
+            Logger.Log("Server connected: " + server.title);
             ws = await server.GetOrConnect();
             if (ws != null)
             {
-                Debug.Log("Server connected: " + server.title);
+                Logger.Log("Server connected: " + server.title);
                 ws.OnMessage += (msg) => OnWSMessage(msg);
-                ws.OnClose += () => Debug.Log("Server closed.");
+                ws.OnClose += () => Logger.Log("Server closed.");
             }
         }
 
         private void OnWSMessage(string msg)
         {
-            Debug.Log("Server message: " + msg);
+            Logger.Log("Server message: " + msg);
             JObject obj = JObject.Parse(msg);
             var type = obj.TryGetValue("type", out var typeobj) ? typeobj.Value<string>() : null;
-            Debug.Log("Server message type: " + type);
+            Logger.Log("Server message type: " + type);
             switch (type)
             {
                 case "user_update":
                     OnUserUpdate(obj.TryGetValue("data", out var data) ? data.ToObject<JObject>() : null);
                     break;
                 case "user_connect":
-                    Debug.Log("User connect.");
+                    Logger.Log("User connect.");
                     break;
                 case "user_disconnect":
-                    Debug.Log("User disconnect.");
+                    Logger.Log("User disconnect.");
                     break;
             }
         }

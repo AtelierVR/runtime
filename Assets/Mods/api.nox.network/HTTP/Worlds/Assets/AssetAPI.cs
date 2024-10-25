@@ -36,7 +36,7 @@ namespace api.nox.network.Worlds.Assets
         // {
         //     var User = _mod._api.NetworkAPI.CallMethod<User>("GetCurrentUser");
         //     if (User == null) return null;
-        //     Debug.Log("Updating asset");
+        //     Logger.Log("Updating asset");
         //     var config = Config.Load();
         //     var gateway = asset.server == User.server ? config.Get<string>("gateway") : (await Gateway.FindGatewayMaster(asset.server))?.OriginalString;
         //     if (gateway == null) return null;
@@ -47,7 +47,7 @@ namespace api.nox.network.Worlds.Assets
         //     try { await req.SendWebRequest(); }
         //     catch { return null; }
         //     if (req.responseCode != 200) return null;
-        //     Debug.Log(req.downloadHandler.text);
+        //     Logger.Log(req.downloadHandler.text);
         //     var res = JsonUtility.FromJson<Response<WorldAsset>>(req.downloadHandler.text);
         //     if (res.IsError) return null;
         //     return res.data;

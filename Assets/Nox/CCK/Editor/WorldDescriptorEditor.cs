@@ -12,6 +12,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using Logger = Nox.CCK.Logger;
 
 namespace Nox.Editor.Worlds
 {
@@ -228,7 +229,7 @@ namespace Nox.Editor.Worlds
                 root.Q<Button>("detect-scenes").clicked += () =>
                 {
                     var descriptors = BaseDescriptor.GetDescriptors();
-                    Debug.Log("Detected " + descriptors.Length + " descriptors");
+                    Logger.Log("Detected " + descriptors.Length + " descriptors");
                     var sc = new List<SceneAsset>();
                     foreach (var desc in descriptors)
                         if (desc is SubDescriptor mD)
@@ -298,7 +299,7 @@ namespace Nox.Editor.Worlds
                     {
                         if (item.userData is int i && i >= 0 && i < descriptor.ModRequirements.Count)
                         {
-                            Debug.Log("Changed mod" + item.userData + " (value) to " + evt.newValue);
+                            Logger.Log("Changed mod" + item.userData + " (value) to " + evt.newValue);
                             descriptor.ModRequirements[i].Id = evt.newValue;
                         }
                     });
@@ -310,7 +311,7 @@ namespace Nox.Editor.Worlds
                     {
                         if (item.userData is int i && i >= 0 && i < descriptor.ModRequirements.Count)
                         {
-                            Debug.Log("Changed mod " + item.userData + " (flag) to " + evt.newValue);
+                            Logger.Log("Changed mod " + item.userData + " (flag) to " + evt.newValue);
                             descriptor.ModRequirements[i].Flags = (ModRequirmentFlags)evt.newValue;
                         }
                     });
@@ -451,7 +452,7 @@ namespace Nox.Editor.Worlds
                     return EndBuild(null, "Scene not found: " + scene.Value.name, dialog, currentScenes);
                 File.Copy(path, destination);
                 File.Copy(path + ".meta", destination + ".meta");
-                Debug.Log("Copied " + path + " to " + destination);
+                Logger.Log("Copied " + path + " to " + destination);
                 assets.Add(destination);
                 scenes.Add(destination);
                 initialGUIDs.Add(destination, AssetDatabase.AssetPathToGUID(path));
@@ -467,7 +468,7 @@ namespace Nox.Editor.Worlds
                     if (Path.GetExtension(dependency) == ".unity") continue;
                     File.Copy(dependency, destinationPath);
                     File.Copy(dependency + ".meta", destinationPath + ".meta");
-                    Debug.Log("Copied " + dependency + " to " + destinationPath);
+                    Logger.Log("Copied " + dependency + " to " + destinationPath);
                     assets.Add(destinationPath);
                     initialGUIDs.Add(destinationPath, AssetDatabase.AssetPathToGUID(dependency));
                     endGUIDs.Add(destinationPath, gui);
@@ -501,7 +502,7 @@ namespace Nox.Editor.Worlds
                 {
                     var fileName = Path.GetFileNameWithoutExtension(asset);
                     newGUIDs.Add(fileName, AssetDatabase.AssetPathToGUID(asset));
-                    Debug.Log("Dependency: " + fileName + " -> " + newGUIDs[fileName]);
+                    Logger.Log("Dependency: " + fileName + " -> " + newGUIDs[fileName]);
                 }
 
             // set updated uids
@@ -546,7 +547,7 @@ namespace Nox.Editor.Worlds
             // compile all descriptors
             foreach (var desc in new BaseDescriptor[] { mD }.Concat(sDs))
             {
-                Debug.Log("Compiling " + desc.name + " in " + desc.gameObject.scene.name);
+                Logger.Log("Compiling " + desc.name + " in " + desc.gameObject.scene.name);
                 desc.Compile();
             }
             // save all scenes and await
@@ -643,14 +644,14 @@ namespace Nox.Editor.Worlds
                 bundleDefinitions = new AssetBundleBuild[] { definition }
             };
 
-            Debug.Log("Building Asset Bundle: " + input.outputPath);
+            Logger.Log("Building Asset Bundle: " + input.outputPath);
             foreach (var scene in input.bundleDefinitions)
             {
-                Debug.Log("Scene: " + scene.assetBundleName);
+                Logger.Log("Scene: " + scene.assetBundleName);
                 foreach (var asset in scene.assetNames)
-                    Debug.Log("Asset: " + asset);
+                    Logger.Log("Asset: " + asset);
                 foreach (var asset in scene.addressableNames)
-                    Debug.Log("Addressable: " + asset);
+                    Logger.Log("Addressable: " + asset);
             }
 
 

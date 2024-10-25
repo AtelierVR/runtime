@@ -1,7 +1,6 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using System.Linq;
-using api.nox.network;
 using Nox.CCK;
 using Nox.CCK.Editor;
 using Nox.CCK.Worlds;
@@ -10,6 +9,7 @@ using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.world
 {
@@ -329,7 +329,7 @@ namespace api.nox.world
                 else
                 {
                     EditorUtility.DisplayDialog("Error", "Unsupported build target.", "Ok");
-                    Debug.LogError("Unsupported build target.");
+                    Logger.LogError("Unsupported build target.");
                     _root.Q<EnumField>("platform-field").value = e.previousValue;
                 }
             });
@@ -341,7 +341,7 @@ namespace api.nox.world
                 {
 
                     EditorUtility.DisplayDialog("Error", "No world descriptor found.", "Ok");
-                    Debug.LogError("No world descriptor found.");
+                    Logger.LogError("No world descriptor found.");
                     return;
                 }
 
@@ -349,14 +349,14 @@ namespace api.nox.world
                 if (target == SupportBuildTarget.NoTarget)
                 {
                     EditorUtility.DisplayDialog("Error", "No build platform selected.", "Ok");
-                    Debug.LogError("No build platform selected.");
+                    Logger.LogError("No build platform selected.");
                     return;
                 }
 
                 if (!SuppordTarget.IsBuildTargetSupported(target))
                 {
                     EditorUtility.DisplayDialog("Error", "Unsupported build target.", "Ok");
-                    Debug.LogError("Unsupported build target.");
+                    Logger.LogError("Unsupported build target.");
                     return;
                 }
 
@@ -364,12 +364,12 @@ namespace api.nox.world
                 if (result.Success)
                 {
                     EditorUtility.DisplayDialog("Success", "Build success.", "Ok");
-                    Debug.Log("Build success.");
+                    Logger.Log("Build success.");
                 }
                 else
                 {
                     EditorUtility.DisplayDialog("Error", result.ErrorMessage, "Ok");
-                    Debug.LogError(result.ErrorMessage);
+                    Logger.LogError(result.ErrorMessage);
                     return;
                 }
             });
@@ -377,7 +377,7 @@ namespace api.nox.world
         }
         public void OnClosed()
         {
-            Debug.Log("Panel Example closed!");
+            Logger.Log("Panel Example closed!");
         }
     }
 }

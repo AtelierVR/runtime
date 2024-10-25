@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using Nox.CCK;
-using UnityEngine;
+using Logger = Nox.CCK.Logger;
 
 
 namespace api.nox.game.Settings
@@ -258,7 +258,7 @@ namespace api.nox.game.Settings
 
         internal void UpdateHandler()
         {
-            Debug.Log("AudioSettings.UpdateHandler");
+            Logger.Log("AudioSettings.UpdateHandler");
             GameClientSystem.CoreAPI.EventAPI.Emit("game.setting", this);
         }
 

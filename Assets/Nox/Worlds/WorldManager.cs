@@ -25,7 +25,7 @@
 
 //         public static async UniTask<World> Fetch(uint id, string server)
 //         {
-//             Debug.Log($"Fetching world {id} from {server}");
+//             Logger.Log($"Fetching world {id} from {server}");
 //             var gateway = (await ServerManager.GetOrFetch(server))?.gateways;
 //             if (gateway == null) return null;
 //             var req = new UnityWebRequest(gateway.CombineHTTP($"/api/worlds/{id}"), "GET")

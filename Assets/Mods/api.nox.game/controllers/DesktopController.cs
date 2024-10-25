@@ -2,6 +2,7 @@ using api.nox.game.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.Controllers
 {
@@ -49,7 +50,7 @@ namespace api.nox.game.Controllers
                 // check if a input firld is selected
                 if (eventSystem.currentSelectedGameObject != null) 
                 {
-                    Debug.Log("Input field selected");
+                    Logger.Log("Input field selected");
                     return;
                 }
                 var menu = MenuManager.Instance.GetViewPortMenu();

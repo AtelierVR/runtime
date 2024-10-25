@@ -4,9 +4,9 @@ using System.Net;
 using api.nox.network.RelayInstances;
 using api.nox.network.Relays.Base;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 using Buffer = api.nox.network.Utils.Buffer;
 using Random = UnityEngine.Random;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.network.Relays
 {
@@ -48,7 +48,7 @@ namespace api.nox.network.Relays
             var type = (ResponseType)buffer.ReadByte();
             if (length < 5 || length > buffer.length) return;
             if (type != ResponseType.Latency)
-                Debug.Log($"Received {state} {type} from {EndPoint}");
+                Logger.Log($"Received {state} {type} from {EndPoint}");
             OnRelayEventEvent?.Invoke(buffer);
             OnRelayEventEvent?.Invoke(buffer);
             if (length >= 6)
@@ -67,7 +67,7 @@ namespace api.nox.network.Relays
                         break;
                     case ResponseType.Disconnect:
                         var message = buffer.ReadString();
-                        Debug.Log($"Received disconnect message: {message}");
+                        Logger.Log($"Received disconnect message: {message}");
                         LastHandshake = null;
                         break;
                 }

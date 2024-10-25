@@ -5,7 +5,6 @@ using Newtonsoft.Json.Linq;
 using System.Linq;
 using Nox.CCK.Mods.Metadata;
 using Nox.CCK;
-using System.IO;
 
 namespace Nox.Mods
 {
@@ -54,8 +53,8 @@ namespace Nox.Mods
             }
             catch (Exception e)
             {
-                Debug.LogWarning(json.ToString());
-                Debug.LogWarning(e);
+                Logger.LogWarning(json.ToString());
+                Logger.LogWarning(e);
                 return null;
             }
         }

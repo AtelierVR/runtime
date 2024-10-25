@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using api.nox.network.Utils;
-using UnityEngine;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.network
 {
@@ -30,7 +30,7 @@ namespace api.nox.network
             }
             catch (SocketException e)
             {
-                Debug.LogError($"Failed to send data ({e.Message})");
+                Logger.LogError($"Failed to send data ({e.Message})");
                 Close();
             }
 
@@ -54,7 +54,7 @@ namespace api.nox.network
             }
             catch (SocketException e)
             {
-                Debug.LogError($"Failed to receive data ({e.Message})");
+                Logger.LogError($"Failed to receive data ({e.Message})");
                 Close();
             }
         }

@@ -5,6 +5,7 @@ using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using UnityEngine;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.network.Auths
 {
@@ -76,7 +77,7 @@ namespace api.nox.network.Auths
 
             var response = await request.Send<string, Response<bool>>(null, new() { { "Authorization", token.ToHeader() } });
             if (request.IsError || response.IsError)
-                Debug.LogError(response.error.message);
+                Logger.LogError(response.error.message);
 
             var config = Config.Load();
             var hash = Animator.StringToHash(address);

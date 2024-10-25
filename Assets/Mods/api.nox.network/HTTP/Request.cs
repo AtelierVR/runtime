@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.network.HTTP
 {
@@ -24,7 +25,7 @@ namespace api.nox.network.HTTP
 
         public async UniTask<TRes> Send<TReq, TRes>(TReq body = default, Dictionary<string, string> headers = null)
         {
-            Debug.Log($"Fetching [{Method}] {Url}...");
+            Logger.Log($"Fetching [{Method}] {Url}...");
             var req = new UnityWebRequest(Url, Method.ToString()) { downloadHandler = new DownloadHandlerBuffer() };
             foreach (var key in DefaultHeaders)
                 req.SetRequestHeader(key.Key, key.Value);
@@ -50,9 +51,9 @@ namespace api.nox.network.HTTP
             try { await req.SendWebRequest(); }
             catch
             {
-                Debug.LogError($"Failed to fetch [{Method}] {Url}");
-                Debug.LogError(req.error);
-                Debug.LogError(req.downloadHandler.text);
+                Logger.LogError($"Failed to fetch [{Method}] {Url}");
+                Logger.LogError(req.error);
+                Logger.LogError(req.downloadHandler.text);
                 return default;
             }
             RequestObject = req;

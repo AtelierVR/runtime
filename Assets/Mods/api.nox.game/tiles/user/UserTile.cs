@@ -1,6 +1,5 @@
 
 using Cysharp.Threading.Tasks;
-using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
 using UnityEngine;
 using Nox.CCK;
@@ -10,6 +9,7 @@ using UnityEngine.Events;
 using System;
 using Object = UnityEngine.Object;
 using api.nox.network.Users;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.Tiles
 {
@@ -150,7 +150,7 @@ namespace api.nox.game.Tiles
             var user = tile.User;
             if (user == null)
             {
-                Debug.LogError("User is null");
+                Logger.LogError("User is null");
                 return;
             }
 
@@ -192,7 +192,7 @@ namespace api.nox.game.Tiles
             var user = tile.User;
             if (user == null)
             {
-                Debug.LogError("User is null");
+                Logger.LogError("User is null");
                 dlb.interactable = true;
                 return;
             }
@@ -201,7 +201,7 @@ namespace api.nox.game.Tiles
 
             if (user == null)
             {
-                Debug.LogError("User not found");
+                Logger.LogError("User not found");
                 dlb.interactable = true;
                 return;
             }

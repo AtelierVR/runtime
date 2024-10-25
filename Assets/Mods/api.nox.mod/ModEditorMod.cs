@@ -10,6 +10,7 @@ using Nox.CCK;
 using System.IO;
 using System.Linq;
 using System;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.mod
 {
@@ -62,7 +63,7 @@ namespace api.nox.mod
             var list = ModEditorMod._api.AssetAPI.GetLocalAsset<VisualTreeAsset>("list");
             var container = _root.Q<VisualElement>("list");
             var metadatas = ModEditorMod._api.ModAPI.GetDetectedMetadatas();
-            Debug.Log("Detected mods: " + string.Join(", ", metadatas.Select(m => m.GetId())));
+            Logger.Log("Detected mods: " + string.Join(", ", metadatas.Select(m => m.GetId())));
             var folder = Config.Load().Get<string>("modding.build_folder");
             if (!string.IsNullOrEmpty(folder))
                 _root.Q<TextField>("build-folder").value = folder;
@@ -103,14 +104,14 @@ namespace api.nox.mod
                 var path = Config.Load().Get<string>("modding.build_folder");
                 if (string.IsNullOrEmpty(path))
                 {
-                    Debug.LogError("Build folder not found!");
+                    Logger.LogError("Build folder not found!");
                     return;
                 }
                 else if (Directory.Exists(path))
                     Directory.Delete(path, true);
                 if (!Directory.CreateDirectory(path).Exists)
                 {
-                    Debug.LogError("Failed to create build folder!");
+                    Logger.LogError("Failed to create build folder!");
                     return;
                 }
 
@@ -118,7 +119,7 @@ namespace api.nox.mod
                 if (!GameBuilder.CanBuild(platform))
                 {
                     EditorUtility.DisplayDialog("Error!", "Platform not supported!", "Ok");
-                    Debug.LogError($"Platform {platform} not supported!");
+                    Logger.LogError($"Platform {platform} not supported!");
                     return;
                 }
 
@@ -129,24 +130,24 @@ namespace api.nox.mod
                 if (select.Count == 0)
                 {
                     EditorUtility.DisplayDialog("Error!", "No mods selected!", "Ok");
-                    Debug.LogError("No mods selected!");
+                    Logger.LogError("No mods selected!");
                     return;
                 }
                 else if (select.Count != _mod._selectedMods.Count)
                 {
                     EditorUtility.DisplayDialog("Error!", "Some mods not found!", "Ok");
                     var missing = _mod._selectedMods.Except(select).ToArray();
-                    Debug.LogError($"Some mods not found: {string.Join(", ", missing)}");
+                    Logger.LogError($"Some mods not found: {string.Join(", ", missing)}");
                     return;
                 }
 
-                Debug.Log("Building mods: " + string.Join(", ", select) + " for platform " + platform + "...");
+                Logger.Log("Building mods: " + string.Join(", ", select) + " for platform " + platform + "...");
 
                 var build = GameBuilder.Build(platform);
                 if (!build)
                 {
                     EditorUtility.DisplayDialog("Error!", "Build failed!", "Ok");
-                    Debug.LogError("Failed to build!");
+                    Logger.LogError("Failed to build!");
                     return;
                 }
 
@@ -158,7 +159,7 @@ namespace api.nox.mod
                     if (string.IsNullOrEmpty(pathDll))
                     {
                         EditorUtility.DisplayDialog("Error!", "Failed to select compiled!", "Ok");
-                        Debug.LogError($"Failed to select compiled for {id}");
+                        Logger.LogError($"Failed to select compiled for {id}");
                         return;
                     }
 
@@ -167,7 +168,7 @@ namespace api.nox.mod
                     if (string.IsNullOrEmpty(pathMeta))
                     {
                         EditorUtility.DisplayDialog("Error!", "Failed to find metadata!", "Ok");
-                        Debug.LogError($"Failed to find metadata for {id}");
+                        Logger.LogError($"Failed to find metadata for {id}");
                         return;
                     }
 
@@ -175,7 +176,7 @@ namespace api.nox.mod
                     if (mmeta == null)
                     {
                         EditorUtility.DisplayDialog("Error!", "Failed to load metadata!", "Ok");
-                        Debug.LogError($"Failed to load metadata for {id} at {pathMeta}");
+                        Logger.LogError($"Failed to load metadata for {id} at {pathMeta}");
                         return;
                     }
 
@@ -191,25 +192,25 @@ namespace api.nox.mod
                     guidOfSelected.Add(id, guid);
                 }
 
-                Debug.Log("Build complete! Packing archives...");
+                Logger.Log("Build complete! Packing archives...");
 
                 // pack archive
                 var pathpacking = Config.Load().Get<string>("modding.build_folder");
                 if (string.IsNullOrEmpty(path))
                 {
-                    Debug.LogError("Build folder not found!");
+                    Logger.LogError("Build folder not found!");
                     return;
                 }
                 else foreach (var id in select)
                         if (!ModPacker.PackArchive(pathpacking, id))
                         {
                             EditorUtility.DisplayDialog("Error!", "Failed to pack archive!", "Ok");
-                            Debug.LogError($"Failed to pack archive for {id}");
+                            Logger.LogError($"Failed to pack archive for {id}");
                             return;
                         }
 
                 EditorUtility.DisplayDialog("Build complete!", "Build complete!", "Ok");
-                Debug.Log("Build complete!");
+                Logger.Log("Build complete!");
             };
 
             return _root;
@@ -225,7 +226,7 @@ namespace api.nox.mod
 
         public void OnClosed()
         {
-            Debug.Log("Panel Example closed!");
+            Logger.Log("Panel Example closed!");
         }
     }
 }

@@ -94,7 +94,7 @@ namespace Nox.Mods
             }
 
             foreach (var mod in mods)
-                Debug.Log($"Detected mod {mod.GetMetadata().GetId()}");
+                CCK.Logger.Log($"Detected mod {mod.GetMetadata().GetId()}");
             if (results.Where(r => r.IsError).ToArray().Length > 0 || mods.Count == 0) return results.ToArray();
 
             // check provides

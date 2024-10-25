@@ -1,6 +1,6 @@
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
-using UnityEngine;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.test
 {
@@ -9,7 +9,7 @@ namespace api.nox.test
 
         public void OnInitializeInstance(InstanceModCoreAPI api)
         {
-            Debug.Log("Hello from TestInstanceMod!");
+            Logger.Log("Hello from TestInstanceMod!");
         }
 
         public void OnUpdateInstance()

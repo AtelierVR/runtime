@@ -4,6 +4,7 @@ using Nox.CCK.Editor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.world
 {
@@ -56,7 +57,7 @@ namespace api.nox.world
 
         public void OnClosed()
         {
-            Debug.Log("Panel Example closed!");
+            Logger.Log("Panel Example closed!");
         }
     }
 }

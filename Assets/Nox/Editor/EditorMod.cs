@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Initializers;
+using Logger = Nox.CCK.Logger;
 
 namespace Nox.Editor.Mods
 {
@@ -55,7 +56,7 @@ namespace Nox.Editor.Mods
                 catch (Exception e)
                 {
                     _enabled = !enabled;
-                    UnityEngine.Debug.LogError($"Error while {(enabled ? "enabling" : "disabling")} mod {_metadata.GetId()}: {e}");
+                    Logger.LogError($"Error while {(enabled ? "enabling" : "disabling")} mod {_metadata.GetId()}: {e}");
                 }
             return _enabled;
         }

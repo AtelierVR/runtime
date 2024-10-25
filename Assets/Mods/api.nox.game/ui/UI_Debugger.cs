@@ -3,10 +3,11 @@ using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.UI;
 using static UnityEngine.InputSystem.InputAction;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game
 {
-    public class UI_Debugger : MonoBehaviour
+    public class UI_Loggerger : MonoBehaviour
     {
         NearFarInteractor nearFarInteractor;
         void Start()
@@ -24,37 +25,37 @@ namespace api.nox.game
 
         void OnUIPressPerformed(CallbackContext context)
         {
-            Debug.Log("UI Press Performed", gameObject);
+            Logger.Log("UI Press Performed", gameObject);
         }
 
         void OnSelectEntered(SelectEnterEventArgs state)
         {
-            Debug.Log("Select Entered", gameObject);
+            Logger.Log("Select Entered", gameObject);
         }
 
         void OnSelectExited(SelectExitEventArgs state)
         {
-            Debug.Log("Select Exited", gameObject);
+            Logger.Log("Select Exited", gameObject);
         }
 
         void OnHoverEntered(HoverEnterEventArgs state)
         {
-            Debug.Log("Hover Entered", gameObject);
+            Logger.Log("Hover Entered", gameObject);
         }
 
         void OnHoverExited(HoverExitEventArgs state)
         {
-            Debug.Log("Hover Exited", gameObject);
+            Logger.Log("Hover Exited", gameObject);
         }
 
         void OnUIHoverEntered(UIHoverEventArgs state)
         {
-            Debug.Log("UI Hover Entered", gameObject);
+            Logger.Log("UI Hover Entered", gameObject);
         }
 
         void OnUIHoverExited(UIHoverEventArgs state)
         {
-            Debug.Log("UI Hover Exited", gameObject);
+            Logger.Log("UI Hover Exited", gameObject);
         }
     }
 }

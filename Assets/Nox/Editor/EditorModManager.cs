@@ -9,6 +9,7 @@ using UnityEditor;
 using UnityEngine;
 using Nox.Mods;
 using Nox.Editor.Manage;
+using Logger = Nox.CCK.Logger;
 
 namespace Nox.Editor.Mods
 {
@@ -39,7 +40,7 @@ namespace Nox.Editor.Mods
             EditorApplication.update += Update;
 
             var sources = SourceModManager.FindAllSource();
-            Debug.Log("Found " + string.Join(", ", sources));
+            Logger.Log("Found " + string.Join(", ", sources));
             if (sources.Length == 0) return;
 
             // get all metadata
@@ -57,7 +58,7 @@ namespace Nox.Editor.Mods
                 .Where(meta =>
                 {
                     if (File.Exists(meta.DllPatch)) return true;
-                    Debug.LogWarning("DLL file not found: " + meta.DllPatch);
+                    Logger.LogWarning("DLL file not found: " + meta.DllPatch);
                     return false;
                 })
                 .ToList();
@@ -71,7 +72,7 @@ namespace Nox.Editor.Mods
                         foreach (var mod in modMetas)
                             if (mod.Metadata.GetId() == provide)
                             {
-                                Debug.LogWarning("Mod " + meta.Metadata.GetId() + " provides " + provide + " but it is already provided by " + mod.Metadata.GetId());
+                                Logger.LogWarning("Mod " + meta.Metadata.GetId() + " provides " + provide + " but it is already provided by " + mod.Metadata.GetId());
                                 return false;
                             }
                     return true;
@@ -82,7 +83,7 @@ namespace Nox.Editor.Mods
 
             foreach (var mod in _mods) RemoveMod(mod);
 
-            Debug.Log("Loading mods");
+            Logger.Log("Loading mods");
 
             var modSearchers = new List<ModSource>();
             foreach (var mod in modMetas)
@@ -91,7 +92,7 @@ namespace Nox.Editor.Mods
                 var asmdef = asmdefFiles.Length == 1 ? JObject.Parse(File.ReadAllText(asmdefFiles[0])) : null;
                 if (asmdef == null || asmdef["name"] == null)
                 {
-                    Debug.LogError("No name found in asmdef file " + asmdefFiles[0]);
+                    Logger.LogError("No name found in asmdef file " + asmdefFiles[0]);
                     continue;
                 }
                 modSearchers.Add(mod);
@@ -109,7 +110,7 @@ namespace Nox.Editor.Mods
                     foreach (var mod2 in platformEngine)
                         if (mod2.Metadata.GetId() == provide)
                         {
-                            Debug.LogError("Mod " + mod.Metadata.GetId() + " provides " + provide + " but it is already provided by " + mod2.Metadata.GetId());
+                            Logger.LogError("Mod " + mod.Metadata.GetId() + " provides " + provide + " but it is already provided by " + mod2.Metadata.GetId());
                             break;
                         }
                 ckeckedMods.Add(mod);
@@ -134,7 +135,7 @@ namespace Nox.Editor.Mods
                             }
                     if (found)
                     {
-                        Debug.LogError("Mod " + mod.Metadata.GetId()
+                        Logger.LogError("Mod " + mod.Metadata.GetId()
                             + " breaks " + required.GetId() + required.GetVersion().ToString()
                             + " but it is present (0x01)");
                         broken = true;
@@ -157,7 +158,7 @@ namespace Nox.Editor.Mods
                         }
                     if (!found)
                     {
-                        Debug.LogError("Mod " + mod.Metadata.GetId()
+                        Logger.LogError("Mod " + mod.Metadata.GetId()
                             + " depends on " + required.GetId() + required.GetVersion().ToString()
                             + (
                                 gameMod != null
@@ -180,7 +181,7 @@ namespace Nox.Editor.Mods
                             }
                     if (found)
                     {
-                        Debug.LogError("Mod " + mod.Metadata.GetId()
+                        Logger.LogError("Mod " + mod.Metadata.GetId()
                             + " conflicts with " + required.GetId() + required.GetVersion().ToString()
                             + " but it is present (0x03)");
                         broken = true;
@@ -203,7 +204,7 @@ namespace Nox.Editor.Mods
                         }
                     if (!found)
                     {
-                        Debug.LogWarning("Mod " + mod.Metadata.GetId()
+                        Logger.LogWarning("Mod " + mod.Metadata.GetId()
                             + " recommends " + required.GetId() + required.GetVersion().ToString()
                             + (
                                 gameMod != null
@@ -251,9 +252,9 @@ namespace Nox.Editor.Mods
 
                 // check if all entry points are found
                 if (mc.Count != m.Length)
-                    Debug.LogError("Failed to load main entry points for mod " + mod.Metadata.GetId());
+                    Logger.LogError("Failed to load main entry points for mod " + mod.Metadata.GetId());
                 if (ec.Count != e.Length)
-                    Debug.LogError("Failed to load editor entry points for mod " + mod.Metadata.GetId());
+                    Logger.LogError("Failed to load editor entry points for mod " + mod.Metadata.GetId());
 
                 // create the mod
                 try
@@ -265,7 +266,7 @@ namespace Nox.Editor.Mods
                 }
                 catch
                 {
-                    Debug.LogError("Failed to load mod " + mod.Metadata.GetId());
+                    Logger.LogError("Failed to load mod " + mod.Metadata.GetId());
                     success = false;
                     break;
                 }

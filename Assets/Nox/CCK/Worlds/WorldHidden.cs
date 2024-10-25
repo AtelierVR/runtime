@@ -11,6 +11,8 @@ namespace Nox.CCK.Worlds
         /// </summary>
         public bool IsValid()
         {
+            if (!gameObject.scene.isLoaded) 
+                return false;
             var roots = gameObject.scene.GetRootGameObjects();
             foreach (var root in roots)
                 if (root == gameObject)
@@ -52,13 +54,13 @@ namespace Nox.CCK.Worlds
         public void Awake()
         {
             if (!IsValid())
-                Debug.LogWarning("WorldHidden must be the root GameObject of a scene.");
+                Logger.LogWarning("WorldHidden must be the root GameObject of a scene.");
         }
 
         public void OnValidate()
         {
             if (!IsValid())
-                Debug.LogWarning("WorldHidden must be the root GameObject of a scene.");
+                Logger.LogWarning("WorldHidden must be the root GameObject of a scene.");
         }
 #endif
     }

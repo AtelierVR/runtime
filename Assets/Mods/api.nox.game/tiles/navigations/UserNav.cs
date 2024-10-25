@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using UnityEngine;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.Tiles
 {
@@ -48,10 +48,10 @@ namespace api.nox.game.Tiles
 
         private async UniTask<NavigationResult> FetchUsers(string server, string query)
         {
-            Debug.Log("Fetching users");
+            Logger.Log("Fetching users");
             var res = await GameClientSystem.Instance.NetworkAPI.User.SearchUsers(new() { server = server, query = query });
             if (res == null) return new NavigationResult { error = "Error fetching users." };
-            Debug.Log("Fetched users " + res.users.Length);
+            Logger.Log("Fetched users " + res.users.Length);
             return new NavigationResult
             {
                 data = res.users.Select(x => new NavigationResultData

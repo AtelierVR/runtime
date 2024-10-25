@@ -5,6 +5,7 @@ using Nox.Scripts;
 using UnityEngine;
 using CacheManager = Nox.CCK.Cache;
 using UnityAssetBundle = UnityEngine.AssetBundle;
+using Logger = Nox.CCK.Logger;
 
 namespace Nox.Assets
 {
@@ -36,7 +37,7 @@ namespace Nox.Assets
             var path = CacheManager.GetPath(hash);
             var bundle = await UnityAssetBundle.LoadFromFileAsync(path);
             if (bundle == null) return null;
-            Debug.Log($"Loaded asset bundle {hash}");
+            Logger.Log($"Loaded asset bundle {hash}");
             return new AssetBundle(hash, bundle);
         }
 
@@ -46,7 +47,7 @@ namespace Nox.Assets
             if (asset == null) return;
             asset.Value.Unload(true);
             Remove(asset);
-            Debug.Log($"Unloaded asset bundle {hash}");
+            Logger.Log($"Unloaded asset bundle {hash}");
         }
 
         public static void UnloadAll()

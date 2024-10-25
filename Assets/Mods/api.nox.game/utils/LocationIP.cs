@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.LocationIP
 {
@@ -81,16 +82,16 @@ namespace api.nox.game.LocationIP
                     return null;
             }
 
-            Debug.Log("Locatize [IP]: " + ip + " from [URI]: " + uri);
+            Logger.Log("Locatize [IP]: " + ip + " from [URI]: " + uri);
 
             var url = $"https://ipwho.is/{ip}";
             var request = new UnityEngine.Networking.UnityWebRequest(url)
             { downloadHandler = new UnityEngine.Networking.DownloadHandlerBuffer() };
             try { await request.SendWebRequest(); }
             catch (System.Exception e)
-            { Debug.Log(e); return null; }
+            { Logger.Log(e); return null; }
             if (request.responseCode != 200) return null;
-            Debug.Log("Localisation " + request.downloadHandler.text);
+            Logger.Log("Localisation " + request.downloadHandler.text);
             return JsonUtility.FromJson<IPData>(request.downloadHandler.text);
         }
     }

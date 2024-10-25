@@ -5,7 +5,7 @@ using api.nox.network.Worlds;
 using api.nox.network.Worlds.Assets;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using UnityEngine;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.Tiles
 {
@@ -48,10 +48,10 @@ namespace api.nox.game.Tiles
 
         private async UniTask<NavigationResult> FetchInstances(string server, string query)
         {
-            Debug.Log("Fetching instances");
+            Logger.Log("Fetching instances");
             var res = await GameClientSystem.Instance.NetworkAPI.Instance.SearchInstances(new() { query = query, server = server });
             if (res == null) return new NavigationResult { error = "Error fetching instances." };
-            Debug.Log("Fetched instances " + res.instances.Length);
+            Logger.Log("Fetched instances " + res.instances.Length);
 
             List<InstanceWithWorld> iww = new();
             foreach (var instance in res.instances)

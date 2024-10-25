@@ -6,6 +6,7 @@ using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.UI
 {
@@ -52,7 +53,7 @@ namespace api.nox.game.UI
                 PlayerController.Instance.Container
             ).GetComponent<ViewPortMenu>();
             Register(menu);
-            Debug.Log($"Creating ViewPortMenu as {menu.Id}");
+            Logger.Log($"Creating ViewPortMenu as {menu.Id}");
             SendGotoTile(menu.Id, menu.initTile);
             return menu;
         }

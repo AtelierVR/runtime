@@ -1,10 +1,10 @@
 
 using System;
-using System.Collections;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game
 {
@@ -44,7 +44,7 @@ namespace api.nox.game
 
         public virtual void Dispose()
         {
-            Debug.Log($"Tile Dispose {id}");
+            Logger.Log($"Tile Dispose {id}");
             Object.Destroy(content);
             onRemove?.Invoke();
             content = null;

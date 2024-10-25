@@ -1,5 +1,6 @@
 using Autohand;
 using UnityEngine;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.Controllers
 {
@@ -69,13 +70,13 @@ namespace api.nox.game.Controllers
 
         public virtual void OnControllerDisable(BaseController current)
         {
-            Debug.Log($"Controller disabled: {GetType().Name}");
+            Logger.Log($"Controller disabled: {GetType().Name}");
         }
 
         private bool is_initialized = false;
         public virtual void OnControllerEnable(BaseController last)
         {
-            Debug.Log($"Controller enabled: {GetType().Name}");
+            Logger.Log($"Controller enabled: {GetType().Name}");
             Player.enabled = false;
             Player.headCamera = PlayerCamera;
             Player.forwardFollow = PlayerCamera.transform;
@@ -90,7 +91,7 @@ namespace api.nox.game.Controllers
 
         public virtual void OnInitialize()
         {
-            Debug.Log($"Controller initialized: {GetType().Name}");
+            Logger.Log($"Controller initialized: {GetType().Name}");
         }
 
         public virtual void Dispose() { }

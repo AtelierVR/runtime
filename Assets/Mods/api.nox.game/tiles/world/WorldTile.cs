@@ -1,6 +1,5 @@
 
 using Cysharp.Threading.Tasks;
-using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
 using UnityEngine;
 using Nox.CCK;
@@ -16,6 +15,7 @@ using api.nox.network.Worlds;
 using api.nox.network.Worlds.Assets;
 using api.nox.network;
 using api.nox.network.Instances;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.Tiles
 {
@@ -100,7 +100,7 @@ namespace api.nox.game.Tiles
         /// <param name="context"></param>
         internal void SendTile(EventData context)
         {
-            Debug.Log("WorldTileManager.SendTile");
+            Logger.Log("WorldTileManager.SendTile");
             var tile = new WorldTileObject() { id = "api.nox.game.world", context = context };
             tile.GetContent = (Transform tf) => OnGetContent(tile, tf);
             tile.onDisplay = (str, gameObject) => OnDisplay(tile, gameObject);
@@ -118,7 +118,7 @@ namespace api.nox.game.Tiles
         /// <returns>Content of the tile</returns>
         internal GameObject OnGetContent(WorldTileObject tile, Transform tf)
         {
-            Debug.Log("WorldTileManager.GetTileContent");
+            Logger.Log("WorldTileManager.GetTileContent");
             var pf = GameClientSystem.CoreAPI.AssetAPI.GetLocalAsset<GameObject>("prefabs/game.world");
             pf.SetActive(false);
             var content = Object.Instantiate(pf, tf);
@@ -144,7 +144,7 @@ namespace api.nox.game.Tiles
 
         internal void OnRemove(WorldTileObject tile)
         {
-            Debug.Log("WorldTileManager.OnRemove");
+            Logger.Log("WorldTileManager.OnRemove");
             if (tile.OnUserUpdated != null)
                 OnUserUpdated.RemoveListener(tile.OnUserUpdated);
             if (tile.OnWorldFetched != null)
@@ -163,7 +163,7 @@ namespace api.nox.game.Tiles
         /// <param name="content"></param>
         internal void OnDisplay(WorldTileObject tile, GameObject content)
         {
-            Debug.Log("WorldTileManager.OnDisplay");
+            Logger.Log("WorldTileManager.OnDisplay");
             UpdateContent(tile, content);
         }
 
@@ -174,7 +174,7 @@ namespace api.nox.game.Tiles
         /// <param name="content"></param>
         internal void OnOpen(WorldTileObject tile, GameObject content)
         {
-            Debug.Log("WorldTileManager.OnOpen");
+            Logger.Log("WorldTileManager.OnOpen");
             OnClickRefreshInstances(tile, content).Forget();
         }
 
@@ -185,7 +185,7 @@ namespace api.nox.game.Tiles
         /// <param name="content"></param>
         internal void OnHide(WorldTileObject tile, GameObject content)
         {
-            Debug.Log("WorldTileManager.OnHide");
+            Logger.Log("WorldTileManager.OnHide");
         }
 
         internal void OnWorldTileUpdate(WorldTileObject tile, GameObject content, World world)
@@ -239,12 +239,12 @@ namespace api.nox.game.Tiles
 
         internal void UpdateContent(WorldTileObject tile, GameObject content)
         {
-            Debug.Log("WorldTileManager.UpdateContent");
+            Logger.Log("WorldTileManager.UpdateContent");
             var world = tile.World;
             var asset = tile.Asset;
             if (world == null)
             {
-                Debug.LogError("World is null");
+                Logger.LogError("World is null");
                 return;
             }
 
@@ -275,7 +275,7 @@ namespace api.nox.game.Tiles
             var asset = tile.Asset;
             if (world == null)
             {
-                Debug.LogError("World is null");
+                Logger.LogError("World is null");
                 dlb.interactable = true;
                 return;
             }
@@ -284,12 +284,12 @@ namespace api.nox.game.Tiles
 
             if (world == null)
             {
-                Debug.LogError("World not found");
+                Logger.LogError("World not found");
                 dlb.interactable = true;
                 return;
             }
 
-            Debug.Log($"World fetched: {world}");
+            Logger.Log($"World fetched: {world}");
             var search = await GameClientSystem.Instance.NetworkAPI.World.Asset.SearchAssets(new()
             {
                 server = world.server,
@@ -311,7 +311,7 @@ namespace api.nox.game.Tiles
 
         internal void CheckHome(WorldTileObject tile, GameObject content, UserMe user)
         {
-            Debug.Log("WorldTileManager.CheckHome");
+            Logger.Log("WorldTileManager.CheckHome");
             var dlb = Reference.GetReference("home.button", content).GetComponent<Button>();
             dlb.onClick.RemoveAllListeners();
             var wp = string.IsNullOrEmpty(user?.home) ? null : WorldIdentifier.FromString(user.home);
@@ -374,7 +374,7 @@ namespace api.nox.game.Tiles
 
         private async UniTask OnClickHome(WorldTileObject tile, GameObject content, UserMe user, Button dlb, bool hasHome)
         {
-            Debug.Log("WorldTileManager.OnClickHome");
+            Logger.Log("WorldTileManager.OnClickHome");
             if (!dlb.interactable) return;
             if (hasHome)
             {
@@ -386,7 +386,7 @@ namespace api.nox.game.Tiles
             else
             {
                 dlb.interactable = false;
-                Debug.Log($"Setting home to {tile.World.ToIdentifier().ToFullString(tile.World.server)}");
+                Logger.Log($"Setting home to {tile.World.ToIdentifier().ToFullString(tile.World.server)}");
                 user = await GameClientSystem.Instance.NetworkAPI.User.UpdateMyUser(new()
                 {
                     home = tile.World.ToIdentifier().ToFullString(tile.World.server)
@@ -399,7 +399,7 @@ namespace api.nox.game.Tiles
 
         private async UniTask OnClickRefreshInstances(WorldTileObject tile, GameObject content)
         {
-            Debug.Log("WorldTileManager.OnClickRefreshInstances");
+            Logger.Log("WorldTileManager.OnClickRefreshInstances");
             var refresh_instances = Reference.GetReference("refresh_instances", content).GetComponent<Button>();
             if (!refresh_instances.interactable) return;
             refresh_instances.interactable = false;

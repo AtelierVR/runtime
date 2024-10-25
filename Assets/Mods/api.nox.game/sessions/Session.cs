@@ -6,6 +6,7 @@ using Nox.CCK;
 using Nox.CCK.Worlds;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.sessions
 {
@@ -53,7 +54,7 @@ namespace api.nox.game.sessions
         }
         public byte IndexOfMainDescriptor(out MainDescriptor descriptor)
         {
-            Debug.Log($"Finding main descriptor in {scenes.Count} scenes");
+            Logger.Log($"Finding main descriptor in {scenes.Count} scenes");
             for (byte i = 0; i < scenes.Count; i++)
             {
                 descriptor = Finder.FindComponent<MainDescriptor>(scenes[i]);
@@ -78,7 +79,7 @@ namespace api.nox.game.sessions
 
         public void OnSelectedCurrent(Session old)
         {
-            Debug.Log("Selected session " + id + (old == null ? "" : " but session " + old.id + " was deselected"));
+            Logger.Log("Selected session " + id + (old == null ? "" : " but session " + old.id + " was deselected"));
             for (byte i = 0; i < scenes.Count; i++)
             {
                 var scene = scenes[i];
@@ -89,7 +90,7 @@ namespace api.nox.game.sessions
 
         public void OnDeselectedCurrent(Session current)
         {
-            Debug.Log("Deselected session " + id + (current == null ? "" : " but session " + current.id + " was selected"));
+            Logger.Log("Deselected session " + id + (current == null ? "" : " but session " + current.id + " was selected"));
             for (byte i = 0; i < scenes.Count; i++)
             {
                 var scene = scenes[i];
@@ -102,7 +103,7 @@ namespace api.nox.game.sessions
         {
             player.SetSession(this);
             abstractPlayers.Add(player);
-            Debug.Log("Player registered");
+            Logger.Log("Player registered");
         }
 
         public void UnregisterPlayer(IAbstractPlayer player)
@@ -110,7 +111,7 @@ namespace api.nox.game.sessions
             if (!abstractPlayers.Contains(player))
                 return;
             abstractPlayers.Remove(player);
-            Debug.Log("Player unregistered");
+            Logger.Log("Player unregistered");
         }
 
 

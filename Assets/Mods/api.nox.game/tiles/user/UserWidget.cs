@@ -4,11 +4,11 @@ using api.nox.network.Servers;
 using api.nox.network.Users;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using Nox.CCK.Mods;
 using Nox.CCK.Mods.Events;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.Tiles
 {
@@ -184,13 +184,13 @@ namespace api.nox.game.Tiles
         {
             if (user == null)
             {
-                Debug.Log("User is null");
+                Logger.Log("User is null");
                 return;
             }
             var home = await user.GetHome();
             if (home == null)
             {
-                Debug.Log("Home is null");
+                Logger.Log("Home is null");
                 return;
             }
 
@@ -206,7 +206,7 @@ namespace api.nox.game.Tiles
 
             if (asset == null || asset.assets.Length == 0)
             {
-                Debug.Log("Asset is null");
+                Logger.Log("Asset is null");
                 return;
             }
 

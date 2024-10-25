@@ -1,8 +1,8 @@
+using System.Collections.Generic;
+using Logger = Nox.CCK.Logger;
+
 namespace Nox.Events
 {
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
 
     public class EventEmitter
     {
@@ -25,7 +25,7 @@ namespace Nox.Events
 
         public static void Emit<T>(string eventName, T arg = default)
         {
-            Debug.Log($"Emitting event {eventName}");
+            Logger.Log($"Emitting event {eventName}");
             if (_events.ContainsKey(eventName))
                 foreach (var callback in _events[eventName])
                     callback.Invoke(arg);

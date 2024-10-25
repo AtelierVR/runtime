@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using UnityEngine;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.UI
 {
@@ -14,7 +14,7 @@ namespace api.nox.game.UI
         public void Add(HistoryTile tile)
         {
             var ot = GetCurrent();
-            Debug.Log($"Add {tile.id} to history {current} {history.Count}");
+            Logger.Log($"Add {tile.id} to history {current} {history.Count}");
             if (current < history.Count - 1)
                 RemoveRange(current + 1, history.Count - current - 1);
             history.Add(tile);
@@ -52,7 +52,7 @@ namespace api.nox.game.UI
             var old = GetCurrent();
             while (v2-- > 0)
             {
-                Debug.Log($"Remove {v1} from history {current} {history.Count}");
+                Logger.Log($"Remove {v1} from history {current} {history.Count}");
                 history[v1].Dispose();
                 history.RemoveAt(v1);
                 if (current > v1)

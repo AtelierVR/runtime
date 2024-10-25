@@ -10,6 +10,7 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 using AudioSettings = api.nox.game.Settings.AudioSettings;
 using Object = UnityEngine.Object;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.Tiles
 {
@@ -117,7 +118,7 @@ namespace api.nox.game.Tiles
 
         internal void PostInitialize()
         {
-            Debug.Log("SettingTileManager.PostInitialize");
+            Logger.Log("SettingTileManager.PostInitialize");
             graphic.UpdateHandler();
             audio.UpdateHandler();
         }
@@ -137,9 +138,9 @@ namespace api.nox.game.Tiles
 
         private void OnSettingHandler(EventData context)
         {
-            Debug.Log("SettingTileManager.OnSettingHandler");
+            Logger.Log("SettingTileManager.OnSettingHandler");
             if (context.Data[0] is not SettingHandler handler) return;
-            Debug.Log("SettingTileManager.OnSettingHandler: " + handler.id);
+            Logger.Log("SettingTileManager.OnSettingHandler: " + handler.id);
             if (settingHandlers.ContainsKey(handler.id) && handler.GetPages == null)
             {
                 settingHandlers.Remove(handler.id);
@@ -269,7 +270,7 @@ namespace api.nox.game.Tiles
 
             if (page == null)
             {
-                Debug.Log("HUM");
+                Logger.Log("HUM");
             }
             else
             {

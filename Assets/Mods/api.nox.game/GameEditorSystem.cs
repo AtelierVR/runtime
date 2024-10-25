@@ -1,6 +1,6 @@
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
-using UnityEngine;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game
 {
@@ -8,7 +8,7 @@ namespace api.nox.game
     {
         public void OnInitializeEditor(EditorModCoreAPI api)
         {
-            Debug.Log("Hello from GameEditorSystem!");
+            Logger.Log("Hello from GameEditorSystem!");
         }
 
         public void OnUpdateEditor()

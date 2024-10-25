@@ -2,8 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
-using UnityEngine;
-using UnityEngine.PlayerLoop;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.Tiles
 {
@@ -46,10 +45,10 @@ namespace api.nox.game.Tiles
 
         private async UniTask<NavigationResult> FetchServers(string server, string query)
         {
-            Debug.Log("Fetching servers");
+            Logger.Log("Fetching servers");
             var res = await GameClientSystem.Instance.NetworkAPI.Server.SearchServers(new() { server = server, query = query });
             if (res == null) return new NavigationResult { error = "Error fetching servers." };
-            Debug.Log("Fetched servers " + res.servers.Length);
+            Logger.Log("Fetched servers " + res.servers.Length);
             return new NavigationResult
             {
                 data = res.servers.Select(x => new NavigationResultData

@@ -1,10 +1,10 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
-using api.nox.network;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Editor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.user
 {
@@ -20,7 +20,7 @@ namespace api.nox.user
 
         public void OnClosed()
         {
-            Debug.Log("Panel Example closed!");
+            Logger.Log("Panel Example closed!");
         }
 
         internal void OnUpdate() { }

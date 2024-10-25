@@ -1,6 +1,7 @@
 using System;
 using Nox.CCK;
 using UnityEngine;
+using Logger = Nox.CCK.Logger;
 
 
 namespace api.nox.game.Settings
@@ -372,7 +373,7 @@ namespace api.nox.game.Settings
 
         internal void UpdateHandler()
         {
-            Debug.Log("GraphicSettings.UpdateHandler");
+            Logger.Log("GraphicSettings.UpdateHandler");
             GameClientSystem.CoreAPI.EventAPI.Emit("game.setting", this);
         }
 

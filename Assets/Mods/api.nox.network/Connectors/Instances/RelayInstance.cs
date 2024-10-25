@@ -4,13 +4,12 @@ using api.nox.network.RelayInstances.Quit;
 using api.nox.network.Relays;
 using Cysharp.Threading.Tasks;
 using api.nox.network.RelayInstances.Transform;
-using api.nox.network.Utils;
 using api.nox.network.RelayInstances.Base;
-using Nox.CCK.Mods;
 using System;
 using Buffer = api.nox.network.Utils.Buffer;
 using UnityEngine;
 using System.Threading;
+using Logger = Nox.CCK.Logger;
 
 // ReSharper disable All
 
@@ -112,7 +111,7 @@ namespace api.nox.network.RelayInstances
         private async UniTask<T> WaitForResponse<T>(ushort uid, ResponseType type, byte timeout = 5, CancellationToken cancellationToken = default)
             where T : InstanceResponse, new()
         {
-            Debug.Log($"WaitForResponse: {uid} {type} {timeout}");
+            Logger.Log($"WaitForResponse: {uid} {type} {timeout}");
             T res = null;
             var rec = new IConnector.OnReceived((buffer) =>
             {
@@ -123,19 +122,19 @@ namespace api.nox.network.RelayInstances
                 var rtype = buffer.ReadEnum<ResponseType>();
                 var riid = buffer.ReadUShort();
                 if (rtype != ResponseType.Latency)
-                    Debug.Log($"WaitForResponse response: {uid} {type} {rtype} {riid} {ruid} {length}");
+                    Logger.Log($"WaitForResponse response: {uid} {type} {rtype} {riid} {ruid} {length}");
                 if (rtype != type || riid != InternalId)
                 {
-                    Debug.Log($"WaitForResponse not match: {uid} {type} {rtype} {riid} {ruid} {length}");
+                    Logger.Log($"WaitForResponse not match: {uid} {type} {rtype} {riid} {ruid} {length}");
                     return;
                 }
                 if (uid != ushort.MaxValue && ruid != uid)
                 {
-                    Debug.Log($"WaitForResponse not match uid: {uid} {type} {rtype} {riid} {ruid} {length}");
+                    Logger.Log($"WaitForResponse not match uid: {uid} {type} {rtype} {riid} {ruid} {length}");
                     return;
                 }
                 var rres = new T { RelayId = RelayId, UId = uid, InternalId = InternalId };
-                Debug.Log($"WaitForResponse ok: {uid} {type} {rtype} {riid} {ruid} {length} {rres}");
+                Logger.Log($"WaitForResponse ok: {uid} {type} {rtype} {riid} {ruid} {length} {rres}");
                 res = rres.FromBuffer(buffer.Clone(5, length)) ? rres : null;
             });
             Relay.Connector.OnReceivedEvent += rec;

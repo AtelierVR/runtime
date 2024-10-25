@@ -1,8 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
-using Nox.CCK.Mods;
-using UnityEngine;
 using System.Net.WebSockets;
+using Logger = Nox.CCK.Logger;
 
 namespace api.nox.network.WebSockets
 {
@@ -28,7 +27,7 @@ namespace api.nox.network.WebSockets
         {
             if (url != null) WSAddress = new Uri(url);
             if (WSAddress == null) return false;
-            Debug.Log($"Connecting [WS] {WSAddress}...");
+            Logger.Log($"Connecting [WS] {WSAddress}...");
             driver = initial ?? new ClientWebSocket();
             if (driver.State != WebSocketState.Open)
                 try
