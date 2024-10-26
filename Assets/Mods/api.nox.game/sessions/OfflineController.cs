@@ -10,11 +10,14 @@ namespace api.nox.game.sessions
         internal void SetSession(Session session) => _session = session;
         void ISessionController.SetSession(Session session) => SetSession(session);
 
-        public void Dispose() { }
-
         public UniTask<bool> Prepare()
         {
             return UniTask.FromResult(true);
+        }
+
+        public async UniTask Close()
+        {
+            return;
         }
     }
 }

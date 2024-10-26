@@ -11,7 +11,7 @@ namespace Nox.CCK.Worlds
         /// </summary>
         public bool IsValid()
         {
-            if (!gameObject.scene.isLoaded) 
+            if (!gameObject.scene.isLoaded)
                 return false;
             var roots = gameObject.scene.GetRootGameObjects();
             foreach (var root in roots)
@@ -29,12 +29,12 @@ namespace Nox.CCK.Worlds
         /// <summary>
         /// Sets the GameObject to be hidden or not.
         /// </summary>
-        public void SetHidden(bool hidden) => gameObject.SetActive(!hidden);
+        public void Set(bool hidden) => gameObject.SetActive(hidden);
 
         /// <summary>
         /// Returns the WorldHidden component of the scene.
         /// </summary>
-        public static WorldHidden GetWorldHidden(Scene scene)
+        public static WorldHidden Get(Scene scene)
         {
             if (!scene.IsValid()) return null;
             foreach (var root in scene.GetRootGameObjects())
@@ -42,6 +42,24 @@ namespace Nox.CCK.Worlds
                     return worldHidden;
             return null;
         }
+
+        public static bool Has(Scene scene) => Get(scene) != null;
+
+        public static WorldHidden Make(Scene scene)
+        {
+            if (Has(scene))
+                return Get(scene);
+            var go = new GameObject("WorldHidden");
+            go.transform.SetAsFirstSibling();
+            var comp = go.AddComponent<WorldHidden>();
+            SceneManager.MoveGameObjectToScene(go, scene);
+            var roots = scene.GetRootGameObjects();
+            foreach (var root in roots)
+                if (root != go)
+                    root.transform.SetParent(go.transform);
+            return comp;
+        }
+
 #if UNITY_EDITOR
         public void OnDrawGizmos()
         {

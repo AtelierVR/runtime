@@ -241,7 +241,7 @@ namespace api.nox.game.Tiles
                 var relay = GameClientSystem.Instance.NetworkAPI.Relay.GetRelay(instance.address);
                 if (relay != null)
                 {
-                    var currentSession = GameSystem.Instance.SessionManager.CurrentSession;
+                    var currentSession = SessionManager.Instance.CurrentSession;
                     if (currentSession != null && currentSession.Controller is OnlineController controller)
                     {
                         if (controller.InstanceId != instance.id || controller.Server != instance.server)
@@ -282,7 +282,7 @@ namespace api.nox.game.Tiles
                 return;
             }
 
-            var session = GameSystem.Instance.SessionManager.GetSession(instance.server, instance.id);
+            var session = SessionManager.Instance.GetSession(instance.server, instance.id);
             if (session != null)
             {
                 session.SetCurrent();
@@ -311,7 +311,7 @@ namespace api.nox.game.Tiles
                 }
             };
 
-            session = GameSystem.Instance.SessionManager.New(controller, instance.server, instance.id);
+            session = SessionManager.Instance.New(controller, instance.server, instance.id);
             session.world = world;
             session.worldAsset = asset;
 
@@ -323,12 +323,11 @@ namespace api.nox.game.Tiles
             else
             {
                 Logger.Log("Session disposed");
-                GameSystem.Instance.SessionManager.Remove(session);
-                session.Dispose();
+                await session.Close();
+                SessionManager.Instance.Remove(session);
             }
 
             gotobtn.interactable = true;
-
             UpdateRelay(tile, content);
         }
 

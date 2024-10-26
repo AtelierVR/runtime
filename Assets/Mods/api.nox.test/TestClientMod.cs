@@ -1,3 +1,5 @@
+using System.Linq;
+using api.nox.xr;
 using Nox.CCK;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
@@ -10,11 +12,12 @@ namespace api.nox.test
         private ClientModCoreAPI api;
         private ExperimentalManager expirimental;
         private CalendarManager calendar;
+        internal XRSystem XRAPI => api.ModAPI.GetMod("xr")?.GetMainClasses().OfType<XRSystem>().FirstOrDefault();
 
         public void OnInitializeClient(ClientModCoreAPI api)
         {
             this.api = api;
-            var devices = api.XRAPI.GetDevices();
+            var devices = XRAPI.GetDevices();
             Logger.Log("Devices: " + devices.Length);
             foreach (var device in devices)
                 Logger.Log("Device: " + device.name);

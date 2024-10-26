@@ -128,6 +128,7 @@ GameObject:
   m_Component:
   - component: {fileID: 14880753}
   - component: {fileID: 14880752}
+  - component: {fileID: 14880754}
   m_Layer: 0
   m_Name: AVRoot
   m_TagString: Untagged
@@ -162,6 +163,29 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &14880754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 14880751}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43f4e977306c68449b789ffe17ab5867, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  NbFrameSaved: 4096
+  GraphSamples: 4096
+  GraphMax: 0.05
+  GraphMarkers:
+  - 24
+  - 60
+  - 120
+  - 240
+  toggleAction: {fileID: -6953156546754423754, guid: eb30b0e162631434a84a75e18ac43992, type: 3}
+  Position: {x: 10, y: 10}
+  Size: {x: 300, y: 150}
 --- !u!1 &17403609
 GameObject:
   m_ObjectHideFlags: 0
@@ -10432,6 +10456,10 @@ PrefabInstance:
     - target: {fileID: 7329063340675680798, guid: f146ec10f8c9bba488cc1c99dddfa98c, type: 3}
       propertyPath: m_InteractionManager
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 7921728349843139477, guid: f146ec10f8c9bba488cc1c99dddfa98c, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8152114964051126177, guid: f146ec10f8c9bba488cc1c99dddfa98c, type: 3}
       propertyPath: m_InteractionManager

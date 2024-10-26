@@ -39,6 +39,5 @@ namespace Nox.Editor.Mods
         public AssetAPI AssetAPI => EditorAssetAPI;
         public CCK.Editor.EditorModPanelAPI PanelAPI => EditorPanelAPI;
         public CCK.Editor.EditorLibsAPI LibsAPI => EditorLibsAPI;
-        public XRAPI XRAPI => throw new System.NotImplementedException();
     }
 }

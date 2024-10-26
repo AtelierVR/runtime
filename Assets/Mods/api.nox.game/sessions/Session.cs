@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using api.nox.network.Worlds;
 using api.nox.network.Worlds.Assets;
+using Cysharp.Threading.Tasks;
 using Nox.CCK;
 using Nox.CCK.Worlds;
 using UnityEngine;
@@ -10,7 +11,7 @@ using Logger = Nox.CCK.Logger;
 
 namespace api.nox.game.sessions
 {
-    public class Session : IDisposable
+    public class Session
     {
         public byte uid;
         public uint id;
@@ -65,9 +66,9 @@ namespace api.nox.game.sessions
             return byte.MaxValue;
         }
 
-        public void Dispose()
+        public async UniTask Close()
         {
-            Controller.Dispose();
+            await Controller.Close();
             Controller = null;
             scenes.Clear();
             abstractPlayers.Clear();
@@ -75,7 +76,8 @@ namespace api.nox.game.sessions
             worldAsset = null;
         }
 
-        public void SetCurrent() => GameSystem.Instance.SessionManager.CurrentSession = this;
+
+        public void SetCurrent() => SessionManager.Instance.CurrentSession = this;
 
         public void OnSelectedCurrent(Session old)
         {
@@ -83,9 +85,12 @@ namespace api.nox.game.sessions
             for (byte i = 0; i < scenes.Count; i++)
             {
                 var scene = scenes[i];
-                var wh = WorldHidden.GetWorldHidden(scene);
-                if (wh != null) wh.SetHidden(false);
+                var wh = WorldHidden.Make(scene);
+                if (wh != null) wh.Set(true);
             }
+            
+            if (scenes.Count > 0)
+                SceneManager.SetActiveScene(scenes[0]);
         }
 
         public void OnDeselectedCurrent(Session current)
@@ -94,8 +99,8 @@ namespace api.nox.game.sessions
             for (byte i = 0; i < scenes.Count; i++)
             {
                 var scene = scenes[i];
-                var wh = WorldHidden.GetWorldHidden(scene);
-                if (wh != null) wh.SetHidden(true);
+                var wh = WorldHidden.Make(scene);
+                if (wh != null) wh.Set(false);
             }
         }
 

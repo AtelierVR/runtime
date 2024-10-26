@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using api.nox.network;
 using api.nox.network.Instances;
 using api.nox.network.RelayInstances;
 using api.nox.network.RelayInstances.Enter;
+using api.nox.network.RelayInstances.Quit;
 using api.nox.network.Relays;
 using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
@@ -59,7 +61,34 @@ namespace api.nox.game.sessions
             }
         }
 
-        public void Dispose() { }
+        public async UniTask Close()
+        {
+            var relayinstance = GetRelayInstance();
+            if (relayinstance != null)
+            {
+                await relayinstance.Quit(QuitType.Normal);
+                RelayInstanceManager.Remove(relayinstance);
+            }
+            var session = GetSession();
+            if (session != null)
+            {
+                foreach (var player in session.abstractPlayers)
+                    player.Unregister();
+                session.abstractPlayers.Clear();
+                await WorldManager.UnloadWorld(session.worldAsset.hash, 0);
+            }
+            var relay = GetRelay();
+            if (relay != null)
+            {
+                List<OnlineController> controllers = new();
+                foreach (var s in SessionManager.Instance.GetSessionsWithController<OnlineController>())
+                    if (!controllers.Contains(s.Controller as OnlineController))
+                        controllers.Add(s.Controller as OnlineController);
+                if (controllers.Count < 2)
+                    relay.Dispose();
+            }
+        }
+
 
         public async UniTask<bool> Prepare()
         {
@@ -75,7 +104,14 @@ namespace api.nox.game.sessions
                 return false;
             }
 
+            0d.ToString("0.000");
+
             var status = await relay.RequestStatus();
+            if (status == null)
+            {
+                Logger.Log("Status is null");
+                return false;
+            }
             RelayInstance relayinstance = null;
             foreach (var i in status.Instances)
                 if (i.Id == InstanceId)
@@ -122,6 +158,7 @@ namespace api.nox.game.sessions
             if (configworld == null)
             {
                 Logger.Log("ConfigWorldData failed");
+                await relayinstance.Quit(QuitType.ConfigurationError, "ConfigWorldData failed");
                 return false;
             }
 
@@ -131,6 +168,7 @@ namespace api.nox.game.sessions
             if (world == null)
             {
                 Logger.Log("World is null");
+                await relayinstance.Quit(QuitType.ConfigurationError, "No world found");
                 return false;
             }
 
@@ -149,6 +187,7 @@ namespace api.nox.game.sessions
             if (asset == null)
             {
                 Logger.Log("Asset is null");
+                await relayinstance.Quit(QuitType.ConfigurationError, "No world asset found");
                 return false;
             }
 
@@ -158,29 +197,33 @@ namespace api.nox.game.sessions
                 if (!res.success) return false;
             }
 
-            var scene = await WorldManager.LoadWorld(
-                asset.hash, 0,
-                GameSystem.Instance.SessionManager.CurrentSession == null ? LoadSceneMode.Single : LoadSceneMode.Additive
-            );
+            var scene = await WorldManager.LoadWorld(asset.hash, 0, LoadSceneMode.Additive);
 
             if (scene == default || !scene.IsValid())
             {
                 Logger.Log("Scene is null");
+                await relayinstance.Quit(QuitType.ConfigurationError, "Error loading scene");
                 return false;
             }
             GetSession().scenes.Add(scene);
+            var wh = WorldHidden.Make(scene);
+            Logger.Log("Scene: " + scene);
+            Logger.Log("WorldHidden: " + wh);
+            wh.Set(false);
 
             var indexMainDescriptor = GetSession().IndexOfMainDescriptor(out var descriptor);
 
             if (indexMainDescriptor == byte.MaxValue)
             {
                 Logger.Log("MainDescriptor is null");
+                await relayinstance.Quit(QuitType.ConfigurationError, "No MainDescriptor found");
                 return false;
             }
 
             if (!relayinstance.SendConfigReady())
             {
                 Logger.Log("SendConfigReady failed");
+                await relayinstance.Quit(QuitType.Timeout, "SendConfigReady failed");
                 return false;
             }
 
@@ -190,6 +233,7 @@ namespace api.nox.game.sessions
             if (abstractPlayer == null)
             {
                 Logger.Log("AbstractPlayer is null");
+                await relayinstance.Quit(QuitType.UnknowError, "AbstractPlayer is null");
                 return false;
             }
 

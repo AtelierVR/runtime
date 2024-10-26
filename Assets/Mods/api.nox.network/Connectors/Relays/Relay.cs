@@ -7,6 +7,7 @@ using Cysharp.Threading.Tasks;
 using Buffer = api.nox.network.Utils.Buffer;
 using Random = UnityEngine.Random;
 using Logger = Nox.CCK.Logger;
+using System.Globalization;
 
 namespace api.nox.network.Relays
 {
@@ -87,7 +88,13 @@ namespace api.nox.network.Relays
             }
         }
 
-        public ushort NextState() => (ushort)Random.Range(ushort.MinValue, ushort.MaxValue);
+        private ushort _nextState = ushort.MinValue + 1;
+        public ushort NextState()
+        {
+            if (_nextState == ushort.MaxValue)
+                _nextState = ushort.MinValue + 1;
+            return _nextState++;
+        }
 
         public ushort Send(Buffer data, RequestType type = RequestType.None, ushort state = ushort.MaxValue)
         {
@@ -104,6 +111,7 @@ namespace api.nox.network.Relays
         private async UniTask<T> WaitForResponse<T>(ushort uid, ResponseType type, byte timeout = 5)
             where T : RelayResponse, new()
         {
+            var t0 = DateTime.Now;
             T res = null;
             var rec = new IConnector.OnReceived((buffer) =>
             {
@@ -121,6 +129,8 @@ namespace api.nox.network.Relays
             var time = DateTime.Now;
             await UniTask.WaitUntil(() => (DateTime.Now - time).TotalSeconds > timeout || res != null);
             Connector.OnReceivedEvent -= rec;
+            var t1 = DateTime.Now;
+            Logger.Log($"WaitForResponse: {uid} {type} {(t1 - t0).TotalMilliseconds.ToString("0.000", CultureInfo.InvariantCulture)}ms");
             return res;
         }
 

@@ -47,6 +47,7 @@ namespace api.nox.game.Controllers
             MicrophoneAction.action.performed += _ => UseMicrophone = !UseMicrophone;
             ToggleMenuAction.action.performed += _ =>
             {
+                Logger.Log("Toggle menu");
                 // check if a input firld is selected
                 if (eventSystem.currentSelectedGameObject != null) 
                 {

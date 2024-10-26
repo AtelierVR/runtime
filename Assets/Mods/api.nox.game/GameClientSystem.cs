@@ -10,6 +10,8 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 using api.nox.network;
 using Logger = Nox.CCK.Logger;
+using api.nox.game.sessions;
+using Cysharp.Threading.Tasks;
 
 namespace api.nox.game
 {
@@ -19,6 +21,9 @@ namespace api.nox.game
         internal static ClientModCoreAPI CoreAPI => Instance.coreAPI;
 
         internal ClientModCoreAPI coreAPI;
+
+        public SessionManager SessionManager { get; private set; }
+
         private HomeTileManager homeTile;
         private UserTileManager userTile;
         private ServerTileManager serverTile;
@@ -30,12 +35,19 @@ namespace api.nox.game
         private EventSubscription tilesub;
         private EventSubscription tilegotosub;
         private EventSubscription sessionchangedsub;
-        
+
         internal NetworkSystem NetworkAPI => coreAPI.ModAPI.GetMod("network")?.GetMainClasses().OfType<NetworkSystem>().FirstOrDefault();
+
+        public void OnUpdateClient()
+        {
+            SessionManager.Update();
+        }
 
         public void OnInitializeClient(ClientModCoreAPI api)
         {
+            Logger.Log("GameClientSystem initialized");
             Instance = this;
+            SessionManager = new SessionManager();
             coreAPI = api;
 
             var world = coreAPI.AssetAPI.LoadLocalWorld("default");
@@ -124,6 +136,11 @@ namespace api.nox.game
             }
         }
 
+        public void OnSessionChanged(Session old, Session value)
+        {
+            CoreAPI.EventAPI.Emit(new EventSessionChanged(old, value));
+        }
+
         // private void OnOldMenuClick(InputAction.CallbackContext context)
         // {
         //     Logger.Log("OldMenu Clicked");
@@ -159,6 +176,7 @@ namespace api.nox.game
             coreAPI.EventAPI.Unsubscribe(tilesub);
             coreAPI.EventAPI.Unsubscribe(tilegotosub);
             coreAPI.EventAPI.Unsubscribe(sessionchangedsub);
+            SessionManager.Close().Forget();
             PlayerController.Instance.Dispose();
             MenuManager.Instance.Dispose();
             WorldManager.UnloadAllWorlds();
@@ -166,4 +184,17 @@ namespace api.nox.game
     }
 
 
+}
+
+class EventSessionChanged : EventContext
+{
+    public EventSessionChanged(Session old, Session value)
+    {
+        _data = new object[] { old, value };
+    }
+    public object[] _data;
+    public object[] Data => _data;
+    public string Destination => null;
+    public string EventName => "game.session.changed";
+    public EventEntryFlags Channel => EventEntryFlags.All;
 }

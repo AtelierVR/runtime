@@ -26,12 +26,10 @@ namespace api.nox.network.HTTP
         public async UniTask<TRes> Send<TReq, TRes>(TReq body = default, Dictionary<string, string> headers = null)
         {
             Logger.Log($"Fetching [{Method}] {Url}...");
+            var t0 = DateTime.Now;
             var req = new UnityWebRequest(Url, Method.ToString()) { downloadHandler = new DownloadHandlerBuffer() };
             foreach (var key in DefaultHeaders)
                 req.SetRequestHeader(key.Key, key.Value);
-            if (headers != null)
-                foreach (var key in headers)
-                    req.SetRequestHeader(key.Key, key.Value);
             if (body == null)
             { }
             else if (body is string str)
@@ -39,13 +37,24 @@ namespace api.nox.network.HTTP
             else if (body is byte[] bytes)
                 req.uploadHandler = new UploadHandlerRaw(bytes);
             else if (body is WWWForm form)
+            {
                 req.uploadHandler = new UploadHandlerRaw(form.data);
+                foreach (var header in form.headers)
+                    req.SetRequestHeader(header.Key, header.Value);
+            }
             else if (body is UploadHandler raw)
                 req.uploadHandler = raw;
-            else req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(
+            else
+            {
+                req.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(
                    JsonConvert.SerializeObject(body)
-               ))
-            { contentType = "application/json" };
+               ));
+                req.SetRequestHeader("Content-Type", "application/json");
+            }
+
+            if (headers != null)
+                foreach (var key in headers)
+                    req.SetRequestHeader(key.Key, key.Value);
 
             RequestObject = null;
             try { await req.SendWebRequest(); }
@@ -57,6 +66,8 @@ namespace api.nox.network.HTTP
                 return default;
             }
             RequestObject = req;
+            var t1 = DateTime.Now;
+            Logger.Log($"Fetched [{Method}] {Url} in {(t1 - t0).TotalMilliseconds:0.000}ms");
 
             if (typeof(TRes) == typeof(long))
                 return (TRes)(object)StatusCode;

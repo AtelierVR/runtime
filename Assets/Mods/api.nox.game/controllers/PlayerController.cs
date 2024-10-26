@@ -75,6 +75,7 @@ namespace api.nox.game.Controllers
         /// </summary>
         void Awake()
         {
+            if (!enabled) return;
             Instance = this;
             foreach (Transform child in Container)
                 Destroy(child.gameObject);

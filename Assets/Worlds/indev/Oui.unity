@@ -169,8 +169,8 @@ MonoBehaviour:
   ModRequirements:
   - Id: 1@localhost:53032
     Flags: 14
-  _target: 19
-  ServerPublisher: avr.hactazia.fr
+  _target: 24
+  ServerPublisher: localhost
   IdPublisher: 1
   VersionPublisher: 0
 --- !u!4 &68164194

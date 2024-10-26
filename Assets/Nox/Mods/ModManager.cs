@@ -7,6 +7,7 @@ using Nox.Mods.Client;
 using Nox.Mods.Type;
 using Nox.Scripts;
 using UnityEngine;
+using Logger = Nox.CCK.Logger;
 
 namespace Nox.Mods
 {
@@ -60,6 +61,7 @@ namespace Nox.Mods
 
         public static ModLoadResult[] LoadAllClientMods()
         {
+            Logger.Log("Loading mods...");
             List<ModLoadResult> results = new();
             var archives = new List<string>();
             var sources = new List<string>();

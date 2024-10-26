@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Cysharp.Threading.Tasks;
@@ -39,14 +40,20 @@ namespace api.nox.game
                 return _loadedWorlds[hash];
             if (!HasWorldInCache(hash))
                 return null;
+            var t0 = DateTime.Now;
             var load = AssetBundle.LoadFromFileAsync(WorldPath(hash));
             GameClientSystem.CoreAPI.EventAPI.Emit("world.assetbundle.loading", hash, 0f);
+            Logger.Log($"Loading assetbundle {hash} 0.00%");
             await UniTask.WaitUntil(() =>
             {
                 GameClientSystem.CoreAPI.EventAPI.Emit("world.assetbundle.loading", hash, load.progress);
+                Logger.Log($"Loading assetbundle {hash} {(load.progress * 100).ToString("0.00", CultureInfo.InvariantCulture)}%");
                 return load.isDone;
             });
             GameClientSystem.CoreAPI.EventAPI.Emit("world.assetbundle.loading", hash, 1f);
+            Logger.Log($"Loaded assetbundle {hash} 100.00%");
+            var t1 = DateTime.Now;
+            Logger.Log($"Loaded assetbundle {hash} in {(t1 - t0).TotalMilliseconds.ToString("0.000", CultureInfo.InvariantCulture)}ms");
             return _loadedWorlds[hash] = load.assetBundle;
         }
 
@@ -124,14 +131,23 @@ namespace api.nox.game
                 Logger.LogError($"Failed to load world {hash} {id}");
                 return default;
             }
+            var t0 = DateTime.Now;
             var load = SceneManager.LoadSceneAsync(sceneId, mode);
             GameClientSystem.CoreAPI.EventAPI.Emit("world.loading", hash, id, mode, 0f);
+            Logger.Log($"Loading world {hash} {id} 0.00%");
             await UniTask.WaitUntil(() =>
             {
                 GameClientSystem.CoreAPI.EventAPI.Emit("world.loading", hash, id, mode, load.progress);
+                Logger.Log($"Loading world {hash} {id} {(load.progress * 100).ToString("0.00", CultureInfo.InvariantCulture)}%");
+
                 return load.isDone;
             });
             GameClientSystem.CoreAPI.EventAPI.Emit("world.loading", hash, id, mode, 1f);
+            Logger.Log($"Loading world {hash} {id} 100.00%");
+            var t1 = DateTime.Now;
+            Logger.Log($"Loaded world {hash} {id} in {(t1 - t0).TotalMilliseconds.ToString("0.000", CultureInfo.InvariantCulture)}ms");
+
+
             var scene = SceneManager.GetSceneByPath(sceneId);
             if (!scene.IsValid())
             {
@@ -140,7 +156,6 @@ namespace api.nox.game
             }
 
             var mainCamera = scene.GetRootGameObjects().FirstOrDefault(x => x.GetComponent<Camera>() != null);
-            Logger.Log($"Loaded world {hash} {id} {sceneId} {mainCamera}");
             if (mainCamera != null)
             {
                 Logger.Log("Disable main camera");
@@ -149,6 +164,36 @@ namespace api.nox.game
 
             GameClientSystem.CoreAPI.EventAPI.Emit("world.loaded", hash, id, mode, sceneId);
             return scene;
+        }
+
+        public static async UniTask<bool> UnloadWorld(string hash, ushort id)
+        {
+            if (!HasWorldInCache(hash))
+                return false;
+            var bundle = await GetOrLoadWorld(hash);
+            var scenes = bundle.GetAllScenePaths();
+            var sceneId = scenes.Length > id ? scenes[id] : null;
+            if (string.IsNullOrEmpty(sceneId))
+            {
+                Logger.LogError($"Failed to unload world {hash} {id}");
+                return false;
+            }
+            var scene = SceneManager.GetSceneByPath(sceneId);
+            if (!scene.IsValid())
+            {
+                Logger.LogError($"Failed to unload world {hash} {id} {sceneId}");
+                return false;
+            }
+            var unload = SceneManager.UnloadSceneAsync(scene);
+            GameClientSystem.CoreAPI.EventAPI.Emit("world.unloading", hash, id, 0f);
+            await UniTask.WaitUntil(() =>
+            {
+                GameClientSystem.CoreAPI.EventAPI.Emit("world.unloading", hash, id, unload.progress);
+                return unload.isDone;
+            });
+            GameClientSystem.CoreAPI.EventAPI.Emit("world.unloading", hash, id, 1f);
+            Logger.Log($"Unloaded world {hash} {id} {sceneId}");
+            return true;
         }
 
         public class DownloadWorldResult

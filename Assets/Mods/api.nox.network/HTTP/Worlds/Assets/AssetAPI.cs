@@ -88,7 +88,6 @@ namespace api.nox.network.Worlds.Assets
             form.AddBinaryData("file", fileBytes, Path.GetFileName(path));
 
             var request = new Request(Method.POST, Request.MergeUrl(gateway, $"/api/worlds/{worldId}/assets/{assetId}/file"));
-
             var response = await request.Send<WWWForm, Response<bool>>(form, new() {
                 { "Authorization", token.ToHeader() },
                 { "X-File-Hash", Hashing.HashFile(path) }

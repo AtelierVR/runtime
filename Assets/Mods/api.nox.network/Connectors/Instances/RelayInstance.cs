@@ -10,6 +10,7 @@ using Buffer = api.nox.network.Utils.Buffer;
 using UnityEngine;
 using System.Threading;
 using Logger = Nox.CCK.Logger;
+using System.Globalization;
 
 // ReSharper disable All
 
@@ -34,7 +35,6 @@ namespace api.nox.network.RelayInstances
 
         public RelayInstance() => RelayInstanceManager.Set(this);
 
-        public ResponseEnter LastEnter { get; private set; }
         public async UniTask<ResponseEnter> Enter(RequestEnter request)
         {
             request.RelayId = RelayId;
@@ -52,18 +52,28 @@ namespace api.nox.network.RelayInstances
                 return null;
             }
             var response = await wait;
-            LastEnter = response;
             return response;
         }
 
-        public async UniTask<EventQuit> Quit()
+        public async UniTask<EventQuit> Quit(QuitType Type, string reason = null)
+            => await Quit(new RequestQuit { Type = Type, Reason = reason });
+
+        public async UniTask<EventQuit> Quit(RequestQuit request)
         {
             var buffer = new Buffer();
             buffer.Write(InternalId);
-            buffer.Write(new RequestQuit().ToBuffer());
-            var uid = Relay.Send(buffer, RequestType.Quit);
-            if (uid == ushort.MaxValue) return null;
-            return await WaitForResponse<EventQuit>(ushort.MaxValue, ResponseType.Quit);
+            buffer.Write(request.ToBuffer());
+            var uid = Relay.NextState();
+            var source = new CancellationTokenSource();
+            var wait = WaitForResponse<EventQuit>(uid, ResponseType.Quit, timeout: 20, cancellationToken: source.Token);
+            uid = Relay.Send(buffer, RequestType.Quit, uid);
+            if (uid == ushort.MaxValue)
+            {
+                source.Cancel();
+                return null;
+            }
+            var response = await wait;
+            return response;
         }
 
         public async UniTask<ResponseConfigWorldData> RequestConfigWorldData()
@@ -71,9 +81,17 @@ namespace api.nox.network.RelayInstances
             var buffer = new Buffer();
             buffer.Write(InternalId);
             buffer.Write(new RequestConfigWorldData().ToBuffer());
-            var uid = Relay.Send(buffer, RequestType.Configuration);
-            if (uid == ushort.MaxValue) return null;
-            return await WaitForResponse<ResponseConfigWorldData>(uid, ResponseType.Configuration);
+            var uid = Relay.NextState();
+            var source = new CancellationTokenSource();
+            var wait = WaitForResponse<ResponseConfigWorldData>(uid, ResponseType.Configuration, timeout: 20, cancellationToken: source.Token);
+            uid = Relay.Send(buffer, RequestType.Configuration, uid);
+            if (uid == ushort.MaxValue)
+            {
+                source.Cancel();
+                return null;
+            }
+            var response = await wait;
+            return response;
         }
 
         public bool SendConfigWorldLoaded()
@@ -111,7 +129,7 @@ namespace api.nox.network.RelayInstances
         private async UniTask<T> WaitForResponse<T>(ushort uid, ResponseType type, byte timeout = 5, CancellationToken cancellationToken = default)
             where T : InstanceResponse, new()
         {
-            Logger.Log($"WaitForResponse: {uid} {type} {timeout}");
+            var t0 = DateTime.Now;
             T res = null;
             var rec = new IConnector.OnReceived((buffer) =>
             {
@@ -121,26 +139,19 @@ namespace api.nox.network.RelayInstances
                 var ruid = buffer.ReadUShort();
                 var rtype = buffer.ReadEnum<ResponseType>();
                 var riid = buffer.ReadUShort();
-                if (rtype != ResponseType.Latency)
-                    Logger.Log($"WaitForResponse response: {uid} {type} {rtype} {riid} {ruid} {length}");
                 if (rtype != type || riid != InternalId)
-                {
-                    Logger.Log($"WaitForResponse not match: {uid} {type} {rtype} {riid} {ruid} {length}");
                     return;
-                }
                 if (uid != ushort.MaxValue && ruid != uid)
-                {
-                    Logger.Log($"WaitForResponse not match uid: {uid} {type} {rtype} {riid} {ruid} {length}");
                     return;
-                }
                 var rres = new T { RelayId = RelayId, UId = uid, InternalId = InternalId };
-                Logger.Log($"WaitForResponse ok: {uid} {type} {rtype} {riid} {ruid} {length} {rres}");
                 res = rres.FromBuffer(buffer.Clone(5, length)) ? rres : null;
             });
             Relay.Connector.OnReceivedEvent += rec;
             var time = DateTime.Now;
             await UniTask.WaitUntil(() => (DateTime.Now - time).TotalSeconds > timeout || res != null || cancellationToken.IsCancellationRequested);
             Relay.Connector.OnReceivedEvent -= rec;
+            var t1 = DateTime.Now;
+            Logger.Log($"WaitForResponse: {uid} {type} {(t1 - t0).TotalMilliseconds.ToString("0.000", CultureInfo.InvariantCulture)}ms");
             return res;
         }
 

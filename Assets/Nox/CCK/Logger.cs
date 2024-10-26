@@ -99,6 +99,10 @@ namespace Nox.CCK
             while ((className.StartsWith("<") 
                 || className.Contains("AsyncUniTaskMethodBuilder")
                 || className.Contains("AsyncUniTask")
+                || className.Contains("PooledDelegate")
+                || className.Contains("AwaiterActions")
+                || className.Contains("UniTaskCompletionSourceCore")
+                || className.Contains("WaitUntilPromise")
             ) && frames.Length > ++old)
             {
                 methodName = frames[old].GetMethod().Name;
