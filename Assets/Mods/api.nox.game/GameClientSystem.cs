@@ -32,6 +32,8 @@ namespace api.nox.game
         internal NavigationTileManager navigationTile;
         private SettingTileManager settingTile;
         private InstanceTileManager instance;
+        private SessionTileManager sessionTile;
+
         private EventSubscription tilesub;
         private EventSubscription tilegotosub;
         private EventSubscription sessionchangedsub;
@@ -76,6 +78,7 @@ namespace api.nox.game
             navigationTile = new NavigationTileManager();
             settingTile = new SettingTileManager();
             makeinstance = new MakeInstanceTileManager();
+            sessionTile = new SessionTileManager();
 
             // Subscribe to the tile events
             tilesub = api.EventAPI.Subscribe("game.tile", context => MenuManager.Instance.OnTile(context));
@@ -88,6 +91,7 @@ namespace api.nox.game
             MenuManager.Instance.GetViewPortMenu().IsVisible = false;
             navigationTile.PostInitialize();
             settingTile.PostInitialize();
+            sessionTile.PostInitialize();
         }
 
         public void OnGotoTile(EventData context)
@@ -133,6 +137,9 @@ namespace api.nox.game
                 case "game.settings":
                     settingTile.SendTile(context);
                     break;
+                case "game.session":
+                    sessionTile.SendTile(context);
+                    break;
             }
         }
 
@@ -173,13 +180,14 @@ namespace api.nox.game
             worldTile.OnDispose();
             navigationTile.OnDispose();
             settingTile.OnDispose();
+            serverTile.OnDispose();
             coreAPI.EventAPI.Unsubscribe(tilesub);
             coreAPI.EventAPI.Unsubscribe(tilegotosub);
             coreAPI.EventAPI.Unsubscribe(sessionchangedsub);
             SessionManager.Close().Forget();
             PlayerController.Instance.Dispose();
             MenuManager.Instance.Dispose();
-            WorldManager.UnloadAllWorlds();
+            Worlds.WorldManager.UnloadAllAssets(true);
         }
     }
 

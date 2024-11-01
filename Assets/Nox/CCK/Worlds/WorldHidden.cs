@@ -29,7 +29,7 @@ namespace Nox.CCK.Worlds
         /// <summary>
         /// Sets the GameObject to be hidden or not.
         /// </summary>
-        public void Set(bool hidden) => gameObject.SetActive(hidden);
+        public void Set(bool active) => gameObject.SetActive(active);
 
         /// <summary>
         /// Returns the WorldHidden component of the scene.

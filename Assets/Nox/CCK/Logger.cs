@@ -49,6 +49,12 @@ namespace Nox.CCK
             ULogger.LogError(message);
         }
 
+        public static void LogDebug(object message)
+        {
+            OnLog(LogType.Debug, message);
+            ULogger.Log(message);
+        }
+
         public static void LogException(Exception exception)
         {
             OnLog(LogType.Exception, exception);
@@ -79,6 +85,12 @@ namespace Nox.CCK
             ULogger.LogException(exception, context);
         }
 
+        public static void LogDebug(object message, Object context)
+        {
+            OnLog(LogType.Debug, message);
+            ULogger.Log(message, context);
+        }
+
         public static void OnLog(LogType type, object message)
         {
             if (!IsInitialized)
@@ -96,7 +108,7 @@ namespace Nox.CCK
             string methodName = frames[old].GetMethod().Name;
             string className = frames[old].GetMethod().DeclaringType.Name;
 
-            while ((className.StartsWith("<") 
+            while ((className.StartsWith("<")
                 || className.Contains("AsyncUniTaskMethodBuilder")
                 || className.Contains("AsyncUniTask")
                 || className.Contains("PooledDelegate")
@@ -111,5 +123,15 @@ namespace Nox.CCK
 
             File.AppendAllText(LogFile, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] [{type}] [{className}.{methodName}] {message}{Environment.NewLine}");
         }
+    }
+
+    public enum LogType
+    {
+        Error,
+        Assert,
+        Warning,
+        Log,
+        Exception,
+        Debug
     }
 }

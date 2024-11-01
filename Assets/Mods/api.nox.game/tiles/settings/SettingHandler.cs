@@ -17,6 +17,8 @@ namespace api.nox.game.Settings
         public UnityAction<TileObject, GameObject> OnDeselected;
 
         public Func<SettingPage[]> GetPages;
+
+        public virtual void Dispose() { }
     }
 
     public class SettingPage

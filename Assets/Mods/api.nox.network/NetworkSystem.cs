@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using api.nox.network.HTTP;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
@@ -46,9 +47,11 @@ namespace api.nox.network
         {
             Relay.Update();
         }
+        
 
         public void OnDispose()
         {
+
             Relay.Dispose();
             World.Dispose();
             WebSocket.Dispose();
@@ -87,7 +90,7 @@ namespace api.nox.network
             return dt.texture;
         }
 
-        public async UniTask<string> DownloadFile(string url, string hash, UnityWebRequest req = null)
+        public async UniTask<string> DownloadFile(string url, string hash, UnityWebRequest req = null, Action<float, ulong> progress = null, CancellationToken token = default)
         {
             Logger.Log($"Fetching [FILE] {url}...");
             req ??= new UnityWebRequest(url, "GET");
@@ -100,8 +103,15 @@ namespace api.nox.network
                 {
                     Logger.Log($"Downloading {url} {req.downloadProgress * 100}%");
                     CoreAPI.EventAPI.Emit(new NetEventContext("network.download", url, req.downloadProgress, req.downloadedBytes));
-                    return asynco.isDone;
+                    progress?.Invoke(req.downloadProgress, req.downloadedBytes);
+                    return asynco.isDone || token.IsCancellationRequested;
                 });
+
+                if (token.IsCancellationRequested)
+                {
+                    req.Abort();
+                    return null;
+                }
             }
             catch { return null; }
             if (req.responseCode != 200) return null;

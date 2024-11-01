@@ -16,7 +16,7 @@ TagManager:
   - Grabbable
   - Hand
   - HandPlayer
-  - 
+  - PostProd
   - 
   - 
   - 
@@ -39,6 +39,9 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: PostProd
+    uniqueID: 2052077401
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0

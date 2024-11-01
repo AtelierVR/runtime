@@ -47,6 +47,7 @@ namespace Nox.CCK
 
         public static T FindComponent<T>(GameObject parent)
         {
+            Logger.LogDebug("Finding component of type " + typeof(T).Name + " in " + parent.name);
             var component = parent.GetComponent<T>();
             if (component != null)
                 return component;

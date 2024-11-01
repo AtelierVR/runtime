@@ -336,10 +336,10 @@ namespace api.nox.game.Tiles
 
             if (asset != null)
             {
-                if (!WorldManager.IsWorldLoaded(asset.hash))
+                if (!Worlds.WorldManager.IsAssetLoaded(asset.hash))
                 {
                     dlb.interactable = true;
-                    var type = WorldManager.HasWorldInCache(asset.hash) ? DownloadButtonType.Downloaded : DownloadButtonType.Download;
+                    var type = Worlds.WorldCache.HasWorldInCache(asset.hash) ? DownloadButtonType.Downloaded : DownloadButtonType.Download;
                     dlb.onClick.AddListener(() => OnClickDownload(tile, content, type).Forget());
                     SetDownloadButton(content, type);
                     gotob.interactable = true;
@@ -495,7 +495,7 @@ namespace api.nox.game.Tiles
             {
                 dlb.interactable = false;
                 SetDownloadButton(content, DownloadButtonType.Downloading, 0);
-                var res = await WorldManager.DownloadWorld(asset.hash, asset.url, (progress, size) => SetDownloadButton(content, DownloadButtonType.Downloading, progress));
+                var res = await Worlds.WorldCache.DownloadWorld(asset.hash, asset.url, (progress, size) => SetDownloadButton(content, DownloadButtonType.Downloading, progress));
                 if (res.success) SetDownloadButton(content, DownloadButtonType.Downloading, 1);
                 dlb.interactable = true;
                 CheckVersion(tile, content);
@@ -503,7 +503,7 @@ namespace api.nox.game.Tiles
             else if (type == DownloadButtonType.Downloaded)
             {
                 dlb.interactable = false;
-                WorldManager.DeleteWorldFromCache(asset.hash);
+                Worlds.WorldCache.DeleteWorldFromCache(asset.hash);
                 SetDownloadButton(content, DownloadButtonType.Download);
                 dlb.interactable = true;
                 CheckVersion(tile, content);

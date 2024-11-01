@@ -113,5 +113,11 @@ namespace api.nox.game.Controllers
             get => false;
             set { }
         }
+
+        public virtual void Move(Vector2 direction)
+        {
+            if (CanMovement)
+                Player.Move(direction, useRelativeDirection: true);
+        }
     }
 }

@@ -132,6 +132,9 @@ namespace api.nox.game.Tiles
             _sub = null;
             OnSettingUpdated.RemoveAllListeners();
             OnSettingUpdated = null;
+            foreach (var handler in settingHandlers)
+                handler.Value.Dispose();
+            settingHandlers.Clear();
             settingHandlers = null;
             Instance = null;
         }

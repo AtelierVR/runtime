@@ -16,6 +16,7 @@ namespace api.nox.network.Instances
         public ushort capacity;
         public string[] tags;
         public string world;
+        public string owner;
         public string address;
         public ushort client_count;
         public InstancePlayer[] players;

@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using api.nox.game.Worlds;
 using api.nox.network;
 using api.nox.network.Instances;
 using api.nox.network.RelayInstances;
 using api.nox.network.RelayInstances.Enter;
 using api.nox.network.RelayInstances.Quit;
 using api.nox.network.Relays;
+using api.nox.network.Users;
 using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
@@ -17,10 +19,15 @@ namespace api.nox.game.sessions
 {
     public class OnlineController : ISessionController
     {
+        public string SessionType => "online";
         public Session _session;
         public Session GetSession() => _session;
         internal void SetSession(Session session) => _session = session;
         void ISessionController.SetSession(Session session) => SetSession(session);
+
+        public string GetTitle() => GetInstance().title ?? GetSession().world.title;
+        public string GetThumbnail() => GetInstance().thumbnail ?? GetSession().world.thumbnail;
+        public string GetDescription() => GetInstance().description ?? GetSession().world.description;
 
         internal MakeRelayConnectionData connectionData;
         internal string Server { get; private set; }
@@ -75,7 +82,7 @@ namespace api.nox.game.sessions
                 foreach (var player in session.abstractPlayers)
                     player.Unregister();
                 session.abstractPlayers.Clear();
-                await WorldManager.UnloadWorld(session.worldAsset.hash, 0);
+                await Worlds.WorldManager.UnloadScene(session.worldAsset.hash, 0);
             }
             var relay = GetRelay();
             if (relay != null)
@@ -191,34 +198,53 @@ namespace api.nox.game.sessions
                 return false;
             }
 
-            if (!WorldManager.HasWorldInCache(asset.hash))
+            if (!WorldCache.HasWorldInCache(asset.hash))
             {
-                var res = await WorldManager.DownloadWorld(asset.hash, asset.url);
+                var res = await WorldCache.DownloadWorld(asset.hash, asset.url);
                 if (!res.success) return false;
             }
 
-            var scene = await WorldManager.LoadWorld(asset.hash, 0, LoadSceneMode.Additive);
+            var scene_result = await WorldManager.LoadScene(new() { 
+                hash = asset.hash, 
+                id = 0,
+                mode = LoadSceneMode.Additive
+            });
 
-            if (scene == default || !scene.IsValid())
+            if (!scene_result.success)
             {
-                Logger.Log("Scene is null");
-                await relayinstance.Quit(QuitType.ConfigurationError, "Error loading scene");
+                Logger.Log("LoadScene failed: " + scene_result.error);
+                await relayinstance.Quit(QuitType.ConfigurationError, "Loadscene failed" + scene_result.error);
                 return false;
             }
-            GetSession().scenes.Add(scene);
+
+            var scene = scene_result.scene;
+            var session = GetSession();
+
+            var wlock = new WorldLock()
+            {
+                hash = asset.hash,
+                id = (uint)(DateTime.Now.Ticks % uint.MaxValue),
+                scenes = new() { new() { index = 0, scene = scene } }
+            };
+
+            WorldManager.LockWorlds.Add(wlock);
+            session.worldLock = wlock;
+
             var wh = WorldHidden.Make(scene);
             Logger.Log("Scene: " + scene);
             Logger.Log("WorldHidden: " + wh);
             wh.Set(false);
 
-            var indexMainDescriptor = GetSession().IndexOfMainDescriptor(out var descriptor);
-
-            if (indexMainDescriptor == byte.MaxValue)
+            var desc = MainDescriptor.GetDescriptor(scene);
+            if (desc == null || desc.GetType() != typeof(MainDescriptor))
             {
-                Logger.Log("MainDescriptor is null");
-                await relayinstance.Quit(QuitType.ConfigurationError, "No MainDescriptor found");
+                Logger.Log("Descriptor is null or not MainDescriptor");
+                await relayinstance.Quit(QuitType.ConfigurationError, "Descriptor is null or not MainDescriptor");
                 return false;
             }
+
+            var descriptor = desc as MainDescriptor;
+            descriptor.SetCustom("world_hidden", new byte[] { 0 });
 
             if (!relayinstance.SendConfigReady())
             {
@@ -229,7 +255,7 @@ namespace api.nox.game.sessions
 
             RegisterPlayer(enter.Player);
 
-            var abstractPlayer = GetSession().GetAbstractPlayer(enter.Player.Id);
+            var abstractPlayer = session.GetAbstractPlayer(enter.Player.Id);
             if (abstractPlayer == null)
             {
                 Logger.Log("AbstractPlayer is null");

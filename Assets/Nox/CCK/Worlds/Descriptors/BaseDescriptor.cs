@@ -16,6 +16,7 @@ namespace Nox.CCK.Worlds
         [SerializeField] private double data_RespawnHeight;
         [SerializeField] protected DescriptorType data_Type = DescriptorType.None;
         [SerializeField] private AudioChannelDescriptor[] data_audios;
+        [SerializeField] private Dictionary<string, byte[]> data_custom = new();
 
         public static BaseDescriptor[] GetDescriptors()
         {
@@ -79,6 +80,26 @@ namespace Nox.CCK.Worlds
                 _ => null,
             };
             return gameobject == null ? gameObject : gameobject;
+        }
+
+        public bool HasCustom(string key) => data_custom.ContainsKey(key);
+        public void RemoveCustom(string key) => data_custom.Remove(key);
+        public byte[] GetCustom(string key) => HasCustom(key) ? data_custom[key] : null;
+        public void SetCustom(string key, byte[] value)
+        {
+            if (HasCustom(key)) data_custom[key] = value;
+            else data_custom.Add(key, value);
+        }
+
+        public bool TryGetCustom(string key, out byte[] value)
+        {
+            if (HasCustom(key))
+            {
+                value = data_custom[key];
+                return true;
+            }
+            value = null;
+            return false;
         }
 
 #if UNITY_EDITOR

@@ -3,205 +3,233 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Nox.CCK;
+using Nox.CCK.Worlds;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Logger = Nox.CCK.Logger;
+using USceneManager = UnityEngine.SceneManagement.SceneManager;
 
-namespace api.nox.game
+namespace api.nox.game.Worlds
 {
+    public class WorldLock
+    {
+        public uint id;
+        public string hash;
+        public List<SceneLock> scenes = new();
+    }
+
+    public class SceneLock
+    {
+        public ushort index;
+        public Scene scene;
+    }
+
+    public class LoadWorldSceneResult
+    {
+        public bool success;
+        public string hash;
+        public ushort id;
+        public LoadSceneMode mode;
+        public Scene scene;
+        public string error;
+    }
+
+    public class LoadWorldSceneRequest
+    {
+        public string hash;
+        public ushort id;
+        public LoadSceneMode mode;
+        public CancellationToken token;
+        public Action<LoadSceneStage, float> progress;
+    }
+
+    public class ActionStageProgress : IProgress<float>
+    {
+        public Action<LoadSceneStage, float> action;
+        public LoadSceneStage stage;
+        public void Report(float value) => action?.Invoke(stage, value);
+    }
+
+    public enum LoadSceneStage
+    {
+        LoadAsset,
+        LoadScene,
+        Checking,
+        Done
+    }
+
     internal class WorldManager
     {
-        internal static Dictionary<string, AssetBundle> _loadedWorlds = new();
-        public static string WorldPath(string hash) => Path.Combine(Constants.GameAppDataPath, "cache", "worlds", hash);
-        public static bool HasWorldInCache(string hash) => File.Exists(WorldPath(hash));
-        public static AssetBundle GetLoadedWorld(string hash) => _loadedWorlds.ContainsKey(hash) ? _loadedWorlds[hash] : null;
-        public static bool IsWorldLoaded(string hash) => _loadedWorlds != null && _loadedWorlds.ContainsKey(hash);
-        public static string[] GetLoaddedWorlds() => _loadedWorlds.Keys.ToArray();
+        public static Dictionary<string, AssetBundle> LoadedAssets = new();
+        public static List<WorldLock> LockWorlds = new();
 
-        public static void SaveWorldToCache(string hash, byte[] data)
+        /// <summary>
+        /// Load an assetbundle from cache
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <returns></returns>
+        public static async UniTask<AssetBundle> LoadAsset(string hash, Action<float> progress = null, CancellationToken token = default)
         {
-            if (!Directory.Exists(Path.Combine(Constants.GameAppDataPath, "cache", "worlds")))
-                Directory.CreateDirectory(Path.Combine(Constants.GameAppDataPath, "cache", "worlds"));
-            File.WriteAllBytes(WorldPath(hash), data);
-        }
+            // If asset is already loaded, return it
+            if (IsAssetLoaded(hash))
+                return LoadedAssets[hash];
 
-        public static void SaveWorldToCache(string hash, string path)
-        {
-            if (!Directory.Exists(Path.Combine(Constants.GameAppDataPath, "cache", "worlds")))
-                Directory.CreateDirectory(Path.Combine(Constants.GameAppDataPath, "cache", "worlds"));
-            File.Copy(path, WorldPath(hash));
-        }
-
-        public static async UniTask<AssetBundle> GetOrLoadWorld(string hash)
-        {
-            if (_loadedWorlds.ContainsKey(hash))
-                return _loadedWorlds[hash];
-            if (!HasWorldInCache(hash))
+            // If asset is not in cache, return null
+            if (!WorldCache.HasWorldInCache(hash))
                 return null;
+
+            // Load asset from cache
             var t0 = DateTime.Now;
-            var load = AssetBundle.LoadFromFileAsync(WorldPath(hash));
-            GameClientSystem.CoreAPI.EventAPI.Emit("world.assetbundle.loading", hash, 0f);
-            Logger.Log($"Loading assetbundle {hash} 0.00%");
+            var promise = AssetBundle.LoadFromFileAsync(WorldCache.WorldPath(hash));
+
+            Logger.LogDebug($"Starting to load assetbundle {hash}...");
+
             await UniTask.WaitUntil(() =>
             {
-                GameClientSystem.CoreAPI.EventAPI.Emit("world.assetbundle.loading", hash, load.progress);
-                Logger.Log($"Loading assetbundle {hash} {(load.progress * 100).ToString("0.00", CultureInfo.InvariantCulture)}%");
-                return load.isDone;
+                progress?.Invoke(promise.progress);
+                return promise.isDone || token.IsCancellationRequested;
             });
-            GameClientSystem.CoreAPI.EventAPI.Emit("world.assetbundle.loading", hash, 1f);
-            Logger.Log($"Loaded assetbundle {hash} 100.00%");
-            var t1 = DateTime.Now;
-            Logger.Log($"Loaded assetbundle {hash} in {(t1 - t0).TotalMilliseconds.ToString("0.000", CultureInfo.InvariantCulture)}ms");
-            return _loadedWorlds[hash] = load.assetBundle;
-        }
 
-        public static void DeleteWorldFromCache(string hash)
-        {
-            if (_loadedWorlds.ContainsKey(hash))
-                throw new System.Exception("World is loaded, unload it first");
-            if (HasWorldInCache(hash))
-                File.Delete(WorldPath(hash));
-        }
-
-        public static void ClearWorldCache()
-        {
-            var files = Directory.GetFiles(Path.Combine(Constants.GameAppDataPath, "cache", "worlds"));
-            foreach (var file in files)
+            // If loading is cancelled, return null
+            if (token.IsCancellationRequested)
             {
-                if (_loadedWorlds.ContainsValue(AssetBundle.LoadFromFile(file))) continue;
-                File.Delete(file);
-            }
-        }
-
-        public static void UnloadWorld(string hash)
-        {
-            if (!_loadedWorlds.ContainsKey(hash))
-                throw new System.Exception("World is not loaded");
-            _loadedWorlds[hash].Unload(true);
-            _loadedWorlds.Remove(hash);
-        }
-
-        public static void UnloadAllWorlds()
-        {
-            foreach (var world in _loadedWorlds)
-                world.Value.Unload(true);
-            _loadedWorlds.Clear();
-        }
-
-        public static async UniTask<DownloadWorldResult> DownloadWorld(string hash, string url, Action<float, ulong> progress = null)
-        {
-            if (HasWorldInCache(hash))
-                return new DownloadWorldResult { success = true, hash = hash, url = url };
-            var eventsub = GameClientSystem.CoreAPI.EventAPI.Subscribe("network.download", (context) =>
-            {
-                if (context.Data[0] as string != url) return;
-                progress?.Invoke((float)context.Data[1], (ulong)context.Data[2]);
-            });
-            var t3 = DateTime.Now;
-            var res = await GameClientSystem.Instance.NetworkAPI.DownloadFile(url, hash);
-            GameClientSystem.CoreAPI.EventAPI.Unsubscribe(eventsub);
-            var t4 = DateTime.Now;
-            progress?.Invoke(1, 0);
-            if (res == null)
-            {
-                Logger.LogError($"Failed to download world {hash} {url}");
-                return new DownloadWorldResult { success = false, hash = hash, url = url, error = "Download failed" };
+                Logger.LogDebug($"Cancelled loading assetbundle {hash}");
+                return null;
             }
 
             var t1 = DateTime.Now;
-            SaveWorldToCache(hash, res);
-            File.Delete(res);
-            var t2 = DateTime.Now;
 
-            Logger.Log($"Downloaded world {hash} {url} {res.Length} bytes in {(t2 - t1).TotalMilliseconds}ms {(t4 - t3).TotalMilliseconds}ms");
-            return new DownloadWorldResult { success = true, hash = hash, url = url };
+            Logger.LogDebug($"Loaded assetbundle {hash} in {(t1 - t0).TotalMilliseconds:0.000}ms");
+
+            return LoadedAssets[hash] = promise.assetBundle;
         }
 
-        public static async UniTask<Scene> LoadWorld(string hash, ushort id, LoadSceneMode mode = LoadSceneMode.Single)
+        /// <summary>
+        /// Check if an assetbunle is locked
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <returns></returns>
+        public static bool IsAssetLocked(string hash) => LockWorlds.Any(x => x.hash == hash);
+        public static bool IsAssetLoaded(string hash) => LoadedAssets.ContainsKey(hash);
+
+        /// <summary>
+        /// Unload an assetbundle
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <returns></returns>
+        public static bool UnloadAsset(string hash, bool force = false)
         {
-            if (!HasWorldInCache(hash))
-                return default;
-            var bundle = await GetOrLoadWorld(hash);
-            var scenes = bundle.GetAllScenePaths();
-            var sceneId = scenes.Length > id ? scenes[id] : null;
-            if (string.IsNullOrEmpty(sceneId))
-            {
-                Logger.LogError($"Failed to load world {hash} {id}");
-                return default;
-            }
-            var t0 = DateTime.Now;
-            var load = SceneManager.LoadSceneAsync(sceneId, mode);
-            GameClientSystem.CoreAPI.EventAPI.Emit("world.loading", hash, id, mode, 0f);
-            Logger.Log($"Loading world {hash} {id} 0.00%");
-            await UniTask.WaitUntil(() =>
-            {
-                GameClientSystem.CoreAPI.EventAPI.Emit("world.loading", hash, id, mode, load.progress);
-                Logger.Log($"Loading world {hash} {id} {(load.progress * 100).ToString("0.00", CultureInfo.InvariantCulture)}%");
+            // If asset is not loaded, return true
+            if (!IsAssetLoaded(hash))
+                return true;
 
-                return load.isDone;
-            });
-            GameClientSystem.CoreAPI.EventAPI.Emit("world.loading", hash, id, mode, 1f);
-            Logger.Log($"Loading world {hash} {id} 100.00%");
-            var t1 = DateTime.Now;
-            Logger.Log($"Loaded world {hash} {id} in {(t1 - t0).TotalMilliseconds.ToString("0.000", CultureInfo.InvariantCulture)}ms");
-
-
-            var scene = SceneManager.GetSceneByPath(sceneId);
-            if (!scene.IsValid())
-            {
-                Logger.LogError($"Failed to load world {hash} {id} {sceneId}");
-                return default;
-            }
-
-            var mainCamera = scene.GetRootGameObjects().FirstOrDefault(x => x.GetComponent<Camera>() != null);
-            if (mainCamera != null)
-            {
-                Logger.Log("Disable main camera");
-                mainCamera.SetActive(false);
-            }
-
-            GameClientSystem.CoreAPI.EventAPI.Emit("world.loaded", hash, id, mode, sceneId);
-            return scene;
-        }
-
-        public static async UniTask<bool> UnloadWorld(string hash, ushort id)
-        {
-            if (!HasWorldInCache(hash))
+            // if asset is locked, return false
+            if (IsAssetLocked(hash))
                 return false;
-            var bundle = await GetOrLoadWorld(hash);
-            var scenes = bundle.GetAllScenePaths();
-            var sceneId = scenes.Length > id ? scenes[id] : null;
-            if (string.IsNullOrEmpty(sceneId))
-            {
-                Logger.LogError($"Failed to unload world {hash} {id}");
-                return false;
-            }
-            var scene = SceneManager.GetSceneByPath(sceneId);
-            if (!scene.IsValid())
-            {
-                Logger.LogError($"Failed to unload world {hash} {id} {sceneId}");
-                return false;
-            }
-            var unload = SceneManager.UnloadSceneAsync(scene);
-            GameClientSystem.CoreAPI.EventAPI.Emit("world.unloading", hash, id, 0f);
-            await UniTask.WaitUntil(() =>
-            {
-                GameClientSystem.CoreAPI.EventAPI.Emit("world.unloading", hash, id, unload.progress);
-                return unload.isDone;
-            });
-            GameClientSystem.CoreAPI.EventAPI.Emit("world.unloading", hash, id, 1f);
-            Logger.Log($"Unloaded world {hash} {id} {sceneId}");
+
+            // Unload asset
+            LoadedAssets[hash].Unload(true);
+            LoadedAssets.Remove(hash);
+
             return true;
         }
 
-        public class DownloadWorldResult
+        /// <summary>
+        /// Unload all assetbundles
+        /// </summary>
+        /// <param name="force"></param>
+        /// <returns></returns>
+        public static bool UnloadAllAssets(bool force = false)
         {
-            public string url;
-            public string hash;
-            public bool success;
-            public string error;
+            while (LockWorlds.Count > 0)
+            {
+                var world = LockWorlds[0];
+                LockWorlds.RemoveAt(0);
+                if (!UnloadAsset(world.hash, force))
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Load a scene from an assetbundle
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public static async UniTask<LoadWorldSceneResult> LoadScene(LoadWorldSceneRequest request)
+        {
+            if (!WorldCache.HasWorldInCache(request.hash))
+                return new() { success = false, hash = request.hash, id = request.id, mode = request.mode, error = "World not in cache" };
+
+            var asset = await LoadAsset(
+                request.hash,
+                p => request.progress?.Invoke(LoadSceneStage.LoadAsset, p),
+                request.token
+            );
+
+            if (asset == null)
+                return new() { success = false, hash = request.hash, id = request.id, mode = request.mode, error = "Failed to load asset" };
+
+            var scenes = asset.GetAllScenePaths();
+            if (scenes.Length <= request.id)
+                return new() { success = false, hash = request.hash, id = request.id, mode = request.mode, error = "Scene not found" };
+
+            // load new instance of scene
+            var scene = await SceneManager.LoadScene(new()
+            {
+                sceneName = scenes[request.id],
+                mode = request.mode,
+                progress = (p) => request.progress?.Invoke(LoadSceneStage.LoadScene, p),
+                token = request.token
+            });
+
+            if (!scene.success)
+                return new() { success = false, hash = request.hash, id = request.id, mode = request.mode, error = scene.error };
+
+            // get if the scene has a descriptor
+            var descriptor = Finder.FindComponent<BaseDescriptor>(scene.scene);
+            if (descriptor == null)
+                return new() { success = false, hash = request.hash, id = request.id, mode = request.mode, error = "Scene has no descriptor" };
+
+            // disable main camera
+            var camera = Finder.FindComponent<Camera>(scene.scene);
+            if (camera != null)
+                camera.gameObject.SetActive(false);
+
+            return new() { success = true, hash = request.hash, id = request.id, mode = request.mode, scene = scene.scene };
+        }
+
+        /// <summary>
+        /// Unload a scene from an assetbundle
+        /// </summary>
+        /// <param name="hash"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static async UniTask<bool> UnloadScene(string hash, ushort id)
+        {
+            if (!WorldCache.HasWorldInCache(hash))
+                return false;
+
+            var asset = await LoadAsset(hash);
+            if (asset == null)
+                return false;
+
+            var scenes = asset.GetAllScenePaths();
+            if (scenes.Length <= id)
+                return false;
+
+            var scene = USceneManager.GetSceneByPath(scenes[id]);
+            if (!scene.IsValid())
+                return false;
+
+            await USceneManager.UnloadSceneAsync(scene);
+
+            UnloadAsset(hash);
+
+            return true;
         }
     }
 }

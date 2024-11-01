@@ -293,6 +293,16 @@ MonoBehaviour:
       value: "Suppression de bruit"
     - key: game.ui.menu.session
       value: "Session"
+    - key: dashboard.session.main_online.leave
+      value: "Quitter"
+    - key: dashboard.session.main_online.goto_offline
+      value: "Aller en off."
+    - key: dashboard.session.description.title
+      value: "Description"
+    - key: dashboard.session.description
+      value: "{0}"
+    - key: session.main_online
+      value: "Informations"
   - IETF: en-US
     entries:
     - key: game.ui.menu.home

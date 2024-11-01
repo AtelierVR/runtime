@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using api.nox.game.Worlds;
 using api.nox.network.Worlds;
 using api.nox.network.Worlds.Assets;
 using Cysharp.Threading.Tasks;
@@ -8,6 +9,7 @@ using Nox.CCK.Worlds;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Logger = Nox.CCK.Logger;
+using USceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace api.nox.game.sessions
 {
@@ -29,7 +31,7 @@ namespace api.nox.game.sessions
             }
         }
 
-        public List<Scene> scenes = new();
+        public WorldLock worldLock = null;
 
         public List<IAbstractPlayer> abstractPlayers = new();
 
@@ -44,21 +46,33 @@ namespace api.nox.game.sessions
         public World world;
         public WorldAsset worldAsset;
 
-        public BaseDescriptor GetDescriptor(byte scene_index) => GetDescriptor(scenes[scene_index]);
-        public BaseDescriptor GetDescriptor(Scene scene) => Finder.FindComponent<BaseDescriptor>(scene);
+        public BaseDescriptor GetDescriptor(byte scene_index)
+            => worldLock != null ? GetDescriptor(worldLock.scenes[scene_index].scene) : null;
+        public BaseDescriptor GetDescriptor(Scene scene)
+            => Finder.FindComponent<BaseDescriptor>(scene);
+
         public List<BaseDescriptor> GetDescriptors()
         {
+            if (worldLock == null)
+                return new();
             List<BaseDescriptor> descriptors = new();
-            foreach (var scene in scenes)
-                descriptors.Add(GetDescriptor(scene));
+            foreach (var scene in worldLock.scenes)
+                descriptors.Add(GetDescriptor(scene.scene));
             return descriptors;
         }
+
         public byte IndexOfMainDescriptor(out MainDescriptor descriptor)
         {
-            Logger.Log($"Finding main descriptor in {scenes.Count} scenes");
-            for (byte i = 0; i < scenes.Count; i++)
+            if (worldLock == null)
             {
-                descriptor = Finder.FindComponent<MainDescriptor>(scenes[i]);
+                descriptor = null;
+                return byte.MaxValue;
+            }
+
+            Logger.Log($"Finding main descriptor in {worldLock.scenes.Count} scenes");
+            for (byte i = 0; i < worldLock.scenes.Count; i++)
+            {
+                descriptor = Finder.FindComponent<MainDescriptor>(worldLock.scenes[i].scene);
                 if (descriptor != null)
                     return i;
             }
@@ -68,39 +82,63 @@ namespace api.nox.game.sessions
 
         public async UniTask Close()
         {
-            await Controller.Close();
-            Controller = null;
-            scenes.Clear();
+            // Unregister all players
+            var abps = new List<IAbstractPlayer>(abstractPlayers);
+            foreach (var player in abps)
+                player.Unregister();
             abstractPlayers.Clear();
+
+            // disconnect controller
+            await Controller.Close();
+
+            // check if is the current session, if so, deselect it
+            await SessionManager.Instance.Remove(this);
+
+            // Unload all scenes
+            while (worldLock.scenes.Count > 0)
+            {
+                var scene = worldLock.scenes[0];
+                worldLock.scenes.RemoveAt(0);
+                if (scene.scene.isLoaded)
+                    await WorldManager.UnloadScene(worldLock.hash, scene.index);
+            }
+
+            // Destroy other objects
+            Controller = null;
             world = null;
             worldAsset = null;
+            WorldManager.LockWorlds.Remove(worldLock);
+            worldLock = null;
+
         }
 
 
-        public void SetCurrent() => SessionManager.Instance.CurrentSession = this;
+        public async UniTask SetCurrent()
+            => await SessionManager.Instance.SetSession(this);
 
         public void OnSelectedCurrent(Session old)
         {
             Logger.Log("Selected session " + id + (old == null ? "" : " but session " + old.id + " was deselected"));
-            for (byte i = 0; i < scenes.Count; i++)
-            {
-                var scene = scenes[i];
-                var wh = WorldHidden.Make(scene);
-                if (wh != null) wh.Set(true);
-            }
-            
-            if (scenes.Count > 0)
-                SceneManager.SetActiveScene(scenes[0]);
+
+            var descriptors = GetDescriptors();
+            foreach (var descriptor in descriptors)
+                if (descriptor.TryGetCustom("world_hidden", out var hidden) && hidden.Length > 0)
+                    WorldHidden.Make(descriptor.gameObject.scene).Set(hidden[0] == 0);
+
+            if (worldLock.scenes.Count > 0)
+                USceneManager.SetActiveScene(worldLock.scenes[0].scene);
         }
 
         public void OnDeselectedCurrent(Session current)
         {
             Logger.Log("Deselected session " + id + (current == null ? "" : " but session " + current.id + " was selected"));
-            for (byte i = 0; i < scenes.Count; i++)
+
+            var descriptors = GetDescriptors();
+            foreach (var descriptor in descriptors)
             {
-                var scene = scenes[i];
-                var wh = WorldHidden.Make(scene);
-                if (wh != null) wh.Set(false);
+                var wh = WorldHidden.Make(descriptor.gameObject.scene);
+                descriptor.SetCustom("world_hidden", new byte[] { wh.IsHidden() ? (byte)1 : (byte)0 });
+                wh.Set(false);
             }
         }
 

@@ -241,7 +241,7 @@ namespace api.nox.game.Tiles
                 var relay = GameClientSystem.Instance.NetworkAPI.Relay.GetRelay(instance.address);
                 if (relay != null)
                 {
-                    var currentSession = SessionManager.Instance.CurrentSession;
+                    var currentSession = SessionManager.Instance.GetSession();
                     if (currentSession != null && currentSession.Controller is OnlineController controller)
                     {
                         if (controller.InstanceId != instance.id || controller.Server != instance.server)
@@ -285,7 +285,7 @@ namespace api.nox.game.Tiles
             var session = SessionManager.Instance.GetSession(instance.server, instance.id);
             if (session != null)
             {
-                session.SetCurrent();
+                await session.SetCurrent();
                 return;
             }
             var token = await GameClientSystem.Instance.NetworkAPI.Auth.GetToken(instance.server);
@@ -318,13 +318,13 @@ namespace api.nox.game.Tiles
             if (await controller.Prepare())
             {
                 Logger.Log("Session set current");
-                session.SetCurrent();
+                await session.SetCurrent();
             }
             else
             {
                 Logger.Log("Session disposed");
                 await session.Close();
-                SessionManager.Instance.Remove(session);
+                await SessionManager.Instance.Remove(session);
             }
 
             gotobtn.interactable = true;
