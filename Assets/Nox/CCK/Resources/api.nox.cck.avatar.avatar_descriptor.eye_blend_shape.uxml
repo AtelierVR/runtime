@@ -1,0 +1,33 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <engine:VisualElement style="flex-grow: 1; margin-top: 0; margin-right: 8px; margin-bottom: 0; margin-left: 0; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px;">
+        <engine:Label text="Eye #0" name="label" style="margin-right: 0; margin-left: 4px; padding-right: 0; padding-left: 0;" />
+        <engine:VisualElement style="flex-grow: 0; flex-shrink: 1; margin-top: 8px; margin-bottom: 8px;">
+            <engine:EnumField label="Placement" value="Left" type="Nox.CCK.Avatars.AvatarDescriptor+EyePlacement, NoxCCK" name="placement" />
+            <editor:ObjectField label="Eye Mesh" type="UnityEngine.SkinnedMeshRenderer, UnityEngine.CoreModule" name="mesh" style="flex-grow: 1;" />
+        </engine:VisualElement>
+        <engine:VisualElement style="flex-grow: 0; margin-bottom: 8px;">
+            <engine:DropdownField label="Look Up" name="look-up" />
+            <engine:DropdownField label="Look Down&#10;" name="look-down" />
+            <engine:DropdownField label="Look Left" name="look-left" />
+            <engine:DropdownField label="Look Right" name="look-right" />
+        </engine:VisualElement>
+        <engine:VisualElement style="flex-grow: 0; margin-bottom: 8px;">
+            <engine:VisualElement style="flex-grow: 0; flex-direction: row; margin-top: 1px; margin-right: 0; margin-bottom: 1px; margin-left: 3px;">
+                <engine:Label text="Limit Down/Up" style="flex-grow: 0; width: 134px; -unity-text-align: middle-left;" />
+                <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                    <engine:FloatField value="-10" name="limit-down" style="min-width: auto; width: 75px;" />
+                    <engine:MinMaxSlider value="-10,15" low-limit="-180" high-limit="180" name="limit-up_down-slider" style="flex-grow: 1; margin-right: 8px; margin-left: 8px;" />
+                    <engine:FloatField value="15" name="limit-up" style="min-width: auto; width: 75px;" />
+                </engine:VisualElement>
+            </engine:VisualElement>
+            <engine:VisualElement style="flex-grow: 0; flex-direction: row; margin-top: 1px; margin-right: 0; margin-bottom: 1px; margin-left: 3px;">
+                <engine:Label text="Limit Left/Right" style="flex-grow: 0; width: 134px; -unity-text-align: middle-left;" />
+                <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                    <engine:FloatField value="-20" name="limit-left" style="min-width: auto; width: 75px;" />
+                    <engine:MinMaxSlider value="-20,20" low-limit="-180" high-limit="180" name="limit-left_right-slider" style="flex-grow: 1; margin-right: 8px; margin-left: 8px;" />
+                    <engine:FloatField value="20" name="limit-right" style="min-width: auto; width: 75px;" />
+                </engine:VisualElement>
+            </engine:VisualElement>
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>

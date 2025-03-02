@@ -1,0 +1,23 @@
+{
+    "name": "api.nox.world",
+    "rootNamespace": "",
+    "references": [
+        "NoxCCK",
+        "UniTask",
+        "api.nox.network",
+        "api.nox.xr",
+        "AutoHandAssembly",
+        "NaughtyAttributes.Core",
+        "NaughtyAttributes.Editor",
+        "RootMotion"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

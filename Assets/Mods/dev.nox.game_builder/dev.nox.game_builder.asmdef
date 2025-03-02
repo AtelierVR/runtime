@@ -1,0 +1,17 @@
+{
+    "name": "dev.nox.game_builder",
+    "rootNamespace": "",
+    "references": [
+        "NoxCCK",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

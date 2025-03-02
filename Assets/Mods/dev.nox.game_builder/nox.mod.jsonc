@@ -1,0 +1,43 @@
+{
+  "type": "mod",
+  "id": "dev.nox.game_builder",
+  "provides": [],
+  "name": "Game Builder",
+  "version": "1.0.0",
+  "description": "A mod to build game.",
+  "license": "GPL-3.0",
+  "icon": null,
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/dev.nox.game_builder",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/dev.nox.game_builder/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [
+    {
+      "id": "api.nox.mod",
+      "type": "depends",
+      "version": ">=0.0.0"
+    }
+  ],
+  "entrypoints": {
+    "main": [],
+    "client": [],
+    "editor": [
+      "dev.nox.game_builder.GameBuilder"
+    ],
+    "instance": []
+  },
+  "references": [],
+  "sides": [],
+  "permissions": [],
+  "kernel": false
+}

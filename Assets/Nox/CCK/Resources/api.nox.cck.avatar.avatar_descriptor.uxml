@@ -1,0 +1,71 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/Nox/CCK/Resources/SDKPanelStyle.uss?fileID=7433441132597879392&amp;guid=9a48eb7dc9a7a094885c1759c2dc636f&amp;type=3#SDKPanelStyle" />
+    <engine:VisualElement style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;">
+        <engine:GroupBox style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;">
+            <engine:VisualElement style="flex-grow: 1; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); border-bottom-width: 1px; padding-bottom: 4px; padding-left: 8px; flex-direction: row; padding-right: 8px; padding-top: 4px;">
+                <engine:Label text="Avatar Description" style="flex-grow: 1;" />
+            </engine:VisualElement>
+        </engine:GroupBox>
+        <engine:VisualElement style="flex-grow: 1; margin-top: 8px; margin-right: 8px; margin-bottom: 0; margin-left: 8px;">
+            <engine:Foldout text="View &amp; Voice" value="false" style="margin-left: 12px;">
+                <engine:VisualElement style="flex-grow: 1; margin-left: 0; margin-right: 8px; padding-bottom: 4px; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Vector3Field label="View Position" name="view-position" style="flex-grow: 1;" />
+                        <engine:VisualElement style="flex-grow: 0; width: 50px; margin-left: 4px; flex-direction: row;">
+                            <engine:Button text="Edit" name="view-position-edit" style="flex-shrink: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
+                            <engine:Button text="Close" name="view-position-close" style="flex-shrink: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <engine:Vector3Field label="Voice Position" name="voice-position" style="flex-grow: 1;" />
+                        <engine:VisualElement style="flex-grow: 0; width: 50px; margin-left: 4px; flex-direction: row;">
+                            <engine:Button text="Edit" name="voice-position-edit" style="flex-shrink: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
+                            <engine:Button text="Close" name="voice-position-close" style="flex-shrink: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                        <editor:ObjectField label="Voice Parent" type="UnityEngine.Transform, UnityEngine.CoreModule" name="voice-parent" style="flex-grow: 1;" />
+                        <engine:VisualElement style="flex-grow: 0; width: 50px; margin-left: 4px; flex-direction: row;">
+                            <engine:Button text="Detect" name="voice-parent-detect" style="flex-shrink: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+                </engine:VisualElement>
+            </engine:Foldout>
+            <engine:Foldout text="Eyes" value="true" style="margin-left: 12px; margin-top: 4px;">
+                <engine:VisualElement style="flex-grow: 1; margin-left: 0; margin-right: 8px; padding-bottom: 4px; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
+                    <editor:ObjectField label="Face Mesh" type="UnityEngine.SkinnedMeshRenderer, UnityEngine.CoreModule" name="face-mesh" />
+                    <engine:Label text="Eye Look Settings" style="margin-left: 0; padding-top: 4px; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 4px; -unity-text-align: upper-center; border-top-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); margin-bottom: 4px;" />
+                    <engine:Toggle label="Use eye mouvements" name="use-eye-movements" />
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px;">
+                        <engine:Label text="Interval Target" style="flex-grow: 0; width: 134px; -unity-text-align: middle-left;" />
+                        <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                            <engine:UnsignedIntegerField value="5" name="eye-target-min" style="min-width: 24px;" />
+                            <engine:MinMaxSlider value="5,10" low-limit="1" high-limit="30" name="eye-target-slider" style="flex-grow: 1; margin-right: 8px; margin-left: 8px;" />
+                            <engine:UnsignedIntegerField value="10" name="eye-target-max" style="min-width: 24px;" />
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+                    <engine:EnumField label="Eye look type" value="Center" type="Nox.CCK.Avatars.AvatarDescriptor+EyeLookType, NoxCCK" name="eye-look-type" />
+                    <engine:ListView show-foldout-header="true" reorderable="true" show-add-remove-footer="true" header-title="Eyes" horizontal-scrolling="false" show-border="true" virtualization-method="DynamicHeight" focusable="true" name="eyes" reorder-mode="Animated" style="margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;" />
+                    <engine:Foldout text="Previews" value="true" style="margin-left: 16px; margin-top: 1px; margin-right: 3px; margin-bottom: 1px;">
+                        <engine:VisualElement style="flex-grow: 1; padding-bottom: 8px;">
+                            <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                                <engine:Slider label="Look Up/Down" value="0" high-value="180" low-value="-180" name="preview-eye-y" page-size="0" style="flex-grow: 1; margin-right: 8px;" />
+                                <engine:FloatField value="42.2" name="preview-eye-y-value" style="width: 75px;" />
+                            </engine:VisualElement>
+                            <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
+                                <engine:Slider label="Look Left/Right" value="0" high-value="180" low-value="-180" name="preview-eye-x" page-size="0" style="flex-grow: 1; margin-right: 8px;" />
+                                <engine:FloatField value="42.2" name="preview-eye-x-value" style="width: 75px;" />
+                            </engine:VisualElement>
+                            <engine:Button text="Reset Looking" name="preview-eye-reset" style="margin-top: 8px; margin-right: 0;" />
+                        </engine:VisualElement>
+                    </engine:Foldout>
+                </engine:VisualElement>
+            </engine:Foldout>
+            <engine:Foldout text="Colliders" value="true" style="margin-left: 12px; margin-top: 4px;">
+                <engine:VisualElement style="flex-grow: 1; margin-left: 0; margin-right: 8px; padding-bottom: 4px; border-bottom-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
+                    <engine:ListView show-foldout-header="true" reorderable="true" show-add-remove-footer="true" header-title="List" horizontal-scrolling="false" show-border="true" virtualization-method="DynamicHeight" focusable="true" name="colliders" reorder-mode="Animated" style="margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;" />
+                </engine:VisualElement>
+            </engine:Foldout>
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>

@@ -1,0 +1,47 @@
+{
+  "type": "mod",
+  "id": "dev.nox.development",
+  "provides": [],
+  "name": "Event Logger",
+  "version": "1.0.0",
+  "description": "A mod to develop Nox",
+  "license": "GPL-3.0",
+  "icon": null,
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/dev.nox.development",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/dev.nox.development/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [
+    {
+      "id": "game",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "network",
+      "type": "depends",
+      "version": ">=1.0.0"
+    }
+  ],
+  "entrypoints": {
+    "editor": [
+      "dev.nox.development.EventLogger",
+      "dev.nox.development.WorldDetails",
+      "dev.nox.development.ModDetails"
+    ]
+  },
+  "references": [],
+  "sides": [],
+  "permissions": [],
+  "kernel": false
+}
