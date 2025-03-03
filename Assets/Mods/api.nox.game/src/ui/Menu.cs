@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Logger = Nox.CCK.Utils.Logger;
 using Nox.CCK.Language;
-
+using Nox.CCK.Utils;
 
 
 #if UNITY_EDITOR

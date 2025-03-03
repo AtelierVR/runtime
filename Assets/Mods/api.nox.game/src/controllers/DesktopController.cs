@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using api.nox.game.UI;
 using Nox.CCK.Mods.Events;
+using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Players;
+using Nox.CCK.Utils;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Transform = UnityEngine.Transform;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.game.controllers
 {
@@ -21,9 +24,9 @@ namespace api.nox.game.controllers
         public float[] movementKeys = new float[6];
         public Vector3 inputMovement = Vector3.zero;
         private Mouse _mouse;
-        
-        [Header("Menu")]
-        public ViewPortMenu menu;
+
+        [Header("Viewport")] public RectTransform viewport;
+        private INoxObject _menu;
 
         private readonly string[] _keys =
         {
@@ -39,6 +42,47 @@ namespace api.nox.game.controllers
 
         private EventSubscription _keyBindingRemoved;
 
+        private static MainModInitializer Keybinding
+            => GameSystem.Instance
+                .CoreAPI.ModAPI
+                .GetMod("keybinding")?.GetMains()
+                .FirstOrDefault();
+
+
+        private static ClientModInitializer UISystem
+            => GameSystem.Instance
+                .CoreAPI.ModAPI
+                .GetMod("ui")?.GetClients()
+                .FirstOrDefault();
+
+        private void ToggleMenu(InputAction.CallbackContext ctx)
+        {
+            if (!ctx.performed) return;
+            Logger.Log("Toggling menu");
+            _menu ??= UISystem.CallMethod("GetViewport");
+
+            if (_menu == null)
+            {
+                _menu = UISystem.CallMethod("SpawnViewport", viewport);
+                _menu.InvokeMethod("Goto", "hello", null);
+                _menu.InvokeMethod("Hide");
+            }
+
+            if (_menu == null)
+            {
+                Logger.LogWarning("No viewport menu found");
+                return;
+            }
+
+            var visible = _menu.CallMethod<bool>("IsVisible");
+            _menu.InvokeMethod(visible ? "Hide" : "Show");
+            visible = !visible;
+
+            LockCursor = !visible;
+            if (visible) ForceUpdateLayout.UpdateManually(viewport.gameObject);
+        }
+
+
         public void Start()
         {
             LockCursor = true;
@@ -53,8 +97,9 @@ namespace api.nox.game.controllers
         private void Rebind()
         {
             foreach (var key in _keys)
-                if (!GameSystem.Instance.KeyBindings.HasKeyBinding($"generic.movement.{key}"))
-                    GameSystem.Instance.KeyBindings.AddKeyBinding(
+            {
+                if (!Keybinding.CallMethod<bool>("HasKeyBinding", $"generic.movement.{key}"))
+                    Keybinding.InvokeMethod("AddKeyBinding",
                         $"generic.movement.{key}",
                         new InputAction(
                             $"generic.movement.{key}",
@@ -73,33 +118,33 @@ namespace api.nox.game.controllers
                             }),
                         "generic.movement"
                     );
+            }
 
 
             foreach (var key in _keys)
             {
-                var action = GameSystem.Instance.KeyBindings.GetKeyBinding($"generic.movement.{key}").Action;
-                if (action == null) continue;
-                if (new[]
-                    {
-                        "forward", 
-                        "backward", 
-                        "left", 
-                        "right",
-                        "jump",
-                        "crouch"
-                    }.Contains(key))
+                var action = Keybinding.CallMethod("GetKeyBinding", $"generic.movement.{key}")
+                    .GetField<InputAction>("Action");
+                if (action == null)
+                {
+                    Logger.LogWarning($"Initialized keybinding for {key} not found");
+                    continue;
+                }
+
+                if (new[] { "forward", "backward", "left", "right", "jump", "crouch" }.Contains(key))
                 {
                     action.performed += ctx => OnMoveKey(key, ctx.ReadValue<float>());
-                    action.canceled += ctx => OnMoveKey(key, 0);
+                    action.canceled += _ => OnMoveKey(key, 0);
                 }
-                
-                
+                else if (key == "menu")
+                    action.performed += ToggleMenu;
             }
         }
 
 
         private void OnMoveKey(string key, float value)
         {
+            Logger.Log($"Key {key} pressed with value {value}");
             switch (key)
             {
                 case "forward":
@@ -139,13 +184,14 @@ namespace api.nox.game.controllers
 
         private void HandleLook()
         {
+            if (!LockCursor || _mouse == null) return;
             var look = _mouse.delta.ReadValue();
-            var lookDelta = look * mouseSensitivity * Time.deltaTime;
+            var lookDelta = mouseSensitivity * Time.deltaTime * look;
 
             // rotate up-down with camera
             var cameraRotation = playerCamera.transform.localEulerAngles;
             cameraRotation.x -= lookDelta.y;
-            
+
             // between 90,0 and 270,360 
             cameraRotation.x = cameraRotation.x > 180f
                 ? Mathf.Clamp(cameraRotation.x, 270f, 360f)
@@ -155,13 +201,13 @@ namespace api.nox.game.controllers
             // rotate left-right with player
             transform.Rotate(Vector3.up, lookDelta.x);
         }
-        
+
         private void HandleJump()
         {
             if (IsFlying) return;
-            
+
             if (movementKeys[4] > 0 && IsGrounded)
-                controller.Move(Vector3.up * jumpForce * Time.deltaTime);
+                controller.Move(jumpForce * Time.deltaTime * Vector3.up);
         }
 
         private void HandleMovement()
@@ -178,8 +224,8 @@ namespace api.nox.game.controllers
         {
             GameClientSystem.CoreAPI.EventAPI.Unsubscribe(_keyBindingRemoved);
             foreach (var key in _keys)
-                if (GameSystem.Instance.KeyBindings.HasKeyBinding($"generic.movement.{key}"))
-                    GameSystem.Instance.KeyBindings.RemoveKeyBinding($"generic.movement.{key}");
+                if (Keybinding.CallMethod<bool>("HasKeyBinding", $"generic.movement.{key}"))
+                    Keybinding.InvokeMethod("RemoveKeyBinding", $"generic.movement.{key}");
         }
 
         private void HandleFly()

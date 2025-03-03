@@ -19,9 +19,6 @@ namespace api.nox.game.Tiles
             var tile = new TileObject() { id = "api.nox.game.home", context = context };
             tile.GetContent = (Transform tf) => OnGetContent(tile, tf);
             tile.onDisplay = (str, gameObject) => OnDisplay(menuId, tile, gameObject);
-            tile.onOpen = (str) => OnOpen(tile, tile.content);
-            tile.onHide = (str) => OnHide(tile, tile.content);
-            tile.onRemove = () => OnRemove(tile);
             MenuManager.Instance.SendTile(menuId, tile);
         }
 
@@ -49,37 +46,7 @@ namespace api.nox.game.Tiles
         internal void OnDisplay(int menuId, TileObject tile, GameObject content)
         {
             Logger.Log("HomeTileManager.OnDisplay");
-            _widgets.UpdateWidgets(menuId, content);
-        }
-
-        /// <summary>
-        /// Handle the opening of the tile
-        /// </summary>
-        /// <param name="tile"></param>
-        /// <param name="content"></param>
-        internal void OnOpen(TileObject tile, GameObject content)
-        {
-            Logger.Log("HomeTileManager.OnOpen");
-        }
-
-        /// <summary>
-        /// Handle the hiding of the tile
-        /// </summary>
-        /// <param name="tile"></param>
-        /// <param name="content"></param>
-        internal void OnHide(TileObject tile, GameObject content)
-        {
-            Logger.Log("HomeTileManager.OnHide");
-        }
-
-        /// <summary>
-        /// Handle the removal of the tile
-        /// </summary>
-        /// <param name="tile"></param>
-        /// <param name="content"></param>
-        internal void OnRemove(TileObject tile)
-        {
-            Logger.Log("HomeTileManager.OnRemove");
+            // _widgets.UpdateWidgets(menuId, content);
         }
 
         private List<HomeWithMenu> GetMenuWithHome()
@@ -96,6 +63,7 @@ namespace api.nox.game.Tiles
             return tiles;
         }
 
+        /*
         private WidgetManager _widgets;
 
         internal HomeTileManager()
@@ -106,13 +74,13 @@ namespace api.nox.game.Tiles
                 foreach (var tile in GetMenuWithHome())
                     _widgets.UpdateWidgets(tile.menuId, tile.home.content);
             });
-        }
+        }*/
 
         internal void OnDispose()
-        {
+        {/*
             _widgets.Dispose();
             _widgets.OnWidgetsUpdate = null;
-            _widgets = null;
+            _widgets = null;*/
         }
     }
 

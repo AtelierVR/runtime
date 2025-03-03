@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Collections.Generic;
 using System.Linq;
 using Nox.CCK.Mods;
@@ -22,7 +22,7 @@ namespace api.nox.game.Tiles
 
         internal void UpdateWidgets(int menuId, GameObject content)
         {
-            var rect = Reference.GetReference("game.home.widgets", content).GetComponent<MenuGridder>();
+            var rect = Reference.GetReference("game.home.widgets", content).GetComponent<WidgetGrid>();
             foreach (var child in rect.transform.Cast<Transform>().ToArray())
                 Object.Destroy(child.gameObject);
             foreach (var widget in widgets.Values.ToArray())
@@ -88,4 +88,4 @@ namespace api.nox.game.Tiles
         internal OnWidgetEvent OnWidgetRemove = new();
         internal OnWidgetEvent OnWidgetUpdate = new();
     }
-}
+}*/

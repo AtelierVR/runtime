@@ -1,10 +1,10 @@
-using api.nox.game;
+using Nox.CCK.Utils;
 using UnityEngine;
 
-public class AutoFitter : MonoBehaviour, UpdateLayout
+public class AutoFitter : MonoBehaviour, IUpdateLayout
 {
     public RectTransform from;
-    public RectTransform rect => GetComponent<RectTransform>();
+    private RectTransform Rect => GetComponent<RectTransform>();
     
     void Start() => UpdateLayout();
     void OnEnable() => UpdateLayout();
@@ -12,7 +12,7 @@ public class AutoFitter : MonoBehaviour, UpdateLayout
 
     public void UpdateLayout()
     { 
-        if (!from || !rect) return;
-        rect.sizeDelta = from.sizeDelta;
+        if (!from || !Rect) return;
+        Rect.sizeDelta = from.sizeDelta;
     }
 }

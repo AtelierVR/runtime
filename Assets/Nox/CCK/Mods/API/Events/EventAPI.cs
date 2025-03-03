@@ -32,6 +32,8 @@ namespace Nox.CCK.Mods.Events
         public Mod Source { get; }
         public void Callback(params object[] args);
         public EventEntryFlags SourceChannel { get; }
+        
+        public bool TryGet<T>(int index, out T value);
     }
 
     public interface EventContext

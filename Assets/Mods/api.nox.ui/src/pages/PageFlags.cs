@@ -3,7 +3,7 @@
 namespace api.nox.ui.histories
 {
     [Flags]
-    public enum HistoryFlags
+    public enum PageFlags
     {
         None = 0,
         IsNew = 1,

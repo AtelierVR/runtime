@@ -1,6 +1,6 @@
 {
-    "name": "api.nox.interface",
-    "rootNamespace": "api.nox.interface",
+    "name": "api.nox.ui",
+    "rootNamespace": "api.nox.ui",
     "references": [
         "NoxCCK",
         "UniTask",

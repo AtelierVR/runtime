@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using Nox.CCK.Mods;
@@ -39,7 +38,8 @@ namespace Nox.ModLoader.Cores.Events
             var mod = context.Destination != null ? Mod.CoreAPI.LocalModAPI.GetInternalMod(context.Destination) : null;
             if (mod != null)
                 mod.CoreAPI.LocalEventAPI.Receive(ncontext);
-            else foreach (var imod in Mod.CoreAPI.LocalModAPI.GetInternalMods())
+            else
+                foreach (var imod in Mod.CoreAPI.LocalModAPI.GetInternalMods())
                 {
                     if (context.Channel.HasFlag(CCK.Mods.Events.EventEntryFlags.Main))
                         imod.CoreAPI?.LocalEventAPI.Receive(ncontext);
@@ -86,6 +86,7 @@ namespace Nox.ModLoader.Cores.Events
                 if (runtime.UID == uint.MaxValue)
                     return null;
             }
+
             Subscriptions.Add(runtime);
             Subscriptions.Sort((a, b) => a.Weight.CompareTo(b.Weight));
             return eventSub;
@@ -101,7 +102,10 @@ namespace Nox.ModLoader.Cores.Events
 
     public class EventSubscription : CCK.Mods.Events.EventSubscription
     {
-        internal EventSubscription() { }
+        internal EventSubscription()
+        {
+        }
+
         internal EventSubscription(CCK.Mods.Events.EventSubscription subscription)
         {
             UID = subscription.UID;
@@ -118,7 +122,10 @@ namespace Nox.ModLoader.Cores.Events
 
     public class EventContext : CCK.Mods.Events.EventContext
     {
-        internal EventContext() { }
+        internal EventContext()
+        {
+        }
+
         internal EventContext(CCK.Mods.Events.EventContext context)
         {
             Data = context.Data;
@@ -140,6 +147,18 @@ namespace Nox.ModLoader.Cores.Events
         public string EventName { get; internal set; }
         public object[] Data { get; internal set; }
         public CCK.Mods.Events.EventEntryFlags SourceChannel { get; internal set; }
+
+        public bool TryGet<T>(int index, out T value)
+        {
+            if (Data.Length > index && Data[index] is T val)
+            {
+                value = val;
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
 
         public ModLoader.Mods.Mod InternalSource { get; internal set; }
         public Mod Source => InternalSource;

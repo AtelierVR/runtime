@@ -1,18 +1,19 @@
 {
-    "name": "api.nox.interface",
-    "rootNamespace": "api.nox.interface",
-    "references": [
-        "NoxCCK",
-        "UniTask",
-        "Unity.TextMeshPro"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "api.nox.keybinding",
+  "rootNamespace": "api.nox.keybinding",
+  "references": [
+    "NoxCCK",
+    "UniTask",
+    "Unity.TextMeshPro",
+    "Unity.InputSystem"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

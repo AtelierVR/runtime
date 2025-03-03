@@ -1,11 +1,9 @@
 using System.Linq;
 using Nox.CCK.Utils;
 using UnityEngine;
-using Logger = Nox.CCK.Utils.Logger;
-
-namespace api.nox.game
+namespace api.nox.ui.components
 {
-    public class MenuGridder : MonoBehaviour, IUpdateLayout
+    public class WidgetGrid : MonoBehaviour, IUpdateLayout
     {
         public Vector2Int dimensions = new(1, 0);
         public float spacing = 0;
@@ -14,27 +12,27 @@ namespace api.nox.game
         void OnValidate() => UpdateContent();
 
         public Vector2 GetDimensions()
-            => GetDimensions(GetComponentsInChildren<MenuGridderItem>(true));
+            => GetDimensions(GetComponentsInChildren<WidgetGridItem>(true));
 
-        private Vector2 GetDimensions(MenuGridderItem[] items)
+        private Vector2 GetDimensions(WidgetGridItem[] items)
         {
             var maxWidth = GetMaxWidth(items);
             var maxHeight = GetMaxHeight(items);
             return new Vector2(maxWidth, maxHeight);
         }
 
-        private int GetMaxWidth(MenuGridderItem[] items) => dimensions.x == 0 ? items.Max(x => x.size.x) : dimensions.x;
+        private int GetMaxWidth(WidgetGridItem[] items) => dimensions.x == 0 ? items.Max(x => x.size.x) : dimensions.x;
 
-        private int GetMaxHeight(MenuGridderItem[] items) =>
+        private int GetMaxHeight(WidgetGridItem[] items) =>
             dimensions.y == 0 ? items.Sum(x => x.size.y) : dimensions.y;
 
-        private MenuGridderItem[] GetItems() => GetComponentsInChildren<MenuGridderItem>(true);
+        private WidgetGridItem[] GetItems() => GetComponentsInChildren<WidgetGridItem>(true);
 
         public void UpdateLayout() => UpdateContent();
 
         public void UpdateContent()
         {
-            var items = GetItems().OrderBy(x => x.index).ToArray();
+            var items = GetItems().OrderBy(x => x.Index).ToArray();
 
             if (items.Length == 0) return;
             if (dimensions is { x: 0, y: 0 }) return;
@@ -87,7 +85,7 @@ namespace api.nox.game
                     var y = (uint)pos.y + i / (uint)item.size.x;
 
                     if (x >= maxWidth || y >= maxHeight) continue;
-                    calculated[x][y] = item.index;
+                    calculated[x][y] = item.Index;
                 }
 
                 item.UpdatePosition(pos, new Vector2Int(maxWidth, maxHeight));

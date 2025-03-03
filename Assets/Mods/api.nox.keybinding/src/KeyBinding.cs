@@ -1,7 +1,7 @@
 ﻿using Nox.CCK.Utils;
 using UnityEngine.InputSystem;
 
-namespace api.nox.game.keybindings
+namespace api.nox.keybinding
 {
     public class KeyBinding : INoxObject
     {
@@ -13,9 +13,9 @@ namespace api.nox.game.keybindings
             IsOverridden = false;
         }
 
-        public readonly string Id;
-        public readonly string Category;
-        public readonly InputAction Action;
-        public bool IsOverridden;
+        [NoxPublic(NoxAccess.Read)] public readonly string Id;
+        [NoxPublic(NoxAccess.Read)] public readonly string Category;
+        [NoxPublic(NoxAccess.Read)] public readonly InputAction Action;
+        [NoxPublic(NoxAccess.Read)] public bool IsOverridden;
     }
 }
