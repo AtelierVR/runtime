@@ -1,17 +1,19 @@
 using System.Linq;
+using Nox.CCK.Utils;
 using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.game
 {
-    public class MenuGridder : MonoBehaviour, UpdateLayout
+    public class MenuGridder : MonoBehaviour, IUpdateLayout
     {
         public Vector2Int dimensions = new(1, 0);
         public float spacing = 0;
-        
+
         void Start() => UpdateContent();
         void OnValidate() => UpdateContent();
 
-        public Vector2 GetDimensions() 
+        public Vector2 GetDimensions()
             => GetDimensions(GetComponentsInChildren<MenuGridderItem>(true));
 
         private Vector2 GetDimensions(MenuGridderItem[] items)
@@ -22,9 +24,13 @@ namespace api.nox.game
         }
 
         private int GetMaxWidth(MenuGridderItem[] items) => dimensions.x == 0 ? items.Max(x => x.size.x) : dimensions.x;
-        private int GetMaxHeight(MenuGridderItem[] items) => dimensions.y == 0 ? items.Sum(x => x.size.y) : dimensions.y;
+
+        private int GetMaxHeight(MenuGridderItem[] items) =>
+            dimensions.y == 0 ? items.Sum(x => x.size.y) : dimensions.y;
 
         private MenuGridderItem[] GetItems() => GetComponentsInChildren<MenuGridderItem>(true);
+
+        public void UpdateLayout() => UpdateContent();
 
         public void UpdateContent()
         {
@@ -85,6 +91,30 @@ namespace api.nox.game
                 }
 
                 item.UpdatePosition(pos, new Vector2Int(maxWidth, maxHeight));
+            }
+
+            var rect = GetComponent<RectTransform>();
+            if (dimensions.y == 0)
+            {
+                var cellWidth = rect.sizeDelta.x / maxWidth;
+                var totalSpacingX = spacing * (dimensions.x - 1);
+                cellWidth -= totalSpacingX / dimensions.x;
+                var height = items.Max(x => x.position.y + x.size.y);
+                rect.sizeDelta = new Vector2(
+                    rect.sizeDelta.x,
+                    height * cellWidth + spacing * (height - 1)
+                );
+            }
+            else if (dimensions.x == 0)
+            {
+                var cellHeight = rect.sizeDelta.y / maxHeight;
+                var totalSpacingY = spacing * (dimensions.y - 1);
+                cellHeight -= totalSpacingY / dimensions.y;
+                var width = items.Max(x => x.position.x + x.size.x);
+                rect.sizeDelta = new Vector2(
+                    width * cellHeight + spacing * (width - 1),
+                    rect.sizeDelta.y
+                );
             }
         }
     }

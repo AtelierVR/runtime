@@ -1,0 +1,14 @@
+﻿using System;
+
+namespace api.nox.ui.histories
+{
+    [Flags]
+    public enum HistoryFlags
+    {
+        None = 0,
+        IsNew = 1,
+        IsRestore = 2,
+        IsBack = 4,
+        IsForward = 8
+    }
+}
