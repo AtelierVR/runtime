@@ -12,18 +12,16 @@ using api.nox.network.Worlds;
 using api.nox.network.Worlds.Assets;
 using Logger = Nox.CCK.Utils.Logger;
 using api.nox.network;
-using api.nox.network.Auths;
 using api.nox.network.Users;
 using Nox.CCK.Utils;
 using Nox.CCK.Language;
-using SearchRequest = api.nox.network.Users.SearchRequest;
 using Transform = UnityEngine.Transform;
 
 namespace api.nox.game.Tiles
 {
     internal class InstanceTileManager : TileManager
     {
-        private EventSubscription InstanceFetchSub;
+        private readonly EventSubscription _instanceFetchSub;
 
         [Serializable]
         public class InstanceFetchedEvent : UnityEvent<Instance>
@@ -34,13 +32,13 @@ namespace api.nox.game.Tiles
 
         internal InstanceTileManager()
         {
-            InstanceFetchSub = GameClientSystem.CoreAPI.EventAPI.Subscribe("instance_fetch", OnFetchInstance);
+            _instanceFetchSub = GameClientSystem.CoreAPI.EventAPI.Subscribe("instance_fetch", OnFetchInstance);
             OnInstanceFetched = new InstanceFetchedEvent();
         }
 
         internal void OnDispose()
         {
-            GameClientSystem.CoreAPI.EventAPI.Unsubscribe(InstanceFetchSub);
+            GameClientSystem.CoreAPI.EventAPI.Unsubscribe(_instanceFetchSub);
             OnInstanceFetched?.RemoveAllListeners();
             OnInstanceFetched = null;
         }
@@ -74,16 +72,15 @@ namespace api.nox.game.Tiles
         /// <param name="context"></param>
         internal void SendTile(EventData context)
         {
-            var tile = new InstanceTileObject() { id = "api.nox.game.instance", context = context };
-            tile.GetContent = (Transform tf) => OnGetContent(tile, tf);
-            tile.onDisplay = (str, gameObject) => OnDisplay(tile, gameObject);
-            tile.onOpen = (str) => OnOpen(tile, tile.content);
-            tile.onHide = (str) => OnHide(tile, tile.content);
+            var tile = new InstanceTileObject { id = "api.nox.game.instance", context = context };
+            tile.GetContent = tf => OnGetContent(tile, tf);
+            tile.onDisplay = (_, gameObject) => OnDisplay(tile, gameObject);
+            tile.onOpen = _ => OnOpen(tile, tile.content);
             tile.onRemove = () => OnRemove(tile);
             MenuManager.Instance.SendTile(tile.MenuId, tile);
         }
 
-        internal void OnRemove(InstanceTileObject tile)
+        private void OnRemove(InstanceTileObject tile)
         {
             if (tile.OnInstanceFetched != null)
                 OnInstanceFetched.RemoveListener(tile.OnInstanceFetched);
@@ -96,7 +93,7 @@ namespace api.nox.game.Tiles
         /// <param name="tile"></param>
         /// <param name="tf"></param>
         /// <returns>Content of the tile</returns>
-        internal GameObject OnGetContent(InstanceTileObject tile, Transform tf)
+        private GameObject OnGetContent(InstanceTileObject tile, Transform tf)
         {
             var pf = GameClientSystem.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/game.instance.prefab");
             pf.SetActive(false);
@@ -105,7 +102,7 @@ namespace api.nox.game.Tiles
 
             if (tile.OnInstanceFetched != null)
                 OnInstanceFetched.RemoveListener(tile.OnInstanceFetched);
-            tile.OnInstanceFetched = (user) => OnInstanceTileUpdate(tile, content, user);
+            tile.OnInstanceFetched = user => OnInstanceTileUpdate(tile, content, user);
             OnInstanceFetched.AddListener(tile.OnInstanceFetched);
 
             return content;
@@ -116,7 +113,7 @@ namespace api.nox.game.Tiles
         /// </summary>
         /// <param name="tile"></param>
         /// <param name="content"></param>
-        internal void OnDisplay(InstanceTileObject tile, GameObject content)
+        private void OnDisplay(InstanceTileObject tile, GameObject content)
         {
             Logger.Log("InstanceTileManager.OnDisplay");
             UpdateContent(tile, content);
@@ -127,23 +124,13 @@ namespace api.nox.game.Tiles
         /// </summary>
         /// <param name="tile"></param>
         /// <param name="content"></param>
-        internal void OnOpen(InstanceTileObject tile, GameObject content)
+        private void OnOpen(InstanceTileObject tile, GameObject content)
         {
             Logger.Log("InstanceTileManager.OnOpen");
             FetchLocation(tile, content).Forget();
             OnClickRefreshPlayers(tile, content).Forget();
         }
-
-        /// <summary>
-        /// Handle the hiding of the tile
-        /// </summary>
-        /// <param name="tile"></param>
-        /// <param name="content"></param>
-        internal void OnHide(InstanceTileObject tile, GameObject content)
-        {
-            Logger.Log("InstanceTileManager.OnHide");
-        }
-
+        
         private void OnFetchInstance(EventData context)
         {
             var instance = context.Data[0] as Instance;
@@ -157,15 +144,15 @@ namespace api.nox.game.Tiles
             if (cInstance.id != instance.id) return;
             if (cInstance.server != instance.server) return;
 
-            var refresh_instance = Reference.GetReference("refresh_instance", content).GetComponent<Button>();
-            if (!refresh_instance.interactable) return;
+            var refreshInstance = Reference.GetReference("refresh_instance", content).GetComponent<Button>();
+            if (!refreshInstance.interactable) return;
 
             tile.Instance = instance;
 
             UpdateContent(tile, content);
         }
 
-        internal void UpdateContent(InstanceTileObject tile, GameObject content)
+        private void UpdateContent(InstanceTileObject tile, GameObject content)
         {
             var instance = tile.Instance;
             if (instance == null)
@@ -175,17 +162,17 @@ namespace api.nox.game.Tiles
             }
 
             Reference.GetReference("display", content).GetComponent<TextLanguage>()
-                .UpdateText(new string[] { instance.title });
+                .UpdateText(new[] { instance.title });
             Reference.GetReference("title", content).GetComponent<TextLanguage>()
-                .UpdateText(new string[] { instance.title });
+                .UpdateText(new[] { instance.title });
             Reference.GetReference("description", content).GetComponent<TextLanguage>()
-                .UpdateText(new string[] { instance.description });
+                .UpdateText(new[] { instance.description });
             Reference.GetReference("ai.address", content).GetComponent<TextLanguage>()
-                .UpdateText(new string[] { instance.server });
+                .UpdateText(new[] { instance.server });
             Reference.GetReference("ai.id", content).GetComponent<TextLanguage>()
-                .UpdateText(new string[] { instance.id.ToString() });
+                .UpdateText(new[] { instance.id.ToString() });
             Reference.GetReference("ai.relay", content).GetComponent<TextLanguage>()
-                .UpdateText(new string[] { instance.address ?? "Not openned" });
+                .UpdateText(new[] { instance.address ?? "Not openned" });
             Reference.GetReference("ai.capacity", content).GetComponent<TextLanguage>()
                 .UpdateText(
                     instance.capacity == ushort.MaxValue
@@ -199,13 +186,13 @@ namespace api.nox.game.Tiles
             if (!string.IsNullOrEmpty(instance.thumbnail))
                 UpdateTexture(thumbnail, instance.thumbnail).Forget();
 
-            var refresh_instance = Reference.GetReference("refresh_instance", content).GetComponent<Button>();
-            refresh_instance.onClick.RemoveAllListeners();
-            refresh_instance.onClick.AddListener(() => OnClickRefreshInstance(tile, content).Forget());
+            var refreshInstance = Reference.GetReference("refresh_instance", content).GetComponent<Button>();
+            refreshInstance.onClick.RemoveAllListeners();
+            refreshInstance.onClick.AddListener(() => OnClickRefreshInstance(tile, content).Forget());
 
-            var refresh_players = Reference.GetReference("refresh_players", content).GetComponent<Button>();
-            refresh_players.onClick.RemoveAllListeners();
-            refresh_players.onClick.AddListener(() => OnClickRefreshPlayers(tile, content, true).Forget());
+            var refreshPlayers = Reference.GetReference("refresh_players", content).GetComponent<Button>();
+            refreshPlayers.onClick.RemoveAllListeners();
+            refreshPlayers.onClick.AddListener(() => OnClickRefreshPlayers(tile, content, true).Forget());
 
             UpdateRelay(tile, content);
         }
@@ -215,12 +202,12 @@ namespace api.nox.game.Tiles
             var instance = tile.Instance;
             var location = await LocationIP.LocationIP.FetchLocation(instance.address.Split(':')[0]);
             var flag = Reference.GetReference("flag", content);
-            var flag_img = Reference.GetReference("flagimg", flag).GetComponent<RawImage>();
+            var flagImg = Reference.GetReference("flagimg", flag).GetComponent<RawImage>();
             flag.SetActive(false);
-            if (location != null && location.success && !string.IsNullOrEmpty(location.GetFlagImg()))
+            if (location is { success: true } && !string.IsNullOrEmpty(location.GetFlagImg()))
                 try
                 {
-                    _ = UpdateTexture(flag_img, location.GetFlagImg()).ContinueWith((bool a) => flag.SetActive(a));
+                    _ = UpdateTexture(flagImg, location.GetFlagImg()).ContinueWith((bool a) => flag.SetActive(a));
                 }
                 catch (Exception e)
                 {
@@ -242,8 +229,8 @@ namespace api.nox.game.Tiles
             }
 
             instance = await GameClientSystem.NetworkAPI
-                .GetField<INoxObject>("Instance")
-                .CallMethod<UniTask<INoxObject>>("GetInstance",
+                .GetField("Instance")
+                .CallAsyncMethod("GetInstance",
                     instance.GetField<string>("server"),
                     instance.GetField<uint>("id"));
 
@@ -272,14 +259,14 @@ namespace api.nox.game.Tiles
 
             if (!string.IsNullOrEmpty(instance.address) && asset != null)
             {
-                var relay = GameClientSystem.RelayAPI?.CallMethod<INoxObject>("GetByAddress", instance.address);
+                var relay = GameClientSystem.RelayAPI?.CallMethod("GetByAddress", instance.address);
                 if (relay != null)
                 {
-                    var currentSession = GameClientSystem.SessionAPI?.CallMethod<INoxObject>("GetCurrentSession");
+                    var currentSession = GameClientSystem.SessionAPI?.CallMethod("GetCurrentSession");
                     if (currentSession == null) gotobtn.interactable = true;
                     else if (currentSession.HasMethod("GetController"))
                     {
-                        var controller = currentSession.CallMethod<INoxObject>("GetController");
+                        var controller = currentSession.CallMethod("GetController");
                         if (controller.CallMethod<string>("GetTypeName") == "online")
                         {
                             var instanceId = controller.GetField<uint>("InstanceId");
@@ -338,7 +325,7 @@ namespace api.nox.game.Tiles
             {
                 if (s == null) continue;
                 if (!s.HasMethod("GetController")) continue;
-                var ctl = s.CallMethod<INoxObject>("GetController");
+                var ctl = s.CallMethod("GetController");
                 if (ctl == null) continue;
                 var instanceId = ctl.GetField<uint>("InstanceId");
                 var masterAddress = ctl.GetField<string>("MasterAddress");
@@ -358,8 +345,8 @@ namespace api.nox.game.Tiles
             }
 
             var token = await GameClientSystem.NetworkAPI
-                .GetField<INoxObject>("Auth")
-                .CallMethod<UniTask<INoxObject>>("GetToken", instance.server);
+                .GetField("Auth")
+                .CallAsyncMethod("GetToken", instance.server);
 
             if (token == null)
             {
@@ -390,22 +377,22 @@ namespace api.nox.game.Tiles
                 }
             };
 
-            session = GameClientSystem.SessionAPI!.CallMethod<INoxObject>("CreateSession", "online", controller);
+            session = GameClientSystem.SessionAPI!.CallMethod("CreateSession", "online", controller);
             session.SetField("WorldId", world.id);
             session.SetField("WorldAssetId", asset.id);
             session.SetField("WorldAddress", instance.server);
 
-            if (await session.CallMethod<INoxObject>("GetController").CallMethod<UniTask<bool>>("Prepare", false))
+            if (await session.CallMethod("GetController").CallAsyncMethod<bool>("Prepare", false))
             {
                 Logger.Log("Session set current");
-                await GameClientSystem.SessionAPI!.CallMethod<UniTask>("SetCurrentSessionUid",
+                await GameClientSystem.SessionAPI!.InvokeAsyncMethod("SetCurrentSessionUid",
                     session.GetField<ushort>("Uid"));
             }
             else
             {
                 Logger.Log("Session disposed");
-                await session.CallMethod<UniTask>("Dispose");
-                await GameClientSystem.SessionAPI!.CallMethod<UniTask>("Remove", session.GetField<ushort>("Uid"));
+                await session.InvokeAsyncMethod("Dispose");
+                await GameClientSystem.SessionAPI!.InvokeAsyncMethod("Remove", session.GetField<ushort>("Uid"));
             }
 
             gotobtn.interactable = true;
@@ -415,16 +402,16 @@ namespace api.nox.game.Tiles
 
         private async UniTask OnClickRefreshPlayers(InstanceTileObject tile, GameObject content, bool isButton = false)
         {
-            var refresh_players = Reference.GetReference("refresh_players", content).GetComponent<Button>();
-            if (!refresh_players.interactable) return;
-            refresh_players.interactable = false;
+            var refreshPlayers = Reference.GetReference("refresh_players", content).GetComponent<Button>();
+            if (!refreshPlayers.interactable) return;
+            refreshPlayers.interactable = false;
 
             if (isButton)
             {
-                var refresh_instance = Reference.GetReference("refresh_instance", content).GetComponent<Button>();
-                if (!refresh_instance.interactable)
+                var refreshInstance = Reference.GetReference("refresh_instance", content).GetComponent<Button>();
+                if (!refreshInstance.interactable)
                 {
-                    refresh_players.interactable = true;
+                    refreshPlayers.interactable = true;
                     return;
                 }
 
@@ -439,7 +426,7 @@ namespace api.nox.game.Tiles
 
             var players = tile.Instance.players;
             Reference.GetReference("players.title", content).GetComponent<TextLanguage>()
-                .UpdateText(new string[] { players.Length.ToString() });
+                .UpdateText(new[] { players.Length.ToString() });
 
             Dictionary<string, List<string>> requests = new();
             foreach (var player in players)
@@ -455,7 +442,7 @@ namespace api.nox.game.Tiles
                 tasks.Add(FetchWorkPlayers(tile, content, server, requests[server].ToArray()));
             await UniTask.WhenAll(tasks);
 
-            refresh_players.interactable = true;
+            refreshPlayers.interactable = true;
         }
 
 
@@ -463,8 +450,8 @@ namespace api.nox.game.Tiles
             string[] players)
         {
             var res = await GameClientSystem.NetworkAPI
-                .GetField<INoxObject>("User")
-                .CallMethod<UniTask<INoxObject>>("SearchUsers", new Dictionary<string, object>
+                .GetField("User")
+                .CallAsyncMethod("SearchUsers", new Dictionary<string, object>
                 {
                     { "user_ids", players },
                     { "server", address },
@@ -476,7 +463,7 @@ namespace api.nox.game.Tiles
             while (res != null && res.CallMethod<bool>("HasNext"))
             {
                 users.AddRange(res.CallMethod<User[]>("GetUsers"));
-                res = await res.CallMethod<UniTask<INoxObject>>("Next");
+                res = await res.CallAsyncMethod("Next");
             }
 
             if (res != null)
@@ -491,7 +478,7 @@ namespace api.nox.game.Tiles
             {
                 var userTile = Object.Instantiate(userPrefab, container.transform);
                 Reference.GetReference("title", userTile).GetComponent<TextLanguage>()
-                    .UpdateText(new string[] { user.display });
+                    .UpdateText(new[] { user.display });
                 userTile.SetActive(true);
                 var thumbnail = Reference.GetReference("thumbnail", userTile).GetComponent<RawImage>();
                 if (!string.IsNullOrEmpty(user.thumbnail))

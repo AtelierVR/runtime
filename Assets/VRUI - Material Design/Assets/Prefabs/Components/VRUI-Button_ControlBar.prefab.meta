@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4a17b3f10cd493f42a368c32cb711853
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 135769
+  packageName: 'VR UI Kit: Material Design System'
+  packageVersion: 2.1
+  assetPath: Assets/VRUI - Material Design/Assets/Prefabs/Components/VRUI-Button_ControlBar.prefab
+  uploadId: 366852

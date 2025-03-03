@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 92416908fe6442e46b63b725c300d2bb
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 135769
+  packageName: 'VR UI Kit: Material Design System'
+  packageVersion: 2.1
+  assetPath: Assets/VRUI - Material Design/Assets/Prefabs/Components/VRUI-Button_Outline.prefab
+  uploadId: 366852

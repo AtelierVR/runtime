@@ -55,18 +55,19 @@ namespace Nox.CCK.Utils
 
                 if (waiter is T value0)
                     return value0;
-                
+
                 if (waiter.GetType().GetGenericTypeDefinition() == typeof(UniTask<object>).GetGenericTypeDefinition())
                 {
                     var awaiter = waiter.GetType().GetMethod("GetAwaiter")?.Invoke(waiter, null);
                     if (awaiter != null)
                     {
-                        await UniTask.WaitUntil(() => awaiter.GetType().GetProperty("IsCompleted")?.GetValue(awaiter) is true);
+                        await UniTask.WaitUntil(() =>
+                            awaiter.GetType().GetProperty("IsCompleted")?.GetValue(awaiter) is true);
                         var result = awaiter.GetType().GetMethod("GetResult")?.Invoke(awaiter, null);
-                        
+
                         if (result is null)
                             return default;
-                        
+
                         if (result is T t)
                             return t;
 
@@ -74,7 +75,7 @@ namespace Nox.CCK.Utils
                             return (T)result;
                     }
                 }
-                
+
                 Logger.LogWarning(
                     $"Method (ASYNC CALL) {method} in {type} returned invalid type {waiter.GetType()} instead of {typeof(T)}");
                 return default;

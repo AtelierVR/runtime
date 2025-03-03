@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 817524d1195160b45ae0856a42a10121
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 135769
+  packageName: 'VR UI Kit: Material Design System'
+  packageVersion: 2.1
+  assetPath: Assets/VRUI - Material Design/Demo/SampleSceneAssets/SampleSceneManager.prefab
+  uploadId: 366852

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 2ae822ee4ed4fdc4b81aa7cf11079912
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 135769
+  packageName: 'VR UI Kit: Material Design System'
+  packageVersion: 2.1
+  assetPath: Assets/VRUI - Material Design/Assets/Prefabs/Components/VRUI-Loading_Circular.prefab
+  uploadId: 366852

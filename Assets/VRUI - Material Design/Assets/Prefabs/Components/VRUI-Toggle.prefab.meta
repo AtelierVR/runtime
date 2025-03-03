@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f2f5d863735f68f40ab2a60ce0f7efa4
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 135769
+  packageName: 'VR UI Kit: Material Design System'
+  packageVersion: 2.1
+  assetPath: Assets/VRUI - Material Design/Assets/Prefabs/Components/VRUI-Toggle.prefab
+  uploadId: 366852

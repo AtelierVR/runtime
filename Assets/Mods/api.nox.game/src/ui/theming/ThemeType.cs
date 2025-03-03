@@ -1,7 +1,12 @@
-﻿namespace Mods.api.nox.game.src.ui.theming
+﻿namespace Mods.api.nox.game.ui.theming
 {
-    public class ThemeType
+    
+    public enum ThemeType
     {
-        
+        Color,
+        Sprite,
+        Font,
+        Material,
+        Number
     }
 }

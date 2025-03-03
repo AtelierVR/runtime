@@ -5,65 +5,87 @@ namespace api.nox.game
 {
     public class MenuGridder : MonoBehaviour, UpdateLayout
     {
-        public Vector2 dimensions = new(1, 1);
+        public Vector2Int dimensions = new(1, 0);
+        public float spacing = 0;
+        
         void Start() => UpdateContent();
         void OnValidate() => UpdateContent();
 
+        public Vector2 GetDimensions() 
+            => GetDimensions(GetComponentsInChildren<MenuGridderItem>(true));
+
+        private Vector2 GetDimensions(MenuGridderItem[] items)
+        {
+            var maxWidth = GetMaxWidth(items);
+            var maxHeight = GetMaxHeight(items);
+            return new Vector2(maxWidth, maxHeight);
+        }
+
+        private int GetMaxWidth(MenuGridderItem[] items) => dimensions.x == 0 ? items.Max(x => x.size.x) : dimensions.x;
+        private int GetMaxHeight(MenuGridderItem[] items) => dimensions.y == 0 ? items.Sum(x => x.size.y) : dimensions.y;
+
+        private MenuGridderItem[] GetItems() => GetComponentsInChildren<MenuGridderItem>(true);
+
         public void UpdateContent()
         {
-            var items = GetComponentsInChildren<MenuGridderItem>(true).OrderBy(x => x.index).ToArray();
+            var items = GetItems().OrderBy(x => x.index).ToArray();
 
-            uint[][] calculated = new uint[(int)dimensions.x][];
-            for (int x = 0; x < dimensions.x; x++)
+            if (items.Length == 0) return;
+            if (dimensions is { x: 0, y: 0 }) return;
+
+            var maxHeight = GetMaxHeight(items);
+            var maxWidth = GetMaxWidth(items);
+
+            uint[][] calculated = new uint[maxWidth][];
+            for (int x = 0; x < maxWidth; x++)
             {
-                calculated[x] = new uint[(int)dimensions.y];
-                for (int y = 0; y < dimensions.y; y++)
+                calculated[x] = new uint[maxHeight];
+                for (int y = 0; y < maxHeight; y++)
                     calculated[x][y] = uint.MaxValue;
             }
+
 
             foreach (var item in items)
             {
                 if (item.flags.HasFlag(GridderItemFlags.ManualVisible) && !item.gameObject.activeInHierarchy)
                     continue;
 
-                var pos = new Vector2(uint.MaxValue, float.MaxValue);
+                var pos = new Vector2Int(maxWidth, maxHeight);
                 if (!item.flags.HasFlag(GridderItemFlags.ManualPosition))
-                    for (uint i = 0; i < dimensions.x * dimensions.y; i++)
+                    for (uint i = 0; i < maxWidth * maxHeight; i++)
                     {
-                        var x = i % (int)dimensions.x;
-                        var y = i / (int)dimensions.x;
+                        var x = (int)(i % maxWidth);
+                        var y = (int)(i / maxWidth);
                         var found = true;
 
                         for (var j = 0; j < item.size.x * item.size.y; j++)
                         {
-                            var xx = x + j % (int)item.size.x;
-                            var yy = y + j / (int)item.size.x;
-                            if (xx >= dimensions.x || yy >= dimensions.y || calculated[xx][yy] != uint.MaxValue)
+                            var xx = x + j % item.size.x;
+                            var yy = y + j / item.size.x;
+                            if (xx >= maxWidth || yy >= maxHeight || calculated[xx][yy] != uint.MaxValue)
                             {
                                 found = false;
                                 break;
                             }
-                            else pos = new Vector2(x, y);
+
+                            pos = new Vector2Int(x, y);
                         }
 
                         if (found) break;
                     }
                 else pos = item.position;
 
-                if (pos.x == uint.MaxValue || pos.y == uint.MaxValue) continue;
-
                 for (uint i = 0; i < item.size.x * item.size.y; i++)
                 {
                     var x = (uint)pos.x + i % (uint)item.size.x;
                     var y = (uint)pos.y + i / (uint)item.size.x;
 
-                    if (x >= dimensions.x || y >= dimensions.y) continue;
+                    if (x >= maxWidth || y >= maxHeight) continue;
                     calculated[x][y] = item.index;
                 }
 
-                item.UpdatePosition(pos);
+                item.UpdatePosition(pos, new Vector2Int(maxWidth, maxHeight));
             }
-
         }
     }
 }

@@ -1,7 +1,17 @@
-﻿namespace Mods.api.nox.ui.menus
+﻿using UnityEngine;
+
+namespace Mods.api.nox.ui.menus
 {
-    public class PhysicalMenu
+    [RequireComponent(typeof(Transform))]
+    public class PhysicalMenu : Menu
     {
-        
+        public static PhysicalMenu Create(Vector3 position, Quaternion rotation)
+        {
+            var asset = UISystem.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/physical_menu");
+            var instance = Instantiate(asset, position, rotation);
+            var menu = instance.GetComponent<PhysicalMenu>();
+            instance.name = $"[{menu.GetType()}_{menu.GetInstanceID()}]";
+            return menu;
+        }
     }
 }

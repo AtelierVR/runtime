@@ -1,7 +1,10 @@
-﻿namespace Mods.api.nox.game.src.ui.theming
+﻿using UnityEngine;
+
+namespace Mods.api.nox.game.ui.theming
 {
-    public class ThemeReference
+    [RequireComponent(typeof(RectTransform))]
+    public class ThemeReference : MonoBehaviour
     {
-        
+        public ThemeAsset theme;
     }
 }

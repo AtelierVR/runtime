@@ -1,7 +1,11 @@
-﻿namespace Mods.api.nox.ui.menus
+﻿using UnityEngine;
+
+namespace Mods.api.nox.ui.menus
 {
-    public class Menu
+    public abstract class Menu : MonoBehaviour
     {
-        
+        public virtual void Show() => gameObject.SetActive(true);
+        public virtual void Hide() => gameObject.SetActive(false);
+        public virtual bool IsVisible() => gameObject.activeSelf;
     }
 }

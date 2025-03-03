@@ -38,6 +38,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Packages/com.unity.xr.core-utils/Tests/Runtime/Scenes/PointInPolygonPerformanceTest.unity
     guid: d469f69adcddc4b1a91654a826f73b4d
+  - enabled: 1
+    path: Assets/VRUI - Material Design/Demo/SampleScene.unity
+    guid: 64354cfcbbea6334c948583585377912
+  - enabled: 1
+    path: Assets/VRUI - Material Design/Demo/SampleCarousel.unity
+    guid: 441ae8ab0fc66ea4f80b970e605c9a9a
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

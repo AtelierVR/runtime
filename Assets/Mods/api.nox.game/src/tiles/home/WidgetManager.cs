@@ -29,7 +29,7 @@ namespace api.nox.game.Tiles
             {
                 var go = widget.GetContent(menuId, rect.transform);
                 var gi = go.GetComponent<MenuGridderItem>();
-                gi.size = new Vector2(widget.width, widget.height);
+                gi.size = new Vector2Int((int)widget.width, (int)widget.height);
             }
 
             ForceUpdateLayout.UpdateManually(rect.GetComponent<RectTransform>());
