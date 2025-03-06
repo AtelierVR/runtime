@@ -16,6 +16,11 @@ namespace api.nox.world
             => WorldSystem.CoreAPI.ModAPI
                 .GetMod("ui").GetMains()
                 .FirstOrDefault();
+        
+        internal static MainModInitializer NetworkAPI
+            => WorldSystem.CoreAPI.ModAPI
+                .GetMod("network").GetMains()
+                .FirstOrDefault();
 
         private HomeWidget _homeWidget;
 
@@ -23,10 +28,13 @@ namespace api.nox.world
 
         private EventSubscription[] _events;
 
-        public void OnInitializeClient(ClientModCoreAPI api)
+        public async UniTask OnInitializeClientAsync(ClientModCoreAPI api)
         {
             Instance = this;
             _homeWidget = new HomeWidget();
+            var user = NetworkAPI.GetField("User").CallMethod("GetCurrentUser");
+            user ??= await NetworkAPI.GetField("User").CallAsyncMethod("GetMyUser");
+            await OnUserUpdated(user);
             _events = new[]
             {
                 WorldSystem.CoreAPI.EventAPI.Subscribe("user_update", ctx => OnUserUpdated(ctx).Forget()),
@@ -41,6 +49,11 @@ namespace api.nox.world
         private async UniTask OnUserUpdated(EventData data)
         {
             if (!data.TryGet(0, out INoxObject user)) return;
+            await OnUserUpdated(user);
+        }
+
+        private async UniTask OnUserUpdated(INoxObject user)
+        {
             if (string.IsNullOrEmpty(user.GetField<string>("home"))) return;
             var home = await user.CallAsyncMethod("GetHome");
             if (home == null) return;
@@ -51,6 +64,8 @@ namespace api.nox.world
         public void OnDisposeClient()
         {
             _homeWidget.Dispose();
+            foreach (var subscription in _events)
+                WorldSystem.CoreAPI.EventAPI.Unsubscribe(subscription);
             _homeWidget = null;
             Instance = null;
         }

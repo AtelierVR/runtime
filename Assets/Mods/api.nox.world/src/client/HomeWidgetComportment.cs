@@ -2,13 +2,12 @@
 using Nox.CCK.Utils;
 using UnityEngine;
 using UnityEngine.UI;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.world
 {
     public class HomeWidgetComportment : MonoBehaviour
     {
-        public GameObject thumbnailContainer;
-        public RawImage thumbnail;
         public Button button;
 
         private void Start()
@@ -23,6 +22,7 @@ namespace api.nox.world
 
         internal void UpdateContent(INoxObject home)
         {
+            Logger.Log($"HomeWidgetComportment.UpdateContent({home})");
         }
     }
 }

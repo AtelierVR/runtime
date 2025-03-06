@@ -16,16 +16,15 @@ namespace api.nox.world
 
         internal HomeWidget()
         {
-            // WorldSystem.Instance.OnUserUpdated.AddListener(OnUserUpdated);
-            // OnUserUpdated(UserSystem.UserAPI.CallMethod("GetCurrentUser"));
+            WorldClient.Instance.OnHomeUpdated.AddListener(OnHomeUpdated);
         }
-
+        
         public void Dispose()
         {
-            // WorldSystem.Instance.OnUserUpdated.RemoveListener(OnUserUpdated);
+            WorldClient.Instance.OnHomeUpdated.RemoveListener(OnHomeUpdated);
         }
 
-        private void OnUserUpdated(INoxObject user)
+        private void OnHomeUpdated(INoxObject home)
         {
             if (WorldClient.UISystem == null) return;
 
@@ -36,10 +35,10 @@ namespace api.nox.world
                 { "height", 1 }
             };
 
-            if (user == null && WidgetAPI.CallMethod<bool>("Has", _widget["key"]))
+            if (home == null && WidgetAPI.CallMethod<bool>("Has", _widget["key"]))
                 WidgetAPI.CallMethod("Remove", _widget["key"]);
 
-            if (user == null) return;
+            if (home == null) return;
 
             _widget["content"] = new Func<RectTransform, GameObject>(rect =>
             {
@@ -50,7 +49,7 @@ namespace api.nox.world
                 var widget = Object.Instantiate(asset, reference.transform);
                 var comportment = widget.GetComponent<HomeWidgetComportment>();
                 comportment.button = button.GetComponent<UnityEngine.UI.Button>();
-                comportment.UpdateContent(user);
+                comportment.UpdateContent(home);
                 return button;
             });
 
