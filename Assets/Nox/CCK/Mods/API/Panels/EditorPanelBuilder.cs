@@ -5,11 +5,11 @@ namespace Nox.CCK.Mods.Panels
 {
     public interface EditorPanelBuilder
     {
-        public string Id { get; }
-        public string Name { get; }
-        public bool Hidded { get; }
+        public string GetId();
+        public string GetName();
+        public bool IsHidden();
 
-        public VisualElement OnOpenned(Dictionary<string, object> data);
+        public VisualElement OnOpened(Dictionary<string, object> data);
         public void OnGUI() { }
         public void OnClosed() { }
     }

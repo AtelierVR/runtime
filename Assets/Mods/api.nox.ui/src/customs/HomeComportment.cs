@@ -1,4 +1,5 @@
-﻿using api.nox.ui.components;
+﻿using System.Collections.Generic;
+using api.nox.ui.components;
 using api.nox.ui.widgets;
 using Nox.CCK.Utils;
 using UnityEngine;
@@ -12,19 +13,22 @@ namespace api.nox.ui.pages
 
         public void UpdateWidgets(Widget[] widgets)
         {
-            foreach (Transform child in grid.transform)
-                Destroy(child.gameObject);
-            
             var rect = grid.GetComponent<RectTransform>();
+            var items = new List<WidgetGridItem>();
+            
+            foreach (Transform child in rect)
+                Destroy(child.gameObject);
             
             foreach (var widget in widgets)
             {
                 var go = widget.GetContent(rect);
                 var gi = go.GetComponent<WidgetGridItem>();
+                items.Add(gi);
                 gi.size = widget.Size;
+                gi.position = Vector2Int.zero;
             }
-
-            ForceUpdateLayout.UpdateManually(grid.gameObject);
+            
+            grid.UpdateContent(items.ToArray());
         }
     }
 }

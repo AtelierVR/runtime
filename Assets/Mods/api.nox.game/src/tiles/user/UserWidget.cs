@@ -18,9 +18,9 @@ namespace api.nox.game.Tiles
     {
         public UserWidget()
         {
-            _userUpdateSub = GameClientSystem.CoreAPI.EventAPI.Subscribe("user_update", OnUserUpdate);
+            /*_userUpdateSub = GameClientSystem.CoreAPI.EventAPI.Subscribe("user_update", OnUserUpdate);
             _userConnectSub = GameClientSystem.CoreAPI.EventAPI.Subscribe("user_connect", OnUserConnect);
-            _userDisconnectSub = GameClientSystem.CoreAPI.EventAPI.Subscribe("user_disconnect", OnUserDisconnect);
+            _userDisconnectSub = GameClientSystem.CoreAPI.EventAPI.Subscribe("user_disconnect", OnUserDisconnect);*/
         }
 
         public void Dispose()

@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using api.nox.network.Worlds;
-using api.nox.network.Worlds.Assets;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Worlds;
 using UnityEditor;
@@ -18,33 +16,27 @@ namespace api.nox.world
 {
     public class WorldPublisherPanel : EditorPanelBuilder
     {
-        public string Id { get; } = "publisher";
-        public string Name { get; } = "World/Publisher";
-        public bool Hidded { get; } = false;
+        public string GetId() => "publisher";
+        public string GetName() => "World/Publisher";
+        public bool IsHidden() => false;
+        
         private readonly VisualElement _root = new();
-        internal MainDescriptor[] Descriptors => MainDescriptorEditor.GetWorldDescriptors(false);
-        private readonly WorldEditorMod _mod;
+        
         private DisplayFlags _displayFlags;
         private DisplayFlags _lastDisplay;
-        private World _world;
+        private INoxObject _world;
 
-        internal WorldPublisherPanel(WorldEditorMod mod) => _mod = mod;
         private void SetDisplay(DisplayFlags flags) => _displayFlags = flags;
-
-        public void OnClosed()
-        {
-            Logger.Log("Panel Example closed!");
-        }
-
+        
         internal void OnUpdate()
         {
-            if (!_mod.HasOnePanelOpenned() || _root.childCount == 0) return;
-            var user = _mod.NetworkAPI.GetField("User").CallMethod("GetCurrentUser");
+            if (!WorldEditor.HasOnePanelOpened() || _root.childCount == 0) return;
+            var user = WorldEditor.NetworkAPI.GetField("User").CallMethod("GetCurrentUser");
             if (_lastDisplay == DisplayFlags.NotLogged && user != null)
                 OnLogged().Forget();
             if (_lastDisplay != DisplayFlags.NotLogged && user == null)
                 SetDisplay(DisplayFlags.NotLogged);
-            var descriptor = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
+            var descriptor = WorldBuilderPanel.Descriptors.Length > 0 ? WorldBuilderPanel.Descriptors[0] : null;
             _root.Q<ObjectField>("descriptor-field").value = descriptor;
             var version = descriptor?.VersionPublisher ?? 0;
             var assetVersion = _root.Q<UnsignedIntegerField>("asset-version");
@@ -61,27 +53,25 @@ namespace api.nox.world
                 label.text = count.ToString();
             }
 
-            if (_lastDisplay != _displayFlags)
-            {
-                SetDisplay(_displayFlags);
-                _lastDisplay = _displayFlags;
-                _root.Q<VisualElement>("world-not-found").style.display =
-                    _displayFlags.HasFlag(DisplayFlags.WorldNotFound) ? DisplayStyle.Flex : DisplayStyle.None;
-                _root.Q<VisualElement>("world").style.display = _displayFlags.HasFlag(DisplayFlags.World)
-                    ? DisplayStyle.Flex
-                    : DisplayStyle.None;
-                _root.Q<VisualElement>("world-asset").style.display = _displayFlags.HasFlag(DisplayFlags.WorldAsset)
-                    ? DisplayStyle.Flex
-                    : DisplayStyle.None;
-                _root.Q<VisualElement>("not-logged").style.display = _displayFlags.HasFlag(DisplayFlags.NotLogged)
-                    ? DisplayStyle.Flex
-                    : DisplayStyle.None;
-            }
+            if (_lastDisplay == _displayFlags) return;
+            SetDisplay(_displayFlags);
+            _lastDisplay = _displayFlags;
+            _root.Q<VisualElement>("world-not-found").style.display =
+                _displayFlags.HasFlag(DisplayFlags.WorldNotFound) ? DisplayStyle.Flex : DisplayStyle.None;
+            _root.Q<VisualElement>("world").style.display = _displayFlags.HasFlag(DisplayFlags.World)
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
+            _root.Q<VisualElement>("world-asset").style.display = _displayFlags.HasFlag(DisplayFlags.WorldAsset)
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
+            _root.Q<VisualElement>("not-logged").style.display = _displayFlags.HasFlag(DisplayFlags.NotLogged)
+                ? DisplayStyle.Flex
+                : DisplayStyle.None;
         }
 
         private async UniTask OnLogged()
         {
-            var descriptor = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
+            var descriptor = WorldBuilderPanel.Descriptors.Length > 0 ? WorldBuilderPanel.Descriptors[0] : null;
             if (!descriptor)
             {
                 SetDisplay(DisplayFlags.NoDescriptor);
@@ -94,15 +84,13 @@ namespace api.nox.world
             await AttachWorld(serverAddress, worldId);
         }
 
-        private async UniTask<World> AttachWorld(string server, uint id, bool create = false)
-        {
-            return await AttachWorld(server, id.ToString(), create);
-        }
+        private async UniTask<INoxObject> AttachWorld(string server, uint id, bool create = false) 
+            => await AttachWorld(server, id.ToString(), create);
 
 
-        private async UniTask<World> AttachWorld(string server, string id, bool create = false)
+        private async UniTask<INoxObject> AttachWorld(string server, string id, bool create = false)
         {
-            var descriptor = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
+            var descriptor = WorldBuilderPanel.Descriptors.Length > 0 ? WorldBuilderPanel.Descriptors[0] : null;
             if (!descriptor)
             {
                 SetDisplay(DisplayFlags.NoDescriptor);
@@ -112,14 +100,14 @@ namespace api.nox.world
 
             SetDisplay(DisplayFlags.Loading);
 
-            World world = null;
+            INoxObject world = null;
             if (!string.IsNullOrWhiteSpace(id) && uint.TryParse(id, out var idParsed))
-                world = await _mod.NetworkAPI.GetField<INoxObject>("World")
-                    .CallAsyncMethod<World>("GetWorld", server, idParsed);
+                world = await WorldEditor.NetworkAPI.GetField("World")
+                    .CallAsyncMethod("GetWorld", server, idParsed);
 
             if (world == null && create)
-                world = await _mod.NetworkAPI.GetField("World")
-                    .CallAsyncMethod<World>("CreateWorld",
+                world = await WorldEditor.NetworkAPI.GetField("World")
+                    .CallAsyncMethod("CreateWorld",
                         !string.IsNullOrWhiteSpace(id) && uint.TryParse(id, out var id1)
                             ? new Dictionary<string, object>
                             {
@@ -132,8 +120,8 @@ namespace api.nox.world
 
             if (world != null)
             {
-                var user = _mod.NetworkAPI.GetField("User").CallMethod("GetCurrentUser");
-                if (user == null || !user.CallMethod<bool>("MatchRef", world.owner, world.server))
+                var user = WorldEditor.NetworkAPI.GetField("User").CallMethod("GetCurrentUser");
+                if (user == null || !user.CallMethod<bool>("MatchRef", world.GetField<string>("owner"), world.GetField<string>("server")))
                     world = null;
             }
 
@@ -152,8 +140,8 @@ namespace api.nox.world
             }
 
             SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
-            descriptor.IdPublisher = world.id;
-            descriptor.ServerPublisher = world.server;
+            descriptor.IdPublisher = world.GetField<uint>("id");
+            descriptor.ServerPublisher = world.GetField<string>("server");
             EditorUtility.SetDirty(descriptor);
             _world = world;
             UpdateWorld();
@@ -163,36 +151,36 @@ namespace api.nox.world
         private void UpdateWorld()
         {
             if (_root.childCount == 0) return;
-            _root.Q<TextField>("info-server").value = _world != null ? _world.server : "";
-            _root.Q<UnsignedIntegerField>("info-id").value = _world?.id ?? 0;
-            _root.Q<TextField>("info-title").value = _world != null ? _world.title : "";
-            _root.Q<TextField>("info-description").value = _world != null ? _world.description : "";
-            _root.Q<UnsignedIntegerField>("info-capacity").value = (_world?.capacity ?? 0);
+            _root.Q<TextField>("info-server").value = _world != null ? _world.GetField<string>("server") : "";
+            _root.Q<UnsignedIntegerField>("info-id").value = _world?.GetField<uint>("id") ?? 0;
+            _root.Q<TextField>("info-title").value = _world != null ? _world.GetField<string>("title") : "";
+            _root.Q<TextField>("info-description").value = _world != null ? _world.GetField<string>("description") : "";
+            _root.Q<UnsignedIntegerField>("info-capacity").value = _world?.GetField<ushort>("capacity") ?? 0;
             var tagsList = _root.Q<ListView>("info-tags");
             tagsList.makeItem = () => new Label { style = { marginLeft = 4, marginRight = 4 } };
-            tagsList.bindItem = (e, i) => ((Label)e).text = _world.tags[i];
-            tagsList.itemsSource = _world != null ? _world.tags : Array.Empty<string>();
+            tagsList.bindItem = (e, i) => ((Label)e).text = _world.GetField<string[]>("tags")[i];
+            tagsList.itemsSource = _world != null ? _world.GetField<string[]>("tags") : Array.Empty<string>();
         }
 
-        public VisualElement OnOpenned(Dictionary<string, object> data)
+        public VisualElement OnOpened(Dictionary<string, object> data)
         {
             _root.ClearBindings();
             _root.Clear();
 
-            var child = _mod._api.AssetAPI.GetAsset<VisualTreeAsset>("publisher.uxml").CloneTree();
+            var child = WorldEditor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("publisher.uxml").CloneTree();
             child.style.flexGrow = 1;
             _root.Add(child);
 
-            _root.Q<Label>("version").text = "v" + _mod._api.ModMetadata.GetVersion();
-            _root.Q<Image>("assigned-icon").image = _mod._api.AssetAPI.GetAsset<Texture2D>("game", "icons/warning.png");
-            var descriptor = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
+            _root.Q<Label>("version").text = "v" + WorldEditor.CoreAPI.ModMetadata.GetVersion();
+            _root.Q<Image>("assigned-icon").image = WorldEditor.CoreAPI.AssetAPI.GetAsset<Texture2D>("game", "icons/warning.png");
+            var descriptor = WorldBuilderPanel.Descriptors.Length > 0 ? WorldBuilderPanel.Descriptors[0] : null;
             _root.Q<EnumField>("platform-field").Init(descriptor?.GetBuildPlatform() ?? Platform.None);
             _root.Q<Button>("detect-platform").clicked += () =>
                 _root.Q<EnumField>("platform-field").value = PlatformExtensions.GetCurrentTarget().GetPlatform();
             _root.Q<ObjectField>("descriptor-field").value = descriptor;
             _root.Q<EnumField>("platform-field").RegisterValueChangedCallback(e =>
             {
-                var mainDescriptor = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
+                var mainDescriptor = WorldBuilderPanel.Descriptors.Length > 0 ? WorldBuilderPanel.Descriptors[0] : null;
                 if (!mainDescriptor) return;
                 var plat = (Platform)e.newValue;
                 if (plat.IsSupported())
@@ -205,12 +193,12 @@ namespace api.nox.world
                     _root.Q<EnumField>("platform-field").value = e.previousValue;
                 }
             });
-            _root.Q<Button>("goto-builder").clicked += () => _mod._api.PanelAPI.SetActivePanel("api.nox.world.builder");
-            _root.Q<Button>("goto-login").clicked += () => _mod._api.PanelAPI.SetActivePanel("api.nox.user.login");
+            _root.Q<Button>("goto-builder").clicked += () => WorldEditor.CoreAPI.PanelAPI.SetActivePanel("api.nox.world.builder");
+            _root.Q<Button>("goto-login").clicked += () => WorldEditor.CoreAPI.PanelAPI.SetActivePanel("api.nox.user.login");
             var notifications = _root.Q<VisualElement>("notifications");
             foreach (var type in new[] { NotificationType.Error, NotificationType.Warning, NotificationType.Info })
             {
-                var container = _mod._api.AssetAPI.GetAsset<VisualTreeAsset>("notification.uxml").CloneTree();
+                var container = WorldEditor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("notification.uxml").CloneTree();
                 container.style.display = DisplayStyle.None;
                 container.style.marginLeft = 2;
                 container.style.marginRight = 2;
@@ -219,7 +207,7 @@ namespace api.nox.world
                     { name = "notification-label-" + type.ToString().ToLower() });
                 container.Q<VisualElement>("actions").style.display = DisplayStyle.None;
                 container.Q<Image>("icon").image =
-                    _mod._api.AssetAPI.GetAsset<Texture2D>("game", "icons/" + type.ToString() + ".png");
+                    WorldEditor.CoreAPI.AssetAPI.GetAsset<Texture2D>("game", "icons/" + type.ToString() + ".png");
                 notifications.Add(container);
             }
 
@@ -232,14 +220,14 @@ namespace api.nox.world
                 var id = attachId.value;
                 var server = attachServer.value;
                 if (string.IsNullOrWhiteSpace(server))
-                    server = _mod.NetworkAPI.GetField("Auth").CallMethod<string>("GetCurrentServerAddress");
+                    server = WorldEditor.NetworkAPI.GetField("Auth").CallMethod<string>("GetCurrentServerAddress");
                 await AttachWorld(server, id, true);
             };
             var fetchInfoButton = _root.Q<Button>("info-fetch");
             fetchInfoButton.clicked += async () =>
             {
                 if (_world == null) return;
-                var e = await AttachWorld(_world.server, _world.id);
+                var e = await AttachWorld(_world.GetField<string>("server"), _world.GetField<uint>("id"));
                 if (e == null)
                     EditorUtility.DisplayDialog("Error", "An error occured while fetching the world.", "Ok");
             };
@@ -259,11 +247,11 @@ namespace api.nox.world
                 }
 
                 SetDisplay(DisplayFlags.Loading);
-                var success = await _mod.NetworkAPI.GetField("World").CallAsyncMethod<World>("UpdateWorld",
+                var success = await WorldEditor.NetworkAPI.GetField("World").CallAsyncMethod("UpdateWorld",
                     new Dictionary<string, object>
                     {
-                        { "server", _world.server },
-                        { "world_id", _world.id },
+                        { "server", _world.GetField<string>("server") },
+                        { "world_id", _world.GetField<uint>("id") },
                         { "title", title },
                         { "description", description },
                         { "capacity", (ushort)capacity }
@@ -272,7 +260,7 @@ namespace api.nox.world
                 {
                     EditorUtility.DisplayDialog("Success", "World updated successfully.", "Ok");
                     Logger.Log("World updated successfully.");
-                    Logger.Log(success.description);
+                    Logger.Log(success.GetField<string>("description"));
                     _world = success;
                     UpdateWorld();
                     SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
@@ -283,7 +271,7 @@ namespace api.nox.world
             detachInfoButton.clicked += () =>
             {
                 if (_world == null || !_lastDisplay.HasFlag(DisplayFlags.World)) return;
-                var target = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
+                var target = WorldBuilderPanel.Descriptors.Length > 0 ? WorldBuilderPanel.Descriptors[0] : null;
                 if (!target) return;
                 target.IdPublisher = 0;
                 target.ServerPublisher = "";
@@ -299,7 +287,7 @@ namespace api.nox.world
             //     var confirm = EditorUtility.DisplayDialog("Delete World", "Are you sure you want to delete this world?", "Yes", "No");
             //     if (!confirm) return;
             //     SetDisplay(DisplayFlags.Loading);
-            //     // var success = await _mod._api.NetworkAPI.WorldAPI.DeleteWorld(_world.server, _world.id);
+            //     // var success = await WorldEditor._api.NetworkAPI.WorldAPI.DeleteWorld(_world.server, _world.id);
             //     // if (success)
             //     // {
             //     //     _world = null;
@@ -332,7 +320,7 @@ namespace api.nox.world
             });
             _root.Q<UnsignedIntegerField>("asset-version").RegisterValueChangedCallback(e =>
             {
-                var target = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
+                var target = WorldBuilderPanel.Descriptors.Length > 0 ? WorldBuilderPanel.Descriptors[0] : null;
                 if (!target) return;
                 target.VersionPublisher = (ushort)e.newValue;
                 EditorUtility.SetDirty(target);
@@ -345,7 +333,7 @@ namespace api.nox.world
 
         private async UniTask OnPublishAsync()
         {
-            var descriptor = _mod._builder.Descriptors.Length > 0 ? _mod._builder.Descriptors[0] : null;
+            var descriptor = WorldBuilderPanel.Descriptors.Length > 0 ? WorldBuilderPanel.Descriptors[0] : null;
             if (!descriptor)
             {
                 EditorUtility.DisplayDialog("Error", "No descriptor found.", "Ok");
@@ -373,8 +361,8 @@ namespace api.nox.world
 
             Logger.Log("Checking world...");
             SetDisplay(DisplayFlags.Loading);
-            var worldAPI = _mod.NetworkAPI.GetField("World");
-            _world = await worldAPI.CallAsyncMethod<World>("GetWorld", _world.server, _world.id);
+            var worldAPI = WorldEditor.NetworkAPI.GetField("World");
+            _world = await worldAPI.CallAsyncMethod("GetWorld", _world.GetField<string>("server"), _world.GetField<uint>("id"));
             if (_world == null)
             {
                 EditorUtility.DisplayDialog("Error", "An error occured while fetching the world.", "Ok");
@@ -387,12 +375,12 @@ namespace api.nox.world
             var autoVersion = config.Get("sdk.auto_version", true);
             var strictVersion = config.Get("sdk.strict_version", true);
 
-            var assetAPI = _mod.NetworkAPI.GetField("Asset");
-            var search = await assetAPI.CallAsyncMethod<SearchResponse>("SearchAssets",
+            var assetAPI = WorldEditor.NetworkAPI.GetField("Asset");
+            var search = await assetAPI.CallAsyncMethod("SearchAssets",
                 new Dictionary<string, object>
                 {
-                    { "server", _world.server },
-                    { "world_id", _world.id },
+                    { "server", _world.GetField<string>("server") },
+                    { "world_id", _world.GetField<uint>("id") },
                     { "versions", new[] { version } },
                     { "platforms", new[] { target.GetPlatformName() } },
                     { "engines", new[] { Constants.CurrentEngine.GetEngineName() } },
@@ -409,16 +397,16 @@ namespace api.nox.world
                 return;
             }
 
-            var asset = search.assets.FirstOrDefault();
-            if (asset != null && autoVersion && !asset.IsEmpty())
-                while (asset != null && !asset.IsEmpty())
+            var asset = search.GetField<INoxObject[]>("assets").FirstOrDefault();
+            if (asset != null && autoVersion && !asset.CallMethod<bool>("IsEmpty"))
+                while (asset != null && !asset.CallMethod<bool>("IsEmpty"))
                 {
                     version++;
-                    search = await assetAPI.CallAsyncMethod<SearchResponse>("SearchAssets",
+                    search = await assetAPI.CallAsyncMethod("SearchAssets",
                         new Dictionary<string, object>
                         {
-                            { "server", _world.server },
-                            { "world_id", _world.id },
+                            { "server", _world.GetField<string>("server") },
+                            { "world_id", _world.GetField<uint>("id") },
                             { "versions", new[] { version } },
                             { "platforms", new[] { target.GetPlatformName() } },
                             { "engines", new[] { Constants.CurrentEngine.GetEngineName() } },
@@ -434,11 +422,11 @@ namespace api.nox.world
                         return;
                     }
 
-                    asset = search.assets.FirstOrDefault();
+                    asset = search.GetField<INoxObject[]>("assets").FirstOrDefault();
                 }
 
             _root.Q<UnsignedIntegerField>("asset-version").value = version;
-            if (asset != null && strictVersion && !asset.IsEmpty())
+            if (asset != null && strictVersion && !asset.CallMethod<bool>("IsEmpty"))
             {
                 EditorUtility.DisplayDialog("Error", "Asset already exists.", "Ok");
                 Logger.LogError("Asset already exists.");
@@ -449,7 +437,7 @@ namespace api.nox.world
 
             Logger.Log("Building world...");
             var result = MainDescriptorEditor.BuildWorld(descriptor, target.GetBuildTarget(), false);
-            if (result == null || !result.Success || string.IsNullOrWhiteSpace(result.path))
+            if (result is not { Success: true } || string.IsNullOrWhiteSpace(result.path))
             {
                 EditorUtility.DisplayDialog("Error", "An error occured while building the world.", "Ok");
                 Logger.LogError("An error occured while building the world.");
@@ -461,11 +449,11 @@ namespace api.nox.world
             Logger.Log("Asset version: " + version);
             Logger.Log($"Asset platform: {target.GetPlatformName()} ({target.GetBuildTarget()})");
 
-            asset ??= await assetAPI.CallAsyncMethod<WorldAsset>("CreateAsset",
+            asset ??= await assetAPI.CallAsyncMethod("CreateAsset",
                 new Dictionary<string, object>
                 {
-                    { "server", _world.server },
-                    { "world_id", _world.id },
+                    { "server", _world.GetField<string>("server") },
+                    { "world_id", _world.GetField<uint>("id") },
                     { "version", version },
                     { "engine", Constants.CurrentEngine.GetEngineName() },
                     { "platform", target.GetPlatformName() }
@@ -480,7 +468,10 @@ namespace api.nox.world
             }
 
             var res = await assetAPI.CallAsyncMethod<bool>("UploadAssetFile",
-                _world.server, _world.id, asset.id, result.path
+                _world.GetField<string>("server"), 
+                _world.GetField<uint>("id"), 
+                asset.GetField<uint>("id"), 
+                result.path
             );
 
             if (!res)
@@ -492,7 +483,7 @@ namespace api.nox.world
             }
 
             Logger.Log("Asset created successfully, Refreshing world...");
-            _world = await worldAPI.CallAsyncMethod<World>("GetWorld", _world.server, _world.id);
+            _world = await worldAPI.CallAsyncMethod("GetWorld", _world.GetField<string>("server"), _world.GetField<uint>("id"));
             if (_world == null)
             {
                 EditorUtility.DisplayDialog("Error", "An error occured while fetching the world.", "Ok");

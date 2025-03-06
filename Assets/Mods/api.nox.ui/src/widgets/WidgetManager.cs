@@ -9,7 +9,6 @@ namespace api.nox.ui.widgets
     public class WidgetManager : INoxObject, IDisposable
     {
         internal readonly List<Widget> Cache = new();
-        private readonly EventSubscription[] _events;
         public readonly UnityEvent<Widget> OnWidgetAdded = new();
         public readonly UnityEvent<Widget> OnWidgetRemoved = new();
         public readonly UnityEvent<Widget> OnWidgetChanged = new();
@@ -61,8 +60,6 @@ namespace api.nox.ui.widgets
 
         public void Dispose()
         {
-            foreach (var ev in _events)
-                UISystem.CoreAPI.EventAPI.Unsubscribe(ev);
             foreach (var w in Cache)
                 Remove(w.Key);
         }

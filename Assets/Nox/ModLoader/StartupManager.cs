@@ -52,21 +52,27 @@ namespace Nox.ModLoader
         [UnityEditor.Callbacks.DidReloadScripts]
         private static void OnScriptsReloaded() => AsyncInitialize().Forget();
 
+        private static bool _isReloading;
+        
         private static async UniTask AsyncReloadMods()
         {
+            if (_isReloading) return;
+            _isReloading = true;
+            
             if (Application.isPlaying)
             {
                 Logger.LogError("Cannot reload mods while playing...");
+                _isReloading = false;
                 return;
             }
 
             Logger.Log("Reloading Mods...");
 
             // open progress bar window
-            EditorUtility.DisplayProgressBar("Reloading Mods", "Unloading Mods...", 0.0f);
+            DisplayProgressBar("Reloading Mods", "Unloading Mods...", 0.0f);
 
             var mods = ModManager.Mods;
-
+            
             foreach (var mod in ModManager.Mods)
                 await mod.SendPreDispose();
 
@@ -83,7 +89,7 @@ namespace Nox.ModLoader
 
             ModManager.Mods.Clear();
 
-            EditorUtility.DisplayProgressBar("Reloading Mods", "Discovering Mods...", -1.0f);
+            DisplayProgressBar("Reloading Mods", "Discovering Mods...", -1.0f);
 
             var results = await ModManager.LoadMods();
 
@@ -94,12 +100,12 @@ namespace Nox.ModLoader
                     Logger.LogWarning(result.Message);
                 else Logger.Log(result.Message);
 
-            EditorUtility.DisplayProgressBar("Reloading Mods", "Enabling Mods...", 0.0f);
+            DisplayProgressBar("Reloading Mods", "Enabling Mods...", 0.0f);
 
             for (var i = 0; i < results.Mods.Length; i++)
             {
                 var mod = results.Mods[i];
-                EditorUtility.DisplayProgressBar("Reloading Mods",
+                DisplayProgressBar("Reloading Mods",
                     $"Enabling Mod {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})...",
                     (float)i / results.Mods.Length);
                 mod.EnableMain();
@@ -111,8 +117,12 @@ namespace Nox.ModLoader
 
             foreach (var mod in results.Mods)
                 await mod.SendPostInitialize();
+            
+            _isReloading = false;
+            
+            Logger.Log("Mods Reloaded...");
 
-            EditorUtility.ClearProgressBar();
+            ClearProgressBar();
         }
 
         private static void DisplayProgressBar(string title, string info, float progress)
@@ -123,7 +133,7 @@ namespace Nox.ModLoader
 
         private static void OnUpdateEditor()
         {
-            if (Application.isPlaying) return;
+            if (Application.isPlaying || _isReloading) return;
             foreach (var mod in ModManager.Mods)
                 mod.SendUpdate();
         }
@@ -224,11 +234,14 @@ namespace Nox.ModLoader
                 await mod.SendPostInitialize();
             }
 
+            Logger.Log("Mods Loaded...");
             ClearProgressBar();
 
 #if UNITY_EDITOR
             EditorApplication.update += OnUpdateEditor;
             EditorApplication.playModeStateChanged += state => OnPlayModeStateChanged(state, resultinfos);
+            if (EditorApplication.isPlaying)
+                OnPlayModeStateChanged(PlayModeStateChange.EnteredPlayMode, resultinfos);
 #else
             StartupPlayerLoop.Setup(resultinfos);
 #endif
@@ -236,7 +249,7 @@ namespace Nox.ModLoader
 
         private static async UniTask OnExitingPlayMode(ResultLoadInfos resultInfos)
         {
-            Logger.Log("Exiting PlayMode...");
+            Logger.Log("Exiting PlayMode... Disabling Mods...");
 
             if (!_isLoaded)
             {
@@ -292,12 +305,13 @@ namespace Nox.ModLoader
                 mod.ClearServer();
             }
 
+            Logger.Log("Mods Disabled...");
             ClearProgressBar();
         }
 
         private static async UniTask OnEnteredPlayMode(ResultLoadInfos resultInfos)
         {
-            Logger.Log("Entered PlayMode...");
+            Logger.Log("Entered PlayMode... Enabling Mods...");
 
 #if UNITY_EDITOR
             // check if auto start is disabled
@@ -369,6 +383,7 @@ namespace Nox.ModLoader
                 await mod.SendPostInitialize();
             }
 
+            Logger.Log("Mods Enabled...");
             ClearProgressBar();
         }
 

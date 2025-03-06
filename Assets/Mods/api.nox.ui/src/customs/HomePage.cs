@@ -60,7 +60,7 @@ namespace api.nox.ui.pages
         {
             var home = page.Content.GetComponent<HomeComportment>();
             if (!home) return;
-            home.UpdateWidgets(UISystem.Instance.Widgets.Cache.ToArray());
+            home.UpdateWidgets(UISystem.Instance.Widgets.Cache.OrderBy(w => w.Weight).ToArray());
         }
     }
 }

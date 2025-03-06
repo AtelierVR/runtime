@@ -11,34 +11,34 @@ namespace api.nox.network.Editor
     public class NetworkEditor : EditorModInitializer
     {
         internal static EditorModCoreAPI CoreEditorAPI;
-        internal EditorPanel cachepanel;
-        internal NetCachePanel cachebuiledpanel;
-        internal EditorPanel relaypanel;
+        private EditorPanel _cachePanel;
+        private NetCachePanel _cacheBuildPanel;
+        internal EditorPanel RelayPanel;
         // internal NetRelayPanel relaybuiledpanel;
 
         public void OnInitializeEditor(EditorModCoreAPI api)
         {
             CoreEditorAPI = api;
-            cachebuiledpanel = new NetCachePanel();
-            cachepanel = CoreEditorAPI.PanelAPI.AddLocalPanel(cachebuiledpanel);
+            _cacheBuildPanel = new NetCachePanel();
+            _cachePanel = CoreEditorAPI.PanelAPI.AddLocalPanel(_cacheBuildPanel);
             // relaybuiledpanel = new NetRelayPanel();
             // relaypanel = CoreEditorAPI.PanelAPI.AddLocalPanel(relaybuiledpanel);
-            NetCache.OnCacheSet.AddListener(OnSettedCache);
+            NetCache.OnCacheSet.AddListener(OnSetCache);
             NetCache.OnCacheRemove.AddListener(OnRemovedCache);
             // RelayManager.OnSet.AddListener(OnSettedRelay);
             // RelayManager.OnRemove.AddListener(OnRemoveRelay);
         }
 
-        private void OnSettedCache(ICached setted)
+        private void OnSetCache(ICached set)
         {
-            if (cachepanel.IsActive())
-                cachebuiledpanel.UpdateCache(setted, true);
+            if (_cachePanel.IsActive())
+                _cacheBuildPanel.UpdateCache(set, true);
         }
 
         private void OnRemovedCache(ICached removed)
         {
-            if (cachepanel.IsActive())
-                cachebuiledpanel.UpdateCache(removed, false);
+            if (_cachePanel.IsActive())
+                _cacheBuildPanel.UpdateCache(removed, false);
         }
 
         // private void OnRemoveRelay(Relay removed)
@@ -55,9 +55,9 @@ namespace api.nox.network.Editor
 
         public void OnDispose()
         {
-            CoreEditorAPI.PanelAPI.RemoveLocalPanel(cachepanel);
-            CoreEditorAPI.PanelAPI.RemoveLocalPanel(relaypanel);
-            NetCache.OnCacheSet.RemoveListener(OnSettedCache);
+            CoreEditorAPI.PanelAPI.RemoveLocalPanel(_cachePanel);
+            CoreEditorAPI.PanelAPI.RemoveLocalPanel(RelayPanel);
+            NetCache.OnCacheSet.RemoveListener(OnSetCache);
             NetCache.OnCacheRemove.RemoveListener(OnRemovedCache);
             // RelayManager.OnSet.RemoveListener(OnSettedRelay);
             // RelayManager.OnRemove.RemoveListener(OnRemoveRelay);
@@ -73,13 +73,13 @@ namespace api.nox.network.Editor
 
     public class NetCachePanel : EditorPanelBuilder
     {
-        public string Id { get; } = "cache";
-        public string Name { get; } = "Network/Cache";
-        public bool Hidded { get; } = false;
-        internal VisualElement _root = new();
+        public string GetId() => "cache";
+        public string GetName() => "Network/Cache";
+        public bool IsHidden() => false;
+        private readonly VisualElement _root = new();
 
 
-        public VisualElement OnOpenned(Dictionary<string, object> data)
+        public VisualElement OnOpened(Dictionary<string, object> data)
         {
             _root.ClearBindings();
             _root.Clear();
@@ -106,10 +106,11 @@ namespace api.nox.network.Editor
             if (isSet)
                 _root.Q<VisualElement>("notifications")
                     .Add(new Label(value.ToString()) { name = value.GetCacheKey() });
-            else _root.Q<VisualElement>("notifications")
+            else
+                _root.Q<VisualElement>("notifications")
                     .Q<Label>(value.GetCacheKey())?.RemoveFromHierarchy();
 
-            _root.Q<Label>("elements").text = LanguageManager.Get("network.cache.elements", new object[] { NetCache.Count() });
+            _root.Q<Label>("elements").text = LanguageManager.Get("network.cache.elements", NetCache.Count());
         }
     }
 
@@ -174,6 +175,5 @@ namespace api.nox.network.Editor
             _root.Q<Label>("elements").text = LanguageManager.Get("network.relay.elements", new object[] { RelayManager.Cache.Count });
         }
     }*/
-
 }
 #endif

@@ -38,16 +38,27 @@ namespace api.nox.network.Auths
             if (request.IsError || response.IsError)
                 Logger.LogError(response.error.message);
             var config = Config.Load();
-            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("user_disconnect",
-                NetworkSystem.ModInstance.User.CurrentUser));
+
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext(
+                "user_disconnect",
+                NetworkSystem.ModInstance.User.CurrentUser
+            ));
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext(
+                "server_disconnect",
+                NetworkSystem.ModInstance.Server.CurrentServer
+            ));
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("user_update", null));
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("server_update", null));
+
+            NetworkSystem.ModInstance.User.CurrentUser = null;
+            NetworkSystem.ModInstance.Server.CurrentServer = null;
+
             SetCurrentServerAddress(null);
             config.Remove(new[] { "servers", address, "token" });
             config.Remove(new[] { "servers", address, "expires" });
             config.Remove(new[] { "servers", address, "user_id" });
-            config.Remove(new [] { "servers", address, "integrity" });
+            config.Remove(new[] { "servers", address, "integrity" });
             config.Save();
-            NetworkSystem.ModInstance.User.CurrentUser = null;
-            NetworkSystem.ModInstance.Server.CurrentServer = null;
             return true;
         }
 
@@ -66,19 +77,27 @@ namespace api.nox.network.Auths
             if (response == null)
                 return new LoginResponse { error = "Response is null" };
             if (request.IsError || response.IsError) return response.data;
+            var server = await NetworkSystem.ModInstance.Server.GetServer(response.data.user.server);
+            if (server == null) return new LoginResponse { error = "Server not found." };
+
             NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("user_connect", response.data.user));
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("server_connect", server));
             NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("user_update", response.data.user));
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("user_fetch", response.data.user));
+
+            NetworkSystem.ModInstance.User.CurrentUser = response.data.user;
+            NetworkSystem.ModInstance.Server.CurrentServer = server;
+
             var config = Config.Load();
-            
+
             config.Set(new[] { "servers", response.data.user.server, "token" }, response.data.token);
             config.Set(new[] { "servers", response.data.user.server, "expires" }, response.data.expires);
             config.Set(new[] { "servers", response.data.user.server, "user_id" }, response.data.user.id);
             config.Remove(new[] { "servers", response.data.user.server, "integrity" });
             config.Save();
             SetCurrentServerAddress(response.data.user.server);
-            NetworkSystem.ModInstance.User.CurrentUser = response.data.user;
-            NetworkSystem.ModInstance.Server.CurrentServer =
-                await NetworkSystem.ModInstance.Server.GetServer(response.data.user.server);
+
+
             return response.data;
         }
 
@@ -99,7 +118,8 @@ namespace api.nox.network.Auths
             var request = new Request(Method.PUT, Request.MergeUrl(gateway, "/api/users/@me/integrity"));
 
             var response = await request.Send<IntegrityRequest, Response<Integrity>>(
-                new IntegrityRequest { address = address }, new Dictionary<string, string> { { "Authorization", token.ToHeader() } });
+                new IntegrityRequest { address = address },
+                new Dictionary<string, string> { { "Authorization", token.ToHeader() } });
             if (request.IsError || response.IsError) return null;
 
             NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("integrity_create", response.data));
@@ -124,10 +144,10 @@ namespace api.nox.network.Auths
 
             if (server == address)
             {
-                if (!config.Has(new []{ "servers", address, "token" })) return null;
+                if (!config.Has(new[] { "servers", address, "token" })) return null;
                 var expires = config.Get(new[] { "servers", address, "expires" }, long.MinValue);
                 if (expires > DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
-                    return new AuthToken { Token = config.Get<string>(new []{ "servers", address, "token" }) };
+                    return new AuthToken { Token = config.Get<string>(new[] { "servers", address, "token" }) };
                 return null;
             }
 
@@ -147,13 +167,12 @@ namespace api.nox.network.Auths
             var result = await CreateIntegrity(address);
             if (result != null && !result.IsExpired())
             {
-                
                 config.Set(new[] { "servers", server, "integrity", address, "token" }, result.token);
                 config.Set(new[] { "servers", server, "integrity", address, "expires" }, result.expires);
                 config.Save();
                 return new AuthToken
                 {
-                    Token = result.token, 
+                    Token = result.token,
                     IsIntegrity = true
                 };
             }

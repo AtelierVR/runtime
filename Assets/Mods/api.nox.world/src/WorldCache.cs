@@ -60,7 +60,10 @@ namespace api.nox.world
 
             // Download world
             var t0 = DateTime.Now;
-            var res = await WorldSystem.Instance.NetworkAPI.DownloadFile(url, hash, progress: (p, b) => progress?.Invoke(p, b), token: token);
+            var res = await WorldSystem.NetworkAPI.CallAsyncMethod<string>("DownloadFile", 
+                url, hash, null, 
+                new Action<float, ulong>((p, b) => progress?.Invoke(p, b)), 
+                token);
             var t1 = DateTime.Now;
 
             if (res == null)

@@ -22,7 +22,7 @@ namespace api.nox.game
     {
         private static GameClientSystem _instance;
         private ClientModCoreAPI _coreAPI;
-        private HomeTileManager _homeTile;
+        /*private HomeTileManager _homeTile;
         private UserTileManager _userTile;
         private ServerTileManager _serverTile;
         private WorldTileManager _worldTile;
@@ -33,7 +33,7 @@ namespace api.nox.game
         private SessionTileManager _sessionTile;
         private EventSubscription _tileSub;
         private EventSubscription _tileGotoSub;
-        private EventSubscription _sessionChangedSub;
+        private EventSubscription _sessionChangedSub;*/
         private Scene _defaultWorld;
 
         internal static ClientModCoreAPI CoreAPI
@@ -56,13 +56,13 @@ namespace api.nox.game
             _coreAPI = api;
 
             // Initialize the tile managers
-            _homeTile = new HomeTileManager();
+            /*_homeTile = new HomeTileManager();
             _worldTile = new WorldTileManager();
             _instanceTile = new InstanceTileManager();
             _userTile = new UserTileManager();
-            await _userTile.Widget.Initialization();
+            // await _userTile.Widget.Initialization();
             _serverTile = new ServerTileManager();
-            await _serverTile.Initialization();
+            // await _serverTile.Initialization();
             _navigationTile = new NavigationTileManager();
             _settingTile = new SettingTileManager();
             _makeInstance = new MakeInstanceTileManager();
@@ -72,6 +72,7 @@ namespace api.nox.game
             _tileSub = api.EventAPI.Subscribe("game.tile", context => MenuManager.Instance.OnTile(context));
             _tileGotoSub = api.EventAPI.Subscribe("game.tile.goto", OnGotoTile);
             _sessionChangedSub = api.EventAPI.Subscribe("session.changed", OnSessionChanged);
+            */
             
             PlayerController.Create();
             Logger.LogDebug("GameControllerClient initialized");
@@ -82,8 +83,7 @@ namespace api.nox.game
         {
             Logger.LogDebug("Loading default world");
             _defaultWorld = await _coreAPI.AssetAPI.LoadWorld("worlds/default/default.unity");
-            Logger.LogDebug(
-                $"aaa Default world loaded as {_defaultWorld.name} {_defaultWorld.isLoaded} {_defaultWorld.IsValid()}");
+            Logger.LogDebug($"aaa Default world loaded as {_defaultWorld.name} {_defaultWorld.isLoaded} {_defaultWorld.IsValid()}");
             SetupDefaultWorld();
         }
 
@@ -91,9 +91,9 @@ namespace api.nox.game
         {
             Logger.LogDebug("GameControllerClient.OnPostInitializeClient");
             MenuManager.Instance.GetViewPortMenu().IsVisible = false;
-            _navigationTile.PostInitialize();
-            _settingTile.PostInitialize();
-            _sessionTile.PostInitialize();
+            // _navigationTile.PostInitialize();
+            // _settingTile.PostInitialize();
+            // _sessionTile.PostInitialize();
         }
 
         private void OnSessionChanged(EventData context)
@@ -119,50 +119,50 @@ namespace api.nox.game
                 cur.Teleport(desc.ChoiceSpawn().transform);
         }
 
-        private void OnGotoTile(EventData context)
-        {
-            var menuId = (context.Data[0] as int?) ?? 0;
-            if (menuId == 0)
-            {
-                Logger.LogWarning("GotoTile: MenuId is 0");
-                return;
-            }
-
-            var page = context.Data[1] as string;
-            Logger.LogDebug($"GotoTile: {menuId} {page}");
-            switch (page)
-            {
-                case "home":
-                case "game.home":
-                case "default":
-                    _homeTile.SendTile(context);
-                    break;
-                case "game.user":
-                    _userTile.SendTile(context);
-                    break;
-                case "game.server":
-                    _serverTile.SendTile(context);
-                    break;
-                case "game.navigation":
-                    _navigationTile.SendTile(context);
-                    break;
-                case "game.world":
-                    _worldTile.SendTile(context);
-                    break;
-                case "game.instance.make":
-                    _makeInstance.SendTile(context);
-                    break;
-                case "game.instance":
-                    _instanceTile.SendTile(context);
-                    break;
-                case "game.settings":
-                    _settingTile.SendTile(context);
-                    break;
-                case "game.session":
-                    _sessionTile.SendTile(context);
-                    break;
-            }
-        }
+        // private void OnGotoTile(EventData context)
+        // {
+        //     var menuId = (context.Data[0] as int?) ?? 0;
+        //     if (menuId == 0)
+        //     {
+        //         Logger.LogWarning("GotoTile: MenuId is 0");
+        //         return;
+        //     }
+        //
+        //     var page = context.Data[1] as string;
+        //     Logger.LogDebug($"GotoTile: {menuId} {page}");
+        //     switch (page)
+        //     {
+        //         case "home":
+        //         case "game.home":
+        //         case "default":
+        //             _homeTile.SendTile(context);
+        //             break;
+        //         case "game.user":
+        //             _userTile.SendTile(context);
+        //             break;
+        //         case "game.server":
+        //             _serverTile.SendTile(context);
+        //             break;
+        //         case "game.navigation":
+        //             _navigationTile.SendTile(context);
+        //             break;
+        //         case "game.world":
+        //             _worldTile.SendTile(context);
+        //             break;
+        //         case "game.instance.make":
+        //             _makeInstance.SendTile(context);
+        //             break;
+        //         case "game.instance":
+        //             _instanceTile.SendTile(context);
+        //             break;
+        //         case "game.settings":
+        //             _settingTile.SendTile(context);
+        //             break;
+        //         case "game.session":
+        //             _sessionTile.SendTile(context);
+        //             break;
+        //     }
+        // }
 
         // private void OnOldMenuClick(InputAction.CallbackContext context)
         // {
@@ -190,18 +190,18 @@ namespace api.nox.game
 
         public async UniTask OnDisposeAsync()
         {
-            _sessionTile.OnDispose();
-            _homeTile.OnDispose();
-            _userTile.OnDispose();
-            await _serverTile.OnDisposeAsync();
-            _worldTile.OnDispose();
-            _navigationTile.OnDispose();
-            _settingTile.OnDispose();
-            _makeInstance.OnDispose();
-            _instanceTile.OnDispose();
-            _coreAPI.EventAPI.Unsubscribe(_tileSub);
-            _coreAPI.EventAPI.Unsubscribe(_tileGotoSub);
-            _coreAPI.EventAPI.Unsubscribe(_sessionChangedSub);
+            // _sessionTile.OnDispose();
+            // _homeTile.OnDispose();
+            // _userTile.OnDispose();
+            // await _serverTile.OnDisposeAsync();
+            // _worldTile.OnDispose();
+            // _navigationTile.OnDispose();
+            // _settingTile.OnDispose();
+            // _makeInstance.OnDispose();
+            // _instanceTile.OnDispose();
+            // _coreAPI.EventAPI.Unsubscribe(_tileSub);
+            // _coreAPI.EventAPI.Unsubscribe(_tileGotoSub);
+            // _coreAPI.EventAPI.Unsubscribe(_sessionChangedSub);
             if (PlayerController.instance)
                 PlayerController.instance.Dispose();
             if (MenuManager.Instance != null)

@@ -680,7 +680,6 @@ namespace Nox.ModLoader.Mods
                 }
             }
 
-            Logger.Log($"{IsClientEnabled()} {_clientState}");
             if (!IsClientEnabled() && _clientState == InitializerState.PostInitialized)
             {
                 _clientState = InitializerState.PreDisposed;
@@ -752,10 +751,8 @@ namespace Nox.ModLoader.Mods
         {
             Logger.LogDebug($"Disposing {Metadata.GetId()}({Metadata.GetVersion()})");
 
-            Logger.LogDebug($"{IsMainEnabled()} {_mainState}");
             if (!IsMainEnabled() && _mainState == InitializerState.PreDisposed)
             {
-                Logger.LogDebug($"Disposing main in {Metadata.GetId()}({Metadata.GetVersion()})");
                 _mainState = InitializerState.Disposed;
                 foreach (var instance in MainInitializers)
                 {

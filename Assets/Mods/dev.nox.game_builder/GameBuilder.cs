@@ -7,7 +7,6 @@ using Cysharp.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
-using Nox.CCK.Mods.Metadata;
 using Nox.CCK.Mods.Panels;
 using Nox.CCK.Utils;
 using UnityEditor;
@@ -20,25 +19,28 @@ namespace dev.nox.game_builder
     public class GameBuilder : EditorModInitializer
     {
         public static EditorModCoreAPI CoreAPI;
-        private EditorPanel buildPanel;
+        private EditorPanel _buildPanel;
 
         public void OnInitializeEditor(EditorModCoreAPI api)
         {
             CoreAPI = api;
-            buildPanel = api.PanelAPI.AddLocalPanel(new BuildGamePanel());
+            _buildPanel = api.PanelAPI.AddLocalPanel(new BuildGamePanel());
         }
 
         public void OnDispose()
-        {
-            CoreAPI.PanelAPI.RemoveLocalPanel(buildPanel);
-        }
+            => CoreAPI.PanelAPI.RemoveLocalPanel(_buildPanel);
 
         public static string[] SelectedMods
         {
             get
             {
                 var mods = CoreAPI.ModAPI.GetMods();
-                return (from mod in mods select mod.GetMetadata() into meta where meta != null where meta.GetCustom("kernel", false) select meta.GetId()).ToArray();
+                return (from mod in mods
+                    select mod.GetMetadata()
+                    into meta
+                    where meta != null
+                    where meta.GetCustom("kernel", false)
+                    select meta.GetId()).ToArray();
             }
             set
             {
@@ -57,7 +59,7 @@ namespace dev.nox.game_builder
             get
             {
                 var path = Path.GetRelativePath(Path.Combine(Application.dataPath, ".."),
-                    Config.LoadEditor().Get("gamebuilder.build_folder", "Build"));
+                    Config.LoadEditor().Get("game_builder.build_folder", "Build"));
                 if (path.StartsWith(".."))
                     path = Path.GetFullPath(path);
                 return path;
@@ -68,13 +70,12 @@ namespace dev.nox.game_builder
                 if (relative.StartsWith(".."))
                     relative = Path.GetFullPath(value);
                 var config = Config.LoadEditor();
-                config.Set("gamebuilder.build_folder", relative);
+                config.Set("game_builder.build_folder", relative);
                 config.Save();
             }
         }
 
-        public static string[] UnAllowedFolders = new[]
-        {
+        private static readonly string[] UnAllowedFolders = {
             Path.Combine(Application.dataPath, "..", "Assets"),
             Path.Combine(Application.dataPath, "..", "Library"),
             Path.Combine(Application.dataPath, "..", "ProjectSettings"),
@@ -90,10 +91,9 @@ namespace dev.nox.game_builder
             return Path.GetRelativePath(Application.dataPath, fullPath) != "..";
         }
 
-        private static bool _isBuilding = false;
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        public static async UniTask BuildPlayer(string BuildPath, Platform platform)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        private static bool _isBuilding;
+        
+        public static async UniTask BuildPlayer(string buildPath, Platform platform)
         {
             try
             {
@@ -127,9 +127,9 @@ namespace dev.nox.game_builder
                     return;
                 }
 
-                if (Directory.Exists(BuildPath))
+                if (Directory.Exists(buildPath))
                 {
-                    if (Directory.GetFiles(BuildPath).Length > 0 && !EditorUtility.DisplayDialog("Folder exists",
+                    if (Directory.GetFiles(buildPath).Length > 0 && !EditorUtility.DisplayDialog("Folder exists",
                             "The selected folder already exists, do you want to overwrite it?", "Yes", "No"))
                     {
                         EditorUtility.DisplayDialog("Build failed", "The game was not built successfully.", "Ok");
@@ -137,12 +137,12 @@ namespace dev.nox.game_builder
                         return;
                     }
 
-                    Directory.Delete(BuildPath, true);
+                    Directory.Delete(buildPath, true);
                 }
 
-                Directory.CreateDirectory(BuildPath);
+                Directory.CreateDirectory(buildPath);
 
-                var resultbuild = BuildGame.BuildPlayer(platform, BuildPath, Application.productName);
+                var resultbuild = BuildGame.BuildPlayer(platform, buildPath, Application.productName);
 
                 if (!resultbuild)
                 {
@@ -154,7 +154,7 @@ namespace dev.nox.game_builder
 
                 var mods = CoreAPI.ModAPI.GetMods();
 
-                var ouputData = Path.Combine(BuildPath, Application.productName + "_Data", "Nox");
+                var ouputData = Path.Combine(buildPath, Application.productName + "_Data", "Nox");
                 var gameData = Path.Combine(ouputData, "game_data.json");
 
                 Directory.CreateDirectory(ouputData);
@@ -205,19 +205,20 @@ namespace dev.nox.game_builder
                             .Replace("\\", "/").ToLower()
                     };
 
-                    var asset_result = resultassets.FirstOrDefault(r => r.mod.GetMetadata().Match(meta.GetId()));
+                    var assetResult = resultassets.FirstOrDefault(r => r.mod.GetMetadata().Match(meta.GetId()));
 
-                    JArray asset_obj = new();
-                    if (asset_result != null)
-                        foreach (var asset in asset_result.outputs)
+                    JArray assetObj = new();
+                    if (assetResult != null)
+                        foreach (var asset in assetResult.outputs)
                             if (File.Exists(asset))
                             {
                                 var bundle = AssetBundle.LoadFromFile(asset);
                                 if (bundle == null) continue;
-                                asset_obj.Add(new JObject()
+                                assetObj.Add(new JObject()
                                 {
                                     ["name"] = Path.GetFileName(asset),
-                                    ["file"] = Path.Combine(Path.GetRelativePath(ouputData, asset)).Replace("\\", "/")
+                                    ["file"] = Path.Combine(Path.GetRelativePath(ouputData, asset))
+                                        .Replace("\\", "/")
                                         .ToLower(),
                                     ["assets"] = new JArray(bundle.GetAllAssetNames().Select(a => a.ToLower())),
                                     ["scenes"] = new JArray(bundle.GetAllScenePaths().Select(a => a.ToLower()))
@@ -225,20 +226,20 @@ namespace dev.nox.game_builder
                                 bundle.Unload(true);
                             }
 
-                    obj["kernel"]["assets"] = asset_obj;
+                    obj["kernel"]["assets"] = assetObj;
 
                     metadatas.Add(obj);
                 }
 
                 EditorUtility.DisplayProgressBar("Building game", "Saving game data...", 1);
 
-                File.WriteAllText(gameData, new JObject
+                await File.WriteAllTextAsync(gameData, new JObject
                 {
                     ["mods"] = metadatas,
                     ["engine"] = new JObject
                     {
-                        ["name"] = Nox.CCK.Utils.Engine.Unity.GetEngineName(),
-                        ["version"] = Application.unityVersion.Split('f')[0]
+                        ["name"] = Engine.Unity.GetEngineName(),
+                        ["version"] = EngineExtensions.CurrentVersion.ToString()
                     },
                     ["platform"] = platform.GetPlatformName()
                 }.ToString());
@@ -246,9 +247,9 @@ namespace dev.nox.game_builder
                 EditorUtility.ClearProgressBar();
                 EditorUtility.DisplayDialog("Build success", "The game was built successfully.", "Ok");
                 EditorApplication.Beep();
-                EditorUtility.RevealInFinder(BuildPath);
-                
-                
+                EditorUtility.RevealInFinder(buildPath);
+
+
                 _isBuilding = false;
             }
             catch (Exception e)
@@ -263,12 +264,13 @@ namespace dev.nox.game_builder
 
     public class BuildGamePanel : EditorPanelBuilder
     {
-        public string Id { get; } = "builder";
-        public string Name { get; } = "Game/Builder";
-        public bool Hidded { get; } = false;
-        internal VisualElement _root = new();
+        public string GetId() => "builder";
+        public string GetName() => "Game/Builder";
+        public bool IsHidden() => false;
 
-        public VisualElement OnOpenned(Dictionary<string, object> data)
+        private readonly VisualElement _root = new();
+
+        public VisualElement OnOpened(Dictionary<string, object> data)
         {
             _root.ClearBindings();
             _root.Clear();
@@ -276,8 +278,6 @@ namespace dev.nox.game_builder
             child.style.flexGrow = 1;
             _root.Add(child);
             _root.Q<Label>("version").text = "v" + GameBuilder.CoreAPI.ModMetadata.GetVersion();
-
-            var config = Config.LoadEditor();
 
             _root.Q<TextField>("build-folder").value = GameBuilder.BuildFolder;
             _root.Q<TextField>("build-folder")
@@ -339,7 +339,7 @@ namespace dev.nox.game_builder
             {
                 var mods = GameBuilder.CoreAPI.ModAPI.GetMods();
                 GameBuilder.SelectedMods =
-                    evt.newValue ? mods.Select(m => m.GetMetadata().GetId()).ToArray() : new string[0];
+                    evt.newValue ? mods.Select(m => m.GetMetadata().GetId()).ToArray() : Array.Empty<string>();
                 RefreshList(container);
             });
 
@@ -392,7 +392,7 @@ namespace dev.nox.game_builder
                 var noClient = item.Q("no-client");
                 var hasCustom = item.Q("has-custom");
                 var isEditor = item.Q("is-editor");
-                
+
                 noMain.style.display = mod.GetMains().Length == 0 ? DisplayStyle.Flex : DisplayStyle.None;
                 noClient.style.display = mod.GetClients().Length == 0 ? DisplayStyle.Flex : DisplayStyle.None;
                 hasCustom.style.display = mod.GetCustomEntries().Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;

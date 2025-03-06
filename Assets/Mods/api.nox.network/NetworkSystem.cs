@@ -68,12 +68,13 @@ namespace api.nox.network
             Action<float, ulong> progress = null, CancellationToken token = default)
         {
             Logger.Log($"Fetching [TEXTURE] {url}...");
-            req ??= new UnityWebRequest(url, "GET");
-            req.url = url;
-            var dt = new DownloadHandlerTexture();
-            req.downloadHandler = dt;
             try
             {
+                req ??= new UnityWebRequest(url, "GET");
+                req.url = url;
+                var dt = new DownloadHandlerTexture();
+                req.downloadHandler = dt;
+
                 var asc = req.SendWebRequest();
                 await UniTask.WaitUntil(() =>
                 {
@@ -86,13 +87,20 @@ namespace api.nox.network
                     progress?.Invoke(req.downloadProgress, req.downloadedBytes);
                     return asc.isDone || token.IsCancellationRequested;
                 }, cancellationToken: token);
+
+                if (!token.IsCancellationRequested) 
+                    return req.responseCode != 200 ? null : dt.texture;
+                
+                req.Abort();
+                return null;
+
             }
             catch
             {
                 // ignored
             }
 
-            return req.responseCode != 200 ? null : dt.texture;
+            return null;
         }
 
         [NoxPublic(NoxAccess.Method)]

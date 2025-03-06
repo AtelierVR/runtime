@@ -1,19 +1,17 @@
 {
   "type": "mod",
-  "id": "api.nox.world",
-  "provides": [
-    "world"
-  ],
-  "name": "World system",
+  "id": "api.nox.server",
+  "provides": [],
+  "name": "Server Information",
   "version": "1.0.0",
   "description": "Provides the Test API for the game.",
   "license": "GPL-3.0",
   "icon": null,
   "contact": {
     "email": "hactazia@gmail.com",
-    "source": "https://github.com/AtelierVR/api.nox.world",
+    "source": "https://github.com/AtelierVR/api.nox.server",
     "website": "https://nox.hactazia.fr/",
-    "issues": "https://github.com/AtelierVR/api.nox.world/issues"
+    "issues": "https://github.com/AtelierVR/api.nox.server/issues"
   },
   "authors": [
     {
@@ -36,24 +34,15 @@
     }
   ],
   "entrypoints": {
-    "main": [
-      "api.nox.world.WorldSystem"
-    ],
-    "editor": [
-      "api.nox.world.WorldEditor"
-    ],
     "client": [
-      "api.nox.world.WorldClient"
+      "api.nox.server.ServerClient"
+    ],
+    "main": [
+      "api.nox.server.ServerSystem"
     ]
   },
   "references": [],
   "sides": [],
-  "permissions": [
-    "file",
-    "file.read",
-    "file.write",
-    "config",
-    "config.global"
-  ],
-  "kernel": true
+  "permissions": [],
+  "kernel": false
 }

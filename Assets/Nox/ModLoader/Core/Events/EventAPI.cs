@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Nox.CCK.Mods;
+using Nox.CCK.Utils;
 
 
 namespace Nox.ModLoader.Cores.Events
@@ -16,9 +17,9 @@ namespace Nox.ModLoader.Cores.Events
             _channel = channel;
         }
 
-        private List<EventSubscription> Subscriptions = new();
+        private List<EventSubscription> _subscriptions = new();
 
-        internal void Receive(EventContext context)
+        private void Receive(EventContext context)
         {
             var data = new EventData()
             {
@@ -27,12 +28,19 @@ namespace Nox.ModLoader.Cores.Events
                 InternalSource = context.Source,
                 SourceChannel = context.Channel
             };
-            foreach (var sub in Subscriptions)
+            foreach (var sub in _subscriptions)
                 if (sub.EventName == null || sub.EventName == context.EventName)
-                    sub.Callback(data);
+                    try
+                    {
+                        sub.Callback(data);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogError($"Error while invoking event callback: {e} of event {context.EventName}");
+                    }
         }
 
-        internal void Emit(EventContext context)
+        private void Emit(EventContext context)
         {
             var ncontext = new EventContext(context) { CurrentChannel = _channel, Source = Mod };
             var mod = context.Destination != null ? Mod.CoreAPI.LocalModAPI.GetInternalMod(context.Destination) : null;
@@ -50,10 +58,10 @@ namespace Nox.ModLoader.Cores.Events
 
         public void Emit(string eventName, params object[] data)
         {
-            if (data.Length > 0 && data[^1] is CCK.Mods.Events.EventCallback callback)
+            if (data.Length > 0 && data[^1] is CCK.Mods.Events.EventCallback)
                 Emit(new EventContext()
                 {
-                    Data = data.Length > 1 ? data[..^1] : new object[0],
+                    Data = data.Length > 1 ? data[..^1] : Array.Empty<object>(),
                     Destination = null,
                     EventName = eventName,
                     Source = Mod,
@@ -73,31 +81,31 @@ namespace Nox.ModLoader.Cores.Events
         }
 
         public CCK.Mods.Events.EventSubscription Subscribe(string eventName, CCK.Mods.Events.EventCallback callback)
-            => Subscribe(new EventSubscription() { EventName = eventName, Callback = callback });
+            => Subscribe(new EventSubscription { EventName = eventName, Callback = callback });
 
         public CCK.Mods.Events.EventSubscription Subscribe(CCK.Mods.Events.EventSubscription eventSub)
         {
             var runtime = new EventSubscription(eventSub);
-            if (Subscriptions.Exists(sub => sub.UID == runtime.UID))
+            if (_subscriptions.Exists(sub => sub.UID == runtime.UID))
             {
                 runtime.UID = 0;
-                while (Subscriptions.Exists(sub => sub.UID == runtime.UID) || runtime.UID == uint.MaxValue)
+                while (_subscriptions.Exists(sub => sub.UID == runtime.UID) || runtime.UID == uint.MaxValue)
                     runtime.UID++;
                 if (runtime.UID == uint.MaxValue)
                     return null;
             }
 
-            Subscriptions.Add(runtime);
-            Subscriptions.Sort((a, b) => a.Weight.CompareTo(b.Weight));
+            _subscriptions.Add(runtime);
+            _subscriptions.Sort((a, b) => a.Weight.CompareTo(b.Weight));
             return eventSub;
         }
 
         public void Unsubscribe(CCK.Mods.Events.EventSubscription eventSub) => Unsubscribe(eventSub.UID);
-        internal void Unsubscribe(EventSubscription eventSub) => Subscriptions.Remove(eventSub);
-        public void Unsubscribe(uint uid) => Subscriptions.RemoveAll(sub => sub.UID == uid);
+        internal void Unsubscribe(EventSubscription eventSub) => _subscriptions.Remove(eventSub);
+        public void Unsubscribe(uint uid) => _subscriptions.RemoveAll(sub => sub.UID == uid);
 
-        public void UnsubscribeAll() => Subscriptions.Clear();
-        public void UnsubscribeAll(string eventName) => Subscriptions.RemoveAll(sub => sub.EventName == eventName);
+        public void UnsubscribeAll() => _subscriptions.Clear();
+        public void UnsubscribeAll(string eventName) => _subscriptions.RemoveAll(sub => sub.EventName == eventName);
     }
 
     public class EventSubscription : CCK.Mods.Events.EventSubscription
@@ -150,6 +158,13 @@ namespace Nox.ModLoader.Cores.Events
 
         public bool TryGet<T>(int index, out T value)
         {
+            if (Data == null)
+            {
+                value = default;
+                return false;
+            }
+
+
             if (Data.Length > index && Data[index] is T val)
             {
                 value = val;

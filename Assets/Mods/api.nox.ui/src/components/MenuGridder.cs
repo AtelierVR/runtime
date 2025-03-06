@@ -1,6 +1,8 @@
 using System.Linq;
 using Nox.CCK.Utils;
 using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
+
 namespace api.nox.ui.components
 {
     public class WidgetGrid : MonoBehaviour, IUpdateLayout
@@ -8,8 +10,8 @@ namespace api.nox.ui.components
         public Vector2Int dimensions = new(1, 0);
         public float spacing = 0;
 
-        void Start() => UpdateContent();
-        void OnValidate() => UpdateContent();
+        void Start() => UpdateContent(GetItems());
+        void OnValidate() => UpdateContent(GetItems());
 
         public Vector2 GetDimensions()
             => GetDimensions(GetComponentsInChildren<WidgetGridItem>(true));
@@ -28,11 +30,12 @@ namespace api.nox.ui.components
 
         private WidgetGridItem[] GetItems() => GetComponentsInChildren<WidgetGridItem>(true);
 
-        public void UpdateLayout() => UpdateContent();
+        public void UpdateLayout() => UpdateContent(GetItems());
 
-        public void UpdateContent()
+        public void UpdateContent(WidgetGridItem[] items)
         {
-            var items = GetItems().OrderBy(x => x.Index).ToArray();
+            items = items.OrderBy(x => x.Index).ToArray();
+            Logger.LogDebug($"Updating grid with {items.Length} items");
 
             if (items.Length == 0) return;
             if (dimensions is { x: 0, y: 0 }) return;

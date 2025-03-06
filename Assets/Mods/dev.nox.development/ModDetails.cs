@@ -12,48 +12,47 @@ namespace dev.nox.development
     public class ModDetails : EditorModInitializer
     {
         public static EditorModCoreAPI CoreAPI;
-        private EditorPanel buildPanel;
+        private EditorPanel _buildPanel;
 
         public void OnInitializeEditor(EditorModCoreAPI api)
         {
-            Logger.Log("ModDetails initialized");
             CoreAPI = api;
             var panel = new ModDetailsPanel();
-            buildPanel = api.PanelAPI.AddLocalPanel(panel);
+            _buildPanel = api.PanelAPI.AddLocalPanel(panel);
         }
 
         public void OnDispose()
         {
-            CoreAPI.PanelAPI.RemoveLocalPanel(buildPanel);
+            CoreAPI.PanelAPI.RemoveLocalPanel(_buildPanel);
             CoreAPI = null;
         }
     }
 
     public class ModDetailsPanel : EditorPanelBuilder
     {
-        public string Id { get; } = "mod_details";
-        public string Name { get; } = "Dev/Mod Details";
-        public bool Hidded { get; } = false;
-        private VisualElement _root = new();
+        public string GetId() => "mod_details";
+        public string GetName() => "Dev/Mod Details";
+        public bool IsHidden() => false;
+        
+        private readonly VisualElement _root = new();
 
-        public VisualElement OnOpenned(Dictionary<string, object> data)
+        public VisualElement OnOpened(Dictionary<string, object> data)
         {
             _root.ClearBindings();
             _root.Clear();
             _root.Add(ModDetails.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("mod_details.uxml").CloneTree());
             _root.Q<Label>("version").text = "v" + EventLogger.CoreAPI.ModMetadata.GetVersion();
-            lastUpdate = DateTime.MinValue;
-            UpdateContent();
+            _lastUpdate = DateTime.MinValue;
+            OnGUI();
             return _root;
         }
 
-        public void OnGUI() => UpdateContent(true);
-        private DateTime lastUpdate = DateTime.Now;
+        private DateTime _lastUpdate = DateTime.Now;
 
-        void UpdateContent(bool a = false)
+        public void OnGUI()
         {
-            if (DateTime.Now - lastUpdate < TimeSpan.FromSeconds(1)) return;
-            lastUpdate = DateTime.Now;
+            if (DateTime.Now - _lastUpdate < TimeSpan.FromSeconds(1)) return;
+            _lastUpdate = DateTime.Now;
             var element = new VisualElement();
             var mods = ModDetails.CoreAPI.ModAPI.GetMods();
 

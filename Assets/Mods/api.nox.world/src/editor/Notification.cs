@@ -35,6 +35,9 @@ namespace api.nox.world
         public NotificationType Type;
         public VisualElement Content;
         public List<VisualElement> Actions = new();
+
+        public override string ToString() 
+            => $"{GetType()}[Uid={Uid}, Type={Type}, Content={Content}]";
     }
 
     public enum NotificationType
@@ -42,8 +45,7 @@ namespace api.nox.world
         Good,
         Warning,
         Error,
-        Info,
-        None
+        Info
     }
 }
 #endif

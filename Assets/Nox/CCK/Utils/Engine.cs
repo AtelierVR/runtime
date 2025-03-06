@@ -32,7 +32,10 @@ namespace Nox.CCK.Utils
             _ => Engine.None,
         };
 
-        public static Engine CurrentEngine => Engine.Unity;
-        public static Version CurrentVersion => new(Application.unityVersion.Split('f')[0]);
+        public static Engine CurrentEngine 
+            => Engine.Unity;
+        
+        public static Version CurrentVersion 
+            => new(Application.unityVersion.Split('f')[0]);
     }
 }
