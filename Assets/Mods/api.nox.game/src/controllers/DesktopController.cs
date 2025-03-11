@@ -7,6 +7,7 @@ using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 using Transform = UnityEngine.Transform;
 using Logger = Nox.CCK.Utils.Logger;
 
@@ -85,6 +86,7 @@ namespace api.nox.game.controllers
 
         public void Start()
         {
+            Logger.LogDebug("DesktopController.Start");
             LockCursor = true;
             _keyBindingRemoved = GameClientSystem.CoreAPI.EventAPI
                 .Subscribe("key_binding_removed", OnKeyBindingRemoved);
@@ -180,6 +182,14 @@ namespace api.nox.game.controllers
             HandleLook();
             HandleMovement();
             HandleJump();
+            HandleGravity();
+        }
+
+        private void HandleGravity()
+        {
+            if (IsFlying || IsGrounded) return;
+            var gravityMovement = gravity * Time.deltaTime * Vector3.down;
+            controller.Move(gravityMovement);
         }
 
         private void HandleLook()
@@ -210,12 +220,15 @@ namespace api.nox.game.controllers
                 controller.Move(jumpForce * Time.deltaTime * Vector3.up);
         }
 
+        public Vector3 finalMovement;
+
         private void HandleMovement()
         {
-            var finalMovement = inputMovement;
+            finalMovement = inputMovement;
             finalMovement *= movementSpeed * Time.deltaTime;
             finalMovement.y = 0;
-            finalMovement = transform.forward * finalMovement.z + transform.right * finalMovement.x;
+            finalMovement = transform.forward * finalMovement.z
+                            + transform.right * finalMovement.x;
             controller.Move(finalMovement);
         }
 
@@ -255,13 +268,19 @@ namespace api.nox.game.controllers
         public override bool IsCrouching { get; set; }
 
 
+        public bool useGravity = true;
+
         public override bool IsFlying
         {
-            get => false;
-            set { }
+            get => !useGravity;
+            set
+            {
+                Logger.LogDebug($"Setting flying to {value}");
+                useGravity = !value;
+            }
         }
 
-        public bool LockCursor
+        private static bool LockCursor
         {
             get => Cursor.lockState == CursorLockMode.Locked;
             set

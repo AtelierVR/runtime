@@ -568,6 +568,7 @@ MonoBehaviour:
   - 0
   inputMovement: {x: 0, y: 0, z: 0}
   viewport: {fileID: 5095963714918250524}
+  finalMovement: {x: 0, y: 0, z: 0}
 --- !u!143 &1789470473161760268
 CharacterController:
   m_ObjectHideFlags: 0

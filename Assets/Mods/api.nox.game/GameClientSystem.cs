@@ -21,7 +21,9 @@ namespace api.nox.game
     public class GameClientSystem : ClientModInitializer
     {
         private static GameClientSystem _instance;
+
         private ClientModCoreAPI _coreAPI;
+
         /*private HomeTileManager _homeTile;
         private UserTileManager _userTile;
         private ServerTileManager _serverTile;
@@ -73,7 +75,7 @@ namespace api.nox.game
             _tileGotoSub = api.EventAPI.Subscribe("game.tile.goto", OnGotoTile);
             _sessionChangedSub = api.EventAPI.Subscribe("session.changed", OnSessionChanged);
             */
-            
+
             PlayerController.Create();
             Logger.LogDebug("GameControllerClient initialized");
             await PrepareDefaultWorld();
@@ -83,7 +85,8 @@ namespace api.nox.game
         {
             Logger.LogDebug("Loading default world");
             _defaultWorld = await _coreAPI.AssetAPI.LoadWorld("worlds/default/default.unity");
-            Logger.LogDebug($"aaa Default world loaded as {_defaultWorld.name} {_defaultWorld.isLoaded} {_defaultWorld.IsValid()}");
+            Logger.LogDebug(
+                $"aaa Default world loaded as {_defaultWorld.name} {_defaultWorld.isLoaded} {_defaultWorld.IsValid()}");
             SetupDefaultWorld();
         }
 
@@ -113,8 +116,13 @@ namespace api.nox.game
             WorldHidden.Get(_defaultWorld).Set(true);
             var cur = PlayerController.instance.currentController;
             if (!BaseDescriptor.TryGetDescriptor<BaseDescriptor>(_defaultWorld, out var desc))
+            {
+                Logger.LogWarning("Default world has no descriptor");
                 return;
+            }
+
             cur.IsFlying = desc.GetFlyOnSpawn();
+            Logger.LogDebug($"Default world is flying: {desc.GetFlyOnSpawn()}");
             if (desc.GetSpawnType() != SpawnType.None)
                 cur.Teleport(desc.ChoiceSpawn().transform);
         }
@@ -188,7 +196,7 @@ namespace api.nox.game
         //     menu.gameObject.SetActive(!menu.gameObject.activeSelf);
         // }
 
-        public async UniTask OnDisposeAsync()
+        public void OnDisposeClient()
         {
             // _sessionTile.OnDispose();
             // _homeTile.OnDispose();
