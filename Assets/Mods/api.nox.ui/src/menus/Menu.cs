@@ -34,7 +34,7 @@ namespace api.nox.ui.menus
         {
             try
             {
-                if (!newPage.Content && newPage.GetContent == null)
+                if (newPage == null || !newPage.Content && newPage.GetContent == null)
                     return;
 
                 if (oldPage != null)

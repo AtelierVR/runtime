@@ -1,20 +1,19 @@
 {
   "type": "mod",
-  "id": "api.nox.xr",
+  "id": "api.nox.discord",
   "provides": [
-    "fr.hactazia.xr",
-    "xr"
+    "fr.hactazia.discord"
   ],
-  "name": "XR System",
+  "name": "Discord",
   "version": "1.0.0",
-  "description": "xr system",
+  "description": "Rich presence for Discord",
   "license": "GPL-3.0",
   "icon": null,
   "contact": {
     "email": "hactazia@gmail.com",
-    "source": "https://github.com/AtelierVR/api.nox.xr",
+    "source": "https://github.com/AtelierVR/api.nox.discord",
     "website": "https://nox.hactazia.fr/",
-    "issues": "https://github.com/AtelierVR/api.nox.xr/issues"
+    "issues": "https://github.com/AtelierVR/api.nox.discord/issues"
   },
   "authors": [
     {
@@ -24,10 +23,16 @@
     }
   ],
   "contributors": [],
-  "relations": [],
+  "relations": [
+    {
+      "id": "api.nox.network",
+      "version": ">=1.0.0",
+      "type": "recommends"
+    }
+  ],
   "entrypoints": {
-    "client": [
-      "api.nox.xr.ClientXR"
+    "main": [
+      "api.nox.discord.DiscordSystem"
     ]
   },
   "references": [],

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.ModLoader.Discovers;
 using Nox.ModLoader.Mods;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace Nox.ModLoader
 {
@@ -27,44 +29,34 @@ namespace Nox.ModLoader
         }
 
         public static async UniTask<ResultLoadInfos> LoadMods(string[] ids, IDiscover discover)
-        {
-            var mods = new List<Mod>();
-
-            foreach (var id in ids)
-            {
-                var package = discover.FindPackage(id);
-                if (package == null) continue;
-                mods.Add(package.InternalDDiscover.CreateMod(package));
-            }
-
-            return await PrepareMods(mods.ToArray());
-        }
+            => await PrepareMods((from id in ids
+                    select discover.FindPackage(id)
+                    into package
+                    where package != null
+                    select package.InternalDDiscover.CreateMod(package))
+                .ToArray());
 
         private static ResultLoad[] CheckModHaveMissingDependencies(Mod mod, Mod[] mods)
         {
             var metadata = mod.GetMetadata();
             if (metadata == null)
-                return new[] { new ResultLoad {
-                    Type = ResultLoad.ResultType.NoMetadata,
-                    ForMod = metadata.GetId()
-                } };
+                return new[]
+                {
+                    new ResultLoad
+                    {
+                        Type = ResultLoad.ResultType.NoMetadata,
+                        ForMod = "<unknown>"
+                    }
+                };
 
             List<ResultLoad> results = new();
-            var CurrentMods = Mods;
-
-            List<Mod> AllMods = new();
-            AllMods.AddRange(CurrentMods);
-            AllMods.AddRange(mods);
+            List<Mod> allMods = new();
+            allMods.AddRange(Mods);
+            allMods.AddRange(mods);
 
             foreach (var dependency in metadata.GetDepends())
             {
-                var isDepend = false;
-                foreach (var currentMod in AllMods)
-                    if (currentMod.GetMetadata().Match(dependency))
-                    {
-                        isDepend = true;
-                        break;
-                    }
+                var isDepend = allMods.Any(currentMod => currentMod.GetMetadata().Match(dependency));
 
                 if (!isDepend)
                     results.Add(new ResultLoad
@@ -84,30 +76,31 @@ namespace Nox.ModLoader
         {
             var metadata = mod.GetMetadata();
             if (metadata == null)
-                return new[] { new ResultLoad {
-                    Type = ResultLoad.ResultType.NoMetadata,
-                    ForMod = metadata.GetId()
-                } };
+                return new[]
+                {
+                    new ResultLoad
+                    {
+                        Type = ResultLoad.ResultType.NoMetadata,
+                        ForMod = "<unknown>"
+                    }
+                };
 
-            List<ResultLoad> results = new();
-            var CurrentMods = Mods;
+            List<Mod> allMods = new();
+            allMods.AddRange(Mods);
+            allMods.AddRange(mods);
 
-            List<Mod> AllMods = new();
-            AllMods.AddRange(CurrentMods);
-            AllMods.AddRange(mods);
-
-            foreach (var dependency in metadata.GetBreaks())
-                foreach (var currentMod in AllMods)
-                    if (currentMod.GetMetadata().Match(dependency))
-                        results.Add(new ResultLoad
-                        {
-                            Type = ResultLoad.ResultType.MissingDependency,
-                            Message = $"Mod {metadata.GetId()}({metadata.GetVersion()}) breaks {dependency.GetId()}({dependency.GetVersion()})",
-                            CausedBy = metadata.GetId(),
-                            ForMod = dependency.GetId()
-                        });
-
-            return results.ToArray();
+            return (from dependency in metadata.GetBreaks()
+                    from currentMod in allMods
+                    where currentMod.GetMetadata().Match(dependency)
+                    select new ResultLoad
+                    {
+                        Type = ResultLoad.ResultType.MissingDependency,
+                        Message =
+                            $"Mod {metadata.GetId()}({metadata.GetVersion()}) breaks {dependency.GetId()}({dependency.GetVersion()})",
+                        CausedBy = metadata.GetId(),
+                        ForMod = dependency.GetId()
+                    })
+                .ToArray();
         }
 
         // Check if mod conflicts with other mods, if have any mod that conflicts, you can load the mod but show a warning
@@ -115,52 +108,76 @@ namespace Nox.ModLoader
         {
             var metadata = mod.GetMetadata();
             if (metadata == null)
-                return new[] { new ResultLoad {
-                    Type = ResultLoad.ResultType.NoMetadata,
-                    ForMod = metadata.GetId()
-                } };
+                return new[]
+                {
+                    new ResultLoad
+                    {
+                        Type = ResultLoad.ResultType.NoMetadata,
+                        ForMod = "<unknown>"
+                    }
+                };
 
-            List<ResultLoad> results = new();
-            var CurrentMods = Mods;
+            List<Mod> allMods = new();
+            allMods.AddRange(Mods);
+            allMods.AddRange(mods);
 
-            List<Mod> AllMods = new();
-            AllMods.AddRange(CurrentMods);
-            AllMods.AddRange(mods);
-
-            foreach (var dependency in metadata.GetConflicts())
-                foreach (var currentMod in AllMods)
-                    if (currentMod.GetMetadata().Match(dependency))
-                        results.Add(new ResultLoad
-                        {
-                            Type = ResultLoad.ResultType.MissingDependency,
-                            Message = $"Mod {metadata.GetId()}({metadata.GetVersion()}) conflicts with {dependency.GetId()}({dependency.GetVersion()})",
-                            CausedBy = metadata.GetId(),
-                            ForMod = dependency.GetId()
-                        });
-
-            return results.ToArray();
+            return (from dependency in metadata.GetConflicts()
+                    from currentMod in allMods
+                    where currentMod.GetMetadata().Match(dependency)
+                    select new ResultLoad
+                    {
+                        Type = ResultLoad.ResultType.MissingDependency,
+                        Message =
+                            $"Mod {metadata.GetId()}({metadata.GetVersion()}) conflicts with {dependency.GetId()}({dependency.GetVersion()})",
+                        CausedBy = metadata.GetId(),
+                        ForMod = dependency.GetId()
+                    })
+                .ToArray();
         }
 
-        private static ResultLoad CheckModIsAllreadyLoaded(Mod mod)
+        private static ResultLoad CheckModIsAlreadyLoaded(Mod mod)
         {
             var metadata = mod.GetMetadata();
             if (metadata == null)
                 return new ResultLoad
                 {
                     Type = ResultLoad.ResultType.NoMetadata,
+                    ForMod = "<unknown>"
+                };
+
+            if (Mods.Any(currentMod => currentMod.GetMetadata().Match(metadata)))
+                return new ResultLoad
+                {
+                    Type = ResultLoad.ResultType.AlreadyLoaded,
+                    Message = $"Mod {metadata.GetId()}({metadata.GetVersion()}) is already loaded",
                     ForMod = metadata.GetId()
                 };
 
-            foreach (var currentMod in Mods)
-                if (currentMod.GetMetadata().Match(metadata))
-                    return new ResultLoad
-                    {
-                        Type = ResultLoad.ResultType.AllreadyLoaded,
-                        Message = $"Mod {metadata.GetId()}({metadata.GetVersion()}) is allready loaded",
-                        ForMod = metadata.GetId()
-                    };
-
             return null;
+        }
+
+        private static void GetRelations(Mod mod, Mod[] inLoading, ref List<Mod> dependencies)
+        {
+            var metadata = mod.GetMetadata();
+            if (metadata == null)
+                return;
+
+            List<Mod> allMods = new();
+            allMods.AddRange(Mods);
+            allMods.AddRange(inLoading);
+
+            foreach (var dependency in metadata.GetRelations())
+            {
+                var depend = allMods.FirstOrDefault(currentMod => currentMod.GetMetadata().Match(dependency));
+                if (depend == null)
+                    continue;
+
+                if (dependencies.Contains(depend))
+                    continue;
+
+                dependencies.Add(depend);
+                GetRelations(depend, inLoading, ref dependencies);
+            }
         }
 
         private static async UniTask<ResultLoadInfos> PrepareMods(Mod[] mods)
@@ -172,43 +189,47 @@ namespace Nox.ModLoader
 
             foreach (var mod in mods)
             {
-                var allreadyLoaded = CheckModIsAllreadyLoaded(mod);
+                var alreadyLoaded = CheckModIsAlreadyLoaded(mod);
                 var missingDependencies = CheckModHaveMissingDependencies(mod, mods);
                 var breaks = CheckModBreakOtherMod(mod, mods);
                 var conflicts = CheckModConflictOtherMod(mod, mods);
 
-                List<ResultLoad> AllResults = new();
-                if (allreadyLoaded != null)
-                    AllResults.Add(allreadyLoaded);
-                AllResults.AddRange(missingDependencies);
-                AllResults.AddRange(breaks);
-                AllResults.AddRange(conflicts);
+                List<ResultLoad> allResults = new();
+                if (alreadyLoaded != null)
+                    allResults.Add(alreadyLoaded);
+                allResults.AddRange(missingDependencies);
+                allResults.AddRange(breaks);
+                allResults.AddRange(conflicts);
 
-                if (AllResults.Count > 0)
+                if (allResults.Count > 0)
                 {
-                    results.AddRange(AllResults);
+                    results.AddRange(allResults);
 
-                    if (AllResults.Exists(x => x.IsError))
+                    if (allResults.Exists(x => x.IsError))
                         continue;
                 }
 
                 verifiedMods.Add(mod);
             }
 
-            var ErrorResults = results.FindAll(x => x.IsError);
-            if (ErrorResults.Count > 0)
-                return new() { Mods = new Mod[0], Results = results.ToArray() };
+            var errorResults = results.FindAll(x => x.IsError);
+            if (errorResults.Count > 0)
+                return new ResultLoadInfos { Mods = Array.Empty<Mod>(), Results = results.ToArray() };
 
-            verifiedMods.Reverse();
-            verifiedMods.Sort((a, b) =>
+            List<Mod> sortedMods = new();
+            foreach (var result in verifiedMods)
             {
                 var i = 0;
-                foreach (var required in a.GetMetadata().GetDepends())
-                    if (b.GetMetadata().Match(required.GetId())) i++;
-                foreach (var required in b.GetMetadata().GetDepends())
-                    if (a.GetMetadata().Match(required.GetId())) i--;
-                return i;
-            });
+                var relations = new List<Mod>();
+                GetRelations(result, sortedMods.ToArray(), ref relations);
+                for (; i < sortedMods.Count; i++)
+                    if (relations.Contains(sortedMods[i]))
+                        break;
+                sortedMods.Insert(i, result);
+            }
+
+            sortedMods.Reverse();
+            verifiedMods = sortedMods;
 
             // Loading mods
             List<Mod> loadedMods = new();
@@ -229,25 +250,23 @@ namespace Nox.ModLoader
                         ForMod = mod.GetMetadata().GetId()
                     });
                 else loadedMods.Add(mod);
-
             }
 
-            ErrorResults = results.FindAll(x => x.IsError);
-            if (ErrorResults.Count > 0)
-                return new() { Mods = new Mod[0], Results = results.ToArray() };
+            errorResults = results.FindAll(x => x.IsError);
+            if (errorResults.Count > 0)
+                return new ResultLoadInfos { Mods = Array.Empty<Mod>(), Results = results.ToArray() };
 
             Mods.AddRange(loadedMods);
 
-            foreach (var mod in loadedMods)
-                results.Add(new ResultLoad
-                {
-                    Type = ResultLoad.ResultType.Success,
-                    Message = $"Mod {mod.GetMetadata().GetId()}({mod.GetMetadata().GetVersion()}) loaded successfully",
-                    ForMod = mod.GetMetadata().GetId()
-                });
+            results.AddRange(loadedMods.Select(mod => new ResultLoad
+            {
+                Type = ResultLoad.ResultType.Success,
+                Message = $"Mod {mod.GetMetadata().GetId()}({mod.GetMetadata().GetVersion()}) loaded successfully",
+                ForMod = mod.GetMetadata().GetId()
+            }));
 
 
-            return new() { Mods = loadedMods.ToArray(), Results = results.ToArray() };
+            return new ResultLoadInfos { Mods = loadedMods.ToArray(), Results = results.ToArray() };
         }
     }
 
@@ -256,7 +275,8 @@ namespace Nox.ModLoader
         public Mod[] Mods;
         public ResultLoad[] Results;
 
-        public ResultLoad[] GetResults(ResultLoad.ResultType flags) => Array.FindAll(Results, x => x.Type.HasFlag(flags));
+        public ResultLoad[] GetResults(ResultLoad.ResultType flags) =>
+            Array.FindAll(Results, x => x.Type.HasFlag(flags));
     }
 
     public class ResultLoad
@@ -277,15 +297,15 @@ namespace Nox.ModLoader
         {
             Success = 1,
             MissingDependency = 2,
-            IsConflit = 4,
+            IsConflict = 4,
             IsBreak = 8,
             NoMetadata = 16,
-            AllreadyLoaded = 32,
+            AlreadyLoaded = 32,
             LoadError = 64,
 
             IsSuccess = Success,
-            IsWarning = IsConflit,
-            IsError = MissingDependency | IsBreak | NoMetadata | AllreadyLoaded | LoadError
+            IsWarning = IsConflict,
+            IsError = MissingDependency | IsBreak | NoMetadata | AlreadyLoaded | LoadError
         }
     }
 }

@@ -191,7 +191,9 @@ namespace Nox.ModLoader
             var resultinfos = await ModManager.LoadMods();
 
             Logger.Log($"Executing Editor as [{(Application.isConsolePlatform ? "Server" : "Client")}]...");
-            Logger.LogDebug($"{resultinfos.Mods.Length} mods loaded...");
+            Logger.LogDebug($"{resultinfos.Mods.Length} mods loaded:");
+            foreach (var mod in resultinfos.Mods)
+                Logger.LogDebug($"- {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})");
 
             foreach (var result in resultinfos.Results)
                 if (result.IsError)
@@ -343,7 +345,7 @@ namespace Nox.ModLoader
             }
 
             // disabling all keybinds of unityeditor to prevent conflicts
-            ShortcutManager.instance.activeProfileId = "Play";
+            // ShortcutManager.instance.activeProfileId = "Play";
 #endif
 
             _isLoaded = true;
@@ -411,9 +413,9 @@ namespace Nox.ModLoader
                     Logger.Log("Application Quit...");
                     await OnExitingPlayMode(resultInfos);
                 }
-                catch (Exception e)
+                catch
                 {
-                    throw; // TODO handle exception
+                    // ignored
                 }
             }
 
@@ -424,9 +426,9 @@ namespace Nox.ModLoader
                     Logger.Log("StartupPlayerLoop Started...");
                     await OnEnteredPlayMode(resultInfos);
                 }
-                catch (Exception e)
+                catch
                 {
-                    throw; // TODO handle exception
+                    // ignored
                 }
             }
 

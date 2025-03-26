@@ -36,6 +36,16 @@ namespace api.nox.world
         public void OnDisposeEditor()
         {
             Builder.Dispose();
+            CoreAPI.PanelAPI.RemoveLocalPanel(_loaderPanel);
+            CoreAPI.PanelAPI.RemoveLocalPanel(_builderPanel);
+            CoreAPI.PanelAPI.RemoveLocalPanel(_publisherPanel);
+            _loader = null;
+            Builder = null;
+            _publisher = null;
+            _loaderPanel = null;
+            _builderPanel = null;
+            _publisherPanel = null;
+            CoreAPI = null;
         }
 
         public void OnUpdateEditor()

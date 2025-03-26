@@ -32,6 +32,7 @@ namespace api.nox.network
             ModInstance = this;
             NetCache.Clear();
             _language = CoreAPI.AssetAPI.GetAsset<LanguagePack>("langpack.asset");
+            Logger.LogDebug("Language: " + _language);
             LanguageManager.AddPack(_language);
 
             Auth = new Auths.AuthAPI();
@@ -88,12 +89,11 @@ namespace api.nox.network
                     return asc.isDone || token.IsCancellationRequested;
                 }, cancellationToken: token);
 
-                if (!token.IsCancellationRequested) 
+                if (!token.IsCancellationRequested)
                     return req.responseCode != 200 ? null : dt.texture;
-                
+
                 req.Abort();
                 return null;
-
             }
             catch
             {

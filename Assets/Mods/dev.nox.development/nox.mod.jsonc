@@ -21,18 +21,7 @@
     }
   ],
   "contributors": [],
-  "relations": [
-    {
-      "id": "game",
-      "type": "depends",
-      "version": ">=1.0.0"
-    },
-    {
-      "id": "network",
-      "type": "depends",
-      "version": ">=1.0.0"
-    }
-  ],
+  "relations": [],
   "entrypoints": {
     "editor": [
       "dev.nox.development.EventLogger",
