@@ -4,21 +4,32 @@ using System.Linq;
 using Jint;
 using Jint.Native;
 using Jint.Native.Object;
+using Jint.Runtime.Interop;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Logger = Nox.CCK.Utils.Logger;
+using LogType = Nox.CCK.Utils.LogType;
 
 #if UNITY_EDITOR
 using System.IO;
 using UnityEditor;
+using UnityEngine.Events;
 #endif // UNITY_EDITOR
 
 namespace Nox.CCK.Worlds
 {
+    [Serializable]
+    public struct JintDataValue
+    {
+        public string key;
+        public string value;
+    }
+
     public class JintScript : MonoBehaviour
     {
-        [SerializeField] private string data_SerializedScript;
+        [SerializeField] public string data_SerializedScript;
 
-        [SerializeField] private Dictionary<string, string> data_Data = new();
+        [SerializeField] public List<JintDataValue> data_Data = new();
 
         private JsValue SetData(JsValue[] args)
         {
@@ -29,11 +40,14 @@ namespace Nox.CCK.Worlds
             return SetData(args[0].AsString(), args[1].AsString());
         }
 
-        private bool SetData(string key, string value)
+        public bool SetData(string key, string value)
         {
             if (data_Data.Count > 100)
                 return false;
-            data_Data[key] = value;
+            var index = data_Data.FindIndex(x => x.key == key);
+            if (index == -1)
+                data_Data.Add(new JintDataValue { key = key, value = value });
+            else data_Data[index] = new JintDataValue { key = key, value = value };
             return true;
         }
 
@@ -45,34 +59,23 @@ namespace Nox.CCK.Worlds
         }
 
         private string GetData(string key)
-            => data_Data.GetValueOrDefault(key);
+            => data_Data.Find(x => x.key == key).value;
 
         private JsValue GetDataKeys(JsValue[] args)
             => new JsArray(Engine, GetDataKeys().Select(key => (JsValue)key).ToArray());
 
-        private string[] GetDataKeys()
+        public string[] GetDataKeys()
         {
             if (data_Data == null)
                 return Array.Empty<string>();
             var keys = new string[data_Data.Count];
-            data_Data.Keys.CopyTo(keys, 0);
+            for (var i = 0; i < data_Data.Count; i++)
+                keys[i] = data_Data[i].key;
             return keys;
         }
 
 
         private Engine Engine { get; set; }
-
-        public ObjectInstance GetExports()
-            => Engine.GetValue("exports").AsObject();
-
-        public T GetExport<T>(string key) where T : ObjectInstance
-            => GetExports().Get(key).As<T>();
-
-        public void SetExports(ObjectInstance exports)
-            => Engine.SetValue("exports", exports);
-
-        public void SetExport<T>(string key, T value) where T : ObjectInstance
-            => GetExports().Set(key, value);
 
         public void Awake()
         {
@@ -88,7 +91,54 @@ namespace Nox.CCK.Worlds
             }
         }
 
-        public JintConstraint Constraint;
+        private readonly JintConstraint _constraint;
+        public ObjectInstance ExecutionContext;
+
+#if UNITY_EDITOR
+        public class LogData
+        {
+            public LogType Type;
+            public string Message;
+            public DateTime Time;
+        }
+
+        public List<LogData> LogList = new();
+        public UnityEvent onLog = new();
+#endif
+
+        private void Log(LogType type, JsValue[] args)
+        {
+            var parsed = string.Join(" ", args.Select(x => x.ToString()));
+            var message = $"Jint-{GetInstanceID()}: {parsed}";
+            switch (type)
+            {
+                case LogType.Log:
+                    Logger.Log(message, this);
+                    break;
+                case LogType.Warning:
+                    Logger.LogWarning(message, this);
+                    break;
+                case LogType.Error:
+                    Logger.LogError(message, this);
+                    break;
+                default:
+                    Logger.LogDebug(message, this);
+                    break;
+            }
+
+#if UNITY_EDITOR
+            LogList ??= new List<LogData>();
+            LogList.Add(new LogData
+            {
+                Type = type,
+                Message = parsed,
+                Time = DateTime.Now
+            });
+            while (LogList.Count > 100)
+                LogList.RemoveAt(0);
+            onLog.Invoke();
+#endif
+        }
 
         public void Prepare()
         {
@@ -96,146 +146,80 @@ namespace Nox.CCK.Worlds
             {
                 ctx.LimitMemory(4_194_304);
                 ctx.LimitRecursion(1024);
-                ctx.Constraint(Constraint);
+                ctx.Constraint(_constraint);
             });
 
-            Engine.SetValue("log", new Action<object>(Logger.Log));
-            Engine.SetValue("warn", new Action<object>(Logger.LogWarning));
-            Engine.SetValue("error", new Action<object>(Logger.LogError));
-            Engine.SetValue("gameObject", gameObject);
-            Engine.SetValue("transform", transform);
+            Engine.SetValue("GameObject", TypeReference.CreateTypeReference(Engine, typeof(GameObject)));
+            Engine.SetValue("Vector3", TypeReference.CreateTypeReference(Engine, typeof(Vector3)));
+            Engine.SetValue("Vector2", TypeReference.CreateTypeReference(Engine, typeof(Vector2)));
+            Engine.SetValue("Quaternion", TypeReference.CreateTypeReference(Engine, typeof(Quaternion)));
+            Engine.SetValue("Transform", TypeReference.CreateTypeReference(Engine, typeof(Transform)));
 
-            Engine.SetValue("Vector3", new Func<float, float, float, Vector3>((x, y, z) => new Vector3(x, y, z)));
-            Engine.SetValue("Vector2", new Func<float, float, Vector2>((x, y) => new Vector2(x, y)));
-            Engine.SetValue("Quaternion",
-                new Func<float, float, float, float, Quaternion>((x, y, z, w) => new Quaternion(x, y, z, w)));
-            Engine.SetValue("Color",
-                new Func<float, float, float, float, Color>((r, g, b, a) => new Color(r, g, b, a)));
-            
+            Engine.SetValue("gameObject", new ObjectWrapper(Engine, gameObject));
+            Engine.SetValue("transform", new ObjectWrapper(Engine, transform));
 
-            Engine.AddModule("api", builder
-                => builder
-                    .ExportFunction("setData", SetData)
-                    .ExportFunction("getData", GetData)
-                    .ExportFunction("getDataKeys", GetDataKeys)
+            Engine.AddModule("api", builder => builder
+                .ExportFunction("setData", SetData)
+                .ExportFunction("getData", GetData)
+                .ExportFunction("getDataKeys", GetDataKeys)
             );
-            
+
+            Engine.AddModule("logger", builder => builder
+                .ExportFunction("log", objets => Log(LogType.Log, objets))
+                .ExportFunction("warn", objets => Log(LogType.Warning, objets))
+                .ExportFunction("error", objets => Log(LogType.Error, objets))
+            );
+
             try
             {
-                Engine.Execute(GetScriptCode());
-                Engine.Invoke("onPrepare");
+                var module = Engine.PrepareModule(GetScriptCode());
+                Engine.AddModule("__main__", x => x.AddModule(module));
+                ExecutionContext = Engine.ImportModule("__main__");
+                InvokeConst("onPrepare");
             }
             catch (Exception e)
             {
                 Logger.LogError($"Error executing onPrepare function: {e.Message}");
                 Engine = null;
+                ExecutionContext = null;
             }
         }
 
-        public void Start()
+        public void Start() => InvokeConst("onStart");
+
+        public void Update() => InvokeConst("onUpdate");
+
+        public void FixedUpdate() => InvokeConst("onFixedUpdate");
+
+        public void LateUpdate() => InvokeConst("onLateUpdate");
+
+        public void OnDestroy() => InvokeConst("onDestroy");
+
+        public void OnEnable() => InvokeConst("onEnable");
+
+        private void InvokeConst(string methodName, params object[] args)
         {
             if (Engine == null) return;
             try
             {
-                Engine.Invoke("onStart");
+                var method = ExecutionContext.Get(methodName);
+                if (method.IsUndefined()) return;
+                Engine.Invoke(method, args);
             }
             catch (Exception e)
             {
-                Logger.LogError($"Error executing onStart function: {e.Message}");
+                Logger.LogError($"Error executing {methodName} function: {e.Message}");
             }
         }
 
-        public void Update()
-        {
-            if (Engine == null) return;
-            try
-            {
-                Engine.Invoke("onUpdate");
-            }
-            catch (Exception e)
-            {
-                Logger.LogError($"Error executing onUpdate function: {e.Message}");
-            }
-        }
-
-        public void FixedUpdate()
-        {
-            if (Engine == null) return;
-            try
-            {
-                Engine.Invoke("onFixedUpdate");
-            }
-            catch (Exception e)
-            {
-                Logger.LogError($"Error executing onFixedUpdate function: {e.Message}");
-            }
-        }
-
-        public void LateUpdate()
-        {
-            if (Engine == null) return;
-            try
-            {
-                Engine.Invoke("onLateUpdate");
-            }
-            catch (Exception e)
-            {
-                Logger.LogError($"Error executing onLateUpdate function: {e.Message}");
-            }
-        }
-
-        public void OnDestroy()
-        {
-            if (Engine == null) return;
-            try
-            {
-                Engine.Invoke("onDestroy");
-            }
-            catch (Exception e)
-            {
-                Logger.LogError($"Error executing onDestroy function: {e.Message}");
-            }
-        }
-
-        public void OnEnable()
-        {
-            if (Engine == null) return;
-            try
-            {
-                Engine.Invoke("onEnable");
-            }
-            catch (Exception e)
-            {
-                Logger.LogError($"Error executing onEnable function: {e.Message}");
-            }
-        }
-
-        public void OnDisable()
-        {
-            if (Engine == null) return;
-            try
-            {
-                Engine.Invoke("onDisable");
-            }
-            catch (Exception e)
-            {
-                Logger.LogError($"Error executing onDisable function: {e.Message}");
-            }
-        }
+        public void OnDisable() => InvokeConst("onDisable");
 
         void Dispose()
         {
             if (Engine == null) return;
-            try
-            {
-                Engine.Invoke("onDispose");
-            }
-            catch (Exception e)
-            {
-                Logger.LogError($"Error executing onDispose function: {e.Message}");
-            }
-
+            InvokeConst("onDispose");
             Engine.Dispose();
+            ExecutionContext = null;
             Engine = null;
         }
 
@@ -279,6 +263,12 @@ namespace Nox.CCK.Worlds
         }
 
         private DateTimeOffset lastFileUpdate = DateTimeOffset.MinValue;
+
+        public JintScript(JintConstraint constraint)
+        {
+            _constraint = constraint;
+        }
+
         private static DateTimeOffset _lastUpdate = DateTimeOffset.MinValue;
 
         private static void OnUpdateInEditor()
