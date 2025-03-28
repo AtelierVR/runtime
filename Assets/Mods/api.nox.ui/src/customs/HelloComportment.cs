@@ -1,4 +1,5 @@
-﻿using api.nox.ui.menus;
+﻿using System;
+using api.nox.ui.menus;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,6 +19,6 @@ namespace api.nox.ui.pages
         }
 
         private void OnClick(Page page, string key)
-            => UISystem.Instance.Pages.Goto(page.MenuId, key);
+            => UISystem.Instance.Pages.Goto(page.MenuId, key, Array.Empty<object>());
     }
 }

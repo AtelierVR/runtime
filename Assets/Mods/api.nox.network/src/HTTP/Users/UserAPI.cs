@@ -114,11 +114,11 @@ namespace api.nox.network.Users
 
             return response.data;
         }
-        
+
         [NoxPublic(NoxAccess.Method)]
         public async UniTask<UserMe> UpdateMyUser(Dictionary<string, object> data)
             => await UpdateMyUser(UserUpdate.From(data));
-        
+
         public async UniTask<UserMe> UpdateMyUser(UserUpdate user)
         {
             if (NetworkSystem.ModInstance == null) throw new AccessViolationException("NetworkSystem not initialized");
@@ -148,5 +148,13 @@ namespace api.nox.network.Users
 
             return response.data;
         }
+
+        [NoxPublic(NoxAccess.Method)]
+        public UserIdentifier MakeIdentifierFromString(string identifier)
+            => UserIdentifier.FromString(identifier);
+
+        [NoxPublic(NoxAccess.Method)]
+        public UserIdentifier MakeIdentifier(string id, string server)
+            => new(id, server);
     }
 }

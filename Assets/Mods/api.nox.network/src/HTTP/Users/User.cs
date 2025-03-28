@@ -31,7 +31,8 @@ namespace api.nox.network.Users
         internal virtual string GetStrictCacheKey() => $"user.{id}.{server}";
 
         [NoxPublic(NoxAccess.Method)]
-        public UserIdentifier ToIdentifier() => new(id.ToString(), server);
+        public UserIdentifier ToIdentifier(bool useUsername = false)
+            => new(useUsername ? username : id.ToString(), server);
 
         public override string ToString() =>
             $"{GetType().Name}[id={id}, username={username}, display={display}, server={server}]";

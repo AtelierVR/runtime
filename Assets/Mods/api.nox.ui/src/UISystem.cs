@@ -14,7 +14,6 @@ namespace api.nox.ui
         [NoxPublic(NoxAccess.Read)] 
         public WidgetManager Widgets;
         
-        
         [NoxPublic(NoxAccess.Read)] 
         public PageManager Pages;
 

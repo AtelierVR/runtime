@@ -5,15 +5,10 @@ let d = Date.now();
 export function onUpdate() {
     let delta = Date.now() - d;
     d = Date.now();
-    log("Update delta: " + delta);
     gameObject.transform.Rotate(delta * 0.1, delta * 0.1, delta * 0.1);
 }
 
 export function onPrepare() {
-    log("Hello from script.js!");
-    log("gameObject.name: " + gameObject.name);
-    log("gameObject.transform.position: " + gameObject.transform.position);
-
    // test(5_000_000);
 }
 

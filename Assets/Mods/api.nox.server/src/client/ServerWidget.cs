@@ -33,7 +33,8 @@ namespace api.nox.server
             {
                 { "key", "my_server" },
                 { "width", 1 },
-                { "height", 1 }
+                { "height", 1 },
+                { "content", null }
             };
 
             if (server == null && WidgetAPI.CallMethod<bool>("Has", _widget["key"]))
@@ -41,18 +42,7 @@ namespace api.nox.server
 
             if (server == null) return;
 
-            _widget["content"] = new Func<RectTransform, GameObject>(rect =>
-            {
-                var asset = ServerSystem.CoreAPI.AssetAPI.GetAsset<GameObject>("ui", "prefabs/widgets/button.prefab");
-                var button = Object.Instantiate(asset, rect);
-                var reference = Reference.GetReference("content", button);
-                asset = ServerSystem.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/widget.prefab");
-                var widget = Object.Instantiate(asset, reference.transform);
-                var comportment = widget.GetComponent<ServerWidgetComportment>();
-                comportment.button = button.GetComponent<UnityEngine.UI.Button>();
-                comportment.UpdateContent(server);
-                return button;
-            });
+            _widget["content"] = new Func<int, RectTransform, GameObject>(OnContent);
 
             WidgetAPI.CallMethod(
                 WidgetAPI.CallMethod<bool>("Has", _widget["key"])
@@ -60,6 +50,20 @@ namespace api.nox.server
                     : "Add",
                 _widget
             );
+        }
+        
+        private GameObject OnContent(int menuId, RectTransform rect)
+        {
+            var asset = ServerSystem.CoreAPI.AssetAPI.GetAsset<GameObject>("ui", "prefabs/widgets/button.prefab");
+            var button = Object.Instantiate(asset, rect);
+            var reference = Reference.GetReference("content", button);
+            asset = ServerSystem.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/widget.prefab");
+            var widget = Object.Instantiate(asset, reference.transform);
+            var comportment = widget.GetComponent<ServerWidgetComportment>();
+            comportment.button = button.GetComponent<UnityEngine.UI.Button>();
+            comportment.menuId = menuId;
+            comportment.UpdateContent(ServerSystem.ServerAPI.CallMethod("GetCurrentServer"));
+            return button;
         }
     }
 }

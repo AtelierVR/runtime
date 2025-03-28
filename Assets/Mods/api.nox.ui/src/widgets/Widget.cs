@@ -10,7 +10,7 @@ namespace api.nox.ui.widgets
         public string Key;
         public int Weight = 1;
         public Vector2Int Size = new(1, 1);
-        public Func<RectTransform, GameObject> GetContent;
+        public Func<int, RectTransform, GameObject> GetContent;
 
         internal static Widget From(Dictionary<string, object> data)
         {
@@ -27,7 +27,7 @@ namespace api.nox.ui.widgets
                 size.y = heightInt;
             widget.Size = size;
             if (data.TryGetValue("content", out var getContent)
-                && getContent is Func<RectTransform, GameObject> getContentFunc)
+                && getContent is Func<int, RectTransform, GameObject> getContentFunc)
                 widget.GetContent = getContentFunc;
             return widget;
         }

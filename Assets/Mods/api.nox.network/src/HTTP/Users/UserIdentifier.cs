@@ -2,7 +2,7 @@ using Nox.CCK.Utils;
 
 namespace api.nox.network
 {
-    public class UserIdentifier
+    public class UserIdentifier : INoxObject
     {
         public const string LocalServer = "::";
 
@@ -48,7 +48,10 @@ namespace api.nox.network
         public bool IsLocal() => string.IsNullOrEmpty(Server) || Server == LocalServer;
 
         [NoxPublic(NoxAccess.Method)]
-        public string ToMinimalString(string defaultServer = null) 
+        public string ToMinimalString(string defaultServer = null)
             => $"{Identifier}@{(IsLocal() ? defaultServer ?? LocalServer : Server)}";
+
+        [NoxPublic(NoxAccess.Method)]
+        public bool IsValid() => TryGetId(out var id) && id > 0;
     }
 }

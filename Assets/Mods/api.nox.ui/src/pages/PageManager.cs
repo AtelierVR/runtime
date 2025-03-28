@@ -25,8 +25,12 @@ namespace api.nox.ui.Mods.api.nox.ui.src.pages
         }
 
         [NoxPublic(NoxAccess.Method)]
-        public void Goto(int menuId, string pageKey, object[] args = null)
-            => UISystem.CoreAPI.EventAPI.Emit("goto_page", menuId, pageKey, args ?? Array.Empty<object>());
+        public void Goto(int menuId, string pageKey, object[] args)
+        {
+            var list = new List<object> { menuId, pageKey };
+            list.AddRange(args);
+            UISystem.CoreAPI.EventAPI.Emit("goto_page", list.ToArray());
+        }
 
         internal void SetPage(int menuId, Page page)
         {
