@@ -28,10 +28,10 @@ namespace Nox.ModLoader.Cores.Panels
 
         public void OnGUI()
         {
-            if (Instance == null) Instance = this;
+            if (!Instance) Instance = this;
             if (rootVisualElement.childCount > 0)
             {
-                GetActivePanel()?.InvokePanelGUI();
+                GetActivePanel()?.InvokeOnUpdate();
                 return;
             }
 
@@ -45,13 +45,10 @@ namespace Nox.ModLoader.Cores.Panels
             var config = Config.LoadEditor();
             var next = config.Get("active_panel", "default");
             var panel = GetPanel(next);
-            if (panel == null || panel.IsHidden() || !Goto(next))
-                if (!Goto("default"))
-                {
-                    var home = new VisualElement();
-                    home.Add(new Label("Welcome to the Nox CCK."));
-                    rootVisualElement.Q<VisualElement>("content").Add(home);
-                }
+            if (panel != null && !panel.IsHidden() && Goto(next) || Goto("default")) return;
+            var home = new VisualElement();
+            home.Add(new Label("Welcome to the Nox CCK."));
+            rootVisualElement.Q<VisualElement>("content").Add(home);
         }
 
 
@@ -101,13 +98,13 @@ namespace Nox.ModLoader.Cores.Panels
                 {
                     root.Remove(child);
                     var o = GetPanel(child.name);
-                    o?.InvokeClosePanel();
+                    o?.InvokeOnHidden();
                 }
 
             root.Add(content);
             content.name = id;
             Instance.ActivePanelId = id;
-            panel.InvokeOpenPanel();
+            panel.InvokeOnVisible();
 
             UpdateMenu();
 

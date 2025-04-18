@@ -22,7 +22,8 @@ namespace api.nox.server
         {
             var server = ServerSystem.ServerAPI.CallMethod("GetCurrentServer");
             if (server == null) return;
-            ServerClient.UISystem.GetField("Page")
+            ServerClient.UISystem
+                .GetField("Pages")
                 .InvokeMethod("Goto", menuId, "server_profile", new object[] { "server", server });
         }
 

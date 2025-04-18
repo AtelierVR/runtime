@@ -20,8 +20,13 @@ namespace api.nox.network.Instances
         public ushort client_count;
         public InstancePlayer[] players;
 
-        public string GetCacheKey() => GetCacheKey(id, server);
-        public static string GetCacheKey(uint id, string server) => $"instance.{id}.{server}";
-        public override string ToString() => $"{GetType().Name}[id={id}, server={server}]";
+        public string GetCacheKey()
+            => GetCacheKey(id, server);
+
+        public static string GetCacheKey(uint id, string server)
+            => $"instance.{id}.{server}";
+
+        public override string ToString()
+            => $"{GetType().Name}[id={id}, server={server}]";
     }
 }

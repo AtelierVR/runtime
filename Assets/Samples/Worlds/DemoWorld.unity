@@ -157,11 +157,14 @@ MonoBehaviour:
   data_jintScripts: []
   SequentialIndex: 0
   NetworkObjects: []
-  Spawns: []
+  Spawns:
+  - {fileID: 497432689}
+  - {fileID: 1064788527}
   FlyOnSpawn: 0
   SpawnType: 1
   RespawnHeight: -100
-  JintScripts: []
+  JintScripts:
+  - {fileID: 585968213}
   data_Scenes: []
   data_Features: []
   data_Mods: []
@@ -173,13 +176,14 @@ MonoBehaviour:
   data_gravity: 0
   data_showingOnJoin: 0
   data_showingDistance: 0
-  Scenes: []
+  Scenes:
+  - {fileID: 102900000, guid: b8ce853cf9a3b2b478f94ddd668c4528, type: 3}
   Features: []
   ModRequirements: []
-  _target: 0
-  ServerPublisher: 
-  IdPublisher: 0
-  VersionPublisher: 0
+  _target: 1
+  ServerPublisher: hactazia.fr
+  IdPublisher: 1
+  VersionPublisher: 12
 --- !u!4 &497432691
 Transform:
   m_ObjectHideFlags: 0

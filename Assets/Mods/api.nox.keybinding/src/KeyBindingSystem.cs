@@ -16,8 +16,7 @@ namespace api.nox.keybinding
         [NoxPublic(NoxAccess.Method)]
         public KeyBinding AddKeyBinding(string id, InputAction action, string category = null)
             => AddKeyBinding(new KeyBinding(id, category, action));
-
-        [NoxPublic(NoxAccess.Method)]
+        
         private KeyBinding AddKeyBinding(KeyBinding binding)
         {
             if (binding == null)
@@ -98,7 +97,6 @@ namespace api.nox.keybinding
         }
 
         [NoxPublic(NoxAccess.Method)]
-
         public bool HasKeyBinding(string id)
             => _bindings.Exists(b => b.Id == id);
 

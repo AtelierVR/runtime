@@ -2,19 +2,19 @@ import { log } from "logger";
 
 let d = Date.now();
 
-export function onUpdate() {
+export function onFixedUpdate() {
     let delta = Date.now() - d;
     d = Date.now();
-    gameObject.transform.Rotate(delta * 0.1, delta * 0.1, delta * 0.1);
+    gameObject.transform.Rotate(delta * -0.1, delta * 0.1, delta * -0.1);
 }
 
 export function onPrepare() {
-   // test(5_000_000);
+ //test(0);
 }
 
 async function test(n) {
     let li = [];
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 10000; i++) {
         let t0 = Date.now();
         let i = 0;
         while (i < n) i++;

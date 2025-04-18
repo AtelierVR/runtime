@@ -15,7 +15,7 @@ namespace api.nox.game.UI
             Instance = this;
         }
 
-        public Camera Camera => PlayerController.instance.currentController.playerCamera;
+        public Camera Camera => PlayerController.Instance.currentController.playerCamera;
         public MeshRenderer Renderer => GetComponent<MeshRenderer>();
 
         public Material Material => Renderer.material;

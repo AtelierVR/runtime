@@ -54,7 +54,7 @@ namespace api.nox.world
 
         private async UniTask OnUserUpdated(INoxObject user)
         {
-            if (string.IsNullOrEmpty(user.GetField<string>("home"))) return;
+            if (user == null || string.IsNullOrEmpty(user.GetField<string>("home"))) return;
             var home = await user.CallAsyncMethod("GetHome");
             if (home == null) return;
             OnHomeUpdated.Invoke(home);

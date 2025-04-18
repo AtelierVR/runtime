@@ -336,7 +336,7 @@ namespace api.nox.world
             }
         }
 
-        public VisualElement OnOpened(Dictionary<string, object> data)
+        public VisualElement Make(Dictionary<string, object> data)
         {
             NotificationManager.Clear();
             _lastHashNotify = "";

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -15,6 +16,38 @@ namespace Nox.CCK.Utils
 
         public async UniTask<INoxObject> CallAsyncMethod(string method, params object[] args)
             => await CallAsyncMethod<INoxObject>(method, args);
+        
+        private bool WaitCallback(object awaiter)
+        {
+            try
+            {
+                if (awaiter == null)
+                {
+                    Logger.LogError("Awaiter is null.");
+                    return false;
+                }
+
+                var isCompletedProperty = awaiter.GetType().GetProperty("IsCompleted");
+                if (isCompletedProperty == null)
+                {
+                    Logger.LogError("IsCompleted property not found on awaiter.");
+                    return false;
+                }
+
+                return (bool)isCompletedProperty.GetValue(awaiter)!;
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Error checking awaiter: {e?.Message}");
+                Logger.LogException(e);
+                return false;
+            }
+            catch
+            {
+                Logger.LogError("Unknown error checking awaiter.");
+                return false;
+            }
+        }
 
         public async UniTask<T> CallAsyncMethod<T>(string method, params object[] args)
         {
@@ -61,8 +94,7 @@ namespace Nox.CCK.Utils
                     var awaiter = waiter.GetType().GetMethod("GetAwaiter")?.Invoke(waiter, null);
                     if (awaiter != null)
                     {
-                        await UniTask.WaitUntil(() =>
-                            awaiter.GetType().GetProperty("IsCompleted")?.GetValue(awaiter) is true);
+                        await UniTask.WaitUntil(() => WaitCallback(awaiter));
                         var result = awaiter.GetType().GetMethod("GetResult")?.Invoke(awaiter, null);
 
                         if (result is null)
@@ -177,6 +209,7 @@ namespace Nox.CCK.Utils
 
                 Logger.LogWarning(
                     $"Field (GET) {field} in {type} returned invalid type {result.GetType()} instead of {typeof(T)}");
+                
                 return default;
             }
             catch (Exception e)

@@ -50,6 +50,102 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Samples/Worlds/DemoWorld.unity
     guid: 39830c7dbe00a6843a4da18a86873368
+  - enabled: 1
+    path: Assets/Samples/Worlds/New Scene.unity
+    guid: b8ce853cf9a3b2b478f94ddd668c4528
+  - enabled: 1
+    path: Assets/Samples/Avatars/demo/New Scene.unity
+    guid: dec68381f5851c342afc1a9c49261343
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-21-03-37-demoworld/1.unity
+    guid: cc3ca9fbe85a4d9bb6f8cdfb5021a9c0
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-21-03-37-demoworld/0.unity
+    guid: cb9282ff1c6a491c8d4fd5f71dcf2adf
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-21-08-43-demoworld/0.unity
+    guid: 28e8fc58a6ee44f1be1415ad89cb2609
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-21-08-43-demoworld/1.unity
+    guid: a6fea687b1374119823b12522c0c69b1
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-21-12-36-demoworld/0.unity
+    guid: 48e6698d50d74365a50e1b296f85c036
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-21-12-36-demoworld/1.unity
+    guid: 5df74d8e7446457f9670aec641546ad2
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-21-18-41-demoworld/0.unity
+    guid: 39e953664ee9456b88460f5e75f65f1c
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-21-18-41-demoworld/1.unity
+    guid: 1699fd07065542289ac2d58fc2d314fd
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-21-46-41-demoworld/0.unity
+    guid: 7c8dd32c9cf14153bfc4024a9c1a71db
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-21-46-41-demoworld/1.unity
+    guid: 3d3e0e6da432405883f837e2faa6a3e1
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-21-50-42-demoworld/0.unity
+    guid: 2e8219ad1f904471a97e1f3aecc3aee7
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-21-50-42-demoworld/1.unity
+    guid: 659f714e82a14acdb21bea51018992af
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-21-55-07-demoworld/1.unity
+    guid: 8453fe16d6e4459bbb2b3edeac035c94
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-21-55-07-demoworld/0.unity
+    guid: 8682c6410ed04961a9085eeba1887b94
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-00-39-demoworld/0.unity
+    guid: 64b735670e0c4b309553e895cef3f713
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-00-39-demoworld/1.unity
+    guid: f589b1125f33473992bdb6a31e956202
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-02-38-demoworld/1.unity
+    guid: 4405ea992260414da8be0d3fa094379e
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-02-38-demoworld/0.unity
+    guid: b3ac4ffa336344c0887d354aceb9380d
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-11-52-demoworld/0.unity
+    guid: bfda61752a1548f899267023ab543d8a
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-11-52-demoworld/1.unity
+    guid: dfbddfa1302b442b9e3379b5f53f45a2
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-27-28-demoworld/1.unity
+    guid: a025fa187d6e45eba4112380716d9df6
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-27-28-demoworld/0.unity
+    guid: 00ddd27f21af4a789ef49d311b8542b9
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-32-36-demoworld/1.unity
+    guid: 1736902783464f53a01a402055d00dd4
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-32-36-demoworld/0.unity
+    guid: 98d9b4417ce24c0aaaf01d02c5ae42e3
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-38-42-demoworld/0.unity
+    guid: 30576ae7cd394c2395f52d22f4019ed2
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-38-42-demoworld/1.unity
+    guid: 38fa03f07e734ac1b2b53f332304ba94
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-42-31-demoworld/0.unity
+    guid: 4582c134af1344d19582a0879833a70e
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-42-31-demoworld/1.unity
+    guid: 499c382bf0274b28a6aaf6c8926b0c93
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-45-22-demoworld/1.unity
+    guid: fb0b0ab18a3648bf93f55d06688877ed
+  - enabled: 1
+    path: Assets/BuildOutput/2025-04-17-22-45-22-demoworld/0.unity
+    guid: 4e871aa58a984d8c94f04ae2d07581ce
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

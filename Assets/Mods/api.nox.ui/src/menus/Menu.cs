@@ -12,6 +12,7 @@ namespace api.nox.ui.menus
         [NoxPublic(NoxAccess.Method)]
         public int GetId() => GetInstanceID();
 
+        [NoxPublic(NoxAccess.Read)]
         public readonly HistoryList History = new();
 
         public RectTransform container;

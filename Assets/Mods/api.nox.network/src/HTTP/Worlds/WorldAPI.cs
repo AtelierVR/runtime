@@ -6,6 +6,7 @@ using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.network.Worlds
 {
@@ -24,7 +25,8 @@ namespace api.nox.network.Worlds
         {
             if (NetworkSystem.ModInstance == null) throw new Exception("Network system is not initialized");
             // PUT /api/worlds
-            var gateway = await Gateway.FindGatewayMaster(world.Server);
+
+            var gateway = await Discover.GetGateway(world.Server);
             if (gateway == null) return null;
 
             var token = await NetworkSystem.ModInstance.Auth.GetToken(world.Server);
@@ -49,10 +51,13 @@ namespace api.nox.network.Worlds
         {
             if (NetworkSystem.ModInstance == null) throw new Exception("Network system is not initialized");
             // DELETE /api/worlds/{worldId}
-            var gateway = await Gateway.FindGatewayMaster(server);
+
+            var gateway = await Discover.GetGateway(server);
             if (gateway == null) return false;
+
             var token = await NetworkSystem.ModInstance.Auth.GetToken(server);
             if (token == null) return false;
+
             var request = new Request(Method.DELETE, Request.MergeUrl(gateway, $"/api/worlds/{worldId}"));
             var response = await request.Send<string, Response<object>>(null,
                 new Dictionary<string, string> { { "Authorization", token.ToHeader() } });
@@ -66,7 +71,8 @@ namespace api.nox.network.Worlds
         {
             if (NetworkSystem.ModInstance == null) throw new Exception("Network system is not initialized");
             // POST /api/worlds/{worldId}/thumbnail
-            var gateway = await Gateway.FindGatewayMaster(server);
+
+            var gateway = await Discover.GetGateway(server);
             if (gateway == null) return false;
 
             var token = await NetworkSystem.ModInstance.Auth.GetToken(server);
@@ -91,7 +97,8 @@ namespace api.nox.network.Worlds
         {
             if (NetworkSystem.ModInstance == null) throw new Exception("Network system is not initialized");
             // GET /api/worlds/{worldId}
-            var gateway = await Gateway.FindGatewayMaster(server);
+
+            var gateway = await Discover.GetGateway(server);
             if (gateway == null) return null;
 
             var request = new Request(Method.GET, Request.MergeUrl(gateway, $"/api/worlds/{worldId}"));
@@ -117,7 +124,8 @@ namespace api.nox.network.Worlds
         {
             if (NetworkSystem.ModInstance == null) throw new Exception("Network system is not initialized");
             // POST /api/worlds/{worldId}
-            var gateway = await Gateway.FindGatewayMaster(world.Server);
+
+            var gateway = await Discover.GetGateway(world.Server);
             if (gateway == null) return null;
 
             var token = await NetworkSystem.ModInstance.Auth.GetToken(world.Server);
@@ -125,9 +133,14 @@ namespace api.nox.network.Worlds
 
             var request = new Request(Method.POST, Request.MergeUrl(gateway, $"/api/worlds/{world.WorldId}"));
 
-            var response =
-                await request.Send<string, Response<World>>(world.ToJson(),
-                    new() { { "Authorization", token.ToHeader() } });
+            Logger.LogDebug($"Updating world {world.WorldId} on {world.Server}: {world.ToJson()}");
+            var response = await request.Send<string, Response<World>>(
+                world.ToJson(),
+                new()
+                {
+                    { "Authorization", token.ToHeader() },
+                    { "Content-Type", "application/json" }
+                });
             if (request.IsError || response.IsError) return null;
 
             NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("world_fetch", response.data));
@@ -140,12 +153,13 @@ namespace api.nox.network.Worlds
         [NoxPublic(NoxAccess.Method)]
         public async UniTask<WorldSearch> SearchWorlds(Dictionary<string, object> data)
             => await SearchWorlds(SearchWorldData.From(data));
-        
+
         internal async UniTask<WorldSearch> SearchWorlds(SearchWorldData data)
         {
             if (NetworkSystem.ModInstance == null) throw new Exception("Network system is not initialized");
             // GET /api/worlds/search?{data.ToParams()}
-            var gateway = await Gateway.FindGatewayMaster(data.Server);
+
+            var gateway = await Discover.GetGateway(data.Server);
             if (gateway == null) return null;
 
             var request = new Request(Method.GET, Request.MergeUrl(gateway, $"/api/worlds/search?{data.ToParams()}"));

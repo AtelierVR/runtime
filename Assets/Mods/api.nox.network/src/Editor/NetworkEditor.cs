@@ -5,6 +5,8 @@ using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Mods.Panels;
 using UnityEngine.UIElements;
+using System;
+using System.Linq;
 
 namespace api.nox.network.Editor
 {
@@ -79,7 +81,7 @@ namespace api.nox.network.Editor
         private readonly VisualElement _root = new();
 
 
-        public VisualElement OnOpened(Dictionary<string, object> data)
+        public VisualElement Make(Dictionary<string, object> data)
         {
             _root.ClearBindings();
             _root.Clear();

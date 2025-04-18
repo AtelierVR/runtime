@@ -10,5 +10,7 @@ namespace api.nox.network.Auths
         [NoxPublic(NoxAccess.Read)] public string token;
         [NoxPublic(NoxAccess.Read)] public ulong expires;
         [NoxPublic(NoxAccess.Read)] public UserMe user;
+        public override string ToString()
+            => $"{GetType().Name}[error={error}, token={token}, expires={expires}, user={user}]";
     }
 }

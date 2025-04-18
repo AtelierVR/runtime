@@ -38,7 +38,7 @@ namespace dev.nox.development
 
         private readonly VisualElement _root = new();
 
-        public VisualElement OnOpened(Dictionary<string, object> data)
+        public VisualElement Make(Dictionary<string, object> data)
         {
             _root.ClearBindings();
             _root.Clear();

@@ -24,6 +24,10 @@ namespace api.nox.game
 
         private ClientModCoreAPI _coreAPI;
 
+        [NoxPublic(NoxAccess.Method)]
+        public PlayerController GetPlayerController()
+            => PlayerController.Instance;
+
         /*private HomeTileManager _homeTile;
         private UserTileManager _userTile;
         private ServerTileManager _serverTile;
@@ -49,7 +53,6 @@ namespace api.nox.game
 
         internal static MainModInitializer RelayAPI
             => CoreAPI.ModAPI.GetMod("relay").GetMains().FirstOrDefault();
-
 
         public async UniTask OnInitializeClientAsync(ClientModCoreAPI api)
         {
@@ -114,7 +117,7 @@ namespace api.nox.game
         private void SetupDefaultWorld()
         {
             WorldHidden.Get(_defaultWorld).Set(true);
-            var cur = PlayerController.instance.currentController;
+            var cur = PlayerController.Instance.currentController;
             if (!BaseDescriptor.TryGetDescriptor<BaseDescriptor>(_defaultWorld, out var desc))
             {
                 Logger.LogWarning("Default world has no descriptor");
@@ -210,8 +213,8 @@ namespace api.nox.game
             // _coreAPI.EventAPI.Unsubscribe(_tileSub);
             // _coreAPI.EventAPI.Unsubscribe(_tileGotoSub);
             // _coreAPI.EventAPI.Unsubscribe(_sessionChangedSub);
-            if (PlayerController.instance)
-                PlayerController.instance.Dispose();
+            if (PlayerController.Instance)
+                PlayerController.Instance.Dispose();
             if (MenuManager.Instance != null)
                 MenuManager.Instance.Dispose();
             Worlds.WorldManager.UnloadAllAssets(true);

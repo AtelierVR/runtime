@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 049ba706b603a3b42b4489dab24b66ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dimensions: {x: 4, y: 0}
+  dimensions: {x: 8, y: 0}
   spacing: 16
 --- !u!1 &2828473505267950094
 GameObject:

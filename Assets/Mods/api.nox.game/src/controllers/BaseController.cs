@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using Nox.CCK.Players;
+using Nox.CCK.Utils;
 using UnityEngine;
+using Transform = UnityEngine.Transform;
 
 namespace api.nox.game.controllers
 {
-    public abstract class BaseController : MonoBehaviour
+    public abstract class BaseController : MonoBehaviour, INoxObject
     {
         public virtual uint Priority => 0;
 

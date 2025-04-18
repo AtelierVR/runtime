@@ -8,5 +8,8 @@ namespace api.nox.network.Auths
         [NoxPublic(NoxAccess.Read)] public bool IsIntegrity;
 
         public string ToHeader() => IsIntegrity ? $"Integrity {Token}" : $"Bearer {Token}";
+
+        public override string ToString()
+            => $"{GetType().Name}[Token={Token}, IsIntegrity={IsIntegrity}]";
     }
 }

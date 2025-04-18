@@ -5,17 +5,20 @@ using api.nox.network.Utils;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.network.Worlds.Assets
 {
     public class AssetAPI : INoxObject
     {
+        
         [NoxPublic(NoxAccess.Method)]
         public async UniTask<WorldAsset> GetAsset(string server, uint worldId, uint assetId)
         {
             if (NetworkSystem.ModInstance == null) throw new System.Exception("NetSystem not initialized");
             // GET /api/worlds/{worldId}/assets/{assetId}
-            var gateway = await Gateway.FindGatewayMaster(server);
+
+            var gateway = await Discover.GetGateway(server);
             if (gateway == null) return null;
 
             var request = new Request(Method.GET, Request.MergeUrl(gateway, $"/api/worlds/{worldId}/assets/{assetId}"));
@@ -38,7 +41,8 @@ namespace api.nox.network.Worlds.Assets
         {
             if (NetworkSystem.ModInstance == null) throw new System.Exception("NetSystem not initialized");
             // DELETE /api/worlds/{worldId}/assets/{assetId}
-            var gateway = await Gateway.FindGatewayMaster(server);
+
+            var gateway = await Discover.GetGateway(server);
             if (gateway == null) return false;
 
             var token = await NetworkSystem.ModInstance.Auth.GetToken(server);
@@ -61,7 +65,8 @@ namespace api.nox.network.Worlds.Assets
         {
             if (NetworkSystem.ModInstance == null) throw new System.Exception("NetSystem not initialized");
             // POST /api/worlds/{worldId}/assets/{assetId}/file
-            var gateway = await Gateway.FindGatewayMaster(server);
+
+            var gateway = await Discover.GetGateway(server);
             if (gateway == null) return false;
 
             var token = await NetworkSystem.ModInstance.Auth.GetToken(server);
@@ -89,26 +94,44 @@ namespace api.nox.network.Worlds.Assets
 
         private async UniTask<WorldAsset> CreateAsset(CreateAssetData asset)
         {
-            if (NetworkSystem.ModInstance == null) throw new System.Exception("NetSystem not initialized");
-            // PUT /api/worlds/{worldId}/assets
-            var gateway = await Gateway.FindGatewayMaster(asset.Server);
-            if (gateway == null) return null;
+            try
+            {
+                Logger.LogDebug("t1");
+                if (NetworkSystem.ModInstance == null) throw new System.Exception("NetSystem not initialized");
+                // PUT /api/worlds/{worldId}/assets
 
-            var token = await NetworkSystem.ModInstance.Auth.GetToken(asset.Server);
-            if (token == null) return null;
+                var gateway = await Discover.GetGateway(asset.Server);
+                if (gateway == null) return null;
 
-            var request = new Request(Method.PUT, Request.MergeUrl(gateway, $"/api/worlds/{asset.WorldId}/assets"));
+                var token = await NetworkSystem.ModInstance.Auth.GetToken(asset.Server);
+                if (token == null) return null;
 
-            var response =
-                await request.Send<CreateAssetData, Response<WorldAsset>>(asset,
-                    new() { { "Authorization", token.ToHeader() } });
-            if (request.IsError || response.IsError) return null;
+                var request = new Request(Method.PUT, Request.MergeUrl(gateway, $"/api/worlds/{asset.WorldId}/assets"));
+                Logger.LogDebug("t5");
 
-            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("world_asset_fetch", response.data));
-            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("world_asset_create", response.data));
-            NetCache.Set(response.data);
+                var response = await request.Send<string, Response<WorldAsset>>(
+                    asset.ToJson(),
+                    new()
+                    {
+                        { "Authorization", token.ToHeader() },
+                        { "Content-Type", "application/json" }
+                    }
+                );
+                Logger.LogDebug("t6");
+                if (request.IsError || response.IsError) return null;
 
-            return response.data;
+                NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("world_asset_fetch", response.data));
+                NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("world_asset_create", response.data));
+                NetCache.Set(response.data);
+                Logger.LogDebug("t7");
+
+                return response.data;
+            }
+            catch (System.Exception e)
+            {
+                Logger.LogError(e);
+                return null;
+            }
         }
 
         [NoxPublic(NoxAccess.Method)]
@@ -119,7 +142,8 @@ namespace api.nox.network.Worlds.Assets
         {
             if (NetworkSystem.ModInstance == null) throw new System.Exception("NetSystem not initialized");
             // GET /api/worlds/{id}/assets/search?{data.ToParams()}
-            var gateway = await Gateway.FindGatewayMaster(data.Server);
+
+            var gateway = await Discover.GetGateway(data.Server);
             if (gateway == null) return null;
 
             var request = new Request(Method.GET,

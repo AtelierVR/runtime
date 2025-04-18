@@ -33,23 +33,23 @@ namespace dev.nox.development
         public string GetId() => "mod_details";
         public string GetName() => "Dev/Mod Details";
         public bool IsHidden() => false;
-        
+
         private readonly VisualElement _root = new();
 
-        public VisualElement OnOpened(Dictionary<string, object> data)
+        public VisualElement Make(Dictionary<string, object> data)
         {
             _root.ClearBindings();
             _root.Clear();
             _root.Add(ModDetails.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("mod_details.uxml").CloneTree());
             _root.Q<Label>("version").text = "v" + EventLogger.CoreAPI.ModMetadata.GetVersion();
             _lastUpdate = DateTime.MinValue;
-            OnGUI();
+            OnUpdate();
             return _root;
         }
 
         private DateTime _lastUpdate = DateTime.Now;
 
-        public void OnGUI()
+        public void OnUpdate()
         {
             if (DateTime.Now - _lastUpdate < TimeSpan.FromSeconds(1)) return;
             _lastUpdate = DateTime.Now;

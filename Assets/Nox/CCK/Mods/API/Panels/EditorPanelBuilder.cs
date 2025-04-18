@@ -9,8 +9,18 @@ namespace Nox.CCK.Mods.Panels
         public string GetName();
         public bool IsHidden();
 
-        public VisualElement OnOpened(Dictionary<string, object> data);
-        public void OnGUI() { }
-        public void OnClosed() { }
+        public VisualElement Make(Dictionary<string, object> data);
+
+        public void OnUpdate()
+        {
+        }
+
+        public void OnHidden()
+        {
+        }
+
+        public void OnVisible()
+        {
+        }
     }
 }

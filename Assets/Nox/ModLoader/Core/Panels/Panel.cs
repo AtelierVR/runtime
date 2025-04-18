@@ -10,12 +10,12 @@ namespace Nox.ModLoader.Cores.Panels
 
         private readonly EditorPanelBuilder _builder;
 
-        public Panel(EditorPanelBuilder panel) 
+        public Panel(EditorPanelBuilder panel)
             => _builder = panel;
-        
-        internal void InvokeOpenPanel() => _builder?.OnOpened(null);
-        internal void InvokeClosePanel() => _builder?.OnClosed();
-        internal void InvokePanelGUI() => _builder?.OnGUI();
+
+        internal void InvokeOnVisible() => _builder?.OnVisible();
+        internal void InvokeOnHidden() => _builder?.OnHidden();
+        internal void InvokeOnUpdate() => _builder?.OnUpdate();
 
         public string GetModId() => ModId;
         public string GetId() => _builder.GetId();
@@ -23,7 +23,8 @@ namespace Nox.ModLoader.Cores.Panels
         public bool IsHidden() => _builder.IsHidden();
         public string GetFullId() => $"{GetModId()}.{GetId()}";
 
-        public VisualElement MakeContent(Dictionary<string, object> data = null) => _builder.OnOpened(data);
+        public VisualElement MakeContent(Dictionary<string, object> data = null) => _builder.Make(data);
         public bool IsActive() => PanelManager.IsActivePanel(this);
+
     }
 }

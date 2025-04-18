@@ -10,11 +10,13 @@ namespace api.nox.network.Auths
         public string password;
 
         public string ToJSON()
-        => new JObject
-        {
-            ["identifier"] = identifier,
-            ["password"] = password
-        }.ToString();
+            => new JObject
+            {
+                ["identifier"] = identifier,
+                ["password"] = password
+            }.ToString();
 
+        public override string ToString()
+            => $"{GetType().Name}[server={server}, identifier={identifier}, password={password}]";
     }
 }

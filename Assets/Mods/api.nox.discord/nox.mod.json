@@ -26,8 +26,8 @@
   "relations": [
     {
       "id": "api.nox.network",
-      "version": ">=1.0.0",
-      "type": "recommends"
+      "type": "recommends",
+      "version": ">=1.0.0"
     }
   ],
   "entrypoints": {

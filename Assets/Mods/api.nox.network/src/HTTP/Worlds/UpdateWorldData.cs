@@ -24,7 +24,7 @@ namespace api.nox.network
         {
             var req = new UpdateWorldData();
             if (data.TryGetValue("server", out var server) && server is string s) req.Server = s;
-            if (data.TryGetValue("worldId", out var worldId) && worldId is uint w) req.WorldId = w;
+            if (data.TryGetValue("world_id", out var worldId) && worldId is uint w) req.WorldId = w;
             if (data.TryGetValue("title", out var title) && title is string t) req._title = t;
             if (data.TryGetValue("description", out var description) && description is string d) req._description = d;
             if (data.TryGetValue("capacity", out var capacity) && capacity is ushort c) req._capacity = c;

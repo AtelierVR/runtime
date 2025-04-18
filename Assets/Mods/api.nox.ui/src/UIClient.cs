@@ -44,7 +44,7 @@ namespace api.nox.ui
             Add(menu);
             return menu;
         }
-
+        
         private bool Has(Menu menu)
             => Cache.Exists(m => m.GetId() == menu.GetId());
 

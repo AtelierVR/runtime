@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.network
 {
@@ -9,8 +10,8 @@ namespace api.nox.network
         public uint WorldId;
         private uint _id;
         public ushort Version;
-        internal string Engine;
-        internal string Platform;
+        public string Engine;
+        public string Platform;
         private string _url;
         private string _hash;
         private uint _size;

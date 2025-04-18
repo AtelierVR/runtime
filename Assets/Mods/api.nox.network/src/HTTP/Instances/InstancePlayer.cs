@@ -7,5 +7,8 @@ namespace api.nox.network.Instances
     {
         public string user;
         public string display;
+        
+        public override string ToString()
+            => $"{GetType().Name}[user={user}, display={display}]";
     }
 }

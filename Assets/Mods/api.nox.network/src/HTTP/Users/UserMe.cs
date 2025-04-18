@@ -31,5 +31,29 @@ namespace api.nox.network.Users
             var worldref = WorldIdentifier.FromString(home);
             return await NetworkSystem.ModInstance.World.GetWorld(worldref.Server ?? server, worldref.ID);
         }
+        
+        [NoxPublic(NoxAccess.Method)]
+        public override async UniTask<bool> Refresh()
+        {
+            var user = await NetworkSystem.ModInstance.User.GetUserById(server, id);;
+            if (user == null) return false;
+            user.CopyTo(this);
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("user_fetch", this));
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("user_update", this));
+            NetCache.Set(this);
+            return true;
+        }
+        
+        internal void CopyTo(UserMe user)
+        {
+            base.CopyTo(user);
+            user.email = email;
+            user.created_at = created_at;
+            user.home = home;
+        }
+        
+        
+        public override string ToString() 
+            => $"{GetType().Name}[id={id}, username={username}, display={display}, server={server}, email={email}, created_at={created_at}, home={home}]";
     }
 }

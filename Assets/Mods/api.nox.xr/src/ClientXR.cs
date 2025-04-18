@@ -2,6 +2,7 @@
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
 using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
@@ -52,6 +53,14 @@ namespace api.nox.xr
 
         public async UniTask OnInitializeClientAsync(ClientModCoreAPI api)
         {
+            InputDevices.deviceConnected += OnDeviceConnected;
+            InputDevices.deviceDisconnected += OnDeviceDisconnected;
+
+            var devices = new List<InputDevice>();
+            InputDevices.GetDevices(devices);
+            foreach (var device in devices)
+                OnDeviceConnected(device);
+
             if (NoVRFlag)
             {
                 Logger.LogWarning("VR disabled by flag.");
@@ -59,6 +68,53 @@ namespace api.nox.xr
             }
 
             await StartLoaderAsync();
+        }
+
+        public void OnDisposeClient()
+        {
+            if (!XRGeneralSettings.Instance.Manager.activeLoader) return;
+            Logger.Log("Stopping XR...");
+            XRGeneralSettings.Instance.Manager.StopSubsystems();
+            XRGeneralSettings.Instance.Manager.DeinitializeLoader();
+            _isXRInitialized = false;
+            InputDevices.deviceConnected -= OnDeviceConnected;
+            InputDevices.deviceDisconnected -= OnDeviceDisconnected;
+        }
+
+        private void OnDeviceConnected(InputDevice device)
+        {
+            Logger.LogDebug($"New XR Device:");
+            Logger.LogDebug(" - name: " + device.name);
+            Logger.LogDebug(" - characteristics: " + device.characteristics);
+            Logger.LogDebug(" - manufacturer: " + device.manufacturer);
+            Logger.LogDebug(" - serial number: " + device.serialNumber);
+            Logger.LogDebug(" - subsystem: " + device.subsystem);
+
+            var usages = new List<InputFeatureUsage>();
+            device.TryGetFeatureUsages(usages);
+            foreach (var usage in usages)
+                Logger.LogDebug(" - usage: " + usage.name);
+
+            if (device.TryGetHapticCapabilities(out var hapticCapabilities))
+            {
+                Logger.LogDebug(" - haptic capabilities:");
+                Logger.LogDebug("   - num channels: " + hapticCapabilities.numChannels);
+                Logger.LogDebug("   - supports buffer: " + hapticCapabilities.supportsBuffer);
+                Logger.LogDebug("   - supports impulse: " + hapticCapabilities.supportsImpulse);
+                Logger.LogDebug("   - buffer optimal size: " + hapticCapabilities.bufferOptimalSize);
+                Logger.LogDebug("   - buffer max size: " + hapticCapabilities.bufferMaxSize);
+                Logger.LogDebug("   - buffer frequency Hz: " + hapticCapabilities.bufferFrequencyHz);
+            }
+
+            if (device.characteristics.HasFlag(InputDeviceCharacteristics.HeadMounted))
+                OnXRHeadsetChange.Invoke(true);
+        }
+
+        private void OnDeviceDisconnected(InputDevice device)
+        {
+            Logger.Log($"XR Device disconnected: {device.name} {device.characteristics}");
+            if (device.characteristics.HasFlag(InputDeviceCharacteristics.HeadMounted))
+                OnXRHeadsetChange.Invoke(false);
         }
 
 
@@ -77,11 +133,25 @@ namespace api.nox.xr
                 await XRGeneralSettings.Instance.Manager.InitializeLoader().ToUniTask();
             }
 
-            if (!XRGeneralSettings.Instance.Manager.activeLoader)
+            var loader = XRGeneralSettings.Instance.Manager.activeLoader;
+
+            if (!loader)
             {
                 Logger.LogError("XR loader is not active.");
                 return;
             }
+
+            Logger.Log("Loading XR...");
+
+
+            if (!loader.Initialize())
+            {
+                Logger.LogError("XR loader failed to initialize.");
+                return;
+            }
+
+            Logger.Log($"XR loader initialized: {loader.name}");
+
 
             Logger.Log("XR initialized. Starting subsystems...");
             XRGeneralSettings.Instance.Manager.StartSubsystems();
@@ -89,24 +159,8 @@ namespace api.nox.xr
             _isXRActive = XRSettings.isDeviceActive;
             _isXRInitialized = true;
             OnXRHeadsetChange.Invoke(_isXRActive);
-
-            if (!XRSettings.isDeviceActive)
-            {
-                Logger.LogWarning("XR device is not active.");
-                return;
-            }
-
-            Logger.Log("XR present. Starting in VR mode.");
         }
 
-        public void OnDisposeClient()
-        {
-            if (!XRGeneralSettings.Instance.Manager.activeLoader) return;
-            Logger.Log("Stopping XR...");
-            XRGeneralSettings.Instance.Manager.StopSubsystems();
-            XRGeneralSettings.Instance.Manager.DeinitializeLoader();
-            _isXRInitialized = false;
-        }
 
         public void OnUpdateClient()
         {
@@ -114,6 +168,14 @@ namespace api.nox.xr
             _isXRActive = XRSettings.isDeviceActive;
             Logger.Log($"XR headset change: {_isXRActive}");
             OnXRHeadsetChange.Invoke(_isXRActive);
+        }
+
+        [NoxPublic(NoxAccess.Method)]
+        public bool HasHeadset()
+        {
+            var devices = new List<InputDevice>();
+            InputDevices.GetDevicesAtXRNode(XRNode.Head, devices);
+            return devices.Count > 0;
         }
     }
 }

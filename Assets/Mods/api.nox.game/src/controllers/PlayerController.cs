@@ -1,14 +1,16 @@
 using System.Linq;
+using Nox.CCK.Utils;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.game.controllers
 {
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : MonoBehaviour, INoxObject
     {
-        public static PlayerController instance;
-
-        public BaseController currentController;
+        public static PlayerController Instance;
+        
+        [NoxPublic(NoxAccess.Read)] public BaseController currentController;
+        [NoxPublic(NoxAccess.Field)] public bool canChange = true;
 
         private BaseController GetFallBackController()
             => GameClientSystem.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/controllers/DesktopController.prefab")
@@ -50,9 +52,9 @@ namespace api.nox.game.controllers
 
         internal void Initialize(bool force = false)
         {
-            if (force && (!enabled || instance == this)) return;
+            if (force && (!enabled || Instance == this)) return;
             Logger.LogDebug("PlayerController.Awake");
-            instance = this;
+            Instance = this;
             SpawnController(GetFallBackController());
         }
 
@@ -61,18 +63,20 @@ namespace api.nox.game.controllers
 
         public void Dispose()
         {
-            instance = instance == this ? null : instance;
+            Instance = Instance == this ? null : Instance;
             Destroy(gameObject);
         }
 
         public static void Create()
         {
-            var controller = Instantiate(GameClientSystem
-                .CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/controllers/PlayerController.prefab")
+            var o = Instantiate(
+                GameClientSystem
+                    .CoreAPI.AssetAPI
+                    .GetAsset<GameObject>("prefabs/controllers/PlayerController.prefab")
             );
-            controller.name = $"[{nameof(PlayerController)}]";
-            DontDestroyOnLoad(controller.gameObject);
-            controller.GetComponent<PlayerController>().Initialize(true);
+            o.name = $"[{nameof(PlayerController)}]";
+            DontDestroyOnLoad(o.gameObject);
+            o.GetComponent<PlayerController>().Initialize(true);
         }
     }
 }

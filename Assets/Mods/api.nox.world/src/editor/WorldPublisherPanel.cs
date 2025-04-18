@@ -162,7 +162,7 @@ namespace api.nox.world
             tagsList.itemsSource = _world != null ? _world.GetField<string[]>("tags") : Array.Empty<string>();
         }
 
-        public VisualElement OnOpened(Dictionary<string, object> data)
+        public VisualElement Make(Dictionary<string, object> data)
         {
             _root.ClearBindings();
             _root.Clear();
@@ -187,7 +187,7 @@ namespace api.nox.world
                     mainDescriptor.Target = plat;
                 else
                 {
-                    EditorUtility.DisplayDialog("Error", $"{plat.GetPlatformName()} is not supported.", "Ok");
+                    EditorUtility.DisplayDialog("Error", $"\"{plat}\" is not supported.", "Ok");
                     Logger.LogError(
                         $"Platform \"{plat.GetPlatformName()}\" ({plat.GetBuildTarget()}) is not supported.");
                     _root.Q<EnumField>("platform-field").value = e.previousValue;
@@ -375,7 +375,7 @@ namespace api.nox.world
             var autoVersion = config.Get("sdk.auto_version", true);
             var strictVersion = config.Get("sdk.strict_version", true);
 
-            var assetAPI = WorldEditor.NetworkAPI.GetField("Asset");
+            var assetAPI = WorldEditor.NetworkAPI.GetField("World").GetField("Asset");
             var search = await assetAPI.CallAsyncMethod("SearchAssets",
                 new Dictionary<string, object>
                 {

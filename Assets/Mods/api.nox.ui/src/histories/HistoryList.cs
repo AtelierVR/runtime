@@ -21,21 +21,26 @@ namespace api.nox.ui.histories
             menu.SetPage(page, crt, PageFlags.IsNew | PageFlags.IsForward);
         }
 
-        public void GoBack(Menu menu)
+        public void Move(Menu menu, int move)
+        {
+            if (move == 0) return;
+            if (move < 0) GoBack(menu, -move);
+            else GoForward(menu, move);
+        }
+
+        public void GoBack(Menu menu, int count = 1)
         {
             var crt = GetCurrent();
-            if (_current > 0)
+            while (count-- > 0 && _current > 0)
                 _current--;
-            else return;
             menu.SetPage(_cache[_current], crt, PageFlags.IsRestore | PageFlags.IsBack);
         }
 
-        public void GoForward(Menu menu)
+        public void GoForward(Menu menu, int count = 1)
         {
             var crt = GetCurrent();
-            if (_current < _cache.Count - 1)
+            while (count-- > 0 && _current < _cache.Count - 1)
                 _current++;
-            else return;
             menu.SetPage(_cache[_current], crt, PageFlags.IsRestore | PageFlags.IsForward);
         }
 

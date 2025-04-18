@@ -12,7 +12,7 @@ namespace api.nox.world
         public string GetName() => "World/Loader";
         public bool IsHidden() => false;
 
-        public VisualElement OnOpened(Dictionary<string, object> data)
+        public VisualElement Make(Dictionary<string, object> data)
         {
             var root = new VisualElement();
             foreach (var file in WorldFiles())

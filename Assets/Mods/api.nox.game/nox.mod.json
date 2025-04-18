@@ -27,7 +27,7 @@
   "relations": [
     {
       "id": "xr",
-      "type": "depends",
+      "type": "suggests",
       "version": ">=1.0.0"
     },
     {

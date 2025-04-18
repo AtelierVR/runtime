@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -9,7 +11,6 @@ namespace api.nox.network.Utils
     public class Gateway
     {
         public const ushort DefaultPortMaster = 53032;
-        public const string SrvMaster = "_noxmaster._{1}.{0}";
 
         public static async UniTask<Uri> FindGatewayMaster(string address)
         {
@@ -18,78 +19,75 @@ namespace api.nox.network.Utils
             var uriType = Uri.CheckHostName(host[0]);
             if (uriType is UriHostNameType.IPv4 or UriHostNameType.IPv6)
             {
+                Logger.LogDebug($"FindGatewayMaster: IPv4/IPv6 {host}");
                 var uri = new Uri($"tcp://{address}");
                 if (uri.Port == -1) uri = new Uri($"tcp://{address}:{DefaultPortMaster}");
-                Logger.LogDebug($"Finding gateway for {uri.Host}:{uri.Port} (IP)");
                 var fmg = await FindGm($"{uri.Host}:{uri.Port}", true);
                 return fmg != null ? fmg : null;
             }
 
             if (host[0] == "localhost")
             {
+                Logger.LogDebug($"FindGatewayMaster: localhost {host}");
                 var uri = new Uri($"tcp://{address}");
                 if (uri.Port == -1) uri = new Uri($"tcp://{address}:{DefaultPortMaster}");
-                Logger.LogDebug($"Finding gateway for {uri.Host}:{uri.Port} (localhost)");
                 var fmg = await FindGm($"{uri.Host}:{uri.Port}", true);
                 return fmg != null ? fmg : null;
             }
 
             if (uriType == UriHostNameType.Dns)
             {
+                Logger.LogDebug($"FindGatewayMaster: DNS {host}");
                 var uri = new Uri($"tcp://{address}");
                 if (uri.Port == -1) uri = new Uri($"tcp://{address}:{DefaultPortMaster}");
                 var fmg = await FindGm($"{uri.Host}:{uri.Port}");
-                Logger.LogDebug($"Finding gateway for {uri.Host}:{uri.Port} (DNS)");
                 if (fmg != null)
                 {
                     Logger.LogDebug($"{fmg.Host}:{fmg.Port} (DNS)");
                     return fmg;
                 }
-                var srv = await FindSrv(uri.Host, SrvMaster);
-                if (srv.Length <= 0)
-                {
-                    Logger.LogError($"Failed to find SRV record for {uri.Host}");
-                    return null;
-                }
-                foreach (var answer in srv)
-                {
-                    var fmg2 = await FindGm($"{answer.GetTarget()}:{answer.GetPort()}");
-                    if (fmg2 != null) return fmg2;
-                }
+
+                return (await ResolveMasterDns(uri.Host)).FirstOrDefault();
             }
 
             return null;
         }
 
-        private static async UniTask<SrvAnswer[]> FindSrv(string domain, string service, string protocol = "tcp")
+        private static async UniTask<Uri[]> ResolveMasterDns(string domain)
         {
+            Logger.LogDebug($"ResolveMasterDns: domain {domain}");
+            List<Uri> uris = new();
+            var url = $"https://dns.google/resolve?name=_nox.{domain}&type=TXT";
             try
             {
-                Logger.Log($"https://dns.google/resolve?name={string.Format(service, domain)}&type=SRV");
                 var req = new UnityWebRequest(
-                    $"https://dns.google/resolve?name={string.Format(service, domain, protocol)}&type=SRV",
-                    UnityWebRequest.kHttpVerbGET) { downloadHandler = new DownloadHandlerBuffer() };
+                    url,
+                    UnityWebRequest.kHttpVerbGET
+                ) { downloadHandler = new DownloadHandlerBuffer() };
                 await req.SendWebRequest();
+
                 if (req.result == UnityWebRequest.Result.Success)
                 {
-                    Logger.Log(req.downloadHandler.text);
-                    var srv = JsonUtility.FromJson<Srv>(req.downloadHandler.text);
-                    if (srv.Status != 0) return Array.Empty<SrvAnswer>();
-                    return srv.Answer ?? Array.Empty<SrvAnswer>();
+                    var txt = JsonUtility.FromJson<Txt>(req.downloadHandler.text);
+                    if (txt.Status != 0 || txt.Answer.Length <= 0)
+                        return uris.ToArray();
+
+                    foreach (var answer in txt.Answer)
+                        if (answer.TryGet("mg", out var gateway))
+                        {
+                            var uri = new Uri(gateway);
+                            uris.Add(uri);
+                        }
+
+                    return uris.ToArray();
                 }
             }
-            catch (UriFormatException)
+            catch (Exception e)
             {
-                return Array.Empty<SrvAnswer>();
-            }
-            catch
-            {
-                return Array.Empty<SrvAnswer>();
             }
 
-            return Array.Empty<SrvAnswer>();
+            return uris.ToArray();
         }
-
 
         private static async UniTask<Uri> FindGm(string domain, bool forceHttp = false)
         {
@@ -98,65 +96,42 @@ namespace api.nox.network.Utils
                 try
                 {
                     var uri = new Uri($"{protocol}://{domain}/.well-known/nox");
-                    Logger.LogDebug($"Finding for {uri}");
                     var req = new UnityWebRequest(uri, UnityWebRequest.kHttpVerbGET)
                         { downloadHandler = new DownloadHandlerBuffer() };
                     await req.SendWebRequest();
                     if (req.result == UnityWebRequest.Result.Success)
                         return new Uri($"{protocol}://{domain}");
                 }
-                catch (UriFormatException)
-                {
-                    return null;
-                }
                 catch (Exception e)
                 {
-                    Logger.LogError($"Error finding {protocol}://{domain}/");
-                    Logger.LogException(e);
                 }
 
-            Logger.LogError($"Failed to find gateway for {domain}");
             return null;
         }
     }
 
     [Serializable]
-    public class Srv
+    public class Txt
     {
         public int Status;
-        public bool TC;
-        public bool RD;
-        public bool RA;
-        public bool AD;
-        public bool CD;
-        public SrvQuestion[] Question;
-        public SrvAnswer[] Answer;
-        public string Comment;
+        public TxtAnswer[] Answer;
     }
 
     [Serializable]
-    public class SrvQuestion
+    public class TxtAnswer
     {
-        public string name;
-        public int type;
-    }
-
-    [Serializable]
-    public class SrvAnswer
-    {
-        public string name;
-        public int type;
-        public int TTL;
         public string data;
 
-        public string[] ToDataArray() => data.Split(' ');
+        public Dictionary<string, string> ToDataDictionary()
+            => data
+                .Split(';')
+                .Select(item => item.Split('='))
+                .Where(kv => kv.Length == 2)
+                .ToDictionary(kv => kv[0].Trim(), kv => kv[1].Trim());
 
-        public ushort GetPriority() => ushort.Parse(ToDataArray()[0]);
-        public ushort GetWeight() => ushort.Parse(ToDataArray()[1]);
-        public ushort GetPort() => ushort.Parse(ToDataArray()[2]);
-        public string GetTarget() => ToDataArray()[3].TrimEnd('.');
+        public bool TryGet(string key, out string value)
+            => ToDataDictionary().TryGetValue(key, out value);
     }
-
 
     [Serializable]
     public class Response<T>

@@ -53,7 +53,7 @@ namespace api.nox.game.UI
             Logger.Log($"Creating ViewPortMenu from {asset}");
             var menu = Object.Instantiate(
                 asset,
-                PlayerController.instance.transform
+                PlayerController.Instance.transform
             ).GetComponent<ViewPortMenu>();
             menu.IsVisible = false;
             Register(menu);
