@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Mods.Metadata;
 using Nox.CCK.Utils;
@@ -50,6 +51,7 @@ namespace Nox.ModLoader.Mods
             Logger.LogDebug($"Enabling main in {Metadata.GetId()}({Metadata.GetVersion()})");
             MainInitializers = CreateInstances<MainModInitializer>("main").ToList();
             mainEnabled = true;
+            CoreAPI.EventAPI.Emit(new ModEventContext("mod_enabled", this, "main"));
         }
 
         public void DisableMain()
@@ -57,6 +59,7 @@ namespace Nox.ModLoader.Mods
             if (!IsMainEnabled()) return;
             Logger.LogDebug($"Disabling main in {Metadata.GetId()}({Metadata.GetVersion()})");
             mainEnabled = false;
+            CoreAPI.EventAPI.Emit(new ModEventContext("mod_disabled", this, "main"));
         }
 
         public void ClearMain()
@@ -83,6 +86,7 @@ namespace Nox.ModLoader.Mods
             var instances = CreateInstances<EditorModInitializer>("editor");
             EditorInitializers = instances.ToList();
             editorEnabled = true;
+            CoreAPI.EventAPI.Emit(new ModEventContext("mod_enabled", this, "editor"));
         }
 
         public void DisableEditor()
@@ -90,6 +94,7 @@ namespace Nox.ModLoader.Mods
             if (!IsEditorEnabled()) return;
             Logger.LogDebug($"Disabling editor in {Metadata.GetId()}({Metadata.GetVersion()})");
             editorEnabled = false;
+            CoreAPI.EventAPI.Emit(new ModEventContext("mod_disabled", this, "editor"));
         }
 
         public void ClearEditor()
@@ -114,6 +119,7 @@ namespace Nox.ModLoader.Mods
             Logger.LogDebug($"Enabling server in {Metadata.GetId()}({Metadata.GetVersion()})");
             ServerInitializers = CreateInstances<ServerModInitializer>("server").ToList();
             serverEnabled = true;
+            CoreAPI.EventAPI.Emit(new ModEventContext("mod_enabled", this, "server"));
         }
 
         public void DisableServer()
@@ -121,6 +127,7 @@ namespace Nox.ModLoader.Mods
             if (!IsServerEnabled()) return;
             Logger.LogDebug($"Disabling server in {Metadata.GetId()}({Metadata.GetVersion()})");
             serverEnabled = false;
+            CoreAPI.EventAPI.Emit(new ModEventContext("mod_disabled", this, "server"));
         }
 
         public void ClearServer()
@@ -146,6 +153,7 @@ namespace Nox.ModLoader.Mods
             Logger.LogDebug($"Enabling client in {Metadata.GetId()}({Metadata.GetVersion()})");
             ClientInitializers = CreateInstances<ClientModInitializer>("client").ToList();
             clientEnabled = true;
+            CoreAPI.EventAPI.Emit(new ModEventContext("mod_enabled", this, "client"));
         }
 
         public void DisableClient()
@@ -153,6 +161,7 @@ namespace Nox.ModLoader.Mods
             if (!IsClientEnabled()) return;
             Logger.LogDebug($"Disabling client in {Metadata.GetId()}({Metadata.GetVersion()})");
             clientEnabled = false;
+            CoreAPI.EventAPI.Emit(new ModEventContext("mod_disabled", this, "client"));
         }
 
         public void ClearClient()
@@ -179,7 +188,7 @@ namespace Nox.ModLoader.Mods
         public InstanceModInitializer[] GetInstances(uint id)
             => InstanceInitializers.ContainsKey(id)
                 ? InstanceInitializers[id].ToArray()
-                : new InstanceModInitializer[0];
+                : Array.Empty<InstanceModInitializer>();
 
         public void EnableInstance(uint id)
         {
@@ -187,6 +196,7 @@ namespace Nox.ModLoader.Mods
             Logger.LogDebug($"Enabling instance {id} in {Metadata.GetId()}({Metadata.GetVersion()})");
             InstanceInitializers[id] = CreateInstances<InstanceModInitializer>("instance").ToList();
             instanceEnabled[id] = true;
+            CoreAPI.EventAPI.Emit(new ModEventContext("mod_enabled", this, "instance", id));
         }
 
         public void DisableInstance(uint id)
@@ -194,6 +204,7 @@ namespace Nox.ModLoader.Mods
             if (!IsInstanceEnabled(id)) return;
             Logger.LogDebug($"Disabling instance {id} in {Metadata.GetId()}({Metadata.GetVersion()})");
             instanceEnabled.Remove(id);
+            CoreAPI.EventAPI.Emit(new ModEventContext("mod_disabled", this, "instance", id));
         }
 
         public void ClearInstance(uint id)
@@ -235,6 +246,7 @@ namespace Nox.ModLoader.Mods
             if (!IsCustomEnabled(entry)) return;
             Logger.LogDebug($"Disabling {entry} in {Metadata.GetId()}({Metadata.GetVersion()})");
             customEnabled[entry] = false;
+            CoreAPI.EventAPI.Emit(new ModEventContext("mod_disabled", this, entry));
         }
 
         public void EnableCustom<T>(string entry) where T : IModInitializer
@@ -243,6 +255,7 @@ namespace Nox.ModLoader.Mods
             Logger.LogDebug($"Enabling {entry} in {Metadata.GetId()}({Metadata.GetVersion()})");
             CustomInitializers[entry] = CreateInstances<T>(entry).Cast<IModInitializer>().ToArray();
             customEnabled[entry] = true;
+            CoreAPI.EventAPI.Emit(new ModEventContext("mod_enabled", this, entry));
         }
 
         public void ClearCustom(string entry)
@@ -344,21 +357,28 @@ namespace Nox.ModLoader.Mods
 
             if (IsMainEnabled() && _mainState == InitializerState.None)
             {
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "main", ExecutionEventStatus.Pre));
                 _mainState = InitializerState.Initialized;
                 foreach (var instance in MainInitializers)
                 {
                     Logger.LogDebug($"Initializing main in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "main",
+                        ExecutionEventStatus.Start, instance));
                     try
                     {
                         instance.OnInitialize(CoreAPI);
                         await instance.OnInitializeAsync(CoreAPI);
                         instance.OnInitializeMain(CoreAPI);
                         await instance.OnInitializeMainAsync(CoreAPI);
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "main",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error initializing main in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "main",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -366,19 +386,26 @@ namespace Nox.ModLoader.Mods
             if (IsEditorEnabled() && _editorState == InitializerState.None)
             {
                 _editorState = InitializerState.Initialized;
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "editor", ExecutionEventStatus.Pre));
                 foreach (var instance in EditorInitializers)
                 {
                     Logger.LogDebug(
                         $"Initializing editor in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "editor",
+                        ExecutionEventStatus.Start, instance));
                     try
                     {
                         instance.OnInitialize(CoreAPI);
                         await instance.OnInitializeAsync(CoreAPI);
                         instance.OnInitializeEditor(CoreAPI);
                         await instance.OnInitializeEditorAsync(CoreAPI);
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "editor",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "editor",
+                            ExecutionEventStatus.Error, instance, e));
                         Logger.LogError(
                             $"Error initializing editor in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
                     }
@@ -388,21 +415,28 @@ namespace Nox.ModLoader.Mods
             if (IsServerEnabled() && _serverState == InitializerState.None)
             {
                 _serverState = InitializerState.Initialized;
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "server", ExecutionEventStatus.Pre));
                 foreach (var instance in ServerInitializers)
                 {
                     Logger.LogDebug(
                         $"Initializing server in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "server",
+                        ExecutionEventStatus.Start, instance));
                     try
                     {
                         instance.OnInitialize(CoreAPI);
                         await instance.OnInitializeAsync(CoreAPI);
                         instance.OnInitializeServer(CoreAPI);
                         await instance.OnInitializeServerAsync(CoreAPI);
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "server",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error initializing server in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "server",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -410,21 +444,28 @@ namespace Nox.ModLoader.Mods
             if (IsClientEnabled() && _clientState == InitializerState.None)
             {
                 _clientState = InitializerState.Initialized;
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "client", ExecutionEventStatus.Pre));
                 foreach (var instance in ClientInitializers)
                 {
                     Logger.LogDebug(
                         $"Initializing client in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "client",
+                        ExecutionEventStatus.Start, instance));
                     try
                     {
                         instance.OnInitialize(CoreAPI);
                         await instance.OnInitializeAsync(CoreAPI);
                         instance.OnInitializeClient(CoreAPI);
                         await instance.OnInitializeClientAsync(CoreAPI);
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "client",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error initializing client in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "client",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -433,21 +474,29 @@ namespace Nox.ModLoader.Mods
                 if (IsInstanceEnabled(entry) && GetInstanceState(entry) == InitializerState.None)
                 {
                     SetInstanceStates(entry, InitializerState.Initialized);
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "instance",
+                        ExecutionEventStatus.Pre, entry));
                     foreach (var instance in InstanceInitializers[entry])
                     {
                         Logger.LogDebug(
                             $"Initializing instance {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "instance",
+                            ExecutionEventStatus.Start, entry, instance));
                         try
                         {
                             instance.OnInitialize(CoreAPI);
                             await instance.OnInitializeAsync(CoreAPI);
                             instance.OnInitializeInstance(CoreAPI);
                             await instance.OnInitializeInstanceAsync(CoreAPI);
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "instance",
+                                ExecutionEventStatus.Success, entry, instance));
                         }
                         catch (Exception e)
                         {
                             Logger.LogError(
                                 $"Error initializing instance {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "instance",
+                                ExecutionEventStatus.Error, entry, instance, e));
                         }
                     }
                 }
@@ -456,19 +505,26 @@ namespace Nox.ModLoader.Mods
                 if (IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.None)
                 {
                     SetCustomStates(entry, InitializerState.Initialized);
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, entry, ExecutionEventStatus.Pre));
                     foreach (var instance in CustomInitializers[entry])
                     {
                         Logger.LogDebug(
                             $"Initializing {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, entry,
+                            ExecutionEventStatus.Start, instance));
                         try
                         {
                             instance.OnInitialize(CoreAPI);
                             await instance.OnInitializeAsync(CoreAPI);
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, entry,
+                                ExecutionEventStatus.Success, instance));
                         }
                         catch (Exception e)
                         {
                             Logger.LogError(
                                 $"Error initializing {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, entry,
+                                ExecutionEventStatus.Error, instance, e));
                         }
                     }
                 }
@@ -481,21 +537,29 @@ namespace Nox.ModLoader.Mods
             if (IsMainEnabled() && _mainState == InitializerState.Initialized)
             {
                 _mainState = InitializerState.PostInitialized;
+                CoreAPI.EventAPI.Emit(
+                    new ModEventContext("mod_post_initialize", this, "main", ExecutionEventStatus.Pre));
                 foreach (var instance in MainInitializers)
                 {
                     Logger.LogDebug(
                         $"Post initializing main in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "main",
+                        ExecutionEventStatus.Start, instance));
                     try
                     {
                         instance.OnPostInitialize();
                         await instance.OnPostInitializeAsync();
                         instance.OnPostInitializeMain();
                         await instance.OnPostInitializeMainAsync();
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "main",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error post initializing main in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "main",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -503,21 +567,29 @@ namespace Nox.ModLoader.Mods
             if (IsEditorEnabled() && _editorState == InitializerState.Initialized)
             {
                 _editorState = InitializerState.PostInitialized;
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "editor",
+                    ExecutionEventStatus.Pre));
                 foreach (var instance in EditorInitializers)
                 {
                     Logger.LogDebug(
                         $"Post initializing editor in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "editor",
+                        ExecutionEventStatus.Start, instance));
                     try
                     {
                         instance.OnPostInitialize();
                         await instance.OnPostInitializeAsync();
                         instance.OnPostInitializeEditor();
                         await instance.OnPostInitializeEditorAsync();
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "editor",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error post initializing editor in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "editor",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -525,21 +597,29 @@ namespace Nox.ModLoader.Mods
             if (IsServerEnabled() && _serverState == InitializerState.Initialized)
             {
                 _serverState = InitializerState.PostInitialized;
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "server",
+                    ExecutionEventStatus.Pre));
                 foreach (var instance in ServerInitializers)
                 {
                     Logger.LogDebug(
                         $"Post initializing server in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "server",
+                        ExecutionEventStatus.Start, instance));
                     try
                     {
                         instance.OnPostInitialize();
                         await instance.OnPostInitializeAsync();
                         instance.OnPostInitializeServer();
                         await instance.OnPostInitializeServerAsync();
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "server",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error post initializing server in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "server",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -547,21 +627,29 @@ namespace Nox.ModLoader.Mods
             if (IsClientEnabled() && _clientState == InitializerState.Initialized)
             {
                 _clientState = InitializerState.PostInitialized;
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "client",
+                    ExecutionEventStatus.Pre));
                 foreach (var instance in ClientInitializers)
                 {
                     Logger.LogDebug(
                         $"Post initializing client in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "client",
+                        ExecutionEventStatus.Start, instance));
                     try
                     {
                         instance.OnPostInitialize();
                         await instance.OnPostInitializeAsync();
                         instance.OnPostInitializeClient();
                         await instance.OnPostInitializeClientAsync();
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "client",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error post initializing client in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "client",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -570,21 +658,29 @@ namespace Nox.ModLoader.Mods
                 if (IsInstanceEnabled(entry) && GetInstanceState(entry) == InitializerState.Initialized)
                 {
                     SetInstanceStates(entry, InitializerState.PostInitialized);
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "instance",
+                        ExecutionEventStatus.Pre, entry));
                     foreach (var instance in InstanceInitializers[entry])
                     {
                         Logger.LogDebug(
                             $"Post initializing instance {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "instance",
+                            ExecutionEventStatus.Start, entry, instance));
                         try
                         {
                             instance.OnPostInitialize();
                             await instance.OnPostInitializeAsync();
                             instance.OnPostInitializeInstance();
                             await instance.OnPostInitializeInstanceAsync();
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "instance",
+                                ExecutionEventStatus.Success, entry, instance));
                         }
                         catch (Exception e)
                         {
                             Logger.LogError(
                                 $"Error post initializing instance {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, "instance",
+                                ExecutionEventStatus.Error, entry, instance, e));
                         }
                     }
                 }
@@ -593,19 +689,27 @@ namespace Nox.ModLoader.Mods
                 if (IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.Initialized)
                 {
                     SetCustomStates(entry, InitializerState.PostInitialized);
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, entry,
+                        ExecutionEventStatus.Pre));
                     foreach (var instance in CustomInitializers[entry])
                     {
                         Logger.LogDebug(
                             $"Post initializing {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, entry,
+                            ExecutionEventStatus.Start, instance));
                         try
                         {
                             instance.OnPostInitialize();
                             await instance.OnPostInitializeAsync();
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, entry,
+                                ExecutionEventStatus.Success, instance));
                         }
                         catch (Exception e)
                         {
                             Logger.LogError(
                                 $"Error post initializing {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, entry,
+                                ExecutionEventStatus.Error, instance, e));
                         }
                     }
                 }
@@ -618,20 +722,27 @@ namespace Nox.ModLoader.Mods
             if (!IsMainEnabled() && _mainState == InitializerState.PostInitialized)
             {
                 _mainState = InitializerState.PreDisposed;
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "main", ExecutionEventStatus.Pre));
                 foreach (var instance in MainInitializers)
                 {
                     Logger.LogDebug($"Pre disposing main in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "main",
+                        ExecutionEventStatus.Start, instance));
                     try
                     {
                         instance.OnPreDispose();
                         await instance.OnPreDisposeAsync();
                         instance.OnDisposeMain();
                         await instance.OnDisposeMainAsync();
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "main",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error pre disposing main in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "main",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -639,21 +750,28 @@ namespace Nox.ModLoader.Mods
             if (!IsEditorEnabled() && _editorState == InitializerState.PostInitialized)
             {
                 _editorState = InitializerState.PreDisposed;
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "editor", ExecutionEventStatus.Pre));
                 foreach (var instance in EditorInitializers)
                 {
                     Logger.LogDebug(
                         $"Pre disposing editor in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "editor",
+                        ExecutionEventStatus.Start, instance));
                     try
                     {
                         instance.OnPreDispose();
                         await instance.OnPreDisposeAsync();
                         instance.OnDisposeEditor();
                         await instance.OnDisposeEditorAsync();
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "editor",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error pre disposing editor in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "editor",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -661,21 +779,28 @@ namespace Nox.ModLoader.Mods
             if (!IsServerEnabled() && _serverState == InitializerState.PostInitialized)
             {
                 _serverState = InitializerState.PreDisposed;
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "server", ExecutionEventStatus.Pre));
                 foreach (var instance in ServerInitializers)
                 {
                     Logger.LogDebug(
                         $"Pre disposing server in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "server",
+                        ExecutionEventStatus.Start, instance));
                     try
                     {
                         instance.OnPreDispose();
                         await instance.OnPreDisposeAsync();
                         instance.OnDisposeServer();
                         await instance.OnDisposeServerAsync();
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "server",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error pre disposing server in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "server",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -683,21 +808,28 @@ namespace Nox.ModLoader.Mods
             if (!IsClientEnabled() && _clientState == InitializerState.PostInitialized)
             {
                 _clientState = InitializerState.PreDisposed;
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "client", ExecutionEventStatus.Pre));
                 foreach (var instance in ClientInitializers)
                 {
                     Logger.LogDebug(
                         $"Pre disposing client in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "client",
+                        ExecutionEventStatus.Start, instance));
                     try
                     {
                         instance.OnPreDispose();
                         await instance.OnPreDisposeAsync();
                         instance.OnDisposeClient();
                         await instance.OnDisposeClientAsync();
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "client",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error pre disposing client in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "client",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -706,21 +838,29 @@ namespace Nox.ModLoader.Mods
                 if (!IsInstanceEnabled(entry) && GetInstanceState(entry) == InitializerState.PostInitialized)
                 {
                     SetInstanceStates(entry, InitializerState.PreDisposed);
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "instance",
+                        ExecutionEventStatus.Pre, entry));
                     foreach (var instance in InstanceInitializers[entry])
                     {
                         Logger.LogDebug(
                             $"Pre disposing instance {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "instance",
+                            ExecutionEventStatus.Start, entry, instance));
                         try
                         {
                             instance.OnPreDispose();
                             await instance.OnPreDisposeAsync();
                             instance.OnDisposeInstance();
                             await instance.OnDisposeInstanceAsync();
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "instance",
+                                ExecutionEventStatus.Success, entry, instance));
                         }
                         catch (Exception e)
                         {
                             Logger.LogError(
                                 $"Error pre disposing instance {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "instance",
+                                ExecutionEventStatus.Error, entry, instance, e));
                         }
                     }
                 }
@@ -729,19 +869,27 @@ namespace Nox.ModLoader.Mods
                 if (!IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.PostInitialized)
                 {
                     SetCustomStates(entry, InitializerState.PreDisposed);
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, entry,
+                        ExecutionEventStatus.Pre));
                     foreach (var instance in CustomInitializers[entry])
                     {
                         Logger.LogDebug(
                             $"Pre disposing {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, entry,
+                            ExecutionEventStatus.Start, instance));
                         try
                         {
                             instance.OnPreDispose();
                             await instance.OnPreDisposeAsync();
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, entry,
+                                ExecutionEventStatus.Success, instance));
                         }
                         catch (Exception e)
                         {
                             Logger.LogError(
                                 $"Error pre disposing {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, entry,
+                                ExecutionEventStatus.Error, instance, e));
                         }
                     }
                 }
@@ -754,20 +902,27 @@ namespace Nox.ModLoader.Mods
             if (!IsMainEnabled() && _mainState == InitializerState.PreDisposed)
             {
                 _mainState = InitializerState.Disposed;
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "main", ExecutionEventStatus.Pre));
                 foreach (var instance in MainInitializers)
                 {
                     Logger.LogDebug($"Disposing main in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "main", ExecutionEventStatus.Start,
+                        instance));
                     try
                     {
                         instance.OnDispose();
                         await instance.OnDisposeAsync();
                         instance.OnDisposeMain();
                         await instance.OnDisposeMainAsync();
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "main",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error disposing main in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "main",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -775,20 +930,27 @@ namespace Nox.ModLoader.Mods
             if (!IsEditorEnabled() && _editorState == InitializerState.PreDisposed)
             {
                 _editorState = InitializerState.Disposed;
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "editor", ExecutionEventStatus.Pre));
                 foreach (var instance in EditorInitializers)
                 {
                     Logger.LogDebug($"Disposing editor in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "editor", ExecutionEventStatus.Start,
+                        instance));
                     try
                     {
                         instance.OnDispose();
                         await instance.OnDisposeAsync();
                         instance.OnDisposeEditor();
                         await instance.OnDisposeEditorAsync();
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "editor",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error disposing editor in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "editor",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -796,20 +958,27 @@ namespace Nox.ModLoader.Mods
             if (!IsServerEnabled() && _serverState == InitializerState.PreDisposed)
             {
                 _serverState = InitializerState.Disposed;
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "server", ExecutionEventStatus.Pre));
                 foreach (var instance in ServerInitializers)
                 {
                     Logger.LogDebug($"Disposing server in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "server", ExecutionEventStatus.Start,
+                        instance));
                     try
                     {
                         instance.OnDispose();
                         await instance.OnDisposeAsync();
                         instance.OnDisposeServer();
                         await instance.OnDisposeServerAsync();
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "server",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error disposing server in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "server",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -817,20 +986,27 @@ namespace Nox.ModLoader.Mods
             if (!IsClientEnabled() && _clientState == InitializerState.PreDisposed)
             {
                 _clientState = InitializerState.Disposed;
+                CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "client", ExecutionEventStatus.Pre));
                 foreach (var instance in ClientInitializers)
                 {
                     Logger.LogDebug($"Disposing client in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "client", ExecutionEventStatus.Start,
+                        instance));
                     try
                     {
                         instance.OnDispose();
                         await instance.OnDisposeAsync();
                         instance.OnDisposeClient();
                         await instance.OnDisposeClientAsync();
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "client",
+                            ExecutionEventStatus.Success, instance));
                     }
                     catch (Exception e)
                     {
                         Logger.LogError(
                             $"Error disposing client in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "client",
+                            ExecutionEventStatus.Error, instance, e));
                     }
                 }
             }
@@ -839,21 +1015,29 @@ namespace Nox.ModLoader.Mods
                 if (!IsInstanceEnabled(entry) && GetInstanceState(entry) == InitializerState.PreDisposed)
                 {
                     SetInstanceStates(entry, InitializerState.Disposed);
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "instance", ExecutionEventStatus.Pre,
+                        entry));
                     foreach (var instance in InstanceInitializers[entry])
                     {
                         Logger.LogDebug(
                             $"Disposing instance {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "instance",
+                            ExecutionEventStatus.Start, entry, instance));
                         try
                         {
                             instance.OnDispose();
                             await instance.OnDisposeAsync();
                             instance.OnDisposeInstance();
                             await instance.OnDisposeInstanceAsync();
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "instance",
+                                ExecutionEventStatus.Success, entry, instance));
                         }
                         catch (Exception e)
                         {
                             Logger.LogError(
                                 $"Error disposing instance {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "instance",
+                                ExecutionEventStatus.Error, entry, instance, e));
                         }
                     }
                 }
@@ -862,19 +1046,26 @@ namespace Nox.ModLoader.Mods
                 if (!IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.PreDisposed)
                 {
                     SetCustomStates(entry, InitializerState.Disposed);
+                    CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, entry, ExecutionEventStatus.Pre));
                     foreach (var instance in CustomInitializers[entry])
                     {
                         Logger.LogDebug(
                             $"Disposing {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}");
+                        CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, entry,
+                            ExecutionEventStatus.Start, instance));
                         try
                         {
                             instance.OnDispose();
                             await instance.OnDisposeAsync();
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, entry,
+                                ExecutionEventStatus.Success, instance));
                         }
                         catch (Exception e)
                         {
                             Logger.LogError(
                                 $"Error disposing {entry} in {Metadata.GetId()}({Metadata.GetVersion()}) on {instance}: {e}");
+                            CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, entry,
+                                ExecutionEventStatus.Error, instance, e));
                         }
                     }
                 }
@@ -1130,8 +1321,8 @@ namespace Nox.ModLoader.Mods
                     }
         }
 
-        public override string ToString() =>
-            $"{GetType().Name}[id={Metadata.GetId()}, version={Metadata.GetVersion()}]";
+        public override string ToString()
+            => $"{GetType().Name}[id={Metadata.GetId()}, version={Metadata.GetVersion()}]";
     }
 
     public enum InitializerState : byte
@@ -1145,5 +1336,32 @@ namespace Nox.ModLoader.Mods
 
         Ready = PostInitialized & Disposed,
         Done = Initialized & Disposed
+    }
+
+    public enum ExecutionEventStatus : byte
+    {
+        None = 0,
+        Pre = 1,
+        Start = 2,
+        Success = 3,
+        Error = 4,
+    }
+
+
+    public class ModEventContext : EventContext
+    {
+        private readonly object[] _data;
+        private readonly string _eventName;
+
+        public ModEventContext(string eventName, params object[] data)
+        {
+            _eventName = eventName;
+            _data = data;
+        }
+
+        public object[] Data => _data;
+        public string Destination => null;
+        public string EventName => _eventName;
+        public EventEntryFlags Channel => EventEntryFlags.Client | EventEntryFlags.Main | EventEntryFlags.Editor;
     }
 }

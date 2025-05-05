@@ -2,7 +2,7 @@ using Nox.CCK.Utils;
 
 namespace api.nox.relay.types.Handshakes
 {
-    public class RequestHandshake : Request
+    public class RelayRequestHandshake : RelayRequest
     {
         public ushort ProtocolVersion;
         public Engine Engine;

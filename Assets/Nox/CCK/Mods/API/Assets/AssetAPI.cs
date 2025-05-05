@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -6,11 +7,23 @@ namespace Nox.CCK.Mods.Assets
 {
     public interface AssetAPI
     {
-        public bool HasAsset<T>(string ns, string name) where T : Object; // check override local assets first, then override assets, then local assets
-        public T GetAsset<T>(string ns, string name) where T : Object; // check override local assets first, then override assets, then local assets
+        public KeyValuePair<string, string>[] GetAssetNames(); // get all asset names
+        public KeyValuePair<string, string>[] GetAssetNames(string ns); // get all asset names in namespace
+        public KeyValuePair<string, string>[] GetLocalAssetNames();
 
-        public bool HasAsset<T>(string name) where T : Object; // check override local assets first, then override assets, then local assets
-        public T GetAsset<T>(string name) where T : Object; // check override local assets first, then override assets, then local assets
+        public KeyValuePair<string, string>[] GetOverrideAssetNames(string ns); // get all override asset names in namespace
+
+        public bool HasAsset<T>(string ns, string name)
+            where T : Object; // check override local assets first, then override assets, then local assets
+
+        public T GetAsset<T>(string ns, string name)
+            where T : Object; // check override local assets first, then override assets, then local assets
+
+        public bool HasAsset<T>(string name)
+            where T : Object; // check override local assets first, then override assets, then local assets
+
+        public T GetAsset<T>(string name)
+            where T : Object; // check override local assets first, then override assets, then local assets
 
         public bool HasLocalAsset<T>(string name) where T : Object; // check strictly local assets
         public T GetLocalAsset<T>(string name) where T : Object; // check strictly local assets

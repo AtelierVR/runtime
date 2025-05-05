@@ -2,7 +2,7 @@ using Nox.CCK.Utils;
 
 namespace api.nox.relay.types
 {
-    public abstract class Response : INoxObject
+    public abstract class RelayResponse : INoxObject
     {
         public ushort ConnectionId { get; set; }
         public ushort State;

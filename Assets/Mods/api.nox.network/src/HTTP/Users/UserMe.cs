@@ -28,8 +28,7 @@ namespace api.nox.network.Users
         public async UniTask<World> GetHome()
         {
             if (string.IsNullOrEmpty(home)) return null;
-            var worldref = WorldIdentifier.FromString(home);
-            return await NetworkSystem.ModInstance.World.GetWorld(worldref.Server ?? server, worldref.ID);
+            return await NetworkSystem.ModInstance.World.GetWorldByIdentifier(home, server);
         }
         
         [NoxPublic(NoxAccess.Method)]

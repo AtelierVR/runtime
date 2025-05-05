@@ -15,42 +15,51 @@ namespace api.nox.network.Utils
         public static async UniTask<Uri> FindGatewayMaster(string address)
         {
             if (string.IsNullOrEmpty(address)) return null;
+            var t0 = DateTime.Now;
+
             var host = address.Split(':');
             var uriType = Uri.CheckHostName(host[0]);
             if (uriType is UriHostNameType.IPv4 or UriHostNameType.IPv6)
             {
-                Logger.LogDebug($"FindGatewayMaster: IPv4/IPv6 {host}");
+                Logger.LogDebug($"FindGatewayMaster: IPv4/IPv6 {address}");
                 var uri = new Uri($"tcp://{address}");
                 if (uri.Port == -1) uri = new Uri($"tcp://{address}:{DefaultPortMaster}");
                 var fmg = await FindGm($"{uri.Host}:{uri.Port}", true);
-                return fmg != null ? fmg : null;
+                return Debugger(fmg != null ? fmg : null);
             }
 
             if (host[0] == "localhost")
             {
-                Logger.LogDebug($"FindGatewayMaster: localhost {host}");
+                Logger.LogDebug($"FindGatewayMaster: localhost {address}");
                 var uri = new Uri($"tcp://{address}");
                 if (uri.Port == -1) uri = new Uri($"tcp://{address}:{DefaultPortMaster}");
                 var fmg = await FindGm($"{uri.Host}:{uri.Port}", true);
-                return fmg != null ? fmg : null;
+                return Debugger(fmg != null ? fmg : null);
             }
 
             if (uriType == UriHostNameType.Dns)
             {
-                Logger.LogDebug($"FindGatewayMaster: DNS {host}");
+                Logger.LogDebug($"FindGatewayMaster: DNS {address}");
                 var uri = new Uri($"tcp://{address}");
                 if (uri.Port == -1) uri = new Uri($"tcp://{address}:{DefaultPortMaster}");
                 var fmg = await FindGm($"{uri.Host}:{uri.Port}");
                 if (fmg != null)
                 {
                     Logger.LogDebug($"{fmg.Host}:{fmg.Port} (DNS)");
-                    return fmg;
+                    return Debugger(fmg);
                 }
 
-                return (await ResolveMasterDns(uri.Host)).FirstOrDefault();
+                return Debugger((await ResolveMasterDns(uri.Host)).FirstOrDefault());
             }
 
             return null;
+
+            Uri Debugger(Uri uri)
+            {
+                var t1 = DateTime.Now - t0;
+                Logger.LogDebug($"FindGatewayMaster: {address} => {uri} ({t1.TotalSeconds:0.00}s)");
+                return uri;
+            }
         }
 
         private static async UniTask<Uri[]> ResolveMasterDns(string domain)
@@ -64,6 +73,7 @@ namespace api.nox.network.Utils
                     url,
                     UnityWebRequest.kHttpVerbGET
                 ) { downloadHandler = new DownloadHandlerBuffer() };
+                req.timeout = 5;
                 await req.SendWebRequest();
 
                 if (req.result == UnityWebRequest.Result.Success)
@@ -98,6 +108,7 @@ namespace api.nox.network.Utils
                     var uri = new Uri($"{protocol}://{domain}/.well-known/nox");
                     var req = new UnityWebRequest(uri, UnityWebRequest.kHttpVerbGET)
                         { downloadHandler = new DownloadHandlerBuffer() };
+                    req.timeout = 5;
                     await req.SendWebRequest();
                     if (req.result == UnityWebRequest.Result.Success)
                         return new Uri($"{protocol}://{domain}");

@@ -8,7 +8,7 @@ namespace api.nox.search
     {
         public string ServerAddress;
         public string ServerTitle;
-        public Func<string, UniTask<Result>> Fetch;
+        public Func<Dictionary<string, object>, UniTask<Result>> Fetch;
 
         public static Worker From(Dictionary<string, object> workers)
         {
@@ -20,8 +20,9 @@ namespace api.nox.search
             if (workers.TryGetValue("server_title", out var serverTitle) && serverTitle is string st)
                 worker.ServerTitle = st;
 
-            if (workers.TryGetValue("fetch", out var fetch) && fetch is Func<string, UniTask<Result>> f)
-                worker.Fetch = f;
+            if (workers.TryGetValue("fetch", out var fetch)
+                && fetch is Func<Dictionary<string, object>, UniTask<Dictionary<string, object>>> f)
+                worker.Fetch = async data => Result.From(await f(data));
 
             return worker;
         }

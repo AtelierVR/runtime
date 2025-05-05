@@ -1,14 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
-namespace api.nox.ui
+namespace api.nox.ui.colors
 {
     [CreateAssetMenu(fileName = "Theme", menuName = "Nox/Theme")]
     public class Theme : ScriptableObject
     {
         public Dictionary<string, Dictionary<string, string>> Colors = new();
 
-        public Dictionary<string, Dictionary<string, string>> DefaultColors = new()
+        public static readonly Dictionary<string, Dictionary<string, string>> DefaultColors = new()
         {
             {
                 "primary",
@@ -25,6 +26,23 @@ namespace api.nox.ui
                     { "800", "#4d2ea5" },
                     { "900", "#412c83" },
                     { "950", "#271a4c" }
+                }
+            },
+            {
+                "secondary",
+                new()
+                {
+                    { "50", "#fafafa" },
+                    { "100", "#f4f4f5" },
+                    { "200", "#e4e4e7" },
+                    { "300", "#d4d4d8" },
+                    { "400", "#a1a1aa" },
+                    { "500", "#71717a" },
+                    { "600", "#52525b" },
+                    { "700", "#3f3f46" },
+                    { "800", "#27272a" },
+                    { "900", "#18181b" },
+                    { "950", "#09090b" }
                 }
             },
             {
@@ -351,23 +369,6 @@ namespace api.nox.ui
                 }
             },
             {
-                "zinc",
-                new()
-                {
-                    { "50", "#fafafa" },
-                    { "100", "#f4f4f5" },
-                    { "200", "#e4e4e7" },
-                    { "300", "#d4d4d8" },
-                    { "400", "#a1a1aa" },
-                    { "500", "#71717a" },
-                    { "600", "#52525b" },
-                    { "700", "#3f3f46" },
-                    { "800", "#27272a" },
-                    { "900", "#18181b" },
-                    { "950", "#09090b" }
-                }
-            },
-            {
                 "gray",
                 new()
                 {
@@ -403,20 +404,21 @@ namespace api.nox.ui
             }
         };
 
-        public Color GetColor(string name, string value)
-            => GetColor(Colors, name, value);
+        public bool TryGetColor(string name, string value, out Color color)
+            => TryGetColor(Colors, name, value, out color);
 
-        public Color GetColor(Dictionary<string, Dictionary<string, string>> colors, string name, string value,
-            bool tryDefault = true)
+        public static bool TryGetColor(
+            Dictionary<string, Dictionary<string, string>> colors,
+            string name, string value,
+            out Color color)
         {
-            if (colors.TryGetValue(name, out var color)
-                && color.TryGetValue(value, out var hex)
-                && ColorUtility.TryParseHtmlString(hex, out var colorValue))
-                return colorValue;
-
-            return tryDefault
-                ? GetColor(DefaultColors, name, value, false)
-                : Color.white;
+            if (colors.TryGetValue(name, out var colorDict)
+                && colorDict.TryGetValue(value, out var hex)
+                && ColorUtility.TryParseHtmlString(hex, out color))
+                return true;
+            Logger.LogDebug($"No color found for {name}:{value} in custom colors");
+            color = default;
+            return false;
         }
     }
 }

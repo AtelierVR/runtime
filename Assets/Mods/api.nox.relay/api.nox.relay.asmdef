@@ -1,20 +1,9 @@
 {
-    "name": "api.nox.game",
+    "name": "api.nox.relay",
     "rootNamespace": "",
     "references": [
         "NoxCCK",
-        "UniTask",
-        "Unity.InputSystem",
-        "Unity.TextMeshPro",
-        "api.nox.network",
-        "api.nox.xr",
-        "api.nox.world",
-        "AutoHandAssembly",
-        "Unity.XR.Interaction.Toolkit",
-        "RootMotion",
-        "NaughtyAttributes.Core",
-        "NaughtyAttributes.Editor",
-        "Jint"
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

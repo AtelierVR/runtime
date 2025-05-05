@@ -1,5 +1,7 @@
 #if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
+using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
@@ -66,20 +68,71 @@ namespace dev.nox.development
             if (save)
             {
                 _history.Add(context);
-                while (_history.Count > MaxLogs) 
+                while (_history.Count > MaxLogs)
                     _history.RemoveAt(0);
             }
 
             if (_root.childCount == 0) return;
             var logDiv = _root.Q<VisualElement>("logs");
-            var label = new Label($"[{context.Source.GetMetadata().GetId()}/{context.SourceChannel}] {context.EventName}");
-            logDiv.Add(label);
+            var foldout = new Foldout
+            {
+                text = CustomLabel(context),
+                value = false,
+            };
 
-            while (logDiv.childCount > MaxLogs) 
+            // add to foldout the information of the event
+            var div = new VisualElement
+            {
+                style = { flexDirection = FlexDirection.Column }
+            };
+
+            foldout.Add(div);
+
+            div.Add(new Label(
+                $"Source mod: {context.Source.GetMetadata().GetId()}@{context.Source.GetMetadata().GetVersion()}"));
+            div.Add(new Label($"Source channel: {context.SourceChannel}"));
+            var divData = new VisualElement { style = { flexDirection = FlexDirection.Column } };
+            div.Add(divData);
+            divData.Add(new Label($"Data ({context.Data.Length})"));
+            foreach (var obj in context.Data)
+                divData.Add(new Label($" - {obj}"));
+
+
+            logDiv.Add(foldout);
+
+            while (logDiv.childCount > MaxLogs)
                 logDiv.RemoveAt(0);
         }
 
-        public void OnClosed() { }
+        public void OnClosed()
+        {
+        }
+
+        private static string CustomLabel(EventData context)
+            => context.EventName switch
+            {
+                "mod_initialize" when context.TryGet(0, out Mod mod)
+                                      && context.TryGet(1, out string entry)
+                                      && context.TryGet(2, out Enum type)
+                    => $"{context.EventName} [{entry.ToUpper()}]{mod.GetMetadata().GetId()}@{mod.GetMetadata().GetVersion()} => {type}",
+                "mod_post_initialize" when context.TryGet(0, out Mod mod)
+                                      && context.TryGet(1, out string entry)
+                                      && context.TryGet(2, out Enum type)
+                    => $"{context.EventName} [{entry.ToUpper()}]{mod.GetMetadata().GetId()}@{mod.GetMetadata().GetVersion()} => {type}",
+                "mod_dispose" when context.TryGet(0, out Mod mod)
+                                      && context.TryGet(1, out string entry)
+                                      && context.TryGet(2, out Enum type)
+                    => $"{context.EventName} [{entry.ToUpper()}]{mod.GetMetadata().GetId()}@{mod.GetMetadata().GetVersion()} => {type}",
+                "mod_pre_dispose" when context.TryGet(0, out Mod mod)
+                                      && context.TryGet(1, out string entry)
+                                      && context.TryGet(2, out Enum type)
+                    => $"{context.EventName} [{entry.ToUpper()}]{mod.GetMetadata().GetId()}@{mod.GetMetadata().GetVersion()} => {type}",
+                "mod_disabled" when context.TryGet(0, out Mod mod) && context.TryGet(1, out string entry)
+                    => $"{context.EventName} [{entry.ToUpper()}]{mod.GetMetadata().GetId()}@{mod.GetMetadata().GetVersion()}",
+                "mod_enabled" when context.TryGet(0, out Mod mod) && context.TryGet(1, out string entry)
+                    => $"{context.EventName} [{entry.ToUpper()}]{mod.GetMetadata().GetId()}@{mod.GetMetadata().GetVersion()}",
+                _ => context.EventName
+            };
     }
 }
 #endif

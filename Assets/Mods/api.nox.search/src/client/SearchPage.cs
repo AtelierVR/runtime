@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Utils;
 using UnityEngine;
+using UnityEngine.Events;
 using Logger = Nox.CCK.Utils.Logger;
 using Object = UnityEngine.Object;
 using Transform = UnityEngine.Transform;
@@ -15,6 +17,10 @@ namespace api.nox.search.client
     {
         private static string GetKey() => "search";
         private static EventSubscription _listener;
+
+        internal readonly UnityEvent<WorkerTask> OnWorkerTaskUpdate = new();
+        internal readonly UnityEvent<WorkerTask[]> OnWorkerTaskStart = new();
+        internal readonly UnityEvent<Handler[]> OnHandlerUpdate = new();
 
         public static void Listen()
         {
@@ -39,7 +45,7 @@ namespace api.nox.search.client
             var auto = context.TryGet(4, out bool a) && a;
             var page = new SearchPage
             {
-                _menuId = menuId,
+                MenuId = menuId,
                 HandlerId = handler,
                 Query = query ?? string.Empty,
                 LastQuery = (query ?? string.Empty) + " ",
@@ -49,7 +55,7 @@ namespace api.nox.search.client
         }
 
         private void Display()
-            => SearchSystem.CoreAPI.EventAPI.Emit("display_page", _menuId, new Dictionary<string, object>
+            => SearchSystem.CoreAPI.EventAPI.Emit("display_page", MenuId, new Dictionary<string, object>
             {
                 {
                     "key", GetKey()
@@ -76,7 +82,7 @@ namespace api.nox.search.client
                 */
             });
 
-        private int _menuId;
+        internal int MenuId;
         private SearchComponent _comportment;
         private string _handlerId;
 
@@ -129,17 +135,215 @@ namespace api.nox.search.client
             return content;
         }
 
-        internal bool IsFetching = false;
+        internal bool IsFetching
+            => _tasks.Count > 0
+               && _tasks.Any(t => t.Status is WorkerTaskStatus.Fetching or WorkerTaskStatus.Pending);
+
+        private readonly List<WorkerTask> _tasks = new();
+
+        internal void Cancel()
+        {
+            foreach (var cancel in _tasks)
+                cancel.Cancel();
+            _tasks.Clear();
+        }
 
         internal async UniTask Submit()
         {
             if (IsFetching) return;
-            IsFetching = true;
             LastQuery = Query;
-            _comportment.UpdateData();
-            await UniTask.Yield();
-            IsFetching = false;
-            _comportment.UpdateData();
+
+            var handler = Handler;
+            if (handler == null)
+            {
+                Logger.LogDebug($"No handler found with id {HandlerId}");
+                OnWorkerTaskStart.Invoke(Array.Empty<WorkerTask>());
+                return;
+            }
+
+            if (handler.GetWorkers == null)
+            {
+                Logger.LogDebug($"No function GetWorkers found for handler {handler.Id}");
+                OnWorkerTaskStart.Invoke(Array.Empty<WorkerTask>());
+                return;
+            }
+
+            var workers = handler.GetWorkers();
+            if (workers.Length == 0)
+            {
+                Logger.LogDebug($"No workers found for handler {handler.Id}");
+                OnWorkerTaskStart.Invoke(Array.Empty<WorkerTask>());
+                return;
+            }
+
+            Cancel();
+
+            foreach (var worker in workers.Where(w => w != null))
+                _tasks.Add(new WorkerTask()
+                {
+                    Worker = worker,
+                    Data = new Dictionary<string, object> { { "query", Query } },
+                    CancellationToken = new CancellationTokenSource(),
+                    Timeout = 10d,
+                });
+
+            OnWorkerTaskStart.Invoke(_tasks.ToArray());
+            await UniTask.WhenAll(_tasks.Select(t => t.Execute(this)));
+        }
+
+        internal enum WorkerTaskStatus
+        {
+            Pending,
+            Fetching,
+            Canceled,
+            CompletedWithoutResult,
+            Completed,
+            Faulted
+        }
+
+        public class WorkerTask
+        {
+            internal int Uid = Guid.NewGuid().GetHashCode();
+
+            internal Worker Worker;
+            internal double Timeout;
+            internal Dictionary<string, object> Data;
+            internal CancellationTokenSource CancellationToken;
+            internal Result Result;
+            internal WorkerTaskStatus Status;
+            private DateTime _t0 = DateTime.MinValue;
+            private DateTime _t1 = DateTime.MinValue;
+
+            private double Elapsed
+                => Status != WorkerTaskStatus.Pending && Status != WorkerTaskStatus.Fetching
+                    ? (float)(_t1 - _t0).TotalSeconds
+                    : (float)(DateTime.Now - _t0).TotalSeconds;
+
+
+            internal string MessageKey = string.Empty;
+            internal string[] MessageArgs = Array.Empty<string>();
+
+            internal void Cancel() => CancellationToken.Cancel();
+
+            internal async UniTask Execute(SearchPage page)
+            {
+                if (CancellationToken.Token.IsCancellationRequested)
+                {
+                    Status = WorkerTaskStatus.Canceled;
+                    MessageKey = "search.worker.canceled";
+                    MessageArgs = Array.Empty<string>();
+                    page.OnWorkerTaskUpdate.Invoke(this);
+                    return;
+                }
+
+                Status = WorkerTaskStatus.Pending;
+                MessageKey = string.Empty;
+                MessageArgs = Array.Empty<string>();
+                Result = null;
+                page.OnWorkerTaskUpdate.Invoke(this);
+
+                _t0 = DateTime.Now;
+
+                if (Worker.Fetch == null)
+                {
+                    Status = WorkerTaskStatus.Faulted;
+                    MessageKey = "search.worker.error.no_fetch";
+                    MessageArgs = Array.Empty<string>();
+                    page.OnWorkerTaskUpdate.Invoke(this);
+                    return;
+                }
+
+                var result = Worker.Fetch(Data).AttachExternalCancellation(CancellationToken.Token);
+
+                Status = WorkerTaskStatus.Fetching;
+                MessageKey = "search.worker.fetching";
+                MessageArgs = Array.Empty<string>();
+                page.OnWorkerTaskUpdate.Invoke(this);
+                await UniTask.WaitUntil(() => result.Status != UniTaskStatus.Pending || Elapsed > Timeout);
+
+                if (CancellationToken.Token.IsCancellationRequested)
+                {
+                    Status = WorkerTaskStatus.Canceled;
+                    MessageKey = "search.worker.canceled";
+                    page.OnWorkerTaskUpdate.Invoke(this);
+                    return;
+                }
+
+                if (result.Status != UniTaskStatus.Pending)
+                    CancellationToken.Cancel();
+
+                switch (result.Status)
+                {
+                    case UniTaskStatus.Canceled:
+                        Status = WorkerTaskStatus.Canceled;
+                        MessageKey = "search.worker.canceled";
+                        MessageArgs = Array.Empty<string>();
+                        page.OnWorkerTaskUpdate.Invoke(this);
+                        return;
+                    case UniTaskStatus.Faulted:
+                        try
+                        {
+                            await result;
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.LogException(ex);
+                            Status = WorkerTaskStatus.Faulted;
+                            MessageKey = "search.worker.error";
+                            MessageArgs = new[] { ex.Message };
+                            page.OnWorkerTaskUpdate.Invoke(this);
+                            return;
+                        }
+
+                        break;
+                    case UniTaskStatus.Succeeded:
+                        Logger.LogDebug("WorkerTask: result is succeeded");
+                        break;
+                    case UniTaskStatus.Pending: // hum ?
+                    default:
+                        Status = WorkerTaskStatus.CompletedWithoutResult;
+                        MessageKey = "search.worker.no_message";
+                        MessageArgs = Array.Empty<string>();
+                        page.OnWorkerTaskUpdate.Invoke(this);
+                        return;
+                }
+
+                Result = await result;
+                _t1 = DateTime.Now;
+                Logger.LogDebug($"WorkerTask: {(_t1 - _t0).TotalMilliseconds}ms");
+
+                if (Result == null)
+                {
+                    Status = WorkerTaskStatus.Faulted;
+                    MessageKey = "search.worker.error.no_result";
+                    MessageArgs = Array.Empty<string>();
+                    page.OnWorkerTaskUpdate.Invoke(this);
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(Result.Error))
+                {
+                    Status = WorkerTaskStatus.Faulted;
+                    MessageKey = "search.worker.error";
+                    MessageArgs = new[] { Result.Error };
+                    page.OnWorkerTaskUpdate.Invoke(this);
+                    return;
+                }
+
+                if (Result.Data == null || Result.Data.Length == 0)
+                {
+                    Status = WorkerTaskStatus.CompletedWithoutResult;
+                    MessageKey = "search.worker.empty";
+                    MessageArgs = Array.Empty<string>();
+                    page.OnWorkerTaskUpdate.Invoke(this);
+                    return;
+                }
+
+                Status = WorkerTaskStatus.Completed;
+                MessageKey = "search.worker.no_message";
+                MessageArgs = Array.Empty<string>();
+                page.OnWorkerTaskUpdate.Invoke(this);
+            }
         }
     }
 }

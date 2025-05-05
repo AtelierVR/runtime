@@ -1,4 +1,4 @@
-namespace nox.nox.relay.connection
+namespace api.nox.relay.connection
 {
     public enum ConnectionFlags : uint
     {

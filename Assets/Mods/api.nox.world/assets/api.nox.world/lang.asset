@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 776389e82c640c44086d3baf10dd1c7b, type: 3}
+  m_Name: lang
+  m_EditorClassIdentifier: 
+  languages:
+  - IETF: en-US
+    entries:
+    - key: search.world.text
+      value: Worlds
+    - key: search.world.placeholder
+      value: "Search a world..."
+    - key: world.title
+      value: "{0}"
+    - key: world.loading
+      value: Loading...
+    - key: world.not_found
+      value: Not Found
+    - key: world.description.label
+      value: Description
+    - key: world.description.value
+      value: "{0}"
+  - IETF: fr-FR
+    entries:
+    - key: search.world.title
+      value: Mondes
+    - key: search.world.placeholder
+      value: "Rechercher un monde..."
+    - key: world.title
+      value: "{0}"
+    - key: world.loading
+      value: "Chargement..."
+    - key: world.not_found
+      value: "Non trouv\xE9"
+    - key: world.description.label
+      value: Description
+    - key: world.description.value
+      value: "{0}"

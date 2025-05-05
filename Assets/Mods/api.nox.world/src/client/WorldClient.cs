@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using api.nox.world.client;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
@@ -32,6 +33,7 @@ namespace api.nox.world
         {
             Instance = this;
             _homeWidget = new HomeWidget();
+            WorldPage.Listen();
             var user = NetworkAPI.GetField("User").CallMethod("GetCurrentUser");
             user ??= await NetworkAPI.GetField("User").CallAsyncMethod("GetMyUser");
             await OnUserUpdated(user);
@@ -63,6 +65,7 @@ namespace api.nox.world
 
         public void OnDisposeClient()
         {
+            WorldPage.StopListen();
             _homeWidget.Dispose();
             foreach (var subscription in _events)
                 WorldSystem.CoreAPI.EventAPI.Unsubscribe(subscription);

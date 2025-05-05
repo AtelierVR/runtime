@@ -22,12 +22,12 @@ namespace api.nox.network.Users
         {
             if (NetworkSystem.ModInstance == null) throw new AccessViolationException("NetworkSystem not initialized");
             // GET /api/users/search?{data.ToParams()}
-            var gateway = await Discover.GetGateway(data.server);
+            var gateway = await Discover.GetGateway(data.Server);
             if (gateway == null) return null;
 
             var request = new Request(Method.GET, Request.MergeUrl(gateway, $"/api/users/search?{data.ToParams()}"));
 
-            var token = await NetworkSystem.ModInstance.Auth.GetToken(data.server);
+            var token = await NetworkSystem.ModInstance.Auth.GetToken(data.Server);
             var header = new Dictionary<string, string>();
             if (token != null) header.Add("Authorization", token.ToHeader());
 
@@ -90,19 +90,22 @@ namespace api.nox.network.Users
 
         [NoxPublic(NoxAccess.Method)]
         public async UniTask<User> GetUserById(string server, uint id)
-            => await GetUserByIdentifier(server, id.ToString());
+            => await GetUserByIdentifier(id.ToString(), server);
 
         [NoxPublic(NoxAccess.Method)]
-        public async UniTask<User> GetUserByIdentifier(string server, string identifier)
+        public async UniTask<User> GetUserByIdentifier(string identifier, string defaultServer)
         {
             if (NetworkSystem.ModInstance == null) throw new AccessViolationException("NetworkSystem not initialized");
             // GET /api/users/{identifier}
-            var gateway = await Discover.GetGateway(server);
+            var ide = UserIdentifier.FromString(identifier);
+            if (ide.IsLocal()) ide.Server = defaultServer;
+            
+            var gateway = await Discover.GetGateway(ide.Server);
             if (gateway == null) return null;
 
             var request = new Request(Method.GET, Request.MergeUrl(gateway, $"/api/users/{identifier}"));
 
-            var token = await NetworkSystem.ModInstance.Auth.GetToken(server);
+            var token = await NetworkSystem.ModInstance.Auth.GetToken(ide.Server);
             var header = new Dictionary<string, string>();
             if (token != null) header.Add("Authorization", token.ToHeader());
 

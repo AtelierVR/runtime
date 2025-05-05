@@ -9,7 +9,6 @@ namespace api.nox.search
     public class Handler : INoxObject
     {
         public string Id;
-        public string TextKey;
         public string TitleKey;
         public string PlaceholderKey;
         public Texture2D Icon;
@@ -21,9 +20,6 @@ namespace api.nox.search
 
             if (data.TryGetValue("id", out var id) && id is string i)
                 handler.Id = i;
-
-            if (data.TryGetValue("text_key", out var textKey) && textKey is string tk)
-                handler.TextKey = tk;
 
             if (data.TryGetValue("title_key", out var titleKey) && titleKey is string ti)
                 handler.TitleKey = ti;

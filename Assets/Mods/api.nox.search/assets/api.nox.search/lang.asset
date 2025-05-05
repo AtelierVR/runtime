@@ -19,9 +19,49 @@ MonoBehaviour:
       value: "Rechercher..."
     - key: search.no_worker
       value: "Aucun serveur trouvé"
+    - key: search.no_handler
+      value: "Aucun gestionnaire trouvé"
+    - key: search.worker.message
+      value: "{0}"
+    - key: search.worker.title
+      value: "{0}"
+    - key: search.worker.empty
+      value: "Aucun résultat trouvé"
+    - key: search.worker.error
+      value: "Une erreur s'est produite : {0}"
+    - key: search.worker.fetching
+      value: "Chargement..."
+    - key: search.worker.no_message
+      value: ""
+    - key: search.worker.error.no_result
+      value: "Aucun résultat trouvé"
+    - key: search.worker.error.no_fetch
+      value: "Erreur de récupération"
+    - key: search.result.title
+      value: "{0}"
   - IETF: en-US
     entries:
     - key: search.query.placeholder
       value: "Search..."
     - key: search.no_worker
       value: "No server found"
+    - key: search.no_handler
+      value: "No handler found"
+    - key: search.worker.message
+      value: "{0}"
+    - key: search.worker.title
+      value: "{0}"
+    - key: search.worker.empty
+      value: "No results found"
+    - key: search.worker.error
+      value: "An error occurred: {0}"
+    - key: search.worker.fetching
+      value: "Loading..."
+    - key: search.worker.no_message
+      value: ""
+    - key: search.worker.error.no_result
+      value: "No result found"
+    - key: search.worker.error.no_fetch
+      value: "Fetch error"
+    - key: search.result.title
+      value: "{0}"

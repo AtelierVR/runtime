@@ -1,7 +1,7 @@
 using Nox.CCK.Utils;
 
 namespace api.nox.relay.types.Session {
-	public class RequestSessions : Request {
+	public class RelayRequestSessions : RelayRequest {
 		public byte Page;
 
 		public override Buffer ToBuffer() {

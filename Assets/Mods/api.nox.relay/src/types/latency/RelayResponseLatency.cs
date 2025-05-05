@@ -3,7 +3,7 @@ using Buffer = Nox.CCK.Utils.Buffer;
 
 namespace api.nox.relay.types.Latency
 {
-    public class ResponseLatency : Response
+    public class RelayResponseLatency : RelayResponse
     {
         public DateTime InitialTime;
         public DateTime IntermediateTime;

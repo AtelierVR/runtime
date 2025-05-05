@@ -3,7 +3,7 @@ using Buffer = Nox.CCK.Utils.Buffer;
 
 namespace api.nox.relay.types.Latency
 {
-    public class RequestLatency : Request
+    public class RelayRequestLatency : RelayRequest
     {
         public static float IntervalLatencyRequest = 2.5f;
         

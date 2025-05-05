@@ -1,22 +1,24 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEngine;
 
 namespace Nox.CCK.Utils
 {
     public class Constants
     {
-        public static ushort ProtocolVersion => 1;
-        public static string GameIdentifier => "AVR";
+        public static Version ProtocolVersion => new("0.0.9");
+        public static string ProtocolIdentifier => "Nox";
+
         public static string GameAppDataPath
         {
             get
             {
-                var dir = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData) + "/.avr/";
+                var dir = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData) + "/.nox/";
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
                 return dir;
             }
         }
-        
+
         public static Engine CurrentEngine => Engine.Unity;
 
         public static float IntervalLantencyRequest = 2.5f;

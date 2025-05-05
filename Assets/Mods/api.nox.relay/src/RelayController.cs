@@ -1,6 +1,6 @@
 using Nox.CCK.Utils;
 
-namespace nox.nox.relay
+namespace api.nox.relay
 {
     public class RelayController : INoxObject
     {

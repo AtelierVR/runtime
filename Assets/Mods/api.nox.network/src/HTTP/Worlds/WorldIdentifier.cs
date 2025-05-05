@@ -3,7 +3,7 @@ using Nox.CCK.Utils;
 
 namespace api.nox.network
 {
-    public class WorldIdentifier
+    public class WorldIdentifier : INoxObject
     {
         [NoxPublic(NoxAccess.Field)] public uint ID;
         [NoxPublic(NoxAccess.Field)] public string Server;

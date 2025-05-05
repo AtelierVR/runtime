@@ -71,25 +71,25 @@ namespace Nox.CCK.Utils
         public static void Log(object message)
         {
             OnLog(LogType.Log, message);
-            ULogger.Log(message);
+            ULogger.Log($"[<color=green>{LogType.Log}</color>] {message}");
         }
 
         public static void LogWarning(object message)
         {
             OnLog(LogType.Warning, message);
-            ULogger.LogWarning(message);
+            ULogger.LogWarning($"[<color=yellow>{LogType.Warning}</color>] {message}");
         }
 
         public static void LogError(object message)
         {
             OnLog(LogType.Error, message);
-            ULogger.LogError(message);
+            ULogger.LogError($"[<color=red>{LogType.Error}</color>] {message}");
         }
 
         public static void LogDebug(object message)
         {
             OnLog(LogType.Debug, message);
-            ULogger.Log(message);
+            ULogger.Log($"[<color=cyan>{LogType.Debug}</color>] {message}");
         }
 
         public static void LogException(Exception exception)
@@ -101,19 +101,19 @@ namespace Nox.CCK.Utils
         public static void Log(object message, Object context)
         {
             OnLog(LogType.Log, message);
-            ULogger.Log(message, context);
+            ULogger.Log($"[<color=green>{LogType.Log}</color>] {message}", context);
         }
 
         public static void LogWarning(object message, Object context)
         {
             OnLog(LogType.Warning, message);
-            ULogger.LogWarning(message, context);
+            ULogger.LogWarning($"[<color=yellow>{LogType.Warning}</color>] {message}", context);
         }
 
         public static void LogError(object message, Object context)
         {
             OnLog(LogType.Error, message);
-            ULogger.LogError(message, context);
+            ULogger.LogError($"[<color=red>{LogType.Error}</color>] {message}", context);
         }
 
         public static void LogException(Exception exception, Object context)
@@ -125,7 +125,7 @@ namespace Nox.CCK.Utils
         public static void LogDebug(object message, Object context)
         {
             OnLog(LogType.Debug, message);
-            ULogger.Log(message, context);
+            ULogger.Log($"[<color=cyan>{LogType.Debug}</color>] {message}", context);
         }
 
         public static void OnLog(LogType type, object message)

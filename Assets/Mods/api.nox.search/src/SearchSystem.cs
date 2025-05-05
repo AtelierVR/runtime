@@ -85,6 +85,7 @@ namespace api.nox.search
             CoreAPI = api;
             Instance = this;
             _languagePack = api.AssetAPI.GetAsset<LanguagePack>("lang.asset");
+            LanguageManager.AddPack(_languagePack);
         }
 
         public void OnDispose()

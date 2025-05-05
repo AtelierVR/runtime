@@ -41,14 +41,14 @@ namespace api.nox.network.Users
         [NoxPublic(NoxAccess.Method)]
         public virtual async UniTask<bool> Refresh()
         {
-            var user = await NetworkSystem.ModInstance.User.GetUserById(server, id);;
+            var user = await NetworkSystem.ModInstance.User.GetUserById(server, id);
             if (user == null) return false;
             user.CopyTo(this);
-            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("user_fetch", this));
+            NetworkSystem.CoreAPI.EventAPI.Emit(new NetEventContext("world_fetch", this));
             NetCache.Set(this);
             return true;
         }
-        
+
         internal void CopyTo(User user)
         {
             user.id = id;
@@ -62,7 +62,7 @@ namespace api.nox.network.Users
             user.banner = banner;
             user.thumbnail = thumbnail;
         }
-        
+
         public string GetCacheKey() => GetStrictCacheKey();
         internal virtual string GetStrictCacheKey() => $"user.{id}.{server}";
 

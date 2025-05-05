@@ -1,20 +1,20 @@
 {
   "type": "mod",
-  "id": "api.nox.game",
+  "id": "api.nox.relay",
   "provides": [
-    "fr.hactazia.game",
-    "game"
+    "fr.hactazia.relay",
+    "relay"
   ],
-  "name": "Game system",
+  "name": "Relay System",
   "version": "1.0.0",
-  "description": "Provides the Game API for the game.",
+  "description": "Provides a relay system for Nox.",
   "license": "GPL-3.0",
   "icon": null,
   "contact": {
     "email": "hactazia@gmail.com",
-    "source": "https://github.com/AtelierVR/api.nox.game",
+    "source": "https://github.com/AtelierVR/api.nox.relay",
     "website": "https://nox.hactazia.fr/",
-    "issues": "https://github.com/AtelierVR/api.nox.game/issues"
+    "issues": "https://github.com/AtelierVR/api.nox.relay/issues"
   },
   "authors": [
     {
@@ -25,28 +25,13 @@
   ],
   "contributors": [],
   "relations": [
-    {
-      "id": "xr",
-      "type": "suggests",
-      "version": ">=1.0.0"
-    },
-    {
-      "id": "network",
-      "type": "depends",
-      "version": ">=1.0.0"
-    },
-    {
-      "id": "world",
-      "type": "depends",
-      "version": ">=1.0.0"
-    }
   ],
   "entrypoints": {
     "main": [
-      "api.nox.game.GameSystem"
+      "api.nox.relay.RelaySystem"
     ],
-    "client": [
-      "api.nox.game.GameClientSystem"
+    "editor": [
+      "api.nox.relay.editor.RelayEditor"
     ]
   },
   "references": [],

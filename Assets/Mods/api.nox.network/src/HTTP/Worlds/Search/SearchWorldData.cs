@@ -14,7 +14,8 @@ namespace api.nox.network.Worlds
         public string ToParams()
         {
             var text = "";
-            if (Query != null) text += (text.Length > 0 ? "&" : "") + $"query={Query}";
+            if (!string.IsNullOrEmpty(Query))
+                text += (text.Length > 0 ? "&" : "") + $"query={Query}";
             if (WorldIds != null)
                 text = WorldIds.Aggregate(text, (current, u)
                     => current + ((current.Length > 0 ? "&" : "") + $"id={u}"));

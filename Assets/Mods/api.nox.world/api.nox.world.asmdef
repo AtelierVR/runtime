@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "NoxCCK",
-        "UniTask"
+        "UniTask",
+        "NoxModLoader"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace api.nox.search
@@ -5,6 +6,7 @@ namespace api.nox.search
 
     public class ResultData
     {
+        public int Id = Guid.NewGuid().GetHashCode();
         public string Title;
         public string ImageUrl;
         public string GotoId;
@@ -13,6 +15,9 @@ namespace api.nox.search
         public static ResultData From(Dictionary<string, object> data)
         {
             var resultData = new ResultData();
+            
+            if (data.TryGetValue("id", out var index) && index is int i)
+                resultData.Id = i;
 
             if (data.TryGetValue("title", out var title) && title is string t)
                 resultData.Title = t;

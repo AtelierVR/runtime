@@ -33,6 +33,11 @@
       "id": "ui",
       "type": "recommends",
       "version": ">=1.0.0"
+    },
+    {
+      "id": "search",
+      "type": "recommends",
+      "version": ">=1.0.0"
     }
   ],
   "entrypoints": {

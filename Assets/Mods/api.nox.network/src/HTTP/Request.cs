@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
+using Nox.CCK.Utils;
 using UnityEngine;
 using UnityEngine.Networking;
 using Logger = Nox.CCK.Utils.Logger;
@@ -39,7 +41,7 @@ namespace api.nox.network.HTTP
             {
                 var t0 = DateTime.Now;
                 var req = new UnityWebRequest(Url, Method.ToString()) { downloadHandler = new DownloadHandlerBuffer() };
-                foreach (var key in DefaultHeaders)
+                foreach (var key in GetDefaultHeaders())
                     req.SetRequestHeader(key.Key, key.Value);
                 if (body == null)
                 {
@@ -112,10 +114,43 @@ namespace api.nox.network.HTTP
         public string Response => RequestObject?.downloadHandler.text;
         public long StatusCode => RequestObject?.responseCode ?? 0;
 
-        static readonly Dictionary<string, string> DefaultHeaders = new()
+        static Dictionary<string, string> GetDefaultHeaders()
         {
-            { "User-Agent", $"{Application.productName}/{Application.version} (Client)" },
-        };
+            var headers = new Dictionary<string, string>()
+            {
+                {
+                    "User-Agent",
+                    string.Join(
+                        ' ',
+                        $"{Application.productName}/{Application.version}",
+                        $"{Constants.ProtocolIdentifier}/{Constants.ProtocolVersion.ToString()}",
+                        $"(en={EngineExtensions.CurrentEngine.GetEngineName()}; pn={PlatformExtensions.CurrentPlatform.GetPlatformName()})"
+                    )
+                },
+                {
+                    "X-Nox-Id",
+                    SystemInfo.deviceUniqueIdentifier
+                },
+                {
+                    "X-Nox-User",
+                    NetworkSystem.ModInstance.User.CurrentUser?.ToIdentifier().ToString()
+                },
+                {
+                    "X-Nox-Mods",
+                    string.Join(
+                        "; ",
+                        NetworkSystem.CoreAPI.ModAPI.GetMods()
+                            .Where(mod => mod != null && mod.IsLoaded())
+                            .Select(m => m.GetMetadata())
+                            .Select(metadata => $"{metadata.GetId()}/{metadata.GetVersion()}")
+                    )
+                }
+            };
+
+            foreach (var key in headers.Keys.ToList().Where(key => string.IsNullOrWhiteSpace(headers[key])))
+                headers.Remove(key);
+            return headers;
+        }
 
         public static string MergeUrl(Uri url, string path) => MergeUrl(url.ToString(), path);
 

@@ -92,18 +92,26 @@ namespace api.nox.network.Worlds
             return !request.IsError && !response.IsError;
         }
 
+
         [NoxPublic(NoxAccess.Method)]
-        public async UniTask<World> GetWorld(string server, uint worldId)
+        public async UniTask<World> GetWorldById(string server, uint id)
+            => await GetWorldByIdentifier(id.ToString(), server);
+
+        [NoxPublic(NoxAccess.Method)]
+        public async UniTask<World> GetWorldByIdentifier(string identifier, string defaultServer)
         {
             if (NetworkSystem.ModInstance == null) throw new Exception("Network system is not initialized");
             // GET /api/worlds/{worldId}
 
-            var gateway = await Discover.GetGateway(server);
+            var ide = UserIdentifier.FromString(identifier);
+            if (ide.IsLocal()) ide.Server = defaultServer;
+
+            var gateway = await Discover.GetGateway(ide.Server);
             if (gateway == null) return null;
 
-            var request = new Request(Method.GET, Request.MergeUrl(gateway, $"/api/worlds/{worldId}"));
+            var request = new Request(Method.GET, Request.MergeUrl(gateway, $"/api/worlds/{identifier}"));
 
-            var token = await NetworkSystem.ModInstance.Auth.GetToken(server);
+            var token = await NetworkSystem.ModInstance.Auth.GetToken(ide.Server);
             var header = new Dictionary<string, string> { };
             if (token != null) header.Add("Authorization", token.ToHeader());
 

@@ -63,8 +63,8 @@ namespace api.nox.world.search
         private async UniTask<Dictionary<string, object>> Fetch(Dictionary<string, object> data, string server)
         {
             var query = data["query"]?.ToString();
-            if (string.IsNullOrEmpty(server) || string.IsNullOrEmpty(query))
-                return new Dictionary<string, object> { { "error", "Invalid server or query." } };
+            if (string.IsNullOrEmpty(server))
+                return new Dictionary<string, object> { { "error", "Invalid server." } };
             var res = await WorldSystem.NetworkAPI.GetField("World").CallAsyncMethod("SearchWorlds",
                 new Dictionary<string, object>
                 {

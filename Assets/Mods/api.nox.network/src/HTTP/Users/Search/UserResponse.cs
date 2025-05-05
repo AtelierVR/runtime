@@ -9,30 +9,27 @@ namespace api.nox.network.Users
     {
         internal string query;
         internal string[] id;
-        public User[] users;
 
+        [NoxPublic(NoxAccess.Read)] public User[] users;
         [NoxPublic(NoxAccess.Read)] public uint total;
         [NoxPublic(NoxAccess.Read)] public uint limit;
         [NoxPublic(NoxAccess.Read)] public uint offset;
-
-        [NoxPublic(NoxAccess.Method)]
-        public INoxObject[] GetUsers() => users;
 
         [NoxPublic(NoxAccess.Method)]
         public bool HasNext() => offset + limit < total;
 
         [NoxPublic(NoxAccess.Method)]
         public bool HasPrevious() => offset > 0;
-        
+
         [NoxPublic(NoxAccess.Method)]
         public async UniTask<UserResponse> Next()
             => HasNext() && NetworkSystem.ModInstance.User != null
                 ? await NetworkSystem.ModInstance.User.SearchUsers(new SearchRequest()
                 {
-                    query = query,
-                    user_ids = id,
-                    offset = offset + limit,
-                    limit = limit
+                    Query = query,
+                    UserIds = id,
+                    Offset = offset + limit,
+                    Limit = limit
                 })
                 : null;
 
@@ -41,10 +38,10 @@ namespace api.nox.network.Users
             => HasPrevious() && NetworkSystem.ModInstance.User != null
                 ? await NetworkSystem.ModInstance.User.SearchUsers(new SearchRequest()
                 {
-                    query = query,
-                    user_ids = id,
-                    offset = offset - limit,
-                    limit = limit
+                    Query = query,
+                    UserIds = id,
+                    Offset = offset - limit,
+                    Limit = limit
                 })
                 : null;
     }

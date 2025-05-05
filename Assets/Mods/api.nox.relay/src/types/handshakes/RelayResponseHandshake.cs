@@ -2,12 +2,12 @@ using System.Net;
 using Nox.CCK.Utils;
 
 namespace api.nox.relay.types.Handshakes {
-	public class ResponseHandshake : Response {
+	public class RelayResponseHandshake : RelayResponse {
 		public ushort       Protocol;
 		public ushort       ClientId;
 		public ClientStatus Status;
 		public IPEndPoint   Address;
-		public RelayFlags   Flags;
+		public HandshakeFlags   Flags;
 		public string       MasterAddress;
 
 		public override bool FromBuffer(Buffer buffer) {
@@ -19,8 +19,8 @@ namespace api.nox.relay.types.Handshakes {
 			var address = buffer.ReadBytes(4);
 			var port    = buffer.ReadUShort();
 			Address = new IPEndPoint(new IPAddress(address), port);
-			Flags   = buffer.ReadEnum<RelayFlags>();
-			if (Flags.HasFlag(RelayFlags.AsMaster))
+			Flags   = buffer.ReadEnum<HandshakeFlags>();
+			if (!Flags.HasFlag(HandshakeFlags.IsOffline))
 				MasterAddress = buffer.ReadString();
 			return true;
 		}

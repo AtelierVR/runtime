@@ -74,6 +74,15 @@ namespace api.nox.ui.menus
             }
         }
 
+        private Vector2 _lastSize;
+        public void Update()
+        {
+            if (!container) return;
+            if (container.rect.size == _lastSize) return;
+            _lastSize = container.rect.size;
+            ForceUpdateLayout.UpdateManually(container);
+        }
+
         public void Dispose()
         {
             Hide();
@@ -81,5 +90,6 @@ namespace api.nox.ui.menus
             foreach (UnityEngine.Transform child in container)
                 Destroy(child.gameObject);
         }
+        
     }
 }

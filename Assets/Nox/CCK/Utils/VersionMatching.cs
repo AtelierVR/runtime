@@ -49,6 +49,12 @@ namespace Nox.CCK.Utils
             _version = new Version(versionpart);
             _matchingType = type;
         }
+        
+        public VersionMatching(Version version, Type matchingType)
+        {
+            _version = version;
+            _matchingType = matchingType;
+        }
 
         public bool Matches(Version version) => _matchingType switch
         {
