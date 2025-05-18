@@ -1,7 +1,7 @@
 using api.nox.relay.types;
 using Nox.CCK.Utils;
 
-namespace api.nox.relay.Disconnect {
+namespace api.nox.relay.types.Disconnect {
 	public class RelayEventDisconnect : RelayResponse {
 		public string Reason;
 

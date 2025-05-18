@@ -1,14 +1,14 @@
 using api.nox.relay.types;
 using Nox.CCK.Utils;
 
-namespace api.nox.relay.Disconnect {
+namespace api.nox.relay.types.Disconnect {
 	public class RelayRequestDisconnect : RelayRequest {
-		public string Raison;
+		public string Reason;
 
 		public override Buffer ToBuffer() {
 			var buffer = new Buffer();
-			if (!string.IsNullOrEmpty(Raison))
-				buffer.Write(Raison);
+			if (!string.IsNullOrEmpty(Reason))
+				buffer.Write(Reason);
 			return buffer;
 		}
 	}

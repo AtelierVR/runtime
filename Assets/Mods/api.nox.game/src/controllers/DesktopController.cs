@@ -18,13 +18,13 @@ namespace api.nox.game.controllers
         [Header("References")] public Animator animator;
         public CharacterController controller;
 
-        [Header("Settings")] public float movementSpeed = 5f;
-        public float jumpForce = 8f;
-        public float gravity = 9.81f;
-        public float mouseSensitivity = 100f;
-        public float[] movementKeys = new float[6];
-        public Vector3 inputMovement = Vector3.zero;
-        private Mouse _mouse;
+        [Header("Settings")] public float   movementSpeed    = 5f;
+        public                      float   jumpForce        = 8f;
+        public                      float   gravity          = 9.81f;
+        public                      float   mouseSensitivity = 100f;
+        public                      Vector3 inputMovement    = Vector3.zero;
+        public                      float[] movementKeys     = new float[6];
+        private                     Mouse   _mouse;
 
         [Header("Viewport")] public RectTransform viewport;
         private INoxObject _menu;

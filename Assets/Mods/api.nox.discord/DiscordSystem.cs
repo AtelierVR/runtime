@@ -64,7 +64,7 @@ namespace api.nox.discord
             var presence = new RichPresence
             {
                 Details = "VR Game Development",
-                State = Application.isEditor ? "In Editor" : "In Game",
+                State = Application.isEditor && !Application.isPlaying ? "In Editor" : "In Game",
                 Assets = new Assets
                 {
                     LargeImageKey = string.IsNullOrEmpty(thumbnail) ? "default" : thumbnail,

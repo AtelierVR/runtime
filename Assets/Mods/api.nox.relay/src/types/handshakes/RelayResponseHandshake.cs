@@ -3,16 +3,15 @@ using Nox.CCK.Utils;
 
 namespace api.nox.relay.types.Handshakes {
 	public class RelayResponseHandshake : RelayResponse {
-		public ushort       Protocol;
-		public ushort       ClientId;
-		public ClientStatus Status;
-		public IPEndPoint   Address;
-		public HandshakeFlags   Flags;
-		public string       MasterAddress;
+		public ushort         Protocol;
+		public ushort         ClientId;
+		public ClientStatus   Status;
+		public IPEndPoint     Address;
+		public HandshakeFlags Flags;
+		public string         MasterAddress;
 
 		public override bool FromBuffer(Buffer buffer) {
 			buffer.Goto(0);
-			if (buffer.length != 11) return false;
 			Protocol = buffer.ReadUShort();
 			ClientId = buffer.ReadUShort();
 			Status   = buffer.ReadEnum<ClientStatus>();

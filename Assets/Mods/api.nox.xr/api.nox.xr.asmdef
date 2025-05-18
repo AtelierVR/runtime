@@ -4,7 +4,8 @@
     "references": [
         "NoxCCK",
         "UniTask",
-        "Unity.XR.Management"
+        "Unity.XR.Management",
+        "AutoHandAssembly"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

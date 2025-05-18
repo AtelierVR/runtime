@@ -1,53 +1,55 @@
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using api.nox.relay.connection;
 using api.nox.relay.connector;
 using UnityEngine;
+using UnityEngine.Events;
 
-namespace api.nox.relay
-{
-    public class RelaySystem : MainModInitializer
-    {
-        public List<Connection> Connections = new();
-        public static RelaySystem Instance;
+namespace api.nox.relay {
+	public class RelaySystem : MainModInitializer {
+		public readonly List<Connection> Connections = new();
+		public static   RelaySystem      Instance;
 
-        public void OnInitializeMain(MainModCoreAPI api)
-        {
-            Instance = this;
-        }
+		public static UnityEvent<Connection> OnConnectionAdded   = new();
+		public static UnityEvent<Connection> OnConnectionRemoved = new();
 
-        public async UniTask OnDisposeMainAsync()
-        {
-            foreach (var connection in Connections)
-                await connection.Disconnect();
-            Connections.Clear();
-        }
+		public void OnInitializeMain(MainModCoreAPI api) {
+			Instance = this;
+		}
 
-        public void OnUpdateMain()
-        {
-            foreach (var connection in Connections)
-                connection.Update();
-        }
+		public async UniTask OnDisposeMainAsync() {
+			foreach (var connection in Connections)
+				await connection.Dispose();
+			Connections.Clear();
+		}
 
-        internal ushort NextId()
-        {
-            if (Connections.Count >= ushort.MaxValue)
-                return ushort.MaxValue;
+		public void OnUpdateMain() {
+			foreach (var connection in Connections)
+				connection.Update();
+		}
 
-            for (var i = 0; i < 1000; i++)
-            {
-                var id = (ushort)Random.Range(ushort.MinValue, ushort.MaxValue);
-                if (!Connections.Exists(r => r.Id == id))
-                    return id;
-            }
+		internal ushort NextId() {
+			if (Connections.Count >= ushort.MaxValue)
+				return ushort.MaxValue;
 
-            var fallbackId = ushort.MinValue;
-            while (Connections.Exists(r => r.Id == fallbackId))
-                fallbackId++;
+			for (var i = 0; i < 1000; i++) {
+				var id = (ushort)Random.Range(ushort.MinValue, ushort.MaxValue);
+				if (!Connections.Exists(r => r.Id == id))
+					return id;
+			}
 
-            return fallbackId;
-        }
-    }
+			var fallbackId = ushort.MinValue;
+			while (Connections.Exists(r => r.Id == fallbackId))
+				fallbackId++;
+
+			return fallbackId;
+		}
+
+		public Connection GetByAddress(IPEndPoint endPoint)
+			=> Connections.FirstOrDefault(connection => connection.Connector.Remote().Equals(endPoint));
+	}
 }

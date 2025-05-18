@@ -110,5 +110,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   theme: {fileID: 0}
-  colorPath: zinc-800
+  path: 
   image: {fileID: 5995743183735118045}

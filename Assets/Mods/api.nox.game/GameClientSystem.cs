@@ -27,19 +27,7 @@ namespace api.nox.game
         [NoxPublic(NoxAccess.Method)]
         public PlayerController GetPlayerController()
             => PlayerController.Instance;
-
-        /*private HomeTileManager _homeTile;
-        private UserTileManager _userTile;
-        private ServerTileManager _serverTile;
-        private WorldTileManager _worldTile;
-        private MakeInstanceTileManager _makeInstance;
-        private NavigationTileManager _navigationTile;
-        private SettingTileManager _settingTile;
-        private InstanceTileManager _instanceTile;
-        private SessionTileManager _sessionTile;
-        private EventSubscription _tileSub;
-        private EventSubscription _tileGotoSub;
-        private EventSubscription _sessionChangedSub;*/
+        
         private Scene _defaultWorld;
 
         internal static ClientModCoreAPI CoreAPI
