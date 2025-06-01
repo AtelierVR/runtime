@@ -12,7 +12,7 @@ namespace dev.nox.development
 {
     public class EventLogger : EditorModInitializer
     {
-        public static EditorModCoreAPI CoreAPI;
+        internal static EditorModCoreAPI CoreAPI;
         private EditorPanel _buildPanel;
         private EventSubscription _subLogs;
 

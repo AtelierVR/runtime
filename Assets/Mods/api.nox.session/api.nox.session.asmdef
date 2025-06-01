@@ -1,19 +1,21 @@
 {
-    "name": "api.nox.player",
-    "rootNamespace": "",
-    "references": [
-        "NoxCCK",
-        "UniTask",
-        "Unity.InputSystem",
-        "KeyBinding"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "api.nox.session",
+  "rootNamespace": "",
+  "references": [
+    "Nox.CCK",
+    "UniTask",
+    "Nox.Sessions",
+    "Nox.Worlds",
+    "Nox.Players",
+    "Nox.Entities"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

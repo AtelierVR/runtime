@@ -1,7 +1,8 @@
 using System;
+using System.Linq;
 
 namespace Nox.CCK.Mods {
-	public class Perfomance {
+	public class Performance {
 		public string   Type;
 		public string   Entry;
 		public string   Key;
@@ -10,5 +11,8 @@ namespace Nox.CCK.Mods {
 
 		public TimeSpan Duration
 			=> End - Start;
+
+		public string GetName()
+			=> string.Join(".", new[] { Type, Entry, Key }.Where(x => !string.IsNullOrEmpty(x)));
 	}
 }

@@ -28,7 +28,7 @@ namespace api.nox.world
 
         private void SetDisplay(DisplayFlags flags) => _displayFlags = flags;
         
-        internal void OnUpdate()
+        internal void Update()
         {
             if (!WorldEditor.HasOnePanelOpened() || _root.childCount == 0) return;
             var user = WorldEditor.NetworkAPI.GetField("User").CallMethod("GetCurrentUser");

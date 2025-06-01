@@ -1,17 +1,19 @@
 {
-    "name": "NoxModLoader",
+    "name": "Nox.Sessions",
     "rootNamespace": "",
     "references": [
-        "NoxCCK",
-        "UniTask"
+        "UniTask",
+        "Nox.Worlds",
+        "Nox.Players",
+        "Nox.Entities"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
+    "overrideReferences": true,
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
-    "noEngineReferences": false
+    "noEngineReferences": true
 }

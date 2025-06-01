@@ -1,5 +1,5 @@
-namespace Nox.Players {
-	public interface IPhysical {
-		
-	}
+using UnityEngine;
+
+namespace Nox.Entities {
+	public abstract class Physical : Object { }
 }

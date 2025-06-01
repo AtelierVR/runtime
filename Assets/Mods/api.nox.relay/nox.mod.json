@@ -24,8 +24,7 @@
     }
   ],
   "contributors": [],
-  "relations": [
-  ],
+  "relations": [],
   "entrypoints": {
     "main": [
       "api.nox.relay.RelaySystem"

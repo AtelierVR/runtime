@@ -2,7 +2,8 @@
   "name": "Nox.Offline",
   "rootNamespace": "",
   "references": [
-    "Nox.Sessions"
+    "Nox.Sessions",
+    "Nox.Worlds"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

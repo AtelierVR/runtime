@@ -53,6 +53,7 @@ namespace api.nox.relay.connector
             _stream.BeginRead(_buffer, 0, _buffer.Length, ReceiveCallback, null);
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         public async UniTask<bool> Send(Buffer buffer)
         {
             try

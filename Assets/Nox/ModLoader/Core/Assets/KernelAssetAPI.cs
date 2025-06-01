@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -12,526 +13,506 @@ using Newtonsoft.Json.Linq;
 #endif
 
 
-namespace Nox.ModLoader.Cores.Assets
-{
-    public class KernelAssetAPI : AssetAPI
-    {
-        private readonly ModLoader.Mods.KernelMod _kernelMod;
+namespace Nox.ModLoader.Cores.Assets {
+	public class KernelAssetAPI : AssetAPI {
+		private readonly ModLoader.Mods.KernelMod _kernelMod;
 
-        public KernelAssetAPI(ModLoader.Mods.KernelMod kernelMod)
-            => _kernelMod = kernelMod;
+		public KernelAssetAPI(ModLoader.Mods.KernelMod kernelMod)
+			=> _kernelMod = kernelMod;
 
-        public bool HasAsset<T>(string name) where T : Object => HasAsset<T>(_kernelMod.Metadata.GetId(), name);
+		public bool HasAsset<T>(string name) where T : Object
+			=> HasAsset<T>(_kernelMod.Metadata.GetId(), name);
 
-        /// <summary>
-        /// Get the list of assets for the current mod
-        /// </summary>
-        /// <returns></returns>
-        public KeyValuePair<string, string>[] GetAssetNames()
-            => GetOverrideAssetNames(_kernelMod.Metadata.GetId());
+		/// <summary>
+		/// Get the list of assets for the current mod
+		/// </summary>
+		/// <returns></returns>
+		public KeyValuePair<string, string>[] GetAssetNames()
+			=> GetOverrideAssetNames(_kernelMod.Metadata.GetId());
 
-        /// <summary>
-        /// Get the list of assets for a mod
-        /// </summary>
-        /// <param name="ns">id or provides of the mod</param>
-        /// <returns>list of entries[namespace, path] of the assets</returns>
-        public KeyValuePair<string, string>[] GetAssetNames(string ns)
-        {
-            var list = new List<KeyValuePair<string, string>>();
-            // get on override mod
-            list.AddRange(GetOverrideAssetNames(ns));
+		/// <summary>
+		/// Get the list of assets for a mod
+		/// </summary>
+		/// <param name="ns">id or provides of the mod</param>
+		/// <returns>list of entries[namespace, path] of the assets</returns>
+		public KeyValuePair<string, string>[] GetAssetNames(string ns) {
+			var list = new List<KeyValuePair<string, string>>();
+			// get on override mod
+			list.AddRange(GetOverrideAssetNames(ns));
 
-            // get on other mods
-            foreach (var m in ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns)))
-                list.AddRange(m.AssetAPI.GetOverrideAssetNames(ns));
+			// get on other mods
+			foreach (var m in ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns)))
+				list.AddRange(m.AssetAPI.GetOverrideAssetNames(ns));
 
-            // get from the initial mod
-            var mod = ModManager.GetMod(ns);
-            if (mod != null) list.AddRange(mod.AssetAPI.GetLocalAssetNames());
+			// get from the initial mod
+			var mod = ModManager.GetMod(ns);
+			if (mod != null) list.AddRange(mod.AssetAPI.GetLocalAssetNames());
 
-            return list.ToArray();
-        }
+			return list.ToArray();
+		}
 
-        /// <summary>
-        /// Get the list of assets of the current mod (including assets FOR other mods)
-        /// </summary>
-        /// <remarks>If the mod is Mod[id=api.nox.world], the assets will be in the format "[Asset folder of api.nox.world]/[namespaces]/[path]"</remarks>
-        /// <returns>list of entries[namespace, path] of the assets</returns>
-        public KeyValuePair<string, string>[] GetLocalAssetNames()
-            => GetOverrideAssetNames(_kernelMod.Metadata.GetId());
+		/// <summary>
+		/// Get the list of assets of the current mod (including assets FOR other mods)
+		/// </summary>
+		/// <remarks>If the mod is Mod[id=api.nox.world], the assets will be in the format "[Asset folder of api.nox.world]/[namespaces]/[path]"</remarks>
+		/// <returns>list of entries[namespace, path] of the assets</returns>
+		public KeyValuePair<string, string>[] GetLocalAssetNames()
+			=> GetOverrideAssetNames(_kernelMod.Metadata.GetId());
 
-        /// <summary>
-        /// Get the list of assets in a specific mod (including assets FOR other mods)
-        /// <remarks>e.g. "api.nox.world" -> "[Asset folder of api.nox.world]/[namespaces]/[path]"</remarks>
-        /// </summary>
-        /// <param name="ns">id or provides of the mod</param>
-        /// <returns>list of entries[namespace, path] of the assets</returns>
-        public KeyValuePair<string, string>[] GetOverrideAssetNames(string ns)
-        {
-            List<KeyValuePair<string, string>> assets = new();
-#if UNITY_EDITOR
-            var dirpath = Path.Combine("Assets", Path.GetRelativePath(
-                Application.dataPath,
-                Path.Combine(_kernelMod.GetData<string>("assets")))
-            );
+		/// <summary>
+		/// Get the list of assets in a specific mod (including assets FOR other mods)
+		/// <remarks>e.g. "api.nox.world" -> "[Asset folder of api.nox.world]/[namespaces]/[path]"</remarks>
+		/// </summary>
+		/// <param name="ns">id or provides of the mod</param>
+		/// <returns>list of entries[namespace, path] of the assets</returns>
+		public KeyValuePair<string, string>[] GetOverrideAssetNames(string ns) {
+			List<KeyValuePair<string, string>> assets = new();
+			#if UNITY_EDITOR
+			var dirpath = Path.Combine(
+				"Assets", Path.GetRelativePath(
+					Application.dataPath,
+					Path.Combine(_kernelMod.GetData<string>("assets"))
+				)
+			);
 
-            var namespaces = Directory.GetDirectories(dirpath);
+			var namespaces = Directory.GetDirectories(dirpath);
 
-            foreach (var n in namespaces)
-            {
-                var space = Path.GetFileName(n);
-                if (string.IsNullOrEmpty(space))
-                    continue;
+			foreach (var n in namespaces) {
+				var space = Path.GetFileName(n);
+				if (string.IsNullOrEmpty(space))
+					continue;
 
-                var files = Directory.GetFiles(n, "*.*", SearchOption.AllDirectories);
-                foreach (var file in files)
-                {
-                    var path = Path.GetRelativePath(n, file);
-                    path = Path.Combine(space, path).Replace('\\', '/').ToLower();
-                    if (path.EndsWith(".meta")) continue;
-                    assets.Add(new KeyValuePair<string, string>(space, path[(path.IndexOf('/') + 1)..]));
-                }
-            }
-#else
+				var files = Directory.GetFiles(n, "*.*", SearchOption.AllDirectories);
+				foreach (var file in files) {
+					var path = Path.GetRelativePath(n, file);
+					path = Path.Combine(space, path).Replace('\\', '/').ToLower();
+					if (path.EndsWith(".meta")) continue;
+					assets.Add(new KeyValuePair<string, string>(space, path[(path.IndexOf('/') + 1)..]));
+				}
+			}
+			#else
             assets.AddRange(GetAssetNamesFromBundle(ns));
-#endif
-            return assets.ToArray();
-        }
+			#endif
+			return assets.ToArray();
+		}
 
 
-        public bool HasAsset<T>(string ns, string name) where T : Object
-        {
-            if (HasOverrideAsset<T>(ns, name))
-                return true;
+		public bool HasAsset<T>(string ns, string name) where T : Object {
+			if (HasOverrideAsset<T>(ns, name))
+				return true;
 
-            // get on other mods
-            if (ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))
-                .Any(m => m.AssetAPI.HasOverrideAsset<T>(ns, name)))
-                return true;
+			// get on other mods
+			if (ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))
+			    .Any(m => m.AssetAPI.HasOverrideAsset<T>(ns, name)))
+				return true;
 
-            // get from the initial mod
-            var mod = ModManager.GetMod(ns);
-            return mod != null && mod.AssetAPI.HasLocalAsset<T>(name);
-        }
+			// get from the initial mod
+			var mod = ModManager.GetMod(ns);
+			return mod != null && mod.AssetAPI.HasLocalAsset<T>(name);
+		}
 
-        public T GetAsset<T>(string name) where T : Object => GetAsset<T>(_kernelMod.Metadata.GetId(), name);
+		public T GetAsset<T>(string name) where T : Object
+			=> GetAsset<T>(_kernelMod.Metadata.GetId(), name);
 
-        public T GetAsset<T>(string ns, string name) where T : Object
-        {
-            // get on override mod
-            if (HasOverrideAsset<T>(ns, name))
-                return GetOverrideAsset<T>(ns, name);
+		public T GetAsset<T>(string ns, string name) where T : Object {
+			// get on override mod
+			if (HasOverrideAsset<T>(ns, name))
+				return GetOverrideAsset<T>(ns, name);
 
-            // get on other mods
-            foreach (var m in ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))
-                         .Where(m => m.AssetAPI.HasOverrideAsset<T>(ns, name)))
-                return m.AssetAPI.GetOverrideAsset<T>(ns, name);
+			// get on other mods
+			foreach (var m in ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))
+				         .Where(m => m.AssetAPI.HasOverrideAsset<T>(ns, name)))
+				return m.AssetAPI.GetOverrideAsset<T>(ns, name);
 
 
-            // get from the initial mod
-            var mod = ModManager.GetMod(ns);
-            return mod?.AssetAPI.GetLocalAsset<T>(name);
-        }
+			// get from the initial mod
+			var mod = ModManager.GetMod(ns);
+			return mod?.AssetAPI.GetLocalAsset<T>(name);
+		}
 
-        public async UniTask<Scene> LoadWorld(string name, LoadSceneMode mode = LoadSceneMode.Single) =>
-            await LoadWorld(_kernelMod.Metadata.GetId(), name, mode);
+		public async UniTask<Scene> LoadWorld(string name, LoadSceneMode mode = LoadSceneMode.Single)
+			=> await LoadWorld(_kernelMod.Metadata.GetId(), name, mode);
 
-        public async UniTask<Scene> LoadWorld(string ns, string name, LoadSceneMode mode = LoadSceneMode.Single)
-        {
-            Logger.LogDebug("Kernel Loading world: " + ns + "/" + name);
-            // load on override mod
-            if (IsLoadedWorld(ns, name))
-            {
-                Logger.LogDebug("Kernel is loaded: " + ns + "/" + name);
-                return GetWorld(ns, name);
-            }
+		public async UniTask<Scene> LoadWorld(string ns, string name, LoadSceneMode mode = LoadSceneMode.Single) {
+			Logger.LogDebug("Kernel Loading world: " + ns + "/" + name);
+			// load on override mod
+			if (IsLoadedWorld(ns, name)) {
+				Logger.LogDebug("Kernel is loaded: " + ns + "/" + name);
+				return GetWorld(ns, name);
+			}
 
-            if (HasOverrideWorld(ns, name))
-            {
-                Logger.LogDebug("Kernel has override: " + ns + "/" + name);
-                return await LoadOverrideWorld(ns, name, mode);
-            }
+			if (HasOverrideWorld(ns, name)) {
+				Logger.LogDebug("Kernel has override: " + ns + "/" + name);
+				return await LoadOverrideWorld(ns, name, mode);
+			}
 
-            // load on other mods
-            foreach (var m in ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))
-                         .Where(m => m.AssetAPI.HasOverrideWorld(ns, name)))
-            {
-                Logger.LogDebug("Kernel loading from other mod: " + ns + "/" + name);
-                return await m.AssetAPI.LoadOverrideWorld(ns, name, mode);
-            }
+			// load on other mods
+			foreach (var m in ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))
+				         .Where(m => m.AssetAPI.HasOverrideWorld(ns, name))) {
+				Logger.LogDebug("Kernel loading from other mod: " + ns + "/" + name);
+				return await m.AssetAPI.LoadOverrideWorld(ns, name, mode);
+			}
 
-            // load from the initial mod
-            var mod = ModManager.GetMod(ns);
-            if (mod != null)
-            {
-                Logger.LogDebug("Kernel loading from initial mod: " + ns + "/" + name);
-                return await mod.AssetAPI.LoadLocalWorld(name, mode);
-            }
+			// load from the initial mod
+			var mod = ModManager.GetMod(ns);
+			if (mod != null) {
+				Logger.LogDebug("Kernel loading from initial mod: " + ns + "/" + name);
+				return await mod.AssetAPI.LoadLocalWorld(name, mode);
+			}
 
-            return default;
-        }
+			return default;
+		}
 
-        public bool HasWorld(string name) => HasWorld(_kernelMod.Metadata.GetId(), name);
+		public bool HasWorld(string name)
+			=> HasWorld(_kernelMod.Metadata.GetId(), name);
 
-        public bool HasWorld(string ns, string name)
-        {
-            if (HasOverrideWorld(ns, name))
-                return true;
+		public bool HasWorld(string ns, string name) {
+			if (HasOverrideWorld(ns, name))
+				return true;
 
-            // get on other mods
-            if (ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))
-                .Any(m => m.AssetAPI.HasOverrideWorld(ns, name)))
-                return true;
+			// get on other mods
+			if (ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))
+			    .Any(m => m.AssetAPI.HasOverrideWorld(ns, name)))
+				return true;
 
-            // get from the initial mod
-            var mod = ModManager.GetMod(ns);
-            return mod != null && mod.AssetAPI.HasLocalAsset<Object>(name);
-        }
+			// get from the initial mod
+			var mod = ModManager.GetMod(ns);
+			return mod != null && mod.AssetAPI.HasLocalAsset<Object>(name);
+		}
 
-        public Scene GetWorld(string name) => GetWorld(_kernelMod.Metadata.GetId(), name);
+		public Scene GetWorld(string name)
+			=> GetWorld(_kernelMod.Metadata.GetId(), name);
 
-        public Scene GetWorld(string ns, string name)
-        {
-            // get on override mod
-            if (IsLoadedOverrideWorld(ns, name))
-                return GetOverrideWorld(ns, name);
+		public Scene GetWorld(string ns, string name) {
+			// get on override mod
+			if (IsLoadedOverrideWorld(ns, name))
+				return GetOverrideWorld(ns, name);
 
-            // get on other mods
-            foreach (var m in ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))
-                         .Where(m => m.AssetAPI.IsLoadedOverrideWorld(ns, name)))
-                return m.AssetAPI.GetOverrideWorld(ns, name);
+			// get on other mods
+			foreach (var m in ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))
+				         .Where(m => m.AssetAPI.IsLoadedOverrideWorld(ns, name)))
+				return m.AssetAPI.GetOverrideWorld(ns, name);
 
-            // get from the initial mod
-            var mod = ModManager.GetMod(ns);
-            return mod != null ? mod.AssetAPI.GetLocalWorld(name) : default;
-        }
+			// get from the initial mod
+			var mod = ModManager.GetMod(ns);
+			return mod != null ? mod.AssetAPI.GetLocalWorld(name) : default;
+		}
 
-        public async UniTask UnloadWorld(string name) => await UnloadWorld(_kernelMod.Metadata.GetId(), name);
+		public async UniTask UnloadWorld(string name)
+			=> await UnloadWorld(_kernelMod.Metadata.GetId(), name);
 
-        public async UniTask UnloadWorld(string ns, string name)
-        {
-            // unload on override mod
-            if (IsLoadedOverrideWorld(ns, name))
-            {
-                await UnloadOverrideWorld(ns, name);
-                return;
-            }
+		public async UniTask UnloadWorld(string ns, string name) {
+			// unload on override mod
+			if (IsLoadedOverrideWorld(ns, name)) {
+				await UnloadOverrideWorld(ns, name);
+				return;
+			}
 
-            // unload on other mods
-            foreach (var m in ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))
-                         .Where(m => m.AssetAPI.IsLoadedOverrideWorld(ns, name)))
-            {
-                await m.AssetAPI.UnloadOverrideWorld(ns, name);
-                return;
-            }
+			// unload on other mods
+			foreach (var m in ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))
+				         .Where(m => m.AssetAPI.IsLoadedOverrideWorld(ns, name))) {
+				await m.AssetAPI.UnloadOverrideWorld(ns, name);
+				return;
+			}
 
-            // unload from the initial mod
-            var mod = ModManager.GetMod(ns);
-            if (mod != null)
-                await mod.AssetAPI.UnloadLocalWorld(name);
-        }
+			// unload from the initial mod
+			var mod = ModManager.GetMod(ns);
+			if (mod != null)
+				await mod.AssetAPI.UnloadLocalWorld(name);
+		}
 
-        public bool IsLoadedWorld(string name) => IsLoadedWorld(_kernelMod.Metadata.GetId(), name);
+		public bool IsLoadedWorld(string name)
+			=> IsLoadedWorld(_kernelMod.Metadata.GetId(), name);
 
-        public bool IsLoadedWorld(string ns, string name)
-        {
-            if (IsLoadedOverrideWorld(ns, name))
-                return true;
+		public bool IsLoadedWorld(string ns, string name) {
+			if (IsLoadedOverrideWorld(ns, name))
+				return true;
 
-            // get on other mods
-            if (ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))
-                .Any(m => m.AssetAPI.IsLoadedOverrideWorld(ns, name)))
-                return true;
+			// get on other mods
+			if (ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))
+			    .Any(m => m.AssetAPI.IsLoadedOverrideWorld(ns, name)))
+				return true;
 
-            // get from the initial mod
-            var mod = ModManager.GetMod(ns);
-            return mod != null && mod.AssetAPI.IsLoadedLocalWorld(name);
-        }
+			// get from the initial mod
+			var mod = ModManager.GetMod(ns);
+			return mod != null && mod.AssetAPI.IsLoadedLocalWorld(name);
+		}
 
-        public bool HasOverrideAsset<T>(string ns, string name) where T : Object
-        {
-            List<string> namespaces = new() { ns };
-            var mod = ModManager.GetMod(ns);
-            if (mod != null)
-            {
-                var meta = mod.GetMetadata();
-                namespaces.Add(meta.GetId());
-                namespaces.AddRange(meta.GetProvides());
-            }
+		public bool HasOverrideAsset<T>(string ns, string name) where T : Object {
+			List<string> namespaces = new() { ns };
+			var          mod        = ModManager.GetMod(ns);
+			if (mod != null) {
+				var meta = mod.GetMetadata();
+				namespaces.Add(meta.GetId());
+				namespaces.AddRange(meta.GetProvides());
+			}
 
-            foreach (var n in namespaces)
-            {
-#if UNITY_EDITOR
-                var dirpath = Path.Combine("Assets", Path.GetRelativePath(
-                    Application.dataPath,
-                    Path.Combine(_kernelMod.GetData<string>("assets"), n, name))
-                );
+			foreach (var n in namespaces) {
+				#if UNITY_EDITOR
+				var dirpath = Path.Combine(
+					"Assets", Path.GetRelativePath(
+						Application.dataPath,
+						Path.Combine(_kernelMod.GetData<string>("assets"), n, name)
+					)
+				);
 
-                return File.Exists(dirpath);
-#else
+				return File.Exists(dirpath);
+				#else
                 return !string.IsNullOrEmpty(HasAssetFromBundle(ns, name));
-#endif
-            }
+				#endif
+			}
 
-            return false;
-        }
+			return false;
+		}
 
-        public T GetOverrideAsset<T>(string ns, string name) where T : Object
-        {
-            List<string> namespaces = new() { ns };
-            var mod = ModManager.GetMod(ns);
-            if (mod != null)
-            {
-                var meta = mod.GetMetadata();
-                namespaces.Add(meta.GetId());
-                namespaces.AddRange(meta.GetProvides());
-            }
+		public T GetOverrideAsset<T>(string ns, string name) where T : Object {
+			List<string> namespaces = new() { ns };
+			var          mod        = ModManager.GetMod(ns);
+			if (mod != null) {
+				var meta = mod.GetMetadata();
+				namespaces.Add(meta.GetId());
+				namespaces.AddRange(meta.GetProvides());
+			}
 
-            foreach (var n in namespaces)
-            {
-#if UNITY_EDITOR
-                var dirpath = Path.Combine("Assets", Path.GetRelativePath(
-                    Application.dataPath,
-                    Path.Combine(_kernelMod.GetData<string>("assets"), n, name))
-                );
+			foreach (var n in namespaces) {
+				#if UNITY_EDITOR
+				var dirpath = Path.Combine(
+					"Assets", Path.GetRelativePath(
+						Application.dataPath,
+						Path.Combine(_kernelMod.GetData<string>("assets"), n, name)
+					)
+				);
 
-                return !File.Exists(dirpath) ? default : UnityEditor.AssetDatabase.LoadAssetAtPath<T>(dirpath);
-#else
+				return !File.Exists(dirpath) ? default : UnityEditor.AssetDatabase.LoadAssetAtPath<T>(dirpath);
+				#else
                 return GetAssetFromBundle<T>(n, name);
-#endif
-            }
+				#endif
+			}
 
-            return default;
-        }
+			return default;
+		}
 
-        public bool HasLocalAsset<T>(string name) where T : Object =>
-            HasOverrideAsset<T>(_kernelMod.Metadata.GetId(), name);
+		public bool HasLocalAsset<T>(string name) where T : Object
+			=> HasOverrideAsset<T>(_kernelMod.Metadata.GetId(), name);
 
-        public T GetLocalAsset<T>(string name) where T : Object =>
-            GetOverrideAsset<T>(_kernelMod.Metadata.GetId(), name);
+		public T GetLocalAsset<T>(string name) where T : Object
+			=> GetOverrideAsset<T>(_kernelMod.Metadata.GetId(), name);
 
-        public async UniTask<Scene> LoadLocalWorld(string name, LoadSceneMode mode = LoadSceneMode.Single)
-            => await LoadOverrideWorld(_kernelMod.Metadata.GetId(), name, mode);
+		public async UniTask<Scene> LoadLocalWorld(string name, LoadSceneMode mode = LoadSceneMode.Single)
+			=> await LoadOverrideWorld(_kernelMod.Metadata.GetId(), name, mode);
 
-        public async UniTask<Scene> LoadOverrideWorld(string ns, string name, LoadSceneMode mode = LoadSceneMode.Single)
-        {
-            Logger.LogDebug("Kernel Loading world: " + ns + "/" + name);
-            List<string> namespaces = new() { ns };
-            var mod = ModManager.GetMod(ns);
-            if (mod != null)
-            {
-                var meta = mod.GetMetadata();
-                namespaces.Add(meta.GetId());
-                namespaces.AddRange(meta.GetProvides());
-            }
+		public async UniTask<Scene> LoadOverrideWorld(string ns, string name, LoadSceneMode mode = LoadSceneMode.Single) {
+			Logger.LogDebug("Kernel Loading world: " + ns + "/" + name);
+			List<string> namespaces = new() { ns };
+			var          mod        = ModManager.GetMod(ns);
+			if (mod != null) {
+				var meta = mod.GetMetadata();
+				namespaces.Add(meta.GetId());
+				namespaces.AddRange(meta.GetProvides());
+			}
 
-            foreach (var n in namespaces)
-            {
-#if UNITY_EDITOR
+			foreach (var n in namespaces) {
+				#if UNITY_EDITOR
 
-                var dirpath = Path.Combine("Assets", Path.GetRelativePath(
-                    Application.dataPath,
-                    Path.Combine(_kernelMod.GetData<string>("assets"), ns, name))
-                );
+				var dirpath = Path.Combine(
+					"Assets", Path.GetRelativePath(
+						Application.dataPath,
+						Path.Combine(_kernelMod.GetData<string>("assets"), ns, name)
+					)
+				);
 
-                for (var i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
-                {
-                    var sc = SceneUtility.GetScenePathByBuildIndex(i);
-                    if (sc.Replace('\\', '/').ToLower() == dirpath.Replace('\\', '/').ToLower())
-                    {
-                        var id = SceneUtility.GetBuildIndexByScenePath(sc);
-                        if (id == -1) return default;
-                        var scene = SceneManager.GetSceneByBuildIndex(id);
-                        if (!scene.isLoaded) await SceneManager.LoadSceneAsync(id, mode);
-                        scene = SceneManager.GetSceneByBuildIndex(id);
-                        Logger.LogDebug("Kernel Loaded world: " + ns + "/" + name + " - " + dirpath + " - " +
-                                        scene.isLoaded + " " + scene.IsValid());
-                        return scene;
-                    }
-                }
+				for (var i = 0; i < SceneManager.sceneCountInBuildSettings; i++) {
+					var sc = SceneUtility.GetScenePathByBuildIndex(i);
+					if (sc.Replace('\\', '/').ToLower() == dirpath.Replace('\\', '/').ToLower()) {
+						var id = SceneUtility.GetBuildIndexByScenePath(sc);
+						if (id == -1) return default;
+						var scene = SceneManager.GetSceneByBuildIndex(id);
+						if (!scene.isLoaded) await SceneManager.LoadSceneAsync(id, mode);
+						scene = SceneManager.GetSceneByBuildIndex(id);
+						Logger.LogDebug("Kernel Loaded world: " + ns + "/" + name + " - " + dirpath + " - " + scene.isLoaded + " " + scene.IsValid());
+						return scene;
+					}
+				}
 
-                return default;
-#else
+				return default;
+				#else
                 return await LoadWorldFromBundle(ns, name, mode);
-#endif
-            }
+				#endif
+			}
 
-            return default;
-        }
+			return default;
+		}
 
-        public async UniTask UnloadLocalWorld(string name) =>
-            await UnloadOverrideWorld(_kernelMod.Metadata.GetId(), name);
+		public async UniTask UnloadLocalWorld(string name)
+			=> await UnloadOverrideWorld(_kernelMod.Metadata.GetId(), name);
 
-        public async UniTask UnloadOverrideWorld(string ns, string name)
-        {
-            List<string> namespaces = new() { ns };
-            var mod = ModManager.GetMod(ns);
-            if (mod != null)
-            {
-                var meta = mod.GetMetadata();
-                namespaces.Add(meta.GetId());
-                namespaces.AddRange(meta.GetProvides());
-            }
+		public async UniTask UnloadOverrideWorld(string ns, string name) {
+			List<string> namespaces = new() { ns };
+			var          mod        = ModManager.GetMod(ns);
+			if (mod != null) {
+				var meta = mod.GetMetadata();
+				namespaces.Add(meta.GetId());
+				namespaces.AddRange(meta.GetProvides());
+			}
 
-            foreach (var n in namespaces)
-            {
-#if UNITY_EDITOR
-                var dirpath = Path.Combine("Assets", Path.GetRelativePath(
-                    Application.dataPath,
-                    Path.Combine(_kernelMod.GetData<string>("assets"), ns, name))
-                );
+			foreach (var n in namespaces) {
+				#if UNITY_EDITOR
+				var dirpath = Path.Combine(
+					"Assets", Path.GetRelativePath(
+						Application.dataPath,
+						Path.Combine(_kernelMod.GetData<string>("assets"), ns, name)
+					)
+				);
 
-                for (var i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
-                {
-                    var sc = SceneUtility.GetScenePathByBuildIndex(i);
-                    if (sc.Replace('\\', '/').ToLower() == dirpath.Replace('\\', '/').ToLower())
-                    {
-                        var id = SceneUtility.GetBuildIndexByScenePath(sc);
-                        if (id == -1) return;
-                        var scene = SceneManager.GetSceneByBuildIndex(id);
-                        if (scene.isLoaded) await SceneManager.UnloadSceneAsync(scene);
-                        return;
-                    }
-                }
-#else
+				for (var i = 0; i < SceneManager.sceneCountInBuildSettings; i++) {
+					var sc = SceneUtility.GetScenePathByBuildIndex(i);
+					if (sc.Replace('\\', '/').ToLower() == dirpath.Replace('\\', '/').ToLower()) {
+						var id = SceneUtility.GetBuildIndexByScenePath(sc);
+						if (id == -1) return;
+						var scene = SceneManager.GetSceneByBuildIndex(id);
+						if (scene.isLoaded) await SceneManager.UnloadSceneAsync(scene);
+						return;
+					}
+				}
+				#else
                 await UnloadWorldFromBundle(ns, name);
-#endif
-            }
+				#endif
+			}
 
-            return;
-        }
+			return;
+		}
 
-        public bool HasOverrideWorld(string ns, string name)
-        {
-            List<string> namespaces = new() { ns };
-            var mod = ModManager.GetMod(ns);
-            if (mod != null)
-            {
-                var meta = mod.GetMetadata();
-                namespaces.Add(meta.GetId());
-                namespaces.AddRange(meta.GetProvides());
-            }
+		public bool HasOverrideWorld(string ns, string name) {
+			List<string> namespaces = new() { ns };
+			var          mod        = ModManager.GetMod(ns);
+			if (mod != null) {
+				var meta = mod.GetMetadata();
+				namespaces.Add(meta.GetId());
+				namespaces.AddRange(meta.GetProvides());
+			}
 
-            foreach (var n in namespaces)
-            {
-#if UNITY_EDITOR
-                var dirpath = Path.Combine("Assets", Path.GetRelativePath(
-                    Application.dataPath,
-                    Path.Combine(_kernelMod.GetData<string>("assets"), ns, name))
-                );
+			foreach (var n in namespaces) {
+				#if UNITY_EDITOR
+				var dirpath = Path.Combine(
+					"Assets", Path.GetRelativePath(
+						Application.dataPath,
+						Path.Combine(_kernelMod.GetData<string>("assets"), ns, name)
+					)
+				);
 
-                for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
-                {
-                    var sc = SceneUtility.GetScenePathByBuildIndex(i);
-                    if (sc.Replace('\\', '/').ToLower() == dirpath.Replace('\\', '/').ToLower())
-                        return true;
-                }
-#else
+				for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++) {
+					var sc = SceneUtility.GetScenePathByBuildIndex(i);
+					if (sc.Replace('\\', '/').ToLower() == dirpath.Replace('\\', '/').ToLower())
+						return true;
+				}
+				#else
                 return !string.IsNullOrEmpty(HasWorldFromBundle(ns, name));
-#endif
-            }
+				#endif
+			}
 
-            return false;
-        }
+			return false;
+		}
 
-        public bool IsLoadedOverrideWorld(string ns, string name)
-        {
-            List<string> namespaces = new() { ns };
-            var mod = ModManager.GetMod(ns);
-            if (mod != null)
-            {
-                var meta = mod.GetMetadata();
-                namespaces.Add(meta.GetId());
-                namespaces.AddRange(meta.GetProvides());
-            }
+		public bool IsLoadedOverrideWorld(string ns, string name) {
+			List<string> namespaces = new() { ns };
+			var          mod        = ModManager.GetMod(ns);
+			if (mod != null) {
+				var meta = mod.GetMetadata();
+				namespaces.Add(meta.GetId());
+				namespaces.AddRange(meta.GetProvides());
+			}
 
-            foreach (var n in namespaces)
-            {
-#if UNITY_EDITOR
-                var dirpath = Path.Combine("Assets", Path.GetRelativePath(
-                    Application.dataPath,
-                    Path.Combine(_kernelMod.GetData<string>("assets"), ns, name))
-                );
+			foreach (var n in namespaces) {
+				#if UNITY_EDITOR
+				var dirpath = Path.Combine(
+					"Assets", Path.GetRelativePath(
+						Application.dataPath,
+						Path.Combine(_kernelMod.GetData<string>("assets"), n, name)
+					)
+				);
 
-                for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
-                {
-                    var sc = SceneUtility.GetScenePathByBuildIndex(i);
-                    if (sc.Replace('\\', '/').ToLower() == dirpath.Replace('\\', '/').ToLower())
-                    {
-                        var id = SceneUtility.GetBuildIndexByScenePath(sc);
-                        if (id == -1) return false;
-                        var scene = SceneManager.GetSceneByBuildIndex(id);
-                        Logger.LogDebug("Scene loaded: " + ns + "/" + name + " - " + dirpath + " - " + scene.isLoaded);
-                        return scene.isLoaded;
-                    }
-                }
-#else
+				for (var i = 0; i < SceneManager.sceneCountInBuildSettings; i++) {
+					var sc = SceneUtility.GetScenePathByBuildIndex(i);
+					if (!string.Equals(sc.Replace('\\', '/'), dirpath.Replace('\\', '/'), StringComparison.CurrentCultureIgnoreCase)) continue;
+					var id = SceneUtility.GetBuildIndexByScenePath(sc);
+					if (id == -1) return false;
+					var scene = SceneManager.GetSceneByBuildIndex(id);
+					return scene.isLoaded;
+				}
+				#else
                 return IsLoadedWorldFromBundle(ns, name);
-#endif
-            }
+				#endif
+			}
 
-            return false;
-        }
+			return false;
+		}
 
-        public Scene GetOverrideWorld(string ns, string name)
-        {
-            List<string> namespaces = new() { ns };
-            var mod = ModManager.GetMod(ns);
-            if (mod != null)
-            {
-                var meta = mod.GetMetadata();
-                namespaces.Add(meta.GetId());
-                namespaces.AddRange(meta.GetProvides());
-            }
+		public Scene GetOverrideWorld(string ns, string name) {
+			List<string> namespaces = new() { ns };
+			var          mod        = ModManager.GetMod(ns);
+			if (mod != null) {
+				var meta = mod.GetMetadata();
+				namespaces.Add(meta.GetId());
+				namespaces.AddRange(meta.GetProvides());
+			}
 
-            foreach (var n in namespaces)
-            {
-#if UNITY_EDITOR
-                var dirpath = Path.Combine("Assets", Path.GetRelativePath(
-                    Application.dataPath,
-                    Path.Combine(_kernelMod.GetData<string>("assets"), n, name))
-                );
+			foreach (var n in namespaces) {
+				#if UNITY_EDITOR
+				var dirpath = Path.Combine(
+					"Assets", Path.GetRelativePath(
+						Application.dataPath,
+						Path.Combine(_kernelMod.GetData<string>("assets"), n, name)
+					)
+				);
 
-                if (!File.Exists(dirpath))
-                    return default;
+				for (var i = 0; i < SceneManager.sceneCountInBuildSettings; i++) {
+					var sc = SceneUtility.GetScenePathByBuildIndex(i);
+					if (!string.Equals(sc.Replace('\\', '/'), dirpath.Replace('\\', '/'), StringComparison.CurrentCultureIgnoreCase)) continue;
+					var id = SceneUtility.GetBuildIndexByScenePath(sc);
+					if (id == -1) return default;
+					var scene = SceneManager.GetSceneByBuildIndex(id);
+					return scene.isLoaded ? scene : default;
+				}
+				#else
+				return GetWorldFromBundle(ns, name);
+				#endif
+			}
 
-                return SceneManager.GetSceneByPath(dirpath);
-#else
-                return GetWorldFromBundle(ns, name);
-#endif
-            }
+			return default;
+		}
 
-            return default;
-        }
+		public bool HasLocalWorld(string name)
+			=> HasOverrideWorld(_kernelMod.Metadata.GetId(), name);
 
-        public bool HasLocalWorld(string name) => HasOverrideWorld(_kernelMod.Metadata.GetId(), name);
-        public bool IsLoadedLocalWorld(string name) => IsLoadedOverrideWorld(_kernelMod.Metadata.GetId(), name);
-        public Scene GetLocalWorld(string name) => GetOverrideWorld(_kernelMod.Metadata.GetId(), name);
+		public bool IsLoadedLocalWorld(string name)
+			=> IsLoadedOverrideWorld(_kernelMod.Metadata.GetId(), name);
 
-
-        public List<AssetBundle> assetBundles = null;
-
-#if UNITY_EDITOR
-#pragma warning disable 1998
-        private bool _loaded = false;
-
-        public async UniTask<bool> RegisterAssets()
-        {
-            _loaded = true;
-            return true;
-        }
-
-        public async UniTask<bool> UnRegisterAssets()
-        {
-            _loaded = false;
-            return true;
-        }
-
-        public bool IsLoaded() => _loaded;
+		public Scene GetLocalWorld(string name)
+			=> GetOverrideWorld(_kernelMod.Metadata.GetId(), name);
 
 
-#pragma warning restore 1998
-#else
+		public List<AssetBundle> assetBundles = null;
+
+		#if UNITY_EDITOR
+		#pragma warning disable 1998
+		private bool _loaded = false;
+
+		public async UniTask<bool> RegisterAssets() {
+			_loaded = true;
+			return true;
+		}
+
+		public async UniTask<bool> UnRegisterAssets() {
+			_loaded = false;
+			return true;
+		}
+
+		public bool IsLoaded()
+			=> _loaded;
+
+
+		#pragma warning restore 1998
+		#else
         public string GetAssetPathFromBundle(string ns, string name)
         {
             var basepath = _kernelMod.Metadata.GetCustom<JObject>("kernel")?.GetValue("assets_path")?.ToObject<string>();
@@ -767,6 +748,6 @@ namespace Nox.ModLoader.Cores.Assets
 
             return default;
         }
-#endif
-    }
+		#endif
+	}
 }

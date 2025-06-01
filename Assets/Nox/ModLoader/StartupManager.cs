@@ -12,139 +12,133 @@ using UnityEditor;
 using UnityEditor.ShortcutManagement;
 #endif
 
-namespace Nox.ModLoader
-{
-    public class StartupManager
-    {
-        private static bool _isLoaded;
-        private static bool _initializing = false;
+namespace Nox.ModLoader {
+	public class StartupManager {
+		private static bool _isLoaded;
+		private static bool _initializing = false;
 
-#if UNITY_EDITOR
+		#if UNITY_EDITOR
 
-        [MenuItem("Nox/ModLoader/Reload Mods")]
-        private static void ReloadMods() => AsyncReloadMods().Forget();
+		[MenuItem("Nox/ModLoader/Reload Mods")]
+		private static void ReloadMods()
+			=> AsyncReloadMods().Forget();
 
-        private static bool AutoStart
-        {
-            get => Config.LoadEditor().Get("auto_start", true);
-            set
-            {
-                var config = Config.LoadEditor();
-                config.Set("auto_start", value);
-                config.Save();
-            }
-        }
+		private static bool AutoStart {
+			get => Config.LoadEditor().Get("auto_start", true);
+			set {
+				var config = Config.LoadEditor();
+				config.Set("auto_start", value);
+				config.Save();
+			}
+		}
 
-        [MenuItem("Nox/Play Mode/Auto Start Enable")]
-        private static void AutoStartEnable()
-        {
-            AutoStart = true;
-            Logger.Log("Auto Start Enabled...");
-        }
+		[MenuItem("Nox/Play Mode/Auto Start Enable")]
+		private static void AutoStartEnable() {
+			AutoStart = true;
+			Logger.Log("Auto Start Enabled...");
+		}
 
-        [MenuItem("Nox/Play Mode/Auto Start Disable")]
-        private static void AutoStartDisable()
-        {
-            AutoStart = false;
-            Logger.Log("Auto Start Disabled...");
-        }
+		[MenuItem("Nox/Play Mode/Auto Start Disable")]
+		private static void AutoStartDisable() {
+			AutoStart = false;
+			Logger.Log("Auto Start Disabled...");
+		}
 
-        [UnityEditor.Callbacks.DidReloadScripts]
-        private static void OnScriptsReloaded() => AsyncInitialize().Forget();
+		[UnityEditor.Callbacks.DidReloadScripts]
+		private static void OnScriptsReloaded()
+			=> AsyncInitialize().Forget();
 
-        private static bool _isReloading;
-        
-        private static async UniTask AsyncReloadMods()
-        {
-            if (_isReloading) return;
-            _isReloading = true;
-            
-            if (Application.isPlaying)
-            {
-                Logger.LogError("Cannot reload mods while playing...");
-                _isReloading = false;
-                return;
-            }
+		private static bool _isReloading;
 
-            Logger.Log("Reloading Mods...");
+		private static async UniTask AsyncReloadMods() {
+			if (_isReloading) return;
+			_isReloading = true;
 
-            // open progress bar window
-            DisplayProgressBar("Reloading Mods", "Unloading Mods...", 0.0f);
+			if (Application.isPlaying) {
+				Logger.LogError("Cannot reload mods while playing...");
+				_isReloading = false;
+				return;
+			}
 
-            var mods = ModManager.Mods;
-            
-            foreach (var mod in ModManager.Mods)
-                await mod.SendPreDispose();
+			Logger.Log("Reloading Mods...");
 
-            foreach (var mod in ModManager.Mods)
-                await mod.SendDispose();
+			// open progress bar window
+			DisplayProgressBar("Reloading Mods", "Unloading Mods...", 0.0f);
 
-            for (var i = 0; i < mods.Count; i++)
-            {
-                var mod = mods[i];
-                EditorUtility.DisplayProgressBar("Reloading Mods",
-                    $"Unloading Mod {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})...", (float)i / mods.Count);
-                await mod.Unload();
-            }
+			var mods = ModManager.Mods;
 
-            ModManager.Mods.Clear();
+			foreach (var mod in ModManager.Mods)
+				await mod.SendPreDispose();
 
-            DisplayProgressBar("Reloading Mods", "Discovering Mods...", -1.0f);
+			foreach (var mod in ModManager.Mods)
+				await mod.SendDispose();
 
-            var results = await ModManager.LoadMods();
+			for (var i = 0; i < mods.Count; i++) {
+				var mod = mods[i];
+				EditorUtility.DisplayProgressBar(
+					"Reloading Mods",
+					$"Unloading Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...", (float)i / mods.Count
+				);
+				await mod.Unload();
+			}
 
-            foreach (var result in results.Results)
-                if (result.IsError)
-                    Logger.LogError(result.Message);
-                else if (result.IsWarning)
-                    Logger.LogWarning(result.Message);
-                else Logger.Log(result.Message);
+			ModManager.Mods.Clear();
 
-            DisplayProgressBar("Reloading Mods", "Enabling Mods...", 0.0f);
+			DisplayProgressBar("Reloading Mods", "Discovering Mods...", -1.0f);
 
-            for (var i = 0; i < results.Mods.Length; i++)
-            {
-                var mod = results.Mods[i];
-                DisplayProgressBar("Reloading Mods",
-                    $"Enabling Mod {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})...",
-                    (float)i / results.Mods.Length);
-                mod.EnableMain();
-                mod.EnableEditor();
-            }
+			var results = await ModManager.LoadMods();
 
-            foreach (var mod in results.Mods)
-                await mod.SendInitialize();
+			foreach (var result in results.Results)
+				if (result.IsError)
+					Logger.LogError(result.Message);
+				else if (result.IsWarning)
+					Logger.LogWarning(result.Message);
+				else Logger.Log(result.Message);
 
-            foreach (var mod in results.Mods)
-                await mod.SendPostInitialize();
-            
-            _isReloading = false;
-            
-            Logger.Log("Mods Reloaded...");
+			DisplayProgressBar("Reloading Mods", "Enabling Mods...", 0.0f);
 
-            ClearProgressBar();
-        }
+			for (var i = 0; i < results.Mods.Length; i++) {
+				var mod = results.Mods[i];
+				DisplayProgressBar(
+					"Reloading Mods",
+					$"Enabling Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
+					(float)i / results.Mods.Length
+				);
+				mod.EnableMain();
+				mod.EnableEditor();
+			}
 
-        private static void DisplayProgressBar(string title, string info, float progress)
-            => EditorUtility.DisplayProgressBar(title, info, progress);
+			foreach (var mod in results.Mods)
+				await mod.SendInitialize();
 
-        private static void ClearProgressBar()
-            => EditorUtility.ClearProgressBar();
+			foreach (var mod in results.Mods)
+				await mod.SendPostInitialize();
 
-        private static void OnUpdateEditor()
-        {
-            if (Application.isPlaying || _isReloading) return;
-            foreach (var mod in ModManager.Mods)
-                mod.SendUpdate();
-        }
+			_isReloading = false;
 
-        private static void OnPlayModeStateChanged(PlayModeStateChange state, ResultLoadInfos resultInfos)
-        {
-            if (state == PlayModeStateChange.EnteredPlayMode)
-                StartupPlayerLoop.Setup(resultInfos);
-        }
+			Logger.Log("Mods Reloaded...");
 
-#else
+			ClearProgressBar();
+		}
+
+		private static void DisplayProgressBar(string title, string info, float progress)
+			=> EditorUtility.DisplayProgressBar(title, info, progress);
+
+		private static void ClearProgressBar()
+			=> EditorUtility.ClearProgressBar();
+
+		private static void OnUpdateEditor() {
+			if (Application.isPlaying || _isReloading) return;
+			foreach (var mod in ModManager.Mods)
+				mod.SendUpdate();
+		}
+
+		private static void OnPlayModeStateChanged(PlayModeStateChange state, ResultLoadInfos resultInfos) {
+			if (state == PlayModeStateChange.EnteredPlayMode)
+				StartupPlayerLoop.Setup(resultInfos);
+		}
+
+		#else
         private static void DisplayProgressBar(string title, string info, float progress)
         {
         }
@@ -155,300 +149,357 @@ namespace Nox.ModLoader
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         public static void OnBeforeSceneLoad() => AsyncInitialize().Forget();
-#endif
+		#endif
 
 
-        private static async UniTaskVoid AsyncInitialize()
-        {
-#if UNITY_EDITOR
-            List<string> types = new();
-            if (EditorApplication.isCompiling)
-                types.Add("compiling");
-            if (EditorApplication.isPlaying)
-            {
-                types.Add("playing");
-                EditorApplication.isPlaying = false;
-                return;
-            }
+		private static async UniTaskVoid AsyncInitialize() {
+			#if UNITY_EDITOR
+			List<string> types = new();
+			if (EditorApplication.isCompiling)
+				types.Add("compiling");
+			if (EditorApplication.isPlaying) {
+				types.Add("playing");
+				EditorApplication.isPlaying = false;
+				return;
+			}
 
-            if (EditorApplication.isPaused)
-                types.Add("paused");
-            if (EditorApplication.isRemoteConnected)
-                types.Add("remote connected");
-            if (EditorApplication.isTemporaryProject)
-                types.Add("temporary project");
+			if (EditorApplication.isPaused)
+				types.Add("paused");
+			if (EditorApplication.isRemoteConnected)
+				types.Add("remote connected");
+			if (EditorApplication.isTemporaryProject)
+				types.Add("temporary project");
 
-            Logger.Log($"Editor is [{string.Join(", ", types)}]...");
-            if (types.Count > 0)
-                return;
-#endif
+			Logger.Log($"Editor is [{string.Join(", ", types)}]...");
+			if (types.Count > 0)
+				return;
+			#endif
 
-            if (_initializing) return;
-            _initializing = true;
+			if (_initializing) return;
+			_initializing = true;
 
-            DisplayProgressBar("Loading Mods", "Discovering Mods...", -1.0f);
+			DisplayProgressBar("Loading Mods", "Discovering Mods...", -1.0f);
 
-            var resultinfos = await ModManager.LoadMods();
+			var resultinfos = await ModManager.LoadMods();
 
-            Logger.Log($"Executing Editor as [{(Application.isConsolePlatform ? "Server" : "Client")}]...");
-            Logger.LogDebug($"{resultinfos.Mods.Length} mods loaded:");
-            foreach (var mod in resultinfos.Mods)
-                Logger.LogDebug($"- {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})");
+			Logger.Log($"Executing Editor as [{(Application.isConsolePlatform ? "Server" : "Client")}]...");
+			Logger.LogDebug($"{resultinfos.Mods.Length} mods loaded:");
+			foreach (var mod in resultinfos.Mods)
+				Logger.LogDebug($"- {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}");
 
-            foreach (var result in resultinfos.Results)
-                if (result.IsError)
-                    Logger.LogError(result.Message);
-                else if (result.IsWarning)
-                    Logger.LogWarning(result.Message);
-                else Logger.Log(result.Message);
+			foreach (var result in resultinfos.Results)
+				if (result.IsError)
+					Logger.LogError(result.Message);
+				else if (result.IsWarning)
+					Logger.LogWarning(result.Message);
+				else Logger.Log(result.Message);
 
-            DisplayProgressBar("Loading Mods", "Enabling Mods...", 0.0f);
+			DisplayProgressBar("Loading Mods", "Enabling Mods...", 0.0f);
 
-            for (var i = 0; i < resultinfos.Mods.Length; i++)
-            {
-                var mod = resultinfos.Mods[i];
-                DisplayProgressBar("Loading Mods",
-                    $"Enabling Mod {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})...",
-                    (float)(i + 1) / resultinfos.Mods.Length);
-                mod.EnableMain();
-#if UNITY_EDITOR
-                mod.EnableEditor();
-#endif
-            }
+			for (var i = 0; i < resultinfos.Mods.Length; i++) {
+				var mod = resultinfos.Mods[i];
+				DisplayProgressBar(
+					"Loading Mods",
+					$"Enabling Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
+					(float)(i + 1) / resultinfos.Mods.Length
+				);
+				mod.EnableMain();
+				#if UNITY_EDITOR
+				mod.EnableEditor();
+				#endif
+			}
 
-            DisplayProgressBar("Loading Mods", "Initializing Mods...", 0.0f);
+			DisplayProgressBar("Loading Mods", "Initializing Mods...", 0.0f);
 
-            for (var i = 0; i < resultinfos.Mods.Length; i++)
-            {
-                var mod = resultinfos.Mods[i];
-                DisplayProgressBar("Loading Mods",
-                    $"Initializing Mod {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})...",
-                    (float)(i + 1) / resultinfos.Mods.Length);
-                await mod.SendInitialize();
-            }
+			for (var i = 0; i < resultinfos.Mods.Length; i++) {
+				var mod = resultinfos.Mods[i];
+				DisplayProgressBar(
+					"Loading Mods",
+					$"Initializing Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
+					(float)(i + 1) / resultinfos.Mods.Length
+				);
+				await mod.SendInitialize();
+			}
 
-            for (var i = 0; i < resultinfos.Mods.Length; i++)
-            {
-                var mod = resultinfos.Mods[i];
-                DisplayProgressBar("Loading Mods",
-                    $"Post-Initializing Mod {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})...",
-                    (float)(i + 1) / resultinfos.Mods.Length);
-                await mod.SendPostInitialize();
-            }
+			for (var i = 0; i < resultinfos.Mods.Length; i++) {
+				var mod = resultinfos.Mods[i];
+				DisplayProgressBar(
+					"Loading Mods",
+					$"Post-Initializing Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
+					(float)(i + 1) / resultinfos.Mods.Length
+				);
+				await mod.SendPostInitialize();
+			}
 
-            Logger.Log("Mods Loaded...");
-            ClearProgressBar();
+			Logger.Log("Mods Loaded...");
+			ClearProgressBar();
 
-#if UNITY_EDITOR
-            EditorApplication.update += OnUpdateEditor;
-            EditorApplication.playModeStateChanged += state => OnPlayModeStateChanged(state, resultinfos);
-            if (EditorApplication.isPlaying)
-                OnPlayModeStateChanged(PlayModeStateChange.EnteredPlayMode, resultinfos);
-#else
+			#if UNITY_EDITOR
+			EditorApplication.update               += OnUpdateEditor;
+			EditorApplication.playModeStateChanged += state => OnPlayModeStateChanged(state, resultinfos);
+			if (EditorApplication.isPlaying)
+				OnPlayModeStateChanged(PlayModeStateChange.EnteredPlayMode, resultinfos);
+			#else
             StartupPlayerLoop.Setup(resultinfos);
-#endif
-        }
+			#endif
+		}
 
-        private static async UniTask OnExitingPlayMode(ResultLoadInfos resultInfos)
-        {
-            Logger.Log("Exiting PlayMode... Disabling Mods...");
+		private static async UniTask OnExitingPlayMode(ResultLoadInfos resultInfos) {
+			Logger.Log("Exiting PlayMode... Disabling Mods...");
 
-            if (!_isLoaded)
-            {
-                Logger.Log("Skipping disabling mods because game was not loaded...");
-                return;
-            }
+			if (!_isLoaded) {
+				Logger.Log("Skipping disabling mods because game was not loaded...");
+				return;
+			}
 
-            DisplayProgressBar("Exiting PlayMode", "Disabling Mods...", 0.0f);
+			DisplayProgressBar("Exiting PlayMode", "Disabling Mods...", 0.0f);
 
-            for (var i = 0; i < resultInfos.Mods.Length; i++)
-            {
-                var mod = resultInfos.Mods[i];
-                DisplayProgressBar("Exiting PlayMode",
-                    $"Disabling Mod {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})...",
-                    (float)(i + 1) / resultInfos.Mods.Length);
-                mod.DisableClient();
-                mod.DisableServer();
-            }
+			for (var i = 0; i < resultInfos.Mods.Length; i++) {
+				var mod = resultInfos.Mods[i];
+				DisplayProgressBar(
+					"Exiting PlayMode",
+					$"Disabling Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
+					(float)(i + 1) / resultInfos.Mods.Length
+				);
+				mod.DisableClient();
+				mod.DisableServer();
+			}
 
-            DisplayProgressBar("Exiting PlayMode", "Pre-Disposing Mods...", 0.0f);
+			DisplayProgressBar("Exiting PlayMode", "Pre-Disposing Mods...", 0.0f);
 
-            for (var i = 0; i < resultInfos.Mods.Length; i++)
-            {
-                var mod = resultInfos.Mods[i];
-                DisplayProgressBar("Exiting PlayMode",
-                    $"Pre-Disposing Mod {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})...",
-                    (float)(i + 1) / resultInfos.Mods.Length);
-                await mod.SendPreDispose();
-            }
+			for (var i = 0; i < resultInfos.Mods.Length; i++) {
+				var mod = resultInfos.Mods[resultInfos.Mods.Length - 1 - i];
+				DisplayProgressBar(
+					"Exiting PlayMode",
+					$"Pre-Disposing Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
+					(float)(i + 1) / resultInfos.Mods.Length
+				);
+				await mod.SendPreDispose();
+			}
 
-            DisplayProgressBar("Exiting PlayMode", "Disposing Mods...", 0.0f);
+			DisplayProgressBar("Exiting PlayMode", "Disposing Mods...", 0.0f);
 
-            for (var i = 0; i < resultInfos.Mods.Length; i++)
-            {
-                var mod = resultInfos.Mods[i];
-                DisplayProgressBar("Exiting PlayMode",
-                    $"Disposing Mod {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})...",
-                    (float)(i + 1) / resultInfos.Mods.Length);
-                await mod.SendDispose();
-            }
+			for (var i = 0; i < resultInfos.Mods.Length; i++) {
+				var mod = resultInfos.Mods[resultInfos.Mods.Length - 1 - i];
+				DisplayProgressBar(
+					"Exiting PlayMode",
+					$"Disposing Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
+					(float)(i + 1) / resultInfos.Mods.Length
+				);
+				await mod.SendDispose();
+			}
 
-            // clearing 
+			// clearing 
 
-            DisplayProgressBar("Exiting PlayMode", "Clearing Mods...", 0.0f);
+			DisplayProgressBar("Exiting PlayMode", "Clearing Mods...", 0.0f);
 
-            for (var i = 0; i < resultInfos.Mods.Length; i++)
-            {
-                var mod = resultInfos.Mods[i];
-                DisplayProgressBar("Exiting PlayMode",
-                    $"Clearing Mod {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})...",
-                    (float)(i + 1) / resultInfos.Mods.Length);
-                mod.ClearClient();
-                mod.ClearServer();
-            }
+			for (var i = 0; i < resultInfos.Mods.Length; i++) {
+				var mod = resultInfos.Mods[resultInfos.Mods.Length - 1 - i];
+				DisplayProgressBar(
+					"Exiting PlayMode",
+					$"Clearing Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
+					(float)(i + 1) / resultInfos.Mods.Length
+				);
+				mod.ClearClient();
+				mod.ClearServer();
+			}
 
-            Logger.Log("Mods Disabled...");
-            ClearProgressBar();
-        }
+			Logger.Log("Mods Disabled...");
+			ClearProgressBar();
+		}
 
-        private static async UniTask OnEnteredPlayMode(ResultLoadInfos resultInfos)
-        {
-            Logger.Log("Entered PlayMode... Enabling Mods...");
+		#if UNITY_EDITOR
+		private enum WantsToLoad : int {
+			None = 0,
+			Yes  = 1,
+			No   = 2
+		}
 
-#if UNITY_EDITOR
-            // check if auto start is disabled
-            if (!AutoStart)
-            {
-                Logger.LogWarning("Auto Start Disabled...");
-                return;
-            }
+		private static WantsToLoad WantsTo {
+			get
+				=> EditorPrefs.GetInt("Nox.ModLoader.WantsToLoad", (int)WantsToLoad.None)
+					switch {
+						0 => WantsToLoad.None,
+						1 => WantsToLoad.Yes,
+						2 => WantsToLoad.No,
+						_ => WantsToLoad.None
+					};
+			set => EditorPrefs.SetInt("Nox.ModLoader.WantsToLoad", (int)value);
+		}
 
-            // check if the active scene have BaseDescriptor
-            if (BaseDescriptor.TryGetDescriptor<BaseDescriptor>(
-                    UnityEngine.SceneManagement.SceneManager.GetActiveScene(),
-                    out var wd)
-                && !EditorUtility.DisplayDialog("Nox ModLoader",
-                    $"This scene have a {wd.GetType().Name}, do you want load game?", "Yes", "No"))
-            {
-                Logger.Log("User canceled the game load...");
-                return;
-            }
+		[MenuItem("Nox/Play Mode/Wants To Load/Force Yes")]
+		public static void WantsToLoadYes() {
+			WantsTo = WantsToLoad.Yes;
+			Logger.Log("Wants to load set to Yes...");
+		}
 
-            if (AvatarDescriptor.TryGetDescriptor(
-                    UnityEngine.SceneManagement.SceneManager.GetActiveScene(),
-                    out var ad)
-                && !EditorUtility.DisplayDialog("Nox ModLoader",
-                    $"This scene have a {ad.GetType().Name}, do you want load game?", "Yes", "No"))
-            {
-                Logger.Log("User canceled the game load...");
-                return;
-            }
+		[MenuItem("Nox/Play Mode/Wants To Load/Force No")]
+		public static void WantsToLoadNo() {
+			WantsTo = WantsToLoad.No;
+			Logger.Log("Wants to load set to No...");
+		}
 
-            // disabling all keybinds of unityeditor to prevent conflicts
-            // ShortcutManager.instance.activeProfileId = "Play";
-#endif
+		[MenuItem("Nox/Play Mode/Wants To Load/Ask every time")]
+		public static void WantsToLoadAsk() {
+			WantsTo = WantsToLoad.None;
+			Logger.Log("Wants to load set to None...");
+		}
+		#endif
 
-            _isLoaded = true;
+		private static async UniTask OnEnteredPlayMode(ResultLoadInfos resultInfos) {
+			Logger.Log("Entered PlayMode... Enabling Mods...");
 
-            DisplayProgressBar("Entered PlayMode", "Enabling Mods...", 0.0f);
+			#if UNITY_EDITOR
+			// check if auto start is disabled
+			if (!AutoStart) {
+				Logger.LogWarning("Auto Start Disabled...");
+				return;
+			}
 
-            for (var i = 0; i < resultInfos.Mods.Length; i++)
-            {
-                var mod = resultInfos.Mods[i];
-                DisplayProgressBar("Entered PlayMode",
-                    $"Enabling Mod {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})...",
-                    (float)(i + 1) / resultInfos.Mods.Length);
-                if (Application.isConsolePlatform)
-                    mod.EnableServer();
-                else mod.EnableClient();
-            }
+			// check if the active scene have BaseDescriptor
+			if (BaseDescriptor.TryGetDescriptor<BaseDescriptor>(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), out var wd))
+				switch (WantsTo) {
+					case WantsToLoad.Yes:
+						Logger.Log("User wants to load the game...");
+						break;
+					case WantsToLoad.No:
+						Logger.Log("User does not want to load the game...");
+						return;
+					case WantsToLoad.None:
+					default: {
+						if (!EditorUtility.DisplayDialog(
+							    "Nox ModLoader",
+							    $"This scene have a {wd.GetType().Name} as {wd}, do you want load game?",
+							    "Yes", "No"
+						    )) {
+							Logger.Log("User canceled the game load...");
+							return;
+						}
 
-            DisplayProgressBar("Entered PlayMode", "Initializing Mods...", 0.0f);
+						break;
+					}
+				}
 
-            for (var i = 0; i < resultInfos.Mods.Length; i++)
-            {
-                var mod = resultInfos.Mods[i];
-                DisplayProgressBar("Entered PlayMode",
-                    $"Initializing Mod {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})...",
-                    (float)(i + 1) / resultInfos.Mods.Length);
-                await mod.SendInitialize();
-            }
+			// check if the active scene have AvatarDescriptor
+			if (AvatarDescriptor.TryGetDescriptor(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), out var ad))
+				switch (WantsTo) {
+					case WantsToLoad.Yes:
+						Logger.Log("User wants to load the game...");
+						break;
+					case WantsToLoad.No:
+						Logger.Log("User does not want to load the game...");
+						return;
+					case WantsToLoad.None:
+					default: {
+						if (!EditorUtility.DisplayDialog(
+							    "Nox ModLoader",
+							    $"This scene have a {ad.GetType().Name} as {ad}, do you want load game?",
+							    "Yes", "No"
+						    )) {
+							Logger.Log("User canceled the game load...");
+							return;
+						}
 
-            DisplayProgressBar("Entered PlayMode", "Post-Initializing Mods...", 0.0f);
-
-            for (var i = 0; i < resultInfos.Mods.Length; i++)
-            {
-                var mod = resultInfos.Mods[i];
-                DisplayProgressBar("Entered PlayMode",
-                    $"Post-Initializing Mod {mod.Metadata.GetId()}({mod.Metadata.GetVersion()})...",
-                    (float)(i + 1) / resultInfos.Mods.Length);
-                await mod.SendPostInitialize();
-            }
-
-            Logger.Log("Mods Enabled...");
-            ClearProgressBar();
-        }
+						break;
+					}
+				}
 
 
-        public class StartupPlayerLoop : MonoBehaviour
-        {
-            private static StartupPlayerLoop _instance;
-            private ResultLoadInfos resultInfos;
+			// disabling all keybinds of unityeditor to prevent conflicts
+			// ShortcutManager.instance.activeProfileId = "Play";
+			#endif
 
-            public static void Setup(ResultLoadInfos resultInfos)
-            {
-                if (_instance)
-                    throw new Exception("StartupPlayerLoop already exists...");
-                var go = new GameObject();
-                _instance = go.AddComponent<StartupPlayerLoop>();
-                go.name = $"[{_instance.GetType().Name}]";
-                _instance.resultInfos = resultInfos;
-                DontDestroyOnLoad(go);
-            }
+			_isLoaded = true;
 
-            private async void OnApplicationQuit()
-            {
-                try
-                {
-                    Logger.Log("Application Quit...");
-                    await OnExitingPlayMode(resultInfos);
-                }
-                catch
-                {
-                    // ignored
-                }
-            }
+			DisplayProgressBar("Entered PlayMode", "Enabling Mods...", 0.0f);
 
-            private async void Start()
-            {
-                try
-                {
-                    Logger.Log("StartupPlayerLoop Started...");
-                    await OnEnteredPlayMode(resultInfos);
-                }
-                catch
-                {
-                    // ignored
-                }
-            }
+			for (var i = 0; i < resultInfos.Mods.Length; i++) {
+				var mod = resultInfos.Mods[i];
+				DisplayProgressBar(
+					"Entered PlayMode",
+					$"Enabling Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
+					(float)(i + 1) / resultInfos.Mods.Length
+				);
+				if (Application.isConsolePlatform)
+					mod.EnableServer();
+				else mod.EnableClient();
+			}
 
-            private void Update()
-            {
-                foreach (var mod in ModManager.Mods)
-                    mod.SendUpdate();
-            }
+			DisplayProgressBar("Entered PlayMode", "Initializing Mods...", 0.0f);
 
-            private void LateUpdate()
-            {
-                foreach (var mod in ModManager.Mods)
-                    mod.SendLateUpdate();
-            }
+			for (var i = 0; i < resultInfos.Mods.Length; i++) {
+				var mod = resultInfos.Mods[i];
+				DisplayProgressBar(
+					"Entered PlayMode",
+					$"Initializing Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
+					(float)(i + 1) / resultInfos.Mods.Length
+				);
+				await mod.SendInitialize();
+			}
 
-            private void FixedUpdate()
-            {
-                foreach (var mod in ModManager.Mods)
-                    mod.SendFixedUpdate();
-            }
-        }
-    }
+			DisplayProgressBar("Entered PlayMode", "Post-Initializing Mods...", 0.0f);
+
+			for (var i = 0; i < resultInfos.Mods.Length; i++) {
+				var mod = resultInfos.Mods[i];
+				DisplayProgressBar(
+					"Entered PlayMode",
+					$"Post-Initializing Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
+					(float)(i + 1) / resultInfos.Mods.Length
+				);
+				await mod.SendPostInitialize();
+			}
+
+			Logger.Log("Mods Enabled...");
+			ClearProgressBar();
+		}
+
+
+		public class StartupPlayerLoop : MonoBehaviour {
+			private static StartupPlayerLoop _instance;
+			private        ResultLoadInfos   resultInfos;
+
+			public static void Setup(ResultLoadInfos resultInfos) {
+				if (_instance)
+					throw new Exception("StartupPlayerLoop already exists...");
+				var go = new GameObject();
+				_instance             = go.AddComponent<StartupPlayerLoop>();
+				go.name               = $"[{_instance.GetType().Name}]";
+				_instance.resultInfos = resultInfos;
+				DontDestroyOnLoad(go);
+			}
+
+			private async void OnApplicationQuit() {
+				try {
+					Logger.Log("Application Quit...");
+					await OnExitingPlayMode(resultInfos);
+				} catch {
+					// ignored
+				}
+			}
+
+			private async void Start() {
+				try {
+					Logger.Log("StartupPlayerLoop Started...");
+					await OnEnteredPlayMode(resultInfos);
+				} catch {
+					// ignored
+				}
+			}
+
+			private void Update() {
+				foreach (var mod in ModManager.Mods)
+					mod.SendUpdate();
+			}
+
+			private void LateUpdate() {
+				foreach (var mod in ModManager.Mods)
+					mod.SendLateUpdate();
+			}
+
+			private void FixedUpdate() {
+				foreach (var mod in ModManager.Mods)
+					mod.SendFixedUpdate();
+			}
+		}
+	}
 }

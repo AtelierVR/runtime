@@ -2,7 +2,7 @@
     "name": "dev.nox.development",
     "rootNamespace": "",
     "references": [
-        "NoxCCK",
+        "Nox.CCK",
         "UniTask",
         "api.nox.session",
         "api.nox.relay",

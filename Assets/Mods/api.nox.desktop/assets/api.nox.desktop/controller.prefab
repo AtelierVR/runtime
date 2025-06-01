@@ -213,7 +213,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7539959870851041451}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e82f9489cd914957876b9accedc1e62e, type: 3}
+  m_Script: {fileID: 11500000, guid: ef47bdf8031b4def9d7cef16d5f495a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   inputMovement: {x: 0, y: 0, z: 0}

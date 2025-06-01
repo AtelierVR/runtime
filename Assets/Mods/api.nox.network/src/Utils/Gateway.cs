@@ -92,7 +92,9 @@ namespace api.nox.network.Utils {
 
 					return uris.ToArray();
 				}
-			} catch (Exception e) { }
+			} catch {
+				// ignored
+			}
 
 			return uris.ToArray();
 		}
@@ -108,7 +110,9 @@ namespace api.nox.network.Utils {
 					await req.SendWebRequest();
 					if (req.result == UnityWebRequest.Result.Success)
 						return new Uri($"{protocol}://{domain}");
-				} catch (Exception e) { }
+				} catch {
+					// ignored
+				}
 
 			return null;
 		}

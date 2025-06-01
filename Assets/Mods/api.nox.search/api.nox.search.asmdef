@@ -2,7 +2,7 @@
     "name": "api.nox.search",
     "rootNamespace": "",
     "references": [
-        "NoxCCK",
+        "Nox.CCK",
         "UniTask",
         "Unity.TextMeshPro"
     ],

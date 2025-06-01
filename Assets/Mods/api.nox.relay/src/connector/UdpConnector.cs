@@ -28,6 +28,7 @@ namespace api.nox.relay.connector {
 			return false;
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		public async UniTask<bool> Send(Buffer buffer) {
 			try {
 				await _client.SendAsync(buffer.data, buffer.length);
@@ -43,6 +44,7 @@ namespace api.nox.relay.connector {
 		public bool IsConnected()
 			=> _client != null;
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		public void Update() {
 			if (_client == null) return;
 			try {

@@ -10,7 +10,7 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.xr {
 	public class Client : ClientModInitializer {
-		internal static Client         Instance;
+		internal static Client           Instance;
 		internal static ClientModCoreAPI CoreAPI;
 
 

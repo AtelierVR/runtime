@@ -2,7 +2,7 @@
     "name": "api.nox.discord",
     "rootNamespace": "",
     "references": [
-        "NoxCCK",
+        "Nox.CCK",
         "UniTask"
     ],
     "includePlatforms": [],

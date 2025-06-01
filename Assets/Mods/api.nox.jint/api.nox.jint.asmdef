@@ -1,14 +1,18 @@
 {
-  "name": "Player",
-  "rootNamespace": "",
-  "references": [],
+  "name": "api.nox.jint",
+  "rootNamespace": "api.nox.jint",
+  "references": [
+    "Nox.CCK",
+    "UniTask",
+    "Jint"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
-  "overrideReferences": true,
+  "overrideReferences": false,
   "precompiledReferences": [],
   "autoReferenced": true,
   "defineConstraints": [],
   "versionDefines": [],
-  "noEngineReferences": true
+  "noEngineReferences": false
 }

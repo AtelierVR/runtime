@@ -27,7 +27,7 @@ namespace api.nox.world
         internal static MainDescriptor[] Descriptors 
             => MainDescriptorEditor.GetWorldDescriptors(false);
 
-        internal void OnUpdate()
+        internal void Update()
         {
             if (!WorldEditor.HasOnePanelOpened() || _root.childCount == 0) return;
             var descriptor = Descriptors.Length > 0 ? Descriptors[0] : null;

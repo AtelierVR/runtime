@@ -1,5 +1,51 @@
-namespace Mods.api.nox.controller.src {
-	public class Main {
-		
+using System;
+using Nox.CCK.Mods.Cores;
+using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Utils;
+using Nox.Controllers;
+
+namespace api.nox.controller {
+	public class Main : IControllerAPI, MainModInitializer {
+		private IController    _current;
+		private MainModCoreAPI _coreAPI;
+
+		public void OnInitializeMain(MainModCoreAPI api) {
+			_coreAPI = api;
+			_current = null;
+		}
+
+		public void OnDisposeMain() {
+			SetCurrent(null);
+			_coreAPI = null;
+		}
+
+		public IController GetCurrent()
+			=> _current;
+
+		public bool SetCurrent(IController controller) {
+			if (_current == controller)
+				return true;
+
+			var canChange = true;
+			_coreAPI.EventAPI.Emit("controller_request_change", controller, new Action<object[]>(OnRequest));
+			if (!canChange) {
+				Logger.LogWarning("Controller change request was denied");
+				return false;
+			}
+
+			if (_current != null) {
+				controller?.Restore(_current);
+				_current.Dispose();
+			}
+
+			_current = controller;
+			_coreAPI.EventAPI.Emit("controller_changed", _current);
+			return true;
+
+			void OnRequest(object[] args) {
+				if (args.Length > 0 && args[0] is false)
+					canChange = false;
+			}
+		}
 	}
 }

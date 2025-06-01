@@ -7,7 +7,7 @@
                 <engine:Label text="v0.0.0" name="version" />
             </engine:VisualElement>
             <engine:VisualElement style="flex-grow: 1; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); border-bottom-width: 1px; padding-bottom: 4px; padding-top: 4px; padding-right: 8px; padding-left: 8px;">
-                <editor:ObjectField label="Descriptor" type="Nox.CCK.Worlds.MainDescriptor, NoxCCK" name="descriptor-field" class="disable-on-error" />
+                <editor:ObjectField label="Descriptor" type="Nox.CCK.Worlds.MainDescriptor, Nox.CCK" name="descriptor-field" class="disable-on-error" />
             </engine:VisualElement>
             <engine:VisualElement style="flex-grow: 1; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); border-bottom-width: 1px; padding-bottom: 4px; padding-top: 4px; padding-right: 8px; padding-left: 8px;">
                 <engine:Button text="Go to Publisher tab" name="goto-publisher" />

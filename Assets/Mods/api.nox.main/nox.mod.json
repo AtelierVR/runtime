@@ -7,7 +7,7 @@
   ],
   "name": "Main Initialization",
   "version": "1.0.0",
-  "description": "Provides the Main API for the main.",
+  "description": "Provides the Main action to use the game.",
   "license": "GPL-3.0",
   "icon": null,
   "contact": {

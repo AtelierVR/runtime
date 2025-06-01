@@ -187,8 +187,6 @@ namespace Nox.CCK.Players {
 			};
 
 		public static ushort ToIndex(this PlayerRig rig)
-			=> rig == default
-				? ushort.MaxValue
-				: (ushort)rig;
+			=> (ushort)rig;
 	}
 }

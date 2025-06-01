@@ -2,9 +2,11 @@
     "name": "api.nox.world",
     "rootNamespace": "",
     "references": [
-        "NoxCCK",
+        "Nox.CCK",
         "UniTask",
-        "NoxModLoader"
+        "Nox.ModLoader",
+        "Nox.Worlds",
+        "Nox.Worlds.Components"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

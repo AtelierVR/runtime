@@ -11,7 +11,6 @@ namespace Nox.CCK.Mods.Cores
     {
         public ModMetadata ModMetadata { get; }
         public ChatAPI ChatAPI { get; }
-        public GroupAPI GroupAPI { get; }
         public EventAPI EventAPI { get; }
         public ModAPI ModAPI { get; }
         public AssetAPI AssetAPI { get; }

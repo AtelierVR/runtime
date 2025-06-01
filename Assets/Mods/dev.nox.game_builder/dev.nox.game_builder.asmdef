@@ -2,7 +2,7 @@
     "name": "dev.nox.game_builder",
     "rootNamespace": "",
     "references": [
-        "NoxCCK",
+        "Nox.CCK",
         "UniTask"
     ],
     "includePlatforms": [],

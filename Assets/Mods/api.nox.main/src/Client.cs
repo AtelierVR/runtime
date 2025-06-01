@@ -33,8 +33,8 @@ namespace api.nox.main {
 				_coreAPI.ModMetadata.GetId(),
 				"worlds/default/default.unity"
 			);
-			var adapter = OfflineAPI.MakeAdapter();
-			
+			var adapter = OfflineAPI.New(world);
+			var session = SessionAPI.New(adapter);
 		}
 
 		public void OnDisposeClient() { }

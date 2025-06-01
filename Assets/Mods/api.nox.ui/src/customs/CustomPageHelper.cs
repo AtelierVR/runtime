@@ -5,7 +5,7 @@ namespace api.nox.ui.pages
     public abstract class CustomPageHelper
     {
         protected CustomPageHelper()
-            => UISystem.CoreAPI.EventAPI.Subscribe("goto_page", OnGotoEvent);
+            => _subscription = UISystem.CoreAPI.EventAPI.Subscribe("goto_page", OnGotoEvent);
 
         private void OnGotoEvent(EventData context)
         {

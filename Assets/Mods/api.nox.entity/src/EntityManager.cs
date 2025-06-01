@@ -1,5 +1,70 @@
+using System.Collections.Generic;
+using System.Linq;
+using Nox.CCK.Utils;
+using Nox.Entities;
+
 namespace api.nox.entity {
-	public class EntityManager {
-		
+	public class EntityManager : IEntityManager, INoxObject {
+		private readonly List<IEntity> _entities = new();
+
+		public T[] GetEntities<T>() where T : IEntity
+			=> _entities
+				.Where(entity => entity is T)
+				.Cast<T>()
+				.ToArray();
+
+		public bool HasEntity(int id)
+			=> _entities.Any(entity => entity.GetIndex() == id);
+
+		public bool HasEntity<T>(int id) where T : IEntity
+			=> _entities.Any(entity => entity.GetIndex() == id && entity is T);
+
+		public int GetCount()
+			=> _entities.Count;
+
+		public int GetCount<T>() where T : IEntity
+			=> _entities.Count(entity => entity is T);
+
+		public void RegisterEntity(IEntity entity) {
+			if (entity == null) {
+				Logger.LogError("Cannot register a null entity.");
+				return;
+			}
+
+			if (HasEntity(entity.GetIndex())) {
+				Logger.LogWarning($"Entity with ID {entity.GetIndex()} is already registered.");
+				return;
+			}
+
+			_entities.Add(entity);
+			Logger.LogDebug($"Registered entity with ID {entity.GetIndex()}");
+		}
+
+		public void UnregisterEntity(IEntity entity) {
+			if (entity == null) {
+				Logger.LogError("Cannot unregister a null entity.");
+				return;
+			}
+
+			if (!HasEntity(entity.GetIndex())) {
+				Logger.LogWarning($"Entity with ID {entity.GetIndex()} is not registered.");
+				return;
+			}
+
+			_entities.Remove(entity);
+			Logger.LogDebug($"Unregistered entity with ID {entity.GetIndex()}");
+		}
+
+		public IEntity GetEntity(int id)
+			=> _entities.FirstOrDefault(entity => entity.GetIndex() == id);
+
+		public T GetEntity<T>(int id) where T : IEntity
+			=> (T)_entities.FirstOrDefault(entity => entity.GetIndex() == id && entity is T);
+
+		public IEntity[] GetEntities()
+			=> _entities.ToArray();
+
+		public override string ToString()
+			=> $"{GetType().Name}[Count={_entities.Count}]";
 	}
 }

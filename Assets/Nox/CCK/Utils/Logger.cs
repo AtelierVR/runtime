@@ -3,6 +3,7 @@ using Object = UnityEngine.Object;
 using System.IO;
 using System;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Nox.CCK.Utils {
 	public class Logger {
@@ -14,9 +15,10 @@ namespace Nox.CCK.Utils {
 		public static string LogFile
 			=> Path.Combine(LogDir, "latest.log");
 
-		public static byte LogID { get; private set; } = 0;
-
+		public static byte LogID         { get; private set; } = 0;
 		public static bool IsInitialized { get; private set; } = false;
+
+		private static readonly object fileLock = new();
 
 		#if UNITY_EDITOR
 		[UnityEditor.MenuItem("Nox/Logger/Open Latest Log")]
@@ -43,68 +45,63 @@ namespace Nox.CCK.Utils {
 		#endif
 
 		public static void Init() {
-			if (!Directory.Exists(LogDir))
-				Directory.CreateDirectory(LogDir);
+			lock (fileLock) {
+				if (!Directory.Exists(LogDir))
+					Directory.CreateDirectory(LogDir);
 
-			if (File.Exists(LogFile)) {
-				var    creationTime = File.GetCreationTime(LogFile);
-				var    i            = 0;
-				string newFileName;
-				do {
-					newFileName = Path.Combine(LogDir, $"log_{creationTime:yyyy-MM-dd_HH-mm-ss}_{i++}.log");
-				} while (File.Exists(newFileName));
+				if (File.Exists(LogFile)) {
+					var    creationTime = File.GetCreationTime(LogFile);
+					int    i            = 0;
+					string newFileName;
+					do {
+						newFileName = Path.Combine(LogDir, $"log_{creationTime:yyyy-MM-dd_HH-mm-ss}_{i++}.log");
+					} while (File.Exists(newFileName));
 
-				File.Move(LogFile, newFileName);
+					File.Move(LogFile, newFileName);
+				}
+
+				using (var fs = new FileStream(LogFile, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite)) {
+					// Création du fichier sans verrou exclusif
+				}
+
+				LogID = (byte)UnityEngine.Random.Range(byte.MinValue, byte.MaxValue);
+
+				File.AppendAllLines(
+					LogFile, new[] {
+						$"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} {LogID:X2}] Logger initialized."
+					}
+				);
 			}
-
-			File.Create(LogFile).Close();
-
-			LogID = (byte)UnityEngine.Random.Range(byte.MinValue, byte.MaxValue);
-
-			File.AppendAllLines(
-				LogFile,
-				new[] { $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} {LogID:X2}] Logger initialized." }
-			);
 		}
 
-		public static void Log(object message) {
-			OnLog(LogType.Log, message);
-			ULogger.Log($"[<color=green>{LogType.Log}</color>] {message}");
-		}
+		public static void Log(object message)
+			=> OnLog(LogType.Log, message);
 
-		public static void LogWarning(object message) {
-			OnLog(LogType.Warning, message);
-			ULogger.LogWarning($"[<color=yellow>{LogType.Warning}</color>] {message}");
-		}
+		public static void LogWarning(object message)
+			=> OnLog(LogType.Warning, message);
 
-		public static void LogError(object message) {
-			OnLog(LogType.Error, message);
-			ULogger.LogError($"[<color=red>{LogType.Error}</color>] {message}");
-		}
+		public static void LogError(object message)
+			=> OnLog(LogType.Error, message);
 
-		public static void LogDebug(object message) {
-			OnLog(LogType.Debug, message);
-			ULogger.Log($"[<color=cyan>{LogType.Debug}</color>] {message}");
-		}
+		public static void LogDebug(object message)
+			=> OnLog(LogType.Debug, message);
 
-		public static void LogException(Exception exception) {
-			OnLog(LogType.Exception, exception);
-			ULogger.LogException(exception);
-		}
+		public static void LogException(Exception exception)
+			=> OnLog(LogType.Exception, exception);
 
 		public static void Log(object message, Object context) {
 			OnLog(LogType.Log, message);
-			ULogger.Log($"[<color=green>{LogType.Log}</color>] {message}", context);
+			ULogger.Log(message, context);
 		}
 
 		public static void LogWarning(object message, Object context) {
 			OnLog(LogType.Warning, message);
-			ULogger.LogWarning($"[<color=yellow>{LogType.Warning}</color>] {message}", context);
+			ULogger.LogWarning(message.ToString(), context);
 		}
 
 		public static void LogError(object message, Object context) {
 			OnLog(LogType.Error, message);
-			ULogger.LogError($"[<color=red>{LogType.Error}</color>] {message}", context);
+			ULogger.LogError(message.ToString(), context);
 		}
 
 		public static void LogException(Exception exception, Object context) {
@@ -114,53 +111,55 @@ namespace Nox.CCK.Utils {
 
 		public static void LogDebug(object message, Object context) {
 			OnLog(LogType.Debug, message);
-			ULogger.Log($"[<color=cyan>{LogType.Debug}</color>] {message}", context);
+			ULogger.Log(message, context);
 		}
 
 		public static void OnLog(LogType type, object message) {
+			if (type == LogType.Debug && !Config.Load().Get(new[] { "debug_logging" }, Application.isEditor))
+				return;
+
+			message ??= "<null>";
+
 			try {
-				if (!IsInitialized) {
-					Init();
-					IsInitialized = true;
-				} else if (!File.Exists(LogFile) || new FileInfo(LogFile).Length > MaxLogSize)
-					Init();
+				lock (fileLock) {
+					if (!IsInitialized) {
+						Init();
+						IsInitialized = true;
+					} else if (!File.Exists(LogFile) || new FileInfo(LogFile).Length > MaxLogSize)
+						Init();
 
-				var stackTrace = new System.Diagnostics.StackTrace(2, true);
-				var old        = 0;
-				var frames     = stackTrace.GetFrames();
-				var methodName = "<UnknownMethod>";
-				var className  = "<UnknownClass>";
+					var    stackTrace = new System.Diagnostics.StackTrace(2, true);
+					var    frames     = stackTrace.GetFrames();
+					int    old        = 0;
+					string methodName = "<UnknownMethod>";
+					string className  = "<UnknownClass>";
 
-				if (frames != null && frames.Length > 0) {
-					methodName = frames[old].GetMethod().Name;
-					className  = frames[old].GetMethod().DeclaringType.Name;
-
-					while ((className.StartsWith("<")
-					       || className.Contains("AsyncUniTaskMethodBuilder")
-					       || className.Contains("AsyncUniTask")
-					       || className.Contains("PooledDelegate")
-					       || className.Contains("AwaiterActions")
-					       || className.Contains("UniTaskCompletionSourceCore")
-					       || className.Contains("WaitUntilPromise")
-					       )
-					       && frames.Length > ++old) {
+					if (frames != null && frames.Length > 0) {
 						methodName = frames[old].GetMethod().Name;
-						var declaringType = frames[old].GetMethod().DeclaringType;
-						if (declaringType != null)
-							className = declaringType.Name;
+						className  = frames[old].GetMethod().DeclaringType?.Name ?? className;
+						while ((className.StartsWith("<") || className.Contains("AsyncUniTask") || className.Contains("AwaiterActions") || className.Contains("CompletionSource")) && frames.Length > ++old) {
+							methodName = frames[old].GetMethod().Name;
+							className  = frames[old].GetMethod().DeclaringType?.Name ?? className;
+						}
 					}
-				}
 
-				File.AppendAllTextAsync(
+					File.AppendAllText(
 						LogFile,
 						$"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} {LogID:X2}] [{type}] [{className}.{methodName}] {message}{Environment.NewLine}"
-					)
-					.AsUniTask()
-					.Forget();
-				if (type is LogType.Error or LogType.Exception)
-					File.AppendAllTextAsync(LogFile, stackTrace + "\n")
-						.AsUniTask()
-						.Forget();
+					);
+
+					if (type == LogType.Error || type == LogType.Exception)
+						File.AppendAllText(LogFile, stackTrace + "\n");
+				}
+
+				// Log côté Unity
+				switch (type) {
+					case LogType.Log:       ULogger.Log(message); break;
+					case LogType.Warning:   ULogger.LogWarning(message); break;
+					case LogType.Error:     ULogger.LogError(message); break;
+					case LogType.Exception: ULogger.LogException(message as Exception); break;
+					case LogType.Debug:     ULogger.Log(message); break;
+				}
 			} catch (Exception e) {
 				ULogger.LogException(e);
 			}

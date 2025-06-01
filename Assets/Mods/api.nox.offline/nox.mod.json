@@ -1,20 +1,20 @@
 {
   "type": "mod",
-  "id": "api.nox.relay",
+  "id": "api.nox.offline",
   "provides": [
-    "fr.hactazia.relay",
-    "relay"
+    "fr.hactazia.offline",
+    "offline"
   ],
-  "name": "Relay System",
+  "name": "Offline System",
   "version": "1.0.0",
-  "description": "Provides a relay system for Nox.",
+  "description": "Provides a offline system for Nox.",
   "license": "GPL-3.0",
   "icon": null,
   "contact": {
     "email": "hactazia@gmail.com",
-    "source": "https://github.com/AtelierVR/api.nox.relay",
+    "source": "https://github.com/AtelierVR/api.nox.offline",
     "website": "https://nox.hactazia.fr/",
-    "issues": "https://github.com/AtelierVR/api.nox.relay/issues"
+    "issues": "https://github.com/AtelierVR/api.nox.offline/issues"
   },
   "authors": [
     {
@@ -24,13 +24,16 @@
     }
   ],
   "contributors": [],
-  "relations": [],
+  "relations": [
+    {
+      "id": "entity",
+      "type": "depends",
+      "version": ">=1.0.0"
+    }
+  ],
   "entrypoints": {
     "main": [
-      "api.nox.relay.RelaySystem"
-    ],
-    "editor": [
-      "api.nox.relay.editor.RelayEditor"
+      "api.nox.offline.Main"
     ]
   },
   "references": [],

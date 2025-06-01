@@ -2,9 +2,11 @@
     "name": "api.nox.player",
     "rootNamespace": "",
     "references": [
-        "NoxCCK",
+        "Nox.CCK",
         "UniTask",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Nox.KeyBinding",
+        "Nox.Players"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

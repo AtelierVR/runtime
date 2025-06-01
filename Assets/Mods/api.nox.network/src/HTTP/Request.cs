@@ -86,7 +86,7 @@ namespace api.nox.network.HTTP
                 RequestObject = req;
                 var t1 = DateTime.Now;
                 Logger.Log(
-                    $"Fetched [{Method}] {Url} in {(t1 - t0).TotalMilliseconds.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture)}ms");
+                    $"Fetched [{Method}] {Url} in {(t1 - t0).TotalMilliseconds.ToString("0", System.Globalization.CultureInfo.InvariantCulture)}ms");
 
                 if (typeof(TRes) == typeof(long))
                     return (TRes)(object)StatusCode;

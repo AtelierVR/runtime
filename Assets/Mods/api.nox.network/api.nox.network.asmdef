@@ -2,7 +2,7 @@
     "name": "api.nox.network",
     "rootNamespace": "",
     "references": [
-        "NoxCCK",
+        "Nox.CCK",
         "UniTask"
     ],
     "includePlatforms": [],

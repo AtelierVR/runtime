@@ -8,7 +8,7 @@ namespace api.nox.desktop {
 		internal static ClientModCoreAPI CoreAPI;
 
 		internal static IControllerAPI ControllerAPI
-			=> CoreAPI.ModAPI.GetMod("controller").GetClients().FirstOrDefault() as IControllerAPI;
+			=> CoreAPI.ModAPI.GetMod("controller").GetMains().FirstOrDefault() as IControllerAPI;
 
 		public void OnInitializeClient(ClientModCoreAPI api) {
 			CoreAPI = api;
@@ -17,10 +17,10 @@ namespace api.nox.desktop {
 		}
 
 		public void OnDisposeClient() {
-			CoreAPI = null;
-			Keybindings.Clear();
-			if (ControllerAPI?.GetCurrent() is DesktopController)
+			if (ControllerAPI.GetCurrent() is DesktopController)
 				ControllerAPI.SetCurrent(null);
+			Keybindings.Clear();
+			CoreAPI = null;
 		}
 	}
 }

@@ -44,7 +44,7 @@
                             <engine:UnsignedIntegerField value="10" name="eye-target-max" style="min-width: 24px;" />
                         </engine:VisualElement>
                     </engine:VisualElement>
-                    <engine:EnumField label="Eye look type" value="Center" type="Nox.CCK.Avatars.AvatarDescriptor+EyeLookType, NoxCCK" name="eye-look-type" />
+                    <engine:EnumField label="Eye look type" value="Center" type="Nox.CCK.Avatars.AvatarDescriptor+EyeLookType, Nox.CCK" name="eye-look-type" />
                     <engine:ListView show-foldout-header="true" reorderable="true" show-add-remove-footer="true" header-title="Eyes" horizontal-scrolling="false" show-border="true" virtualization-method="DynamicHeight" focusable="true" name="eyes" reorder-mode="Animated" style="margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;" />
                     <engine:Foldout text="Previews" value="true" style="margin-left: 16px; margin-top: 1px; margin-right: 3px; margin-bottom: 1px;">
                         <engine:VisualElement style="flex-grow: 1; padding-bottom: 8px;">

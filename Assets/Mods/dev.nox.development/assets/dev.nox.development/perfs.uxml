@@ -9,16 +9,16 @@
         </engine:GroupBox>
         <engine:ScrollView style="flex-grow: 1;">
             <engine:VisualElement style="flex-grow: 1;">
-                <!-- Performance stats display -->
-                <engine:VisualElement style="margin: 5px;">
+                <engine:VisualElement style="margin: 5px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;">
                     <engine:Label text="FPS: --" name="fps-label" />
                     <engine:Label text="Memory: --" name="memory-label" />
-                    <engine:Label text="Draw Calls: --" name="drawcalls-label" />
+                    <engine:Label text="Draw Calls: --" name="draw-calls-label" />
                 </engine:VisualElement>
-                
-                <!-- Graphics display section -->
-                <engine:Foldout text="Performance Graph" name="perf-graph-foldout" style="background-color: rgb(42, 42, 42); border-radius: 4px;">
-                    <engine:VisualElement name="graphic" style="height: 200px; margin: 5px;" />
+                <engine:Foldout text="Performance Graph" name="perf-graph-foldout" style="background-color: rgb(42, 42, 42); border-radius: 4px; padding-top: 8px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px; margin-top: 8px;">
+                    <engine:VisualElement name="perf-graphic" style="height: 200px; margin: 5px; flex-grow: 1;" />
+                </engine:Foldout>
+                <engine:Foldout text="Mods" name="mods-foldout" style="background-color: rgb(42, 42, 42); border-radius: 4px; padding-top: 8px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px; margin-top: 8px;">
+                    <engine:VisualElement name="mods" style="flex-grow: 1; padding-top: 0; padding-right: 8px; padding-bottom: 8px; padding-left: 8px;" />
                 </engine:Foldout>
             </engine:VisualElement>
         </engine:ScrollView>

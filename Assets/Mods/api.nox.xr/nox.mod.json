@@ -24,10 +24,16 @@
     }
   ],
   "contributors": [],
-  "relations": [],
+  "relations": [
+    {
+      "id": "controller",
+      "type": "depends",
+      "version": ">=1.0.0"
+    }
+  ],
   "entrypoints": {
     "client": [
-      "api.nox.xr.ClientXR"
+      "api.nox.xr.Client"
     ]
   },
   "references": [],

@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.Linq;
 using api.nox.relay.connector;
 using api.nox.relay.types;
@@ -125,6 +124,7 @@ namespace api.nox.relay.connection {
 			return (await Connector.Send(buffer), state);
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		private async UniTask<T> Request<T>(
 			Buffer       request,
 			RequestType  oType,

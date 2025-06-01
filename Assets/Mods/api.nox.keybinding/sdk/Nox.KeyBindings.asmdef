@@ -1,17 +1,16 @@
 {
-    "name": "NoxCCK",
+    "name": "Nox.KeyBindings",
     "rootNamespace": "",
     "references": [
-        "UniTask",
-        "Unity.TextMeshPro"
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
+    "overrideReferences": true,
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
-    "noEngineReferences": false
+    "noEngineReferences": true
 }

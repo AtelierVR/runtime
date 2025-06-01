@@ -1,20 +1,20 @@
 {
   "type": "mod",
-  "id": "api.nox.main",
+  "id": "api.nox.session",
   "provides": [
-    "fr.hactazia.main",
-    "main"
+    "fr.hactazia.session",
+    "session"
   ],
-  "name": "Main Initialization",
+  "name": "Session System",
   "version": "1.0.0",
-  "description": "Provides the Main action to use the game.",
+  "description": "Provides the Session API for Nox.",
   "license": "GPL-3.0",
   "icon": null,
   "contact": {
     "email": "hactazia@gmail.com",
-    "source": "https://github.com/AtelierVR/api.nox.main",
+    "source": "https://github.com/AtelierVR/api.nox.session",
     "website": "https://nox.hactazia.fr/",
-    "issues": "https://github.com/AtelierVR/api.nox.main/issues"
+    "issues": "https://github.com/AtelierVR/api.nox.session/issues"
   },
   "authors": [
     {
@@ -31,22 +31,19 @@
       "version": ">=1.0.0"
     },
     {
-      "id": "offline",
+      "id": "player",
       "type": "depends",
       "version": ">=1.0.0"
     },
     {
-      "id": "session",
+      "id": "entity",
       "type": "depends",
       "version": ">=1.0.0"
     }
   ],
   "entrypoints": {
     "main": [
-      "api.nox.main.Main"
-    ],
-    "client": [
-      "api.nox.main.Client"
+      "api.nox.session.Main"
     ]
   },
   "references": [],

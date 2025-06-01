@@ -2,7 +2,7 @@
   "type": "mod",
   "id": "dev.nox.development",
   "provides": [],
-  "name": "Event Logger",
+  "name": "Development Tools",
   "version": "1.0.0",
   "description": "A mod to develop Nox",
   "license": "GPL-3.0",
@@ -26,7 +26,8 @@
     "editor": [
       "dev.nox.development.EventLogger",
       "dev.nox.development.WorldDetails",
-      "dev.nox.development.ModDetails"
+      "dev.nox.development.ModDetails",
+      "dev.nox.development.Performances"
     ]
   },
   "references": [],

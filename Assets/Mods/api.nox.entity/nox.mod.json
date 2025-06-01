@@ -1,20 +1,20 @@
 {
   "type": "mod",
-  "id": "api.nox.player",
+  "id": "api.nox.entity",
   "provides": [
-    "fr.hactazia.player",
-    "player"
+    "fr.hactazia.entity",
+    "entity"
   ],
-  "name": "Player system",
+  "name": "Entity system",
   "version": "1.0.0",
-  "description": "Provides the Player API for the player.",
+  "description": "Provides the Entity API for the entity.",
   "license": "GPL-3.0",
   "icon": null,
   "contact": {
     "email": "hactazia@gmail.com",
-    "source": "https://github.com/AtelierVR/api.nox.player",
+    "source": "https://github.com/AtelierVR/api.nox.entity",
     "website": "https://nox.hactazia.fr/",
-    "issues": "https://github.com/AtelierVR/api.nox.player/issues"
+    "issues": "https://github.com/AtelierVR/api.nox.entity/issues"
   },
   "authors": [
     {
@@ -33,10 +33,7 @@
   ],
   "entrypoints": {
     "main": [
-      "api.nox.player.PlayerSystem"
-    ],
-    "client": [
-      "api.nox.player.PlayerClient"
+      "api.nox.entity.Main"
     ]
   },
   "references": [],

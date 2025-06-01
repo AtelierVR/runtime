@@ -1,12 +1,13 @@
+#if UNITY_EDITOR
 using api.nox.xr;
 using UnityEditor;
 
 namespace Mods.api.nox.xr.editor {
-	[CustomEditor(typeof(XRProxy))]
+	[CustomEditor(typeof(XRController))]
 	public class XRProxyEditor : Editor {
 		public override void OnInspectorGUI() {
 			base.OnInspectorGUI();
-			var controller = (XRProxy)target;
+			var controller = (XRController)target;
 			if (!controller) {
 				EditorGUILayout.LabelField("Controller is null");
 				return;
@@ -30,3 +31,4 @@ namespace Mods.api.nox.xr.editor {
 		}
 	}
 }
+#endif

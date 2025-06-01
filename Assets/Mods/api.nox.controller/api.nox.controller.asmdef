@@ -2,7 +2,8 @@
     "name": "api.nox.controller",
     "rootNamespace": "",
     "references": [
-        "Nox.CCK"
+        "Nox.CCK",
+        "Nox.Controllers"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

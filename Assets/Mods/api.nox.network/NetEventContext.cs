@@ -1,3 +1,4 @@
+using System;
 using Nox.CCK.Mods.Events;
 
 namespace api.nox.network
@@ -11,9 +12,10 @@ namespace api.nox.network
             _eventName = eventName;
             _data = data;
         }
-        public object[] Data => _data;
-        public string Destination => null;
-        public string EventName => _eventName;
-        public EventEntryFlags Channel => EventEntryFlags.Client | EventEntryFlags.Main | EventEntryFlags.Editor;
+        public object[]         Data        => _data;
+        public string           Destination => null;
+        public string           EventName   => _eventName;
+        public EventEntryFlags  Channel     => EventEntryFlags.Client | EventEntryFlags.Main | EventEntryFlags.Editor;
+        public Action<object[]> Callback    { get; }
     }
 }

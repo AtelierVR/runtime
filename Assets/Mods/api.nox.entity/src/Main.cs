@@ -1,5 +1,12 @@
-namespace Mods.api.nox.entity.src {
-	public class Main {
+using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Utils;
+using Nox.Entities;
+
+namespace api.nox.entity {
+	public class Main : IEntityAPI, MainModInitializer {
 		
+		[NoxPublic(NoxAccess.Method)]
+		public IEntityManager New()
+			=> new EntityManager();
 	}
 }

@@ -1,0 +1,31 @@
+#if UNITY_EDITOR
+using Nox.CCK.Mods.Cores;
+using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Mods.Panels;
+
+namespace api.nox.keybinding {
+	public class KeyBindingEditor : EditorModInitializer {
+		internal static EditorModCoreAPI CoreAPI;
+
+		private static EditorPanel     _kbPanel;
+		private        KeyBindingPanel _kb;
+
+		public void OnInitializeEditor(EditorModCoreAPI api) {
+			CoreAPI  = api;
+			_kb      = new KeyBindingPanel();
+			_kbPanel = api.PanelAPI.AddLocalPanel(_kb);
+		}
+
+		public void OnUpdateEditor() {
+			_kb.OnUpdate();
+		}
+
+		public void OnDisposeEditor() {
+			CoreAPI.PanelAPI.RemoveLocalPanel(_kbPanel);
+			_kbPanel = null;
+			_kb      = null;
+			CoreAPI  = null;
+		}
+	}
+}
+#endif // UNITY_EDITOR

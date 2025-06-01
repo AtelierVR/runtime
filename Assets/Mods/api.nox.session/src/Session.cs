@@ -1,43 +1,43 @@
-using System.Collections.Generic;
-using System.Linq;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
+using Nox.Entities;
+using Nox.Players;
+using Nox.Sessions;
 
-namespace api.nox.session
-{
-    public class Session : INoxObject
-    {
-        public List<INoxObject> AbstractPlayers = new();
+namespace api.nox.session {
+	public class Session : ISession, INoxObject {
+		public Session(Main manager, IAdapter adapter) {
+			Adapter = adapter;
+			Adapter.SetSession(this);
+			Manager = manager;
+			Manager.Add(this);
+		}
 
-        [NoxPublic(NoxAccess.Method)]
-        public INoxObject GetAbstractPlayer(ushort id)
-            => AbstractPlayers.FirstOrDefault(player => player.CallMethod<ushort>("GetId") == id);
+		public readonly IAdapter Adapter;
+		public readonly Main     Manager;
 
-        [NoxPublic(NoxAccess.Method)]
-        public void RegisterPlayer(INoxObject player)
-        {
-            if (AbstractPlayers.Contains(player))
-            {
-                Logger.LogWarning($"Player {player} is already registered.");
-                return;
-            }
+		[NoxPublic(NoxAccess.Method)]
+		public IAdapter GetAdapter()
+			=> Adapter;
 
-            player.InvokeMethod("SetSession", this);
-            AbstractPlayers.Add(player);
-            Logger.LogDebug($"Registered player {player}.");
-        }
+		public IPlayer GetPlayer(int id)
+			=> Adapter.GetPlayer(id);
 
-        [NoxPublic(NoxAccess.Method)]
-        public void UnregisterPlayer(INoxObject player)
-        {
-            if (!AbstractPlayers.Contains(player))
-            {
-                Logger.LogWarning($"Player {player} is not registered.");
-                return;
-            }
+		public IEntity GetEntity(int id)
+			=> Adapter.GetEntity(id);
 
-            player.InvokeMethod("SetSession", null);
-            AbstractPlayers.Remove(player);
-            Logger.LogDebug($"Unregistered player {player}.");
-        }
-    }
+		public int GetEntityCount()
+			=> Adapter.GetEntityCount();
+
+		public int GetPlayerCount()
+			=> Adapter.GetPlayerCount();
+
+		public async UniTask Dispose() {
+			await Adapter.Dispose();
+			Manager.Remove(this);
+		}
+
+		public override string ToString()
+			=> $"{GetType().Name}[Adapter={Adapter}]";
+	}
 }

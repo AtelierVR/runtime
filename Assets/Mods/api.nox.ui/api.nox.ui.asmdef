@@ -2,7 +2,7 @@
     "name": "api.nox.ui",
     "rootNamespace": "api.nox.ui",
     "references": [
-        "NoxCCK",
+        "Nox.CCK",
         "UniTask",
         "Unity.TextMeshPro"
     ],

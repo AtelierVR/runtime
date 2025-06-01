@@ -1,19 +1,22 @@
 {
-    "name": "api.nox.xr",
-    "rootNamespace": "",
-    "references": [
-        "NoxCCK",
-        "UniTask",
-        "Unity.XR.Management",
-        "AutoHandAssembly"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "api.nox.xr",
+  "rootNamespace": "",
+  "references": [
+    "Nox.CCK",
+    "UniTask",
+    "Nox.Controllers",
+    "Unity.XR.Management",
+    "AutoHandAssembly",
+    "NaughtyAttributes.Core",
+    "NaughtyAttributes.Editor"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

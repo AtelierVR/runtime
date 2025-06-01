@@ -1,0 +1,14 @@
+{
+    "name": "Nox.Players",
+    "rootNamespace": "",
+    "references": ["GUID:6e37f2034571459fa02fbe779aedcc10"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

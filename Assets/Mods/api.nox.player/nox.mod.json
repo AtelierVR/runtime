@@ -25,14 +25,7 @@
   ],
   "contributors": [],
   "relations": [],
-  "entrypoints": {
-    "main": [
-      "api.nox.player.PlayerSystem"
-    ],
-    "client": [
-      "api.nox.player.PlayerClient"
-    ]
-  },
+  "entrypoints": {},
   "references": [],
   "sides": [],
   "permissions": [],

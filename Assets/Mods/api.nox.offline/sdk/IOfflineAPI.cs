@@ -1,5 +1,7 @@
-namespace UnityEngine.InputSystem;
+using Nox.Worlds;
 
-public interface IOfflineAPI {
-	
+namespace Nox.Offline {
+	public interface IOfflineAPI {
+		public IOfflineAdapter New(IWorld world);
+	}
 }

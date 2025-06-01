@@ -2,7 +2,7 @@
     "name": "api.nox.relay",
     "rootNamespace": "",
     "references": [
-        "NoxCCK",
+        "Nox.CCK",
         "UniTask"
     ],
     "includePlatforms": [],

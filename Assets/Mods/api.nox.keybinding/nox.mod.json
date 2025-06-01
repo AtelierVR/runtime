@@ -28,6 +28,9 @@
   "entrypoints": {
     "main": [
       "api.nox.keybinding.KeyBindingSystem"
+    ],
+    "editor": [
+      "api.nox.keybinding.KeyBindingEditor"
     ]
   },
   "references": [],

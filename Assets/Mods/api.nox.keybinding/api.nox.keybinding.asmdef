@@ -2,10 +2,11 @@
   "name": "api.nox.keybinding",
   "rootNamespace": "api.nox.keybinding",
   "references": [
-    "NoxCCK",
+    "Nox.CCK",
     "UniTask",
     "Unity.TextMeshPro",
-    "Unity.InputSystem"
+    "Unity.InputSystem",
+    "Nox.KeyBindings"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

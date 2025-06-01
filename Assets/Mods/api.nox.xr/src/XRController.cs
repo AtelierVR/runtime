@@ -10,35 +10,29 @@ using Transform = UnityEngine.Transform;
 using Nox.Controllers;
 
 namespace api.nox.xr {
-	public class XRProxy : MonoBehaviour, IController, INoxObject {
+	public class XRController : MonoBehaviour, IController, INoxObject {
 		private static int DefaultPriority
-			=> ClientXR.IsReady() && ClientXR.Instance.HasHeadset()
-				? Config.Load().Get("settings.xr.proxy_priority", ProxyAPIDefaultPriority + 1)
-				: ProxyAPIDefaultPriority - 1;
+			=> Client.IsReady() && Client.Instance.HasHeadset()
+				? Config.Load().Get("settings.controller.xr_priority", IController.DefaultPriority + 1)
+				: IController.DefaultPriority - 1;
 
-		private const string DefaultId = "nox.xr";
+		private const string DefaultId = "xr";
 
 		/// <summary>
 		/// Get the proxy mod API.
 		/// </summary>
-		private static INoxObject PlayerAPI
-			=> ClientXR.CoreAPI
-				.ModAPI.GetMod("player")
-				?.GetMains()
-				.FirstOrDefault();
-
-		private static int ProxyAPIDefaultPriority
-			=> PlayerAPI?.CallMethod<int>("GetDefaultPriority") ?? 1;
+		private static IControllerAPI ControllerAPI
+			=> Client.CoreAPI.ModAPI.GetMod("controller").GetMains().FirstOrDefault() as IControllerAPI;
 
 		/// <summary>
 		/// Check if the current proxy is better than XR proxy.
 		/// </summary>
 		/// <returns></returns>
 		private static bool IsBetterThanCurrent() {
-			var proxy = PlayerAPI.CallMethod("GetProxy");
-			return proxy                                == null
-				|| proxy.CallMethod<int>("GetPriority") < DefaultPriority
-				|| proxy.CallMethod<string>("GetId")    == DefaultId;
+			var controller = ControllerAPI.GetCurrent();
+			return controller               == null
+				|| controller.GetPriority() < DefaultPriority
+				|| controller.GetId()       == DefaultId;
 		}
 
 		/// <summary>
@@ -46,9 +40,9 @@ namespace api.nox.xr {
 		/// </summary>
 		/// <returns></returns>
 		private static bool IsCurrent() {
-			var proxy = PlayerAPI.CallMethod("GetProxy");
-			return proxy                             != null
-				&& proxy.CallMethod<string>("GetId") == DefaultId;
+			var controller = ControllerAPI.GetCurrent();
+			return controller         != null
+				&& controller.GetId() == DefaultId;
 		}
 
 		/// <summary>
@@ -56,7 +50,7 @@ namespace api.nox.xr {
 		/// </summary>
 		internal static bool Remove() {
 			if (!IsCurrent()) return false;
-			PlayerAPI.InvokeMethod("SetProxy", null);
+			ControllerAPI.SetCurrent(null);
 			return true;
 		}
 
@@ -67,14 +61,14 @@ namespace api.nox.xr {
 		internal static bool Make() {
 			if (!IsBetterThanCurrent()) return false;
 
-			var prefab = ClientXR.CoreAPI.AssetAPI.GetAsset<GameObject>("proxy.prefab");
+			var prefab = Client.CoreAPI.AssetAPI.GetAsset<GameObject>("proxy.prefab");
 			if (!prefab) {
 				Logger.LogError("Failed to load desktop proxy prefab");
 				return false;
 			}
 
 			var instance = Instantiate(prefab);
-			var xr       = instance.GetComponent<XRProxy>();
+			var xr       = instance.GetComponent<XRController>();
 
 			if (!xr) {
 				Logger.LogError("Failed to get desktop proxy component");
@@ -82,7 +76,12 @@ namespace api.nox.xr {
 				return false;
 			}
 
-			PlayerAPI.InvokeMethod("SetProxy", xr);
+			if (!ControllerAPI.SetCurrent(xr)) {
+				Logger.LogError("Failed to set XR proxy as current");
+				Destroy(instance);
+				return false;
+			}
+
 			xr.gameObject.name = $"[{xr.GetType().Name}_{xr.GetInstanceID()}]";
 			DontDestroyOnLoad(xr);
 			return true;
@@ -99,6 +98,10 @@ namespace api.nox.xr {
 		public AutoHandPlayer player;
 		public bool           mayFly;
 
+		public void Dispose() {
+			Destroy(gameObject);
+		}
+
 		[NoxPublic(NoxAccess.Method)]
 		public Camera GetCamera()
 			=> player.headCamera;
@@ -106,6 +109,11 @@ namespace api.nox.xr {
 		[NoxPublic(NoxAccess.Method)]
 		public Collider GetCollider()
 			=> player.bodyCollider;
+
+		public void Restore(IController controller) {
+			foreach (var ability in controller.GetAbilities())
+				SetAbilities(ability.Key, ability.Value);
+		}
 
 		[NoxPublic(NoxAccess.Method)]
 		public Dictionary<string, object> GetAbilities()

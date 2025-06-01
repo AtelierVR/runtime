@@ -2,7 +2,7 @@
     <engine:VisualElement style="flex-grow: 1; margin-top: 0; margin-right: 8px; margin-bottom: 0; margin-left: 0; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px;">
         <engine:Label text="Eye #0" name="label" style="margin-right: 0; margin-left: 4px; padding-right: 0; padding-left: 0;" />
         <engine:VisualElement style="flex-grow: 0; flex-shrink: 1; margin-top: 8px; margin-bottom: 8px;">
-            <engine:EnumField label="Placement" value="Left" type="Nox.CCK.Avatars.AvatarDescriptor+EyePlacement, NoxCCK" name="placement" />
+            <engine:EnumField label="Placement" value="Left" type="Nox.CCK.Avatars.AvatarDescriptor+EyePlacement, Nox.CCK" name="placement" />
             <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-right: 0;">
                 <editor:ObjectField label="Transform" type="UnityEngine.Transform, UnityEngine.CoreModule" name="target" style="flex-grow: 1;" />
                 <engine:Button text="Detect" name="target-detect" style="margin-right: 0;" />

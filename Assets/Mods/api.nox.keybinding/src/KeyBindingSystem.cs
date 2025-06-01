@@ -1,115 +1,120 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
+using Nox.KeyBindings;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using Logger = Nox.CCK.Utils.Logger;
 
-namespace api.nox.keybinding
-{
-    public class KeyBindingSystem : MainModInitializer
-    {
-        private static MainModCoreAPI _coreAPI;
+namespace api.nox.keybinding {
+	public class KeyBindingSystem : IKeyBindingManager, MainModInitializer {
+		public void OnInitializeMain(MainModCoreAPI api) {
+			CoreAPI  = api;
+			Instance = this;
+		}
 
-        private readonly List<KeyBinding> _bindings = new();
+		public void OnDisposeMain() {
+			foreach (var binding in Bindings.ToArray())
+				RemoveKeyBinding(binding.Id, binding.Category);
+			CoreAPI  = null;
+			Instance = null;
+		}
 
-        [NoxPublic(NoxAccess.Method)]
-        public KeyBinding AddKeyBinding(string id, InputAction action, string category = null)
-            => AddKeyBinding(new KeyBinding(id, category, action));
-        
-        private KeyBinding AddKeyBinding(KeyBinding binding)
-        {
-            if (binding == null)
-            {
-                Logger.LogError("Cannot register a null key binding");
-                return null;
-            }
+		internal static          MainModCoreAPI         CoreAPI;
+		internal static          KeyBindingSystem       Instance;
+		internal readonly        List<KeyBinding>       Bindings            = new();
+		internal static readonly UnityEvent<KeyBinding> OnKeyBindingAdded   = new();
+		internal static readonly UnityEvent<KeyBinding> OnKeyBindingRemoved = new();
 
-            if (string.IsNullOrWhiteSpace(binding.Id))
-            {
-                Logger.LogError("Cannot register a key binding with an empty id");
-                return null;
-            }
+		[NoxPublic(NoxAccess.Method)]
+		public IKeyBinding AddKeyBinding(string id, string binding, string category = null) {
+			if (string.IsNullOrWhiteSpace(id)) {
+				Logger.LogError("Key binding id cannot be null or empty");
+				return null;
+			}
 
-            if (_bindings.Exists(b => b.Id == binding.Id))
-            {
-                Logger.LogError($"Key binding with id {binding.Id} already exists");
-                return null;
-            }
+			if (string.IsNullOrWhiteSpace(binding)) {
+				Logger.LogError("Key binding action cannot be null or empty");
+				return null;
+			}
 
+			if (HasKeyBinding(id, category)) {
+				Logger.LogWarning($"Key binding with id {id} already exists in category {category}");
+				return Internal_GetKeyBinding(id, category);
+			}
 
-            var config = Config.Load();
-            var key = new[] { "settings", "key_bindings", binding.Id };
-            if (config.Has(key))
-            {
-                var action = config.Get<string>(key);
-                if (!string.IsNullOrWhiteSpace(action))
-                {
-                    binding.Action.LoadBindingOverridesFromJson(action);
-                    binding.IsOverridden = true;
-                }
-            }
+			var inputAction = new InputAction(id, InputActionType.Value, binding);
+			var keybinding  = new KeyBinding(id.ToLowerInvariant(), category?.ToLowerInvariant(), inputAction);
 
-            binding.Action.Enable();
-            _bindings.Add(binding);
+			var config = Config.Load();
+			var key    = keybinding.GetConfigPath();
+			if (config.Has(key)) {
+				var action = config.Get<string>(key);
+				if (!string.IsNullOrWhiteSpace(action)) {
+					keybinding.Action.LoadBindingOverridesFromJson(action);
+					keybinding.Overridden = true;
+				}
+			}
 
-            _coreAPI.EventAPI.Emit("key_binding_added", binding);
+			Bindings.Add(keybinding);
+			CoreAPI.EventAPI.Emit("key_binding_added", keybinding);
+			OnKeyBindingAdded.Invoke(keybinding);
 
-            return binding;
-        }
+			return keybinding;
+		}
 
+		[NoxPublic(NoxAccess.Method)]
+		public IKeyBinding GetKeyBinding(string id, string category = null)
+			=> Internal_GetKeyBinding(id, category);
 
-        [NoxPublic(NoxAccess.Method)]
-        public KeyBinding GetKeyBinding(string id)
-            => _bindings.Find(b => b.Id == id);
+		private KeyBinding Internal_GetKeyBinding(string id, string category = null)
+			=> Bindings.Find(b => b.Id == id && (string.IsNullOrWhiteSpace(category) || b.Category == category));
 
-        [NoxPublic(NoxAccess.Method)]
-        public void RemoveKeyBinding(string id)
-        {
-            var binding = GetKeyBinding(id);
-            if (binding == null)
-            {
-                Logger.LogError($"Key binding with id {id} does not exist");
-                return;
-            }
+		[NoxPublic(NoxAccess.Method)]
+		public bool RemoveKeyBinding(string id, string category = null) {
+			var binding = Internal_GetKeyBinding(id, category);
+			if (binding == null) {
+				Logger.LogError($"Key binding with id {id} does not exist");
+				return true;
+			}
 
-            var config = Config.Load();
-            var key = new[] { "settings", "key_bindings", binding.Id };
-            if (binding.IsOverridden)
-            {
-                var res = binding.Action.SaveBindingOverridesAsJson();
-                if (!string.IsNullOrWhiteSpace(res))
-                {
-                    config.Set(key, res);
-                    config.Save();
-                }
-            }
-            else if (config.Has(key))
-            {
-                config.Remove(key);
-                config.Save();
-            }
+			var canRemove = true;
+			CoreAPI.EventAPI.Emit("key_binding_request_remove", binding, new Action<object[]>(OnRequestRemove));
+			if (!canRemove) {
+				Logger.LogDebug($"Canceling removing key binding {binding.Category}.{binding.Id}");
+				return false;
+			}
 
-            binding.Action.Disable();
-            _bindings.Remove(binding);
+			var config = Config.Load();
+			var key    = binding.GetConfigPath();
+			if (binding.IsOverridden()) {
+				var res = binding.Action.SaveBindingOverridesAsJson();
+				if (!string.IsNullOrWhiteSpace(res)) {
+					config.Set(key, res);
+					config.Save();
+				}
+			} else if (config.Has(key)) {
+				config.Remove(key);
+				config.Save();
+			}
 
-            _coreAPI.EventAPI.Emit("key_binding_removed", binding);
-        }
+			binding.Action.Disable();
+			Bindings.Remove(binding);
 
-        [NoxPublic(NoxAccess.Method)]
-        public bool HasKeyBinding(string id)
-            => _bindings.Exists(b => b.Id == id);
+			CoreAPI.EventAPI.Emit("key_binding_removed", binding);
+			OnKeyBindingRemoved.Invoke(binding);
+			return true;
 
-        public void OnInitializeMain(MainModCoreAPI api)
-        {
-            _coreAPI = api;
-        }
+			void OnRequestRemove(object[] rms) {
+				if (rms.Length > 0 && rms[0] is false)
+					canRemove = false;
+			}
+		}
 
-        public void OnDisposeMain()
-        {
-            foreach (var binding in _bindings.ToArray())
-                RemoveKeyBinding(binding.Id);
-            _coreAPI = null;
-        }
-    }
+		[NoxPublic(NoxAccess.Method)]
+		public bool HasKeyBinding(string id, string category = null)
+			=> Bindings.Exists(b => b.Id == id && (string.IsNullOrWhiteSpace(category) || b.Category == category));
+	}
 }

@@ -1,5 +1,4 @@
-namespace Players {
+namespace Nox.Players {
 	public interface IPlayerAPI {
-		public IPlayer GetPlayer(int index);
 	}
 }
