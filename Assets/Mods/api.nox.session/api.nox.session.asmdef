@@ -1,0 +1,19 @@
+{
+    "name": "api.nox.player",
+    "rootNamespace": "",
+    "references": [
+        "NoxCCK",
+        "UniTask",
+        "Unity.InputSystem",
+        "KeyBinding"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

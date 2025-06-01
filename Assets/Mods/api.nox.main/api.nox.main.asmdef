@@ -1,0 +1,20 @@
+{
+    "name": "api.nox.main",
+    "rootNamespace": "",
+    "references": [
+        "Nox.CCK",
+        "UniTask",
+        "Nox.Worlds",
+        "Nox.Sessions",
+        "Nox.Offline"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

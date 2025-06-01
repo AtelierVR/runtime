@@ -1,0 +1,16 @@
+{
+    "name": "api.nox.desktop",
+    "rootNamespace": "",
+    "references": [
+        "Nox.CCK"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

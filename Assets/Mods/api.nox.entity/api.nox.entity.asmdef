@@ -1,0 +1,18 @@
+{
+    "name": "api.nox.entity",
+    "rootNamespace": "",
+    "references": [
+        "Nox.CCK",
+        "UniTask",
+        "Nox.Entity"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

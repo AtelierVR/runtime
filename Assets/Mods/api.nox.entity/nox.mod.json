@@ -1,0 +1,46 @@
+{
+  "type": "mod",
+  "id": "api.nox.player",
+  "provides": [
+    "fr.hactazia.player",
+    "player"
+  ],
+  "name": "Player system",
+  "version": "1.0.0",
+  "description": "Provides the Player API for the player.",
+  "license": "GPL-3.0",
+  "icon": null,
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.player",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.player/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [
+    {
+      "id": "keybinding",
+      "type": "depends",
+      "version": ">=0.0.0"
+    }
+  ],
+  "entrypoints": {
+    "main": [
+      "api.nox.player.PlayerSystem"
+    ],
+    "client": [
+      "api.nox.player.PlayerClient"
+    ]
+  },
+  "references": [],
+  "sides": [],
+  "permissions": [],
+  "kernel": true
+}
