@@ -23,6 +23,13 @@ namespace Nox.Worlds {
 		public IScene<T> GetScene<T>(int index) where T : BaseDescriptor;
 
 		/// <summary>
+		/// Returns the scene at the given index.
+		/// </summary>
+		/// <param name="index"></param>
+		/// <returns></returns>
+		public IScene<BaseDescriptor> GetScene(int index);
+
+		/// <summary>
 		/// Returns the main scene.
 		/// </summary>
 		/// <returns></returns>

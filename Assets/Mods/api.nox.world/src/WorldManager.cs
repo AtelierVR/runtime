@@ -100,7 +100,7 @@ namespace api.nox.world {
 
 			var old = GetCurrent();
 			if (old == world) {
-				Logger.LogDebug($"World {id} is already the current world.");
+				Logger.LogWarning($"World {id} is already the current world.");
 				return true;
 			}
 
@@ -111,8 +111,8 @@ namespace api.nox.world {
 				return false;
 			}
 
-			old?.MakeNotCurrent(world);
-			world.MakeCurrent(old);
+			old?.OnDeselect(world);
+			world.OnSelect(old);
 
 			WorldSystem.CoreAPI.EventAPI.Emit("world_changed", world);
 			Logger.Log($"Current world set to: {world.Id}");

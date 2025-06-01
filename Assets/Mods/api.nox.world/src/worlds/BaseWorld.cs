@@ -8,10 +8,10 @@ using Nox.Worlds;
 
 namespace api.nox.world {
 	public abstract class BaseWorld : IWorld, INoxObject {
-		internal string     Id;
-		internal int        Active = 0;
-		internal MainScene  MainScene;
-		internal SubScene[] SubScenes;
+		internal string       Id;
+		internal int          Active = 0;
+		internal MainScene    MainScene;
+		internal SubScene[]   SubScenes;
 		internal WorldManager Manager;
 
 		internal Scene[] GetUnityScenes()
@@ -34,10 +34,14 @@ namespace api.nox.world {
 		[NoxPublic(NoxAccess.Method)]
 		public IScene<T> GetScene<T>(int index) where T : BaseDescriptor
 			=> index switch {
-				0 when typeof(T) == typeof(MainDescriptor) => GetMainScene() as IScene<T>,
-				_ when typeof(T) == typeof(SubDescriptor)  => GetSubScene(index - 1) as IScene<T>,
+				0 when typeof(MainDescriptor) == typeof(T) => MainScene as IScene<T>,
+				_ when typeof(SubDescriptor)  == typeof(T) => GetSubScene(index - 1) as IScene<T>,
 				_                                          => null
 			};
+
+		[NoxPublic(NoxAccess.Method)]
+		public IScene<BaseDescriptor> GetScene(int index)
+			=> index == 0 ? GetMainScene() : GetSubScene(index);
 
 		[NoxPublic(NoxAccess.Method)]
 		public IMainScene GetMainScene()
@@ -78,25 +82,30 @@ namespace api.nox.world {
 			}
 		}
 
-		internal void MakeCurrent(BaseWorld oldWorld) {
-			var activeScene = GetScene<BaseDescriptor>(Active);
+		internal void OnSelect(BaseWorld oldWorld) {
+			Logger.LogDebug($"OnSelect: {Id}");
+			var activeScene = GetScene(Active) ?? GetMainScene();
 			foreach (var scene in GetScenes()) {
 				if (scene == activeScene) {
+					Logger.LogDebug($"Showing the active scene {scene} in world {Id}");
 					scene.GetWorldHidden().Set(true);
 					scene.SetVisible(true);
 					SceneManager.SetActiveScene(scene.GetScene());
 				} else {
-					scene.GetWorldHidden().Set(scene.IsVisible());
-					scene.SetVisible(scene.IsVisible());
+					var visible = scene.IsVisible();
+					Logger.LogDebug($"{(visible ? "Hiding" : "Showing")} the scene {scene} in world {Id}");
+					scene.GetWorldHidden().Set(visible);
+					scene.SetVisible(visible);
 				}
 			}
 		}
 
-		internal void MakeNotCurrent(BaseWorld newWorld) {
+		internal void OnDeselect(BaseWorld newWorld) {
+			Logger.LogDebug($"OnDeselect: {Id}");
 			foreach (var scene in GetScenes())
 				scene.GetWorldHidden().Set(false);
 		}
-		
+
 		public override string ToString()
 			=> $"{GetType().Name}[Id={Id} Active={Active}]";
 	}

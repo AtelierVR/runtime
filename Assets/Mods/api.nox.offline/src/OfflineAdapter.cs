@@ -1,5 +1,6 @@
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Utils;
 using Nox.Entities;
 using Nox.Offline;
 using Nox.Players;
@@ -8,39 +9,112 @@ using Nox.Worlds;
 
 namespace api.nox.offline {
 	public class OfflineAdapter : IOfflineAdapter {
-		internal IWorld         World;
-		internal IEntityManager Entities;
+		private readonly IWorld         _world;
+		private readonly IEntityManager _entities;
+		private          int            _masterPlayerId;
+		private          int            _nextPlayerId;
+		private          ISession       _session;
 
 		internal OfflineAdapter(IWorld world) {
-			World    = world;
-			Entities = Main.EntityAPI.New();
+			_world          = world;
+			_masterPlayerId = -1;
+			_nextPlayerId   = 0;
+			_entities       = Main.EntityAPI.New();
 		}
 
-		public void SetSession(ISession session) { }
+		private void NewPlayer() {
+			var offlinePlayer = new OfflinePlayer(this, _nextPlayerId++);
+			_entities.RegisterEntity(offlinePlayer);
+			if (_masterPlayerId < 0)
+				TransferOfflineAuthority(offlinePlayer);
+			_session.OnPlayerJoined(offlinePlayer);
+		}
 
+		private void RemovePlayer(IPlayer player) {
+			if (player == null) return;
+			_entities.UnregisterEntity(player);
+			if (player.GetId() != _masterPlayerId) return;
+			var newMaster = _entities.GetEntities<OfflinePlayer>()
+				.OrderBy(p => p.CreationTime)
+				.FirstOrDefault();
+			TransferOfflineAuthority(newMaster);
+			_session.OnPlayerLeft(player);
+		}
+
+		private bool TransferOfflineAuthority(IPlayer player) {
+			if (player == null || !_entities.HasEntity(player.GetId())) {
+				Logger.LogWarning($"TransferAuthority: Player {player} is not registered.");
+				return false;
+			}
+
+			if (player.GetId() == _masterPlayerId) {
+				Logger.LogWarning($"TransferAuthority: Player {player} is already the master player.");
+				return true;
+			}
+
+			_masterPlayerId = player.GetId();
+			Logger.LogDebug($"TransferAuthority: Authority transferred to player {player}.");
+			_session.OnAuthorityTransferred(player);
+			return true;
+		}
+
+		public void OnDeselect(ISession newSession) {
+			Logger.LogDebug($"OnDeselect: {this}");
+		}
+
+		public void OnSelect(ISession oldSession) {
+			Logger.LogDebug($"OnSelect: {this}");
+			if (GetLocalPlayer() == null) NewPlayer();
+			_world.SetCurrent();
+		}
+
+		[NoxPublic(NoxAccess.Method)]
+		public void SetSession(ISession session) {
+			Logger.LogDebug($"SetSession: {this} -> {session}");
+			_session = session;
+		}
+
+		[NoxPublic(NoxAccess.Method)]
 		public async UniTask Dispose() {
 			await UniTask.Yield();
-			foreach (var entity in Entities.GetEntities().ToArray())
-				Entities.UnregisterEntity(entity);
-			World.Dispose();
+			foreach (var entity in _entities.GetEntities().ToArray())
+				_entities.UnregisterEntity(entity);
+			_world.Dispose();
 		}
 
+		[NoxPublic(NoxAccess.Method)]
 		public IPlayer GetPlayer(int id)
-			=> Entities.GetEntity<IPlayer>(id);
+			=> _entities.GetEntity<IPlayer>(id);
 
+		[NoxPublic(NoxAccess.Method)]
+		public IPlayer GetLocalPlayer()
+			=> _entities.GetEntities<IPlayer>().FirstOrDefault(p => p.IsLocal());
+
+		[NoxPublic(NoxAccess.Method)]
+		public IPlayer GetMasterPlayer()
+			=> _entities.GetEntity<IPlayer>(_masterPlayerId);
+
+		[NoxPublic(NoxAccess.Method)]
+		public UniTask<bool> TransferAuthority(IPlayer player)
+			=> UniTask.FromResult(TransferOfflineAuthority(player));
+
+		[NoxPublic(NoxAccess.Method)]
 		public IEntity GetEntity(int index)
-			=> Entities.GetEntity(index);
+			=> _entities.GetEntity(index);
 
+		[NoxPublic(NoxAccess.Method)]
 		public int GetEntityCount()
-			=> Entities.GetCount();
+			=> _entities.GetCount();
 
+		[NoxPublic(NoxAccess.Method)]
 		public int GetPlayerCount()
-			=> Entities.GetCount<IPlayer>();
+			=> _entities.GetCount<IPlayer>();
 
+		[NoxPublic(NoxAccess.Method)]
 		public IWorld GetWorld()
-			=> World;
+			=> _world;
 
 		public override string ToString()
-			=> $"{GetType().Name}[World={World}, Entities={Entities}]";
+			=> $"{GetType().Name}[World={_world}, Entities={_entities}]";
 	}
 }

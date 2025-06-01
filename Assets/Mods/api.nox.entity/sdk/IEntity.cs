@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Numerics;
+using UnityEngine;
 
 namespace Nox.Entities {
 	public interface IEntity {
@@ -7,7 +7,7 @@ namespace Nox.Entities {
 		/// Get the unique identifier of the entity.
 		/// </summary>
 		/// <returns></returns>
-		public int GetIndex();
+		public int GetId();
 
 		/// <summary>
 		/// Get all properties of the entity.

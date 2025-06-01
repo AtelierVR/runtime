@@ -14,10 +14,10 @@ namespace api.nox.entity {
 				.ToArray();
 
 		public bool HasEntity(int id)
-			=> _entities.Any(entity => entity.GetIndex() == id);
+			=> _entities.Any(entity => entity.GetId() == id);
 
 		public bool HasEntity<T>(int id) where T : IEntity
-			=> _entities.Any(entity => entity.GetIndex() == id && entity is T);
+			=> _entities.Any(entity => entity.GetId() == id && entity is T);
 
 		public int GetCount()
 			=> _entities.Count;
@@ -31,13 +31,13 @@ namespace api.nox.entity {
 				return;
 			}
 
-			if (HasEntity(entity.GetIndex())) {
-				Logger.LogWarning($"Entity with ID {entity.GetIndex()} is already registered.");
+			if (HasEntity(entity.GetId())) {
+				Logger.LogWarning($"Entity with ID {entity.GetId()} is already registered.");
 				return;
 			}
 
 			_entities.Add(entity);
-			Logger.LogDebug($"Registered entity with ID {entity.GetIndex()}");
+			Logger.LogDebug($"Registered entity with ID {entity.GetId()}");
 		}
 
 		public void UnregisterEntity(IEntity entity) {
@@ -46,20 +46,20 @@ namespace api.nox.entity {
 				return;
 			}
 
-			if (!HasEntity(entity.GetIndex())) {
-				Logger.LogWarning($"Entity with ID {entity.GetIndex()} is not registered.");
+			if (!HasEntity(entity.GetId())) {
+				Logger.LogWarning($"Entity with ID {entity.GetId()} is not registered.");
 				return;
 			}
 
 			_entities.Remove(entity);
-			Logger.LogDebug($"Unregistered entity with ID {entity.GetIndex()}");
+			Logger.LogDebug($"Unregistered entity with ID {entity.GetId()}");
 		}
 
 		public IEntity GetEntity(int id)
-			=> _entities.FirstOrDefault(entity => entity.GetIndex() == id);
+			=> _entities.FirstOrDefault(entity => entity.GetId() == id);
 
 		public T GetEntity<T>(int id) where T : IEntity
-			=> (T)_entities.FirstOrDefault(entity => entity.GetIndex() == id && entity is T);
+			=> (T)_entities.FirstOrDefault(entity => entity.GetId() == id && entity is T);
 
 		public IEntity[] GetEntities()
 			=> _entities.ToArray();

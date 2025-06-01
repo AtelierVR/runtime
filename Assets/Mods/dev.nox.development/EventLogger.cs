@@ -95,7 +95,7 @@ namespace dev.nox.development
             div.Add(divData);
             divData.Add(new Label($"Data ({context.Data.Length})"));
             foreach (var obj in context.Data)
-                divData.Add(new Label($" - {obj}"));
+                divData.Add(new Label($" - {obj ?? "null"}"));
 
 
             logDiv.Add(foldout);

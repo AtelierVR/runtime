@@ -4,47 +4,80 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
-using Nox.Players;
 using Nox.Sessions;
 
 namespace api.nox.session {
 	public class Main : MainModInitializer, ISessionAPI {
-		private readonly List<ISession> _sessions = new();
-
-		private static MainModCoreAPI _coreAPI;
+		private readonly List<Session>  _sessions = new();
+		internal static  MainModCoreAPI CoreAPI;
+		private          ushort         _nextId    = ushort.MinValue + 1;
+		private          ushort         _currentId = ushort.MinValue;
 
 		public void OnInitializeMain(MainModCoreAPI api)
-			=> _coreAPI = api;
+			=> CoreAPI = api;
 
 		public async UniTask OnDisposeMainAsync() {
 			foreach (var session in _sessions.ToArray())
 				await session.Dispose();
 			_sessions.Clear();
-			_coreAPI = null;
+			CoreAPI = null;
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public ISession GetSession(int index) {
-			if (index < 0 || index >= _sessions.Count) return null;
-			return _sessions[index];
-		}
+		public ISession GetSession(ushort id)
+			=> _sessions.FirstOrDefault(s => s.Id == id);
+
+		[NoxPublic(NoxAccess.Method)]
+		public ISession[] GetSessions()
+			=> _sessions.Cast<ISession>().ToArray();
+
+		[NoxPublic(NoxAccess.Method)]
+		public int GetSessionCount()
+			=> _sessions.Count;
 
 		[NoxPublic(NoxAccess.Method)]
 		public ISession New(IAdapter adapter)
 			=> adapter != null
-				? new Session(this, adapter)
+				? new Session(this, GetNextId(), adapter)
 				: null;
+
+		[NoxPublic(NoxAccess.Method)]
+		public ISession GetCurrent()
+			=> GetSession(_currentId);
+
+		[NoxPublic(NoxAccess.Method)]
+		public void SetCurrent(ushort id) {
+			if (id == _currentId) return;
+			var nSession = _sessions.FirstOrDefault(s => s.Id == id);
+			var oSession = _sessions.FirstOrDefault(s => s.Id == _currentId);
+
+			oSession?.OnDeselect(nSession);
+			_currentId = id;
+			nSession?.OnSelect(oSession);
+
+			CoreAPI.EventAPI.Emit("session_current_changed", nSession, oSession);
+		}
 
 		internal void Add(Session session) {
 			if (session == null) return;
 			_sessions.Add(session);
-			_coreAPI.EventAPI.Emit("session_added", session);
+			CoreAPI.EventAPI.Emit("session_added", session);
 		}
 
 		internal void Remove(Session session) {
 			if (session == null) return;
 			_sessions.Remove(session);
-			_coreAPI.EventAPI.Emit("session_removed", session);
+			CoreAPI.EventAPI.Emit("session_removed", session);
+		}
+
+		private ushort GetNextId() {
+			var i = _nextId;
+			do {
+				if (i >= ushort.MaxValue) i = ushort.MinValue + 1;
+				else i++;
+			} while (_sessions.Any(s => s.Id == i));
+
+			return _nextId = i;
 		}
 	}
 }

@@ -27,6 +27,25 @@ namespace Nox.Sessions {
 		public IPlayer GetPlayer(int index);
 
 		/// <summary>
+		/// Get the first local player in the session.
+		/// </summary>
+		/// <returns></returns>
+		public IPlayer GetLocalPlayer();
+
+		/// <summary>
+		/// Get the master player in the session, which is the player that has the authority over the session.
+		/// </summary>
+		/// <returns></returns>
+		public IPlayer GetMasterPlayer();
+
+		/// <summary>
+		/// Allow to the master player to transfer the authority to another player.
+		/// </summary>
+		/// <param name="player"></param>
+		/// <returns>Returns true if the authority was successfully transferred, false otherwise.</returns>
+		public UniTask<bool> TransferAuthority(IPlayer player);
+
+		/// <summary>
 		/// Get an entity by index.
 		/// </summary>
 		/// <param name="index"></param>
@@ -50,5 +69,17 @@ namespace Nox.Sessions {
 		/// </summary>
 		/// <returns></returns>
 		IWorld GetWorld();
+
+		/// <summary>
+		/// Called when the session is deselected (is not the current session).
+		/// </summary>
+		/// <param name="newSession">The new session that is now current.</param>
+		void OnDeselect(ISession newSession);
+
+		/// <summary>
+		/// Called when the session is selected (is the current session).
+		/// </summary>
+		/// <param name="oldSession">The previous session that was current.</param>
+		void OnSelect(ISession oldSession);
 	}
 }

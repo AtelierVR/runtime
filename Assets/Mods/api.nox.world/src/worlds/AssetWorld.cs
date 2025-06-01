@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using Nox.CCK.Worlds;
 using Nox.Worlds.Components;
+using UnityEngine.SceneManagement;
 
 namespace api.nox.world {
 	public class AssetWorld : BaseWorld {
@@ -19,7 +20,7 @@ namespace api.nox.world {
 
 			var scene = WorldSystem.CoreAPI.AssetAPI.GetWorld(ns, path);
 			if (!scene.IsValid()) {
-				var tmp = WorldSystem.CoreAPI.AssetAPI.LoadWorld(ns, path);
+				var tmp = WorldSystem.CoreAPI.AssetAPI.LoadWorld(ns, path, LoadSceneMode.Additive);
 				await UniTask.WaitUntil(() => tmp.Status == UniTaskStatus.Pending, cancellationToken: token);
 
 				if (token.IsCancellationRequested) {

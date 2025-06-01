@@ -35,6 +35,7 @@ namespace api.nox.main {
 			);
 			var adapter = OfflineAPI.New(world);
 			var session = SessionAPI.New(adapter);
+			session.SetCurrent();
 		}
 
 		public void OnDisposeClient() { }

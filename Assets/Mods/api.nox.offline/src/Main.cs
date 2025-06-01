@@ -4,12 +4,16 @@ using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
 using Nox.Entities;
 using Nox.Offline;
+using Nox.Players;
 using Nox.Worlds;
 
 namespace api.nox.offline {
 	public class Main : IOfflineAPI, MainModInitializer {
 		internal static IEntityAPI EntityAPI
 			=> _coreAPI.ModAPI.GetMod("entity").GetMains().FirstOrDefault() as IEntityAPI;
+
+		internal static IPlayerAPI PlayerAPI
+			=> _coreAPI.ModAPI.GetMod("player").GetMains().FirstOrDefault() as IPlayerAPI;
 
 		private static MainModCoreAPI _coreAPI;
 
