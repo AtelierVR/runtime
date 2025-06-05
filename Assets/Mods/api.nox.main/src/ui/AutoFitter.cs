@@ -2,7 +2,7 @@ using Nox.CCK.Utils;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
-public class AutoFitter : MonoBehaviour, IUpdateLayout
+public class AutoFitter : MonoBehaviour
 {
     public RectTransform from;
     private RectTransform Rect => GetComponent<RectTransform>();

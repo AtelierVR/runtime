@@ -5,7 +5,8 @@
     "Nox.CCK",
     "Nox.Controllers",
     "Nox.KeyBindings",
-    "Unity.InputSystem"
+    "Unity.InputSystem",
+    "Nox.UI"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

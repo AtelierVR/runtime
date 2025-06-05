@@ -26,14 +26,12 @@
   "contributors": [],
   "relations": [],
   "entrypoints": {
-    "main": [
-      "api.nox.ui.UISystem"
-    ],
     "client": [
-      "api.nox.ui.UIClient"
+      "api.nox.ui.Client",
+      "api.nox.ui.defaults.DefaultPagesClient"
     ],
     "editor": [
-      "api.nox.ui.UIEditor"
+      "api.nox.ui.Editor"
     ]
   },
   "references": [],

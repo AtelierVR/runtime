@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Nox.KeyBindings;
 using UnityEngine;
+using UnityEngine.Events;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.desktop {
@@ -22,6 +23,8 @@ namespace api.nox.desktop {
 			("nox.movement", "sprint", "<Keyboard>/leftShift", value => SetValue("sprint", value), 0f),
 			("nox.ui", "main", "<Keyboard>/tab", value => SetValue("main", value), 0f)
 		};
+
+		internal static readonly UnityEvent<string, float, float> KeyEvent = new();
 
 		/// <summary>
 		/// Gets the current movement vector based on the key bindings.
@@ -57,8 +60,10 @@ namespace api.nox.desktop {
 			var index = Array.FindIndex(Keys, k => k.Item2 == key);
 			if (index == -1) return;
 			var keyTuple = Keys[index];
+			var oldValue = keyTuple.Item5;
 			keyTuple.Item5 = value;
 			Keys[index]    = keyTuple;
+			KeyEvent.Invoke(key, value, oldValue);
 		}
 
 		/// <summary>

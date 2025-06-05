@@ -10,7 +10,7 @@ using Transform = UnityEngine.Transform;
 
 namespace api.nox.search.client
 {
-    public class SearchComponent : MonoBehaviour, IUpdateLayout
+    public class SearchComponent : MonoBehaviour
     {
         public TMPro.TMP_InputField queryInput;
         public TextLanguage queryPlaceholder;
@@ -135,7 +135,7 @@ namespace api.nox.search.client
 
             resultText.gameObject.SetActive(false);
             workerContainer.gameObject.SetActive(true);
-            ForceUpdateLayout.UpdateManually(workerContainer);
+            Nox.CCK.Utils.UpdateLayout.UpdateManually(workerContainer);
             UpdateSearchButtons();
         }
 
@@ -148,7 +148,7 @@ namespace api.nox.search.client
                 component.UpdateData(task);
             }
 
-            ForceUpdateLayout.UpdateManually(workerContainer);
+            Nox.CCK.Utils.UpdateLayout.UpdateManually(workerContainer);
             UpdateSearchButtons();
         }
 
@@ -262,7 +262,7 @@ namespace api.nox.search.client
                 component.button.interactable = component.Data.Id != Page.Handler.Id;
             }
 
-            ForceUpdateLayout.UpdateManually(handlerContainer);
+            Nox.CCK.Utils.UpdateLayout.UpdateManually(handlerContainer);
         }
 
         private void OnChangeHandler(Handler handler)

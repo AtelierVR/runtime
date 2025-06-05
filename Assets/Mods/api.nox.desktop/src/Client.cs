@@ -2,6 +2,7 @@ using System.Linq;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.Controllers;
+using Nox.UI;
 
 namespace api.nox.desktop {
 	public class Client : ClientModInitializer {
@@ -9,6 +10,9 @@ namespace api.nox.desktop {
 
 		internal static IControllerAPI ControllerAPI
 			=> CoreAPI.ModAPI.GetMod("controller").GetMains().FirstOrDefault() as IControllerAPI;
+
+		internal static IUiAPI UiAPI
+			=> CoreAPI.ModAPI.GetMod("ui").GetClients().FirstOrDefault() as IUiAPI;
 
 		public void OnInitializeClient(ClientModCoreAPI api) {
 			CoreAPI = api;

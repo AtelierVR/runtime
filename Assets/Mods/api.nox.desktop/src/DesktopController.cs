@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
 using Nox.CCK.Development;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using Nox.Controllers;
+using Nox.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Gizmos = Nox.CCK.Development.Gizmos;
@@ -42,12 +44,23 @@ namespace api.nox.desktop {
 				return false;
 			}
 
+			Logger.LogDebug("Menu: " + Client.UiAPI);
+			desktop.menu = Client.UiAPI?.Make(desktop.menuContainer);
+			if (desktop.menu == null) {
+				Logger.LogError("Failed to create desktop proxy menu");
+				Destroy(instance);
+				return false;
+			}
+
+			desktop.menu.SetActive(false);
+
 			if (!Client.ControllerAPI.SetCurrent(desktop)) {
 				Logger.LogError("Failed to set desktop proxy as current");
 				Destroy(instance);
 				return false;
 			}
 
+			desktop._mouse          = InputSystem.GetDevice<Mouse>();
 			desktop.gameObject.name = $"[{desktop.GetType().Name}_{desktop.GetInstanceID()}]";
 			DontDestroyOnLoad(desktop);
 			return true;
@@ -69,12 +82,11 @@ namespace api.nox.desktop {
 			};
 
 		[HideInInspector] public Vector3 inputMovement = Vector3.zero;
-
-		private Mouse _mouse;
+		private                  Mouse   _mouse;
 
 		public void Start() {
 			LockCursor = true;
-			_mouse     = InputSystem.GetDevice<Mouse>();
+			Keybindings.KeyEvent.AddListener(OnKeyEvent);
 		}
 
 		private static bool LockCursor {
@@ -90,6 +102,8 @@ namespace api.nox.desktop {
 		public Camera              viewCamera;
 		public Transform           viewOffset;
 		public Vector3             velocity = Vector3.zero;
+		public RectTransform       menuContainer;
+		public IMenu               menu;
 
 		private readonly Dictionary<string, object> _abilities = new() {
 			{ "may_fly", true }
@@ -275,7 +289,14 @@ namespace api.nox.desktop {
 		}
 
 		public void Dispose() {
+			Keybindings.KeyEvent.RemoveListener(OnKeyEvent);
 			Destroy(gameObject);
+		}
+
+		private void OnKeyEvent(string key, float v, float o) {
+			if (key != "main" || !(o < 0.1f) || !(v > o)) return;
+			LockCursor = !LockCursor;
+			menu?.SetActive(!LockCursor);
 		}
 
 		[NoxPublic(NoxAccess.Method)]

@@ -20,8 +20,8 @@ namespace api.nox.world {
 
 			var scene = WorldSystem.CoreAPI.AssetAPI.GetWorld(ns, path);
 			if (!scene.IsValid()) {
-				var tmp = WorldSystem.CoreAPI.AssetAPI.LoadWorld(ns, path, LoadSceneMode.Additive);
-				await UniTask.WaitUntil(() => tmp.Status == UniTaskStatus.Pending, cancellationToken: token);
+				var tmp = await WorldSystem.CoreAPI.AssetAPI.LoadWorld(ns, path, LoadSceneMode.Additive)
+					.AttachExternalCancellation(token);
 
 				if (token.IsCancellationRequested) {
 					Logger.LogWarning($"Loading scene from AssetBundle {path} was cancelled before completion.");
@@ -29,12 +29,7 @@ namespace api.nox.world {
 					return null;
 				}
 
-				if (tmp.Status == UniTaskStatus.Faulted) {
-					Logger.LogError($"Failed to load scene from AssetBundle: {path}");
-					return null;
-				}
-
-				scene = await tmp;
+				scene = tmp;
 			}
 
 			if (!scene.IsValid()) {

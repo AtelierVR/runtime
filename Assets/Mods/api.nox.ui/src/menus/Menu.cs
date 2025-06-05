@@ -1,95 +1,284 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using api.nox.ui.defaults;
 using api.nox.ui.histories;
-using api.nox.ui.pages;
+using api.nox.ui.layouts;
+using Cysharp.Threading.Tasks;
+using Nox.CCK.Mods.Cores;
 using Nox.CCK.Utils;
+using Nox.UI;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
+using Object = UnityEngine.Object;
+using Transform = log4net.Util.Transform;
 
-namespace api.nox.ui.menus
-{
-    public abstract class Menu : MonoBehaviour, INoxObject, IDisposable
-    {
-        [NoxPublic(NoxAccess.Method)]
-        public int GetId() => GetInstanceID();
+namespace api.nox.ui.menus {
+	public class Menu : MonoBehaviour, INoxObject, IMenu {
+		[Header("Menu Settings")] public string   defaultKey       = HomePage.GetStaticKey();
+		public                           object[] defaultArguments = Array.Empty<object>();
 
-        [NoxPublic(NoxAccess.Read)]
-        public readonly HistoryList History = new();
+		[Header("References")] public BottomOrbiter bottomOrbiter;
+		public                        TopOrbiter    topOrbiter;
+		public                        RectTransform container;
 
-        public RectTransform container;
+		internal HistoryList History;
+		internal Client      Client;
 
-        [NoxPublic(NoxAccess.Method)]
-        public virtual void Show() => gameObject.SetActive(true);
 
-        [NoxPublic(NoxAccess.Method)]
-        public virtual void Hide() => gameObject.SetActive(false);
+		public Dictionary<string, List<NavigationData>> GetDefaultData()
+			=> new() {
+				{
+					"applications",
+					new List<NavigationData> {
+						new() {
+							key = "home",
+							// text               = "home",
+							iconPath           = "icons/home.png",
+							execution          = "home",
+							flags              = NavigationFlags.Button,
+							executionArguments = new object[] { },
+							executionType      = NavigationExecution.Goto,
+						},
+						new() {
+							key = "applications",
+							// text               = "applications",
+							iconPath           = "icons/apps.png",
+							execution          = "applications",
+							flags              = NavigationFlags.Button,
+							executionArguments = new object[] { },
+							executionType      = NavigationExecution.Goto
+						},
+						new() {
+							key = "inventory",
+							// text               = "inventory",
+							iconPath           = "icons/inventory.png",
+							execution          = "inventory",
+							flags              = NavigationFlags.Button,
+							executionArguments = new object[] { },
+							executionType      = NavigationExecution.Goto
+						},
+						new() {
+							key = "friends",
+							// text               = "friends",
+							iconPath           = "icons/friend.png",
+							execution          = "friends",
+							flags              = NavigationFlags.Button,
+							executionArguments = new object[] { },
+							executionType      = NavigationExecution.Goto
+						},
+						new() {
+							key = "search",
+							// text               = "search",
+							iconPath           = "icons/explore.png",
+							execution          = "search",
+							flags              = NavigationFlags.Button,
+							executionArguments = new object[] { },
+							executionType      = NavigationExecution.Goto
+						},
+						new() {
+							key = "settings",
+							// text               = "settings",
+							iconPath           = "icons/settings.png",
+							execution          = "settings",
+							flags              = NavigationFlags.Button,
+							executionArguments = new object[] { },
+							executionType      = NavigationExecution.Goto
+						}
+					}
+				}, {
+					"specials",
+					new List<NavigationData> {
+						new() {
+							key = "help",
+							// text               = "help",
+							iconPath           = "icons/question.png",
+							execution          = "help",
+							flags              = NavigationFlags.Button,
+							executionArguments = new object[] { "ui/how-to-use-menu" },
+							executionType      = NavigationExecution.Goto,
+						},
+						new() {
+							key = "mute",
+							// text               = "mute",
+							iconPath           = "icons/unmute.png",
+							execution          = "mute",
+							flags              = NavigationFlags.Button,
+							executionArguments = new object[] { },
+							executionType      = NavigationExecution.Event
+						},
+						new() {
+							key = "sessions",
+							// text               = "sessions",
+							iconPath           = "icons/group.png",
+							execution          = "sessions",
+							flags              = NavigationFlags.Button,
+							executionArguments = new object[] { },
+							executionType      = NavigationExecution.Goto
+						}
+					}
+				}, {
+					"actions",
+					new List<NavigationData> {
+						new() {
+							key = "notifications",
+							// text               = "notifications",
+							iconPath           = "icons/notifications.png",
+							execution          = "notifications",
+							flags              = NavigationFlags.Button,
+							executionArguments = new object[] { },
+							executionType      = NavigationExecution.Goto,
+						},
+						new() {
+							key              = "time",
+							text             = "time",
+							flags            = NavigationFlags.Enable,
+							getCustomContent = tr => Instantiate(PageManager.GetAsset<GameObject>("prefabs/time.prefab"), tr),
+							executionType    = NavigationExecution.None,
+						},
+						new() {
+							key = "exit",
+							// text = "exit",
+							iconPath           = "icons/power.png",
+							execution          = "exit",
+							flags              = NavigationFlags.Button,
+							executionArguments = new object[] { },
+							executionType      = NavigationExecution.Event,
+						}
+					}
+				}, {
+					"histories",
+					new List<NavigationData> {
+						new() {
+							key = "back",
+							// text               = "back",
+							iconPath           = "icons/left.png",
+							execution          = "back",
+							flags              = NavigationFlags.Button,
+							executionArguments = new object[] { },
+							executionType      = NavigationExecution.Action,
+						},
+						new() {
+							key = "forward",
+							// text               = "forward",
+							iconPath           = "icons/right.png",
+							execution          = "forward",
+							flags              = NavigationFlags.Button,
+							executionArguments = new object[] { },
+							executionType      = NavigationExecution.Action,
+						},
+						new() {
+							key = "refresh",
+							// text               = "refresh",
+							iconPath           = "icons/refresh.png",
+							execution          = "refresh",
+							flags              = NavigationFlags.Button,
+							executionArguments = new object[] { },
+							executionType      = NavigationExecution.Action,
+						}
+					}
+				}
+			};
 
-        [NoxPublic(NoxAccess.Method)]
-        public virtual bool IsVisible() => gameObject.activeSelf;
-        
-        
-        [NoxPublic(NoxAccess.Method)]
-        public void Goto(string pageKey, object[] args = null)
-            => UISystem.CoreAPI.EventAPI.Emit("goto_page", GetId(), pageKey, args ?? Array.Empty<object>());
+		public Menu() {
+			History = new HistoryList(this);
+		}
 
-        public void SetPage(Page newPage, Page oldPage = null, PageFlags flags = PageFlags.None)
-        {
-            try
-            {
-                if (newPage == null || !newPage.Content && newPage.GetContent == null)
-                    return;
+		private void Start() {
+			StartAsync().Forget();
+			Client.SendGoto(GetId(), defaultKey, defaultArguments);
+		}
 
-                if (oldPage != null)
-                {
-                    Logger.Log($"Hiding old tile {oldPage.Key}");
-                    oldPage.OnHide?.Invoke(newPage.Key, oldPage.Content);
-                    oldPage.Content?.SetActive(false);
-                }
+		private async UniTask StartAsync() {
+			foreach (var o in GetInternalOrbiters())
+			foreach (var p in o.GetInternalParts()) {
+				p.SetActive(false);
+				p.menu = this;
+			}
 
-                if (!newPage.Content)
-                    newPage.Content = newPage.GetContent(container);
+			foreach (var data in GetDefaultData()) {
+				var part = GetPart(data.Key);
+				foreach (var entry in data.Value) {
+					part.AddElement(entry);
+					await UniTask.Yield();
+				}
+			}
 
-                if (flags.HasFlag(PageFlags.IsNew))
-                {
-                    Logger.Log($"Opening new tile {newPage.Key}");
-                    newPage.OnOpen?.Invoke(oldPage?.Key, newPage.Content);
-                }
+			foreach (var o in GetInternalOrbiters())
+			foreach (var p in o.GetInternalParts())
+				if (p.GetChildren().Length > 0)
+					p.SetActive(true);
 
-                if (flags.HasFlag(PageFlags.IsRestore))
-                {
-                    Logger.Log($"Restoring tile {newPage.Key}");
-                    newPage.OnRestore?.Invoke(oldPage?.Key, newPage.Content);
-                }
+			UpdateLayout.UpdateManually(gameObject);
+		}
 
-                Logger.Log($"Displaying tile {newPage.Key}");
-                newPage.OnDisplay?.Invoke(oldPage?.Key, newPage.Content);
-                newPage.Content.name = newPage.Key;
-                newPage.Content.SetActive(true);
+		public int GetId()
+			=> GetInstanceID();
 
-                ForceUpdateLayout.UpdateManually(newPage.Content);
-            }
-            catch (Exception e)
-            {
-                Logger.LogWarning("Error setting tile");
-                Logger.LogError(e);
-            }
-        }
+		public bool GetActive()
+			=> gameObject.activeSelf;
 
-        private Vector2 _lastSize;
-        public void Update()
-        {
-            if (!container) return;
-            if (container.rect.size == _lastSize) return;
-            _lastSize = container.rect.size;
-            ForceUpdateLayout.UpdateManually(container);
-        }
+		public void SetActive(bool active)
+			=> gameObject.SetActive(active);
 
-        public void Dispose()
-        {
-            Hide();
-            History.Clear(this);
-            foreach (UnityEngine.Transform child in container)
-                Destroy(child.gameObject);
-        }
-        
-    }
+		public IOrbiter[] GetOrbiters()
+			=> GetInternalOrbiters().Cast<IOrbiter>().ToArray();
+
+		private Orbiter[] GetInternalOrbiters()
+			=> new Orbiter[] { bottomOrbiter, topOrbiter };
+
+		public IPart GetPart(string key)
+			=> GetOrbiters()
+				.SelectMany(o => o.GetParts())
+				.FirstOrDefault(p => p.GetKey() == key);
+
+
+		public void Dispose() {
+			SetActive(false);
+			History.Clear();
+			foreach (UnityEngine.Transform child in container)
+				Destroy(child.gameObject);
+			History = null;
+		}
+
+		public void Go(IPage page)
+			=> History.Add(page);
+
+		public void GoBack(int count = 1)
+			=> History.GoBack(count);
+
+		public void GoForward(int count = 1)
+			=> History.GoForward(count);
+
+		public IPage GetCurrent()
+			=> History.GetCurrent();
+
+		public void SetPage(IPage newPage, IPage oldPage = null, PageFlags flags = PageFlags.None) {
+			try {
+				var content = newPage.GetContent(container);
+				if (!content) {
+					Debug.LogError($"Page {newPage.GetKey()} does not have content.");
+					return;
+				}
+
+				foreach (UnityEngine.Transform child in container)
+					if (child.gameObject.activeSelf && child.gameObject != content)
+						child.gameObject.SetActive(false);
+
+				oldPage?.OnHide(newPage);
+				if (flags.HasFlag(PageFlags.IsNew))
+					newPage.OnOpen(oldPage);
+
+				if (flags.HasFlag(PageFlags.IsRestore))
+					newPage.OnRestore(oldPage);
+
+				newPage.OnDisplay(oldPage);
+				content.SetActive(true);
+
+				UpdateLayout.UpdateManually(content);
+			} catch {
+				// ignored
+			}
+		}
+	}
 }

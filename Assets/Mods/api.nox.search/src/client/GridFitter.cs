@@ -6,7 +6,7 @@ using Logger = Nox.CCK.Utils.Logger;
 namespace api.nox.search.client
 {
     [RequireComponent(typeof(GridLayoutGroup))]
-    public class GridFitter : MonoBehaviour, IUpdateLayout
+    public class GridFitter : MonoBehaviour
     {
         public float ratio = 1.0f;
         public float minWidth = 150f;

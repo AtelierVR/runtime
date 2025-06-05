@@ -147,6 +147,13 @@ namespace api.nox.keybinding {
 				keys.bindItem    = (e, i) => ((Label)e).text = keys.itemsSource[i].ToString();
 			}
 
+			var actions = child.Q<ListView>("actions");
+			actions.Clear();
+
+			actions.itemsSource = binding.Actions.ToArray();
+			actions.makeItem    = () => new Label();
+			actions.bindItem    = (e, i) => ((Label)e).text = actions.itemsSource[i].ToString();
+
 			keys.Rebuild();
 		}
 

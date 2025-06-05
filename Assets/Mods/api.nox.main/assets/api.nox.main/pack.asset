@@ -43,7 +43,7 @@ MonoBehaviour:
       value: "Messages"
     - key: dashboard.main.widgets.title
       value: "Widgets"
-    - key: dashboard.main.time
+    - key: time
       value: '{1}:{2}'
     - key: dashboard.main.friends.title
       value: "Amis"

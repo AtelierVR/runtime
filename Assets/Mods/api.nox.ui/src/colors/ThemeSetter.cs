@@ -5,7 +5,7 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.ui.colors
 {
-    public class ThemeSetter : MonoBehaviour, IUpdateLayout
+    public class ThemeSetter : MonoBehaviour
     {
         public static Theme Main;
         public static UnityEvent<Theme> OnMainChanged = new();

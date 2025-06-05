@@ -1,10 +1,11 @@
 {
     "name": "api.nox.ui",
-    "rootNamespace": "api.nox.ui",
+    "rootNamespace": "",
     "references": [
         "Nox.CCK",
         "UniTask",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Nox.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

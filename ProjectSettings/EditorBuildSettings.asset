@@ -138,9 +138,6 @@ EditorBuildSettings:
     path: Assets/BuildOutput/2025-04-17-22-45-22-demoworld/0.unity
     guid: 4e871aa58a984d8c94f04ae2d07581ce
   - enabled: 1
-    path: Assets/Mods/api.nox.ui/assets/api.nox.ui/worlds/Template.unity
-    guid: 3b8e6e9cee805f244a6c4239c3ae7161
-  - enabled: 1
     path: Assets/Mods/api.nox.xr/assets/api.nox.xr/Editor.unity
     guid: 1babc5969d2cbd94eb5c37fc7708b40f
   - enabled: 1
@@ -161,6 +158,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Mods/api.nox.main/assets/api.nox.main/worlds/default/default.unity
     guid: 6846bd5ba84175847ac059e62f04fe89
+  - enabled: 1
+    path: Assets/Mods/api.nox.ui/assets/api.nox.ui/obsolete/worlds/Template.unity
+    guid: 3b8e6e9cee805f244a6c4239c3ae7161
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
