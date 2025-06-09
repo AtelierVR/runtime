@@ -26,16 +26,16 @@
   "relations": [
     {
       "id": "ui",
-      "type": "recommends",
+      "type": "depends",
       "version": ">=1.0.0"
     }
   ],
   "entrypoints": {
     "client": [
-      "api.nox.search.SearchClient"
+      "api.nox.search.Client"
     ],
     "main": [
-      "api.nox.search.SearchSystem"
+      "api.nox.search.Main"
     ]
   },
   "references": [],

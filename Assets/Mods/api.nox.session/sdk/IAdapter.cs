@@ -68,7 +68,7 @@ namespace Nox.Sessions {
 		/// Get the world associated with the session.
 		/// </summary>
 		/// <returns></returns>
-		IWorld GetWorld();
+		ILoadedWorld GetWorld();
 
 		/// <summary>
 		/// Called when the session is deselected (is not the current session).

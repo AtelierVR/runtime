@@ -14,13 +14,13 @@ namespace api.nox.server
 
         private void Start()
         {
-            ServerSystem.Instance.OnServerUpdated.AddListener(UpdateContent);
+            Main.Instance.OnServerUpdated.AddListener(UpdateContent);
             button.onClick.AddListener(OnClick);
         }
 
         private void OnClick()
         {
-            var server = ServerSystem.ServerAPI.CallMethod("GetCurrentServer");
+            var server = Main.ServerAPI.CallMethod("GetCurrentServer");
             if (server == null) return;
             ServerClient.UISystem
                 .GetField("Pages")
@@ -29,7 +29,7 @@ namespace api.nox.server
 
         private void OnDestroy()
         {
-            ServerSystem.Instance.OnServerUpdated.RemoveListener(UpdateContent);
+            Main.Instance.OnServerUpdated.RemoveListener(UpdateContent);
             button.onClick.RemoveListener(OnClick);
         }
 
@@ -55,7 +55,7 @@ namespace api.nox.server
         {
             try
             {
-                var texture = await ServerSystem.NetworkAPI
+                var texture = await Main.NetworkAPI
                     .CallAsyncMethod<Texture2D>("FetchTexture", url, null, null, null);
                 if (!texture)
                 {

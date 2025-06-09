@@ -138,20 +138,4 @@ namespace api.nox.network {
 		public bool TryGet(string key, out string value)
 			=> ToDataDictionary().TryGetValue(key, out value);
 	}
-
-	[Serializable]
-	public class Response<T> {
-		public T             data;
-		public ResponseError error;
-
-		public bool IsError
-			=> error != null && error.code != 0 || data == null;
-	}
-
-	[Serializable]
-	public class ResponseError {
-		public string message;
-		public ushort code;
-		public ushort status;
-	}
 }

@@ -14,6 +14,8 @@ GameObject:
   - component: {fileID: 7458343944823304225}
   - component: {fileID: 6511546209272079824}
   - component: {fileID: 8915562037591930561}
+  - component: {fileID: 2592139051189965049}
+  - component: {fileID: 1679515496031818841}
   m_Layer: 5
   m_Name: CircleButton
   m_TagString: Untagged
@@ -256,6 +258,34 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!114 &2592139051189965049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1996412040217567697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7b0678e90722794f8a65be8b45ee25e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Key: image
+  Refrence: {fileID: 5516928052485915457}
+--- !u!114 &1679515496031818841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1996412040217567697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7b0678e90722794f8a65be8b45ee25e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Key: text
+  Refrence: {fileID: 8867412756245463450}
 --- !u!1001 &994996464561457830
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -401,6 +431,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &5516928052485915457 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4710449470896802279, guid: f48e38d2f7a098147b9acf9c7a7a6dec, type: 3}
+  m_PrefabInstance: {fileID: 994996464561457830}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &8867412756245463450 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8557280096614075196, guid: f48e38d2f7a098147b9acf9c7a7a6dec, type: 3}
+  m_PrefabInstance: {fileID: 994996464561457830}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2391244974044101761
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -17,8 +17,6 @@ namespace api.nox.widget {
 
 		private void OnWidgetSet(EventData context) {
 			context.TryGet(0, out IWidget widget);
-			if (context.TryGet(0, out Dictionary<string, object> data))
-				widget = ActionWidget.From(data);
 			if (widget == null) return;
 			Set(widget);
 		}

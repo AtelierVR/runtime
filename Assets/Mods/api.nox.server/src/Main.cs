@@ -5,12 +5,13 @@ using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
+using Nox.Servers;
 using UnityEngine.Events;
 
 namespace api.nox.server {
-	public class Main : MainModInitializer {
+	public class Main : MainModInitializer, IServerAPI {
 		internal static MainModCoreAPI CoreAPI;
-		internal static Main   Instance;
+		internal static Main           Instance;
 
 		internal static MainModInitializer NetworkAPI
 			=> CoreAPI.ModAPI
@@ -86,5 +87,8 @@ namespace api.nox.server {
 			CoreAPI  = null;
 			Instance = null;
 		}
+
+		public async UniTask<IServer> Fetch(string from = null)
+			=> null;
 	}
 }

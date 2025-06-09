@@ -86,23 +86,26 @@ namespace api.nox.world {
 		#endregion
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<IWorld> LoadWorldFromPath(string path, Action<float> progress = null, CancellationToken token = default)
+		public async UniTask<ILoadedWorld> LoadWorldFromPath(string path, Action<float> progress = null, CancellationToken token = default)
 			=> await Manager.LoadWorldFromPath(path, progress, token);
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<IWorld> LoadWorldFromAssets(string modId, string path, Action<float> progress = null, CancellationToken token = default)
+		public async UniTask<ILoadedWorld> LoadWorldFromAssets(string modId, string path, Action<float> progress = null, CancellationToken token = default)
 			=> await Manager.LoadWorldFromAssets(modId, path, progress, token);
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<IWorld> LoadWorldFromCache(string hash, Action<float> progress = null, CancellationToken token = default)
+		public async UniTask<ILoadedWorld> LoadWorldFromCache(string hash, Action<float> progress = null, CancellationToken token = default)
 			=> await Manager.LoadWorldFromCache(hash, progress, token);
 
 		[NoxPublic(NoxAccess.Method)]
 		public bool SetCurrent(string id)
 			=> Manager.SetCurrent(id);
 
+		public async UniTask<IWorld> Fetch(string id, string from = null)
+			=> null;
+
 		[NoxPublic(NoxAccess.Method)]
-		public IWorld GetCurrent()
+		public ILoadedWorld GetCurrent()
 			=> Manager.GetCurrent();
 	}
 }

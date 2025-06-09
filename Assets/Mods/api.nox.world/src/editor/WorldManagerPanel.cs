@@ -46,33 +46,33 @@ namespace api.nox.world {
 			_root.RemoveFromHierarchy();
 		}
 
-		private void OnWorldAdded(BaseWorld world) {
+		private void OnWorldAdded(BaseLoadedWorld loadedWorld) {
 			var list = _root.Q("list");
 			if (list == null) return;
-			var child = list.Children().FirstOrDefault(c => c.userData is string id && id == world.Id);
+			var child = list.Children().FirstOrDefault(c => c.userData is string id && id == loadedWorld.Id);
 			if (child != null) {
-				UpdateWorld(child, world);
+				UpdateWorld(child, loadedWorld);
 				return;
 			}
 
 			child                = WorldSystem.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("world.uxml").CloneTree();
 			child.style.flexGrow = 1;
-			child.userData       = world.Id;
-			UpdateWorld(child, world);
+			child.userData       = loadedWorld.Id;
+			UpdateWorld(child, loadedWorld);
 			list.Add(child);
 		}
 
 
-		private void OnWorldRemoved(BaseWorld world) {
+		private void OnWorldRemoved(BaseLoadedWorld loadedWorld) {
 			var list = _root.Q("list");
 			if (list == null) return;
-			var child = _root.Children().FirstOrDefault(c => c.userData is string id && id == world.Id);
+			var child = _root.Children().FirstOrDefault(c => c.userData is string id && id == loadedWorld.Id);
 			child?.RemoveFromHierarchy();
 		}
 
-		private void UpdateWorld(VisualElement child, BaseWorld world) {
+		private void UpdateWorld(VisualElement child, BaseLoadedWorld loadedWorld) {
 			var label = child.Q<Label>("id");
-			label.text = world.Id;
+			label.text = loadedWorld.Id;
 		}
 	}
 }

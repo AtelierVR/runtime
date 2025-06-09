@@ -1,5 +1,11 @@
 namespace Nox.Search {
 	public interface IResult {
+		public bool IsError();
+
+		public string GetError();
 		
+		public bool   HasNext();
+
+		public IResultData[] GetData();
 	}
 }

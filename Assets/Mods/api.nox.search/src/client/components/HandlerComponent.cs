@@ -1,59 +1,46 @@
-// using Nox.CCK.Language;
-// using UnityEngine;
-// using UnityEngine.UI;
-// using Logger = Nox.CCK.Utils.Logger;
-//
-// namespace api.nox.search.client
-// {
-//     public class HandlerComponent : MonoBehaviour
-//     {
-//         public RawImage icon;
-//         public TextLanguage text;
-//         public Button button;
-//
-//         public Handler Data;
-//         
-//         
-//
-//         public void Initiate(Handler data)
-//         {
-//             if (Data != null) return;
-//             UpdateData(data);
-//         }
-//
-//         private void OnDestroy()
-//         {
-//             Data = null;
-//         }
-//
-//         private void Awake()
-//         {
-//             icon.gameObject.SetActive(false);
-//             UpdateData(Data);
-//         }
-//
-//         internal void UpdateData(Handler data)
-//         {
-//             Data = data;
-//             if (Data == null)
-//             {
-//                 Logger.LogError("HandlerComponent: Data is not initiated.");
-//                 return;
-//             }
-//
-//             icon.gameObject.SetActive(true);
-//             if (!data.Icon)
-//             {
-//                 icon.texture = null;
-//                 icon.gameObject.SetActive(false);
-//             }
-//             else
-//             {
-//                 icon.texture = data.Icon;
-//                 icon.gameObject.SetActive(true);
-//             }
-//
-//             text.UpdateText(data.TitleKey);
-//         }
-//     }
-// }
+using System;
+using Nox.CCK.Language;
+using Nox.Search;
+using UnityEngine;
+using UnityEngine.UI;
+using Logger = Nox.CCK.Utils.Logger;
+
+namespace api.nox.search.client {
+	public class HandlerComponent : MonoBehaviour {
+		public Image         icon;
+		public RectTransform iconContainer;
+		public TextLanguage  text;
+		public Button        button;
+
+		public IHandler Data;
+
+
+		public void Initiate(IHandler data) {
+			if (Data != null) return;
+			UpdateData(data);
+		}
+
+		private void OnDestroy() {
+			Data = null;
+		}
+
+		internal void UpdateData(IHandler data) {
+			Data = data;
+			if (Data == null) {
+				Logger.LogError("HandlerComponent: Data is not initiated.");
+				return;
+			}
+
+			var texture = data.GetIcon();
+			if (!texture) {
+				icon.sprite = null;
+				iconContainer.gameObject.SetActive(false);
+			} else {
+				icon.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+				iconContainer.gameObject.SetActive(true);
+			}
+
+			text.UpdateText(data.GetTitleKey(), data.GetTitleArguments() ?? Array.Empty<string>());
+		}
+	}
+}

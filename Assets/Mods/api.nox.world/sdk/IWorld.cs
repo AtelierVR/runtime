@@ -1,5 +1,3 @@
 namespace Nox.Worlds {
-	public interface IWorld {
-		
-	}
+	public interface IWorld { }
 }

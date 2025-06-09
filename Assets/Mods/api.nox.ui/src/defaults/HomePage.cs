@@ -1,11 +1,8 @@
-﻿using api.nox.ui.layouts;
-using Codice.CM.WorkspaceServer;
-using Nox.CCK.Language;
+﻿using Nox.CCK.Language;
 using Nox.CCK.Utils;
 using Nox.UI;
 using UnityEngine;
 using UnityEngine.UI;
-using Transform = UnityEngine.Transform;
 
 namespace api.nox.ui.defaults {
 	public class HomePage : IPage {
@@ -33,6 +30,9 @@ namespace api.nox.ui.defaults {
 
 		public object[] GetContext()
 			=> _context;
+
+		public IMenu GetMenu()
+			=> Client.Instance.Get<IMenu>(_mId);
 
 		public GameObject GetContent(RectTransform parent) {
 			if (_content) return _content;
@@ -85,9 +85,6 @@ namespace api.nox.ui.defaults {
 
 			return _content;
 		}
-
-		public IMenu GetMenu()
-			=> Client.Instance.Get<IMenu>(_mId);
 
 		public void OnRemove() {
 			if (_content) {

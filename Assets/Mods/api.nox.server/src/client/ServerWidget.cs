@@ -16,13 +16,13 @@ namespace api.nox.server
 
         internal ServerWidget()
         {
-            ServerSystem.Instance.OnServerUpdated.AddListener(OnServerUpdated);
-            OnServerUpdated(ServerSystem.ServerAPI.CallMethod("GetCurrentServer"));
+            Main.Instance.OnServerUpdated.AddListener(OnServerUpdated);
+            OnServerUpdated(Main.ServerAPI.CallMethod("GetCurrentServer"));
         }
 
         public void Dispose()
         {
-            ServerSystem.Instance.OnServerUpdated.RemoveListener(OnServerUpdated);
+            Main.Instance.OnServerUpdated.RemoveListener(OnServerUpdated);
         }
 
         private void OnServerUpdated(INoxObject server)
@@ -54,15 +54,15 @@ namespace api.nox.server
         
         private GameObject OnContent(int menuId, RectTransform rect)
         {
-            var asset = ServerSystem.CoreAPI.AssetAPI.GetAsset<GameObject>("ui", "prefabs/widgets/button.prefab");
+            var asset = Main.CoreAPI.AssetAPI.GetAsset<GameObject>("ui", "prefabs/widgets/button.prefab");
             var button = Object.Instantiate(asset, rect);
             var reference = Reference.GetReference("content", button);
-            asset = ServerSystem.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/widget.prefab");
+            asset = Main.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/widget.prefab");
             var widget = Object.Instantiate(asset, reference.transform);
             var comportment = widget.GetComponent<ServerWidgetComportment>();
             comportment.button = button.GetComponent<UnityEngine.UI.Button>();
             comportment.menuId = menuId;
-            comportment.UpdateContent(ServerSystem.ServerAPI.CallMethod("GetCurrentServer"));
+            comportment.UpdateContent(Main.ServerAPI.CallMethod("GetCurrentServer"));
             return button;
         }
     }

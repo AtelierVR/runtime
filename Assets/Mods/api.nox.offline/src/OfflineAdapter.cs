@@ -9,14 +9,14 @@ using Nox.Worlds;
 
 namespace api.nox.offline {
 	public class OfflineAdapter : IOfflineAdapter {
-		private readonly IWorld         _world;
+		private readonly ILoadedWorld         _loadedWorld;
 		private readonly IEntityManager _entities;
 		private          int            _masterPlayerId;
 		private          int            _nextPlayerId;
 		private          ISession       _session;
 
-		internal OfflineAdapter(IWorld world) {
-			_world          = world;
+		internal OfflineAdapter(ILoadedWorld loadedWorld) {
+			_loadedWorld          = loadedWorld;
 			_masterPlayerId = -1;
 			_nextPlayerId   = 0;
 			_entities       = Main.EntityAPI.New();
@@ -65,7 +65,7 @@ namespace api.nox.offline {
 		public void OnSelect(ISession oldSession) {
 			Logger.LogDebug($"OnSelect: {this}");
 			if (GetLocalPlayer() == null) NewPlayer();
-			_world.SetCurrent();
+			_loadedWorld.SetCurrent();
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -79,7 +79,7 @@ namespace api.nox.offline {
 			await UniTask.Yield();
 			foreach (var entity in _entities.GetEntities().ToArray())
 				_entities.UnregisterEntity(entity);
-			_world.Dispose();
+			_loadedWorld.Dispose();
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -111,10 +111,10 @@ namespace api.nox.offline {
 			=> _entities.GetCount<IPlayer>();
 
 		[NoxPublic(NoxAccess.Method)]
-		public IWorld GetWorld()
-			=> _world;
+		public ILoadedWorld GetWorld()
+			=> _loadedWorld;
 
 		public override string ToString()
-			=> $"{GetType().Name}[World={_world}, Entities={_entities}]";
+			=> $"{GetType().Name}[World={_loadedWorld}, Entities={_entities}]";
 	}
 }

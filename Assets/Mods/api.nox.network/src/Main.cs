@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
@@ -7,58 +8,49 @@ using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
 using Nox.Network;
+using Nox.Users;
 using UnityEngine;
 using UnityEngine.Networking;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.network {
 	public class Main : MainModInitializer, INetworkAPI {
-		internal static ModCoreAPI    CoreAPI;
-		internal static Main ModInstance;
-		private         LanguagePack  _language;
+		internal        ModCoreAPI   CoreAPI;
+		internal static Main         Instance;
+		private         LanguagePack _language;
+		internal        CacheManager Cache;
 
-		[NoxPublic(NoxAccess.Read)] public Instances.InstanceAPI   Instance;
-		[NoxPublic(NoxAccess.Read)] public Auths.AuthAPI           Auth;
-		[NoxPublic(NoxAccess.Read)] public Users.UserAPI           User;
-		[NoxPublic(NoxAccess.Read)] public Servers.ServerAPI       Server;
-		[NoxPublic(NoxAccess.Read)] public Worlds.WorldAPI         World;
-		[NoxPublic(NoxAccess.Read)] public WebSockets.WebSocketAPI WebSocket;
-
+		internal static IUserAPI UserAPI
+			=> Main.Instance.CoreAPI.ModAPI.GetMod("user")
+				?.GetMains()
+				.FirstOrDefault() as IUserAPI;
 
 		public void OnInitialize(ModCoreAPI api) {
-			CoreAPI     = api;
-			ModInstance = this;
-			NetCache.Clear();
-			_language = CoreAPI.AssetAPI.GetAsset<LanguagePack>("langpack.asset");
-			Logger.LogDebug("Language: " + _language);
-			LanguageManager.AddPack(_language);
-
-			Auth      = new Auths.AuthAPI();
-			Instance  = new Instances.InstanceAPI();
-			Server    = new Servers.ServerAPI();
-			WebSocket = new WebSockets.WebSocketAPI();
-			User      = new Users.UserAPI();
-			World     = new Worlds.WorldAPI();
-			// Relay = new Relays.RelayAPI();
-
-			Logger.Log("NetworkSystem initialized");
+			CoreAPI  = api;
+			Instance = this;
+			Cache    = new CacheManager();
 		}
 
-		public void OnDispose() {
-			World.Dispose();
-			WebSocket.Dispose();
-			NetCache.Clear();
-			LanguageManager.RemovePack(_language);
-			_language   = null;
-			User        = null;
-			World       = null;
-			Server      = null;
-			Instance    = null;
-			Auth        = null;
-			WebSocket   = null;
-			ModInstance = null;
+		// public async UniTask OnPostInitializeMainAsync() {
+		// 	Logger.Log("Testing network API...");
+		// 	var req = new Request();
+		// 	if (!await req.SetMasterUrl(UserAPI.GetCurrent().GetServerAddress(), "/api/test"))
+		// 		Logger.LogWarning("Network API is not working. Please check your server address.");
+		// 	else {
+		// 		req.SetUrl("https://postman-echo.com/get");
+		// 		await req.Send(true);
+		// 		Logger.LogDebug("Test: " + req.GetResponse<string>());
+		// 	}
+		// }
 
-			Logger.Log("NetworkSystem disposed");
+		public void OnDispose() {
+			if (Cache != null) {
+				Cache.Dispose();
+				Cache = null;
+			}
+
+			CoreAPI  = null;
+			Instance = null;
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -139,6 +131,44 @@ namespace api.nox.network {
 			if (Hashing.HashFile(file) == hash) return file;
 			File.Delete(file);
 			return null;
+		}
+
+		public string MergeUrl(Uri url, string path)
+			=> Request.MergeUrl(url, path);
+
+		public string MergeUrl(string url, string path)
+			=> Request.MergeUrl(url, path);
+
+		public UniTask<string> GetGateway(string address)
+			=> Discover.GetGateway(address);
+
+		public IRequest MakeRequest()
+			=> new Request();
+
+		public async UniTask<Texture2D> FetchTexture(string address) {
+			if (string.IsNullOrEmpty(address)) {
+				Logger.LogWarning("FetchTexture: Address is null or empty.");
+				return null;
+			}
+
+			var uri = new Uri(address);
+			if (!uri.IsAbsoluteUri) {
+				Logger.LogWarning($"FetchTexture: Invalid URI {address}.");
+				return null;
+			}
+
+			try {
+				var req = MakeRequest();
+				req.SetUrl(address);
+				await req.Send();
+				if (req.GetStatus() == 200)
+					return req.GetResponse<Texture2D>();
+				Logger.LogError($"FetchTexture: Failed to fetch texture from {address}. Status: {req.GetStatus()}");
+				return null;
+			} catch (Exception e) {
+				Logger.LogError($"FetchTexture: Failed to fetch texture from {address}. Error: {e.Message}");
+				return null;
+			}
 		}
 	}
 }

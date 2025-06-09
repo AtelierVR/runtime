@@ -23,7 +23,7 @@ namespace api.nox.widget {
 		public T Get<T>(string key) where T : IWidget
 			=> _manager.Get<T>(key);
 
-		public void Set(IWidget widget)
+		public void Add(IWidget widget)
 			=> _manager.Set(widget);
 
 		public void Remove(string key)

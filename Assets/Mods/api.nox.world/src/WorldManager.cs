@@ -9,10 +9,10 @@ using UnityEngine.SceneManagement;
 
 namespace api.nox.world {
 	public class WorldManager : INoxObject {
-		public readonly List<BaseWorld> Worlds = new();
+		public readonly List<BaseLoadedWorld> Worlds = new();
 
-		internal readonly UnityEvent<BaseWorld> OnWorldAdded   = new();
-		internal readonly UnityEvent<BaseWorld> OnWorldRemoved = new();
+		internal readonly UnityEvent<BaseLoadedWorld> OnWorldAdded   = new();
+		internal readonly UnityEvent<BaseLoadedWorld> OnWorldRemoved = new();
 
 		public async UniTask Dispose() {
 			foreach (var world in Worlds) {
@@ -24,11 +24,11 @@ namespace api.nox.world {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public BaseWorld GetWorld(string id)
+		public BaseLoadedWorld GetWorld(string id)
 			=> Worlds.Find(w => w.Id == id);
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<AssetBundleWorld> LoadWorldFromCache(string hash, Action<float> progress = null, CancellationToken token = default) {
+		public async UniTask<AssetBundleLoadedWorld> LoadWorldFromCache(string hash, Action<float> progress = null, CancellationToken token = default) {
 			var path = WorldCache.GetWorldFromCache(hash);
 			if (!string.IsNullOrEmpty(path))
 				return await LoadWorldFromPath(path, progress, token);
@@ -37,14 +37,14 @@ namespace api.nox.world {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<AssetBundleWorld> LoadWorldFromPath(string path, Action<float> progress = null, CancellationToken token = default) {
-			var existingWorld = GetWorld(AssetBundleWorld.ParseId(path));
+		public async UniTask<AssetBundleLoadedWorld> LoadWorldFromPath(string path, Action<float> progress = null, CancellationToken token = default) {
+			var existingWorld = GetWorld(AssetBundleLoadedWorld.ParseId(path));
 			if (existingWorld != null) {
 				Logger.LogWarning($"World {path} is already loaded.");
-				return existingWorld as AssetBundleWorld;
+				return existingWorld as AssetBundleLoadedWorld;
 			}
 
-			var world = await AssetBundleWorld.Load(path, progress, token);
+			var world = await AssetBundleLoadedWorld.Load(path, progress, token);
 
 			if (world == null) {
 				Logger.LogError($"Failed to load world from path: {path}");
@@ -59,14 +59,14 @@ namespace api.nox.world {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<AssetWorld> LoadWorldFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default) {
-			var existingWorld = GetWorld(AssetWorld.ParseId(ns, path));
+		public async UniTask<AssetLoadedWorld> LoadWorldFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default) {
+			var existingWorld = GetWorld(AssetLoadedWorld.ParseId(ns, path));
 			if (existingWorld != null) {
 				Logger.LogWarning($"World {ns}:{path} is already loaded.");
-				return existingWorld as AssetWorld;
+				return existingWorld as AssetLoadedWorld;
 			}
 
-			var world = await AssetWorld.Load(ns, path, progress, token);
+			var world = await AssetLoadedWorld.Load(ns, path, progress, token);
 
 			if (world == null) {
 				Logger.LogError($"Failed to load world from assets: {ns}:{path}");
@@ -81,7 +81,7 @@ namespace api.nox.world {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public BaseWorld GetCurrent() {
+		public BaseLoadedWorld GetCurrent() {
 			var currentScene = SceneManager.GetActiveScene();
 			if (!currentScene.IsValid()) return null;
 			return (from world in Worlds

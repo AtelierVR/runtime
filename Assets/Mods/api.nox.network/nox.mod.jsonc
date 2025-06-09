@@ -24,10 +24,16 @@
     }
   ],
   "contributors": [],
-  "relations": [],
+  "relations": [
+    {
+      "id": "user",
+      "type": "recommends",
+      "version": ">=1.0.0"
+    }
+  ],
   "entrypoints": {
     "main": [
-      "api.nox.network.NetworkSystem"
+      "api.nox.network.Main"
     ],
     "client": [],
     "editor": [
@@ -35,17 +41,7 @@
     ],
     "instance": []
   },
-  "references": [
-    {
-      "name": "api.nox.network",
-      "file": "372cfc8ccdbc48cb9197ffe6031e0bf2.dll",
-      "engine": {
-        "name": "None",
-        "version": "==2023.2.19"
-      },
-      "platform": "None"
-    }
-  ],
+  "references": [],
   "sides": [],
   "permissions": [],
   "kernel": true

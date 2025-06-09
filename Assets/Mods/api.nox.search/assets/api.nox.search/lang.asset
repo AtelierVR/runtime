@@ -15,53 +15,53 @@ MonoBehaviour:
   languages:
   - IETF: fr-FR
     entries:
+    - key: search.start_search
+      value: "Démarrer une recherche pour voir des résultats"
+    - key: search.title
+      value: "Recherche"
+    - key: search.info.title
+      value: "Info"
     - key: search.query.placeholder
       value: "Rechercher..."
-    - key: search.no_worker
-      value: "Aucun serveur trouvé"
-    - key: search.no_handler
-      value: "Aucun gestionnaire trouvé"
-    - key: search.worker.message
-      value: "{0}"
-    - key: search.worker.title
-      value: "{0}"
+    - search.no_handler
+      value: "Aucun gestionnaire de recherche trouvé"
+    - key: search.worker.canceled
+      value: "Annulée"
+    - key: search.worker.fetching
+      value: "Recherche..."
+    - key: search.worker.error
+      value: "Erreur: {0}"
+    - key: search.worker.no_message
+      value: "Une erreur s'est produite, mais aucun message n'a été fourni."
+    - key: search.worker.error.no_result
+      value: "Aucun résultat trouvé, mais avec une erreur."
     - key: search.worker.empty
       value: "Aucun résultat trouvé"
-    - key: search.worker.error
-      value: "Une erreur s'est produite : {0}"
-    - key: search.worker.fetching
-      value: "Chargement..."
-    - key: search.worker.no_message
-      value: ""
-    - key: search.worker.error.no_result
-      value: "Aucun résultat trouvé"
-    - key: search.worker.error.no_fetch
-      value: "Erreur de récupération"
-    - key: search.result.title
+    - key: search.worker.title
       value: "{0}"
   - IETF: en-US
     entries:
+    - key: search.start_search
+      value: "Start search to see results"
+    - key: search.title
+      value: "Search"
+    - key: search.info.title
+      value: "Info"
     - key: search.query.placeholder
       value: "Search..."
-    - key: search.no_worker
-      value: "No server found"
-    - key: search.no_handler
-      value: "No handler found"
-    - key: search.worker.message
-      value: "{0}"
-    - key: search.worker.title
-      value: "{0}"
+    - search.no_handler
+      value: "No search handler found"
+    - key: search.worker.canceled
+      value: "Search canceled"
+    - key: search.worker.fetching
+      value: "Searching..."
+    - key: search.worker.error
+      value: "Error: {0}"
+    - key: search.worker.no_message
+      value: "An error occurred, but no message was provided."
+    - key: search.worker.error.no_result
+      value: "No results found, but with an error."
     - key: search.worker.empty
       value: "No results found"
-    - key: search.worker.error
-      value: "An error occurred: {0}"
-    - key: search.worker.fetching
-      value: "Loading..."
-    - key: search.worker.no_message
-      value: ""
-    - key: search.worker.error.no_result
-      value: "No result found"
-    - key: search.worker.error.no_fetch
-      value: "Fetch error"
-    - key: search.result.title
+    - key: search.worker.title
       value: "{0}"

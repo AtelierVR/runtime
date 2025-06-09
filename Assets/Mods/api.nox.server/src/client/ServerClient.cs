@@ -7,7 +7,7 @@ namespace api.nox.server
     public class ServerClient : ClientModInitializer
     {
         internal static MainModInitializer UISystem
-            => ServerSystem.CoreAPI.ModAPI
+            => Main.CoreAPI.ModAPI
                 .GetMod("ui").GetMains()
                 .FirstOrDefault();
 

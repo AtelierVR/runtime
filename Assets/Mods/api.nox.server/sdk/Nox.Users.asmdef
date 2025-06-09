@@ -1,7 +1,8 @@
 {
-  "name": "Nox.Users",
+  "name": "Nox.Servers",
   "rootNamespace": "",
   "references": [
+    "UniTask"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

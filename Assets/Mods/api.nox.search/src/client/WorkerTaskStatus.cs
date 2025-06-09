@@ -1,5 +1,10 @@
 namespace api.nox.search.client {
-	public class WorkerTaskStatus {
-		
+	internal enum WorkerTaskStatus {
+		Pending,
+		Fetching,
+		Canceled,
+		CompletedWithoutResult,
+		Completed,
+		Faulted
 	}
 }

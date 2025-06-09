@@ -3,347 +3,228 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Nox.CCK.Mods.Events;
+using Nox.CCK.Language;
 using Nox.CCK.Utils;
+using Nox.Search;
+using Nox.UI;
 using UnityEngine;
 using UnityEngine.Events;
-using Logger = Nox.CCK.Utils.Logger;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
-using Transform = UnityEngine.Transform;
+using Logger = Nox.CCK.Utils.Logger;
 
-namespace api.nox.search.client
-{
-    public class SearchPage
-    {
-        private static string GetKey() => "search";
-        private static EventSubscription _listener;
+namespace api.nox.search.client {
+	public class SearchPage : IPage {
+		internal static string GetStaticKey()
+			=> "search";
 
-        internal readonly UnityEvent<WorkerTask> OnWorkerTaskUpdate = new();
-        internal readonly UnityEvent<WorkerTask[]> OnWorkerTaskStart = new();
-        internal readonly UnityEvent<Handler[]> OnHandlerUpdate = new();
+		public string GetKey()
+			=> GetStaticKey();
 
-        public static void Listen()
-        {
-            Logger.LogDebug("SearchPage.Listen");
-            _listener = SearchSystem.CoreAPI.EventAPI.Subscribe("goto_page", OnGotoEvent);
-        }
+		private readonly int        _mId;
+		private readonly object[]   _context;
+		private          GameObject _content;
 
-        public static void StopListen()
-        {
-            SearchSystem.CoreAPI.EventAPI.Unsubscribe(_listener);
-        }
+		private static bool T<T>(object[] o, int index, out T value) {
+			if (o.Length > index && o[index] is T t) {
+				value = t;
+				return true;
+			}
 
-        private static void OnGotoEvent(EventData context)
-        {
-            if (!context.TryGet(0, out int menuId)) return;
-            if (!context.TryGet(1, out string pageKey)) return;
-            if (pageKey != GetKey()) return;
-            var handler = !context.TryGet(2, out string h)
-                ? Config.Load().Get<string>("search.last_handler")
-                : h;
-            var query = context.TryGet(3, out string q) ? q : null;
-            var auto = context.TryGet(4, out bool a) && a;
-            var page = new SearchPage
-            {
-                MenuId = menuId,
-                HandlerId = handler,
-                Query = query ?? string.Empty,
-                LastQuery = (query ?? string.Empty) + " ",
-            };
-            page.Display();
-            if (auto) page.Submit().Forget();
-        }
-
-        private void Display()
-            => SearchSystem.CoreAPI.EventAPI.Emit("display_page", MenuId, new Dictionary<string, object>
-            {
-                {
-                    "key", GetKey()
-                }, // id of the page
-                {
-                    "content", new Func<Transform, GameObject>(OnContent)
-                }, // called when the menu need the content of the page (first call)
-                /*
-                 {
-                    "open", new Action<string, GameObject>(OnOpen)
-                }, // called once when the page is display for the first time
-                 {
-                    "restore", (string key, GameObject go) => OnRestore(key, go)
-                }, // called when the menu go back from history and display the page again
-                {
-                    "remove", (GameObject go) => OnRemove(go)
-                }, // called when the menu remove the page from history (last call)
-                {
-                    "display", (string key, GameObject go) => OnDisplay(key, go)
-                }, // called when the page is displayed
-                {
-                    "hide", (string key, GameObject go) => OnHide(key, go)
-                } // called when another page is displayed
-                */
-            });
-
-        internal int MenuId;
-        private SearchComponent _comportment;
-        private string _handlerId;
-
-        internal string HandlerId
-        {
-            get => _handlerId;
-            set
-            {
-                _handlerId = value;
-                var config = Config.Load();
-                config.Set("search.last_handler", value);
-                config.Save();
-            }
-        }
-
-        internal string Query = string.Empty;
-        internal string LastQuery = string.Empty + " ";
-
-        internal bool IsEmptyQuery => string.IsNullOrEmpty(Query);
-        internal bool IsNewQuery => Query != LastQuery;
-
-        internal Handler Handler
-        {
-            get
-            {
-                var handler = HandlerId != null
-                    ? SearchSystem.Instance.GetHandler(HandlerId)
-                    : null;
-                handler ??= SearchSystem.Instance.Handlers.FirstOrDefault();
-                return handler;
-            }
-            set
-            {
-                HandlerId = value?.Id;
-                LastQuery = null;
-            }
-        }
+			value = default;
+			return false;
+		}
 
 
-        private GameObject OnContent(Transform transform)
-        {
-            var asset = SearchSystem.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/content.prefab");
-            asset.SetActive(false);
-            var content = Object.Instantiate(asset, transform);
-            _comportment = content.GetComponent<SearchComponent>();
-            _comportment.Initiate(this);
-            _comportment.UpdateData();
-            Logger.LogDebug($"SearchPage.OnGetContent: {asset.name} {content.name}");
-            content.name = $"{GetKey()}_{content.name}";
-            return content;
-        }
+		internal static IPage OnGotoAction(IMenu menu, object[] o)
+			=> new SearchPage(menu.GetId(), o);
 
-        internal bool IsFetching
-            => _tasks.Count > 0
-               && _tasks.Any(t => t.Status is WorkerTaskStatus.Fetching or WorkerTaskStatus.Pending);
+		private SearchPage(int mId, object[] context) {
+			_mId     = mId;
+			_context = context;
+			var handler = !T(context, 0, out string h)
+				? Config.Load().Get<string>("search.last_handler")
+				: h;
+			var query = T(context, 1, out string q) ? q : null;
+			var auto  = T(context, 2, out bool a) && a;
+			HandlerId = handler;
+			Query     = query ?? string.Empty;
+			LastQuery = (query ?? string.Empty) + " ";
+			if (auto) Submit().Forget();
+		}
 
-        private readonly List<WorkerTask> _tasks = new();
+		public object[] GetContext()
+			=> _context;
 
-        internal void Cancel()
-        {
-            foreach (var cancel in _tasks)
-                cancel.Cancel();
-            _tasks.Clear();
-        }
+		public IMenu GetMenu()
+			=> Client.UiAPI.Get<IMenu>(_mId);
 
-        internal async UniTask Submit()
-        {
-            if (IsFetching) return;
-            LastQuery = Query;
+		private string HandlerId {
+			get => _handlerId;
+			set {
+				_handlerId = value;
+				var config = Config.Load();
+				config.Set("search.last_handler", value);
+				config.Save();
+			}
+		}
 
-            var handler = Handler;
-            if (handler == null)
-            {
-                Logger.LogDebug($"No handler found with id {HandlerId}");
-                OnWorkerTaskStart.Invoke(Array.Empty<WorkerTask>());
-                return;
-            }
+		private           string                   _handlerId;
+		internal          string                   Query;
+		internal          string                   LastQuery;
+		internal readonly UnityEvent<WorkerTask>   OnWorkerTaskUpdate = new();
+		internal readonly UnityEvent<WorkerTask[]> OnWorkerTaskStart  = new();
+		internal readonly UnityEvent<IHandler[]>   OnHandlerUpdate    = new();
 
-            if (handler.GetWorkers == null)
-            {
-                Logger.LogDebug($"No function GetWorkers found for handler {handler.Id}");
-                OnWorkerTaskStart.Invoke(Array.Empty<WorkerTask>());
-                return;
-            }
+		internal bool IsEmptyQuery
+			=> string.IsNullOrEmpty(Query);
 
-            var workers = handler.GetWorkers();
-            if (workers.Length == 0)
-            {
-                Logger.LogDebug($"No workers found for handler {handler.Id}");
-                OnWorkerTaskStart.Invoke(Array.Empty<WorkerTask>());
-                return;
-            }
+		internal bool IsNewQuery
+			=> Query != LastQuery;
 
-            Cancel();
+		internal IHandler Handler {
+			get {
+				var handler = HandlerId != null
+					? Main.Instance.Get(HandlerId)
+					: null;
+				handler ??= Main.Instance.Handlers.FirstOrDefault();
+				return handler;
+			}
+			set {
+				HandlerId = value?.GetId();
+				LastQuery = string.Empty + " ";
+			}
+		}
 
-            foreach (var worker in workers.Where(w => w != null))
-                _tasks.Add(new WorkerTask()
-                {
-                    Worker = worker,
-                    Data = new Dictionary<string, object> { { "query", Query } },
-                    CancellationToken = new CancellationTokenSource(),
-                    Timeout = 10d,
-                });
+		internal bool IsFetching
+			=> _tasks.Count > 0
+				&& _tasks.Any(t => t.Status is WorkerTaskStatus.Fetching or WorkerTaskStatus.Pending);
 
-            OnWorkerTaskStart.Invoke(_tasks.ToArray());
-            await UniTask.WhenAll(_tasks.Select(t => t.Execute(this)));
-        }
+		private readonly List<WorkerTask> _tasks = new();
 
-        internal enum WorkerTaskStatus
-        {
-            Pending,
-            Fetching,
-            Canceled,
-            CompletedWithoutResult,
-            Completed,
-            Faulted
-        }
+		public GameObject GetContent(RectTransform parent) {
+			if (_content) return _content;
+			_content      = Object.Instantiate(Client.GetAsset<GameObject>("prefabs/split.prefab", "ui"), parent);
+			_content.name = $"[{GetStaticKey()}_{_content.GetInstanceID()}]";
+			var splitContent   = Reference.GetComponent<RectTransform>("content", _content);
+			var containerAsset = Client.GetAsset<GameObject>("prefabs/container.prefab", "ui");
+			var iconAsset      = Client.GetAsset<GameObject>("prefabs/header_icon.prefab", "ui");
+			var labelAsset     = Client.GetAsset<GameObject>("prefabs/header_label.prefab", "ui");
+			var scrollAsset    = Client.GetAsset<GameObject>("prefabs/scroll.prefab", "ui");
+			var infoAsset      = Client.GetAsset<GameObject>("prefabs/infobox.prefab", "ui");
+			var listAsset      = Client.GetAsset<GameObject>("prefabs/list.prefab", "ui");
 
-        public class WorkerTask
-        {
-            internal int Uid = Guid.NewGuid().GetHashCode();
+			// generate background containers
 
-            internal Worker Worker;
-            internal double Timeout;
-            internal Dictionary<string, object> Data;
-            internal CancellationTokenSource CancellationToken;
-            internal Result Result;
-            internal WorkerTaskStatus Status;
-            private DateTime _t0 = DateTime.MinValue;
-            private DateTime _t1 = DateTime.MinValue;
+			// generate notification
+			var container = Object.Instantiate(containerAsset, splitContent);
+			var withTitle = Object.Instantiate(
+				Client.GetAsset<GameObject>("prefabs/with_title.prefab", "ui"),
+				Reference.GetComponent<RectTransform>("content", container)
+			);
+			var header = Reference.GetReference("header", withTitle);
+			var icon   = Object.Instantiate(iconAsset, Reference.GetComponent<RectTransform>("before", header));
+			var label  = Object.Instantiate(labelAsset, Reference.GetComponent<RectTransform>("content", header));
 
-            private double Elapsed
-                => Status != WorkerTaskStatus.Pending && Status != WorkerTaskStatus.Fetching
-                    ? (float)(_t1 - _t0).TotalSeconds
-                    : (float)(DateTime.Now - _t0).TotalSeconds;
+			Reference.GetComponent<Image>("image", icon).sprite = Client.GetAsset<Sprite>("icons/search.png", "ui");
+			Reference.GetComponent<TextLanguage>("text", label).UpdateText("search.title");
+
+			var handlers = Object.Instantiate(
+				scrollAsset,
+				Reference.GetComponent<RectTransform>("content", withTitle)
+			);
+			var listsHandler = Reference.GetComponent<RectTransform>(
+				"content",
+				Object.Instantiate(
+					listAsset,
+					Reference.GetComponent<RectTransform>(
+						"content", handlers
+					)
+				)
+			);
+			var box = Object.Instantiate(Client.GetAsset<GameObject>("prefabs/box.prefab", "ui"), listsHandler);
+			Reference.GetComponent<TextLanguage>("title", box).UpdateText("search.info.title");
+			var handleInfo = Object.Instantiate(
+				infoAsset,
+				Reference.GetComponent<RectTransform>("content", withTitle)
+			);
 
 
-            internal string MessageKey = string.Empty;
-            internal string[] MessageArgs = Array.Empty<string>();
+			// generate dashboard
+			container = Object.Instantiate(Client.GetAsset<GameObject>("prefabs/container_full.prefab", "ui"), splitContent);
+			withTitle = Object.Instantiate(
+				Client.GetAsset<GameObject>("prefabs/with_search.prefab", "ui"),
+				Reference.GetComponent<RectTransform>("content", container)
+			);
+			header = Reference.GetReference("header", withTitle);
+			var content   = Reference.GetComponent<RectTransform>("content", withTitle);
+			var component = _content.AddComponent<SearchComponent>();
+			component.submitButton         = Reference.GetComponent<Button>("submit", header);
+			component.inputField           = Reference.GetComponent<TMPro.TMP_InputField>("input", header);
+			component.imageButton          = Reference.GetComponent<Image>("image", component.submitButton.gameObject);
+			component.workersContainer     = Object.Instantiate(scrollAsset, content);
+			component.workerListContainer  = Reference.GetComponent<RectTransform>("content", component.workersContainer);
+			component.resultContainer      = Object.Instantiate(infoAsset, content);
+			component.resultText           = Reference.GetComponent<TextLanguage>("text", component.resultContainer);
+			component.inputImage           = Reference.GetComponent<Image>("image", component.inputField.gameObject);
+			component.inputImageContainer  = Reference.GetReference("image_container", component.inputField.gameObject);
+			component.infoContainer        = box;
+			component.infoText             = Reference.GetComponent<TextLanguage>("text", component.infoContainer);
+			component.infoHandlerContainer = handleInfo;
+			component.infoHandlerText      = Reference.GetComponent<TextLanguage>("text", component.infoHandlerContainer);
+			component.handlerContainer     = handlers;
+			component.handlerListContainer = Reference.GetComponent<RectTransform>(
+				"content", Object.Instantiate(
+					listAsset,
+					listsHandler
+				)
+			);
+			component.Page = this;
 
-            internal void Cancel() => CancellationToken.Cancel();
+			Reference.GetComponent<Image>("image", component.resultContainer).sprite = Client.GetAsset<Sprite>("icons/help.png", "ui");
+			Reference.GetComponent<Image>("image", component.resultContainer).sprite = Client.GetAsset<Sprite>("icons/help.png", "ui");
 
-            internal async UniTask Execute(SearchPage page)
-            {
-                if (CancellationToken.Token.IsCancellationRequested)
-                {
-                    Status = WorkerTaskStatus.Canceled;
-                    MessageKey = "search.worker.canceled";
-                    MessageArgs = Array.Empty<string>();
-                    page.OnWorkerTaskUpdate.Invoke(this);
-                    return;
-                }
+			return _content;
+		}
 
-                Status = WorkerTaskStatus.Pending;
-                MessageKey = string.Empty;
-                MessageArgs = Array.Empty<string>();
-                Result = null;
-                page.OnWorkerTaskUpdate.Invoke(this);
+		internal void Cancel() {
+			foreach (var cancel in _tasks)
+				cancel.Cancel();
+			_tasks.Clear();
+		}
 
-                _t0 = DateTime.Now;
+		internal async UniTask Submit() {
+			if (IsFetching) return;
+			LastQuery = Query;
 
-                if (Worker.Fetch == null)
-                {
-                    Status = WorkerTaskStatus.Faulted;
-                    MessageKey = "search.worker.error.no_fetch";
-                    MessageArgs = Array.Empty<string>();
-                    page.OnWorkerTaskUpdate.Invoke(this);
-                    return;
-                }
+			var handler = Handler;
+			if (handler == null) {
+				Logger.LogDebug($"No handler found with id {HandlerId}");
+				OnWorkerTaskStart.Invoke(Array.Empty<WorkerTask>());
+				return;
+			}
 
-                var result = Worker.Fetch(Data).AttachExternalCancellation(CancellationToken.Token);
+			var workers = handler.GetWorkers();
+			if (workers.Length == 0) {
+				Logger.LogDebug($"No workers found for handler {handler.GetId()}");
+				OnWorkerTaskStart.Invoke(Array.Empty<WorkerTask>());
+				return;
+			}
 
-                Status = WorkerTaskStatus.Fetching;
-                MessageKey = "search.worker.fetching";
-                MessageArgs = Array.Empty<string>();
-                page.OnWorkerTaskUpdate.Invoke(this);
-                await UniTask.WaitUntil(() => result.Status != UniTaskStatus.Pending || Elapsed > Timeout);
+			Cancel();
 
-                if (CancellationToken.Token.IsCancellationRequested)
-                {
-                    Status = WorkerTaskStatus.Canceled;
-                    MessageKey = "search.worker.canceled";
-                    page.OnWorkerTaskUpdate.Invoke(this);
-                    return;
-                }
+			foreach (var worker in workers.Where(w => w != null))
+				_tasks.Add(
+					new WorkerTask {
+						Worker            = worker,
+						Data              = new FetchOptions { Query = Query },
+						CancellationToken = new CancellationTokenSource(),
+						Timeout           = 10d,
+					}
+				);
 
-                if (result.Status != UniTaskStatus.Pending)
-                    CancellationToken.Cancel();
-
-                switch (result.Status)
-                {
-                    case UniTaskStatus.Canceled:
-                        Status = WorkerTaskStatus.Canceled;
-                        MessageKey = "search.worker.canceled";
-                        MessageArgs = Array.Empty<string>();
-                        page.OnWorkerTaskUpdate.Invoke(this);
-                        return;
-                    case UniTaskStatus.Faulted:
-                        try
-                        {
-                            await result;
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.LogException(ex);
-                            Status = WorkerTaskStatus.Faulted;
-                            MessageKey = "search.worker.error";
-                            MessageArgs = new[] { ex.Message };
-                            page.OnWorkerTaskUpdate.Invoke(this);
-                            return;
-                        }
-
-                        break;
-                    case UniTaskStatus.Succeeded:
-                        Logger.LogDebug("WorkerTask: result is succeeded");
-                        break;
-                    case UniTaskStatus.Pending: // hum ?
-                    default:
-                        Status = WorkerTaskStatus.CompletedWithoutResult;
-                        MessageKey = "search.worker.no_message";
-                        MessageArgs = Array.Empty<string>();
-                        page.OnWorkerTaskUpdate.Invoke(this);
-                        return;
-                }
-
-                Result = await result;
-                _t1 = DateTime.Now;
-                Logger.LogDebug($"WorkerTask: {(_t1 - _t0).TotalMilliseconds}ms");
-
-                if (Result == null)
-                {
-                    Status = WorkerTaskStatus.Faulted;
-                    MessageKey = "search.worker.error.no_result";
-                    MessageArgs = Array.Empty<string>();
-                    page.OnWorkerTaskUpdate.Invoke(this);
-                    return;
-                }
-
-                if (!string.IsNullOrEmpty(Result.Error))
-                {
-                    Status = WorkerTaskStatus.Faulted;
-                    MessageKey = "search.worker.error";
-                    MessageArgs = new[] { Result.Error };
-                    page.OnWorkerTaskUpdate.Invoke(this);
-                    return;
-                }
-
-                if (Result.Data == null || Result.Data.Length == 0)
-                {
-                    Status = WorkerTaskStatus.CompletedWithoutResult;
-                    MessageKey = "search.worker.empty";
-                    MessageArgs = Array.Empty<string>();
-                    page.OnWorkerTaskUpdate.Invoke(this);
-                    return;
-                }
-
-                Status = WorkerTaskStatus.Completed;
-                MessageKey = "search.worker.no_message";
-                MessageArgs = Array.Empty<string>();
-                page.OnWorkerTaskUpdate.Invoke(this);
-            }
-        }
-    }
+			OnWorkerTaskStart.Invoke(_tasks.ToArray());
+			await UniTask.WhenAll(_tasks.Select(t => t.Execute(this)));
+		}
+	}
 }

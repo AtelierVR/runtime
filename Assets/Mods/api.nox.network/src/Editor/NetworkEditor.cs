@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+/*#if UNITY_EDITOR
 using System.Collections.Generic;
 using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
@@ -176,6 +176,7 @@ namespace api.nox.network.Editor
 
             _root.Q<Label>("elements").text = LanguageManager.Get("network.relay.elements", new object[] { RelayManager.Cache.Count });
         }
-    }*/
+    }#1#
 }
-#endif
+#endif*/
+
