@@ -1,4 +1,4 @@
-namespace Nox.Users {
+namespace Nox.Worlds {
 	public interface ISearchRequest {
 		public ISearchRequest SetQuery(string query);
 		public ISearchRequest SetIds(uint[]   userIds);

@@ -1,10 +1,11 @@
 using Nox.Search;
 
-namespace api.nox.search.client  {
+namespace api.nox.search.client {
 	public class FetchOptions : IFetchOptions {
 		public string Query;
-		public uint   Page  = 0;
-		public uint   Limit = 0;
+		public uint   Page   = 0;
+		public uint   Limit  = 0;
+		public int    MenuId = 0;
 
 		public string GetQuery()
 			=> Query;
@@ -14,5 +15,8 @@ namespace api.nox.search.client  {
 
 		public uint GetLimit()
 			=> Limit;
+
+		public int GetMenuId()
+			=> MenuId;
 	}
 }

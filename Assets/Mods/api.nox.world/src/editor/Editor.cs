@@ -12,6 +12,7 @@ namespace api.nox.world {
 		private static  EditorPanel         _managerPanel;
 		private static  EditorPanel         _builderPanel;
 		private static  EditorPanel         _publisherPanel;
+		
 		private         WorldPublisherPanel _publisher;
 		internal static WorldBuilderPanel   Builder;
 		internal static EditorModCoreAPI    CoreAPI;
@@ -57,10 +58,10 @@ namespace api.nox.world {
 			_publisher.Update();
 		}
 
-		internal static bool HasOnePanelOpened() => false;
-			// => _loaderPanel.IsActive()
-			// 	|| _builderPanel.IsActive()
-			// 	|| _publisherPanel.IsActive();
+		internal static bool HasOnePanelOpened()
+			=> _loaderPanel.IsActive()
+				|| _builderPanel.IsActive()
+				|| _publisherPanel.IsActive();
 	}
 }
 #endif

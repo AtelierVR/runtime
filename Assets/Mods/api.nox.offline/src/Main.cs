@@ -24,7 +24,7 @@ namespace api.nox.offline {
 			=> _coreAPI = null;
 
 		[NoxPublic(NoxAccess.Method)]
-		public IOfflineAdapter New(ILoadedWorld loadedWorld)
-			=> new OfflineAdapter(loadedWorld);
+		public IOfflineAdapter New(IScene scene)
+			=> new OfflineAdapter(scene);
 	}
 }

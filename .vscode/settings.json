@@ -8,7 +8,7 @@
         "**/*.booproj": true,
         "**/*.pidb": true,
         "**/*.suo": true,
-        "**/*.user": true,
+        "**/*.user": false,
         "**/*.userprefs": true,
         "**/*.unityproj": true,
         "**/*.dll": true,

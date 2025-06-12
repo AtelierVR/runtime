@@ -29,9 +29,9 @@ namespace api.nox.world
 
         internal void Update()
         {
-            if (!WorldEditor.HasOnePanelOpened() || _root.childCount == 0) return;
+            if (!Editor.HasOnePanelOpened() || _root.childCount == 0) return;
             var descriptor = Descriptors.Length > 0 ? Descriptors[0] : null;
-            var user = WorldEditor.NetworkAPI.GetField("User").CallMethod("GetCurrentUser");
+            var user = Editor.NetworkAPI.GetField("User").CallMethod("GetCurrentUser");
 
             // Check if a scene has a world descriptor
             if (!descriptor && !NotificationManager.Has("NoWorldDescriptor"))
@@ -85,7 +85,7 @@ namespace api.nox.world
                         Content = new Label("No user found.\nA user is required to publish a world."),
                         Actions = new List<VisualElement>
                         {
-                            new Button(() => WorldEditor.CoreAPI.PanelAPI.SetActivePanel("api.nox.user.login")) { text = "Login" }
+                            new Button(() => Editor.CoreAPI.PanelAPI.SetActivePanel("api.nox.user.login")) { text = "Login" }
                         }
                     });
                 else if (user != null && NotificationManager.Has("NoUser"))
@@ -300,7 +300,7 @@ namespace api.nox.world
                     var notificationList = _root.Q<VisualElement>("notifications");
                     notificationList.Clear();
                     notify.Sort((a, b) => a.Type.CompareTo(b.Type));
-                    var asset = WorldEditor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("notification.uxml");
+                    var asset = Editor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("notification.uxml");
                     foreach (var notification in notify)
                     {
                         var item = asset.CloneTree();
@@ -308,16 +308,16 @@ namespace api.nox.world
                         if (item.Q<VisualElement>("typing") != null)
                             if (notification.Type == NotificationType.Error)
                                 item.Q<Image>("icon").style.backgroundImage =
-                                    WorldEditor.CoreAPI.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/error.png");
+                                    Editor.CoreAPI.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/error.png");
                             else if (notification.Type == NotificationType.Warning)
                                 item.Q<Image>("icon").style.backgroundImage =
-                                    WorldEditor.CoreAPI.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/warning.png");
+                                    Editor.CoreAPI.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/warning.png");
                             else if (notification.Type == NotificationType.Info)
                                 item.Q<Image>("icon").style.backgroundImage =
-                                    WorldEditor.CoreAPI.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/info.png");
+                                    Editor.CoreAPI.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/info.png");
                             else if (notification.Type == NotificationType.Good)
                                 item.Q<Image>("icon").style.backgroundImage =
-                                    WorldEditor.CoreAPI.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/good.png");
+                                    Editor.CoreAPI.AssetAPI.GetAsset<Texture2D>("api.nox.game", "icons/good.png");
                             else item.Q<VisualElement>("typing").style.display = DisplayStyle.None;
                         if (notification.Actions is { Count: > 0 })
                             foreach (var action in notification.Actions)
@@ -343,16 +343,16 @@ namespace api.nox.world
             _root.ClearBindings();
             _root.Clear();
 
-            var child = WorldEditor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("builder.uxml").CloneTree();
+            var child = Editor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("builder.uxml").CloneTree();
             child.style.flexGrow = 1;
             _root.Add(child);
 
-            _root.Q<Label>("version").text = "v" + WorldEditor.CoreAPI.ModMetadata.GetVersion();
+            _root.Q<Label>("version").text = "v" + Editor.CoreAPI.ModMetadata.GetVersion();
             var descriptor = Descriptors.Length > 0 ? Descriptors[0] : null;
             _root.Q<EnumField>("platform-field").Init(descriptor?.GetBuildPlatform() ?? Platform.None);
             _root.Q<ObjectField>("descriptor-field").value = descriptor;
             _root.Q<Button>("goto-publisher").clicked +=
-                () => WorldEditor.CoreAPI.PanelAPI.SetActivePanel("api.nox.world.publisher");
+                () => Editor.CoreAPI.PanelAPI.SetActivePanel("api.nox.world.publisher");
             _root.Q<Button>("detect-platform").clicked += () =>
                 _root.Q<EnumField>("platform-field").value = PlatformExtensions.GetCurrentTarget().GetPlatform();
             _root.Q<EnumField>("platform-field").RegisterValueChangedCallback(e =>

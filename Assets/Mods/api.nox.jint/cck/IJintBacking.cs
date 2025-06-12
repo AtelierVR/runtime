@@ -1,11 +1,9 @@
-using UnityEngine;
-
 namespace Nox.CCK.Jint {
 	public interface IJintBacking {
-		void Invoke(string functionName, JintScript script, params object[] args);
+		public void Invoke(string method, params object[] args);
 
-		object Call(string functionName, JintScript script, object[] args);
+		public object Call(string method, object[] args);
 
-		T Call<T>(string functionName, JintScript script, object[] args);
+		public T Call<T>(string method, object[] args);
 	}
 }

@@ -1,8 +1,8 @@
-using api.nox.user.network;
+using api.nox.world.network;
 using Cysharp.Threading.Tasks;
 using Nox.Search;
 
-namespace api.nox.user.search {
+namespace api.nox.world.search {
 	public class SearchWorker : IWorker {
 		public string Title;
 		public string ServerAddress;
@@ -12,6 +12,9 @@ namespace api.nox.user.search {
 
 		public string[] GetTitleArguments()
 			=> new[] { Title };
+
+		public float GetRatio()
+			=> 4f / 3f;
 
 		public async UniTask<IResult> Fetch(IFetchOptions options) {
 			if (string.IsNullOrEmpty(ServerAddress))

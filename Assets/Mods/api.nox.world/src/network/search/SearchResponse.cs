@@ -2,17 +2,17 @@ using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
-using Nox.Users;
+using Nox.Worlds;
 
-namespace api.nox.user.network {
+namespace api.nox.world.network {
 	[Serializable]
 	public class SearchResponse : ISearchResponse, INoxObject {
-		internal string query;
-		internal uint[] ids;
-		public   User[] users;
-		public   uint   total;
-		public   uint   limit;
-		public   uint   offset;
+		internal string  query;
+		internal uint[]  ids;
+		public   World[] worlds;
+		public   uint    total;
+		public   uint    limit;
+		public   uint    offset;
 
 		[NoxPublic(NoxAccess.Method)]
 		public string GetQuery()
@@ -23,8 +23,8 @@ namespace api.nox.user.network {
 			=> ids;
 
 		[NoxPublic(NoxAccess.Method)]
-		public IUser[] GetUsers()
-			=> users.Cast<IUser>()
+		public IWorld[] GetWorlds()
+			=> worlds.Cast<IWorld>()
 				.ToArray();
 
 		[NoxPublic(NoxAccess.Method)]

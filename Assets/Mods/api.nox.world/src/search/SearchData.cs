@@ -1,26 +1,26 @@
+using api.nox.world.client;
 using Cysharp.Threading.Tasks;
 using Nox.Search;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
-namespace api.nox.user.search {
+namespace api.nox.world.search {
 	public class SearchData : IResultData {
-		public User Reference;
+		public World Reference;
 
 		public int GetId()
 			=> Reference.ToIdentifier().ToString().GetHashCode();
 
 		public string GetTitleKey()
-			=> "user.search.data.title";
+			=> "world.search.data.title";
 
 		public string[] GetTitleArguments()
-			=> new[] { Reference.GetDisplay() ?? Reference.GetUsername() };
+			=> new[] { Reference.GetTitle() ?? Reference.GetId().ToString() };
 
-		public UniTask<Texture2D> GetImage()
-			=> Reference.GetThumbnail();
+		public async UniTask<Texture2D> GetImage()
+			=> await Main.Instance.NetworkAPI.FetchTexture(Reference.GetThumbnailUrl());
 
-		public void OnClick() {
-			Logger.LogDebug($"SearchData.OnClick: {Reference.GetDisplay()} ({Reference.ToIdentifier()})");
-		}
+		public void OnClick(int menuId)
+			=> Client.UiAPI?.SendGoto(menuId, WorldPage.GetStaticKey(), "world", Reference);
 	}
 }

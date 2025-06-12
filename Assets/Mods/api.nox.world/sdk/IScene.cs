@@ -5,7 +5,7 @@ namespace Nox.Worlds {
 	/// <summary>
 	/// Represents the world in which all scenes are loaded.
 	/// </summary>
-	public interface ILoadedWorld {
+	public interface IScene {
 		/// <summary>
 		/// Returns all loaded scenes in the world.
 		/// </summary>

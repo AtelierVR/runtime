@@ -8,23 +8,23 @@ using UnityEngine.Events;
 
 namespace api.nox.world {
 	public class SceneGroupManager : INoxObject {
-		public readonly List<SceneGroup> Worlds = new();
+		public readonly List<SceneGroup> Groups = new();
 
-		internal readonly UnityEvent<SceneGroup> OnWorldAdded   = new();
-		internal readonly UnityEvent<SceneGroup> OnWorldRemoved = new();
+		internal readonly UnityEvent<SceneGroup> OnGroupAdded   = new();
+		internal readonly UnityEvent<SceneGroup> OnGroupRemoved = new();
 
 		public async UniTask Dispose() {
-			foreach (var world in Worlds) {
+			foreach (var world in Groups) {
 				await world.Dispose();
-				OnWorldRemoved.Invoke(world);
+				OnGroupRemoved.Invoke(world);
 			}
 
-			Worlds.Clear();
+			Groups.Clear();
 		}
 
 		[NoxPublic(NoxAccess.Method)]
 		public SceneGroup GetWorld(string id)
-			=> Worlds.Find(w => w.Id == id);
+			=> Groups.Find(w => w.Id == id);
 
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask<AssetBundleSceneGroup> LoadWorldFromCache(string hash, Action<float> progress = null, CancellationToken token = default) {
@@ -51,8 +51,8 @@ namespace api.nox.world {
 			}
 
 			world.GroupManager = this;
-			Worlds.Add(world);
-			OnWorldAdded.Invoke(world);
+			Groups.Add(world);
+			OnGroupAdded.Invoke(world);
 			Main.Instance.CoreAPI.EventAPI.Emit("scene_group_added", world);
 			return world;
 		}
@@ -73,8 +73,8 @@ namespace api.nox.world {
 			}
 
 			world.GroupManager = this;
-			Worlds.Add(world);
-			OnWorldAdded.Invoke(world);
+			Groups.Add(world);
+			OnGroupAdded.Invoke(world);
 			Main.Instance.CoreAPI.EventAPI.Emit("scene_group_added", world);
 			return world;
 		}
@@ -83,7 +83,7 @@ namespace api.nox.world {
 		public SceneGroup GetCurrent() {
 			var currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
 			if (!currentScene.IsValid()) return null;
-			return (from world in Worlds
+			return (from world in Groups
 				let scenes = world.GetUnityScenes()
 				where scenes.Any(scene => scene.name == currentScene.name)
 				select world).FirstOrDefault();

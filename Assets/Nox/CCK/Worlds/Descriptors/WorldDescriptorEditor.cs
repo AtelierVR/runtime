@@ -82,63 +82,63 @@ namespace Nox.CCK.Worlds
             else root.Q<Button>("spawns-normalize").SetEnabled(false);
 
 
-            var jintscripts = root.Q<ListView>("jintscripts-objects");
-            jintscripts.showAddRemoveFooter = !descriptor.IsCompiled;
-            jintscripts.allowAdd = !descriptor.IsCompiled;
-            jintscripts.allowRemove = !descriptor.IsCompiled;
-            jintscripts.showBoundCollectionSize = !descriptor.IsCompiled;
-            jintscripts.makeItem = () =>
-            {
-                var item = new VisualElement
-                {
-                    style =
-                    {
-                        paddingLeft = 2,
-                        paddingRight = 8
-                    }
-                };
-                var obj = new ObjectField()
-                    { objectType = typeof(JintScript), label = "#-", focusable = !descriptor.IsCompiled };
-                if (!descriptor.IsCompiled)
-                    obj.RegisterValueChangedCallback(evt =>
-                    {
-                        if (item.userData is int i and >= 0 && i < descriptor.GetJintScripts().Count)
-                            descriptor.JintScripts[i] = evt.newValue as JintScript;
-                        EditorUtility.SetDirty(descriptor);
-                    });
-                else obj.SetEnabled(false);
-                item.Add(obj);
-                return item;
-            };
-            jintscripts.bindItem = (e, i) =>
-            {
-                e.Q<ObjectField>().label = "#" + i;
-                e.Q<ObjectField>().value = descriptor.GetJintScripts()[i];
-                e.userData = i;
-            };
-            jintscripts.itemsSource = descriptor.GetJintScripts();
-
-            if (!descriptor.IsCompiled)
-                root.Q<Button>("jintscripts-objects-normalize").clicked += () =>
-                {
-                    var o = descriptor.EstimateJintScripts();
-                    descriptor.JintScripts = o.Values.ToList();
-                    jintscripts.itemsSource = descriptor.GetJintScripts();
-                    EditorUtility.SetDirty(descriptor);
-                };
-            else root.Q<Button>("jintscripts-objects-normalize").SetEnabled(false);
-
-            if (!descriptor.IsCompiled)
-                root.Q<Button>("jintscripts-objects-detect").clicked += () =>
-                {
-                    var o = new List<JintScript>();
-                    foreach (var ro in descriptor.gameObject.scene.GetRootGameObjects())
-                        o.AddRange(ro.GetComponentsInChildren<JintScript>());
-                    descriptor.JintScripts = o;
-                    jintscripts.itemsSource = descriptor.GetJintScripts();
-                    EditorUtility.SetDirty(descriptor);
-                };
-            else root.Q<Button>("jintscripts-objects-detect").SetEnabled(false);
+            // var jintscripts = root.Q<ListView>("jintscripts-objects");
+            // jintscripts.showAddRemoveFooter = !descriptor.IsCompiled;
+            // jintscripts.allowAdd = !descriptor.IsCompiled;
+            // jintscripts.allowRemove = !descriptor.IsCompiled;
+            // jintscripts.showBoundCollectionSize = !descriptor.IsCompiled;
+            // jintscripts.makeItem = () =>
+            // {
+            //     var item = new VisualElement
+            //     {
+            //         style =
+            //         {
+            //             paddingLeft = 2,
+            //             paddingRight = 8
+            //         }
+            //     };
+            //     var obj = new ObjectField()
+            //         { objectType = typeof(JintScript), label = "#-", focusable = !descriptor.IsCompiled };
+            //     if (!descriptor.IsCompiled)
+            //         obj.RegisterValueChangedCallback(evt =>
+            //         {
+            //             if (item.userData is int i and >= 0 && i < descriptor.GetJintScripts().Count)
+            //                 descriptor.JintScripts[i] = evt.newValue as JintScript;
+            //             EditorUtility.SetDirty(descriptor);
+            //         });
+            //     else obj.SetEnabled(false);
+            //     item.Add(obj);
+            //     return item;
+            // };
+            // jintscripts.bindItem = (e, i) =>
+            // {
+            //     e.Q<ObjectField>().label = "#" + i;
+            //     e.Q<ObjectField>().value = descriptor.GetJintScripts()[i];
+            //     e.userData = i;
+            // };
+            // jintscripts.itemsSource = descriptor.GetJintScripts();
+            //
+            // if (!descriptor.IsCompiled)
+            //     root.Q<Button>("jintscripts-objects-normalize").clicked += () =>
+            //     {
+            //         var o = descriptor.EstimateJintScripts();
+            //         descriptor.JintScripts = o.Values.ToList();
+            //         jintscripts.itemsSource = descriptor.GetJintScripts();
+            //         EditorUtility.SetDirty(descriptor);
+            //     };
+            // else root.Q<Button>("jintscripts-objects-normalize").SetEnabled(false);
+            //
+            // if (!descriptor.IsCompiled)
+            //     root.Q<Button>("jintscripts-objects-detect").clicked += () =>
+            //     {
+            //         var o = new List<JintScript>();
+            //         foreach (var ro in descriptor.gameObject.scene.GetRootGameObjects())
+            //             o.AddRange(ro.GetComponentsInChildren<JintScript>());
+            //         descriptor.JintScripts = o;
+            //         jintscripts.itemsSource = descriptor.GetJintScripts();
+            //         EditorUtility.SetDirty(descriptor);
+            //     };
+            // else root.Q<Button>("jintscripts-objects-detect").SetEnabled(false);
 
             var networkObjects = root.Q<ListView>("network-objects");
             networkObjects.showAddRemoveFooter = !descriptor.IsCompiled;
@@ -748,20 +748,20 @@ namespace Nox.CCK.Worlds
             }
 
             // get all scripts
-            List<JintScript> jSs = new();
-            foreach (var scene in loadedScenes)
-            foreach (var root in scene.GetRootGameObjects())
-            {
-                var jS = root.GetComponentInChildren<JintScript>();
-                if (jS) jSs.Add(jS);
-            }
-
-            // compile all scripts
-            foreach (var script in jSs)
-            {
-                Logger.Log("Compiling " + script.name + " in " + script.gameObject.scene.name);
-                script.Compile();
-            }
+            // List<JintScript> jSs = new();
+            // foreach (var scene in loadedScenes)
+            // foreach (var root in scene.GetRootGameObjects())
+            // {
+            //     var jS = root.GetComponentInChildren<JintScript>();
+            //     if (jS) jSs.Add(jS);
+            // }
+            //
+            // // compile all scripts
+            // foreach (var script in jSs)
+            // {
+            //     Logger.Log("Compiling " + script.name + " in " + script.gameObject.scene.name);
+            //     script.Compile();
+            // }
 
 
             // save all scenes and await

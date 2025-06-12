@@ -129,6 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 497432691}
   - component: {fileID: 497432690}
+  - component: {fileID: 497432692}
   m_Layer: 0
   m_Name: World Descriptor
   m_TagString: Untagged
@@ -154,7 +155,6 @@ MonoBehaviour:
   data_FlyOnSpawn: 0
   data_RespawnHeight: 0
   data_Type: 0
-  data_jintScripts: []
   SequentialIndex: 0
   NetworkObjects: []
   Spawns:
@@ -163,8 +163,6 @@ MonoBehaviour:
   FlyOnSpawn: 0
   SpawnType: 1
   RespawnHeight: -100
-  JintScripts:
-  - {fileID: 585968213}
   data_Scenes: []
   data_Features: []
   data_Mods: []
@@ -199,6 +197,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &497432692
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 497432689}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27b143a69400493093a10d9445ba058d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scenes: []
+  sceneAssets: []
 --- !u!1 &585968212
 GameObject:
   m_ObjectHideFlags: 0
@@ -208,10 +220,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 585968217}
+  - component: {fileID: 585968220}
   - component: {fileID: 585968216}
   - component: {fileID: 585968215}
   - component: {fileID: 585968214}
-  - component: {fileID: 585968213}
+  - component: {fileID: 585968219}
+  - component: {fileID: 585968218}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -219,25 +233,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &585968213
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 585968212}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b61457b1f5f4908b7b3c9c319ab191b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  data_SerializedScript: 
-  data_Data: []
-  onLog:
-    m_PersistentCalls:
-      m_Calls: []
-  IsCompiled: 0
-  scriptPath: Assets/Samples/Worlds/script.js
 --- !u!65 &585968214
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -327,6 +322,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &585968218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 585968212}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f61d84ece0a4ef99731c30083f86220, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  reference: {fileID: 0}
+--- !u!54 &585968219
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 585968212}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &585968220
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 585968212}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e77e91199bec49a3944ad291d06e985d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  asset: {fileID: -6750239444755058063, guid: c10079710428c5147943f022db27a34a, type: 3}
+  exports:
+  - key: 
 --- !u!1 &1064788527
 GameObject:
   m_ObjectHideFlags: 0

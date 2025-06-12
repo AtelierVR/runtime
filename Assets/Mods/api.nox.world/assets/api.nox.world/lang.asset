@@ -15,33 +15,26 @@ MonoBehaviour:
   languages:
   - IETF: en-US
     entries:
-    - key: search.world.text
-      value: Worlds
-    - key: search.world.placeholder
-      value: "Search a world..."
-    - key: world.title
+    - key: world.search.data.title
       value: "{0}"
-    - key: world.loading
-      value: Loading...
-    - key: world.not_found
-      value: Not Found
-    - key: world.description.label
-      value: Description
-    - key: world.description.value
+    - key: world.search.title
+      value: "Worlds"
+    - key: world.search.placeholder
+      value: "Search worlds..."
+    - key: world.search.description
+      value: "Search for worlds by title, or description."
+    - key: world.search.worker.title
       value: "{0}"
   - IETF: fr-FR
     entries:
-    - key: search.world.title
-      value: Mondes
-    - key: search.world.placeholder
-      value: "Rechercher un monde..."
-    - key: world.title
+    - key: world.search.data.title
       value: "{0}"
-    - key: world.loading
-      value: "Chargement..."
-    - key: world.not_found
-      value: "Non trouv\xE9"
-    - key: world.description.label
-      value: Description
-    - key: world.description.value
+    - key: world.search.title
+      value: "Mondes"
+    - key: world.search.placeholder
+      value: "Rechercher des mondes..."
+    - key: world.search.description
+      value: "Recherchez des mondes par titre ou description."
+    - key: world.search.worker.title
       value: "{0}"
+

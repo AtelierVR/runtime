@@ -4,7 +4,6 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Worlds;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Nox.Worlds.Components;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.world {
@@ -67,13 +66,13 @@ namespace api.nox.world {
 				return null;
 			}
 
-			await UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(scenes[0], LoadSceneMode.Additive)
+			await SceneManager.LoadSceneAsync(scenes[0], LoadSceneMode.Additive)
 				.ToUniTask(
 					progress: new Progress<float>(p => progress?.Invoke(p * 0.3f + 0.3f)),
 					cancellationToken: token
 				);
 
-			var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(scenes[0]);
+			var scene = SceneManager.GetSceneByPath(scenes[0]);
 
 			if (!scene.IsValid()) {
 				Logger.LogError($"Failed to load scene from AssetBundle: {path}");
@@ -83,29 +82,26 @@ namespace api.nox.world {
 
 			if (token.IsCancellationRequested) {
 				Logger.LogWarning($"Loading scene from AssetBundle {path} was cancelled after loading.");
-				await UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(scene);
+				await SceneManager.UnloadSceneAsync(scene);
 				await bundle.UnloadAsync(true);
 				return null;
 			}
 
 			progress?.Invoke(0.6f);
 
+			var prefab = new GameObject($"[Reference] {nameof(AssetBundleSceneGroup)}");
+			SceneManager.MoveGameObjectToScene(prefab, scene);
+			foreach (var root in scene.GetRootGameObjects())
+				root.transform.SetParent(prefab.transform);
+			prefab.SetActive(false);
+
 			if (!BaseDescriptor.TryGetDescriptor<MainDescriptor>(scene, out var main)) {
 				Logger.LogError($"Failed to load main descriptor: {path}");
-				await UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(scene);
+				await SceneManager.UnloadSceneAsync(scene);
 				await bundle.UnloadAsync(true);
 				return null;
 			}
 
-			var hidden = WorldHidden.Make(scene);
-			if (!hidden) {
-				Logger.LogError($"Failed to create WorldHidden for scene: {path}");
-				await UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(scene);
-				await bundle.UnloadAsync(true);
-				return null;
-			}
-
-			hidden.Set(false);
 			progress?.Invoke(1f);
 
 			var abw = new AssetBundleSceneGroup {
@@ -115,10 +111,10 @@ namespace api.nox.world {
 				SubScenes   = new SubScene[main.GetScenes().Count]
 			};
 
-			abw.MainScene = new MainScene(abw, scene, main, hidden);
+			abw.MainScene = new MainScene(abw, scene, prefab);
 			return abw;
 		}
-		
+
 		public override string ToString()
 			=> $"{GetType().Name}[Id={Id} Active={Active} AssetBundle={AssetBundle.name}]";
 	}

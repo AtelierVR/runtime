@@ -1,14 +1,14 @@
 using System;
 using System.Linq;
-using api.nox.user.network;
+using api.nox.world.network;
 using Nox.Search;
 
-namespace api.nox.user.search {
-
+namespace api.nox.world.search {
 	public class SearchResult : IResult {
 		public string         Error;
 		public SearchResponse Response;
 		public string         ServerAddress;
+		public int            MenuId;
 
 		public bool IsError()
 			=> !string.IsNullOrEmpty(Error);
@@ -21,11 +21,10 @@ namespace api.nox.user.search {
 
 		public IResultData[] GetData()
 			=> Response != null
-				? Response.users
+				? Response.worlds
 					.Select(x => new SearchData { Reference = x })
 					.Cast<IResultData>()
 					.ToArray()
 				: Array.Empty<IResultData>();
 	}
-
 }

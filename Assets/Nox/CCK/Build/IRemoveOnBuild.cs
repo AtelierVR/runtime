@@ -1,5 +1,5 @@
 namespace Nox.CCK.Build {
-	public class IRemoveOnBuild {
-		
+	public interface IRemoveOnBuild {
+		void OnRemoveOnBuild();
 	}
 }

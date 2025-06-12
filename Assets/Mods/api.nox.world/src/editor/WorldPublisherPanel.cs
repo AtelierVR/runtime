@@ -30,8 +30,8 @@ namespace api.nox.world
         
         internal void Update()
         {
-            if (!WorldEditor.HasOnePanelOpened() || _root.childCount == 0) return;
-            var user = WorldEditor.NetworkAPI.GetField("User").CallMethod("GetCurrentUser");
+            if (!Editor.HasOnePanelOpened() || _root.childCount == 0) return;
+            var user = Editor.NetworkAPI.GetField("User").CallMethod("GetCurrentUser");
             if (_lastDisplay == DisplayFlags.NotLogged && user != null)
                 OnLogged().Forget();
             if (_lastDisplay != DisplayFlags.NotLogged && user == null)
@@ -102,11 +102,11 @@ namespace api.nox.world
 
             INoxObject world = null;
             if (!string.IsNullOrWhiteSpace(id) && uint.TryParse(id, out var idParsed))
-                world = await WorldEditor.NetworkAPI.GetField("World")
+                world = await Editor.NetworkAPI.GetField("World")
                     .CallAsyncMethod("GetWorld", server, idParsed);
 
             if (world == null && create)
-                world = await WorldEditor.NetworkAPI.GetField("World")
+                world = await Editor.NetworkAPI.GetField("World")
                     .CallAsyncMethod("CreateWorld",
                         !string.IsNullOrWhiteSpace(id) && uint.TryParse(id, out var id1)
                             ? new Dictionary<string, object>
@@ -120,7 +120,7 @@ namespace api.nox.world
 
             if (world != null)
             {
-                var user = WorldEditor.NetworkAPI.GetField("User").CallMethod("GetCurrentUser");
+                var user = Editor.NetworkAPI.GetField("User").CallMethod("GetCurrentUser");
                 if (user == null || !user.CallMethod<bool>("MatchRef", world.GetField<string>("owner"), world.GetField<string>("server")))
                     world = null;
             }
@@ -167,12 +167,12 @@ namespace api.nox.world
             _root.ClearBindings();
             _root.Clear();
 
-            var child = WorldEditor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("publisher.uxml").CloneTree();
+            var child = Editor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("publisher.uxml").CloneTree();
             child.style.flexGrow = 1;
             _root.Add(child);
 
-            _root.Q<Label>("version").text = "v" + WorldEditor.CoreAPI.ModMetadata.GetVersion();
-            _root.Q<Image>("assigned-icon").image = WorldEditor.CoreAPI.AssetAPI.GetAsset<Texture2D>("game", "icons/warning.png");
+            _root.Q<Label>("version").text = "v" + Editor.CoreAPI.ModMetadata.GetVersion();
+            _root.Q<Image>("assigned-icon").image = Editor.CoreAPI.AssetAPI.GetAsset<Texture2D>("game", "icons/warning.png");
             var descriptor = WorldBuilderPanel.Descriptors.Length > 0 ? WorldBuilderPanel.Descriptors[0] : null;
             _root.Q<EnumField>("platform-field").Init(descriptor?.GetBuildPlatform() ?? Platform.None);
             _root.Q<Button>("detect-platform").clicked += () =>
@@ -193,12 +193,12 @@ namespace api.nox.world
                     _root.Q<EnumField>("platform-field").value = e.previousValue;
                 }
             });
-            _root.Q<Button>("goto-builder").clicked += () => WorldEditor.CoreAPI.PanelAPI.SetActivePanel("api.nox.world.builder");
-            _root.Q<Button>("goto-login").clicked += () => WorldEditor.CoreAPI.PanelAPI.SetActivePanel("api.nox.user.login");
+            _root.Q<Button>("goto-builder").clicked += () => Editor.CoreAPI.PanelAPI.SetActivePanel("api.nox.world.builder");
+            _root.Q<Button>("goto-login").clicked += () => Editor.CoreAPI.PanelAPI.SetActivePanel("api.nox.user.login");
             var notifications = _root.Q<VisualElement>("notifications");
             foreach (var type in new[] { NotificationType.Error, NotificationType.Warning, NotificationType.Info })
             {
-                var container = WorldEditor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("notification.uxml").CloneTree();
+                var container = Editor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("notification.uxml").CloneTree();
                 container.style.display = DisplayStyle.None;
                 container.style.marginLeft = 2;
                 container.style.marginRight = 2;
@@ -207,7 +207,7 @@ namespace api.nox.world
                     { name = "notification-label-" + type.ToString().ToLower() });
                 container.Q<VisualElement>("actions").style.display = DisplayStyle.None;
                 container.Q<Image>("icon").image =
-                    WorldEditor.CoreAPI.AssetAPI.GetAsset<Texture2D>("game", "icons/" + type.ToString() + ".png");
+                    Editor.CoreAPI.AssetAPI.GetAsset<Texture2D>("game", "icons/" + type.ToString() + ".png");
                 notifications.Add(container);
             }
 
@@ -220,7 +220,7 @@ namespace api.nox.world
                 var id = attachId.value;
                 var server = attachServer.value;
                 if (string.IsNullOrWhiteSpace(server))
-                    server = WorldEditor.NetworkAPI.GetField("Auth").CallMethod<string>("GetCurrentServerAddress");
+                    server = Editor.NetworkAPI.GetField("Auth").CallMethod<string>("GetCurrentServerAddress");
                 await AttachWorld(server, id, true);
             };
             var fetchInfoButton = _root.Q<Button>("info-fetch");
@@ -247,7 +247,7 @@ namespace api.nox.world
                 }
 
                 SetDisplay(DisplayFlags.Loading);
-                var success = await WorldEditor.NetworkAPI.GetField("World").CallAsyncMethod("UpdateWorld",
+                var success = await Editor.NetworkAPI.GetField("World").CallAsyncMethod("UpdateWorld",
                     new Dictionary<string, object>
                     {
                         { "server", _world.GetField<string>("server") },
@@ -361,7 +361,7 @@ namespace api.nox.world
 
             Logger.Log("Checking world...");
             SetDisplay(DisplayFlags.Loading);
-            var worldAPI = WorldEditor.NetworkAPI.GetField("World");
+            var worldAPI = Editor.NetworkAPI.GetField("World");
             _world = await worldAPI.CallAsyncMethod("GetWorld", _world.GetField<string>("server"), _world.GetField<uint>("id"));
             if (_world == null)
             {
@@ -375,7 +375,7 @@ namespace api.nox.world
             var autoVersion = config.Get("sdk.auto_version", true);
             var strictVersion = config.Get("sdk.strict_version", true);
 
-            var assetAPI = WorldEditor.NetworkAPI.GetField("World").GetField("Asset");
+            var assetAPI = Editor.NetworkAPI.GetField("World").GetField("Asset");
             var search = await assetAPI.CallAsyncMethod("SearchAssets",
                 new Dictionary<string, object>
                 {

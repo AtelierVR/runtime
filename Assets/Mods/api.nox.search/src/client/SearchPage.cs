@@ -217,7 +217,7 @@ namespace api.nox.search.client {
 				_tasks.Add(
 					new WorkerTask {
 						Worker            = worker,
-						Data              = new FetchOptions { Query = Query },
+						Data              = new FetchOptions { Query = Query, MenuId = _mId },
 						CancellationToken = new CancellationTokenSource(),
 						Timeout           = 10d,
 					}

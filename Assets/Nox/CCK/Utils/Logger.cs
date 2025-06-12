@@ -89,32 +89,22 @@ namespace Nox.CCK.Utils {
 		public static void LogException(Exception exception)
 			=> OnLog(LogType.Exception, exception);
 
-		public static void Log(object message, Object context) {
-			OnLog(LogType.Log, message);
-			ULogger.Log(message, context);
-		}
+		public static void Log(object message, Object context)
+			=> OnLog(LogType.Log, message, context);
 
-		public static void LogWarning(object message, Object context) {
-			OnLog(LogType.Warning, message);
-			ULogger.LogWarning(message.ToString(), context);
-		}
+		public static void LogWarning(object message, Object context)
+			=> OnLog(LogType.Warning, message, context);
 
-		public static void LogError(object message, Object context) {
-			OnLog(LogType.Error, message);
-			ULogger.LogError(message.ToString(), context);
-		}
+		public static void LogError(object message, Object context)
+			=> OnLog(LogType.Error, message, context);
 
-		public static void LogException(Exception exception, Object context) {
-			OnLog(LogType.Exception, exception);
-			ULogger.LogException(exception, context);
-		}
+		public static void LogException(Exception exception, Object context)
+			=> OnLog(LogType.Exception, exception, context);
 
-		public static void LogDebug(object message, Object context) {
-			OnLog(LogType.Debug, message);
-			ULogger.Log(message, context);
-		}
+		public static void LogDebug(object message, Object context)
+			=> OnLog(LogType.Debug, message, context);
 
-		public static void OnLog(LogType type, object message) {
+		public static void OnLog(LogType type, object message, Object context = null) {
 			if (type == LogType.Debug && !Config.Load().Get(new[] { "debug_logging" }, Application.isEditor))
 				return;
 
@@ -154,11 +144,11 @@ namespace Nox.CCK.Utils {
 
 				// Log côté Unity
 				switch (type) {
-					case LogType.Log:       ULogger.Log(message); break;
-					case LogType.Warning:   ULogger.LogWarning(message); break;
-					case LogType.Error:     ULogger.LogError(message); break;
-					case LogType.Exception: ULogger.LogException(message as Exception); break;
-					case LogType.Debug:     ULogger.Log(message); break;
+					case LogType.Log:       ULogger.Log($"[<color=cyan>{type}</color>] {message}", context); break;
+					case LogType.Warning:   ULogger.LogWarning($"[<color=yellow>{type}</color>] {message}", context); break;
+					case LogType.Error:     ULogger.LogError($"[<color=red>{type}</color>] {message}", context); break;
+					case LogType.Exception: ULogger.LogException(message as Exception, context); break;
+					case LogType.Debug:     ULogger.Log($"[<color=green>{type}</color>] {message}", context); break;
 				}
 			} catch (Exception e) {
 				ULogger.LogException(e);

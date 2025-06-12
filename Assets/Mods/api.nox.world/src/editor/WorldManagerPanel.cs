@@ -21,58 +21,58 @@ namespace api.nox.world {
 			_root.ClearBindings();
 			_root.Clear();
 
-			var child = WorldSystem.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("manager.uxml").CloneTree();
+			var child = Main.Instance.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("manager.uxml").CloneTree();
 			child.style.flexGrow = 1;
 			_root.Add(child);
 
-			_root.Q<Label>("version").text = "v" + WorldSystem.CoreAPI.ModMetadata.GetVersion();
+			_root.Q<Label>("version").text = "v" + Main.Instance.CoreAPI.ModMetadata.GetVersion();
 
-			foreach (var world in WorldSystem.Instance.Manager.Worlds)
+			foreach (var world in Main.Instance.GroupManager.Groups)
 				OnWorldAdded(world);
 
 			return _root;
 		}
 
 		public WorldManagerPanel() {
-			WorldSystem.Instance.Manager.OnWorldAdded.AddListener(OnWorldAdded);
-			WorldSystem.Instance.Manager.OnWorldRemoved.AddListener(OnWorldRemoved);
+			Main.Instance.GroupManager.OnGroupAdded.AddListener(OnWorldAdded);
+			Main.Instance.GroupManager.OnGroupRemoved.AddListener(OnWorldRemoved);
 		}
 
 		public void Dispose() {
-			WorldSystem.Instance.Manager.OnWorldAdded.RemoveListener(OnWorldAdded);
-			WorldSystem.Instance.Manager.OnWorldRemoved.RemoveListener(OnWorldRemoved);
+			Main.Instance.GroupManager.OnGroupAdded.RemoveListener(OnWorldAdded);
+			Main.Instance.GroupManager.OnGroupRemoved.RemoveListener(OnWorldRemoved);
 			_root.ClearBindings();
 			_root.Clear();
 			_root.RemoveFromHierarchy();
 		}
 
-		private void OnWorldAdded(BaseLoadedWorld loadedWorld) {
+		private void OnWorldAdded(SceneGroup sceneGroup) {
 			var list = _root.Q("list");
 			if (list == null) return;
-			var child = list.Children().FirstOrDefault(c => c.userData is string id && id == loadedWorld.Id);
+			var child = list.Children().FirstOrDefault(c => c.userData is string id && id == sceneGroup.Id);
 			if (child != null) {
-				UpdateWorld(child, loadedWorld);
+				UpdateWorld(child, sceneGroup);
 				return;
 			}
 
-			child                = WorldSystem.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("world.uxml").CloneTree();
+			child                = Main.Instance.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("world.uxml").CloneTree();
 			child.style.flexGrow = 1;
-			child.userData       = loadedWorld.Id;
-			UpdateWorld(child, loadedWorld);
+			child.userData       = sceneGroup.Id;
+			UpdateWorld(child, sceneGroup);
 			list.Add(child);
 		}
 
 
-		private void OnWorldRemoved(BaseLoadedWorld loadedWorld) {
+		private void OnWorldRemoved(SceneGroup sceneGroup) {
 			var list = _root.Q("list");
 			if (list == null) return;
-			var child = _root.Children().FirstOrDefault(c => c.userData is string id && id == loadedWorld.Id);
+			var child = _root.Children().FirstOrDefault(c => c.userData is string id && id == sceneGroup.Id);
 			child?.RemoveFromHierarchy();
 		}
 
-		private void UpdateWorld(VisualElement child, BaseLoadedWorld loadedWorld) {
+		private void UpdateWorld(VisualElement child, SceneGroup sceneGroup) {
 			var label = child.Q<Label>("id");
-			label.text = loadedWorld.Id;
+			label.text = sceneGroup.Id;
 		}
 	}
 }

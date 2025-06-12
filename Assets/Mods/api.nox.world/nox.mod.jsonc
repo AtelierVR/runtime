@@ -42,13 +42,13 @@
   ],
   "entrypoints": {
     "main": [
-      "api.nox.world.WorldSystem"
+      "api.nox.world.Main"
     ],
     "editor": [
-      "api.nox.world.WorldEditor"
+      "api.nox.world.Editor"
     ],
     "client": [
-      "api.nox.world.WorldClient"
+      "api.nox.world.Client"
     ]
   },
   "references": [],

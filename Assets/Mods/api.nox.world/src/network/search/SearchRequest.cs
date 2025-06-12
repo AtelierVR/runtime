@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Nox.CCK.Utils;
-using Nox.Users;
+using Nox.Worlds;
 
-namespace api.nox.user.network {
+namespace api.nox.world.network {
 	public class SearchRequest : ISearchRequest, INoxObject {
 		internal string query;
 		internal uint[] ids;

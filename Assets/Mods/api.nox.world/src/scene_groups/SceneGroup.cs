@@ -8,10 +8,10 @@ using Nox.Worlds;
 
 namespace api.nox.world {
 	public abstract class SceneGroup : IScene, INoxObject {
-		internal string       Id;
-		internal int          Active = 0;
-		internal MainScene    MainScene;
-		internal SubScene[]   SubScenes;
+		internal string            Id;
+		internal int               Active = 0;
+		internal MainScene         MainScene;
+		internal SubScene[]        SubScenes;
 		internal SceneGroupManager GroupManager;
 
 		internal Scene[] GetUnityScenes()
@@ -88,14 +88,13 @@ namespace api.nox.world {
 			foreach (var scene in GetScenes()) {
 				if (scene == activeScene) {
 					Logger.LogDebug($"Showing the active scene {scene} in world {Id}");
-					scene.GetWorldHidden().Set(true);
-					scene.SetVisible(true);
-					UnityEngine.SceneManagement.SceneManager.SetActiveScene(scene.GetScene());
-				} else {
-					var visible = scene.IsVisible();
+					SceneManager.SetActiveScene(scene.GetScene());
+				}
+
+				foreach (var id in scene.GetInstanceIds()) {
+					var visible = scene.IsVisibleInstance(id);
 					Logger.LogDebug($"{(visible ? "Hiding" : "Showing")} the scene {scene} in world {Id}");
-					scene.GetWorldHidden().Set(visible);
-					scene.SetVisible(visible);
+					scene.SetVisibleInstance(id, visible, true);
 				}
 			}
 		}
@@ -103,7 +102,8 @@ namespace api.nox.world {
 		internal void OnDeselect(SceneGroup newSceneGroup) {
 			Logger.LogDebug($"OnDeselect: {Id}");
 			foreach (var scene in GetScenes())
-				scene.GetWorldHidden().Set(false);
+			foreach (var id in scene.GetInstanceIds())
+				scene.SetVisibleInstance(id, false, false);
 		}
 
 		public override string ToString()

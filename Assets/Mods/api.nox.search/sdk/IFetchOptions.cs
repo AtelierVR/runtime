@@ -3,5 +3,6 @@ namespace Nox.Search {
 		public string GetQuery();
 		public uint   GetPage();
 		public uint   GetLimit();
+		public int    GetMenuId();
 	}
 }

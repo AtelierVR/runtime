@@ -11,6 +11,6 @@ namespace Nox.Search {
 
 		public UniTask<Texture2D> GetImage();
 
-		public void OnClick();
+		public void OnClick(int menuId);
 	}
 }

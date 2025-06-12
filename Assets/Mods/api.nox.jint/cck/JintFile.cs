@@ -1,7 +1,6 @@
-using System.IO;
 using UnityEngine;
 
-namespace Nox.CCK.Worlds {
+namespace Nox.CCK.Jint {
 	public class JintFile : ScriptableObject {
 		[SerializeField] public string text;
 

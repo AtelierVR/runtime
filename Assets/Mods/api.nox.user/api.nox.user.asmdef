@@ -1,0 +1,24 @@
+{
+    "name": "api.nox.user",
+    "rootNamespace": "",
+    "references": [
+        "Nox.CCK",
+        "UniTask",
+        "Nox.Widgets",
+        "Nox.Network",
+        "Nox.Worlds",
+        "Nox.Users",
+        "Nox.Servers",
+        "Nox.Search",
+        "Nox.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

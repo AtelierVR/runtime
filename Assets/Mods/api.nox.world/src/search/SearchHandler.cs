@@ -6,29 +6,29 @@ using Nox.CCK.Utils;
 using Nox.Search;
 using UnityEngine;
 
-namespace api.nox.user.search {
+namespace api.nox.world.search {
 	public class SearchHandler : IHandler {
 		public string GetId()
 			=> Main.Instance.CoreAPI.ModMetadata.GetId();
 
 		public string GetTitleKey()
-			=> "user.search.title";
+			=> "world.search.title";
 
 		public string[] GetTitleArguments()
 			=> Array.Empty<string>();
 
 		public string GetPlaceholderKey()
-			=> "user.search.placeholder";
+			=> "world.search.placeholder";
 
 		public string[] GetPlaceholderArguments()
 			=> Array.Empty<string>();
 
 		public Texture2D GetIcon()
 			=> Main.Instance.CoreAPI.AssetAPI
-				.GetAsset<Texture2D>("icons/person.png");
+				.GetAsset<Texture2D>("icons/globe.png");
 
 		public string GetDescriptionKey()
-			=> "user.search.description";
+			=> "world.search.description";
 
 		public string[] GetDescriptionArguments()
 			=> Array.Empty<string>();
@@ -42,7 +42,7 @@ namespace api.nox.user.search {
 				var title    = value["title"]?.ToString();
 				var features = value["features"]?.Values<string>().ToArray() ?? Array.Empty<string>();
 				var search   = value["search"]?.ToObject<bool>()             ?? false;
-				if (!(search && features.Contains("user"))) continue;
+				if (!(search && features.Contains("world"))) continue;
 				x2.Add(new SearchWorker { Title = title, ServerAddress = address });
 			}
 

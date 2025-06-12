@@ -1,13 +1,13 @@
 using Nox.CCK.Worlds;
 using UnityEngine.SceneManagement;
 using Nox.Worlds;
-using Nox.Worlds.Components;
+using UnityEngine;
 
 namespace api.nox.world {
-	public class MainBaseScene : BaseScene<MainDescriptor>, IMainSceneDescription {
-		public MainBaseScene(SceneGroup init, Scene scene, MainDescriptor descriptor, WorldHidden hidden) : base(init, scene, descriptor, hidden) { }
+	public class MainScene : BaseScene<MainDescriptor>, IMainSceneDescription {
+		public MainScene(SceneGroup init, Scene scene, GameObject prefab) : base(init, scene, prefab) { }
 
 		public override string ToString()
-			=> $"{GetType().Name}[Scene={Scene.name}, World={SceneGroup}, Visible={Visible}]";
+			=> $"{GetType().Name}[Scene={Scene.name}, World={SceneGroup}]";
 	}
 }

@@ -184,6 +184,8 @@ namespace api.nox.search.client {
 			handlerContainer.gameObject.SetActive(true);
 
 			// Clear not used handlers
+			var ids = new List<string>();
+
 			foreach (Transform tf in handlerListContainer) {
 				var component = tf.GetComponent<HandlerComponent>();
 				if (!component) {
@@ -198,11 +200,11 @@ namespace api.nox.search.client {
 				}
 
 				component.UpdateData(handler);
+				ids.Add(handler.GetId());
 			}
 
 			// Add new handlers
 			var btn = Client.GetAsset<GameObject>("prefabs/btn_icon.prefab", "ui");
-			var ids = new List<string>();
 			foreach (var handler in handlers) {
 				if (string.IsNullOrEmpty(handler.GetId())) continue;
 				if (ids.Contains(handler.GetId())) continue;
