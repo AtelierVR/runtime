@@ -5,15 +5,15 @@ using Nox.Worlds;
 using Nox.Worlds.Components;
 
 namespace api.nox.world {
-	public class BaseScene<T> : IScene<T>, INoxObject where T : BaseDescriptor {
-		internal BaseLoadedWorld   LoadedWorld;
+	public class DScene<T> : ISceneDescription<T>, INoxObject where T : BaseDescriptor {
+		internal SceneGroup   SceneGroup;
 		internal Scene       Scene;
 		internal bool        Visible;
 		internal T           Descriptor;
 		internal WorldHidden Hidden;
 
-		public BaseScene(BaseLoadedWorld loadedWorld, Scene scene, T descriptor, WorldHidden hidden) {
-			LoadedWorld      = loadedWorld;
+		public DScene(SceneGroup init, Scene scene, T descriptor, WorldHidden hidden) {
+			SceneGroup  = init;
 			Scene      = scene;
 			Descriptor = descriptor;
 			Hidden     = hidden;
@@ -34,16 +34,16 @@ namespace api.nox.world {
 
 		[NoxPublic(NoxAccess.Method)]
 		public void SetVisible(bool active) {
-			if (LoadedWorld.IsCurrent() && active && Hidden.IsHidden())
+			if (SceneGroup.IsCurrent() && active && Hidden.IsHidden())
 				Hidden.Set(true);
-			if (LoadedWorld.IsCurrent() && !active && !Hidden.IsHidden())
+			if (SceneGroup.IsCurrent() && !active && !Hidden.IsHidden())
 				Hidden.Set(false);
 			Visible = active;
 		}
 
 		[NoxPublic(NoxAccess.Method)]
 		public bool IsVisible() {
-			if (LoadedWorld.IsCurrent())
+			if (SceneGroup.IsCurrent())
 				return !Hidden.IsHidden();
 			return Visible;
 		}
@@ -54,10 +54,10 @@ namespace api.nox.world {
 			Scene      = default;
 			Descriptor = null;
 			Hidden     = null;
-			LoadedWorld      = null;
+			SceneGroup  = null;
 		}
 
 		public override string ToString()
-			=> $"{GetType().Name}<{typeof(T).Name}>[Scene={Scene.name}, World={LoadedWorld}, Visible={Visible}]";
+			=> $"{GetType().Name}<{typeof(T).Name}>[Scene={Scene.name}, World={SceneGroup}, Visible={Visible}]";
 	}
 }

@@ -1,38 +1,69 @@
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Worlds;
-using UnityEngine.SceneManagement;
-using Nox.Worlds.Components;
 
 namespace Nox.Worlds {
-	public interface IScene<out T> where T : BaseDescriptor {
+	/// <summary>
+	/// Represents the world in which all scenes are loaded.
+	/// </summary>
+	public interface ILoadedWorld {
 		/// <summary>
-		/// Returns the Unity scene associated with this IScene.
+		/// Returns all loaded scenes in the world.
 		/// </summary>
 		/// <returns></returns>
-		public Scene GetScene();
+		public ISceneDescription<BaseDescriptor>[] GetScenes();
 
 		/// <summary>
-		/// Returns the descriptor associated with this scene.
+		/// Returns the scene at the given index.
+		/// The index 0 is reserved for the main scene.
+		/// All other scenes are loaded as sub-scenes or null if not loaded.
 		/// </summary>
-		/// <returns><see cref="BaseDescriptor"/></returns>
-		public T GetDescriptor();
+		/// <param name="index"></param>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		public ISceneDescription<T> GetScene<T>(int index) where T : BaseDescriptor;
 
 		/// <summary>
-		/// Returns the WorldHidden associated with this scene.
+		/// Returns the scene at the given index.
+		/// </summary>
+		/// <param name="index"></param>
+		/// <returns></returns>
+		public ISceneDescription<BaseDescriptor> GetScene(int index);
+
+		/// <summary>
+		/// Returns the main scene.
 		/// </summary>
 		/// <returns></returns>
-		public WorldHidden GetWorldHidden();
+		public IMainSceneDescription GetMainScene();
 
 		/// <summary>
-		/// Hide or show the scene in the world.
-		/// Make immediately the setting when the world is current.
+		/// Returns the sub-scene at the given index.
+		/// Can return null if the sub-scene is not loaded.
 		/// </summary>
-		/// <param name="active"></param>
-		public void SetVisible(bool active);
+		/// <param name="index"></param>
+		/// <returns></returns>
+		public ISubSceneDescription GetSubScene(int index);
 
 		/// <summary>
-		/// Checks if the scene is active in the world.
+		/// Returns the number of scenes in the world.
 		/// </summary>
 		/// <returns></returns>
-		public bool IsVisible();
+		public int GetSceneCount();
+
+		/// <summary>
+		/// Makes the world current.
+		/// </summary>
+		public void SetCurrent();
+
+		/// <summary>
+		/// Checks if the world is current.
+		/// </summary>
+		/// <returns></returns>
+		public bool IsCurrent();
+
+		/// <summary>
+		/// Disposes the world and unloads all scenes.
+		/// </summary>
+		/// <returns></returns>
+		public UniTask Dispose();
 	}
 }

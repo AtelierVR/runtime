@@ -4,10 +4,10 @@ using Nox.Worlds;
 using Nox.Worlds.Components;
 
 namespace api.nox.world {
-	public class MainScene : BaseScene<MainDescriptor>, IMainScene {
-		public MainScene(BaseLoadedWorld loadedWorld, Scene scene, MainDescriptor descriptor, WorldHidden hidden) : base(loadedWorld, scene, descriptor, hidden) { }
+	public class MainBaseScene : BaseScene<MainDescriptor>, IMainSceneDescription {
+		public MainBaseScene(SceneGroup init, Scene scene, MainDescriptor descriptor, WorldHidden hidden) : base(init, scene, descriptor, hidden) { }
 
 		public override string ToString()
-			=> $"{GetType().Name}[Scene={Scene.name}, World={LoadedWorld}, Visible={Visible}]";
+			=> $"{GetType().Name}[Scene={Scene.name}, World={SceneGroup}, Visible={Visible}]";
 	}
 }
