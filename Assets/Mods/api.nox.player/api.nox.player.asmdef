@@ -5,8 +5,7 @@
         "Nox.CCK",
         "UniTask",
         "Unity.InputSystem",
-        "Nox.KeyBinding",
-        "Nox.Players"
+        "Nox.KeyBindings"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

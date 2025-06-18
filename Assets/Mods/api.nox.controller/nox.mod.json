@@ -28,6 +28,9 @@
   "entrypoints": {
     "main": [
       "api.nox.controller.Main"
+    ],
+    "editor": [
+      "api.nox.controller.Editor"
     ]
   },
   "references": [],

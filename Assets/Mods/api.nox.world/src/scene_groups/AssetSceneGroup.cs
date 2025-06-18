@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using api.nox.world.editor;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Worlds;
 using UnityEngine;
@@ -51,7 +52,7 @@ namespace api.nox.world {
 				root.transform.SetParent(prefab.transform);
 			prefab.SetActive(false);
 
-			if (!BaseDescriptor.TryGetDescriptor<MainDescriptor>(scene, out var main)) {
+			if (!SceneDescriptorExtension.TryGetDescriptor<MainSceneDescriptor>(scene, out var main)) {
 				Logger.LogError($"Failed to load main descriptor: {path}");
 				await Main.Instance.CoreAPI.AssetAPI.UnloadWorld(ns, path);
 				return null;
@@ -62,7 +63,7 @@ namespace api.nox.world {
 			var aw = new AssetSceneGroup {
 				Id        = ParseId(ns, path),
 				Active    = 0,
-				SubScenes = new SubScene[main.GetScenes().Count]
+				SubScenes = new SubScene[main.GetScenes().Length],
 			};
 
 			aw.MainScene = new MainScene(aw, scene, prefab);

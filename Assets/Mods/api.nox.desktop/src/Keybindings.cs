@@ -39,7 +39,7 @@ namespace api.nox.desktop {
 		/// <param name="key"></param>
 		/// <returns></returns>
 		private static float GetValue(string key) {
-			var index = Array.FindIndex(Keys, k => k.Item1 == key);
+			var index = Array.FindIndex(Keys, k => k.Item2 == key);
 			return index == -1 ? 0f : Keys[index].Item5;
 		}
 

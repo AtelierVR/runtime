@@ -6,17 +6,19 @@ using Nox.Controllers;
 
 namespace api.nox.controller {
 	public class Main : IControllerAPI, MainModInitializer {
+		public static Main Instance { get; private set; }
+
 		private IController    _current;
 		private MainModCoreAPI _coreAPI;
-
 		public void OnInitializeMain(MainModCoreAPI api) {
+			Instance = this;
 			_coreAPI = api;
 			_current = null;
 		}
-
 		public void OnDisposeMain() {
 			SetCurrent(null);
 			_coreAPI = null;
+			Instance = null;
 		}
 
 		public IController GetCurrent()

@@ -12,6 +12,7 @@ Shader "SpatialFramework/Textured Fresnel/Standard"
         // First, we do a stencil like technique of writing depth of the model,
         // so we don't have any transparent overdraw in subsequent steps
         Tags{ "RenderType" = "Transparent" "Queue" = "Transparent" }
+        Cull Off  // Render both front and back faces to avoid magenta error
         Pass
         {
             Tags
@@ -98,5 +99,55 @@ Shader "SpatialFramework/Textured Fresnel/Standard"
             ENDCG
         }
     }
-    FallBack "Diffuse"
+    
+    // Add a simpler fallback subshader for compatibility
+    SubShader
+    {
+        Tags{ "RenderType" = "Transparent" "Queue" = "Transparent" }
+        Cull Off
+        
+        Pass
+        {
+            Blend SrcAlpha OneMinusSrcAlpha
+            ZWrite Off
+            
+            CGPROGRAM
+            #pragma vertex vert_simple
+            #pragma fragment frag_simple
+            #include "UnityCG.cginc"
+            
+            sampler2D _MainTex;
+            float4 _MainTex_ST;
+            fixed4 _Color;
+            
+            struct appdata_simple
+            {
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+            };
+            
+            struct v2f_simple
+            {
+                float2 uv : TEXCOORD0;
+                float4 vertex : SV_POSITION;
+            };
+            
+            v2f_simple vert_simple(appdata_simple v)
+            {
+                v2f_simple o;
+                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                return o;
+            }
+            
+            fixed4 frag_simple(v2f_simple i) : SV_Target
+            {
+                fixed4 col = tex2D(_MainTex, i.uv) * _Color;
+                return col;
+            }
+            ENDCG
+        }
+    }
+    
+    FallBack "Transparent/Diffuse"
 }

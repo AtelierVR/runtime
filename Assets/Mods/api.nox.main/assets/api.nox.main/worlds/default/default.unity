@@ -5155,7 +5155,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1055241735}
-  - component: {fileID: 1055241734}
+  - component: {fileID: 1055241736}
   m_Layer: 0
   m_Name: World Descriptor
   m_TagString: Untagged
@@ -5163,49 +5163,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1055241734
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1055241733}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 725fa2223879bcd48a4864ab4ae76033, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  data_SpawnType: 0
-  data_NetworkObjects: []
-  data_Spawns: []
-  data_FlyOnSpawn: 0
-  data_RespawnHeight: 0
-  data_Type: 0
-  SequentialIndex: 0
-  NetworkObjects: []
-  Spawns:
-  - {fileID: 1055241733}
-  FlyOnSpawn: 0
-  SpawnType: 1
-  RespawnHeight: -1
-  data_Scenes: []
-  data_Features: []
-  data_Mods: []
-  data_crouchSpeed: 0
-  data_walkSpeed: 0
-  data_SprintSpeed: 0
-  data_jumpForce: 0
-  data_flySpeed: 0
-  data_gravity: 0
-  data_showingOnJoin: 0
-  data_showingDistance: 0
-  Scenes: []
-  Features: []
-  ModRequirements: []
-  _target: 19
-  ServerPublisher: localhost:53032
-  IdPublisher: 41
-  VersionPublisher: 0
 --- !u!4 &1055241735
 Transform:
   m_ObjectHideFlags: 0
@@ -5221,6 +5178,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1055241736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1055241733}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27b143a69400493093a10d9445ba058d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawns:
+  - {fileID: 1055241733}
+  scenes: []
+  sceneAssets: []
+  target: 0
+  publishId: 0
+  publishServer: 
+  publishVersion: 0
 --- !u!1 &1978528953
 GameObject:
   m_ObjectHideFlags: 0

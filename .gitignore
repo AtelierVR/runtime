@@ -79,5 +79,6 @@ crashlytics-build.properties
 /[Pp]ackages/
 !/[Pp]ackages/manifest.json
 /[Aa]ssets/[Tt]emp/
+/[Aa]ssets/[Aa]uto[Hh]and/
 
 mono_crash.*
