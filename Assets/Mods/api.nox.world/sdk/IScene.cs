@@ -7,6 +7,12 @@ namespace Nox.Worlds {
 	/// </summary>
 	public interface IScene {
 		/// <summary>
+		/// Returns the world identifier.
+		/// </summary>
+		/// <returns></returns>
+		public string GetWorldId();
+		
+		/// <summary>
 		/// Returns all loaded scenes in the world.
 		/// </summary>
 		/// <returns></returns>

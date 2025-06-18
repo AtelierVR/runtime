@@ -9,7 +9,8 @@
     "Nox.Entities",
     "Nox.Players",
     "Nox.CCK.Worlds",
-    "Nox.Worlds"
+    "Nox.Worlds",
+    "Nox.Users"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

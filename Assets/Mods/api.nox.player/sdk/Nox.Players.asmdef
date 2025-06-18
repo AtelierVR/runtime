@@ -1,7 +1,9 @@
 {
     "name": "Nox.Players",
     "rootNamespace": "",
-    "references": ["GUID:6e37f2034571459fa02fbe779aedcc10"],
+    "references": [
+        "Nox.Entities"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
@@ -10,5 +12,5 @@
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
-    "noEngineReferences": true
+    "noEngineReferences": false
 }

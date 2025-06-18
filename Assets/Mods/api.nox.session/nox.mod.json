@@ -39,11 +39,19 @@
       "id": "entity",
       "type": "depends",
       "version": ">=1.0.0"
+    },
+    {
+      "id": "controller",
+      "type": "depends",
+      "version": ">=1.0.0"
     }
   ],
   "entrypoints": {
     "main": [
       "api.nox.session.Main"
+    ],
+    "editor": [
+      "api.nox.session.Editor"
     ]
   },
   "references": [],

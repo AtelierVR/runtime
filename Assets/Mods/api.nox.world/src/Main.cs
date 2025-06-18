@@ -44,15 +44,15 @@ namespace api.nox.world {
 
 
 		internal SceneGroupManager GroupManager;
-		internal Network      Network;
+		internal Network           Network;
 
 		private LanguagePack _lang;
 		private Search       _search;
 
 
-		public readonly UnityEvent<BaseDescriptor, Scene> OnWorldLoaded     = new();
-		public readonly UnityEvent<MainDescriptor, Scene> OnMainWorldLoaded = new();
-		public readonly UnityEvent<SubDescriptor, Scene>  OnSubWorldLoaded  = new();
+		public readonly UnityEvent<BaseSceneDescriptor, Scene> OnWorldLoaded     = new();
+		public readonly UnityEvent<MainSceneDescriptor, Scene> OnMainWorldLoaded = new();
+		public readonly UnityEvent<SubSceneDescriptor, Scene>  OnSubWorldLoaded  = new();
 
 		#endregion
 
@@ -84,15 +84,15 @@ namespace api.nox.world {
 
 
 		private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-			if (!BaseDescriptor.TryGetDescriptor<BaseDescriptor>(scene, out var descriptor)) {
+			if (!SceneDescriptorExtension.TryGetDescriptor<BaseSceneDescriptor>(scene, out var descriptor)) {
 				Logger.LogWarning("WorldSystem.OnSceneLoaded: Scene does not have a valid descriptor.");
 				return;
 			}
 
 			OnWorldLoaded.Invoke(descriptor, scene);
-			if (descriptor is MainDescriptor mainDescriptor)
+			if (descriptor is MainSceneDescriptor mainDescriptor)
 				OnMainWorldLoaded.Invoke(mainDescriptor, scene);
-			else if (descriptor is SubDescriptor subDescriptor)
+			else if (descriptor is SubSceneDescriptor subDescriptor)
 				OnSubWorldLoaded.Invoke(subDescriptor, scene);
 		}
 
@@ -116,8 +116,10 @@ namespace api.nox.world {
 		public bool SetCurrent(string id)
 			=> GroupManager.SetCurrent(id);
 
-		public async UniTask<IWorld> Fetch(string id, string from = null)
-			=> null;
+		public async UniTask<IWorld> Fetch(string id, string from = null) {
+			await UniTask.Yield();
+			return null;
+		}
 
 		[NoxPublic(NoxAccess.Method)]
 		public IScene GetCurrent()

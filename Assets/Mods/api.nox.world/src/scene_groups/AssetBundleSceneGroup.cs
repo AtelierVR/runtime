@@ -95,7 +95,7 @@ namespace api.nox.world {
 				root.transform.SetParent(prefab.transform);
 			prefab.SetActive(false);
 
-			if (!BaseDescriptor.TryGetDescriptor<MainDescriptor>(scene, out var main)) {
+			if (!SceneDescriptorExtension.TryGetDescriptor<MainSceneDescriptor>(scene, out var main)) {
 				Logger.LogError($"Failed to load main descriptor: {path}");
 				await SceneManager.UnloadSceneAsync(scene);
 				await bundle.UnloadAsync(true);
@@ -108,7 +108,7 @@ namespace api.nox.world {
 				Id          = ParseId(path),
 				AssetBundle = bundle,
 				Active      = 0,
-				SubScenes   = new SubScene[main.GetScenes().Count]
+				SubScenes   = new SubScene[main.GetScenes().Length]
 			};
 
 			abw.MainScene = new MainScene(abw, scene, prefab);

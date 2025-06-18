@@ -8,6 +8,7 @@ using Nox.CCK.Worlds;
 
 #if UNITY_EDITOR
 using Nox.CCK.Utils;
+using Nox.ModLoader.Mods;
 using UnityEditor;
 using UnityEngine.UIElements;
 #endif
@@ -356,54 +357,49 @@ namespace Nox.ModLoader {
 				return;
 			}
 
-			// check if the active scene have BaseDescriptor
-			if (BaseDescriptor.TryGetDescriptor<BaseDescriptor>(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), out var wd))
+			Mod blockerMod = null;
+
+			// Send can_load event to all mods
+			foreach (var mod in resultInfos.Mods) {
+				mod.CoreAPI.LocalEventAPI.Emit("mod_can_load", mod, new Action<object[]>(Action));
+				continue;
+
+				void Action(object[] obj) {
+					if (obj.Length > 0 && obj[0] is false) {
+						blockerMod = mod;
+						Logger.LogWarning($"Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()} blocked loading the game.");
+					} else Logger.LogDebug($"Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()} allowed loading the game.");
+				}
+			}
+
+			// If any mod returned false, handle based on WantsTo setting
+			if (blockerMod != null) {
 				switch (WantsTo) {
 					case WantsToLoad.Yes:
-						Logger.Log("User wants to load the game...");
+						Logger.Log("User wants to load the game (forced)...");
 						break;
 					case WantsToLoad.No:
 						Logger.Log("User does not want to load the game...");
 						return;
 					case WantsToLoad.None:
 					default: {
-						if (!EditorUtility.DisplayDialog(
-							    "Nox ModLoader",
-							    $"This scene have a {wd.GetType().Name} as {wd}, do you want load game?",
-							    "Yes", "No"
-						    )) {
-							Logger.Log("User canceled the game load...");
+						var result = EditorUtility.DisplayDialog(
+							"Mod Loader",
+							$"Mod {blockerMod.Metadata.GetId()}@{blockerMod.Metadata.GetVersion()} blocked loading the game. Do you want to continue?",
+							"Yes, continue",
+							"No, cancel"
+						);
+						if (!result) {
+							Logger.Log("User does not want to load the game...");
 							return;
 						}
+
+						Logger.Log("User wants to load the game (asked)...");
 
 						break;
 					}
 				}
-
-			// check if the active scene have AvatarDescriptor
-			if (AvatarDescriptor.TryGetDescriptor(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), out var ad))
-				switch (WantsTo) {
-					case WantsToLoad.Yes:
-						Logger.Log("User wants to load the game...");
-						break;
-					case WantsToLoad.No:
-						Logger.Log("User does not want to load the game...");
-						return;
-					case WantsToLoad.None:
-					default: {
-						if (!EditorUtility.DisplayDialog(
-							    "Nox ModLoader",
-							    $"This scene have a {ad.GetType().Name} as {ad}, do you want load game?",
-							    "Yes", "No"
-						    )) {
-							Logger.Log("User canceled the game load...");
-							return;
-						}
-
-						break;
-					}
-				}
-
+			}
 
 			// disabling all keybinds of unityeditor to prevent conflicts
 			// ShortcutManager.instance.activeProfileId = "Play";
@@ -412,8 +408,9 @@ namespace Nox.ModLoader {
 			_isLoaded = true;
 
 			DisplayProgressBar("Entered PlayMode", "Enabling Mods...", 0.0f);
-
-			for (var i = 0; i < resultInfos.Mods.Length; i++) {
+			for (var i = 0;
+			     i < resultInfos.Mods.Length;
+			     i++) {
 				var mod = resultInfos.Mods[i];
 				DisplayProgressBar(
 					"Entered PlayMode",
@@ -426,8 +423,9 @@ namespace Nox.ModLoader {
 			}
 
 			DisplayProgressBar("Entered PlayMode", "Initializing Mods...", 0.0f);
-
-			for (var i = 0; i < resultInfos.Mods.Length; i++) {
+			for (var i = 0;
+			     i < resultInfos.Mods.Length;
+			     i++) {
 				var mod = resultInfos.Mods[i];
 				DisplayProgressBar(
 					"Entered PlayMode",
@@ -438,8 +436,9 @@ namespace Nox.ModLoader {
 			}
 
 			DisplayProgressBar("Entered PlayMode", "Post-Initializing Mods...", 0.0f);
-
-			for (var i = 0; i < resultInfos.Mods.Length; i++) {
+			for (var i = 0;
+			     i < resultInfos.Mods.Length;
+			     i++) {
 				var mod = resultInfos.Mods[i];
 				DisplayProgressBar(
 					"Entered PlayMode",

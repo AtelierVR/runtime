@@ -7,7 +7,9 @@
     "Nox.Sessions",
     "Nox.Worlds",
     "Nox.Players",
-    "Nox.Entities"
+    "Nox.Entities",
+    "Nox.CCK.Worlds",
+    "Nox.Controllers"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build Sessions Panel",
+			"type": "shell",
+			"command": "echo",
+			"args": [
+				"Building Sessions Panel module..."
+			],
+			"group": "build",
+			"isBackground": false
+		}
+	]
+}

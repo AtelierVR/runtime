@@ -36,7 +36,7 @@ namespace api.nox.world.network {
 				ide.Server = "::"; // Use "::" to indicate local server in the identifier
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
-			request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}");
+			await request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}");
 			await request.Send();
 			var response = request.GetMasterResponse<World>();
 			if (response.HasError()) {
@@ -61,7 +61,7 @@ namespace api.nox.world.network {
 			}
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
-			request.SetMasterUrl(address, $"/api/worlds?{data.ToParams()}");
+			await request.SetMasterUrl(address, $"/api/worlds?{data.ToParams()}");
 			await request.Send();
 			var response = request.GetMasterResponse<SearchResponse>();
 			Logger.LogDebug(request.GetResponse<string>());
@@ -88,7 +88,7 @@ namespace api.nox.world.network {
 			}
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
-			request.SetMasterUrl(server, "/api/worlds");
+			await request.SetMasterUrl(server, "/api/worlds");
 			request.SetBody(data.ToJson(), "application/json");
 			request.SetMethod("PUT");
 			await request.Send();
@@ -126,7 +126,7 @@ namespace api.nox.world.network {
 				ide.Server = "::"; // Use "::" to indicate local server in the identifier
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
-			request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}");
+			await request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}");
 			request.SetBody(form.ToJson(), "application/json");
 			request.SetMethod("POST");
 			await request.Send();
@@ -164,7 +164,7 @@ namespace api.nox.world.network {
 				ide.Server = "::"; // Use "::" to indicate local server in the identifier
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
-			request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}");
+			await request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}");
 			request.SetMethod("DELETE");
 			await request.Send();
 			var response = request.GetMasterResponse<object>();
@@ -196,7 +196,7 @@ namespace api.nox.world.network {
 				ide.Server = "::"; // Use "::" to indicate local server in the identifier
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
-			request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}/assets{data.ToParams()}");
+			await request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}/assets{data.ToParams()}");
 			await request.Send();
 			var response = request.GetMasterResponse<AssetSearchResponse>();
 			if (!response.HasError()) return response.GetData();
@@ -226,7 +226,7 @@ namespace api.nox.world.network {
 				ide.Server = "::"; // Use "::" to indicate local server in the identifier
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
-			request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}/assets");
+			await request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}/assets");
 			request.SetBody(data.ToJson(), "application/json");
 			request.SetMethod("PUT");
 			await request.Send();

@@ -13,12 +13,16 @@ namespace api.nox.world {
 		internal MainScene         MainScene;
 		internal SubScene[]        SubScenes;
 		internal SceneGroupManager GroupManager;
+		internal IWorldIdentifier  WorldIdentifier;
 
 		internal Scene[] GetUnityScenes()
 			=> GetScenes()
 				.Select(e => e.GetScene())
 				.Where(s => s.IsValid())
 				.ToArray();
+
+		public string GetWorldId()
+			=> WorldIdentifier?.ToString();
 
 		[NoxPublic(NoxAccess.Method)]
 		public ISceneDescription<BaseSceneDescriptor>[] GetScenes() {
@@ -34,8 +38,8 @@ namespace api.nox.world {
 		[NoxPublic(NoxAccess.Method)]
 		public ISceneDescription<T> GetScene<T>(int index) where T : BaseSceneDescriptor
 			=> index switch {
-				0 when typeof(MainDescriptor) == typeof(T) => MainScene as ISceneDescription<T>,
-				_ when typeof(SubDescriptor)  == typeof(T) => GetSubScene(index - 1) as ISceneDescription<T>,
+				0 when typeof(MainSceneDescriptor) == typeof(T) => MainScene as ISceneDescription<T>,
+				_ when typeof(SubSceneDescriptor)  == typeof(T) => GetSubScene(index - 1) as ISceneDescription<T>,
 				_                                          => null
 			};
 

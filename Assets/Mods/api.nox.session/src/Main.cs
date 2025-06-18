@@ -3,24 +3,38 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Players;
 using Nox.CCK.Utils;
+using Nox.Controllers;
 using Nox.Sessions;
+using UnityEngine;
 
 namespace api.nox.session {
 	public class Main : MainModInitializer, ISessionAPI {
 		private readonly List<Session>  _sessions = new();
-		internal static  MainModCoreAPI CoreAPI;
+		internal         MainModCoreAPI CoreAPI;
+		internal static  Main           Instance;
 		private          ushort         _nextId    = ushort.MinValue + 1;
 		private          ushort         _currentId = ushort.MinValue;
+		private          GameObject     _updateHandler;
 
-		public void OnInitializeMain(MainModCoreAPI api)
-			=> CoreAPI = api;
+		internal IControllerAPI ControllerAPI
+			=> CoreAPI.ModAPI.GetMod("controller")
+				?.GetMains()
+				.FirstOrDefault() as IControllerAPI;
+
+		public void OnInitializeMain(MainModCoreAPI api) {
+			CoreAPI  = api;
+			Instance = this;
+		}
 
 		public async UniTask OnDisposeMainAsync() {
 			foreach (var session in _sessions.ToArray())
 				await session.Dispose();
 			_sessions.Clear();
-			CoreAPI = null;
+
+			CoreAPI  = null;
+			Instance = null;
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -55,6 +69,16 @@ namespace api.nox.session {
 			_currentId = id;
 			nSession?.OnSelect(oSession);
 
+			var localPlayer       = nSession?.GetAdapter().GetLocalPlayer();
+			var currentController = ControllerAPI.GetCurrent();
+
+			var b = currentController.GetParts();
+			if (b.TryGetValue(PlayerRig.Base.ToIndex(), out var tr))
+				tr.SetPositionAndRotation(
+					localPlayer?.GetPosition() ?? Vector3.zero,
+					localPlayer?.GetRotation() ?? Quaternion.identity
+				);
+
 			CoreAPI.EventAPI.Emit("session_current_changed", nSession, oSession);
 		}
 
@@ -78,6 +102,16 @@ namespace api.nox.session {
 			} while (_sessions.Any(s => s.Id == i));
 
 			return _nextId = i;
+		}
+
+		public void OnUpdateMain() {
+			var currentSession    = GetCurrent();
+			var localPlayer       = currentSession?.GetAdapter().GetLocalPlayer();
+			var currentController = ControllerAPI.GetCurrent();
+			if (localPlayer == null || currentController == null) return;
+			var b = currentController.GetParts();
+			localPlayer.SetPosition(b.TryGetValue(0, out var value) ? value.position : Vector3.zero);
+			localPlayer.SetRotation(b.TryGetValue(0, out value) ? value.rotation : Quaternion.identity);
 		}
 	}
 }

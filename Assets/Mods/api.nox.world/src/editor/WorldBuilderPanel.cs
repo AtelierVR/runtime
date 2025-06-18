@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using api.nox.world.builder;
-using api.nox.world.editor;
 using Nox.CCK.Language;
 using Nox.CCK.Mods.Panels;
 using Nox.CCK.Utils;

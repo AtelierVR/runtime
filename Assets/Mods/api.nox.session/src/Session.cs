@@ -1,8 +1,10 @@
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
+using Nox.CCK.Worlds;
 using Nox.Entities;
 using Nox.Players;
 using Nox.Sessions;
+using UnityEngine.SceneManagement;
 
 namespace api.nox.session {
 	public class Session : ISession, INoxObject {
@@ -58,17 +60,22 @@ namespace api.nox.session {
 
 		public void OnPlayerJoined(IPlayer player) {
 			Logger.LogDebug($"OnPlayerJoined: {player}");
-			Main.CoreAPI.EventAPI.Emit("session_player_joined", this, player);
+
+			// Si c'est un joueur local, vérifier s'il faut le téléporter au spawn
+			if (player.IsLocal())
+				TryTeleportPlayerToSpawn(player);
+
+			Main.Instance.CoreAPI.EventAPI.Emit("session_player_joined", this, player);
 		}
 
 		public void OnPlayerLeft(IPlayer player) {
 			Logger.LogDebug($"OnPlayerLeft: {player}");
-			Main.CoreAPI.EventAPI.Emit("session_player_left", this, player);
+			Main.Instance.CoreAPI.EventAPI.Emit("session_player_left", this, player);
 		}
 
 		public void OnAuthorityTransferred(IPlayer player) {
 			Logger.LogDebug($"OnAuthorityTransferred: {player}");
-			Main.CoreAPI.EventAPI.Emit("session_authority_transferred", this, player);
+			Main.Instance.CoreAPI.EventAPI.Emit("session_authority_transferred", this, player);
 		}
 
 		public override string ToString()
@@ -79,5 +86,29 @@ namespace api.nox.session {
 
 		public void OnSelect(Session oSession)
 			=> Adapter.OnSelect(oSession);
+
+		private void TryTeleportPlayerToSpawn(IPlayer player) {
+			// Rechercher un descripteur de scène dans la scène active
+			var activeScene = SceneManager.GetActiveScene();
+			if (!SceneDescriptorExtension.TryGetDescriptor<BaseSceneDescriptor>(activeScene, out var descriptor)) {
+				Logger.LogDebug("No scene descriptor found in active scene for spawn teleportation");
+				return;
+			}
+
+			// Vérifier si le descripteur utilise un système de spawn
+			if (!descriptor.UseSpawn()) {
+				Logger.LogDebug("Scene descriptor does not use spawn system");
+				return;
+			}
+
+			// Choisir un spawn et téléporter le joueur
+			var spawnObject = descriptor.ChoiceSpawn();
+			if (spawnObject) {
+				player.Teleport(spawnObject.transform);
+				Logger.LogDebug($"Teleported local player {player.GetDisplay()} to spawn at {spawnObject.transform.position}");
+			} else {
+				Logger.LogWarning("ChoiceSpawn returned null object");
+			}
+		}
 	}
 }

@@ -5,6 +5,7 @@ using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using Nox.Entities;
 using Nox.Players;
+using Nox.Users;
 using Transform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.offline {
@@ -22,6 +23,7 @@ namespace api.nox.offline {
 		private readonly  OfflineAdapter                _context;
 		internal readonly DateTime                      CreationTime;
 		internal readonly Dictionary<ushort, Transform> Transforms = new();
+		internal readonly IUserIdentifier               Identifier = null;
 
 		[NoxPublic(NoxAccess.Method)]
 		public int GetId()
@@ -30,6 +32,9 @@ namespace api.nox.offline {
 		[NoxPublic(NoxAccess.Method)]
 		public bool IsLocal()
 			=> true;
+
+		public string GetPlayerId()
+			=> Identifier?.ToString();
 
 		[NoxPublic(NoxAccess.Method)]
 		public bool IsMaster()
@@ -78,25 +83,33 @@ namespace api.nox.offline {
 
 		[NoxPublic(NoxAccess.Method)]
 		public void SetPosition(Vector3 position) {
-			var transform = !Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)
-				? new Transform()
-				: tr;
-			transform.SetPosition(position);
-			Transforms[PlayerRig.Base.ToIndex()] = transform;
-		}
-
-		[NoxPublic(NoxAccess.Method)]
-		public void SetRotation(Quaternion rotation) {
-			var transform = !Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)
-				? new Transform()
-				: tr;
-			transform.SetRotation(rotation);
-			Transforms[PlayerRig.Base.ToIndex()] = transform;
+			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
+			tr.SetPosition(position);
+			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
 
 		public bool TryGetPhysical(out Physical physical) {
 			physical = null;
 			return false;
+		}
+
+		[NoxPublic(NoxAccess.Method)]
+		public void Teleport(Vector3 position, Quaternion rotation) {
+			SetPosition(position);
+			SetRotation(rotation);
+		}
+
+		[NoxPublic(NoxAccess.Method)]
+		public void SetRotation(Quaternion rotation) {
+			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
+			tr.SetRotation(rotation);
+			Transforms[PlayerRig.Base.ToIndex()] = tr;
+		}
+
+		[NoxPublic(NoxAccess.Method)]
+		public void Teleport(UnityEngine.Transform transform) {
+			if (!transform) return;
+			Teleport(transform.position, transform.rotation);
 		}
 	}
 }

@@ -632,7 +632,6 @@ namespace api.nox.world {
 			importer.isReadable = true;
 			importer.textureType = TextureImporterType.Default;
 			importer.textureCompression = TextureImporterCompression.Uncompressed;
-			importer.textureFormat = TextureImporterFormat.RGBA32;
 			
 			// Apply the changes
 			AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
