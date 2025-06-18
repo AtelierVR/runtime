@@ -63,5 +63,19 @@ namespace Nox.Users {
 		/// </summary>
 		/// <returns></returns>
 		public string GetServerAddress();
+
+		/// <summary>
+		/// Checks if this identifier is equal to another identifier.
+		/// </summary>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		public bool Equals(IUserIdentifier other);
+
+		/// <summary>
+		/// Checks if this identifier is equal to another string identifier.
+		/// </summary>
+		/// <param name="other"></param>
+		/// <returns></returns>
+		public bool Equals(string other);
 	}
 }

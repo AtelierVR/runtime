@@ -1,5 +1,5 @@
 using Nox.CCK.Worlds;
 
 namespace Nox.Worlds {
-	public interface ISubSceneDescription : ISceneDescription<SubDescriptor> { }
+	public interface ISubSceneDescription : ISceneDescription<SubSceneDescriptor> { }
 }

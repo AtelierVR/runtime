@@ -8,6 +8,7 @@
     "Nox.Offline",
     "Nox.Entities",
     "Nox.Players",
+    "Nox.CCK.Worlds",
     "Nox.Worlds"
   ],
   "includePlatforms": [],

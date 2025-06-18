@@ -2,6 +2,7 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
 using Nox.CCK.Utils;
 using Nox.UI;
+using Nox.Users;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -17,8 +18,10 @@ namespace api.nox.user.client {
 		private int            _mId;
 		private object[]       _context;
 		private GameObject     _content;
-		private UserIdentifier _identifier;
-		private User           _user;
+		private UserComponent  _component;
+		private IUserIdentifier _identifier;
+		private IUser           _user;
+		private bool           _isLoading;
 
 
 		public void OnRefresh()
@@ -68,7 +71,13 @@ namespace api.nox.user.client {
 			};
 		}
 
-		private async UniTask Refresh() { }
+
+		private async UniTask Refresh() {
+			if (_isLoading) return;
+			_isLoading = true;
+			await UniTask.Yield();
+			_isLoading = false;
+		}
 
 		public object[] GetContext()
 			=> _context;
@@ -78,61 +87,15 @@ namespace api.nox.user.client {
 
 		public GameObject GetContent(RectTransform parent) {
 			if (_content) return _content;
-			_content      = Object.Instantiate(Client.GetAsset<GameObject>("prefabs/split.prefab", "ui"), parent);
-			_content.name = $"[{GetStaticKey()}_{_content.GetInstanceID()}]";
-			var splitContent   = Reference.GetComponent<RectTransform>("content", _content);
-			var containerAsset = Client.GetAsset<GameObject>("prefabs/container.prefab", "ui");
-			var iconAsset      = Client.GetAsset<GameObject>("prefabs/header_icon.prefab", "ui");
-			var labelAsset     = Client.GetAsset<GameObject>("prefabs/header_label.prefab", "ui");
-			var scrollAsset    = Client.GetAsset<GameObject>("prefabs/scroll.prefab", "ui");
-			var infoAsset      = Client.GetAsset<GameObject>("prefabs/infobox.prefab", "ui");
-			var listAsset      = Client.GetAsset<GameObject>("prefabs/list.prefab", "ui");
-
-			// generate background containers
-
-			// generate notification
-			var container = Object.Instantiate(containerAsset, splitContent);
-			var withTitle = Object.Instantiate(
-				Client.GetAsset<GameObject>("prefabs/with_title.prefab", "ui"),
-				Reference.GetComponent<RectTransform>("content", container)
-			);
-			var header = Reference.GetReference("header", withTitle);
-			var icon   = Object.Instantiate(iconAsset, Reference.GetComponent<RectTransform>("before", header));
-			var label  = Object.Instantiate(labelAsset, Reference.GetComponent<RectTransform>("content", header));
-
-			Reference.GetComponent<Image>("image", icon).sprite = Client.GetAsset<Sprite>("icons/search.png", "ui");
-			Reference.GetComponent<TextLanguage>("text", label).UpdateText("search.title");
-
-			var handlers = Object.Instantiate(
-				scrollAsset,
-				Reference.GetComponent<RectTransform>("content", withTitle)
-			);
-			var listsHandler = Reference.GetComponent<RectTransform>(
-				"content",
-				Object.Instantiate(
-					listAsset,
-					Reference.GetComponent<RectTransform>(
-						"content", handlers
-					)
-				)
-			);
-			var box = Object.Instantiate(Client.GetAsset<GameObject>("prefabs/box.prefab", "ui"), listsHandler);
-			Reference.GetComponent<TextLanguage>("title", box).UpdateText("search.info.title");
-			var handleInfo = Object.Instantiate(
-				infoAsset,
-				Reference.GetComponent<RectTransform>("content", withTitle)
-			);
-
-
-			// generate dashboard
-			container = Object.Instantiate(Client.GetAsset<GameObject>("prefabs/container_full.prefab", "ui"), splitContent);
-			withTitle = Object.Instantiate(
-				Client.GetAsset<GameObject>("prefabs/with_search.prefab", "ui"),
-				Reference.GetComponent<RectTransform>("content", container)
-			);
-			header = Reference.GetReference("header", withTitle);
-			var content = Reference.GetComponent<RectTransform>("content", withTitle);
+			(_content, _component) = UserComponent.Generate(this, parent);
+			_component.UpdateLoading();
 			return _content;
+		}
+
+		public void OnDisplay(IPage lastPage) {
+			if (_user != null) _component.UpdateContent(_user);
+			else if (_isLoading) _component.UpdateLoading();
+			else _component.UpdateError("User not found or loading failed.");
 		}
 	}
 }

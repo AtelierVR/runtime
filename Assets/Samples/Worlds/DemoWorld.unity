@@ -209,8 +209,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27b143a69400493093a10d9445ba058d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spawns: []
   scenes: []
   sceneAssets: []
+  target: 1
+  publishId: 1
+  publishServer: hactazia.fr
+  publishVersion: 0
 --- !u!1 &585968212
 GameObject:
   m_ObjectHideFlags: 0
@@ -334,7 +339,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f61d84ece0a4ef99731c30083f86220, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  reference: {fileID: 0}
+  script: {fileID: 585968220}
 --- !u!54 &585968219
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -357,7 +362,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
@@ -375,8 +380,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   asset: {fileID: -6750239444755058063, guid: c10079710428c5147943f022db27a34a, type: 3}
-  exports:
-  - key: 
+  exports: 
 --- !u!1 &1064788527
 GameObject:
   m_ObjectHideFlags: 0
@@ -388,6 +392,8 @@ GameObject:
   - component: {fileID: 1064788529}
   - component: {fileID: 1064788528}
   - component: {fileID: 1064788530}
+  - component: {fileID: 1064788531}
+  - component: {fileID: 1064788532}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -468,13 +474,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1064788527}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!114 &1064788530
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -498,6 +504,33 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!114 &1064788531
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1064788527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e77e91199bec49a3944ad291d06e985d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  asset: {fileID: -6750239444755058063, guid: 756d4e4d82dbcfa47ae6b9b2de627038, type: 3}
+  exports: 
+--- !u!114 &1064788532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1064788527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f61d84ece0a4ef99731c30083f86220, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  script: {fileID: 1064788531}
 --- !u!1 &1625806933
 GameObject:
   m_ObjectHideFlags: 0

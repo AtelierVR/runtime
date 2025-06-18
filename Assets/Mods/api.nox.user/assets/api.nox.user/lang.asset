@@ -25,6 +25,10 @@ MonoBehaviour:
       value: "Search for users by display, username, or bio."
     - key: user.search.worker.title
       value: "{0}"
+    - key: user.display
+      value: "{0}"
+    - key: user.identifier
+      value: "{0}"
   - IETF: fr-FR
     entries:
     - key: user.search.data.title
@@ -37,3 +41,7 @@ MonoBehaviour:
       value: "Recherchez des utilisateurs par affichage, nom d'utilisateur ou biographie."
     - key: user.search.worker.title
       value: "{0}"
+    - key: user.display
+      value: "{0}"
+    - key: user.identifier
+      value: "{2}@{3}"

@@ -10,7 +10,7 @@ using Logger = Nox.CCK.Utils.Logger;
 
 #if UNITY_EDITOR
 namespace api.nox.keybinding {
-	public class KeyBindingPanel : EditorPanelBuilder, IDisposable {
+	public class KeyBindingPanel : IEditorPanelBuilder, IDisposable {
 		public string GetId()
 			=> "keybinding";
 

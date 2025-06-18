@@ -10,7 +10,7 @@ namespace Nox.Worlds {
 		/// Returns all loaded scenes in the world.
 		/// </summary>
 		/// <returns></returns>
-		public ISceneDescription<BaseDescriptor>[] GetScenes();
+		public ISceneDescription<BaseSceneDescriptor>[] GetScenes();
 
 		/// <summary>
 		/// Returns the scene at the given index.
@@ -20,14 +20,14 @@ namespace Nox.Worlds {
 		/// <param name="index"></param>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public ISceneDescription<T> GetScene<T>(int index) where T : BaseDescriptor;
+		public ISceneDescription<T> GetScene<T>(int index) where T : BaseSceneDescriptor;
 
 		/// <summary>
 		/// Returns the scene at the given index.
 		/// </summary>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		public ISceneDescription<BaseDescriptor> GetScene(int index);
+		public ISceneDescription<BaseSceneDescriptor> GetScene(int index);
 
 		/// <summary>
 		/// Returns the main scene.

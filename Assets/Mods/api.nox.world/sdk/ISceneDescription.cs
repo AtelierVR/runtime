@@ -1,8 +1,9 @@
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Worlds;
 using UnityEngine.SceneManagement;
 
 namespace Nox.Worlds {
-	public interface ISceneDescription<out T> where T : BaseDescriptor {
+	public interface ISceneDescription<out T> where T : BaseSceneDescriptor {
 		/// <summary>
 		/// Returns the Unity scene associated with this IScene.
 		/// </summary>
@@ -13,7 +14,7 @@ namespace Nox.Worlds {
 		/// Returns the ID of the scene in the world.
 		/// </summary>
 		/// <returns></returns>
-		public int MakeInstance();
+		public UniTask<int> MakeInstance();
 
 		/// <summary>
 		/// Returns the scene instance descriptor for the given ID.

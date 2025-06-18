@@ -123,12 +123,9 @@ namespace api.nox.network {
 				_responseCache = Main.Instance.Cache.Get(Cache.CalculateId(this));
 				if (_responseCache != null) return;
 			} else _responseCache = null;
-
-
-			foreach (var header in GetHeaders().Where(header => !string.IsNullOrEmpty(header.Value))) {
+			
+			foreach (var header in GetHeaders().Where(header => !string.IsNullOrEmpty(header.Value))) 
 				RequestObject.SetRequestHeader(header.Key, header.Value);
-				Logger.LogDebug($"Request header: {header.Key} = {header.Value}");
-			}
 
 			try {
 				Logger.Log($"Sending request to {RequestObject.url}...");
@@ -184,11 +181,16 @@ namespace api.nox.network {
 
 			return default;
 		}
-
 		public void SetBody(string text, string contentType = null) {
 			if (!string.IsNullOrEmpty(contentType))
 				RequestObject.SetRequestHeader("Content-Type", contentType);
 			RequestObject.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(text ?? ""));
+		}
+
+		public void SetBody(byte[] data, string contentType = null) {
+			if (!string.IsNullOrEmpty(contentType))
+				RequestObject.SetRequestHeader("Content-Type", contentType);
+			RequestObject.uploadHandler = new UploadHandlerRaw(data ?? Array.Empty<byte>());
 		}
 
 		public void SetMethod(string method) {

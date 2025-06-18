@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace api.nox.user {
-	public class ProfilePanel : EditorPanelBuilder {
+	public class ProfilePanel : IEditorPanelBuilder {
 		public string GetId()
 			=> "profile";
 

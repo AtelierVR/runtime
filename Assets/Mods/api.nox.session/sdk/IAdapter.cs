@@ -56,30 +56,30 @@ namespace Nox.Sessions {
 		/// Get the count of entities in the session.
 		/// </summary>
 		/// <returns></returns>
-		int GetEntityCount();
+		public int GetEntityCount();
 
 		/// <summary>
 		/// Get the count of players in the session.
 		/// </summary>
 		/// <returns></returns>
-		int GetPlayerCount();
+		public int GetPlayerCount();
 
 		/// <summary>
 		/// Get the world associated with the session.
 		/// </summary>
 		/// <returns></returns>
-		IScene GetWorld();
+		public IScene GetWorld();
 
 		/// <summary>
 		/// Called when the session is deselected (is not the current session).
 		/// </summary>
 		/// <param name="newSession">The new session that is now current.</param>
-		void OnDeselect(ISession newSession);
+		public UniTask OnDeselect(ISession newSession);
 
 		/// <summary>
 		/// Called when the session is selected (is the current session).
 		/// </summary>
 		/// <param name="oldSession">The previous session that was current.</param>
-		void OnSelect(ISession oldSession);
+		public UniTask OnSelect(ISession oldSession);
 	}
 }

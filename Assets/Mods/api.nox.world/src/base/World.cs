@@ -36,6 +36,9 @@ namespace api.nox.world {
 		public string GetOwnerId()
 			=> owner;
 
+		public string[] GetContributorIds() 
+		=> new []{ owner }; // Assuming only owner is a contributor for now, can be extended later
+
 		public string GetThumbnailUrl()
 			=> thumbnail;
 

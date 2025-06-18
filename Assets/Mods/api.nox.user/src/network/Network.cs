@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Nox.CCK.Utils;
 using UnityEngine.Events;
@@ -29,7 +30,7 @@ namespace api.nox.user.network {
 			}
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
-			request.SetMasterUrl(address, "/api/users/@me");
+			await request.SetMasterUrl(address, "/api/users/@me");
 			await request.Send();
 			var response = request.GetMasterResponse<CurrentUser>();
 			if (response.HasError()) {
@@ -90,7 +91,7 @@ namespace api.nox.user.network {
 			}
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
-			request.SetMasterUrl(address, $"/api/users/{ide.ToString()}");
+			await request.SetMasterUrl(address, $"/api/users/{ide.ToString()}");
 			await request.Send();
 			var response = request.GetMasterResponse<User>();
 			if (response.HasError()) {
@@ -113,7 +114,7 @@ namespace api.nox.user.network {
 			}
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
-			request.SetMasterUrl(address, $"/api/users?{data.ToParams()}");
+			await request.SetMasterUrl(address, $"/api/users?{data.ToParams()}");
 			await request.Send();
 			var response = request.GetMasterResponse<SearchResponse>();
 			Logger.LogDebug(request.GetResponse<string>());
@@ -141,17 +142,12 @@ namespace api.nox.user.network {
 			}
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
-			request.SetMasterUrl(address, "/api/auth/logout");
+			await request.SetMasterUrl(address, "/api/auth/logout");
 			await request.Send();
+
 			var response = request.GetMasterResponse<LogoutResponse>();
 			if (response.HasError()) {
 				Logger.LogError($"Failed to logout from {address}: {response.GetError().GetMessage()}");
-				return false;
-			}
-
-			var logoutResponse = response.GetData();
-			if (!logoutResponse.success) {
-				Logger.LogError($"Logout failed from {address}: {response.GetError().GetMessage()}");
 				return false;
 			}
 
@@ -185,25 +181,29 @@ namespace api.nox.user.network {
 			}
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
-			request.SetMasterUrl(address, "/api/auth/login");
+			await request.SetMasterUrl(address, "/api/auth/login");
 			request.SetBody(form.ToJson(), "application/json");
 			request.SetMethod("POST");
 			await request.Send();
-			Logger.LogDebug(request.GetResponse<string>());
+
 			var response = request.GetMasterResponse<LoginResponse>();
-			Logger.LogDebug("data" + response.GetData());
-			Logger.LogDebug("err"  + response.GetError());
+			var login    = response.GetData();
+
+			Logger.LogDebug($"Login response: {response.HasError()} {response.GetError()}");
 			if (response.HasError()) {
-				Logger.LogError($"Failed to login to {address}: {response.GetError().GetMessage()}");
-				return new LoginResponse { Error = response.GetError().GetMessage() };
+				var errorInfo = response.GetError();
+
+				return new LoginResponse {
+					Error = errorInfo.GetMessage(),
+					Verification = new VerificationRequired {
+						Required = errorInfo.GetCode() == 20 && errorInfo.GetStatus() == 428,
+						Methods  = login?.methods ?? Array.Empty<VerificationMethod>()
+					}
+				};
 			}
 
-			var login = response.GetData();
-			if (login.IsError()) {
-				Logger.LogError($"Login error for {address}: {login.Error}");
-				return login;
-			}
 
+			// Successful login - set current user and save config
 			CurrentUser   = login.user;
 			ServerAddress = login.user.server;
 			var config = Config.Load();
@@ -226,7 +226,7 @@ namespace api.nox.user.network {
 			}
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
-			request.SetMasterUrl(address, "/api/users/@me/integrity");
+			await request.SetMasterUrl(address, "/api/users/@me/integrity");
 			request.SetBody(
 				new JObject {
 					["address"] = server,
@@ -298,6 +298,30 @@ namespace api.nox.user.network {
 			}
 
 			return null;
+		}
+
+		public async UniTask<SendVerificationCodeResponse> SendVerificationCode(string type, string from = null) {
+			if (Main.Instance.NetworkAPI == null)
+				return new SendVerificationCodeResponse { success = false, message = "Network API is not initialized." };
+
+			var address = from ?? CurrentUser?.GetServerAddress() ?? ServerAddress;
+			if (string.IsNullOrEmpty(address)) {
+				Logger.LogError("Cannot send verification code: no server address provided.");
+				return new SendVerificationCodeResponse { success = false, message = "No server address provided." };
+			}
+
+			var request = Main.Instance.NetworkAPI.MakeRequest();
+			await request.SetMasterUrl(address, $"/api/auth/{type}/send");
+			await request.Send();
+			var response = request.GetMasterResponse<SendVerificationCodeResponse>();
+			if (response.HasError()) {
+				Logger.LogError($"Failed to send verification code from {address}: {response.GetError().GetMessage()}");
+				return new SendVerificationCodeResponse { success = false, message = response.GetError().GetMessage() };
+			}
+
+			var verificationResponse = response.GetData();
+			Logger.LogDebug($"Verification code send result: {verificationResponse}");
+			return verificationResponse;
 		}
 	}
 }

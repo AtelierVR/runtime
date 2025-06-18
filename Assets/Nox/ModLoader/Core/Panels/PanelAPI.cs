@@ -48,7 +48,7 @@ namespace Nox.ModLoader.Cores.Panels
             => Panels.Any(panel => panel.GetId() == panelId || panel.GetFullId() == panelId);
 
         // add panel
-        public EditorPanel AddLocalPanel(EditorPanelBuilder panel)
+        public EditorPanel AddLocalPanel(IEditorPanelBuilder panel)
         {
             if (HasLocalPanel(panel.GetId())) return null;
             var editorPanel = new Panel(panel) { ModId = _mod.Metadata.GetId() };

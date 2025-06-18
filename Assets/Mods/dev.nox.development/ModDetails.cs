@@ -24,7 +24,7 @@ namespace dev.nox.development {
 		}
 	}
 
-	public class ModDetailsPanel : EditorPanelBuilder {
+	public class ModDetailsPanel : IEditorPanelBuilder {
 		public string GetId()
 			=> "mod_details";
 

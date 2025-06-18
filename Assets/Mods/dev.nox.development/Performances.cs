@@ -64,7 +64,7 @@ namespace dev.nox.development {
 		}
 	}
 
-	public class PerformancePanel : EditorPanelBuilder {
+	public class PerformancePanel : IEditorPanelBuilder {
 		public string GetId()
 			=> "performances";
 

@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 using Nox.CCK.Utils;
 
 namespace api.nox.world {
-	public class WorldManagerPanel : EditorPanelBuilder {
+	public class WorldManagerPanel : IEditorPanelBuilder {
 		public string GetId()
 			=> "manager";
 

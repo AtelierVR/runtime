@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Nox.CCK.Utils;
 using UnityEditor;
 
 namespace Nox.CCK.Worlds {
@@ -25,6 +26,17 @@ namespace Nox.CCK.Worlds {
 		public string[] GetScenes() 
 			=> scenes 
 				?? Array.Empty<string>();
+		#endif
+
+		#endregion
+
+		#region Publisher
+
+		#if UNITY_EDITOR
+		public Platform target;
+		public uint     publishId;
+		public string   publishServer;
+		public uint     publishVersion;
 		#endif
 
 		#endregion

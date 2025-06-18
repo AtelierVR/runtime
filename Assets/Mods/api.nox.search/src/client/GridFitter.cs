@@ -43,8 +43,6 @@ namespace api.nox.search.client
 
             var cellSize = new Vector2(cellWidth, cellWidth / ratio);
             gridLayoutGroup.cellSize = cellSize;
-
-            Logger.Log($"GridFitter: {cellSize} {cellWidth} {nbCells}");
         }
     }
 }

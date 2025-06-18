@@ -59,16 +59,17 @@ namespace api.nox.offline {
 			return true;
 		}
 
-		public void OnDeselect(ISession newSession) {
+		public async UniTask OnDeselect(ISession newSession) {
 			Logger.LogDebug($"OnDeselect: {this}");
+			await UniTask.Yield();
 		}
 
-		public void OnSelect(ISession oldSession) {
+		public async UniTask OnSelect(ISession oldSession) {
 			Logger.LogDebug($"OnSelect: {this}");
 			if (GetLocalPlayer() == null) NewPlayer();
 			var main = _scene.GetMainScene();
 			if (_sceneId == 0)
-				_sceneId = main.MakeInstance();
+				_sceneId = await main.MakeInstance();
 			_scene.SetCurrent();
 			main.SetVisibleInstance(_sceneId, true, true);
 		}
@@ -84,7 +85,7 @@ namespace api.nox.offline {
 			await UniTask.Yield();
 			foreach (var entity in _entities.GetEntities().ToArray())
 				_entities.UnregisterEntity(entity);
-			_scene.Dispose();
+			await _scene.Dispose();
 		}
 
 		[NoxPublic(NoxAccess.Method)]

@@ -63,9 +63,6 @@ namespace api.nox.jint {
 			Engine.SetValue("Quaternion", TypeReference.CreateTypeReference(Engine, typeof(Quaternion)));
 			Engine.SetValue("Transform", TypeReference.CreateTypeReference(Engine, typeof(Transform)));
 
-			Engine.SetValue("gameObject", new ObjectWrapper(Engine, gameObject));
-			Engine.SetValue("transform", new ObjectWrapper(Engine, transform));
-
 			// import json of Script.exports
 			if (!string.IsNullOrEmpty(script.exports)) {
 				try {
@@ -83,6 +80,11 @@ namespace api.nox.jint {
 					.ExportFunction("error", objets => Logger.Log(LogType.Error, string.Join(" ", objets.Select(e => e.ToString()))))
 			);
 
+			Engine.AddModule(
+				"behaviour", builder => builder
+					.ExportObject("transform", new ObjectWrapper(Engine, transform))
+					.ExportObject("gameObject", new ObjectWrapper(Engine, gameObject))
+			);
 			try {
 				var module = Engine.PrepareModule(script.asset.text);
 				Engine.AddModule("__main__", x => x.AddModule(module));

@@ -9,7 +9,7 @@ using Nox.CCK.Worlds;
 #if UNITY_EDITOR
 using Nox.CCK.Utils;
 using UnityEditor;
-using UnityEditor.ShortcutManagement;
+using UnityEngine.UIElements;
 #endif
 
 namespace Nox.ModLoader {
@@ -456,22 +456,25 @@ namespace Nox.ModLoader {
 
 		public class StartupPlayerLoop : MonoBehaviour {
 			private static StartupPlayerLoop _instance;
-			private        ResultLoadInfos   resultInfos;
+			private        ResultLoadInfos   _resultInfos;
 
 			public static void Setup(ResultLoadInfos resultInfos) {
 				if (_instance)
 					throw new Exception("StartupPlayerLoop already exists...");
 				var go = new GameObject();
-				_instance             = go.AddComponent<StartupPlayerLoop>();
-				go.name               = $"[{_instance.GetType().Name}]";
-				_instance.resultInfos = resultInfos;
+				_instance = go.AddComponent<StartupPlayerLoop>();
+				go.name   = $"[{_instance.GetType().Name}]";
+				#if UNITY_EDITOR
+				EditorGUIUtility.SetIconForObject(_instance, Resources.Load<Texture2D>("Nox.CCK.Icon"));
+				#endif
+				_instance._resultInfos = resultInfos;
 				DontDestroyOnLoad(go);
 			}
 
 			private async void OnApplicationQuit() {
 				try {
 					Logger.Log("Application Quit...");
-					await OnExitingPlayMode(resultInfos);
+					await OnExitingPlayMode(_resultInfos);
 				} catch {
 					// ignored
 				}
@@ -480,7 +483,7 @@ namespace Nox.ModLoader {
 			private async void Start() {
 				try {
 					Logger.Log("StartupPlayerLoop Started...");
-					await OnEnteredPlayMode(resultInfos);
+					await OnEnteredPlayMode(_resultInfos);
 				} catch {
 					// ignored
 				}

@@ -1,11 +1,14 @@
 import { log } from "console";
+import { transform, gameObject } from "behaviour";
 
 let d = Date.now();
 
-export function onFixedUpdate() {
+export let speed = 0.1;
+
+export function onUpdate() {
     let delta = Date.now() - d;
     d = Date.now();
-    gameObject.transform.Rotate(delta * -0.1, delta * 0.1, delta * -0.1);
+    transform.Rotate(delta * -speed, delta * speed, delta * -speed);
 }
 
 export function onAwake() {
@@ -17,7 +20,5 @@ export function onPrepare() {
 }
 
 export function onValidate() {
-    log("onValidate called");
     log("onValidate called", gameObject.name);
-    log("74");
 }

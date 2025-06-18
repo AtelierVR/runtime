@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -75,15 +76,16 @@ namespace Nox.CCK.Language {
 			if (Application.isPlaying)
 				return GetInPacks(language, key);
 
-			var                guids = UnityEditor.AssetDatabase.FindAssets("t:LanguagePack");
+			var guids = UnityEditor.AssetDatabase.FindAssets("t:LanguagePack");
+
 			List<LanguagePack> packs = new();
 			foreach (var guid in guids)
 				try {
 					var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
 					var pack = UnityEditor.AssetDatabase.LoadAssetAtPath<LanguagePack>(path);
 					if (pack) packs.Add(pack);
-				} catch {
-					// ignored
+				} catch (Exception e) {
+					Logger.LogException(e);
 				}
 
 			var value = GetInPacks(language, key, packs);
@@ -111,7 +113,9 @@ namespace Nox.CCK.Language {
 			var value = Get(language, key);
 			try {
 				return string.Format(value, args);
-			} catch { }
+			} catch (Exception e) {
+				Logger.LogException(e);
+			}
 
 			return value;
 		}
@@ -146,7 +150,7 @@ namespace Nox.CCK.Language {
 
 		public static string GetInPacks(string language, string key, List<LanguagePack> packs = null) {
 			packs ??= LanguagePacks;
-			for (int i = packs.Count - 1; i >= 0; i--) {
+			for (var i = packs.Count - 1; i >= 0; i--) {
 				if (!packs[i]) continue;
 				if (packs[i].TryGetLocalizedString(language, key, out string value))
 					return value;

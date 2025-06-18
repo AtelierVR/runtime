@@ -67,6 +67,20 @@ namespace api.nox.user {
 		public string GetServerAddress()
 			=> Server;
 
+		public bool Equals(IUserIdentifier other) {
+			var sameServer = other.IsLocal() && IsLocal()
+				|| !other.IsLocal()          && !IsLocal() && other.GetServerAddress() == GetServerAddress();
+			if (!sameServer) return false;
+			if (IsId() && other.IsId())
+				return GetId() == other.GetId();
+			if (IsUsername() && other.IsUsername())
+				return GetUsername() == other.GetUsername();
+			return false;
+		}
+
+		public bool Equals(string other)
+			=> Equals(FromString(other));
+
 		public static UserIdentifier FromBase(IUserIdentifier identifier) {
 			if (identifier == null) return null;
 			if (identifier.IsId())

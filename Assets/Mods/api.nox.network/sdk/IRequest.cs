@@ -28,6 +28,8 @@ namespace Nox.Network {
 
 		public void SetBody(string text, string contentType = null);
 
+		public void SetBody(byte[] data, string contentType = null);
+
 		public void SetMethod(string method);
 
 		public string GetMethod();

@@ -21,18 +21,18 @@ namespace api.nox.world {
 				.ToArray();
 
 		[NoxPublic(NoxAccess.Method)]
-		public ISceneDescription<BaseDescriptor>[] GetScenes() {
-			var scenes = new List<ISceneDescription<BaseDescriptor>> { MainScene };
+		public ISceneDescription<BaseSceneDescriptor>[] GetScenes() {
+			var scenes = new List<ISceneDescription<BaseSceneDescriptor>> { MainScene };
 			scenes.AddRange(
 				from t in SubScenes
 				where t != null
-				select t as ISceneDescription<BaseDescriptor>
+				select t as ISceneDescription<BaseSceneDescriptor>
 			);
 			return scenes.ToArray();
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public ISceneDescription<T> GetScene<T>(int index) where T : BaseDescriptor
+		public ISceneDescription<T> GetScene<T>(int index) where T : BaseSceneDescriptor
 			=> index switch {
 				0 when typeof(MainDescriptor) == typeof(T) => MainScene as ISceneDescription<T>,
 				_ when typeof(SubDescriptor)  == typeof(T) => GetSubScene(index - 1) as ISceneDescription<T>,
@@ -40,7 +40,7 @@ namespace api.nox.world {
 			};
 
 		[NoxPublic(NoxAccess.Method)]
-		public ISceneDescription<BaseDescriptor> GetScene(int index)
+		public ISceneDescription<BaseSceneDescriptor> GetScene(int index)
 			=> index == 0 ? GetMainScene() : GetSubScene(index);
 
 		[NoxPublic(NoxAccess.Method)]

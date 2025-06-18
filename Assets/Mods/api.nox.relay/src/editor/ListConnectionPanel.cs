@@ -10,7 +10,7 @@ using Nox.CCK.Utils;
 using UnityEngine.UIElements;
 
 namespace api.nox.relay.editor {
-	public class ListConnectionPanel : EditorPanelBuilder, IDisposable {
+	public class ListConnectionPanel : IEditorPanelBuilder, IDisposable {
 		public string GetId()
 			=> "list_connections";
 

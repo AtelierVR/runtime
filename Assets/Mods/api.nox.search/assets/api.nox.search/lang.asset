@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 776389e82c640c44086d3baf10dd1c7b, type: 3}
-  m_Name: langpack
-  m_EditorClassIdentifier: 
+  m_Name: lang
+  m_EditorClassIdentifier:
   languages:
   - IETF: fr-FR
     entries:
@@ -23,7 +23,7 @@ MonoBehaviour:
       value: "Info"
     - key: search.query.placeholder
       value: "Rechercher..."
-    - search.no_handler
+    - key: search.no_handler
       value: "Aucun gestionnaire de recherche trouvé"
     - key: search.worker.canceled
       value: "Annulée"
@@ -49,7 +49,7 @@ MonoBehaviour:
       value: "Info"
     - key: search.query.placeholder
       value: "Search..."
-    - search.no_handler
+    - key: search.no_handler
       value: "No search handler found"
     - key: search.worker.canceled
       value: "Search canceled"

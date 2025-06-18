@@ -262,7 +262,7 @@ namespace dev.nox.game_builder
         }
     }
 
-    public class BuildGamePanel : EditorPanelBuilder
+    public class BuildGamePanel : IEditorPanelBuilder
     {
         public string GetId() => "builder";
         public string GetName() => "Game/Builder";
@@ -277,8 +277,6 @@ namespace dev.nox.game_builder
             var child = GameBuilder.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("builder.uxml").CloneTree();
             child.style.flexGrow = 1;
             _root.Add(child);
-            _root.Q<Label>("version").text = "v" + GameBuilder.CoreAPI.ModMetadata.GetVersion();
-
             _root.Q<TextField>("build-folder").value = GameBuilder.BuildFolder;
             _root.Q<TextField>("build-folder")
                 .RegisterCallback<ChangeEvent<string>>(evt => GameBuilder.BuildFolder = evt.newValue);

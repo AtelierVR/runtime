@@ -1,45 +1,35 @@
-using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.Linq;
 using UnityEngine;
 
-namespace Nox.CCK.Language
-{
+namespace Nox.CCK.Language {
+	[CreateAssetMenu(fileName = "LanguagePack", menuName = "Nox/Language Pack", order = 1)]
+	public class LanguagePack : ScriptableObject {
+		[System.Serializable]
+		public class LanguageData {
+			public string IETF;
 
-    [CreateAssetMenu(fileName = "LanguagePack", menuName = "Nox/Language Pack", order = 1)]
-    public class LanguagePack : ScriptableObject
-    {
-        [System.Serializable]
-        public class LanguageData
-        {
-            public string IETF;
+			public List<LanguageEntry> entries = new();
+		}
 
-            public List<LanguageEntry> entries = new();
-        }
+		[System.Serializable]
+		public class LanguageEntry {
+			public string key;
+			public string value;
+		}
 
-        [System.Serializable]
-        public class LanguageEntry
-        {
-            public string key;
-            public string value;
-        }
+		public LanguageData[] languages;
 
-        public LanguageData[] languages;
+		public string GetLocalizedString(string key, string language)
+			=> (from lang in languages
+				where lang.IETF == language
+				from entry in lang.entries.Where(entry => entry.key == key)
+				select entry.value).FirstOrDefault();
 
-        public string GetLocalizedString(string key, string language)
-        {
-            foreach (var lang in languages)
-                if (lang.IETF == language)
-                    foreach (var entry in lang.entries)
-                        if (entry.key == key)
-                            return entry.value;
-            return null;
-        }
 
-        internal bool TryGetLocalizedString(string language, string key, out string value)
-        {
-            value = GetLocalizedString(key, language);
-            return value != null;
-        }
-    }
+		internal bool TryGetLocalizedString(string language, string key, out string value) {
+			value = GetLocalizedString(key, language);
+			return value != null;
+		}
+	}
 }

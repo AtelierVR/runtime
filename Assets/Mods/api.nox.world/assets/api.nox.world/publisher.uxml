@@ -1,118 +1,104 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
-    <Style src="project://database/Assets/Mods/api.nox.world/Resources/Style.uss?fileID=7433441132597879392&amp;guid=e5801f130c21d4a43937749c0d48a9cd&amp;type=3#Style" />
-    <engine:VisualElement style="flex-grow: 1; padding-top: 4px; padding-bottom: 4px;">
-        <engine:GroupBox style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;">
-            <engine:VisualElement style="flex-grow: 1; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); border-bottom-width: 1px; padding-bottom: 4px; padding-top: 4px; flex-direction: row; padding-right: 8px; padding-left: 8px;">
-                <engine:Label text="World Publisher" style="margin-right: 3px; margin-left: 3px; flex-grow: 1;" />
-                <engine:Label text="v0.0.0" name="version" />
-            </engine:VisualElement>
-            <engine:VisualElement style="flex-grow: 1; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); border-bottom-width: 1px; padding-bottom: 4px; padding-top: 4px; padding-right: 8px; padding-left: 8px;">
-                <editor:ObjectField label="Descriptor" type="Nox.CCK.Worlds.MainDescriptor, Nox.CCK" name="descriptor-field" class="disable-on-error" />
-            </engine:VisualElement>
-            <engine:VisualElement style="flex-grow: 1; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); border-bottom-width: 1px; padding-bottom: 4px; padding-top: 4px; padding-right: 8px; padding-left: 8px;">
-                <engine:Button text="Go to Builder tab" name="goto-builder" />
-                <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
-                    <engine:VisualElement name="notifications" style="flex-grow: 0; margin-top: auto; margin-right: auto; margin-bottom: auto; margin-left: auto; padding-top: 4px; padding-right: 4px; padding-bottom: 0; padding-left: 4px; flex-direction: row; flex-shrink: 0;" />
-                </engine:VisualElement>
-            </engine:VisualElement>
-        </engine:GroupBox>
-        <engine:ScrollView style="flex-grow: 1;">
-            <engine:VisualElement name="notifications" style="flex-grow: 1;">
-                <engine:VisualElement name="not-logged" style="flex-grow: 1; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-left-radius: 4px; border-top-right-radius: 4px; border-bottom-right-radius: 4px; border-bottom-left-radius: 4px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; margin-top: 2px; margin-bottom: 2px; display: flex;">
-                    <engine:Label text="You are not logged in. &#10;To publish on a server, you must be connected to the CCK or upload the world." style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px; white-space: normal;" />
-                    <engine:Button text="Login" name="goto-login" />
-                </engine:VisualElement>
-                <engine:VisualElement name="world-not-found" style="flex-grow: 1; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-left-radius: 4px; border-top-right-radius: 4px; border-bottom-right-radius: 4px; border-bottom-left-radius: 4px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; margin-top: 2px; margin-bottom: 2px; display: flex;">
-                    <engine:Label text="No world was found.&#10;This may be because you don&apos;t have permissions to modify the world or it doesn&apos;t exist." style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px; white-space: normal;" />
-                    <engine:Foldout text="Advanced settings" value="true" style="margin-top: 4px; margin-bottom: 4px;">
-                        <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
-                            <engine:Label text="Server" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                            <engine:TextField placeholder-text="(optional)" name="attach-server" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
-                        </engine:VisualElement>
-                        <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
-                            <engine:Label text="World Id" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                            <engine:TextField placeholder-text="(optional)" name="attach-id" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
-                        </engine:VisualElement>
-                    </engine:Foldout>
-                    <engine:Button text="Attach" name="attach-world" />
-                </engine:VisualElement>
-                <engine:VisualElement name="world" style="flex-grow: 1; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-left-radius: 4px; border-top-right-radius: 4px; border-bottom-right-radius: 4px; border-bottom-left-radius: 4px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; margin-top: 2px; margin-bottom: 2px; display: flex;">
-                    <engine:Label text="World Informations" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px; white-space: normal;" />
-                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
-                        <engine:Label text="Server" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:TextField name="info-server" readonly="true" class="cannot-change" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
-                    </engine:VisualElement>
-                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;">
-                        <engine:Label text="World Id" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:UnsignedIntegerField name="info-id" readonly="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
-                    </engine:VisualElement>
-                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
-                        <engine:Label text="Title" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:TextField name="info-title" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
-                    </engine:VisualElement>
-                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
-                        <engine:Label text="Description" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:TextField multiline="true" vertical-scroller-visibility="AlwaysVisible" name="info-description" class="cannot-change" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
-                    </engine:VisualElement>
-                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px; display: none;">
-                        <engine:Label text="Tags" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:ListView show-add-remove-footer="true" virtualization-method="DynamicHeight" selection-type="Single" show-border="true" show-foldout-header="false" show-bound-collection-size="true" name="info-tags" style="flex-grow: 1;" />
-                    </engine:VisualElement>
-                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;">
-                        <engine:Label text="Capacity" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:UnsignedIntegerField name="info-capacity" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-grow: 1;" />
-                    </engine:VisualElement>
-                    <engine:Foldout text="Advanced Options" value="false" style="margin-top: 4px; margin-bottom: 4px;">
-                        <engine:Button text="Delete World" name="info-delete" />
-                    </engine:Foldout>
-                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
-                        <engine:Button text="Fetch" name="info-fetch" style="flex-grow: 1;" />
-                        <engine:Button text="Update" name="info-update" style="flex-grow: 1;" />
-                        <engine:Button text="Detach" name="info-detach" />
-                    </engine:VisualElement>
-                </engine:VisualElement>
-                <engine:VisualElement name="world-asset" style="flex-grow: 1; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-left-radius: 4px; border-top-right-radius: 4px; border-bottom-right-radius: 4px; border-bottom-left-radius: 4px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; margin-top: 2px; margin-bottom: 2px;">
-                    <engine:Label text="World Asset Informations" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px; white-space: normal;" />
-                    <engine:VisualElement template="api.nox.world.notification" style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px;">
-                        <engine:GroupBox name="asset-file-assigned" style="margin-top: 2px; margin-right: 0; margin-left: 0; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-left-radius: 4px; border-top-right-radius: 4px; border-bottom-right-radius: 4px; border-bottom-left-radius: 4px; margin-bottom: 2px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; flex-direction: row;">
-                            <engine:VisualElement name="typing" style="flex-grow: 0; padding-top: 8px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px; border-right-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47);">
-                                <engine:Image name="assigned-icon" style="flex-grow: 0; width: 24px; height: 24px; flex-shrink: 0; margin-top: auto; margin-right: auto; margin-bottom: auto; margin-left: auto;" />
+    <Style src="project://database/Assets/Nox/ModLoader/Resources/nox.cck.style.uss?fileID=7433441132597879392&amp;guid=b86e17dc57cb40d2a131e93eab25a53d&amp;type=3#nox.cck.style" />
+    <engine:VisualElement class="parent-container">
+        <engine:VisualElement class="main-container">
+            <engine:GroupBox class="section">
+                <editor:ObjectField label="World Descriptor" type="Nox.CCK.Worlds.MainDescriptor, Nox.CCK" name="descriptor-field" class="disable-on-error large readonly" />
+            </engine:GroupBox>
+            <engine:ScrollView class="border border-top" style="flex-grow: 1;">
+                <engine:GroupBox name="notifications" class="p-0 m-0">
+                    <engine:VisualElement name="not-logged" class="section border border-bottom" style="display: none;">
+                        <engine:VisualElement class="notification notification-warning">
+                            <engine:VisualElement class="icon-container">
+                                <engine:VisualElement name="icon" class="icon" />
                             </engine:VisualElement>
-                            <engine:VisualElement style="flex-grow: 1; padding-top: 8px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px; flex-wrap: wrap;">
-                                <engine:VisualElement name="content" style="flex-grow: 0; flex-shrink: 1; margin-top: auto; margin-right: 0; margin-bottom: auto; margin-left: 0;">
-                                    <engine:Label text="Please note that an asset with this version and platform already has a file assigned to it. To remove the assignment, you can “Clear Asset” in the advanced options." style="margin-top: 1px; margin-right: 3px; margin-bottom: 4px; margin-left: 3px; white-space: normal;" />
+                            <engine:VisualElement style="flex-grow: 1; justify-content: center;">
+                                <engine:VisualElement name="content">
+                                    <engine:Label text="You are not logged in.\nTo publish on a server, you must be connected to the CCK or upload the world." style="white-space: pre-wrap;" />
                                 </engine:VisualElement>
                             </engine:VisualElement>
-                            <engine:VisualElement name="actions" style="flex-grow: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); border-left-width: 1px; display: none;">
-                                <engine:VisualElement name="actionbox" style="flex-grow: 0; margin-top: auto; margin-right: auto; margin-bottom: auto; margin-left: auto; flex-shrink: 0;" />
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+                    <engine:GroupBox name="world-not-found" class="p-0 m-0 border border-bottom">
+                        <engine:Foldout text="Attach World" class="section">
+                            <engine:Label text="No world was found.\nThis may be because you don&apos;t have permissions to modify the world or it doesn&apos;t exist." class="label subtitle" style="white-space: pre-wrap;" />
+                            <engine:Foldout text="Advanced settings" value="false" style="margin-top: 8px;">
+                                <engine:TextField label="Server" placeholder-text="(optional)" name="attach-server" class="large" />
+                                <engine:UnsignedIntegerField placeholder-text="(optional)" name="attach-id" label="World id" class="large" />
+                            </engine:Foldout>
+                            <engine:Button text="Attach" name="attach-world" class="large" style="margin-top: 8px;" />
+                        </engine:Foldout>
+                    </engine:GroupBox>
+                    <engine:GroupBox name="world" class="p-0 m-0 border border-bottom">
+                        <engine:Foldout text="World Informations" value="true" class="section">
+                            <engine:Label text="View and edit world details, capacity, and metadata" class="subtitle" />
+                            <engine:TextField label="Server" placeholder-text="::" name="info-server" readonly="true" class="large" />
+                            <engine:UnsignedIntegerField label="World Id" value="0" readonly="true" name="info-id" class="large" />
+                            <engine:TextField label="Title" name="info-title" class="large" style="margin-top: 8px;" />
+                            <engine:TextField label="Description" name="info-description" multiline="true" class="large multiline" />
+                            <engine:UnsignedIntegerField label="Capacity" value="0" name="info-capacity" class="large" />
+                            <engine:Foldout text="Thumbnail" value="true" style="margin-top: 8px; display: flex;">
+                                <engine:Label text="Upload a thumbnail image for your world" class="subtitle" />
+                                <engine:VisualElement style="flex-direction: row; margin-top: 4px;">
+                                    <editor:ObjectField label="Thumbnail" type="UnityEngine.Texture2D, UnityEngine.CoreModule" name="thumbnail-field" class="large" style="flex-grow: 1; margin-right: 2px;" />
+                                    <engine:Button text="Upload" name="thumbnail-upload" class="large" style="margin-left: 2px;" />
+                                </engine:VisualElement>
+                                <engine:VisualElement name="thumbnail-preview" style="margin-top: 8px; align-items: center; justify-content: center; min-height: 100px; background-color: rgba(0, 0, 0, 0.1); border-radius: 4px; padding-top: 8px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px;">
+                                    <engine:Image name="thumbnail-image" style="max-width: 200px; max-height: 200px; margin-bottom: 4px; -unity-background-scale-mode: scale-to-fit; display: none;" />
+                                    <engine:Label text="No thumbnail preview available" name="thumbnail-status" style="color: rgba(255, 255, 255, 0.6);" />
+                                    <engine:Button text="Fix Automatically" name="thumbnail-fix-button" class="large" style="display: none; margin-top: 4px;" />
+                                </engine:VisualElement>
+                            </engine:Foldout>
+                            <engine:Foldout text="Advanced Options" value="false" style="margin-bottom: 8px; margin-top: 8px;">
+                                <engine:Button text="Delete World" name="info-delete" class="large" />
+                            </engine:Foldout>
+                            <engine:VisualElement style="flex-direction: row;">
+                                <engine:Button text="Fetch" name="info-fetch" class="large" style="flex-grow: 1; margin-right: 1px;" />
+                                <engine:Button text="Update" name="info-update" class="large" style="flex-grow: 1; margin-left: 1px; margin-right: 1px;" />
+                                <engine:Button text="Detach" name="info-detach" class="large" style="margin-left: 1px;" />
                             </engine:VisualElement>
-                        </engine:GroupBox>
+                        </engine:Foldout>
+                    </engine:GroupBox>
+                    <engine:GroupBox name="world-asset" class="p-0 m-0 border border-bottom">
+                        <engine:Foldout text="Asset Versioning" value="false" class="section">
+                            <engine:Label text="Manage asset versions and publication settings" class="subtitle" />
+                            <engine:VisualElement name="asset-file-assigned" class="notification">
+                                <engine:VisualElement class="icon-container">
+                                    <engine:VisualElement name="icon" class="icon" />
+                                </engine:VisualElement>
+                                <engine:VisualElement style="flex-grow: 1; justify-content: center;">
+                                    <engine:VisualElement name="content">
+                                        <engine:Label text="Please note that an asset with this version and platform already has a file assigned to it. To remove the assignment, you can &apos;Clear Asset&apos; in the advanced options.&#10;" style="white-space: pre-wrap;" />
+                                    </engine:VisualElement>
+                                </engine:VisualElement>
+                            </engine:VisualElement>
+                            <engine:UnsignedIntegerField label="Version" value="0" name="asset-version" class="large" />
+                            <engine:Foldout text="Advanced Options" value="true" style="margin-bottom: 8px; margin-top: 8px;">
+                                <engine:Toggle label="Publication only if there is no assigned file to it" name="asset-strict" value="true" class="large" />
+                                <engine:Toggle label="Auto-increment, if asset has a file assigned to it" name="asset-auto-version" class="large" />
+                                <engine:Button text="Delete Asset" name="asset-delete" class="large" />
+                                <engine:Button text="Clear Asset" name="asset-clear" class="large" />
+                            </engine:Foldout>
+                            <engine:VisualElement style="flex-direction: row;">
+                                <engine:Button text="Fetch" name="asset-fetch" class="large" style="flex-grow: 1;" />
+                                <engine:Button text="Detect last version" name="asset-detect-version" class="large" />
+                            </engine:VisualElement>
+                        </engine:Foldout>
+                    </engine:GroupBox>
+                </engine:GroupBox>
+            </engine:ScrollView>
+            <engine:GroupBox class="p-0 m-0 border border-top">
+                <engine:Foldout text="Build" value="false" class="section">
+                    <engine:Label text="Configure target platform and start the build process" class="subtitle" />
+                    <engine:VisualElement style="flex-direction: row;">
+                        <engine:EnumField label="Target" value="Center" type="Nox.CCK.Utils.Platform, Nox.CCK" name="platform-field" class="large" style="flex-grow: 1; margin-right: 1px;" />
+                        <engine:Button text="Detect" name="detect-platform" class="large" style="margin-left: 1px;" />
                     </engine:VisualElement>
-                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
-                        <engine:Label text="Version" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:UnsignedIntegerField name="asset-version" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+                    <engine:VisualElement style="margin-top: 8px;">
+                        <engine:Button text="Build" name="build-button" class="large" />
                     </engine:VisualElement>
-                    <engine:Foldout text="Advanced Options" value="false" style="margin-top: 4px; margin-bottom: 4px;">
-                        <engine:Toggle label="Publication only if there is no assigned file to it" name="asset-strict" style="flex-direction: row-reverse;" />
-                        <engine:Toggle label="Auto-increment, if asset has a file assigned to it" name="asset-auto-version" style="margin-bottom: 7px; flex-direction: row-reverse;" />
-                        <engine:Button text="Delete Asset" name="asset-delete" />
-                        <engine:Button text="Clear Asset" name="asset-clear" />
-                    </engine:Foldout>
-                    <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
-                        <engine:Button text="Fetch" name="asset-fetch" style="flex-grow: 1;" />
-                        <engine:Button text="Detect last version" name="asset-detect-version" />
-                    </engine:VisualElement>
-                </engine:VisualElement>
-            </engine:VisualElement>
-        </engine:ScrollView>
-        <engine:GroupBox name="building" style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;">
-            <engine:VisualElement style="flex-grow: 0; flex-direction: row; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); padding-top: 4px; padding-bottom: 4px; border-top-width: 1px; padding-right: 8px; padding-left: 8px;">
-                <engine:EnumField label="Build Platform" name="platform-field" class="disable-on-error" style="flex-grow: 1;" />
-                <engine:Button text="Detect" name="detect-platform" class="disable-on-error" />
-            </engine:VisualElement>
-            <engine:VisualElement style="flex-grow: 0; padding-top: 4px; border-top-width: 1px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); padding-bottom: 4px; flex-wrap: nowrap; padding-right: 8px; padding-left: 8px;">
-                <engine:Button text="Build and publish" name="publish-button" class="disable-on-error" />
-            </engine:VisualElement>
-        </engine:GroupBox>
+                </engine:Foldout>
+            </engine:GroupBox>
+        </engine:VisualElement>
     </engine:VisualElement>
 </engine:UXML>

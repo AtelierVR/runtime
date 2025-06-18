@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using api.nox.world.editor;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using Nox.CCK.Worlds;
 using UnityEngine.SceneManagement;
@@ -7,7 +9,7 @@ using Nox.Worlds;
 using UnityEngine;
 
 namespace api.nox.world {
-	public class BaseScene<T> : ISceneDescription<T>, INoxObject where T : BaseDescriptor {
+	public class BaseScene<T> : ISceneDescription<T>, INoxObject where T : BaseSceneDescriptor {
 		internal SceneGroup             SceneGroup;
 		internal Scene                  Scene;
 		internal GameObject             Anchor;
@@ -25,26 +27,29 @@ namespace api.nox.world {
 			=> Scene;
 
 
-		public int MakeInstance() {
+		public async UniTask<int> MakeInstance() {
 			if (!Prefab)
 				return -1;
 
 			Prefab.SetActive(false);
-			var container = Object.Instantiate(Prefab);
-			if (!container)
+			var container = await Object.InstantiateAsync(Prefab);
+			if (container.Length != 1) {
+				foreach (var go in container)
+					Object.Destroy(go);
 				return -1;
+			}
 
-			SceneManager.MoveGameObjectToScene(container, Scene);
+			SceneManager.MoveGameObjectToScene(container[0], Scene);
 
 			var instance = new InstanceScene<T> {
-				Container  = container,
-				Descriptor = BaseDescriptor.TryGetDescriptor(container, out T desc) ? desc : null,
+				Container  = container[0],
+				Descriptor = SceneDescriptorExtension.TryGetDescriptor(container[0], out T desc) ? desc : null,
 			};
-			
-			container.name = $"{GetType().Name}_{instance.GetId()}]";
+
+			container[0].name = $"{GetType().Name}_{instance.GetId()}]";
 
 			if (!instance.Descriptor) {
-				Object.Destroy(container);
+				Object.Destroy(container[0]);
 				return -1;
 			}
 

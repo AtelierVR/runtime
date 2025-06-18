@@ -42,7 +42,7 @@ namespace api.nox.world
 
     public enum NotificationType
     {
-        Good,
+        Success,
         Warning,
         Error,
         Info

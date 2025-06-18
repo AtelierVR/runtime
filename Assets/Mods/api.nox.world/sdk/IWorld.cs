@@ -16,6 +16,8 @@ namespace Nox.Worlds {
 		
 		public string GetOwnerId();
 		
+		public string[] GetContributorIds();
+		
 		public string GetThumbnailUrl();
 		
 		public UniTask<IWorld> Refresh();

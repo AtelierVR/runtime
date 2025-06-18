@@ -12,7 +12,7 @@ namespace api.nox.network {
 			=> error;
 
 		public bool HasError()
-			=> error is { status: > 0 };
+			=> error is { status: > 0 } or { code: > 0 };
 
 		public bool HasData()
 			=> data != null;

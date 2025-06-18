@@ -1,26 +1,26 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
 
-namespace Nox.CCK.Mods.Panels
-{
-    public interface EditorPanelBuilder
-    {
-        public string GetId();
-        public string GetName();
-        public bool IsHidden();
+namespace Nox.CCK.Mods.Panels {
+	public interface IEditorPanelBuilder {
+		public string GetId();
+		public string GetName();
 
-        public VisualElement Make(Dictionary<string, object> data);
+		public string GetTitle()
+			=> null;
 
-        public void OnUpdate()
-        {
-        }
+		public VisualElement[] GetHeaders()
+			=> Array.Empty<VisualElement>();
 
-        public void OnHidden()
-        {
-        }
+		public bool IsHidden();
 
-        public void OnVisible()
-        {
-        }
-    }
+		public VisualElement Make(Dictionary<string, object> data);
+
+		public void OnUpdate() { }
+
+		public void OnHidden() { }
+
+		public void OnVisible() { }
+	}
 }

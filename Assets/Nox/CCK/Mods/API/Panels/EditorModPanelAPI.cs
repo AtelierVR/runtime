@@ -13,7 +13,7 @@ namespace Nox.CCK.Mods.Panels
         public bool HasPanel(EditorPanel panel);
         public bool HasPanel(string panelId);
 
-        public EditorPanel AddLocalPanel(EditorPanelBuilder panel);
+        public EditorPanel AddLocalPanel(IEditorPanelBuilder panel);
         public bool RemoveLocalPanel(EditorPanel panel);
         public bool RemoveLocalPanel(string panelId);
         public bool HasLocalPanel(EditorPanel panel);
