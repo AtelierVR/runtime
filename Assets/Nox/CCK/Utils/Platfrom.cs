@@ -83,7 +83,6 @@ namespace Nox.CCK.Utils {
 		#if UNITY_EDITOR
 		public static Platform GetPlatform(this BuildTarget target)
 			=> target switch {
-				BuildTarget.StandaloneWindows   => Platform.Windows,
 				BuildTarget.StandaloneWindows64 => Platform.Windows,
 				BuildTarget.StandaloneLinux64   => Platform.Linux,
 				BuildTarget.StandaloneOSX       => Platform.MacOS,
