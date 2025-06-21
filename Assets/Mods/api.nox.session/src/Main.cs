@@ -69,15 +69,9 @@ namespace api.nox.session {
 			_currentId = id;
 			nSession?.OnSelect(oSession);
 
-			var localPlayer       = nSession?.GetAdapter().GetLocalPlayer();
-			var currentController = ControllerAPI.GetCurrent();
-
-			var b = currentController.GetParts();
-			if (b.TryGetValue(PlayerRig.Base.ToIndex(), out var tr))
-				tr.SetPositionAndRotation(
-					localPlayer?.GetPosition() ?? Vector3.zero,
-					localPlayer?.GetRotation() ?? Quaternion.identity
-				);
+			if (nSession != null)
+				ControllerAPI.GetCurrent()
+					.SetPlayer(nSession.GetAdapter().GetLocalPlayer());
 
 			CoreAPI.EventAPI.Emit("session_current_changed", nSession, oSession);
 		}
@@ -102,16 +96,6 @@ namespace api.nox.session {
 			} while (_sessions.Any(s => s.Id == i));
 
 			return _nextId = i;
-		}
-
-		public void OnUpdateMain() {
-			var currentSession    = GetCurrent();
-			var localPlayer       = currentSession?.GetAdapter().GetLocalPlayer();
-			var currentController = ControllerAPI.GetCurrent();
-			if (localPlayer == null || currentController == null) return;
-			var b = currentController.GetParts();
-			localPlayer.SetPosition(b.TryGetValue(0, out var value) ? value.position : Vector3.zero);
-			localPlayer.SetRotation(b.TryGetValue(0, out value) ? value.rotation : Quaternion.identity);
 		}
 	}
 }

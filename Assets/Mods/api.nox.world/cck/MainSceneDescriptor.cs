@@ -24,8 +24,7 @@ namespace Nox.CCK.Worlds {
 				?? Array.Empty<SceneAsset>();
 		#else
 		public string[] GetScenes() 
-			=> scenes 
-				?? Array.Empty<string>();
+			=> scenes ?? Array.Empty<string>();
 		#endif
 
 		#endregion
@@ -37,6 +36,21 @@ namespace Nox.CCK.Worlds {
 		public uint     publishId;
 		public string   publishServer;
 		public uint     publishVersion;
+		#endif
+
+		#endregion
+
+		#region Build
+
+		#if UNITY_EDITOR
+		public override void Compile() {
+			if (target == Platform.None)
+				target = PlatformExtensions.CurrentPlatform;
+			sceneAssets = this.EstimateScenes().Values.ToList();
+			sceneAssets.RemoveAt(0);
+			scenes = GetScenes().ToArray();
+			base.Compile();
+		}
 		#endif
 
 		#endregion

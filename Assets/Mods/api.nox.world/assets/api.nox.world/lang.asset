@@ -32,7 +32,7 @@ MonoBehaviour:
     - key: world.builder.no_build_platform
       value: "No build platform selected.\nA build platform is required."
     - key: world.builder.use_active_platform
-      value: "No build platform selected.\nThe builder will use the current active platform."
+      value: "No build platform selected.\nThe builder will use the current active platform ({0})."
     - key: world.builder.unsupported_platform
       value: "Platform {0} is not supported.\nPlease select a supported platform."
     - key: world.builder.use_supported
@@ -75,10 +75,18 @@ MonoBehaviour:
       value: "Exit"
     - key: world.builder.detect
       value: "Detect"
+    - key: world.builder.platform_mismatch
+      value: "Platform mismatch detected.\nCurrent Unity platform: {0}\nWorld target platform: {1}"
+    - key: world.builder.use_current
+      value: "Use Current"
+    - key: world.builder.switch_platform
+      value: "Switch Platform"
     - key: world.builder.error_no_descriptor
       value: "No world descriptor found."
     - key: world.builder.error_unsupported_target
       value: "Unsupported build target."
+    - key: world.builder.error_no_output_folder
+      value: "No output folder specified."
     - key: world.builder.error_platform_not_supported
       value: "{0} is not supported."
     - key: world.builder.success_build
@@ -125,6 +133,22 @@ MonoBehaviour:
       value: "Load & Play"
     - key: world.loader.no_results
       value: "No world files found matching the filter."
+    - key: world.title
+      value: "{0}"
+    - key: world.identifier
+      value: "{0}"
+    - key: world.builder.error_already_building
+      value: "A build is already in progress."
+    - key: world.builder.error_editor_compiling
+      value: "Unity is currently compiling scripts. Please wait until compilation is complete."
+    - key: world.builder.error_editor_playing
+      value: "Unity is currently in play mode. Please stop playing before building."
+    - key: world.builder.error_invalid_target
+      value: "Invalid build target specified."
+    - key: world.builder.error_invalid_scene
+      value: "The scene is not valid for building."
+    - key: world.builder.error_unknown
+      value: "An unknown error occurred during the build process."
   - IETF: fr-FR
     entries:
     - key: world.search.data.title
@@ -144,7 +168,7 @@ MonoBehaviour:
     - key: world.builder.no_build_platform
       value: "Aucune plateforme de construction sélectionnée.\nUne plateforme de construction est requise."
     - key: world.builder.use_active_platform
-      value: "Aucune plateforme de construction sélectionnée.\nLe constructeur utilisera la plateforme active actuelle."
+      value: "Aucune plateforme de construction sélectionnée.\nLe constructeur utilisera la plateforme active actuelle ({0})."
     - key: world.builder.unsupported_platform
       value: "La plateforme {0} n'est pas supportée.\nVeuillez sélectionner une plateforme supportée."
     - key: world.builder.use_supported
@@ -187,10 +211,18 @@ MonoBehaviour:
       value: "Sortir"
     - key: world.builder.detect
       value: "Détecter"
+    - key: world.builder.platform_mismatch
+      value: "Désynchronisation de plateforme détectée.\nPlateforme Unity actuelle: {0}\nPlateforme cible du monde: {1}"
+    - key: world.builder.use_current
+      value: "Utiliser Actuelle"
+    - key: world.builder.switch_platform
+      value: "Changer Plateforme"
     - key: world.builder.error_no_descriptor
       value: "Aucun descripteur de monde trouvé."
     - key: world.builder.error_unsupported_target
       value: "Cible de construction non supportée."
+    - key: world.builder.error_no_output_folder
+      value: "Aucun dossier de sortie spécifié."
     - key: world.builder.error_platform_not_supported
       value: "{0} n'est pas supporté."
     - key: world.builder.success_build
@@ -237,4 +269,20 @@ MonoBehaviour:
       value: "Charger & Jouer"
     - key: world.loader.no_results
       value: "Aucun fichier de monde trouvé correspondant au filtre."
+    - key: world.title
+      value: "{0}"
+    - key: world.identifier
+      value: "{0}"
+    - key: world.builder.error_already_building
+      value: "Une construction est déjà en cours."
+    - key: world.builder.error_editor_compiling
+      value: "Unity compile actuellement des scripts. Veuillez attendre que la compilation soit terminée."
+    - key: world.builder.error_editor_playing
+      value: "Unity est actuellement en mode lecture. Veuillez arrêter la lecture avant de construire."
+    - key: world.builder.error_invalid_target
+      value: "Cible de construction invalide spécifiée."
+    - key: world.builder.error_invalid_scene
+      value: "La scène n'est pas valide pour la construction."
+    - key: world.builder.error_unknown
+      value: "Une erreur inconnue s'est produite pendant le processus de construction."
 

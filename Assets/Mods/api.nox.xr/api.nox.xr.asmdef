@@ -8,7 +8,9 @@
     "Unity.XR.Management",
     "AutoHandAssembly",
     "NaughtyAttributes.Core",
-    "NaughtyAttributes.Editor"
+    "NaughtyAttributes.Editor",
+    "Nox.Players",
+    "Nox.Entities"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

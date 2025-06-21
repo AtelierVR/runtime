@@ -1,6 +1,6 @@
+using Newtonsoft.Json.Linq;
 using Nox.CCK.Utils;
 using Nox.Worlds;
-using Unity.Plastic.Newtonsoft.Json.Linq;
 
 namespace api.nox.world.network {
 	public class CreateWorldRequest : INoxObject, ICreateWorldRequest {

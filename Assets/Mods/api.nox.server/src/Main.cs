@@ -88,7 +88,9 @@ namespace api.nox.server {
 			Instance = null;
 		}
 
-		public async UniTask<IServer> Fetch(string from = null)
-			=> null;
+		public async UniTask<IServer> Fetch(string from = null) {
+			await UniTask.Yield();
+			return null;
+		}
 	}
 }

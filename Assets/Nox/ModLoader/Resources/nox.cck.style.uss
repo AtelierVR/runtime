@@ -255,14 +255,6 @@
     flex-grow: 1;
 }
 
-.notification-warning .notification {
-    background-color: rgb(255, 193, 7);
-    border-left-color: rgb(201, 151, 0);
-    border-right-color: rgb(201, 151, 0);
-    border-top-color: rgb(201, 151, 0);
-    border-bottom-color: rgb(201, 151, 0);
-}
-
 .notification-warning.notification {
     background-color: rgb(255, 193, 7);
     border-left-color: rgb(201, 151, 0);
@@ -271,7 +263,15 @@
     border-bottom-color: rgb(201, 151, 0);
 }
 
-.notification-error .notification {
+.notification-warning .notification {
+    background-color: rgb(255, 193, 7);
+    border-left-color: rgb(201, 151, 0);
+    border-right-color: rgb(201, 151, 0);
+    border-top-color: rgb(201, 151, 0);
+    border-bottom-color: rgb(201, 151, 0);
+}
+
+.notification-error.notification {
     background-color: rgb(255, 83, 74);
     border-left-color: rgb(177, 12, 12);
     border-right-color: rgb(177, 12, 12);
@@ -279,7 +279,7 @@
     border-bottom-color: rgb(177, 12, 12);
 }
 
-.notification-error.notification {
+.notification-error .notification {
     background-color: rgb(255, 83, 74);
     border-left-color: rgb(177, 12, 12);
     border-right-color: rgb(177, 12, 12);
@@ -384,6 +384,13 @@
     padding-left: 8px;
 }
 
+.large.unity-base-field .unity-object-field__input {
+    padding-top: 4px;
+    padding-right: 8px;
+    padding-bottom: 4px;
+    padding-left: 8px;
+}
+
 .large.unity-base-field .unity-base-text-field__input {
     padding-top: 4px;
     padding-right: 8px;
@@ -391,7 +398,7 @@
     padding-left: 8px;
 }
 
-.large.unity-base-field .unity-object-field__input {
+.large.unity-base-field .unity-enum-field__input {
     padding-top: 4px;
     padding-right: 8px;
     padding-bottom: 4px;
@@ -474,4 +481,18 @@
 
 .readonly .unity-object-field__selector {
     display: none;
+}
+
+.notification-warning .notification * {
+    color: rgb(51, 51, 51);
+    -unity-background-image-tint-color: rgb(51, 51, 51);
+}
+
+.notification-warning.notification * {
+    color: rgb(51, 51, 51);
+    -unity-background-image-tint-color: rgb(51, 51, 51);
+}
+
+.large.unity-progress-bar .unity-progress-bar__background {
+    height: 24px;
 }

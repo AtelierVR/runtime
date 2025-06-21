@@ -5,12 +5,13 @@
         "Nox.CCK",
         "UniTask",
         "Nox.Worlds",
-        "Nox.Worlds.Components",
         "Nox.Search",
         "Nox.Network",
         "Nox.Users",
         "Nox.CCK.Worlds",
-        "Nox.UI"
+        "Nox.UI",
+        "Unity.ScriptableBuildPipeline.Editor",
+        "Unity.ScriptableBuildPipeline"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

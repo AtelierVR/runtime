@@ -8,6 +8,7 @@ using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
 using Nox.Controllers;
+using Nox.Players;
 
 namespace api.nox.xr {
 	public class XRController : MonoBehaviour, IController, INoxObject {
@@ -113,6 +114,9 @@ namespace api.nox.xr {
 		public void Restore(IController controller) {
 			foreach (var ability in controller.GetAbilities())
 				SetAbilities(ability.Key, ability.Value);
+			var p = controller.GetPlayer();
+			controller.SetPlayer(null);
+			SetPlayer(p);
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -157,6 +161,32 @@ namespace api.nox.xr {
 				{ PlayerRig.LeftHand.ToIndex(), player.handLeft.transform },
 				{ PlayerRig.RightHand.ToIndex(), player.handRight.transform }
 			};
+		
+		private IPlayer _attachedPlayer;
+
+		[NoxPublic(NoxAccess.Method)]
+		public void SetPlayer(IPlayer p) {
+			_attachedPlayer = p;
+			if (p == null) return;
+			SynchronizeControllerFromPlayer();
+		}
+
+		[NoxPublic(NoxAccess.Method)]
+		public IPlayer GetPlayer()
+			=> _attachedPlayer;
+
+		private void Update() {
+			SynchronizePlayerFromController();
+		}
+
+		private void SynchronizePlayerFromController() {
+			_attachedPlayer?.SetPosition(transform.position);
+		}
+
+		private void SynchronizeControllerFromPlayer() {
+			if (_attachedPlayer == null) return;
+			transform.position = _attachedPlayer.GetPosition();
+		}
 
 		/// <summary>
 		/// When the player is currently flying, the value is true.

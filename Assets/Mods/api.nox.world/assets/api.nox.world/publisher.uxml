@@ -87,15 +87,19 @@
                     </engine:GroupBox>
                 </engine:GroupBox>
             </engine:ScrollView>
+            <engine:GroupBox name="progress-container" class="border border-top section" style="display: none;">
+                <engine:Label text="Building..." name="progress-label" class="subtitle" />
+                <engine:ProgressBar name="progress-bar" class="large" />
+            </engine:GroupBox>
             <engine:GroupBox class="p-0 m-0 border border-top">
-                <engine:Foldout text="Build" value="false" class="section">
-                    <engine:Label text="Configure target platform and start the build process" class="subtitle" />
+                <engine:Foldout text="Publish" value="false" class="section">
+                    <engine:Label text="Build and upload your world to the server" class="subtitle" />
                     <engine:VisualElement style="flex-direction: row;">
                         <engine:EnumField label="Target" value="Center" type="Nox.CCK.Utils.Platform, Nox.CCK" name="platform-field" class="large" style="flex-grow: 1; margin-right: 1px;" />
                         <engine:Button text="Detect" name="detect-platform" class="large" style="margin-left: 1px;" />
                     </engine:VisualElement>
                     <engine:VisualElement style="margin-top: 8px;">
-                        <engine:Button text="Build" name="build-button" class="large" />
+                        <engine:Button text="Publish" name="publish-button" class="large" />
                     </engine:VisualElement>
                 </engine:Foldout>
             </engine:GroupBox>

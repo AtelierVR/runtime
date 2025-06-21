@@ -6,7 +6,9 @@
     "Nox.Controllers",
     "Nox.KeyBindings",
     "Unity.InputSystem",
-    "Nox.UI"
+    "Nox.UI",
+    "Nox.Players",
+    "Nox.Entities"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

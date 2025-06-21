@@ -9,7 +9,7 @@ namespace api.nox.world {
 		public uint     version;
 		public string   engine;
 		public string   platform;
-		public bool?    is_empty;
+		public bool     is_empty;
 		public string   url;
 		public string   hash;
 		public uint?    size;
@@ -29,7 +29,7 @@ namespace api.nox.world {
 			=> platform;
 
 		public bool IsEmpty()
-			=> is_empty ?? false;
+			=> is_empty;
 
 		public string GetUrl()
 			=> url;

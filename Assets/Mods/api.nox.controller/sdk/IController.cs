@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Nox.CCK.Players;
+using Nox.Players;
 using UnityEngine;
 
 namespace Nox.Controllers {
@@ -69,5 +70,9 @@ namespace Nox.Controllers {
 		/// <param name="key"></param>
 		/// <param name="value"></param>
 		public void SetAbilities(string key, object value);
+
+		public IPlayer GetPlayer();
+
+		public void SetPlayer(IPlayer player);
 	}
 }

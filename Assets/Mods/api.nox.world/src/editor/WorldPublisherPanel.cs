@@ -1,9 +1,12 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using api.nox.world.builder;
 using api.nox.world.network;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Language;
 using Nox.CCK.Worlds;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -37,6 +40,12 @@ namespace api.nox.world {
 		}
 
 		private readonly VisualElement _root = new();
+
+		// Cache for UI elements to avoid repeated queries
+		private VisualElement _progressContainer;
+		private ProgressBar   _progressBar;
+		private Label         _progressLabel;
+		private Button        _publishButton;
 
 		private DisplayFlags _displayFlags;
 		private DisplayFlags _lastDisplay;
@@ -151,13 +160,14 @@ namespace api.nox.world {
 				_world = null;
 				return null;
 			}
+
 			SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
-		descriptor.publishId     = world.GetId();
-		descriptor.publishServer = world.GetServerAddress();
-		EditorUtility.SetDirty(descriptor);
-		_world = world;
-		UpdateWorld();
-		return world;
+			descriptor.publishId     = world.GetId();
+			descriptor.publishServer = world.GetServerAddress();
+			EditorUtility.SetDirty(descriptor);
+			_world = world;
+			UpdateWorld();
+			return world;
 		}
 
 		private void UpdateWorld() {
@@ -208,102 +218,115 @@ namespace api.nox.world {
 			}
 
 			var thumbnailPreview = _root.Q<VisualElement>("thumbnail-preview");
-			var thumbnailStatus = _root.Q<Label>("thumbnail-status");
-			
+			var thumbnailStatus  = _root.Q<Label>("thumbnail-status");
+
 			if (thumbnailPreview != null && thumbnailStatus != null) {
 				if (_world != null) {
 					// Try to download and display the current thumbnail from server
 					DownloadAndDisplayThumbnail().Forget();
 				} else {
-					thumbnailStatus.text = "No world attached";
+					thumbnailStatus.text        = "No world attached";
 					thumbnailStatus.style.color = new StyleColor(new UnityEngine.Color(1f, 1f, 1f, 0.6f));
 				}
 			}
 		}
 
-	private async UniTask DownloadAndDisplayThumbnail() {
-		var thumbnailPreview = _root.Q<VisualElement>("thumbnail-preview");
-		var thumbnailStatus = _root.Q<Label>("thumbnail-status");
-		var thumbnailImage = _root.Q<Image>("thumbnail-image");
-		var thumbnailFixButton = _root.Q<Button>("thumbnail-fix-button");
-		
-		if (thumbnailPreview == null || thumbnailStatus == null || thumbnailImage == null || thumbnailFixButton == null || _world == null) return;
+		private async UniTask DownloadAndDisplayThumbnail() {
+			var thumbnailPreview   = _root.Q<VisualElement>("thumbnail-preview");
+			var thumbnailStatus    = _root.Q<Label>("thumbnail-status");
+			var thumbnailImage     = _root.Q<Image>("thumbnail-image");
+			var thumbnailFixButton = _root.Q<Button>("thumbnail-fix-button");
 
-		try {
-			var thumbnailUrl = _world.GetThumbnailUrl();
-			
-			if (!string.IsNullOrEmpty(thumbnailUrl)) {
-				// Show loading state
-				thumbnailStatus.text = "Loading thumbnail...";
-				thumbnailPreview.RemoveFromClassList("thumbnail-error");
-				thumbnailPreview.RemoveFromClassList("thumbnail-warning");
-				thumbnailPreview.RemoveFromClassList("thumbnail-success");
-				thumbnailPreview.AddToClassList("thumbnail-loading");
-				
-				thumbnailImage.style.display = DisplayStyle.None;
-				thumbnailFixButton.style.display = DisplayStyle.None;
-				thumbnailStatus.style.display = DisplayStyle.Flex;
-				
-				var texture = await Main.Instance.NetworkAPI.FetchTexture(thumbnailUrl);
-				
-				if (texture != null) {
-					// Display the downloaded thumbnail
-					thumbnailImage.image = texture;
-					thumbnailImage.scaleMode = ScaleMode.ScaleToFit;
-					thumbnailImage.style.width = 100;
-					thumbnailImage.style.height = 100;
-					thumbnailImage.style.maxWidth = 200;
-					thumbnailImage.style.maxHeight = 200;
-					
-					thumbnailStatus.text = $"Current thumbnail - {texture.width}x{texture.height}";
+			if (thumbnailPreview == null || thumbnailStatus == null || thumbnailImage == null || thumbnailFixButton == null || _world == null) return;
+
+			try {
+				var thumbnailUrl = _world.GetThumbnailUrl();
+
+				if (!string.IsNullOrEmpty(thumbnailUrl)) {
+					// Show loading state
+					thumbnailStatus.text = "Loading thumbnail...";
+					thumbnailPreview.RemoveFromClassList("thumbnail-error");
+					thumbnailPreview.RemoveFromClassList("thumbnail-warning");
+					thumbnailPreview.RemoveFromClassList("thumbnail-success");
+					thumbnailPreview.AddToClassList("thumbnail-loading");
+
+					thumbnailImage.style.display     = DisplayStyle.None;
+					thumbnailFixButton.style.display = DisplayStyle.None;
+					thumbnailStatus.style.display    = DisplayStyle.Flex;
+
+					var texture = await Main.Instance.NetworkAPI.FetchTexture(thumbnailUrl);
+
+					if (texture != null) {
+						// Display the downloaded thumbnail
+						thumbnailImage.image           = texture;
+						thumbnailImage.scaleMode       = ScaleMode.ScaleToFit;
+						thumbnailImage.style.width     = 100;
+						thumbnailImage.style.height    = 100;
+						thumbnailImage.style.maxWidth  = 200;
+						thumbnailImage.style.maxHeight = 200;
+
+						thumbnailStatus.text = $"Current thumbnail - {texture.width}x{texture.height}";
+						thumbnailPreview.RemoveFromClassList("thumbnail-error");
+						thumbnailPreview.RemoveFromClassList("thumbnail-warning");
+						thumbnailPreview.RemoveFromClassList("thumbnail-loading");
+						thumbnailPreview.AddToClassList("thumbnail-success");
+
+						thumbnailImage.style.display  = DisplayStyle.Flex;
+						thumbnailStatus.style.display = DisplayStyle.Flex;
+					} else {
+						thumbnailStatus.text = "Failed to load thumbnail";
+						thumbnailPreview.RemoveFromClassList("thumbnail-success");
+						thumbnailPreview.RemoveFromClassList("thumbnail-warning");
+						thumbnailPreview.RemoveFromClassList("thumbnail-loading");
+						thumbnailPreview.AddToClassList("thumbnail-error");
+
+						thumbnailImage.style.display  = DisplayStyle.None;
+						thumbnailStatus.style.display = DisplayStyle.Flex;
+					}
+				} else {
+					thumbnailStatus.text = "No thumbnail available";
 					thumbnailPreview.RemoveFromClassList("thumbnail-error");
 					thumbnailPreview.RemoveFromClassList("thumbnail-warning");
 					thumbnailPreview.RemoveFromClassList("thumbnail-loading");
-					thumbnailPreview.AddToClassList("thumbnail-success");
-					
-					thumbnailImage.style.display = DisplayStyle.Flex;
-					thumbnailStatus.style.display = DisplayStyle.Flex;
-				} else {
-					thumbnailStatus.text = "Failed to load thumbnail";
 					thumbnailPreview.RemoveFromClassList("thumbnail-success");
-					thumbnailPreview.RemoveFromClassList("thumbnail-warning");
-					thumbnailPreview.RemoveFromClassList("thumbnail-loading");
-					thumbnailPreview.AddToClassList("thumbnail-error");
-					
-					thumbnailImage.style.display = DisplayStyle.None;
-					thumbnailStatus.style.display = DisplayStyle.Flex;
+
+					thumbnailImage.style.display     = DisplayStyle.None;
+					thumbnailFixButton.style.display = DisplayStyle.None;
+					thumbnailStatus.style.display    = DisplayStyle.Flex;
 				}
-			} else {
-				thumbnailStatus.text = "No thumbnail available";
-				thumbnailPreview.RemoveFromClassList("thumbnail-error");
+			} catch (Exception ex) {
+				Logger.LogError($"Failed to load thumbnail: {ex.Message}");
+				thumbnailStatus.text = "Failed to load thumbnail";
+				thumbnailPreview.RemoveFromClassList("thumbnail-success");
 				thumbnailPreview.RemoveFromClassList("thumbnail-warning");
 				thumbnailPreview.RemoveFromClassList("thumbnail-loading");
-				thumbnailPreview.RemoveFromClassList("thumbnail-success");
-				
-				thumbnailImage.style.display = DisplayStyle.None;
+				thumbnailPreview.AddToClassList("thumbnail-error");
+
+				thumbnailImage.style.display     = DisplayStyle.None;
 				thumbnailFixButton.style.display = DisplayStyle.None;
-				thumbnailStatus.style.display = DisplayStyle.Flex;
+				thumbnailStatus.style.display    = DisplayStyle.Flex;
 			}
-		} catch (Exception ex) {
-			Logger.LogError($"Failed to load thumbnail: {ex.Message}");
-			thumbnailStatus.text = "Failed to load thumbnail";
-			thumbnailPreview.RemoveFromClassList("thumbnail-success");
-			thumbnailPreview.RemoveFromClassList("thumbnail-warning");
-			thumbnailPreview.RemoveFromClassList("thumbnail-loading");
-			thumbnailPreview.AddToClassList("thumbnail-error");
-			
-			thumbnailImage.style.display = DisplayStyle.None;
-			thumbnailFixButton.style.display = DisplayStyle.None;
-			thumbnailStatus.style.display = DisplayStyle.Flex;
 		}
-	}
 
 		public VisualElement Make(Dictionary<string, object> data) {
 			_root.ClearBindings();
 			_root.Clear();
+
+			// Reset cached UI elements
+			_progressContainer = null;
+			_progressBar       = null;
+			_progressLabel     = null;
+			_publishButton     = null;
+
 			var child = Editor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("publisher.uxml").CloneTree();
 			child.style.flexGrow = 1;
 			_root.Add(child);
+
+			// Cache UI elements
+			_progressContainer = _root.Q<VisualElement>("progress-container");
+			_progressBar       = _root.Q<ProgressBar>("progress-bar");
+			_progressLabel     = _root.Q<Label>("progress-label");
+			_publishButton     = _root.Q<Button>("publish-button");
 
 			var versionLabel = _root.Q<Label>("version");
 			if (versionLabel != null)
@@ -323,7 +346,7 @@ namespace api.nox.world {
 				detectPlatformButton.clicked += () => {
 					var platformFieldInner = _root.Q<EnumField>("platform-field");
 					if (platformFieldInner != null)
-						platformFieldInner.value = PlatformExtensions.GetCurrentTarget().GetPlatform();
+						platformFieldInner.value = PlatformExtensions.CurrentPlatform;
 				};
 
 			var descriptorField = _root.Q<ObjectField>("descriptor-field");
@@ -336,7 +359,8 @@ namespace api.nox.world {
 							var mainDescriptor = WorldBuilderPanel.Descriptors.Length > 0 ? WorldBuilderPanel.Descriptors[0] : null;
 							if (!mainDescriptor) return;
 							var plat = (Platform)e.newValue;
-							if (plat.IsSupported())
+							// Allow Platform.None as a valid selection (no specific platform)
+							if (plat == Platform.None || plat.IsSupported())
 								mainDescriptor.target = plat;
 							else {
 								EditorUtility.DisplayDialog("Error", $"\"{plat}\" is not supported.", "Ok");
@@ -423,22 +447,23 @@ namespace api.nox.world {
 				detachInfoButton.clicked += () => {
 					if (_world == null || !_lastDisplay.HasFlag(DisplayFlags.World)) return;
 					var target = WorldBuilderPanel.Descriptors.Length > 0 ? WorldBuilderPanel.Descriptors[0] : null;
-					if (!target) return;				target.publishId     = 0;
-				target.publishServer = "";
-				EditorUtility.SetDirty(target);
-				_world = null;
-				UpdateWorld();
-				
-				// Clear thumbnail preview
-				var thumbnailPreview = _root.Q<VisualElement>("thumbnail-preview");
-				var thumbnailStatus = _root.Q<Label>("thumbnail-status");
-				if (thumbnailPreview != null && thumbnailStatus != null) {
-					thumbnailPreview.Clear();
-					thumbnailPreview.Add(thumbnailStatus);
-					thumbnailStatus.text = "No world attached";
-				}
-				
-				SetDisplay(DisplayFlags.WorldNotFound);
+					if (!target) return;
+					target.publishId     = 0;
+					target.publishServer = "";
+					EditorUtility.SetDirty(target);
+					_world = null;
+					UpdateWorld();
+
+					// Clear thumbnail preview
+					var thumbnailPreview = _root.Q<VisualElement>("thumbnail-preview");
+					var thumbnailStatus  = _root.Q<Label>("thumbnail-status");
+					if (thumbnailPreview != null && thumbnailStatus != null) {
+						thumbnailPreview.Clear();
+						thumbnailPreview.Add(thumbnailStatus);
+						thumbnailStatus.text = "No world attached";
+					}
+
+					SetDisplay(DisplayFlags.WorldNotFound);
 				};
 			}
 
@@ -504,9 +529,9 @@ namespace api.nox.world {
 					);
 			}
 
-			var publishButton = _root.Q<Button>("publish-button");
-			if (publishButton != null)
-				publishButton.clicked += () => OnPublishAsync().Forget();
+			// Connect button events
+			if (_publishButton != null)
+				_publishButton.clicked += () => OnPublishAsync().Forget();
 
 			var thumbnailUploadButton = _root.Q<Button>("thumbnail-upload");
 			if (thumbnailUploadButton != null)
@@ -535,124 +560,126 @@ namespace api.nox.world {
 			}
 		}
 
-	private void OnThumbnailFieldChanged(ChangeEvent<UnityEngine.Object> evt) {
-		var texture = evt.newValue as Texture2D;
-		_currentTexture = texture;
-		UpdateThumbnailPreviewWithTexture(texture);
-	}
+		private void OnThumbnailFieldChanged(ChangeEvent<UnityEngine.Object> evt) {
+			var texture = evt.newValue as Texture2D;
+			_currentTexture = texture;
+			UpdateThumbnailPreviewWithTexture(texture);
+		}
 
-	private void UpdateThumbnailPreviewWithTexture(Texture2D texture) {
-		var thumbnailPreview = _root.Q<VisualElement>("thumbnail-preview");
-		var thumbnailStatus = _root.Q<Label>("thumbnail-status");
-		var thumbnailImage = _root.Q<Image>("thumbnail-image");
-		var thumbnailFixButton = _root.Q<Button>("thumbnail-fix-button");
-		
-		if (thumbnailPreview == null || thumbnailStatus == null || thumbnailImage == null || thumbnailFixButton == null) return;
+		private void UpdateThumbnailPreviewWithTexture(Texture2D texture) {
+			var thumbnailPreview   = _root.Q<VisualElement>("thumbnail-preview");
+			var thumbnailStatus    = _root.Q<Label>("thumbnail-status");
+			var thumbnailImage     = _root.Q<Image>("thumbnail-image");
+			var thumbnailFixButton = _root.Q<Button>("thumbnail-fix-button");
 
-		// Hide all elements initially
-		thumbnailStatus.style.display = DisplayStyle.None;
-		thumbnailImage.style.display = DisplayStyle.None;
-		thumbnailFixButton.style.display = DisplayStyle.None;
-		
-		if (texture != null) {
-			// Validate texture
-			if (!texture.isReadable) {
-				thumbnailStatus.text = "Texture must be readable";
-				thumbnailPreview.RemoveFromClassList("thumbnail-success");
-				thumbnailPreview.RemoveFromClassList("thumbnail-warning");
-				thumbnailPreview.RemoveFromClassList("thumbnail-loading");
-				thumbnailPreview.AddToClassList("thumbnail-error");
-				
-				thumbnailFixButton.text = "Fix Automatically";
-				
-				thumbnailStatus.style.display = DisplayStyle.Flex;
-				thumbnailFixButton.style.display = DisplayStyle.Flex;
-				return;
-			}
+			if (thumbnailPreview == null || thumbnailStatus == null || thumbnailImage == null || thumbnailFixButton == null) return;
 
-			// Check texture type for optimal compatibility
-			var assetPath = AssetDatabase.GetAssetPath(texture);
-			if (!string.IsNullOrEmpty(assetPath)) {
-				var importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
-				if (importer != null && importer.textureType != TextureImporterType.Default) {
-					thumbnailStatus.text = $"Texture type is '{importer.textureType}' (recommend 'Default')";
+			// Hide all elements initially
+			thumbnailStatus.style.display    = DisplayStyle.None;
+			thumbnailImage.style.display     = DisplayStyle.None;
+			thumbnailFixButton.style.display = DisplayStyle.None;
+
+			if (texture != null) {
+				// Validate texture
+				if (!texture.isReadable) {
+					thumbnailStatus.text = "Texture must be readable";
 					thumbnailPreview.RemoveFromClassList("thumbnail-success");
-					thumbnailPreview.RemoveFromClassList("thumbnail-error");
+					thumbnailPreview.RemoveFromClassList("thumbnail-warning");
 					thumbnailPreview.RemoveFromClassList("thumbnail-loading");
-					thumbnailPreview.AddToClassList("thumbnail-warning");
-					
-					thumbnailFixButton.text = "Fix Settings";
-					
-					thumbnailStatus.style.display = DisplayStyle.Flex;
+					thumbnailPreview.AddToClassList("thumbnail-error");
+
+					thumbnailFixButton.text = "Fix Automatically";
+
+					thumbnailStatus.style.display    = DisplayStyle.Flex;
 					thumbnailFixButton.style.display = DisplayStyle.Flex;
 					return;
 				}
+
+				// Check texture type for optimal compatibility
+				var assetPath = AssetDatabase.GetAssetPath(texture);
+				if (!string.IsNullOrEmpty(assetPath)) {
+					var importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
+					if (importer != null && importer.textureType != TextureImporterType.Default) {
+						thumbnailStatus.text = $"Texture type is '{importer.textureType}' (recommend 'Default')";
+						thumbnailPreview.RemoveFromClassList("thumbnail-success");
+						thumbnailPreview.RemoveFromClassList("thumbnail-error");
+						thumbnailPreview.RemoveFromClassList("thumbnail-loading");
+						thumbnailPreview.AddToClassList("thumbnail-warning");
+
+						thumbnailFixButton.text = "Fix Settings";
+
+						thumbnailStatus.style.display    = DisplayStyle.Flex;
+						thumbnailFixButton.style.display = DisplayStyle.Flex;
+						return;
+					}
+				}
+
+				// Display the texture
+				thumbnailImage.image = texture;
+
+				thumbnailStatus.text = $"Preview - {texture.width}x{texture.height} - Ready to upload";
+				thumbnailPreview.RemoveFromClassList("thumbnail-error");
+				thumbnailPreview.RemoveFromClassList("thumbnail-warning");
+				thumbnailPreview.RemoveFromClassList("thumbnail-loading");
+				thumbnailPreview.AddToClassList("thumbnail-success");
+
+				thumbnailImage.style.display  = DisplayStyle.Flex;
+				thumbnailStatus.style.display = DisplayStyle.Flex;
+			} else {
+				thumbnailStatus.text = "No thumbnail selected";
+				thumbnailPreview.RemoveFromClassList("thumbnail-error");
+				thumbnailPreview.RemoveFromClassList("thumbnail-warning");
+				thumbnailPreview.RemoveFromClassList("thumbnail-loading");
+				thumbnailPreview.RemoveFromClassList("thumbnail-success");
+
+				thumbnailStatus.style.display = DisplayStyle.Flex;
 			}
-			
-			// Display the texture
-			thumbnailImage.image = texture;
-			
-			thumbnailStatus.text = $"Preview - {texture.width}x{texture.height} - Ready to upload";
-			thumbnailPreview.RemoveFromClassList("thumbnail-error");
-			thumbnailPreview.RemoveFromClassList("thumbnail-warning");
-			thumbnailPreview.RemoveFromClassList("thumbnail-loading");
-			thumbnailPreview.AddToClassList("thumbnail-success");
-			
-			thumbnailImage.style.display = DisplayStyle.Flex;
-			thumbnailStatus.style.display = DisplayStyle.Flex;
-		} else {
-			thumbnailStatus.text = "No thumbnail selected";
-			thumbnailPreview.RemoveFromClassList("thumbnail-error");
-			thumbnailPreview.RemoveFromClassList("thumbnail-warning");
-			thumbnailPreview.RemoveFromClassList("thumbnail-loading");
-			thumbnailPreview.RemoveFromClassList("thumbnail-success");
-			
-			thumbnailStatus.style.display = DisplayStyle.Flex;
 		}
-	}
 
 		private void MakeTextureReadable(Texture2D texture) {
 			if (texture == null) return;
-		try {
-			// Get the asset path
-			var assetPath = AssetDatabase.GetAssetPath(texture);
-			if (string.IsNullOrEmpty(assetPath)) {
-				EditorUtility.DisplayDialog("Error", "Cannot find texture asset path.", "Ok");
-				return;
-			}
+			try {
+				// Get the asset path
+				var assetPath = AssetDatabase.GetAssetPath(texture);
+				if (string.IsNullOrEmpty(assetPath)) {
+					EditorUtility.DisplayDialog("Error", "Cannot find texture asset path.", "Ok");
+					return;
+				}
 
-			// Get the texture importer
-			var importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
-			if (importer == null) {
-				EditorUtility.DisplayDialog("Error", "Cannot access texture import settings.", "Ok");
-				return;
-			}
+				// Get the texture importer
+				var importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
+				if (importer == null) {
+					EditorUtility.DisplayDialog("Error", "Cannot access texture import settings.", "Ok");
+					return;
+				}
 
-			// Enable read/write and set compatible format
-			importer.isReadable = true;
-			importer.textureType = TextureImporterType.Default;
-			importer.textureCompression = TextureImporterCompression.Uncompressed;
-			
-			// Apply the changes
-			AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
-			AssetDatabase.Refresh();
+				// Enable read/write and set compatible format
+				importer.isReadable         = true;
+				importer.textureType        = TextureImporterType.Default;
+				importer.textureCompression = TextureImporterCompression.Uncompressed;
 
-			// Test if the texture can now be encoded
-			var testData = texture.EncodeToPNG();
-			if (testData == null || testData.Length == 0) {
-				EditorUtility.DisplayDialog("Warning", 
-					$"Texture '{texture.name}' is now readable but still cannot be encoded to PNG.\n" +
-					"You may need to manually adjust the texture format in import settings.", "Ok");
-			}
-			
-			// Refresh the preview
-			UpdateThumbnailPreviewWithTexture(texture);
-			
-			Logger.Log($"Made texture '{texture.name}' readable for thumbnail upload.");
-			
-		} catch (System.Exception ex) {
-				EditorUtility.DisplayDialog("Error", 
-					$"Failed to make texture readable: {ex.Message}", "Ok");
+				// Apply the changes
+				AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
+				AssetDatabase.Refresh();
+
+				// Test if the texture can now be encoded
+				var testData = texture.EncodeToPNG();
+				if (testData == null || testData.Length == 0) {
+					EditorUtility.DisplayDialog(
+						"Warning",
+						$"Texture '{texture.name}' is now readable but still cannot be encoded to PNG.\n" + "You may need to manually adjust the texture format in import settings.", "Ok"
+					);
+				}
+
+				// Refresh the preview
+				UpdateThumbnailPreviewWithTexture(texture);
+
+				Logger.Log($"Made texture '{texture.name}' readable for thumbnail upload.");
+			} catch (System.Exception ex) {
+				EditorUtility.DisplayDialog(
+					"Error",
+					$"Failed to make texture readable: {ex.Message}", "Ok"
+				);
 				Logger.LogError($"Failed to make texture readable: {ex.Message}");
 			}
 		}
@@ -677,43 +704,40 @@ namespace api.nox.world {
 				Logger.LogError("No thumbnail texture selected.");
 				return;
 			}
-		// Validate texture format
-		if (!texture.isReadable) {
-			EditorUtility.DisplayDialog("Error", "Texture must be readable. Please check the texture import settings.", "Ok");
-			Logger.LogError("Texture is not readable.");
-			return;
-		}
 
-		// Additional validation: try to encode to test if it works
-		try {
-			var testData = texture.EncodeToPNG();
-			if (testData == null || testData.Length == 0) {
-				EditorUtility.DisplayDialog("Error", 
-					"Texture cannot be encoded to PNG. This may be due to:\n" +
-					"• Unsupported texture format\n" +
-					"• Compressed texture that can't be read\n" +
-					"• Non-power-of-2 dimensions on some platforms\n\n" +
-					"Try:\n" +
-					"• Setting texture format to 'RGBA32' or 'RGB24'\n" +
-					"• Enabling 'Read/Write Enabled'\n" +
-					"• Using power-of-2 dimensions", "Ok");
-				Logger.LogError("Texture encoding test failed - EncodeToPNG returned null.");
+			// Validate texture format
+			if (!texture.isReadable) {
+				EditorUtility.DisplayDialog("Error", "Texture must be readable. Please check the texture import settings.", "Ok");
+				Logger.LogError("Texture is not readable.");
 				return;
 			}
-		} catch (System.Exception ex) {
-			EditorUtility.DisplayDialog("Error", 
-				$"Texture encoding test failed: {ex.Message}\n\n" +
-				"Please check texture import settings.", "Ok");
-			Logger.LogError($"Texture encoding test failed: {ex.Message}");
-			return;
-		}
+
+			// Additional validation: try to encode to test if it works
+			try {
+				var testData = texture.EncodeToPNG();
+				if (testData == null || testData.Length == 0) {
+					EditorUtility.DisplayDialog(
+						"Error",
+						"Texture cannot be encoded to PNG. This may be due to:\n" + "• Unsupported texture format\n" + "• Compressed texture that can't be read\n" + "• Non-power-of-2 dimensions on some platforms\n\n" + "Try:\n" + "• Setting texture format to 'RGBA32' or 'RGB24'\n" + "• Enabling 'Read/Write Enabled'\n" + "• Using power-of-2 dimensions", "Ok"
+					);
+					Logger.LogError("Texture encoding test failed - EncodeToPNG returned null.");
+					return;
+				}
+			} catch (System.Exception ex) {
+				EditorUtility.DisplayDialog(
+					"Error",
+					$"Texture encoding test failed: {ex.Message}\n\n" + "Please check texture import settings.", "Ok"
+				);
+				Logger.LogError($"Texture encoding test failed: {ex.Message}");
+				return;
+			}
 
 			try {
 				SetDisplay(DisplayFlags.Loading);
 				Logger.Log("Uploading thumbnail...");
 
 				var success = await Main.Instance.Network.UploadThumbnail(_world.GetId(), texture, _world.GetServerAddress());
-				
+
 				if (success) {
 					Logger.Log("Thumbnail uploaded successfully.");
 					// Refresh the thumbnail preview
@@ -733,14 +757,28 @@ namespace api.nox.world {
 		private async UniTask OnPublishAsync() {
 			var descriptor = WorldBuilderPanel.Descriptors.Length > 0 ? WorldBuilderPanel.Descriptors[0] : null;
 			if (!descriptor) {
-				EditorUtility.DisplayDialog("Error", "No descriptor found.", "Ok");
+				ShowErrorDialog("No descriptor found.", useDirectMessage: true);
 				Logger.LogError("No descriptor found.");
 				return;
 			}
 
+			// Check if world is attached
+			if (_world == null) {
+				ShowErrorDialog("No world attached. Please attach a world before publishing.", useDirectMessage: true);
+				Logger.LogError("No world attached.");
+				return;
+			}
+
 			var target = descriptor.target;
+
+			// If platform is None, use the current build target
+			if (target == Platform.None) {
+				target = PlatformExtensions.CurrentPlatform;
+				Logger.Log($"Platform is set to None, using current build target: {target.GetPlatformName()}");
+			}
+
 			if (!target.IsSupported()) {
-				EditorUtility.DisplayDialog("Error", $"{target.GetPlatformName()} is not supported.", "Ok");
+				ShowErrorDialog($"{target.GetPlatformName()} is not supported.", useDirectMessage: true);
 				Logger.LogError(
 					$"Platform \"{target.GetPlatformName()}\" ({target.GetBuildTarget()}) is not supported."
 				);
@@ -749,7 +787,7 @@ namespace api.nox.world {
 
 			var assetVersionField = _root.Q<UnsignedIntegerField>("asset-version");
 			if (assetVersionField == null) {
-				EditorUtility.DisplayDialog("Error", "Asset version field not found.", "Ok");
+				ShowErrorDialog("Asset version field not found.", useDirectMessage: true);
 				Logger.LogError("Asset version field not found.");
 				return;
 			}
@@ -757,16 +795,18 @@ namespace api.nox.world {
 			var version = (ushort)assetVersionField.value;
 
 			if (version >= ushort.MaxValue) {
-				EditorUtility.DisplayDialog("Error", "Version must be less than " + ushort.MaxValue, "Ok");
-				Logger.LogError("Version must be less than "                      + ushort.MaxValue);
+				ShowErrorDialog("Version must be less than " + ushort.MaxValue, useDirectMessage: true);
+				Logger.LogError("Version must be less than " + ushort.MaxValue);
 				return;
 			}
 
 			Logger.Log("Checking world...");
-			SetDisplay(DisplayFlags.Loading);
+			ShowProgress(0f, "Verifying world...");
+
 			_world = await Main.Instance.Network.Fetch(_world.GetId(), _world.GetServerAddress());
 			if (_world == null) {
-				EditorUtility.DisplayDialog("Error", "An error occured while fetching the world.", "Ok");
+				HideProgress();
+				ShowErrorDialog("An error occured while fetching the world.", useDirectMessage: true);
 				Logger.LogError("An error occured while fetching the world.");
 				SetDisplay(DisplayFlags.WorldNotFound);
 				return;
@@ -775,6 +815,8 @@ namespace api.nox.world {
 			var config        = Config.Load();
 			var autoVersion   = config.Get("sdk.auto_version", true);
 			var strictVersion = config.Get("sdk.strict_version", true);
+
+			ShowProgress(0.1f, "Checking asset versions...");
 
 			var search = await Main.Instance.Network.SearchAssets(
 				_world.GetId(), new AssetSearchRequest {
@@ -788,14 +830,16 @@ namespace api.nox.world {
 			);
 
 			if (search == null) {
-				EditorUtility.DisplayDialog("Error", "An error occured while fetching the assets.", "Ok");
+				HideProgress();
+				ShowErrorDialog("An error occured while fetching the assets.", useDirectMessage: true);
 				Logger.LogError("An error occured while fetching the assets.");
 				SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
 				return;
 			}
 
 			var asset = search.GetAssets().FirstOrDefault();
-			if (asset != null && autoVersion && !asset.IsEmpty())
+			if (asset != null && autoVersion && !asset.IsEmpty()) {
+				ShowProgress(0.15f, "Auto-incrementing version...");
 				while (asset != null && !asset.IsEmpty()) {
 					version++;
 					search = await Main.Instance.Network.SearchAssets(
@@ -809,7 +853,8 @@ namespace api.nox.world {
 						}, _world.GetServerAddress()
 					);
 					if (search == null) {
-						EditorUtility.DisplayDialog("Error", "An error occured while fetching the assets.", "Ok");
+						HideProgress();
+						ShowErrorDialog("An error occured while fetching the assets.", useDirectMessage: true);
 						Logger.LogError("An error occured while fetching the assets.");
 						SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
 						return;
@@ -817,49 +862,209 @@ namespace api.nox.world {
 
 					asset = search.GetAssets().FirstOrDefault();
 				}
+			}
 
 			_root.Q<UnsignedIntegerField>("asset-version").value = version;
+			
+			// Log asset information for debugging
+			if (asset != null) {
+				Logger.Log($"Found asset version {version}: IsEmpty={asset.IsEmpty()}, StrictMode={strictVersion}");
+			} else {
+				Logger.Log($"No asset found for version {version}, will create new asset.");
+			}
+			
 			if (asset != null && strictVersion && !asset.IsEmpty()) {
-				EditorUtility.DisplayDialog("Error", "Asset already exists.", "Ok");
-				Logger.LogError("Asset already exists.");
+				HideProgress();
+				ShowErrorDialog("Asset version already exists and has a file assigned. Disable 'Publication only if there is no assigned file to it' to allow overwriting.", useDirectMessage: true);
+				Logger.LogError($"Asset version {version} already exists with assigned file. Strict mode is enabled.");
 				Logger.LogError("Asset: " + asset);
 				SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
 				return;
 			}
 
-			Logger.Log("Building world...");
-			// var result = MainDescriptorEditor.BuildWorld(descriptor, target.GetBuildTarget(), false);
-			// if (result is not { Success: true } || string.IsNullOrWhiteSpace(result.path)) {
-			// EditorUtility.DisplayDialog("Error", "An error occured while building the world.", "Ok");
-			// Logger.LogError("An error occured while building the world.");
-			// SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
-			// return;
-			// }
-			EditorUtility.DisplayDialog("Error", "Not implemented yet.", "Ok");
-			SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
-			return;
+			// Create temporary build path
+			var    tempBuildPath = CreateTempBuildPath();
+			string builtFilePath = null;
 
-			Logger.Log("Uploading asset...");
-			Logger.Log("Asset version: " + version);
-			Logger.Log($"Asset platform: {target.GetPlatformName()} ({target.GetBuildTarget()})");
+			try {
+				Logger.Log("Building world...");
+				ShowProgress(0.2f, "Building world...");
 
-			asset ??= await Main.Instance.Network.CreateAsset(
-				_world.GetId(), new CreateAssetRequest {
-					Version  = version,
-					Engine   = Constants.CurrentEngine.GetEngineName(),
-					Platform = target.GetPlatformName()
-				}, _world.GetServerAddress()
-			);
+				// Create build data
+				var buildData = new BuildData {
+					Descriptor       = descriptor,
+					Target           = target,
+					OutputPath       = tempBuildPath,
+					Filename         = descriptor.name + "_" + version + ".nox",
+					ShowDialog       = false, // We'll handle the dialog ourselves
+					ProgressCallback = (progress, status) => ShowProgress(0.2f + (progress * 0.6f), status)
+				};
 
-			if (asset == null) {
-				EditorUtility.DisplayDialog("Error", "An error occured while creating the asset.", "Ok");
-				Logger.LogError("An error occured while creating the asset.");
+				// Start the build process
+				Logger.Log($"Building world '{descriptor.name}'");
+				var result = await Builder.Build(buildData);
+				Logger.Log($"Build result: {result.Type}, Message: {result.Message}");
+
+				// Handle build result
+				if (result.Type != BuildResultType.Success) {
+					HideProgress();
+					string errorMessage = result.Type switch {
+						BuildResultType.Failed            => $"Build failed: {result.Message}",
+						BuildResultType.AlreadyBuilding   => "A build is already in progress.",
+						BuildResultType.EditorCompiling   => "Unity is currently compiling scripts.",
+						BuildResultType.InvalidTarget     => "Invalid build target specified.",
+						BuildResultType.UnsupportedTarget => $"Build target {target} is not supported.",
+						BuildResultType.InvalidScene      => "The scene is not valid for building.",
+						_                                 => $"Unknown build error: {result.Type}"
+					};
+					ShowErrorDialog(errorMessage, useDirectMessage: true);
+					Logger.LogError(errorMessage);
+					SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+					return;
+				}
+
+				Logger.Log("Build completed successfully.");
+
+				// Find the built file (assuming it's the first .nox file in the output directory)
+				builtFilePath = Path.Join(buildData.OutputPath, buildData.Filename);
+				if (!File.Exists(builtFilePath)) {
+					HideProgress();
+					ShowErrorDialog("Built file not found: " + builtFilePath, useDirectMessage: true);
+					Logger.LogError("Built file not found: " + builtFilePath);
+					SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+					return;
+				}
+				
+				Logger.Log($"Built file: {builtFilePath}");
+
+				ShowProgress(0.8f, "Creating asset...");
+				Logger.Log("Creating asset...");
+				Logger.Log("Asset version: " + version);
+				Logger.Log($"Asset platform: {target.GetPlatformName()} ({target.GetBuildTarget()})");
+
+				asset ??= await Main.Instance.Network.CreateAsset(
+					_world.GetId(), new CreateAssetRequest {
+						Version  = version,
+						Engine   = Constants.CurrentEngine.GetEngineName(),
+						Platform = target.GetPlatformName()
+					}, _world.GetServerAddress()
+				);
+
+				if (asset == null) {
+					HideProgress();
+					ShowErrorDialog("An error occured while creating the asset.", useDirectMessage: true);
+					Logger.LogError("An error occured while creating the asset.");
+					SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+					return;
+				}
+
+				ShowProgress(0.85f, "Uploading world asset...");
+				Logger.Log("Uploading asset file...");
+
+				// Read the built file as byte array
+				var fileData = File.ReadAllBytes(builtFilePath);
+				
+				// Calculate file hash for validation
+				string fileHash = null;
+				using (var sha256 = System.Security.Cryptography.SHA256.Create()) {
+					var hashBytes = sha256.ComputeHash(fileData);
+					fileHash = System.BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+				}
+
+				// Upload the file
+				var uploadSuccess = await Main.Instance.Network.UploadAssetFile(
+					_world.GetId(),
+					asset.GetId(),
+					fileData,
+					buildData.Filename,
+					fileHash,
+					_world.GetServerAddress()
+				);
+
+				if (!uploadSuccess) {
+					HideProgress();
+					ShowErrorDialog("Failed to upload asset file.", useDirectMessage: true);
+					Logger.LogError("Failed to upload asset file.");
+					SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+					return;
+				}
+
+				ShowProgress(1.0f, "Upload completed!");
+				Logger.Log("Asset uploaded successfully.");
+
+				HideProgress();
+				ShowSuccessDialog("World published successfully!");
 				SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
-				return;
+			} catch (Exception ex) {
+				HideProgress();
+				ShowErrorDialog($"An error occurred during publish: {ex.Message}", useDirectMessage: true);
+				Logger.LogError($"An error occurred during publish: {ex.Message}");
+				SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+			} finally {
+				// Cleanup temporary build path
+				CleanupTempPath(tempBuildPath);
+			}
+		}
+
+		private void ShowProgress(float progress, string status) {
+			if (_progressContainer != null)
+				_progressContainer.style.display = DisplayStyle.Flex;
+			if (_progressBar != null)
+				_progressBar.value = progress * 100f;
+			if (_progressLabel != null)
+				_progressLabel.text = status;
+			_publishButton?.SetEnabled(false);
+			Logger.Log($"Progress: {progress * 100f:F1}%, Status: {status}");
+		}
+
+		private void HideProgress() {
+			if (_progressContainer != null) {
+				_progressContainer.style.display = DisplayStyle.None;
 			}
 
-			Logger.Log("Asset created successfully.");
-			SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
+			// Re-enable the publish button
+			if (_publishButton != null) {
+				_publishButton.SetEnabled(true);
+			}
+		}
+
+		private void ShowErrorDialog(string messageKey, params object[] args)
+			=> ShowErrorDialog(messageKey, false, args);
+
+		private void ShowErrorDialog(string messageKey, bool useDirectMessage, params object[] args) {
+			var message = useDirectMessage ? messageKey : LanguageManager.Get(messageKey, args);
+			EditorUtility.DisplayDialog(
+				LanguageManager.Get("world.publisher.error", "Error"),
+				message,
+				LanguageManager.Get("world.publisher.ok", "Ok")
+			);
+		}
+
+		private void ShowSuccessDialog(string messageKey, params object[] args)
+			=> ShowSuccessDialog(messageKey, false, args);
+
+		private void ShowSuccessDialog(string messageKey, bool useDirectMessage, params object[] args)
+			=> EditorUtility.DisplayDialog(
+				LanguageManager.Get("world.publisher.success", "Success"),
+				useDirectMessage ? messageKey : LanguageManager.Get(messageKey, args),
+				LanguageManager.Get("world.publisher.ok", "Ok")
+			);
+
+		private string CreateTempBuildPath() {
+			var tempDir = Path.Combine(Path.GetTempPath(), "NoxWorldBuild", System.Guid.NewGuid().ToString("N"));
+			Directory.CreateDirectory(tempDir);
+			return tempDir.Replace('\\', '/') + "/";
+		}
+
+		private void CleanupTempPath(string tempPath) {
+			try {
+				if (!string.IsNullOrEmpty(tempPath) && Directory.Exists(tempPath)) {
+					Directory.Delete(tempPath, true);
+					Logger.Log($"Cleaned up temporary build directory: {tempPath}");
+				}
+			} catch (Exception ex) {
+				Logger.LogError($"Failed to cleanup temporary directory {tempPath}: {ex.Message}");
+			}
 		}
 	}
 

@@ -11,7 +11,6 @@ using Nox.UI;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 using Object = UnityEngine.Object;
-using Transform = log4net.Util.Transform;
 
 namespace api.nox.ui.menus {
 	public class Menu : MonoBehaviour, INoxObject, IMenu {

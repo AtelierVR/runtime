@@ -316,41 +316,56 @@ namespace api.nox.world.network {
 			}
 
 			return true;
-		}
+		}		public async UniTask<bool> UploadAssetFile(WorldIdentifier identifier, uint assetId, byte[] fileData, string fileName, string fileHash = null, string from = null)
+			=> await UploadAssetFile(identifier.ToString(), assetId, fileData, fileName, fileHash, from);
 
-		// public async UniTask<bool> UploadAssetFile(WorldIdentifier identifier, uint assetId, byte[] fileData, string fileName, string fileHash = null, string from = null)
-		// 	=> await UploadAssetFile(identifier.ToString(), assetId, fileData, fileName, fileHash, from);
-		//
-		// public async UniTask<bool> UploadAssetFile(uint id, uint assetId, byte[] fileData, string fileName, string fileHash = null, string from = null)
-		// 	=> await UploadAssetFile(id.ToString(), assetId, fileData, fileName, fileHash, from);
-		//
-		// public async UniTask<bool> UploadAssetFile(string identifier, uint assetId, byte[] fileData, string fileName, string fileHash = null, string from = null) {
-		// 	if (Main.Instance.NetworkAPI == null)
-		// 		return false;
-		// 	var ide = WorldIdentifier.FromString(identifier);
-		// 	if (ide.IsLocal())
-		// 		ide.Server = from;
-		// 	var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.GetServerAddress();
-		// 	if (string.IsNullOrEmpty(address)) {
-		// 		Logger.LogError($"Cannot upload asset file for world {identifier}: no server address provided.");
-		// 		return false;
-		// 	}
-		//
-		// 	var request = Main.Instance.NetworkAPI.MakeRequest();
-		// 	request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}/assets/{assetId}/file");
-		// 	request.SetMethod("POST");
-		// 	request.SetFileData("file", fileData, fileName);
-		// 	if (!string.IsNullOrEmpty(fileHash))
-		// 		request.SetHeader("x-file-hash", fileHash);
-		// 	await request.Send();
-		// 	var response = request.GetMasterResponse<object>();
-		// 	if (response.HasError()) {
-		// 		Logger.LogError($"Failed to upload asset file for world {identifier} on {address}: {response.GetError().GetMessage()}");
-		// 		return false;
-		// 	}
-		//
-		// 	return true;
-		// }
+		public async UniTask<bool> UploadAssetFile(uint id, uint assetId, byte[] fileData, string fileName, string fileHash = null, string from = null)
+			=> await UploadAssetFile(id.ToString(), assetId, fileData, fileName, fileHash, from);
+
+		public async UniTask<bool> UploadAssetFile(string identifier, uint assetId, byte[] fileData, string fileName, string fileHash = null, string from = null) {
+			if (Main.Instance.NetworkAPI == null)
+				return false;
+			var ide = WorldIdentifier.FromString(identifier);
+			if (ide.IsLocal())
+				ide.Server = from;
+			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.GetServerAddress();
+			if (string.IsNullOrEmpty(address)) {
+				Logger.LogError($"Cannot upload asset file for world {identifier}: no server address provided.");
+				return false;
+			}
+
+			if (address == ide.GetServerAddress())
+				ide.Server = "::"; // Use "::" to indicate local server in the identifier
+
+			// Create multipart form data manually (same pattern as UploadThumbnail)
+			var boundary = "----formdata-nox-" + System.Guid.NewGuid().ToString();
+			var formData = $"--{boundary}\r\n";
+			formData += $"Content-Disposition: form-data; name=\"file\"; filename=\"{fileName}\"\r\n";
+			formData += "Content-Type: application/octet-stream\r\n\r\n";
+
+			// Combine header, file data, and footer
+			var headerBytes = System.Text.Encoding.UTF8.GetBytes(formData);
+			var footerBytes = System.Text.Encoding.UTF8.GetBytes($"\r\n--{boundary}--\r\n");
+
+			var bodyData = new byte[headerBytes.Length + fileData.Length + footerBytes.Length];
+			System.Array.Copy(headerBytes, 0, bodyData, 0, headerBytes.Length);
+			System.Array.Copy(fileData, 0, bodyData, headerBytes.Length, fileData.Length);
+			System.Array.Copy(footerBytes, 0, bodyData, headerBytes.Length + fileData.Length, footerBytes.Length);
+
+			var request = Main.Instance.NetworkAPI.MakeRequest();
+			await request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}/assets/{assetId}/file");
+			request.SetMethod("POST");
+			request.SetBody(bodyData, $"multipart/form-data; boundary={boundary}");			if (!string.IsNullOrEmpty(fileHash))
+				request.SetHeader("x-file-hash", fileHash);
+			
+			await request.Send();
+			if (request.GetStatus() != 200) {
+				Logger.LogError($"Failed to upload asset file for world {identifier} on {address}: {request.GetResponse<string>()}");
+				return false;
+			}
+
+			return true;
+		}
 		//
 		// public async UniTask<byte[]> DownloadAssetFile(WorldIdentifier identifier, uint assetId, string from = null)
 		// 	=> await DownloadAssetFile(identifier.ToString(), assetId, from);

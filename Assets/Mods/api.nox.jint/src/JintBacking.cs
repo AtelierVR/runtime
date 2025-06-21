@@ -20,7 +20,7 @@ namespace api.nox.jint {
 		public Logger         Logger;
 
 		public void Compile()
-			=> Destroy(this);
+			=> DestroyImmediate(this);
 
 		public string[] GetProperties()
 			=> ExecutionContext != null
@@ -35,7 +35,7 @@ namespace api.nox.jint {
 				var prop = ExecutionContext.Get(propertyName);
 				return prop.IsUndefined() ? null : prop.ToObject();
 			} catch (Exception e) {
-				NoxLogger.LogError($"Error getting property {propertyName}: {e.Message}");
+				NoxLogger.LogError($"Error getting property {propertyName}: {e.Message}", this);
 				return null;
 			}
 		}
@@ -69,7 +69,7 @@ namespace api.nox.jint {
 					var exports = Engine.Evaluate(script.exports).AsObject();
 					Engine.SetValue("exports", exports);
 				} catch (Exception e) {
-					NoxLogger.LogError($"Error parsing exports: {e.Message}");
+					NoxLogger.LogError($"Error parsing exports: {e.Message}", this);
 				}
 			} else Engine.SetValue("exports", new ObjectWrapper(Engine, new Dictionary<string, object>()));
 
@@ -91,7 +91,7 @@ namespace api.nox.jint {
 				ExecutionContext = Engine.ImportModule("__main__");
 				Invoke("onPrepare");
 			} catch (Exception e) {
-				NoxLogger.LogError($"Error executing onPrepare function: {e.Message}");
+				NoxLogger.LogError($"Error executing onPrepare function: {e.Message}", this);
 				Engine           = null;
 				ExecutionContext = null;
 			}
@@ -102,7 +102,7 @@ namespace api.nox.jint {
 			try {
 				Invoke("onDestroy");
 			} catch (Exception e) {
-				NoxLogger.LogError($"Error executing onDestroy function: {e.Message}");
+				NoxLogger.LogError($"Error executing onDestroy function: {e.Message}", this);
 			}
 
 			Engine.Dispose();
@@ -118,7 +118,7 @@ namespace api.nox.jint {
 				if (method.IsUndefined()) return;
 				Engine.Invoke(method, args);
 			} catch (Exception e) {
-				NoxLogger.LogError($"Error executing {methodName} function: {e.Message}");
+				NoxLogger.LogError($"Error executing {methodName} function: {e.Message}", this);
 			}
 		}
 
@@ -131,7 +131,7 @@ namespace api.nox.jint {
 					? Engine.Invoke(method, args)
 					: null;
 			} catch (Exception e) {
-				NoxLogger.LogError($"Error executing {functionName} function: {e.Message}");
+				NoxLogger.LogError($"Error executing {functionName} function: {e.Message}", this);
 				return null;
 			}
 		}
@@ -145,7 +145,7 @@ namespace api.nox.jint {
 				var result = Engine.Invoke(method, args);
 				return (T)result.ToObject();
 			} catch (Exception e) {
-				NoxLogger.LogError($"Error executing {functionName} function: {e.Message}");
+				NoxLogger.LogError($"Error executing {functionName} function: {e.Message}", this);
 				return default;
 			}
 		}
