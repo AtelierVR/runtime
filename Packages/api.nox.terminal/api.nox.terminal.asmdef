@@ -1,0 +1,19 @@
+{
+  "name": "api.nox.terminal",
+  "rootNamespace": "api.nox.terminal",
+  "references": [
+    "Nox.CCK",
+    "UniTask",
+    "Nox.Terminals",
+    "Nox.KeyBindings"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

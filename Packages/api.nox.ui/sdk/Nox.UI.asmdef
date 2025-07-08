@@ -1,0 +1,7 @@
+{
+	"name": "Nox.UI",
+	"references":[ 
+		"Nox.CCK",
+		"UniTask"
+	]
+}

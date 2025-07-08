@@ -174,7 +174,7 @@ MonoBehaviour:
   target: 1
   publishId: 1
   publishServer: hactazia.fr
-  publishVersion: 0
+  publishVersion: 2
 --- !u!1 &585968212
 GameObject:
   m_ObjectHideFlags: 0

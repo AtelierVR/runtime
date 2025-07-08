@@ -1,0 +1,64 @@
+{
+  "type": "mod",
+  "id": "api.nox.table",
+  "provides": [
+    "table"
+  ],
+  "name": "Table system",
+  "version": "1.0.0",
+  "description": "Provides the Test API for the game.",
+  "license": "GPL-3.0",
+  "icon": null,
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.table",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.table/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [
+    {
+      "id": "network",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "ui",
+      "type": "recommends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "search",
+      "type": "recommends",
+      "version": ">=1.0.0"
+    }
+  ],
+  "entrypoints": {
+    "main": [
+      "api.nox.table.Main"
+    ],
+    "editor": [
+      "api.nox.table.Editor"
+    ],
+    "client": [
+      "api.nox.table.Client"
+    ]
+  },
+  "references": [],
+  "sides": [],
+  "permissions": [
+    "file",
+    "file.read",
+    "file.write",
+    "config",
+    "config.global"
+  ],
+  "kernel": true
+}

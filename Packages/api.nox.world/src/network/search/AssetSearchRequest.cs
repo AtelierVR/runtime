@@ -1,0 +1,90 @@
+using System;
+using Nox.CCK.Utils;
+using Nox.Worlds;
+
+namespace api.nox.world.network {
+	[Serializable]
+	public class AssetSearchRequest : INoxObject, IAssetSearchRequest {
+		internal uint     Offset;
+		internal uint     Limit;
+		internal bool     ShowEmpty;
+		internal ushort[] Versions;
+		internal string[] Engines;
+		internal string[] Platforms;
+
+		public string ToParams() {
+			var text             = "";
+			if (Offset > 0) text += (text.Length > 0 ? "&" : "") + $"offset={Offset}";
+			if (Limit  > 1) text += (text.Length > 0 ? "&" : "") + $"limit={Limit}";
+			if (ShowEmpty) text  += (text.Length > 0 ? "&" : "") + "empty";
+			if (Versions != null)
+				foreach (var v in Versions)
+					text += (text.Length > 0 ? "&" : "") + $"version={v}";
+			if (Engines != null)
+				foreach (var e in Engines)
+					text += (text.Length > 0 ? "&" : "") + $"engine={e}";
+			if (Platforms != null)
+				foreach (var p in Platforms)
+					text += (text.Length > 0 ? "&" : "") + $"platform={p}";
+			return string.IsNullOrEmpty(text) ? "" : "?" + text;
+		}
+
+		public IAssetSearchRequest SetOffset(uint o) {
+			Offset = o;
+			return this;
+		}
+
+		public IAssetSearchRequest SetLimit(uint l) {
+			Limit = l;
+			return this;
+		}
+
+		public IAssetSearchRequest SetShowEmpty(bool showEmpty) {
+			ShowEmpty = showEmpty;
+			return this;
+		}
+
+		public IAssetSearchRequest SetVersions(ushort[] v) {
+			Versions = v;
+			return this;
+		}
+
+		public IAssetSearchRequest SetEngines(string[] e) {
+			Engines = e;
+			return this;
+		}
+
+		public IAssetSearchRequest SetPlatforms(string[] p) {
+			Platforms = p;
+			return this;
+		}
+
+		public uint GetOffset()
+			=> Offset;
+
+		public uint GetLimit()
+			=> Limit;
+
+		public bool GetShowEmpty()
+			=> ShowEmpty;
+
+		public ushort[] GetVersions()
+			=> Versions ?? Array.Empty<ushort>();
+
+		public string[] GetEngines()
+			=> Engines ?? Array.Empty<string>();
+
+		public string[] GetPlatforms()
+			=> Platforms ?? Array.Empty<string>();
+
+		public static AssetSearchRequest FromBase(IAssetSearchRequest data)
+			=> new() {
+				Offset    = data.GetOffset(),
+				Limit     = data.GetLimit(),
+				ShowEmpty = data.GetShowEmpty(),
+				Versions  = data.GetVersions(),
+				Engines   = data.GetEngines(),
+				Platforms = data.GetPlatforms()
+			};
+	}
+}

@@ -1,0 +1,27 @@
+{
+    "name": "api.nox.table",
+    "rootNamespace": "",
+    "references": [
+        "Nox.CCK",
+        "UniTask",
+        "Nox.Worlds",
+        "Nox.Search",
+        "Nox.Network",
+        "Nox.Users",
+        "Nox.CCK.Worlds",
+        "Nox.UI",
+        "Unity.ScriptableBuildPipeline.Editor",
+        "Unity.ScriptableBuildPipeline",
+        "Nox.Instances",
+        "Nox.Tables"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

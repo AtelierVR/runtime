@@ -1,7 +1,0 @@
-<engine:UXML xmlns:engine="UnityEngine.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
-    <engine:VisualElement style="flex-grow: 1; padding-top: 4px; padding-bottom: 4px;">
-        <engine:ScrollView style="flex-grow: 1;">
-            <engine:VisualElement name="logs" style="flex-grow: 1; flex-direction: column-reverse;" />
-        </engine:ScrollView>
-    </engine:VisualElement>
-</engine:UXML>

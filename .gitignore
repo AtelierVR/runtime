@@ -34,6 +34,7 @@
 ExportedObj/
 .consulo/
 *.csproj
+!api.nox.*.csproj
 *.unityproj
 *.sln
 *.suo
@@ -75,9 +76,12 @@ crashlytics-build.properties
 # Remove Temps from Nox
 /[Aa]ssets/[Bb]uilds/
 /[Pp]roject[Ss]ettings/EditorBuildSettings.asset
-/[Pp]ackages/
+/[Pp]ackages/*
+!/[Pp]ackages/*.nox.*/
 !/[Pp]ackages/manifest.json
 /[Aa]ssets/[Tt]emp/
 /[Aa]ssets/[Aa]uto[Hh]and/
 
 mono_crash.*
+
+

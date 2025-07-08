@@ -12,9 +12,6 @@ EditorBuildSettings:
     path: Packages/com.unity.render-pipelines.universal/Editor/SceneTemplates/Standard.unity
     guid: 5cae0d87369a2405eaa962b8d920b947
   - enabled: 1
-    path: Assets/Mods/dev.nox.game_builder/buildscenes/main.unity
-    guid: eaaaa443d7bb2384a99758427d41bfd8
-  - enabled: 1
     path: Assets/OpenME.unity
     guid: 72f73d93637f36d428e530292b77d863
   - enabled: 1
@@ -48,20 +45,8 @@ EditorBuildSettings:
     path: Assets/Samples/Avatars/demo/New Scene.unity
     guid: dec68381f5851c342afc1a9c49261343
   - enabled: 1
-    path: Assets/Mods/api.nox.xr/assets/api.nox.xr/Editor.unity
-    guid: 1babc5969d2cbd94eb5c37fc7708b40f
-  - enabled: 1
     path: Assets/Samples/Avatars/demo/RINDO MOD/Rindo emission layer examples.unity
     guid: e64e40bb456e4834bb2206f05829993c
-  - enabled: 1
-    path: Assets/Mods/api.nox.main/assets/api.nox.main/worlds/error/error.unity
-    guid: 39db45c140203674a86a8de1e290e984
-  - enabled: 1
-    path: Assets/Mods/api.nox.main/assets/api.nox.main/worlds/default/default.unity
-    guid: 6846bd5ba84175847ac059e62f04fe89
-  - enabled: 1
-    path: Assets/Mods/api.nox.ui/assets/api.nox.ui/obsolete/worlds/Template.unity
-    guid: 3b8e6e9cee805f244a6c4239c3ae7161
   - enabled: 1
     path: Assets/AutoHand/Examples/Scenes/XR/Demo.unity
     guid: 9935fff7a54383d4a8ca954c1411c833
@@ -71,6 +56,27 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/AutoHand/Examples/Scenes/Desktop/Desktop Player.unity
     guid: bb1eab65b7f030d4fab81d20430b0b3d
+  - enabled: 1
+    path: Assets/Temp/811b848639f3d3dbfe3e6e186b30e238/1.unity
+    guid: f1e091148e1e4bba8b0fed176754e6cb
+  - enabled: 1
+    path: Assets/Temp/811b848639f3d3dbfe3e6e186b30e238/0.unity
+    guid: 73a69eb24f3d4a01b69a44a769a45638
+  - enabled: 1
+    path: Packages/api.nox.ui/assets/api.nox.ui/obsolete/worlds/Template.unity
+    guid: 3b8e6e9cee805f244a6c4239c3ae7161
+  - enabled: 1
+    path: Packages/api.nox.main/assets/api.nox.main/worlds/default/default.unity
+    guid: 6846bd5ba84175847ac059e62f04fe89
+  - enabled: 1
+    path: Packages/api.nox.xr/assets/api.nox.xr/Editor.unity
+    guid: 1babc5969d2cbd94eb5c37fc7708b40f
+  - enabled: 1
+    path: Packages/api.nox.main/assets/api.nox.main/worlds/error/error.unity
+    guid: 39db45c140203674a86a8de1e290e984
+  - enabled: 1
+    path: Packages/dev.nox.game_builder/buildscenes/main.unity
+    guid: eaaaa443d7bb2384a99758427d41bfd8
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
