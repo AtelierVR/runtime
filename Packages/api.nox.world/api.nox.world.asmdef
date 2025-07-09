@@ -13,7 +13,9 @@
         "Unity.ScriptableBuildPipeline.Editor",
         "Unity.ScriptableBuildPipeline",
         "Nox.Instances",
-        "Nox.Tables"
+        "Nox.Tables",
+        "Nox.Offline",
+        "Nox.Sessions"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

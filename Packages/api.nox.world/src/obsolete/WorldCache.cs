@@ -16,20 +16,20 @@ namespace api.nox.world
 
     public class WorldCache
     {
-        public static string WorldPath(string hash) => Path.Combine(Constants.GameAppDataPath, "cache", "worlds", hash);
+        public static string WorldPath(string hash) => Path.Combine(Constants.AppPath, "cache", "worlds", hash);
         public static bool HasWorldInCache(string hash) => File.Exists(WorldPath(hash));
 
         public static void SaveWorldToCache(string hash, byte[] data)
         {
-            if (!Directory.Exists(Path.Combine(Constants.GameAppDataPath, "cache", "worlds")))
-                Directory.CreateDirectory(Path.Combine(Constants.GameAppDataPath, "cache", "worlds"));
+            if (!Directory.Exists(Path.Combine(Constants.AppPath, "cache", "worlds")))
+                Directory.CreateDirectory(Path.Combine(Constants.AppPath, "cache", "worlds"));
             File.WriteAllBytes(WorldPath(hash), data);
         }
 
         public static void SaveWorldToCache(string hash, string path)
         {
-            if (!Directory.Exists(Path.Combine(Constants.GameAppDataPath, "cache", "worlds")))
-                Directory.CreateDirectory(Path.Combine(Constants.GameAppDataPath, "cache", "worlds"));
+            if (!Directory.Exists(Path.Combine(Constants.AppPath, "cache", "worlds")))
+                Directory.CreateDirectory(Path.Combine(Constants.AppPath, "cache", "worlds"));
             File.Copy(path, WorldPath(hash));
         }
 
@@ -48,8 +48,8 @@ namespace api.nox.world
 
         public static void ClearCache()
         {
-            if (Directory.Exists(Path.Combine(Constants.GameAppDataPath, "cache", "worlds")))
-                Directory.Delete(Path.Combine(Constants.GameAppDataPath, "cache", "worlds"), true);
+            if (Directory.Exists(Path.Combine(Constants.AppPath, "cache", "worlds")))
+                Directory.Delete(Path.Combine(Constants.AppPath, "cache", "worlds"), true);
         }
 
 

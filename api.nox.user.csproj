@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Packages\api.nox.user\src\search\SearchWorker.cs" />
     <Compile Include="Packages\api.nox.user\src\obsolete\pages\ProfilePage.cs" />
+    <Compile Include="Packages\api.nox.user\src\network\update\UpdateCurrentUserRequest.cs" />
     <Compile Include="Packages\api.nox.user\src\obsolete\Client.cs" />
     <Compile Include="Packages\api.nox.user\src\network\login\VerificationMethod.cs" />
     <Compile Include="Packages\api.nox.user\src\search\SearchResult.cs" />

@@ -325,5 +325,37 @@ namespace api.nox.user.network {
 			Logger.LogDebug($"Verification code send result: {verificationResponse}");
 			return verificationResponse;
 		}
+
+		public async UniTask<CurrentUser> UpdateCurrentUser(UpdateCurrentUserRequest data, string from = null) {
+			if (Main.Instance.NetworkAPI == null)
+				return null;
+
+			var address = from ?? CurrentUser?.GetServerAddress() ?? ServerAddress;
+			if (string.IsNullOrEmpty(address)) {
+				Logger.LogError("Cannot update current user: no server address provided.");
+				return null;
+			}
+
+			var request = Main.Instance.NetworkAPI.MakeRequest();
+			await request.SetMasterUrl(address, "/api/users/@me");
+			request.SetBody(data.ToJson(), "application/json");
+			request.SetMethod("POST");
+			await request.Send();
+
+			var response = request.GetMasterResponse<CurrentUser>();
+			if (response.HasError())
+				return null;
+
+			var updateResult = response.GetData();
+			if (updateResult == null) {
+				Logger.LogError("Failed to update current user: no data returned.");
+				return null;
+			}
+
+			CurrentUser = updateResult;
+			InvokeUpdate(CurrentUser);
+			Logger.LogDebug($"Current user updated: {CurrentUser}");
+			return CurrentUser;
+		}
 	}
 }

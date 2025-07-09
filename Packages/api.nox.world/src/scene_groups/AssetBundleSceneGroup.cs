@@ -5,15 +5,15 @@ using Nox.CCK.Worlds;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Logger = Nox.CCK.Utils.Logger;
+using Random = UnityEngine.Random;
 
 namespace api.nox.world {
 	public class AssetBundleSceneGroup : SceneGroup {
 		public AssetBundle AssetBundle;
-
-
-		public static string ParseId(string path) {
+		
+		public static string ParseGroup(string path) {
 			if (!string.IsNullOrEmpty(path))
-				return $"asset_bundle:{path}";
+				return $"bundle:{path}";
 			Logger.LogError("AssetBundleWorld: Path is null or empty.");
 			return null;
 		}
@@ -105,7 +105,7 @@ namespace api.nox.world {
 			progress?.Invoke(1f);
 
 			var abw = new AssetBundleSceneGroup {
-				Id          = ParseId(path),
+				Id          = ParseGroup(path),
 				AssetBundle = bundle,
 				Active      = 0,
 				SubScenes   = new SubScene[main.GetScenes().Length]

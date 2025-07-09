@@ -6,6 +6,7 @@ using Nox.CCK.Worlds;
 using UnityEngine.SceneManagement;
 using Nox.Worlds;
 using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.world {
 	public class BaseScene<T> : ISceneDescription<T>, INoxObject where T : BaseSceneDescriptor {
@@ -64,7 +65,11 @@ namespace api.nox.world {
 
 		public void SetVisibleInstance(int id, bool active, bool save) {
 			var instance = GetInstance(id);
-			if (instance == null) return;
+			if (instance == null) {
+				Logger.LogWarning($"BaseScene<{typeof(T).Name}>: Instance with ID {id} not found.");
+				return;
+			}
+
 			instance.Container.SetActive(active);
 			instance.Visible = active;
 		}
@@ -74,7 +79,11 @@ namespace api.nox.world {
 
 		public void RemoveInstance(int id) {
 			var instance = GetInstance(id);
-			if (instance == null) return;
+			if (instance == null) {
+				Logger.LogWarning($"BaseScene<{typeof(T).Name}>: Instance with ID {id} not found.");
+				return;
+			}
+
 			Instances.Remove(instance);
 			Object.Destroy(instance.Container);
 		}

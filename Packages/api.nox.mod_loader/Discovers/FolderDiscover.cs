@@ -37,7 +37,7 @@ namespace Nox.ModLoader.Discovers
 
                 if (UseGlobalPackages)
                 {
-                    folders.Add(Path.Combine(Constants.GameAppDataPath, "mods"));
+                    folders.Add(Path.Combine(Constants.AppPath, "mods"));
                     var config = Config.Load();
                     if (config.Has("mod_folders"))
                         folders.AddRange(config.Get<string[]>("mod_folders"));

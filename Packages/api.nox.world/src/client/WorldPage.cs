@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading;
+using api.nox.world.cache;
 using api.nox.world.network;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
@@ -18,15 +19,15 @@ namespace api.nox.world.client {
 		public string GetKey()
 			=> GetStaticKey();
 
-		private int              _mId;
-		private object[]         _context;
-		private GameObject       _content;
-		private WorldComponent   _component;
-		private IWorldIdentifier _identifier;
-		public  IWorld           World;
-		public  IWorldAsset      Asset;
-		public  ushort           Version = ushort.MaxValue;
-		private bool             _isLoading;
+		internal int              MId;
+		private  object[]         _context;
+		private  GameObject       _content;
+		private  WorldComponent   _component;
+		private  IWorldIdentifier _identifier;
+		public   IWorld           World;
+		public   IWorldAsset      Asset;
+		public   ushort           Version = ushort.MaxValue;
+		private  bool             _isLoading;
 
 
 		public void OnRefresh()
@@ -41,6 +42,11 @@ namespace api.nox.world.client {
 			value = default;
 			return false;
 		}
+
+		internal bool IsHome()
+			=> WorldIdentifier.FromString(Main.Instance.UserAPI.GetCurrent()?.GetHomeId())?
+				.Equals(World?.ToIdentifier()) ?? false;
+
 
 		internal static IPage OnGotoAction(IMenu menu, object[] context) {
 			if (!T(context, 0, out string type)) return null;
@@ -59,7 +65,7 @@ namespace api.nox.world.client {
 
 		private static WorldPage OnPageByIdentifier(IMenu menu, object[] context, WorldIdentifier identifier) {
 			var page = new WorldPage {
-				_mId        = menu.GetId(),
+				MId         = menu.GetId(),
 				_context    = context,
 				_identifier = identifier,
 				World       = null,
@@ -70,20 +76,40 @@ namespace api.nox.world.client {
 			return page;
 		}
 
-		private static WorldPage OnPageByWorld(IMenu menu, object[] context, IWorld world, IWorldAsset asset)
-			=> new() {
-				_mId        = menu.GetId(),
+		private static WorldPage OnPageByWorld(IMenu menu, object[] context, IWorld world, IWorldAsset asset) {
+			var page = new WorldPage {
+				MId         = menu.GetId(),
 				_context    = context,
 				_identifier = world.ToIdentifier(),
 				World       = world,
 				Asset       = asset,
 				Version     = asset?.GetVersion() ?? ushort.MaxValue
 			};
+			if (page.Asset == null)
+				page.FetchAsset(true).Forget();
+			return page;
+		}
 
 		private async UniTask Refresh(bool load) {
 			if (_isLoading) return;
+			await FetchWorld();
+			await FetchAsset();
+			if (!load)
+				_component.UpdateInstances(World).Forget();
+			_component.UpdateContent(World, Asset);
+		}
+
+		private async UniTask FetchWorld(bool update = false) {
+			if (_isLoading) return;
 			_isLoading = true;
 			World      = await Main.Instance.Network.Fetch(_identifier.ToString());
+			_isLoading = false;
+			if (update) _component.UpdateContent(World, Asset);
+		}
+
+		private async UniTask FetchAsset(bool update = false) {
+			if (_isLoading) return;
+			_isLoading = true;
 			Asset = (await Main.Instance.Network.SearchAssets(
 					_identifier.ToString(),
 					new AssetSearchRequest {
@@ -94,61 +120,65 @@ namespace api.nox.world.client {
 					}
 				)).GetAssets()
 				.FirstOrDefault();
-			if (!load) _component.UpdateInstances(World).Forget();
 			_isLoading = false;
+			if (update) _component.UpdateContent(World, Asset);
 		}
 
-		public CancellationTokenSource DownloadToken;
-
-		public bool IsDownloading()
-			=> DownloadToken is { IsCancellationRequested: false };
-
-		public bool IsDownloaded()
-			=> false;
+		public ICaching Caching;
 
 		public void RemoveDownload() {
-			return;
-		}
-
-		public void CancelDownload() {
-			if (DownloadToken == null) return;
-			DownloadToken.Cancel();
-			DownloadToken.Dispose();
-			DownloadToken = null;
-			_component?.UpdateDownloading(false, 1);
-		}
-
-		public async UniTask DownloadAssetAsync() {
-			if (DownloadToken != null || Asset == null) return;
-			DownloadToken = new CancellationTokenSource();
-
-			_component.UpdateDownloading(true, 0);
-			await Main.Instance.Network.DownloadAssetFile(
-					_identifier.ToString(),
-					Asset.GetVersion(),
-					null,
-					f => _component.UpdateDownloading(true, f)
-				)
-				.AttachExternalCancellation(DownloadToken.Token);
-
-			if (DownloadToken.IsCancellationRequested) {
-				DownloadToken.Dispose();
-				DownloadToken = null;
+			if (!InCache() && !IsDownloading()) {
+				Logger.LogWarning("Cannot remove download, asset is not in cache.");
 				return;
 			}
 
-			_component.UpdateDownloading(true, 1);
-			await UniTask.Yield();
+			Main.Instance.RemoveSceneFromCache(Asset.GetHash());
+			Logger.Log($"Removed asset from cache: {Asset.GetHash()}");
 			_component.UpdateDownloading(false, 1);
-			DownloadToken.Dispose();
-			DownloadToken = null;
+			Caching = null;
+		}
+
+		public void CancelDownload()
+			=> Caching?.Cancel();
+
+		public async UniTask DownloadAssetAsync() {
+			if (Caching != null || Asset == null) {
+				Logger.LogWarning("Caching is already running or asset is null.");
+				_component.UpdateDownloading(false, 1);
+				return;
+			}
+
+			if (InCache()) {
+				Logger.Log("Asset is already in cache, no need to download.");
+				_component.UpdateDownloading(false, 1);
+				return;
+			}
+
+			_component.UpdateDownloading(true, 0);
+
+			Logger.Log("Caching is running.");
+			Caching = Main.Instance.DownloadSceneToCache(
+				_identifier.ToString(),
+				Asset.GetId(),
+				Asset.GetHash(),
+				progress: p => _component.UpdateDownloading(true, p)
+			);
+
+			await Caching.Start();
+			if (Caching.IsRunning())
+				await Caching.Wait();
+
+			Logger.Log("Caching finished.");
+			Caching = null;
+
+			_component.UpdateDownloading(false, 1);
 		}
 
 		public object[] GetContext()
 			=> _context;
 
 		public IMenu GetMenu()
-			=> Client.UiAPI.Get<IMenu>(_mId);
+			=> Client.UiAPI.Get<IMenu>(MId);
 
 		public GameObject GetContent(RectTransform parent) {
 			if (_content) return _content;
@@ -163,17 +193,21 @@ namespace api.nox.world.client {
 			=> _component.UpdateInstances(World).Forget();
 
 		public void OnDisplay(IPage lastPage) {
-			if (World != null) _component.UpdateContent(World);
+			if (World != null) _component.UpdateContent(World, Asset);
 			else if (_isLoading) _component.UpdateLoading();
 			else _component.UpdateError("World not found or loading failed.");
 		}
 
-		public void OnRemove() {
-			if (DownloadToken != null) {
-				DownloadToken.Cancel();
-				DownloadToken.Dispose();
-				DownloadToken = null;
-			}
-		}
+		public void OnRemove()
+			=> CancelDownload();
+
+		public bool InCache()
+			=> Main.Instance.Cache.Has(Asset.GetHash());
+
+		public bool IsDownloading()
+			=> Main.Instance.Cache
+					.GetDownload(_identifier.ToString(), Asset.GetId())
+					?.IsRunning()
+				?? false;
 	}
 }

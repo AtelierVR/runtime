@@ -119,12 +119,12 @@ namespace api.nox.network {
 		private Cache _responseCache;
 
 		public async UniTask Send(bool force = false, CancellationToken token = default) {
-			if (!force) {
+			if (!force && CacheDuration > 0 && _responseCache != null) {
 				_responseCache = Main.Instance.Cache.Get(Cache.CalculateId(this));
 				if (_responseCache != null) return;
 			} else _responseCache = null;
-			
-			foreach (var header in GetHeaders().Where(header => !string.IsNullOrEmpty(header.Value))) 
+
+			foreach (var header in GetHeaders().Where(header => !string.IsNullOrEmpty(header.Value)))
 				RequestObject.SetRequestHeader(header.Key, header.Value);
 
 			try {
@@ -181,6 +181,7 @@ namespace api.nox.network {
 
 			return default;
 		}
+
 		public void SetBody(string text, string contentType = null) {
 			if (!string.IsNullOrEmpty(contentType))
 				RequestObject.SetRequestHeader("Content-Type", contentType);
@@ -204,6 +205,7 @@ namespace api.nox.network {
 
 		public int GetCacheDuration()
 			=> CacheDuration;
+
 		public void SetCacheDuration(int cacheTime = -1) {
 			if (cacheTime < 0)
 				CacheDuration = Cache.DefaultCacheDuration;
@@ -237,6 +239,11 @@ namespace api.nox.network {
 			if (path.StartsWith("/"))
 				path = path[1..];
 			return $"{url}/{path}";
+		}
+
+		public void SetDownloadHandler(DownloadHandler handler) {
+			if (handler == null) return;
+			RequestObject.downloadHandler = handler;
 		}
 	}
 }

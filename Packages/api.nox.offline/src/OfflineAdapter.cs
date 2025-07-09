@@ -61,6 +61,8 @@ namespace api.nox.offline {
 
 		public async UniTask OnDeselect(ISession newSession) {
 			Logger.LogDebug($"OnDeselect: {this}");
+			var main = _scene.GetMainScene();
+			main?.SetVisibleInstance(_sceneId, false, false);
 			await UniTask.Yield();
 		}
 

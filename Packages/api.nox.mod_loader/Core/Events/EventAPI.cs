@@ -16,12 +16,13 @@ namespace Nox.ModLoader.Cores.Events {
 
 		private List<EventSubscription> _subscriptions = new();
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		private void Receive(EventContext context) {
-			var data = new EventData() {
-				EventName      = context.EventName,
-				Data           = context.Data,
-				InternalSource = context.Source,
-				SourceChannel  = context.Channel,
+			var data = new EventData {
+				EventName        = context.EventName,
+				Data             = context.Data,
+				InternalSource   = context.Source,
+				SourceChannel    = context.Channel,
 				CallbackFunction = context.Callback ?? (_ => { })
 			};
 			foreach (var sub in _subscriptions)
@@ -177,10 +178,10 @@ namespace Nox.ModLoader.Cores.Events {
 	}
 
 	public class EventData : CCK.Mods.Events.EventData {
-		public string                          EventName     { get; internal set; }
-		public object[]                        Data          { get; internal set; }
-		public CCK.Mods.Events.EventEntryFlags SourceChannel { get; internal set; }
-		public Action<object[]>                CallbackFunction      { get; internal set; }
+		public string                          EventName        { get; internal set; }
+		public object[]                        Data             { get; internal set; }
+		public CCK.Mods.Events.EventEntryFlags SourceChannel    { get; internal set; }
+		public Action<object[]>                CallbackFunction { get; internal set; }
 
 		public bool TryGet<T>(int index, out T value) {
 			if (Data == null) {

@@ -24,17 +24,19 @@ namespace api.nox.instance {
 			_event = Main.Instance.CoreAPI.EventAPI.Subscribe("menu_goto", OnGoto);
 		}
 
-		private void OnGoto(EventData context) {
-			// if (!context.TryGet(0, out int mid)) return;
-			// if (!context.TryGet(1, out string key)) return;
-			// var menu = UiAPI?.Get<IMenu>(mid);
-			// if (menu == null) return;
-			// IPage page = null;
-			// if (UserPage.GetStaticKey() == key)
-			// 	page = UserPage.OnGotoAction(menu, context.Data[2..]);
-			// if (page == null) return;
-			// Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.GetId(), page);
-		}
+	private void OnGoto(EventData context) {
+		if (!context.TryGet(0, out int mid)) return;
+		if (!context.TryGet(1, out string key)) return;
+		var menu = UiAPI?.Get<IMenu>(mid);
+		if (menu == null) return;
+		IPage page = null;
+		if (InstancePage.GetStaticKey() == key)
+			page = InstancePage.OnGotoAction(menu, context.Data[2..]);
+		else if (InstanceCreationPage.GetStaticKey() == key)
+			page = InstanceCreationPage.OnGotoAction(menu, context.Data[2..]);
+		if (page == null) return;
+		Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.GetId(), page);
+	}
 
 		public void OnDisposeClient() {
 			Main.Instance.CoreAPI.EventAPI.Unsubscribe(_event);

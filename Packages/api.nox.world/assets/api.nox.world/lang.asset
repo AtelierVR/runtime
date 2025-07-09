@@ -185,6 +185,18 @@ MonoBehaviour:
       value: "Downloaded"
     - key: world.cache.remove
       value: "Remove Dl."
+    - key: world.offline.join
+      value: "Join Offline"
+    - key: world.instance.make
+      value: "Make Instance"
+    - key: world.home.star
+      value: "Is Home"
+    - key: world.home.none
+      value: "Set as Home"
+    - key: world.home.add
+      value: "Set as Home"
+    - key: world.home.remove
+      value: "Remove Home"
   - IETF: fr-FR
     entries:
     - key: world.search.data.title

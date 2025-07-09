@@ -61,6 +61,8 @@
     <Compile Include="Packages\api.nox.instance\src\base\Instance.cs" />
     <Compile Include="Packages\api.nox.instance\src\client\InstanceComponent.cs" />
     <Compile Include="Packages\api.nox.instance\src\Main.cs" />
+    <Compile Include="Packages\api.nox.instance\src\client\InstanceCreationPage.cs" />
+    <Compile Include="Packages\api.nox.instance\src\client\InstanceCreationComponent.cs" />
     <Compile Include="Packages\api.nox.instance\src\search\SearchHandler.cs" />
     <None Include="Packages\api.nox.instance\package.json" />
     <None Include="Packages\api.nox.instance\api.nox.instance.asmdef" />

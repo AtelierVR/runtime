@@ -103,5 +103,11 @@ namespace api.nox.user {
 
 		public async UniTask<IntegrityResponse> CreateIntegrity(string address)
 			=> await Network.CreateIntegrity(address);
+
+		public async UniTask<ICurrentUser> UpdateCurrent(IUpdateCurrentUserRequest request)
+			=> await Network.UpdateCurrentUser(UpdateCurrentUserRequest.FromBase(request));
+
+		public IUpdateCurrentUserRequest MakeUpdateCurrentRequest()
+			=> new UpdateCurrentUserRequest();
 	}
 }

@@ -37,7 +37,7 @@ namespace api.nox.world {
 
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask<AssetBundleSceneGroup> LoadWorldFromPath(string path, Action<float> progress = null, CancellationToken token = default) {
-			var existingWorld = GetWorld(AssetBundleSceneGroup.ParseId(path));
+			var existingWorld = GetWorld(AssetBundleSceneGroup.ParseGroup(path));
 			if (existingWorld != null) {
 				Logger.LogWarning($"World {path} is already loaded.");
 				return existingWorld as AssetBundleSceneGroup;

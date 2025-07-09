@@ -31,17 +31,17 @@ namespace api.nox.network {
 			Cache    = new CacheManager();
 		}
 
-		// public async UniTask OnPostInitializeMainAsync() {
-		// 	Logger.Log("Testing network API...");
-		// 	var req = new Request();
-		// 	if (!await req.SetMasterUrl(UserAPI.GetCurrent().GetServerAddress(), "/api/test"))
-		// 		Logger.LogWarning("Network API is not working. Please check your server address.");
-		// 	else {
-		// 		req.SetUrl("https://postman-echo.com/get");
-		// 		await req.Send(true);
-		// 		Logger.LogDebug("Test: " + req.GetResponse<string>());
-		// 	}
-		// }
+		public async UniTask OnPostInitializeMainAsync() {
+			Logger.Log("Testing network API...");
+			var req = new Request();
+			if (!await req.SetMasterUrl(UserAPI.GetCurrent().GetServerAddress(), "/api/test"))
+				Logger.LogWarning("Network API is not working. Please check your server address.");
+			else {
+				req.SetUrl("https://postman-echo.com/get");
+				await req.Send(true);
+				Logger.LogDebug("Test: " + req.GetResponse<string>());
+			}
+		}
 
 		public void OnDispose() {
 			if (Cache != null) {
@@ -54,8 +54,7 @@ namespace api.nox.network {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<Texture2D> FetchTexture(string url,             UnityWebRequest   req   = null,
-			Action<float, ulong>                            progress = null, CancellationToken token = default) {
+		public async UniTask<Texture2D> FetchTexture(string url, UnityWebRequest req = null, Action<float, ulong> progress = null, CancellationToken token = default) {
 			Logger.Log($"Fetching [TEXTURE] {url}...");
 			try {
 				req     ??= new UnityWebRequest(url, "GET");
@@ -92,8 +91,7 @@ namespace api.nox.network {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<string> DownloadFile(string url,             string            hash, UnityWebRequest req = null,
-			Action<float, ulong>                         progress = null, CancellationToken token = default) {
+		public async UniTask<string> DownloadFile(string url, string hash, UnityWebRequest req = null, Action<float, ulong> progress = null, CancellationToken token = default) {
 			Logger.Log($"Fetching [FILE] {url}...");
 			req                 ??= new UnityWebRequest(url, "GET");
 			req.url             =   url;

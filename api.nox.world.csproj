@@ -79,11 +79,13 @@
     <Compile Include="Packages\api.nox.world\src\search\SearchWorker.cs" />
     <Compile Include="Packages\api.nox.world\src\network\search\SearchResponse.cs" />
     <Compile Include="Packages\api.nox.world\src\search\SearchResult.cs" />
+    <Compile Include="Packages\api.nox.world\src\cache\Cache.cs" />
     <Compile Include="Packages\api.nox.world\src\editor\WorldLoaderPanel.cs" />
     <Compile Include="Packages\api.nox.world\src\scene_groups\SceneGroup.cs" />
     <Compile Include="Packages\api.nox.world\src\scenes\BaseScene.cs" />
     <Compile Include="Packages\api.nox.world\src\editor\Editor.cs" />
     <Compile Include="Packages\api.nox.world\src\scenes\InstanceScene.cs" />
+    <Compile Include="Packages\api.nox.world\src\cache\Caching.cs" />
     <Compile Include="Packages\api.nox.world\src\obsolete\client\WorldPage.cs" />
     <Compile Include="Packages\api.nox.world\src\network\create\CreateWorldRequest.cs" />
     <Compile Include="Packages\api.nox.world\src\obsolete\client\HomeWidget.cs" />
@@ -943,6 +945,14 @@
     <ProjectReference Include="Nox.Tables.csproj">
       <Project>{0c3ec72f-1a6d-6f11-4b52-b30265f6622e}</Project>
       <Name>Nox.Tables</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Offline.csproj">
+      <Project>{c6ce7c45-db80-6a69-bbc0-0b8589deadd1}</Project>
+      <Name>Nox.Offline</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Sessions.csproj">
+      <Project>{0874ac54-00dd-a011-6c68-4b824efa4828}</Project>
+      <Name>Nox.Sessions</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,10 +1,14 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using api.nox.world.cache;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Utils;
 using Nox.Worlds;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Networking;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.world.network {
@@ -397,18 +401,22 @@ namespace api.nox.world.network {
 			return true;
 		}
 
-		public async UniTask<byte[]> DownloadAssetFile(WorldIdentifier identifier, uint assetId, string from = null, System.Action<float> onProgress = null)
-			=> await DownloadAssetFile(identifier.ToString(), assetId, from, onProgress);
+		public async UniTask<string> DownloadAssetFile(WorldIdentifier identifier, uint assetId, string hash = null, string from = null, Action<float> onProgress = null)
+			=> await DownloadAssetFile(identifier.ToString(), assetId, hash, from, onProgress);
 
-		public async UniTask<byte[]> DownloadAssetFile(uint id, uint assetId, string from = null, System.Action<float> onProgress = null)
-			=> await DownloadAssetFile(id.ToString(), assetId, from, onProgress);
+		public async UniTask<string> DownloadAssetFile(uint id, uint assetId, string hash = null, string from = null, Action<float> onProgress = null)
+			=> await DownloadAssetFile(id.ToString(), assetId, hash, from, onProgress);
 
-		public async UniTask<byte[]> DownloadAssetFile(string identifier, uint assetId, string from = null, System.Action<float> onProgress = null) {
+		public async UniTask<string> DownloadAssetFile(string identifier, uint assetId, string hash = null, string from = null, Action<float> onProgress = null) {
 			if (Main.Instance.NetworkAPI == null)
 				return null;
-			var ide = WorldIdentifier.FromString(identifier);
+
+			var output = Path.Join(Application.temporaryCachePath, string.IsNullOrEmpty(hash) ? $"{identifier}_{assetId}" : hash);
+			var ide    = WorldIdentifier.FromString(identifier);
+
 			if (ide.IsLocal())
 				ide.Server = from;
+
 			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.GetServerAddress();
 			if (string.IsNullOrEmpty(address)) {
 				Logger.LogError($"Cannot download asset file for world {identifier}: no server address provided.");
@@ -417,9 +425,12 @@ namespace api.nox.world.network {
 
 			if (address == ide.GetServerAddress())
 				ide.Server = "::"; // Use "::" to indicate local server in the identifier
+
 			var request = Main.Instance.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}/assets/{assetId}/file");
-
+			var downloadHandler = new DownloadHandlerFile(output) { removeFileOnAbort = true };
+			request.SetDownloadHandler(downloadHandler); // Use DownloadHandlerFile to save directly to file
+			request.SetCacheDuration(0);                 // Disable caching because is not compatible with DownloadHandlerFile
 			// Send request with progress monitoring if callback provided
 			if (onProgress != null) {
 				onProgress.Invoke(0.0f); // Initialize progress at 0
@@ -440,7 +451,19 @@ namespace api.nox.world.network {
 				return null;
 			}
 
-			return request.GetResponse<byte[]>();
+			if (!File.Exists(output)) {
+				Logger.LogError($"Downloaded asset file for world {identifier} does not exist at expected path: {output}");
+				return null;
+			}
+
+			if (!string.IsNullOrEmpty(hash) && Hashing.HashFile(output) != hash) {
+				Logger.LogError($"Downloaded asset file for world {identifier} does not match expected hash: {hash}");
+				File.Delete(output); // Clean up if hash doesn't match
+				return null;
+			}
+
+			Logger.LogDebug($"Successfully downloaded asset file for world {identifier} to {output}");
+			return output;
 		}
 
 		public async UniTask<WorldIdentifier[]> FetchFavorites(string from = null) {

@@ -56,7 +56,7 @@ namespace api.nox.world.client {
 			descriptionContainer.SetActive(false);
 		}
 
-		public void UpdateContent(IWorld world) {
+		public void UpdateContent(IWorld world, IWorldAsset asset) {
 			if (world == null) return;
 
 			title.UpdateText("world.title", new[] { world.GetTitle() });
@@ -76,6 +76,10 @@ namespace api.nox.world.client {
 
 
 			UpdateThumbnail(world).Forget();
+
+			HoverCache(_isCachedHover);
+			_isHome = Page.IsHome();
+			HoverHome(_isHomeHover);
 		}
 
 		private async UniTask UpdateThumbnail(IWorld world) {
@@ -193,13 +197,13 @@ namespace api.nox.world.client {
 		private void OnRefreshInstancesClicked()
 			=> UpdateInstances(Page.World).Forget();
 
+		#region Favorite Logic
+
 		private bool         _isFavorite      = false;
 		private bool         _isFavoriteHover = false;
 		public  Image        favoriteIcon;
 		public  Button       favoriteButton;
 		public  TextLanguage favoriteLabel;
-
-		#region Favorite Logic
 
 		private void HoverFavorite(bool isHover) {
 			_isFavoriteHover = isHover;
@@ -248,19 +252,21 @@ namespace api.nox.world.client {
 		public  TextLanguage cacheLabel;
 
 		public void UpdateDownloading(bool isDownloading, float progress) {
-			HoverCache(_isCachedHover);
-			cacheButton.interactable = !isDownloading;
 			if (isDownloading) {
 				cacheProgress.value = progress;
 			} else cacheProgress.value = 0;
+
+			HoverCache(_isCachedHover);
 		}
 
 		private void HoverCache(bool isHover) {
 			_isCachedHover = isHover;
-			var texture = ((Page.IsDownloaded() ? 1 : 0) << 2)
-				| ((Page.IsDownloading() ? 1 : 0)        << 1)
-				| ((_isCachedHover ? 1 : 0)              << 0);
+			var texture = ((Page.InCache() ? 1 : 0) << 2)
+				| ((Page.IsDownloading() ? 1 : 0)   << 1)
+				| ((_isCachedHover ? 1 : 0)         << 0);
 			if (texture > 5) texture -= 4;
+			if (!Page.IsDownloading())
+				cacheProgress.value = 0;
 
 			// 0 - | 0 | 0 | 0 | neutral (not hovered, not downloaded)
 			// 1 - | 0 | 0 | 1 | can be downloaded (hovered, not downloaded)
@@ -296,7 +302,7 @@ namespace api.nox.world.client {
 				return;
 			}
 
-			if (Page.IsDownloaded()) {
+			if (Page.InCache()) {
 				Page.RemoveDownload();
 				return;
 			}
@@ -307,6 +313,120 @@ namespace api.nox.world.client {
 
 		#endregion
 
+		#region Join Offline Logic
+
+		public Image        offlineIcon;
+		public TextLanguage offlineLabel;
+
+		private async UniTask OnJoinOfflineAsync() {
+			try {
+				// Check if world is already in cache
+				if (!Page.InCache()) {
+					Logger.Log($"World {Page.World.GetTitle()} not in cache, starting download...");
+
+					// Start download if not already downloading
+					if (!Page.IsDownloading())
+						await Page.DownloadAssetAsync();
+
+					// Wait for download to complete
+					while (Page.IsDownloading())
+						await UniTask.Yield();
+
+
+					// Verify download completed successfully
+					if (!Page.InCache()) {
+						Logger.LogError($"Failed to download world {Page.World.GetTitle()}");
+						// Show error message to user
+						return;
+					}
+				}
+
+				Logger.Log($"Loading world {Page.World.GetTitle()} from cache for offline session...");
+
+				// Load world from cache
+				var world = await Main.Instance.LoadSceneFromCache(
+					Page.Asset.GetHash()
+				);
+
+				if (world == null) {
+					Logger.LogError($"Failed to load world {Page.World.GetTitle()} from cache");
+					return;
+				}
+
+				Logger.Log($"Creating offline adapter and session for world {Page.World.GetTitle()}...");
+
+				// Create offline adapter
+				var adapter = Main.Instance.OfflineAPI.New(world);
+
+				// Create session with offline adapter
+				var session = Main.Instance.SessionAPI.New(adapter);
+
+				// Set as current session
+				await session.SetCurrent();
+
+				Logger.Log($"Successfully started offline session for world {Page.World.GetTitle()}");
+			} catch (Exception ex) {
+				Logger.LogError($"Error starting offline session for world {Page.World.GetTitle()}: {ex.Message}");
+			}
+		}
+
+		#endregion
+
+		#region Make Instance Logic
+
+		private void OnMakeInstanceClicked() {
+			if (Page?.World == null) return;
+			Client.UiAPI?.SendGoto(Page.MId, "instance_create", Page.World, Page.Version == ushort.MaxValue ? null : Page.Version);
+		}
+
+		#endregion
+
+		#region Home Logic
+
+		private bool         _isHome      = false;
+		private bool         _isHomeHover = false;
+		public  Image        homeIcon;
+		public  TextLanguage homeLabel;
+		public  Button       homeButton;
+
+		private void HoverHome(bool isHover) {
+			_isHomeHover = isHover;
+			homeIcon.sprite = Client.GetAsset<Sprite>(
+				$"icons/{(isHover ? _isHome ? "home_remove" : "home_add" : _isHome ? "home_star" : "home")}.png",
+				"ui"
+			);
+			homeLabel.UpdateText(
+				isHover
+					? _isHome
+						? "world.home.remove"
+						: "world.home.add"
+					: _isHome
+						? "world.home.star"
+						: "world.home.none"
+			);
+		}
+
+		private async UniTask OnHomeClickedAsync() {
+			if (!homeButton.interactable) return;
+			var hasHome = Page.IsHome();
+			_isHome                 = !hasHome;
+			homeButton.interactable = false;
+			HoverHome(_isHomeHover);
+			var id = Page.World.ToIdentifier();
+
+			await Main.Instance.UserAPI
+				.UpdateCurrent(
+					Main.Instance.UserAPI.MakeUpdateCurrentRequest()
+						.SetHome(hasHome ? null : id.ToString())
+				);
+
+			_isHome = Page.IsHome();
+			HoverHome(_isHomeHover);
+
+			homeButton.interactable = true;
+		}
+
+		#endregion
 
 		public static (GameObject, WorldComponent) Generate(WorldPage worldPage, RectTransform parent) {
 			var content              = Instantiate(Client.GetAsset<GameObject>("prefabs/split.prefab", "ui"), parent);
@@ -364,15 +484,48 @@ namespace api.nox.world.client {
 			Reference.GetComponent<TextLanguage>("text", boxActions).UpdateText("world.about.actions");
 			component.actions = Reference.GetComponent<RectTransform>("content", Instantiate(actionContainerAsset, Reference.GetComponent<RectTransform>("content", boxActions)));
 
-			// make different actions (join offline, new instance, download, add/remove favorite, set as home)
+			#region Join Offline Button
+
+			var offline             = Instantiate(actionButtonAsset, component.actions);
+			var offlineEventTrigger = Reference.GetComponent<EventTrigger>("button", offline);
+			component.offlineIcon        = Reference.GetComponent<Image>("image", offline);
+			component.offlineLabel       = Reference.GetComponent<TextLanguage>("text", offline);
+			component.offlineIcon.sprite = Client.GetAsset<Sprite>("icons/distance.png", "ui");
+			component.offlineLabel.UpdateText("world.offline.join");
+			SetupEvents(
+				offlineEventTrigger,
+				() => component.OnJoinOfflineAsync().Forget(),
+				() => { }, // No hover effects for now
+				() => { }  // No hover effects for now
+			);
+
+			#endregion
+
+			#region Make Instance Button
+
+			var makeInstance             = Instantiate(actionButtonAsset, component.actions);
+			var makeInstanceEventTrigger = Reference.GetComponent<EventTrigger>("button", makeInstance);
+			var makeInstanceIcon         = Reference.GetComponent<Image>("image", makeInstance);
+			var makeInstanceLabel        = Reference.GetComponent<TextLanguage>("text", makeInstance);
+			makeInstanceIcon.sprite = Client.GetAsset<Sprite>("icons/edit_location.png", "ui");
+			makeInstanceLabel.UpdateText("world.instance.make");
+			SetupEvents(
+				makeInstanceEventTrigger,
+				() => component.OnMakeInstanceClicked(),
+				() => { }, // No hover effects for now
+				() => { }  // No hover effects for now
+			);
+
+			#endregion
 
 			#region Cache Button
 
 			var cache             = Instantiate(actionButtonAsset, component.actions);
 			var cacheEventTrigger = Reference.GetComponent<EventTrigger>("button", cache);
-			component.cacheButton = Reference.GetComponent<Button>("button", cache);
-			component.cacheIcon   = Reference.GetComponent<Image>("image", cache);
-			component.cacheLabel  = Reference.GetComponent<TextLanguage>("text", cache);
+			component.cacheButton   = Reference.GetComponent<Button>("button", cache);
+			component.cacheIcon     = Reference.GetComponent<Image>("image", cache);
+			component.cacheLabel    = Reference.GetComponent<TextLanguage>("text", cache);
+			component.cacheProgress = Reference.GetComponent<Slider>("progress", cache);
 			component.cacheLabel.UpdateText("world.cache.none");
 			component.cacheIcon.sprite = Client.GetAsset<Sprite>("icons/cache0.png", "ui");
 			SetupEvents(
@@ -402,6 +555,23 @@ namespace api.nox.world.client {
 
 			#endregion
 
+			#region Home Button
+
+			var homeButton       = Instantiate(actionButtonAsset, component.actions);
+			var homeEventTrigger = Reference.GetComponent<EventTrigger>("button", homeButton);
+			component.homeButton = Reference.GetComponent<Button>("button", homeButton);
+			component.homeIcon   = Reference.GetComponent<Image>("image", homeButton);
+			component.homeLabel  = Reference.GetComponent<TextLanguage>("text", homeButton);
+			component.homeLabel.UpdateText("world.home.none");
+			component.homeIcon.sprite = Client.GetAsset<Sprite>("icons/home.png", "ui");
+			SetupEvents(
+				homeEventTrigger,
+				() => component.OnHomeClickedAsync().Forget(),
+				() => component.HoverHome(true),
+				() => component.HoverHome(false)
+			);
+
+			#endregion
 
 			// add box description
 			component.descriptionContainer = Instantiate(boxAsset, component.content);

@@ -6,7 +6,7 @@ namespace Nox.CCK.Utils
 {
     public class Config
     {
-        public static string GetPath() => Path.Combine(Constants.GameAppDataPath, "config.json");
+        public static string GetPath() => Path.Combine(Constants.AppPath, "config.json");
 
         public static Config Current;
 

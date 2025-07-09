@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Nox.CCK.Utils;
 using Nox.Worlds;
 
@@ -15,10 +16,10 @@ namespace api.nox.world.network {
 		public string ToParams() {
 			var text             = "";
 			if (Offset > 0) text += (text.Length > 0 ? "&" : "") + $"offset={Offset}";
-			if (Limit  > 1) text += (text.Length > 0 ? "&" : "") + $"limit={Limit}";
+			if (Limit  > 0) text += (text.Length > 0 ? "&" : "") + $"limit={Limit}";
 			if (ShowEmpty) text  += (text.Length > 0 ? "&" : "") + "empty";
 			if (Versions != null)
-				foreach (var v in Versions)
+				foreach (var v in Versions.Where(v => v != ushort.MaxValue))
 					text += (text.Length > 0 ? "&" : "") + $"version={v}";
 			if (Engines != null)
 				foreach (var e in Engines)

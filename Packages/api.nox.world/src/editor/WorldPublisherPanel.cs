@@ -1060,9 +1060,9 @@ namespace api.nox.world {
 		private void ShowErrorDialog(string messageKey, bool useDirectMessage, params object[] args) {
 			var message = useDirectMessage ? messageKey : LanguageManager.Get(messageKey, args);
 			EditorUtility.DisplayDialog(
-				LanguageManager.Get("world.publisher.error", "Error"),
+				LanguageManager.Get("world.publisher.error"),
 				message,
-				LanguageManager.Get("world.publisher.ok", "Ok")
+				LanguageManager.Get("world.publisher.ok")
 			);
 		}
 
@@ -1071,9 +1071,9 @@ namespace api.nox.world {
 
 		private void ShowSuccessDialog(string messageKey, bool useDirectMessage, params object[] args)
 			=> EditorUtility.DisplayDialog(
-				LanguageManager.Get("world.publisher.success", "Success"),
+				LanguageManager.Get("world.publisher.success"),
 				useDirectMessage ? messageKey : LanguageManager.Get(messageKey, args),
-				LanguageManager.Get("world.publisher.ok", "Ok")
+				LanguageManager.Get("world.publisher.ok")
 			);
 
 		private string CreateTempBuildPath() {

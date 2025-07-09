@@ -13,11 +13,15 @@ namespace Nox.Users {
 		public UniTask<IUser> Fetch(string identifier, string from = null);
 
 		public ISearchRequest MakeSearchRequest();
-		
-		public IUserIdentifier          Make(string identifier);
+
+		public IUserIdentifier Make(string identifier);
 
 		public UniTask<ISearchResponse> Search(ISearchRequest request);
 
 		public UniTask<IAuthToken> GetToken(string address);
+
+		public UniTask<ICurrentUser> UpdateCurrent(IUpdateCurrentUserRequest request);
+
+		public IUpdateCurrentUserRequest MakeUpdateCurrentRequest();
 	}
 }

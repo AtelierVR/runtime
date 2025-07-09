@@ -99,5 +99,11 @@ namespace api.nox.world {
 				return version;
 			return ushort.MaxValue; // Default value if no version is set
 		}
+
+		public bool Equals(IWorldIdentifier other) {
+			if (other == null) return false;
+			if (ReferenceEquals(this, other)) return true;
+			return _id == other.GetId() && Server == other.GetServerAddress();
+		}
 	}
 }

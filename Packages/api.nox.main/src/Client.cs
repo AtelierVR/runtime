@@ -29,7 +29,7 @@ namespace api.nox.main {
 			=> GetMainClass<ISessionAPI>("session");
 
 		public async UniTask OnPostInitializeClientAsync() {
-			var world = await WorldAPI.LoadWorldFromAssets(
+			var world = await WorldAPI.LoadSceneFromAssets(
 				_coreAPI.ModMetadata.GetId(),
 				"worlds/default/default.unity"
 			);

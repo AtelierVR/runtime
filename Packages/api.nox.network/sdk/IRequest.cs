@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using UnityEngine.Networking;
 
 namespace Nox.Network {
 	public interface IRequest {
@@ -19,6 +20,8 @@ namespace Nox.Network {
 		public UniTask<bool> SetMasterUrl(string address, string path);
 
 		public UniTask Send(bool force = false, CancellationToken token = default);
+
+		public void SetDownloadHandler(DownloadHandler handler);
 
 		public ushort GetStatus();
 
@@ -40,6 +43,7 @@ namespace Nox.Network {
 		/// </summary>
 		/// <returns></returns>
 		public int GetCacheDuration();
+
 		/// <summary>
 		/// Sets the cache duration for the request.
 		/// If the value is -1, it will use default cache duration.

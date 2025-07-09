@@ -10,7 +10,7 @@ namespace Nox.CCK.Utils {
 		public const long MaxLogSize = 1024 * 1024 * 10; // 10 MB
 
 		public static string LogDir
-			=> Path.Combine(Constants.GameAppDataPath, "logs");
+			=> Path.Combine(Constants.AppPath, "logs");
 
 		public static string LogFile
 			=> Path.Combine(LogDir, "latest.log");

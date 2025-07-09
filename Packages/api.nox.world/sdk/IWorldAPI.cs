@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Nox.Worlds {
 	/// <summary>
@@ -16,7 +17,7 @@ namespace Nox.Worlds {
 		/// <param name="progress">Progress callback to report loading progress.</param>
 		/// <param name="token">Cancellation token to cancel the loading operation.</param>
 		/// <returns>Returns a <see cref="IScene"/> instance representing the loaded world.</returns>
-		public UniTask<IScene> LoadWorldFromPath(string path, Action<float> progress = null, CancellationToken token = default);
+		public UniTask<IScene> LoadSceneFromPath(string path, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Loads a world from the given path in the assets.
@@ -27,7 +28,7 @@ namespace Nox.Worlds {
 		/// <param name="progress">Progress callback to report loading progress.</param>
 		/// <param name="token">Cancellation token to cancel the loading operation.</param>
 		/// <returns>Returns a <see cref="IScene"/> instance representing the loaded world.</returns>
-		public UniTask<IScene> LoadWorldFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default);
+		public UniTask<IScene> LoadSceneFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Loads a world from the cache using its hash.
@@ -37,7 +38,7 @@ namespace Nox.Worlds {
 		/// <param name="progress">Progress callback to report loading progress.</param>
 		/// <param name="token">Cancellation token to cancel the loading operation.</param>
 		/// <returns>Returns a <see cref="IScene"/> instance representing the loaded world, or null if not found.</returns>
-		public UniTask<IScene> LoadWorldFromCache(string hash, Action<float> progress = null, CancellationToken token = default);
+		public UniTask<IScene> LoadSceneFromCache(string hash, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Gets the currently active world.
@@ -147,10 +148,24 @@ namespace Nox.Worlds {
 		/// </summary>
 		/// <param name="identifier"></param>
 		/// <param name="assetId"></param>
+		/// <param name="hash"></param>
 		/// <param name="from"></param>
-		/// <param name="onProgress"></param>
+		/// <param name="progress"></param>
 		/// <returns></returns>
-		public UniTask<byte[]> DownloadAssetFile(string identifier, uint assetId, string from = null, Action<float> onProgress = null);
+		public ICaching DownloadSceneToCache(string identifier, uint assetId, string hash = null, string from = null, UnityAction<float> progress = null);
+
+		/// <summary>
+		/// Removes an asset from the cache using its hash.
+		/// </summary>
+		/// <param name="hash"></param>
+		public void RemoveSceneFromCache(string hash);
+
+		/// <summary>
+		/// Checks if an asset with the given hash exists in the cache.
+		/// </summary>
+		/// <param name="hash"></param>
+		/// <returns></returns>
+		public bool HasSceneInCache(string hash);
 
 		/// <summary>
 		/// Creates a world identifier from a string.
