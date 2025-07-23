@@ -275,8 +275,8 @@ namespace api.nox.ui.menus {
 				content.SetActive(true);
 
 				UpdateLayout.UpdateManually(content);
-			} catch {
-				// ignored
+			} catch (Exception e) {
+				Logger.LogException(e);
 			}
 		}
 	}

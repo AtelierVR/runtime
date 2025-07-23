@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using api.nox.relay.connector;
+using api.nox.relay.Instances;
 using api.nox.relay.types;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
@@ -124,8 +125,8 @@ namespace api.nox.relay.connection {
 			return (await Connector.Send(buffer), state);
 		}
 
-		private async UniTask<T> Request<T>(
-			Buffer       request,
+		internal async UniTask<T> Request<T>(
+			RelayRequest request,
 			RequestType  oType,
 			ResponseType iType,
 			ushort       state,
@@ -150,7 +151,7 @@ namespace api.nox.relay.connection {
 			Connector.OnReceivedEvent += rec;
 			var t0 = DateTime.Now;
 
-			var (ok, _) = await Emit(request, oType, state);
+			var (ok, _) = await Emit(request.ToBuffer(), oType, state);
 			if (!ok) {
 				Connector.OnReceivedEvent -= rec;
 				Logger.Log($"Requested: failed {oType} {state}");
@@ -176,7 +177,7 @@ namespace api.nox.relay.connection {
 					ProtocolVersion = ProtocolVersion,
 					Engine          = EngineExtensions.CurrentEngine,
 					Platform        = PlatformExtensions.CurrentPlatform
-				}.ToBuffer(),
+				},
 				RequestType.Handshake,
 				ResponseType.Handshake,
 				NextState()
@@ -187,22 +188,27 @@ namespace api.nox.relay.connection {
 				new types.Latency.RelayRequestLatency {
 					ConnectionId = Id,
 					InitialTime  = DateTime.UtcNow
-				}.ToBuffer(),
+				},
 				RequestType.Latency,
 				ResponseType.Latency,
 				NextState()
 			);
 
-		public async UniTask<types.Session.RelayResponseSessions> RequestSessions(byte page)
-			=> _lastSessions = await Request<types.Session.RelayResponseSessions>(
+		public async UniTask<types.Session.RelayResponseSessions> RequestSessions(byte page) {
+			_lastSessions = await Request<types.Session.RelayResponseSessions>(
 				new types.Session.RelayRequestSessions {
 					ConnectionId = Id,
 					Page         = page
-				}.ToBuffer(),
+				},
 				RequestType.Sessions,
 				ResponseType.Sessions,
 				NextState()
 			);
+			if (_lastSessions == null) return null;
+			foreach (var instance in _lastSessions.Instances) 
+				instance.Connection = this;
+			return _lastSessions;
+		}
 
 		public async UniTask<types.Session.RelayResponseSessions> RequestSessions() {
 			var all = await RequestSessions(0);
@@ -219,12 +225,30 @@ namespace api.nox.relay.connection {
 			return _lastSessions = all;
 		}
 
+		public async UniTask<RelayInstance> RequestSession(uint mid) {
+			byte          total, page = 0;
+			RelayInstance instance    = null;
+
+			do {
+				var sessions = await RequestSessions(page++);
+				if (sessions == null) return null;
+				total = sessions.PageCount;
+				foreach (var inst in sessions.Instances) {
+					if (inst.Id != mid) continue;
+					instance = inst;
+					break;
+				}
+			} while (instance == null && page < total);
+
+			return instance;
+		}
+
 		public async UniTask<types.Disconnect.RelayEventDisconnect> RequestDisconnect(string reason = null)
 			=> await Request<types.Disconnect.RelayEventDisconnect>(
 				new types.Disconnect.RelayRequestDisconnect {
 					ConnectionId = Id,
 					Reason       = reason
-				}.ToBuffer(),
+				},
 				RequestType.Disconnect,
 				ResponseType.Disconnect,
 				NextState()
@@ -232,7 +256,7 @@ namespace api.nox.relay.connection {
 
 		public async UniTask<types.Authentication.RelayResponseAuthentication> RequestAuthentication(types.Authentication.RelayRequestAuthentication request)
 			=> await Request<types.Authentication.RelayResponseAuthentication>(
-					request.ToBuffer(),
+					request,
 					RequestType.Authentication,
 					ResponseType.Authentication,
 					NextState()

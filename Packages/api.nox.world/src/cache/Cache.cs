@@ -1,22 +1,58 @@
 using System.Collections.Generic;
-using System;
 using System.IO;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 
 namespace api.nox.world.cache {
 	public class Cache {
-		internal readonly List<Caching> Cachings = new();
+		public Cache() {
+			_watcher = new FileSystemWatcher(CachePath) {
+				NotifyFilter          = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.CreationTime,
+				EnableRaisingEvents   = true,
+				IncludeSubdirectories = false
+			};
+			_watcher.Changed += OnFile;
+			_watcher.Created += OnFile;
+			_watcher.Deleted += OnFile;
+			_watcher.Renamed += OnRenameFile;
+		}
+
+		private void OnFile(object sender, FileSystemEventArgs e)
+			=> OnFileAsync(e).Forget();
+		
+		private async UniTask OnFileAsync(FileSystemEventArgs e) {
+			await UniTask.SwitchToMainThread();
+			var path = Path.GetRelativePath(CachePath, e.FullPath);
+			if (e.ChangeType == WatcherChangeTypes.Created)
+				Main.Instance.CoreAPI.EventAPI.Emit("world_cache_added", path);
+			else if (e.ChangeType == WatcherChangeTypes.Deleted)
+				Main.Instance.CoreAPI.EventAPI.Emit("world_cache_removed", path);
+		}
+
+		private void OnRenameFile(object sender, RenamedEventArgs e)
+			=> OnRenameFileAsync(e).Forget();
+
+		private async UniTask OnRenameFileAsync(RenamedEventArgs e) {
+			await UniTask.SwitchToMainThread();
+			var oldPath = Path.GetRelativePath(CachePath, e.OldFullPath);
+			var newPath = Path.GetRelativePath(CachePath, e.FullPath);
+			Main.Instance.CoreAPI.EventAPI.Emit("world_cache_removed", oldPath);
+			Main.Instance.CoreAPI.EventAPI.Emit("world_cache_added", newPath);
+		}
+
+		private readonly  FileSystemWatcher _watcher;
+		internal readonly List<Caching>     Caching = new();
+
 
 		public Caching GetDownload(string identifier, uint assetId)
-			=> Cachings.Find(c => c.Identifier == identifier && c.AssetId == assetId);
+			=> Caching.Find(c => c.Identifier == identifier && c.AssetId == assetId);
 
 		public Caching AddDownload(string identifier, uint assetId, string hash = null) {
 			var existing = GetDownload(identifier, assetId);
 			return existing ?? new Caching(this, identifier, assetId, hash);
 		}
 
-		public string CachePath {
+		public static string CachePath {
 			get {
 				var dir = Path.Combine(Constants.CachePath, "worlds");
 				if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
@@ -45,9 +81,10 @@ namespace api.nox.world.cache {
 			=> File.Copy(path, Get(hash));
 
 		public void Dispose() {
-			foreach (var caching in Cachings)
+			foreach (var caching in Caching)
 				caching.Cancel();
-			Cachings.Clear();
+			_watcher.Dispose();
+			Caching.Clear();
 		}
 	}
 }

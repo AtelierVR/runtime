@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
@@ -9,18 +11,35 @@ using Nox.Worlds;
 
 namespace api.nox.offline {
 	public class OfflineAdapter : IOfflineAdapter {
-		private readonly IScene         _scene;
-		private readonly IEntityManager _entities;
-		private          int            _masterPlayerId;
-		private          int            _nextPlayerId;
-		private          ISession       _session;
-		private          int            _sceneId = 0;
+		private readonly List<OfflineDimension> _dimensions;
+		private readonly IEntityManager         _entities;
+		private          int                    _masterPlayerId;
+		private          int                    _nextPlayerId;
+		private          ISession               _session;
+		private          OfflineState           _state = new(true);
 
-		internal OfflineAdapter(IScene scene) {
-			_scene          = scene;
+		internal OfflineAdapter() {
+			_dimensions     = new List<OfflineDimension>();
 			_masterPlayerId = -1;
 			_nextPlayerId   = 0;
 			_entities       = Main.EntityAPI.New();
+		}
+
+		public void AddDimension(string key, IScene scene) {
+			if (scene == null) return;
+			_dimensions.Add(new OfflineDimension(key, 0, scene, true));
+		}
+
+		public void RemoveDimension(string key)
+			=> _dimensions.RemoveAll(e => e.GetName() == key);
+
+		public IAdapterState GetState()
+			=> _state;
+
+		internal void SetState(bool isReady, string message = "", float progress = 1f) {
+			var old = _state;
+			_state = new OfflineState(isReady, message, progress);
+			_session.OnStateChanged(_state, old);
 		}
 
 		private void NewPlayer() {
@@ -59,21 +78,28 @@ namespace api.nox.offline {
 			return true;
 		}
 
+		public IDimension[] GetDimensions()
+			=> GetInternalDimensions().Cast<IDimension>().ToArray();
+
 		public async UniTask OnDeselect(ISession newSession) {
 			Logger.LogDebug($"OnDeselect: {this}");
-			var main = _scene.GetMainScene();
-			main?.SetVisibleInstance(_sceneId, false, false);
+			var dimension = GetInternalCurrentDimension();
+			var main      = dimension.GetScene().GetMainScene();
+			main?.SetVisibleInstance(dimension.GetMainIndex(), false, false);
 			await UniTask.Yield();
 		}
 
 		public async UniTask OnSelect(ISession oldSession) {
 			Logger.LogDebug($"OnSelect: {this}");
+			var dimension = GetInternalCurrentDimension();
+			if (dimension == null)
+				throw new InvalidOperationException($"No current dimension found for session {this}. Please ensure a dimension is set before selecting the session.");
 			if (GetLocalPlayer() == null) NewPlayer();
-			var main = _scene.GetMainScene();
-			if (_sceneId == 0)
-				_sceneId = await main.MakeInstance();
-			_scene.SetCurrent();
-			main.SetVisibleInstance(_sceneId, true, true);
+			var main = dimension.GetScene().GetMainScene();
+			if (dimension.GetMainIndex() == 0)
+				dimension.SetMainIndex(await main.MakeInstance());
+			dimension.GetScene().SetCurrent();
+			main.SetVisibleInstance(dimension.GetMainIndex(), true, true);
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -87,7 +113,14 @@ namespace api.nox.offline {
 			await UniTask.Yield();
 			foreach (var entity in _entities.GetEntities().ToArray())
 				_entities.UnregisterEntity(entity);
-			await _scene.Dispose();
+			foreach (var dimension in _dimensions.ToArray()) {
+				if (dimension.GetMainIndex() > 0)
+					dimension.GetScene()
+						.GetMainScene()
+						.RemoveInstance(dimension.GetMainIndex());
+			}
+
+			_dimensions.Clear();
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -118,11 +151,18 @@ namespace api.nox.offline {
 		public int GetPlayerCount()
 			=> _entities.GetCount<IPlayer>();
 
-		[NoxPublic(NoxAccess.Method)]
-		public IScene GetWorld()
-			=> _scene;
+		public IDimension GetCurrentDimension()
+			=> GetInternalCurrentDimension();
+
+		private OfflineDimension GetInternalCurrentDimension()
+			=> GetInternalDimensions().FirstOrDefault(e => e.IsActive());
+
+		public void SetCurrentDimension(string key) { }
+
+		private OfflineDimension[] GetInternalDimensions()
+			=> _dimensions.ToArray();
 
 		public override string ToString()
-			=> $"{GetType().Name}[World={_scene}, Entities={_entities}]";
+			=> $"{GetType().Name}[Entities={_entities}, Dimensions={_dimensions.Count}]";
 	}
 }

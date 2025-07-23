@@ -1,10 +1,14 @@
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using Nox.CCK.Worlds;
 using Nox.Entities;
 using Nox.Players;
 using Nox.Sessions;
+using Nox.Worlds;
+using UnityEngine;
 using UnityEngine.SceneManagement;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.session {
 	public class Session : ISession, INoxObject {
@@ -77,6 +81,17 @@ namespace api.nox.session {
 			Logger.LogDebug($"OnAuthorityTransferred: {player}");
 			Main.Instance.CoreAPI.EventAPI.Emit("session_authority_transferred", this, player);
 		}
+
+		public void OnStateChanged(IAdapterState state, IAdapterState previousState) {
+			Main.Instance.CoreAPI.EventAPI.Emit("session_state_changed", this, state, previousState);
+			if (state.IsReady() && !previousState.IsReady())
+				Main.Instance.CoreAPI.EventAPI.Emit("session_ready", this);
+			else if (!state.IsReady() && Mathf.Approximately(state.GetProgress(), -1))
+				Main.Instance.CoreAPI.EventAPI.Emit("session_error", this);
+		}
+
+		public bool Match(IWorldIdentifier identifier)
+			=> Adapter.GetDimensions().Any(e => e.GetScene().GetIdentifier().Equals(identifier));
 
 		public override string ToString()
 			=> $"{GetType().Name}[Id={Id}, Adapter={Adapter}]";

@@ -171,7 +171,7 @@ MonoBehaviour:
   scenes: []
   sceneAssets:
   - {fileID: 102900000, guid: b8ce853cf9a3b2b478f94ddd668c4528, type: 3}
-  target: 2
+  target: 1
   publishId: 1
   publishServer: hactazia.fr
   publishVersion: 3

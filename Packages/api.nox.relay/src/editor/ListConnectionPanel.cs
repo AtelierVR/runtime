@@ -50,6 +50,8 @@ namespace api.nox.relay.editor {
 		}
 
 		private void OnConnectionAdded(Connection connection) {
+			if (_root.childCount == 0) return;
+
 			Logger.LogDebug("Connection added: " + connection.Id);
 			var list = _root.Q("list");
 			if (list == null) return;
@@ -67,6 +69,7 @@ namespace api.nox.relay.editor {
 		}
 
 		private void OnConnectionRemoved(Connection connection) {
+			if (_root.childCount == 0) return;
 			Logger.LogDebug("Connection removed: " + connection.Id);
 			var list = _root.Q("list");
 			if (list == null) return;

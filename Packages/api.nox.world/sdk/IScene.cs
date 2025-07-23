@@ -10,7 +10,13 @@ namespace Nox.Worlds {
 		/// Returns the world identifier.
 		/// </summary>
 		/// <returns></returns>
-		public string GetWorldId();
+		public IWorldIdentifier GetIdentifier();
+
+		/// <summary>
+		/// Sets the world identifier.
+		/// </summary>
+		/// <param name="identifier"></param>
+		public void SetIdentifier(IWorldIdentifier identifier);
 		
 		/// <summary>
 		/// Returns all loaded scenes in the world.

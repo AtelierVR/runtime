@@ -21,8 +21,11 @@ namespace api.nox.world {
 				.Where(s => s.IsValid())
 				.ToArray();
 
-		public string GetWorldId()
-			=> WorldIdentifier?.ToString();
+		public IWorldIdentifier GetIdentifier()
+			=> WorldIdentifier;
+
+		public void SetIdentifier(IWorldIdentifier identifier)
+			=> WorldIdentifier = identifier;
 
 		[NoxPublic(NoxAccess.Method)]
 		public ISceneDescription<BaseSceneDescriptor>[] GetScenes() {
@@ -40,7 +43,7 @@ namespace api.nox.world {
 			=> index switch {
 				0 when typeof(MainSceneDescriptor) == typeof(T) => MainScene as ISceneDescription<T>,
 				_ when typeof(SubSceneDescriptor)  == typeof(T) => GetSubScene(index - 1) as ISceneDescription<T>,
-				_                                          => null
+				_                                               => null
 			};
 
 		[NoxPublic(NoxAccess.Method)]

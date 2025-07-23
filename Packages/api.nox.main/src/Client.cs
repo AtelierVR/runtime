@@ -9,6 +9,7 @@ using Nox.Sessions;
 namespace api.nox.main {
 	public class Client : ClientModInitializer {
 		private static ClientModCoreAPI _coreAPI;
+
 		public void OnInitializeClient(ClientModCoreAPI api)
 			=> _coreAPI = api;
 
@@ -33,7 +34,9 @@ namespace api.nox.main {
 				_coreAPI.ModMetadata.GetId(),
 				"worlds/default/default.unity"
 			);
-			var adapter = OfflineAPI.New(world);
+			var adapter = OfflineAPI.New();
+			adapter.AddDimension("default", world);
+			adapter.SetCurrentDimension("default");
 			var session = SessionAPI.New(adapter);
 			await session.SetCurrent();
 		}

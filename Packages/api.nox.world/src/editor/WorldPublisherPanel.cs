@@ -1086,6 +1086,10 @@ namespace api.nox.world {
 			try {
 				if (!string.IsNullOrEmpty(tempPath) && Directory.Exists(tempPath)) {
 					Directory.Delete(tempPath, true);
+					// delete folder
+					
+					
+					
 					Logger.Log($"Cleaned up temporary build directory: {tempPath}");
 				}
 			} catch (Exception ex) {

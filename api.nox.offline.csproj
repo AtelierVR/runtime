@@ -48,6 +48,8 @@
   <ItemGroup>
     <Compile Include="Packages\api.nox.offline\src\Main.cs" />
     <Compile Include="Packages\api.nox.offline\src\OfflinePlayer.cs" />
+    <Compile Include="Packages\api.nox.offline\src\OfflineState.cs" />
+    <Compile Include="Packages\api.nox.offline\src\OfflineDimension.cs" />
     <Compile Include="Packages\api.nox.offline\src\OfflineAdapter.cs" />
     <None Include="Packages\api.nox.offline\api.nox.offline.asmdef" />
     <None Include="Packages\api.nox.offline\package.json" />

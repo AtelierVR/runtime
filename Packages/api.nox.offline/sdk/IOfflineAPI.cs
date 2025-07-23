@@ -2,6 +2,6 @@ using Nox.Worlds;
 
 namespace Nox.Offline {
 	public interface IOfflineAPI {
-		public IOfflineAdapter New(IScene scene);
+		public IOfflineAdapter New();
 	}
 }

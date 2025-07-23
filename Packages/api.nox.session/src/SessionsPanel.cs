@@ -134,9 +134,15 @@ namespace api.nox.session {
 				infoContainer.Add(playersInfo);
 
 				// World info
-				var world = adapter.GetWorld();
-				if (world != null) {
-					var worldLabel = new Label($"World: {world.GetWorldId()}");
+				var world = adapter.GetDimensions();
+				foreach (var worldDimension in world) {
+					var worldLabel = new Label(
+						LanguageManager.Get(
+							"session.manager.world_info",
+							worldDimension.GetName(),
+							worldDimension.GetScene().GetIdentifier()
+						)
+					);
 					worldLabel.AddToClassList("session-world");
 					infoContainer.Add(worldLabel);
 				}
@@ -147,14 +153,14 @@ namespace api.nox.session {
 			actionsContainer.AddToClassList("session-actions");
 
 			if (!isCurrent) {
-				var setCurrentButton = new Button(() => SetCurrentSession(session)) {
+				var setCurrentButton = new Button(() => SetCurrentSession(session).Forget()) {
 					text = LanguageManager.Get("session.manager.set_current")
 				};
 				setCurrentButton.AddToClassList("session-action-button");
 				actionsContainer.Add(setCurrentButton);
 			}
 
-			var disposeButton = new Button(() => DisposeSession(session)) {
+			var disposeButton = new Button(() => DisposeSession(session).Forget()) {
 				text = LanguageManager.Get("session.manager.dispose")
 			};
 			disposeButton.AddToClassList("session-action-button");

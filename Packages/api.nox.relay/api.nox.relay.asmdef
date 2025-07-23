@@ -4,7 +4,12 @@
     "references": [
         "Nox.CCK",
         "UniTask",
-        "Nox.Users"
+        "Nox.Users",
+        "api.nox.jint",
+        "Nox.Sessions",
+        "Nox.Worlds",
+        "Nox.Players",
+        "Nox.Entities"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

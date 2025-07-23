@@ -4,7 +4,7 @@ using Nox.CCK.Utils;
 
 namespace api.nox.relay.connector {
 	public interface IConnector {
-		string Type { get; }
+		string GetProtocolName();
 
 		bool          IsConnected();
 		IPEndPoint    Remote();

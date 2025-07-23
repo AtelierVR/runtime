@@ -55,6 +55,7 @@
     <Compile Include="Packages\api.nox.user\src\network\login\LoginRequest.cs" />
     <Compile Include="Packages\api.nox.user\src\editor\EditorUser.cs" />
     <Compile Include="Packages\api.nox.user\src\base\User.cs" />
+    <Compile Include="Packages\api.nox.user\src\network\update\UpdateCurrentUserResponse.cs" />
     <Compile Include="Packages\api.nox.user\src\obsolete\pages\ProfileComportment.cs" />
     <Compile Include="Packages\api.nox.user\src\search\Search.cs" />
     <Compile Include="Packages\api.nox.user\src\obsolete\widget\UserWidget.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="Packages\api.nox.user\src\client\UserComponent.cs" />
     <Compile Include="Packages\api.nox.user\src\editor\AuthPanel.cs" />
     <Compile Include="Packages\api.nox.user\src\network\login\LoginResponse.cs" />
+    <Compile Include="Packages\api.nox.user\src\network\UpdateCurrentUserRequest.cs" />
     <Compile Include="Packages\api.nox.user\src\Client.cs" />
     <Compile Include="Packages\api.nox.user\src\base\CurrentUser.cs" />
     <Compile Include="Packages\api.nox.user\src\network\login\SendVerificationCodeResponse.cs" />

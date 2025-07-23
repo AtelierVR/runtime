@@ -171,6 +171,10 @@ namespace api.nox.world {
 			=> new SearchRequest();
 
 		[NoxPublic(NoxAccess.Method)]
+		public IAssetSearchRequest MakeAssetSearchRequest()
+			=> new AssetSearchRequest();
+
+		[NoxPublic(NoxAccess.Method)]
 		public async UniTask<ISearchResponse> Search(ISearchRequest data, string from = null)
 			=> await Network.Search(SearchRequest.FromBase(data), from);
 

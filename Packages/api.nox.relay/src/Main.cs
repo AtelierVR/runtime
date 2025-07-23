@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -5,14 +6,33 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using api.nox.relay.connection;
-using UnityEngine;
+using api.nox.relay.connector;
+using Nox.CCK.Mods.Events;
+using Nox.Entities;
+using Nox.Sessions;
+using Nox.Users;
+using Nox.Worlds;
 using UnityEngine.Events;
+using Random = UnityEngine.Random;
 
 namespace api.nox.relay {
 	public class Main : MainModInitializer {
-		public readonly List<Connection> Connections = new();
-		public static   Main             Instance;
-		public          MainModCoreAPI   CoreAPI;
+		public readonly List<Connection>    Connections = new();
+		public static   Main                Instance;
+		internal        MainModCoreAPI      CoreAPI;
+		private         EventSubscription[] _events = Array.Empty<EventSubscription>();
+
+		internal static IEntityAPI EntityAPI
+			=> Instance.CoreAPI.ModAPI.GetMod("entity").GetMains().FirstOrDefault() as IEntityAPI;
+
+		internal static IUserAPI UserAPI
+			=> Instance.CoreAPI.ModAPI.GetMod("user").GetMains().FirstOrDefault() as IUserAPI;
+
+		internal static IWorldAPI WorldAPI
+			=> Instance.CoreAPI.ModAPI.GetMod("world").GetMains().FirstOrDefault() as IWorldAPI;
+
+		internal static ISessionAPI SessionAPI
+			=> Instance.CoreAPI.ModAPI.GetMod("session").GetMains().FirstOrDefault() as ISessionAPI;
 
 		public static UnityEvent<Connection> OnConnectionAdded   = new();
 		public static UnityEvent<Connection> OnConnectionRemoved = new();
@@ -20,9 +40,15 @@ namespace api.nox.relay {
 		public void OnInitializeMain(MainModCoreAPI api) {
 			Instance = this;
 			CoreAPI  = api;
+			_events = new[] {
+				CoreAPI.EventAPI.Subscribe("session_can_make_adapter", Adapting.OnCanMakeAdapter),
+				CoreAPI.EventAPI.Subscribe("session_make_adapter", Adapting.OnMakeAdapter)
+			};
 		}
 
 		public async UniTask OnDisposeMainAsync() {
+			foreach (var e in _events)
+				CoreAPI.EventAPI.Unsubscribe(e);
 			foreach (var connection in Connections)
 				await connection.Dispose();
 			Connections.Clear();
@@ -54,5 +80,14 @@ namespace api.nox.relay {
 
 		public Connection GetByAddress(IPEndPoint endPoint)
 			=> Connections.FirstOrDefault(connection => connection.Connector.Remote().Equals(endPoint));
+
+		public Connection GetConnectionByType(string proto) {
+			proto = proto.ToLowerInvariant();
+			if (TcpConnector.GetStaticProtocolName().Equals(proto))
+				return Connection.New<TcpConnector>();
+			if (UdpConnector.GetStaticProtocolName().Equals(proto))
+				return Connection.New<UdpConnector>();
+			return null;
+		}
 	}
 }

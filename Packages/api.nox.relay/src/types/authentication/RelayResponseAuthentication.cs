@@ -10,7 +10,7 @@ namespace api.nox.relay.types.Authentication {
 				or AuthenticationResult.Blacklisted;
 
 		public AuthenticationResult Result;
-		public DateTime             ExpireAt;
+		public DateTime             ExpireAt = DateTime.MinValue;
 		public string               Reason;
 
 		public bool HasExpiration

@@ -13,7 +13,7 @@ namespace Nox.Sessions {
 		/// </summary>
 		/// <param name="session"></param>
 		public void SetSession(ISession session);
-		
+
 		/// <summary>
 		/// Close the adapter.
 		/// </summary>
@@ -68,7 +68,19 @@ namespace Nox.Sessions {
 		/// Get the world associated with the session.
 		/// </summary>
 		/// <returns></returns>
-		public IScene GetWorld();
+		public IDimension GetCurrentDimension();
+
+		/// <summary>
+		/// Set the current dimension of the session.
+		/// </summary>
+		/// <param name="key"></param>
+		void SetCurrentDimension(string key);
+
+		/// <summary>
+		/// Get all dimensions in the session.
+		/// </summary>
+		/// <returns></returns>
+		public IDimension[] GetDimensions();
 
 		/// <summary>
 		/// Called when the session is deselected (is not the current session).
@@ -81,5 +93,27 @@ namespace Nox.Sessions {
 		/// </summary>
 		/// <param name="oldSession">The previous session that was current.</param>
 		public UniTask OnSelect(ISession oldSession);
+
+		/// <summary>
+		/// Add a dimension to the session.
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="scene"></param>
+		public void AddDimension(string key, IScene scene);
+
+		/// <summary>
+		/// Remove a dimension from the session.
+		/// </summary>
+		/// <param name="key"></param>
+		public void RemoveDimension(string key);
+
+		/// <summary>
+		/// Get the current state of the adapter, which includes the current operation and its progress.
+		/// (used when the session is loading (e.g. loading a world or connecting to a server)).
+		/// If there is no operation, it returns an empty string and 1.0f (100%).
+		/// If the adapter is errored, it returns the error message and -1.0f.
+		/// </summary>
+		/// <returns></returns>
+		public IAdapterState GetState();
 	}
 }

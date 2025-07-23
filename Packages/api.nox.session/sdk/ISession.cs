@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Nox.Entities;
 using Nox.Players;
+using Nox.Worlds;
 
 namespace Nox.Sessions {
 	public interface ISession {
@@ -76,5 +77,19 @@ namespace Nox.Sessions {
 		/// </summary>
 		/// <param name="player"></param>
 		void OnAuthorityTransferred(IPlayer player);
+
+		/// <summary>
+		/// Check if the session matches a specific world identifier.
+		/// </summary>
+		/// <param name="identifier"></param>
+		/// <returns></returns>
+		bool Match(IWorldIdentifier identifier);
+
+		/// <summary>
+		/// Notify the session that its state has changed.
+		/// </summary>
+		/// <param name="state"></param>
+		/// <param name="previousState"></param>
+		void OnStateChanged(IAdapterState state, IAdapterState previousState);
 	}
 }

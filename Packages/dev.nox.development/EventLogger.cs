@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Nox.CCK.Mods;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
@@ -100,7 +101,7 @@ namespace dev.nox.development {
 			div.Add(divData);
 			divData.Add(new Label($"Data ({context.Data.Length})"));
 			foreach (var obj in context.Data)
-				divData.Add(new Label($" - {obj ?? "null"}"));
+				divData.Add(new Label($" - {ParseData(obj)}"));
 
 
 			logDiv.Add(foldout);
@@ -110,6 +111,29 @@ namespace dev.nox.development {
 		}
 
 		public void OnClosed() { }
+
+		private string ParseData(object obj) {
+			if (obj == null) 
+				return "null";
+			
+			if (obj is string s) 
+				return $"\"{s}\"";
+			
+			if (obj is Enum e) 
+				return e.ToString();
+			
+			if (obj is IList<object> list) {
+				var items = string.Join(", ", list.Select(ParseData));
+				return $"{obj.GetType().Name}[{items}]";
+			}
+
+			if (obj is IDictionary<string, object> dict) {
+				var items = string.Join(", ", dict.Select(kv => $"{kv.Key}={ParseData(kv.Value)}"));
+				return $"{obj.GetType().Name}[{items}]";
+			}
+
+			return obj.ToString();
+		}
 
 		private static string CustomLabel(EventData context)
 			=> context.EventName switch {

@@ -49,5 +49,11 @@ namespace Nox.Worlds {
 		/// </summary>
 		/// <returns></returns>
 		public ushort GetVersion();
+
+		/// <summary>
+		/// Sets the version of the asset in the metadata.
+		/// </summary>
+		/// <param name="version"></param>
+		public void SetVersion(ushort version);
 	}
 }

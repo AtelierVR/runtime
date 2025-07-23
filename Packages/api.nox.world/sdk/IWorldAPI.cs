@@ -70,6 +70,12 @@ namespace Nox.Worlds {
 		public ISearchRequest MakeSearchRequest();
 
 		/// <summary>
+		/// Creates a new search request for asset worlds.
+		/// </summary>
+		/// <returns></returns>
+		public IAssetSearchRequest MakeAssetSearchRequest();
+		
+		/// <summary>
 		/// Searches for worlds based on the provided search request.
 		/// </summary>
 		/// <param name="data">Search request containing the search parameters.</param>

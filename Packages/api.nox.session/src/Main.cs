@@ -1,13 +1,16 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
+using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using Nox.Controllers;
 using Nox.Sessions;
 using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.session {
 	public class Main : MainModInitializer, ISessionAPI {
@@ -98,6 +101,43 @@ namespace api.nox.session {
 			} while (_sessions.Any(s => s.Id == i));
 
 			return _nextId = i;
+		}
+
+		public bool CanMakeSession(string adapterId, Dictionary<string, object> options = null) {
+			var canMake = false;
+			options ??= new Dictionary<string, object>();
+			CoreAPI.EventAPI.Emit("session_can_make_adapter", adapterId, options, new Action<object[]>(Callback));
+			return canMake;
+
+			void Callback(object[] data) {
+				if (data is { Length: > 0 } && data[0] is true)
+					canMake = true;
+			}
+		}
+
+		public ISession MakeSession(string adapterId, Dictionary<string, object> options = null) {
+			if (!CanMakeSession(adapterId, options)) return null;
+			IAdapter adapter = null;
+			ISession session = null;
+			CoreAPI.EventAPI.Emit("session_make_adapter", adapterId, options, new Action<object[]>(Callback));
+			if (adapter == null) {
+				Logger.LogError($"Failed to make session with adapter '{adapterId}'");
+				return null;
+			}
+
+			session ??= New(adapter);
+			if (session != null)
+				return session;
+
+			Logger.LogError($"Failed to create session with adapter '{adapterId}'");
+			return null;
+
+			void Callback(object[] data) {
+				if (data is { Length: > 0 } && data[0] is IAdapter a)
+					adapter = a;
+				if (data is { Length: > 1 } && data[0] is ISession s)
+					session = s;
+			}
 		}
 	}
 }

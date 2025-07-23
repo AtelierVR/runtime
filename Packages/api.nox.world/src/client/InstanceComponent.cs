@@ -5,30 +5,57 @@ using Nox.CCK.Utils;
 using Nox.Instances;
 using UnityEngine;
 using UnityEngine.UI;
+using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
 
 namespace api.nox.world.client {
 	public class InstanceComponent : MonoBehaviour {
-		public static (GameObject go, InstanceComponent comp) Generate(WorldComponent worldComponent, Transform parent) {
+		public static (GameObject go, InstanceComponent comp) Generate(WorldComponent reference, Transform parent) {
 			var instance  = Instantiate(Client.GetAsset<GameObject>("prefabs/instance.prefab", "instance"), parent);
 			var component = instance.AddComponent<InstanceComponent>();
-			component.world = worldComponent;
-			component.label = Reference.GetComponent<TextLanguage>("label", instance);
-			component.text  = Reference.GetComponent<TextLanguage>("text", instance);
-			component.image = Reference.GetComponent<Image>("image", instance);
+			component.reference = reference;
+			component.label     = Reference.GetComponent<TextLanguage>("label", instance);
+			component.text      = Reference.GetComponent<TextLanguage>("text", instance);
+			component.image     = Reference.GetComponent<Image>("image", instance);
+			component.button    = Reference.GetComponent<Button>("button", instance);
+			component.button.onClick.AddListener(component.OnClick);
 			return (instance, component);
 		}
 
-		public  WorldComponent          world;
+		public  WorldComponent          reference;
 		public  TextLanguage            label;
 		public  TextLanguage            text;
+		public  Button                  button;
 		public  Image                   image;
 		private CancellationTokenSource _thumbnailTokenSource;
+		private IInstance               _instance;
 
 		public void UpdateContent(IInstance instance) {
-			label.UpdateText("world.instance.label", new[] { instance.GetName() });
-			text.UpdateText("world.instance.text", new[] { instance.GetTitle() ?? world.Page.World.GetTitle() ?? instance.ToIdentifier().ToString() });
+			_instance = instance;
+			label.UpdateText(
+				"world.instance.label", new[] {
+					instance.GetName()
+				}
+			);
+			text.UpdateText(
+				"world.instance.text", new[] {
+					instance.GetTitle()
+					?? reference.Page.World.GetTitle()
+					?? instance.ToIdentifier().ToString()
+				}
+			);
 			UpdateThumbnail(instance).Forget();
+		}
+
+		private void OnClick() {
+			Logger.LogDebug($"{_instance} ({reference.Page.World}) clicked");
+			Client.UiAPI?.SendGoto(
+				reference.Page.MId,
+				"instance",
+				"instance",
+				_instance,
+				reference.Page.World
+			);
 		}
 
 
@@ -39,7 +66,7 @@ namespace api.nox.world.client {
 			}
 
 			_thumbnailTokenSource = new CancellationTokenSource();
-			var url = instance?.GetThumbnailUrl() ?? world.Page.World.GetThumbnailUrl();
+			var url = instance?.GetThumbnailUrl() ?? reference.Page.World.GetThumbnailUrl();
 
 			if (!string.IsNullOrEmpty(url)) {
 				var texture = await Main.Instance.NetworkAPI

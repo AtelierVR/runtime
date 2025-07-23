@@ -1,6 +1,10 @@
 ﻿using System.Runtime.InteropServices;
-using UnityEditor;
 using UnityEngine;
+using URuntimePlatform = UnityEngine.RuntimePlatform;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Nox.CCK.Utils {
 	public enum Platform : byte {
@@ -49,9 +53,9 @@ namespace Nox.CCK.Utils {
 		public static Platform CurrentPlatform {
 			get
 			#if UNITY_EDITOR
-				=> GetCurrentTarget().GetPlatform();
+				=> CurrentTarget.GetPlatform();
 			#else
-				=> RuntimePlatform.GetPlatform();
+				=> RuntimePlatform;
 			#endif
 			#if UNITY_EDITOR
 			set {
@@ -66,25 +70,25 @@ namespace Nox.CCK.Utils {
 			#endif
 		}
 
-		public static Platform GetPlatform(this RuntimePlatform target)
+		public static Platform GetPlatform(this URuntimePlatform target)
 			=> target switch {
-				UnityEngine.RuntimePlatform.OSXEditor               => Platform.MacOS,
-				UnityEngine.RuntimePlatform.OSXPlayer               => Platform.MacOS,
-				UnityEngine.RuntimePlatform.WindowsEditor           => Platform.Windows,
-				UnityEngine.RuntimePlatform.WindowsPlayer           => Platform.Windows,
-				UnityEngine.RuntimePlatform.LinuxEditor             => Platform.Linux,
-				UnityEngine.RuntimePlatform.LinuxPlayer             => Platform.Linux,
-				UnityEngine.RuntimePlatform.LinuxServer             => Platform.Linux,
-				UnityEngine.RuntimePlatform.LinuxHeadlessSimulation => Platform.Linux,
-				UnityEngine.RuntimePlatform.EmbeddedLinuxArm32      => Platform.Linux,
-				UnityEngine.RuntimePlatform.EmbeddedLinuxArm64      => Platform.Linux,
-				UnityEngine.RuntimePlatform.EmbeddedLinuxX64        => Platform.Linux,
-				UnityEngine.RuntimePlatform.IPhonePlayer            => Platform.IOS,
-				UnityEngine.RuntimePlatform.Android                 => Platform.Android,
-				UnityEngine.RuntimePlatform.VisionOS                => Platform.VisionOS,
-				_                                                   => Platform.None
+				URuntimePlatform.OSXEditor               => Platform.MacOS,
+				URuntimePlatform.OSXPlayer               => Platform.MacOS,
+				URuntimePlatform.WindowsEditor           => Platform.Windows,
+				URuntimePlatform.WindowsPlayer           => Platform.Windows,
+				URuntimePlatform.LinuxEditor             => Platform.Linux,
+				URuntimePlatform.LinuxPlayer             => Platform.Linux,
+				URuntimePlatform.LinuxServer             => Platform.Linux,
+				URuntimePlatform.LinuxHeadlessSimulation => Platform.Linux,
+				URuntimePlatform.EmbeddedLinuxArm32      => Platform.Linux,
+				URuntimePlatform.EmbeddedLinuxArm64      => Platform.Linux,
+				URuntimePlatform.EmbeddedLinuxX64        => Platform.Linux,
+				URuntimePlatform.IPhonePlayer            => Platform.IOS,
+				URuntimePlatform.Android                 => Platform.Android,
+				URuntimePlatform.VisionOS                => Platform.VisionOS,
+				_                                        => Platform.None
 			};
-		
+
 		public static Platform RuntimePlatform
 			=> Application.platform.GetPlatform();
 
@@ -114,9 +118,9 @@ namespace Nox.CCK.Utils {
 		private static bool IsSupported(this BuildTarget target)
 			=> BuildPipeline.IsBuildTargetSupported(BuildPipeline.GetBuildTargetGroup(target), target);
 
-		private static BuildTarget GetCurrentTarget()
+		private static BuildTarget CurrentTarget
 			=> EditorUserBuildSettings.activeBuildTarget;
-		
+
 		public static bool IsSupported(this Platform platform)
 			=> IsSupported(GetBuildTarget(platform));
 		#endif

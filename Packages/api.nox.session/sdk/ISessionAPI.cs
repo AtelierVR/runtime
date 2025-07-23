@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Nox.Sessions {
 	/// <summary>
 	/// Interface for the session API, allowing to manage sessions.
@@ -28,5 +30,21 @@ namespace Nox.Sessions {
 		/// </summary>
 		/// <returns></returns>
 		public int GetSessionCount();
+
+		/// <summary>
+		/// Request if is possible to make a session with the given adapter.
+		/// </summary>
+		/// <param name="adapter"></param>
+		/// <param name="options"></param>
+		/// <returns></returns>
+		bool CanMakeSession(string adapter, Dictionary<string, object> options = null);
+
+		/// <summary>
+		/// Make a session with the given adapter.
+		/// </summary>
+		/// <param name="adapter"></param>
+		/// <param name="options">Options for the session, please refer to the adapter documentation for available options.</param>
+		/// <returns>If the session is successfully created, it will return the session instance, otherwise it will return null.</returns>
+		public ISession MakeSession(string adapter, Dictionary<string, object> options = null);
 	}
 }

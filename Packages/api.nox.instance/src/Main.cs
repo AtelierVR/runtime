@@ -8,6 +8,7 @@ using Nox.CCK.Mods.Initializers;
 using Nox.Instances;
 using Nox.Network;
 using Nox.Search;
+using Nox.Sessions;
 using Nox.Users;
 using Nox.Worlds;
 using ISearchRequest = Nox.Instances.ISearchRequest;
@@ -44,6 +45,12 @@ namespace api.nox.instance {
 				.GetMod("search")
 				.GetMains()
 				.FirstOrDefault() as ISearchAPI;
+		
+		internal ISessionAPI SessionAPI
+			=> Instance.CoreAPI.ModAPI
+				.GetMod("session")
+				.GetMains()
+				.FirstOrDefault() as ISessionAPI;
 
 		public async UniTask<IInstance> Fetch(IInstanceIdentifier identifier)
 			=> await Network.Fetch(InstanceIdentifier.FromBase(identifier));

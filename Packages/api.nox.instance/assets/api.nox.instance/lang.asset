@@ -25,3 +25,23 @@ MonoBehaviour:
       value: "Search for instances by title, or description."
     - key: instance.search.worker.title
       value: "{0}"
+    - key: instance.title
+      value: "{0}"
+    - key: instance.identifier
+      value: "{0}"
+    - key: instance.error
+      value: "Error"
+    - key: instance.loading
+      value: "Loading..."
+    - key: instance.about.title
+      value: "About {0}"
+    - key: instance.about.description
+      value: "Description"
+    - key: instance.about.actions
+      value: "Actions"
+    - key: instance.description
+      value: "{0}"
+    - key: instance.players.title
+      value: "Players"
+    - key: instance.no_players
+      value: "No players found."

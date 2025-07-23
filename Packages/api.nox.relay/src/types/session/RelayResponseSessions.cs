@@ -12,7 +12,6 @@ namespace api.nox.relay.types.Session {
 			var instances     = new RelayInstance[instanceCount];
 			for (var i = 0; i < instanceCount; i++)
 				instances[i] = new RelayInstance {
-					ConnectionId   = ConnectionId,
 					Flags          = buffer.ReadEnum<InstanceFlags>(),
 					InternalId     = buffer.ReadByte(),
 					Id             = buffer.ReadUInt(),

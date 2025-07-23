@@ -93,11 +93,13 @@ namespace api.nox.world {
 		public ushort GetVersion() {
 			if (_metadata.TryGetValue("v", out var versions) && versions.Length > 0 && ushort.TryParse(versions[0], out var version))
 				return version;
-			if (_metadata.TryGetValue("version", out versions) && versions.Length > 0 && ushort.TryParse(versions[0], out version))
-				return version;
-			if (_metadata.TryGetValue("ver", out versions) && versions.Length > 0 && ushort.TryParse(versions[0], out version))
-				return version;
 			return ushort.MaxValue; // Default value if no version is set
+		}
+
+		public void SetVersion(ushort version) {
+			_metadata.Remove("v");
+			if (version == ushort.MaxValue) return; // Do not set version if it's the default value
+			_metadata["v"] = new[] { version.ToString() };
 		}
 
 		public bool Equals(IWorldIdentifier other) {

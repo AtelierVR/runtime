@@ -894,6 +894,10 @@
       <Project>{d72e3f1d-b6a9-ae1f-6165-22b88075502b}</Project>
       <Name>Nox.Network</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.Sessions.csproj">
+      <Project>{0874ac54-00dd-a011-6c68-4b824efa4828}</Project>
+      <Name>Nox.Sessions</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

@@ -27,8 +27,12 @@ namespace api.nox.world.cache {
 
 		private void SetProgress(float value) {
 			_progress = value;
+			SendEvent();
 			OnProgress.Invoke(_progress);
 		}
+
+		private void SendEvent()
+			=> Main.Instance.CoreAPI.EventAPI.Emit("world_cache_download", Identifier, IsRunning(), GetProgress());
 
 		public bool IsRunning()
 			=> _cts is { IsCancellationRequested: false };
@@ -42,12 +46,13 @@ namespace api.nox.world.cache {
 			_cts.Cancel();
 			_cts.Dispose();
 			_cts = null;
+			SendEvent();
 		}
 
 		public async UniTask Wait() {
 			if (!IsRunning()) return;
 			Logger.Log($"Waiting for download to complete: {Identifier} (AssetId: {AssetId}, Hash: {Hash})");
-			await UniTask.WaitUntil(() => _cts.IsCancellationRequested || _progress >= 1f);
+			await UniTask.WaitUntil(() => _cts is { IsCancellationRequested: true } || _progress >= 1f);
 		}
 
 		public UnityEvent<float> GetProgressEvent()
@@ -63,7 +68,7 @@ namespace api.nox.world.cache {
 			}
 
 			_cts = new CancellationTokenSource();
-			_cache.Cachings.Add(this);
+			_cache.Caching.Add(this);
 			Logger.Log($"Starting download for {Identifier} (AssetId: {AssetId}, Hash: {Hash})");
 
 			try {
@@ -95,9 +100,11 @@ namespace api.nox.world.cache {
 				SetProgress(0f);
 			}
 
-			_cache.Cachings.Remove(this);
+			_cache.Caching.Remove(this);
 			_cts.Dispose();
 			_cts = null;
+
+			SendEvent();
 		}
 	}
 }

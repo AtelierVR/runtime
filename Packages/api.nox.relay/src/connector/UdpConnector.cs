@@ -10,8 +10,11 @@ namespace api.nox.relay.connector {
 		private UdpClient  _client;
 		private IPEndPoint _endPoint;
 
-		public string Type
-			=> "UDP";
+		public string GetProtocolName()
+			=> GetStaticProtocolName();
+
+		public static string GetStaticProtocolName()
+			=> "udp";
 
 		public async UniTask<bool> Connect(string address, ushort port) {
 			Logger.LogDebug($"Connecting to {address}:{port}");

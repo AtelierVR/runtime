@@ -251,9 +251,9 @@ namespace api.nox.world.client {
 		public  Slider       cacheProgress;
 		public  TextLanguage cacheLabel;
 
-		public void UpdateDownloading(bool isDownloading, float progress) {
-			if (isDownloading) {
-				cacheProgress.value = progress;
+		public void UpdateDownloading((bool, float) download) {
+			if (download.Item1) {
+				cacheProgress.value = download.Item2;
 			} else cacheProgress.value = 0;
 
 			HoverCache(_isCachedHover);
@@ -261,11 +261,11 @@ namespace api.nox.world.client {
 
 		private void HoverCache(bool isHover) {
 			_isCachedHover = isHover;
-			var texture = ((Page.InCache() ? 1 : 0) << 2)
-				| ((Page.IsDownloading() ? 1 : 0)   << 1)
-				| ((_isCachedHover ? 1 : 0)         << 0);
+			var texture = ((Page.InCache() ? 1 : 0)     << 2)
+				| ((Page.IsDownloading().Item1 ? 1 : 0) << 1)
+				| ((_isCachedHover ? 1 : 0)             << 0);
 			if (texture > 5) texture -= 4;
-			if (!Page.IsDownloading())
+			if (!Page.IsDownloading().Item1)
 				cacheProgress.value = 0;
 
 			// 0 - | 0 | 0 | 0 | neutral (not hovered, not downloaded)
@@ -297,7 +297,7 @@ namespace api.nox.world.client {
 		}
 
 		private void OnCacheClickedAsync() {
-			if (Page.IsDownloading()) {
+			if (Page.IsDownloading().Item1) {
 				Page.CancelDownload();
 				return;
 			}
@@ -307,7 +307,7 @@ namespace api.nox.world.client {
 				return;
 			}
 
-			Page.DownloadAssetAsync().Forget();
+			Page.DownloadAsset();
 			HoverCache(_isCachedHover);
 		}
 
@@ -318,56 +318,15 @@ namespace api.nox.world.client {
 		public Image        offlineIcon;
 		public TextLanguage offlineLabel;
 
-		private async UniTask OnJoinOfflineAsync() {
-			try {
-				// Check if world is already in cache
-				if (!Page.InCache()) {
-					Logger.Log($"World {Page.World.GetTitle()} not in cache, starting download...");
-
-					// Start download if not already downloading
-					if (!Page.IsDownloading())
-						await Page.DownloadAssetAsync();
-
-					// Wait for download to complete
-					while (Page.IsDownloading())
-						await UniTask.Yield();
-
-
-					// Verify download completed successfully
-					if (!Page.InCache()) {
-						Logger.LogError($"Failed to download world {Page.World.GetTitle()}");
-						// Show error message to user
-						return;
-					}
+		private void OnJoinOffline() {
+			var world = Page.World.ToIdentifier();
+			world.SetVersion(Page.Version);
+			Main.Instance.SessionAPI.MakeSession(
+				"offline", new Dictionary<string, object> {
+					{ "world", world },
+					{ "set_current", true }
 				}
-
-				Logger.Log($"Loading world {Page.World.GetTitle()} from cache for offline session...");
-
-				// Load world from cache
-				var world = await Main.Instance.LoadSceneFromCache(
-					Page.Asset.GetHash()
-				);
-
-				if (world == null) {
-					Logger.LogError($"Failed to load world {Page.World.GetTitle()} from cache");
-					return;
-				}
-
-				Logger.Log($"Creating offline adapter and session for world {Page.World.GetTitle()}...");
-
-				// Create offline adapter
-				var adapter = Main.Instance.OfflineAPI.New(world);
-
-				// Create session with offline adapter
-				var session = Main.Instance.SessionAPI.New(adapter);
-
-				// Set as current session
-				await session.SetCurrent();
-
-				Logger.Log($"Successfully started offline session for world {Page.World.GetTitle()}");
-			} catch (Exception ex) {
-				Logger.LogError($"Error starting offline session for world {Page.World.GetTitle()}: {ex.Message}");
-			}
+			);
 		}
 
 		#endregion
@@ -388,6 +347,11 @@ namespace api.nox.world.client {
 		public  Image        homeIcon;
 		public  TextLanguage homeLabel;
 		public  Button       homeButton;
+
+		public void UpdateHome(bool isHome) {
+			_isHome = isHome;
+			HoverHome(_isHomeHover);
+		}
 
 		private void HoverHome(bool isHover) {
 			_isHomeHover = isHover;
@@ -471,7 +435,7 @@ namespace api.nox.world.client {
 
 			component.labelIcon        = Reference.GetComponent<Image>("image", icon);
 			component.label            = Reference.GetComponent<TextLanguage>("text", label);
-			component.labelIcon.sprite = Client.GetAsset<Sprite>("icons/globe.png");
+			component.labelIcon.sprite = Client.GetAsset<Sprite>("icons/globe.png", "ui");
 
 			var contentDash = Reference.GetComponent<RectTransform>("content", withTitle);
 			// setup scroll + list
@@ -494,7 +458,7 @@ namespace api.nox.world.client {
 			component.offlineLabel.UpdateText("world.offline.join");
 			SetupEvents(
 				offlineEventTrigger,
-				() => component.OnJoinOfflineAsync().Forget(),
+				() => component.OnJoinOffline(),
 				() => { }, // No hover effects for now
 				() => { }  // No hover effects for now
 			);
@@ -582,7 +546,6 @@ namespace api.nox.world.client {
 					Reference.GetComponent<RectTransform>("content", component.descriptionContainer)
 				)
 			);
-
 
 			// generate instances
 			container = Instantiate(containerAsset, splitContent);

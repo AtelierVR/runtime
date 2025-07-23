@@ -6,16 +6,15 @@ using Nox.CCK.Utils;
 
 namespace Nox.ModLoader.Cores.Events {
 	public class EventAPI : CCK.Mods.Events.EventAPI {
-		private ModLoader.Mods.Mod              Mod;
-		private CCK.Mods.Events.EventEntryFlags _channel;
+		private readonly ModLoader.Mods.Mod              _mod;
+		private readonly CCK.Mods.Events.EventEntryFlags _channel;
+		private readonly List<EventSubscription>         _subscriptions = new();
 
 		internal EventAPI(ModLoader.Mods.Mod mod, CCK.Mods.Events.EventEntryFlags channel) {
-			Mod      = mod;
+			_mod     = mod;
 			_channel = channel;
 		}
-
-		private List<EventSubscription> _subscriptions = new();
-
+		
 		// ReSharper disable Unity.PerformanceAnalysis
 		private void Receive(EventContext context) {
 			var data = new EventData {
@@ -35,12 +34,12 @@ namespace Nox.ModLoader.Cores.Events {
 		}
 
 		private void Emit(EventContext context) {
-			var ncontext = new EventContext(context) { CurrentChannel = _channel, Source = Mod };
-			var mod      = context.Destination != null ? Mod.CoreAPI.LocalModAPI.GetInternalMod(context.Destination) : null;
+			var ncontext = new EventContext(context) { CurrentChannel = _channel, Source = _mod };
+			var mod      = context.Destination != null ? _mod.CoreAPI.LocalModAPI.GetInternalMod(context.Destination) : null;
 			if (mod != null)
 				mod.CoreAPI.LocalEventAPI.Receive(ncontext);
 			else
-				foreach (var imod in Mod.CoreAPI.LocalModAPI.GetInternalMods()) {
+				foreach (var imod in _mod.CoreAPI.LocalModAPI.GetInternalMods()) {
 					if (context.Channel.HasFlag(CCK.Mods.Events.EventEntryFlags.Main))
 						imod.CoreAPI?.LocalEventAPI.Receive(ncontext);
 				}
@@ -59,7 +58,7 @@ namespace Nox.ModLoader.Cores.Events {
 						Data           = data.Length > 1 ? data[..^1] : Array.Empty<object>(),
 						Destination    = null,
 						EventName      = eventName,
-						Source         = Mod,
+						Source         = _mod,
 						CurrentChannel = _channel,
 						Channel        = _channel,
 						Callback       = data[^1] as Action<object[]>
@@ -71,7 +70,7 @@ namespace Nox.ModLoader.Cores.Events {
 						Data           = data,
 						Destination    = null,
 						EventName      = eventName,
-						Source         = Mod,
+						Source         = _mod,
 						CurrentChannel = _channel,
 						Channel        = _channel,
 						Callback       = _ => { }

@@ -128,7 +128,7 @@ namespace api.nox.network {
 				RequestObject.SetRequestHeader(header.Key, header.Value);
 
 			try {
-				Logger.Log($"Sending request to {RequestObject.url}...");
+				Logger.Log($"Sending request to {GetMethod()} {RequestObject.url}...");
 
 				await RequestObject.SendWebRequest().WithCancellation(token);
 			} catch (Exception e) {
