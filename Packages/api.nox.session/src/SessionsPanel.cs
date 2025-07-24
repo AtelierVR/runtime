@@ -127,25 +127,14 @@ namespace api.nox.session {
 				var playersInfo = new Label(
 					LanguageManager.Get(
 						"session.manager.players_info",
-						localPlayer != null ? 1 : 0, masterPlayer != null ? masterPlayer.GetPlayerId() : "None"
+						new object[] {
+							localPlayer != null ? "True" : "False",
+							masterPlayer?.ToIdentifier()?.ToString() ?? "None"
+						}
 					)
 				);
 				playersInfo.AddToClassList("session-players");
 				infoContainer.Add(playersInfo);
-
-				// World info
-				var world = adapter.GetDimensions();
-				foreach (var worldDimension in world) {
-					var worldLabel = new Label(
-						LanguageManager.Get(
-							"session.manager.world_info",
-							worldDimension.GetName(),
-							worldDimension.GetScene().GetIdentifier()
-						)
-					);
-					worldLabel.AddToClassList("session-world");
-					infoContainer.Add(worldLabel);
-				}
 			}
 
 			// Actions

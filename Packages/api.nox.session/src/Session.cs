@@ -91,7 +91,8 @@ namespace api.nox.session {
 		}
 
 		public bool Match(IWorldIdentifier identifier)
-			=> Adapter.GetDimensions().Any(e => e.GetScene().GetIdentifier().Equals(identifier));
+			=> Adapter.GetDimension()?.GetScene().GetIdentifier().Equals(identifier)
+				?? false;
 
 		public override string ToString()
 			=> $"{GetType().Name}[Id={Id}, Adapter={Adapter}]";

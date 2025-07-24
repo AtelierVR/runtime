@@ -154,6 +154,10 @@ namespace Nox.ModLoader {
 
 
 		private static async UniTaskVoid AsyncInitialize() {
+			
+			// Force background mode to true (for updating mods in background like sockets with Update method)
+			Application.runInBackground = true;
+
 			#if UNITY_EDITOR
 			List<string> types = new();
 			if (EditorApplication.isCompiling)

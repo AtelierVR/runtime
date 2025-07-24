@@ -153,11 +153,8 @@ namespace api.nox.world.client {
 				return;
 			}
 
-			var cache = Main.Instance.DownloadSceneToCache(
-				_identifier.ToString(),
-				Asset.GetId(),
-				Asset.GetHash()
-			);
+			var cache = Main.Instance
+				.DownloadSceneToCache(Asset.GetUrl(), Asset.GetHash());
 
 			cache.Start().Forget();
 		}
@@ -207,8 +204,9 @@ namespace api.nox.world.client {
 			=> Main.Instance.Cache.Has(Asset.GetHash());
 
 		private Caching GetDownload()
-			=> Main.Instance.Cache
-				.GetDownload(_identifier.ToString(), Asset.GetId());
+			=> Asset != null
+				? Main.Instance.Cache.GetDownload(Asset.GetUrl(), Asset.GetHash())
+				: null;
 
 		public (bool, float) IsDownloading() {
 			var cache = GetDownload();

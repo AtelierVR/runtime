@@ -553,6 +553,69 @@ MonoBehaviour:
   angleMassMaxAngle: 45
   maxDistanceNoParentReleaseFrames: 1
   maxDistanceParentReleaseFrames: 5
+--- !u!1 &1344219956
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1344219958}
+  - component: {fileID: 1344219957}
+  - component: {fileID: 1344219959}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1344219957
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1344219956}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b97df1672d274b589de48ba7e9808555, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  graphWidth: 200
+  graphHeight: 100
+  maxSamples: 200
+--- !u!4 &1344219958
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1344219956}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.66556, y: 1.89569, z: -8.74533}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1344219959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1344219956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06be9d63e6364efd920b345836a3beee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  graphWidth: 300
+  graphHeight: 100
+  maxSamples: 300
 --- !u!1001 &1556293192
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18471,9 +18534,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc6307aadcb5414fad0fc6c2cf566824, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  world: {fileID: 7548749680135474810}
+  reference: {fileID: 0}
   label: {fileID: 4664748916417142888}
   text: {fileID: 8897660774152830748}
+  button: {fileID: 0}
   image: {fileID: 5779978166415521737}
 --- !u!114 &1319279323462328086
 MonoBehaviour:
@@ -68413,9 +68477,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc6307aadcb5414fad0fc6c2cf566824, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  world: {fileID: 8674252856794549583}
+  reference: {fileID: 0}
   label: {fileID: 309486505885927147}
   text: {fileID: 3050886174940093878}
+  button: {fileID: 0}
   image: {fileID: 6288568910874562819}
 --- !u!1 &5030294405656820081
 GameObject:
@@ -100412,6 +100477,18 @@ MonoBehaviour:
   descriptionContainer: {fileID: 0}
   descriptionText: {fileID: 0}
   actions: {fileID: 0}
+  favoriteIcon: {fileID: 0}
+  favoriteButton: {fileID: 0}
+  favoriteLabel: {fileID: 0}
+  cacheIcon: {fileID: 0}
+  cacheButton: {fileID: 0}
+  cacheProgress: {fileID: 0}
+  cacheLabel: {fileID: 0}
+  offlineIcon: {fileID: 0}
+  offlineLabel: {fileID: 0}
+  homeIcon: {fileID: 0}
+  homeLabel: {fileID: 0}
+  homeButton: {fileID: 0}
 --- !u!1 &7549595329995430808
 GameObject:
   m_ObjectHideFlags: 0
@@ -111601,9 +111678,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc6307aadcb5414fad0fc6c2cf566824, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  world: {fileID: 8674252856794549583}
+  reference: {fileID: 0}
   label: {fileID: 733732461897560061}
   text: {fileID: 715116614312031142}
+  button: {fileID: 0}
   image: {fileID: 7313614773433232046}
 --- !u!224 &8426464005985990423
 RectTransform:
@@ -114743,6 +114821,18 @@ MonoBehaviour:
   descriptionContainer: {fileID: 0}
   descriptionText: {fileID: 0}
   actions: {fileID: 0}
+  favoriteIcon: {fileID: 0}
+  favoriteButton: {fileID: 0}
+  favoriteLabel: {fileID: 0}
+  cacheIcon: {fileID: 0}
+  cacheButton: {fileID: 0}
+  cacheProgress: {fileID: 0}
+  cacheLabel: {fileID: 0}
+  offlineIcon: {fileID: 0}
+  offlineLabel: {fileID: 0}
+  homeIcon: {fileID: 0}
+  homeLabel: {fileID: 0}
+  homeButton: {fileID: 0}
 --- !u!224 &8675001576781227762
 RectTransform:
   m_ObjectHideFlags: 0
@@ -119547,9 +119637,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc6307aadcb5414fad0fc6c2cf566824, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  world: {fileID: 7548749680135474810}
+  reference: {fileID: 0}
   label: {fileID: 6853907987864165576}
   text: {fileID: 4087517969794915225}
+  button: {fileID: 0}
   image: {fileID: 329000237734220098}
 --- !u!114 &9002819802426319321
 MonoBehaviour:
@@ -122711,3 +122802,4 @@ SceneRoots:
   m_Roots:
   - {fileID: 1556293192}
   - {fileID: 7244960037742042855}
+  - {fileID: 1344219958}

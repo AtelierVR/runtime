@@ -20,9 +20,9 @@ namespace api.nox.offline {
 		private           string                        _name = "Offline Player";
 		private readonly  int                           _id;
 		private readonly  Dictionary<string, object>    _properties;
+		internal readonly Dictionary<ushort, Transform> Transforms = new();
 		private readonly  OfflineAdapter                _context;
 		internal readonly DateTime                      CreationTime;
-		internal readonly Dictionary<ushort, Transform> Transforms = new();
 		internal readonly IUserIdentifier               Identifier = null;
 
 		[NoxPublic(NoxAccess.Method)]
@@ -33,8 +33,8 @@ namespace api.nox.offline {
 		public bool IsLocal()
 			=> true;
 
-		public string GetPlayerId()
-			=> Identifier?.ToString();
+		public IUserIdentifier ToIdentifier()
+			=> Identifier;
 
 		[NoxPublic(NoxAccess.Method)]
 		public bool IsMaster()
@@ -88,6 +88,13 @@ namespace api.nox.offline {
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
 
+		[NoxPublic(NoxAccess.Method)]
+		public void SetRotation(Quaternion rotation) {
+			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
+			tr.SetRotation(rotation);
+			Transforms[PlayerRig.Base.ToIndex()] = tr;
+		}
+		
 		public bool TryGetPhysical(out Physical physical) {
 			physical = null;
 			return false;
@@ -99,12 +106,6 @@ namespace api.nox.offline {
 			SetRotation(rotation);
 		}
 
-		[NoxPublic(NoxAccess.Method)]
-		public void SetRotation(Quaternion rotation) {
-			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
-			tr.SetRotation(rotation);
-			Transforms[PlayerRig.Base.ToIndex()] = tr;
-		}
 
 		[NoxPublic(NoxAccess.Method)]
 		public void Teleport(UnityEngine.Transform transform) {

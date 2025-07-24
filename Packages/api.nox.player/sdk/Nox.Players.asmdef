@@ -2,7 +2,8 @@
     "name": "Nox.Players",
     "rootNamespace": "",
     "references": [
-        "Nox.Entities"
+        "Nox.Entities",
+        "Nox.Users"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

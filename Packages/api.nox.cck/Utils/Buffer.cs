@@ -140,9 +140,9 @@ namespace Nox.CCK.Utils {
 			=> offset = (ushort)(offset + move);
 
 		public override string ToString() {
-			var res = "Buffer[(offset=" + offset + ", length=" + length + ") ";
+			var res = $"{GetType().Name}[(offset={offset}, length={length})";
 			for (var i = 0; i < length; i++)
-				res += (i == 0 ? "" : " ") + data[i].ToString("X2");
+				res += " " + data[i].ToString("X2");
 			return res + "]";
 		}
 

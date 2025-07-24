@@ -882,6 +882,10 @@
       <Project>{7876f9af-a4fc-8e9f-76eb-a1ac927434f2}</Project>
       <Name>Nox.Controllers</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.Users.csproj">
+      <Project>{c237149e-58f6-bdd3-6473-3bc76e6fd9f4}</Project>
+      <Name>Nox.Users</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

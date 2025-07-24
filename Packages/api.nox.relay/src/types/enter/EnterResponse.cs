@@ -4,7 +4,7 @@ using api.nox.relay.types.Player;
 using Buffer = Nox.CCK.Utils.Buffer;
 
 namespace api.nox.relay.types.Enter {
-	public class InstanceResponseEnter : RelayInstanceResponse {
+	public class EnterResponse : RelayInstanceResponse {
 		public EnterResult    Result;
 		public DateTime       ExpireAt = DateTime.MinValue;
 		public string         Reason;
@@ -17,7 +17,7 @@ namespace api.nox.relay.types.Enter {
 		public bool IsError
 			=> Result is not EnterResult.Success;
 
-		public static InstanceResponseEnter CreateUnknown(ushort id, byte iid, string reason)
+		public static EnterResponse CreateUnknown(ushort id, byte iid, string reason)
 			=> new() {
 				ConnectionId = id,
 				InternalId   = iid,
@@ -36,14 +36,13 @@ namespace api.nox.relay.types.Enter {
 					return true;
 				case EnterResult.Success:
 					Player = new InstancePlayer {
-						ConnectionId  = ConnectionId,
-						InternalId    = InternalId,
-						Flags         = buffer.ReadEnum<InstancePlayerFlags>(),
-						Id            = buffer.ReadUShort(),
-						MasterId      = buffer.ReadUInt(),
-						ServerAddress = buffer.ReadString(),
-						Display       = buffer.ReadString(),
-						CreatedAt     = buffer.ReadDateTime(),
+						ConnectionId = ConnectionId,
+						InternalId   = InternalId,
+						Flags        = buffer.ReadEnum<InstancePlayerFlags>(),
+						Id           = buffer.ReadUShort(),
+						Identifier   = Main.UserAPI.Make(buffer.ReadUInt(), buffer.ReadString()),
+						Display      = buffer.ReadString(),
+						CreatedAt    = buffer.ReadDateTime(),
 					};
 					MaxTps = buffer.ReadByte();
 					return true;

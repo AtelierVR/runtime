@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using api.nox.relay.connection;
-using api.nox.relay.connector;
 using api.nox.relay.types.Authentication;
+using api.nox.relay.types.Traveling;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Utils;
 using Nox.Sessions;
+using src.adapter.players;
 
 namespace api.nox.relay {
 	public class Adapting {
@@ -125,11 +126,17 @@ namespace api.nox.relay {
 				var (proto, endPoint) = await ParseIPEndPoint(addr);
 
 				connection = Main.Instance.GetConnectionByType(proto);
-				if (connection == null)
+				if (connection == null) {
+					Logger.LogWarning($"No connection for protocol {proto} found, trying to create a new one");
 					continue;
+				}
 
-				if (!await connection.Connect(endPoint.Address.ToString(), (ushort)endPoint.Port))
+				if (!await connection.Connect(endPoint.Address.ToString(), (ushort)endPoint.Port)) {
+					Logger.LogWarning($"Failed to connect to {addr}");
 					continue;
+				}
+
+				break;
 			}
 
 
@@ -158,19 +165,21 @@ namespace api.nox.relay {
 			}
 
 			adapter.SetState(false, "Fetching instances from relay...", 0.25f);
-			var relayInstance = await connection.RequestSession(instance);
-			if (relayInstance == null) {
+			adapter.Instance = await connection.RequestSession(instance);
+			if (adapter.Instance == null) {
 				adapter.SetState(false, $"Failed to get instance {instance}", -1f);
 				await connection.Dispose();
 				return;
 			}
 
-			Logger.LogDebug($"Got instance {relayInstance} from relay");
+			adapter.Instance.OnQuit.AddListener(adapter.OnQuit);
+
+			Logger.LogDebug($"Got instance {adapter.Instance} from relay");
 			adapter.SetState(false, $"Got instance {instance} from relay", 0.275f);
 
 
 			adapter.SetState(false, "Connecting to an instance...", 0.3f);
-			var enter = await relayInstance.RequestEnter();
+			var enter = await adapter.Instance.RequestEnter();
 			if (enter.IsError) {
 				adapter.SetState(false, "Failed to connect to instance", -1f);
 				Logger.LogDebug($"Failed to connect to instance {instance}: {enter.Result} - {enter.Reason}");
@@ -180,19 +189,37 @@ namespace api.nox.relay {
 
 			adapter.SetState(false, $"Connected as {enter.Player.Display} ({enter.Player.Id}) to instance {instance}", 0.325f);
 
-			// ...
+			var travel = await adapter.Instance.RequestTraveling(TravelingAction.Travel);
+			if (travel.IsError) {
+				adapter.SetState(false, $"Failed to travel to instance {instance}: {travel.Reason}", -1f);
+				Logger.LogDebug($"Failed to travel to instance {instance}: {travel.Results} - {travel.Reason}");
+				await connection.Dispose();
+				return;
+			}
 
-			adapter.SetState(false, "Not implemented", -1f);
-			await connection.Dispose();
-			return;
+			var travaling = await adapter.OnTravelingAsync(
+				travel,
+				progress: (f, s) => adapter.SetState(false, $"Traveling to instance {instance}...", 0.325f + f * 0.575f)
+			);
 
-			/*
+			if (!travaling) {
+				adapter.SetState(false, "Failed to travel to instance", -1f);
+				Logger.LogDebug($"Failed to travel to instance {instance}");
+				await connection.Dispose();
+				return;
+			}
+
+			adapter.NewPlayer<RelayLocalPlayer>(enter.Player);
+
+			adapter.Instance.OnTraveling.AddListener(adapter.OnTraveling);
+			adapter.Instance.OnEnter.AddListener(adapter.OnEnter);
+
 			if (setCurrent) {
 				adapter.SetState(false, "Setting instance as current", 0.9f);
 				await session.SetCurrent();
 			}
 
-			adapter.SetState(true, "Ready", 1f);*/
+			adapter.SetState(true, "Ready", 1f);
 		}
 	}
 }

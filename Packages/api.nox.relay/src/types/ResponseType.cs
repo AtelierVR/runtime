@@ -8,7 +8,7 @@ namespace api.nox.relay.types {
 		Enter            = 0x05,
 		Quit             = 0x06,
 		CustomDataPacket = 0x07,
-		Configuration    = 0x09,
+		Traveling        = 0x09,
 		Join             = 0x0A,
 		Leave            = 0x0B,
 		Transform        = 0x0C,

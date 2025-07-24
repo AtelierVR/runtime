@@ -79,6 +79,8 @@ namespace api.nox.relay.editor {
 		}
 
 		private void UpdateConnection(VisualElement child, Connection connection) {
+			if (_root.childCount == 0) return;
+			
 			var label = child.Q<Label>("id");
 			label.text = connection.Id.ToString();
 

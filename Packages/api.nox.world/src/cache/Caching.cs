@@ -9,30 +9,29 @@ using Logger = Nox.CCK.Utils.Logger;
 namespace api.nox.world.cache {
 	public class Caching : ICaching {
 		private          float                   _progress;
-		public readonly  string                  Identifier;
-		public readonly  uint                    AssetId;
+		public readonly  string                  Url;
 		public readonly  string                  Hash;
 		private          CancellationTokenSource _cts;
 		private readonly Cache                   _cache;
 
-		public Caching(Cache cache, string identifier, uint assetId, string hash = null) {
-			Identifier = identifier;
-			_cache     = cache;
-			AssetId    = assetId;
-			Hash       = hash;
-			_progress  = 0f;
+		public Caching(Cache cache, string url, string hash = null) {
+			Url       = url;
+			_cache    = cache;
+			Hash      = hash;
+			_progress = 0f;
 		}
 
 		public readonly UnityEvent<float> OnProgress = new();
 
-		private void SetProgress(float value) {
+		private void SetProgress(float value, ulong size = 0) {
 			_progress = value;
 			SendEvent();
 			OnProgress.Invoke(_progress);
 		}
 
 		private void SendEvent()
-			=> Main.Instance.CoreAPI.EventAPI.Emit("world_cache_download", Identifier, IsRunning(), GetProgress());
+			=> Main.Instance.CoreAPI.EventAPI
+				.Emit("world_cache_download", Url, Hash, IsRunning(), GetProgress());
 
 		public bool IsRunning()
 			=> _cts is { IsCancellationRequested: false };
@@ -51,8 +50,8 @@ namespace api.nox.world.cache {
 
 		public async UniTask Wait() {
 			if (!IsRunning()) return;
-			Logger.Log($"Waiting for download to complete: {Identifier} (AssetId: {AssetId}, Hash: {Hash})");
-			await UniTask.WaitUntil(() => _cts is { IsCancellationRequested: true } || _progress >= 1f);
+			Logger.Log($"Waiting for download to complete: {Url} (Hash: {Hash})");
+			await UniTask.WaitUntil(() => !IsRunning());
 		}
 
 		public UnityEvent<float> GetProgressEvent()
@@ -69,15 +68,14 @@ namespace api.nox.world.cache {
 
 			_cts = new CancellationTokenSource();
 			_cache.Caching.Add(this);
-			Logger.Log($"Starting download for {Identifier} (AssetId: {AssetId}, Hash: {Hash})");
+			Logger.Log($"Starting download for {Url} (Hash: {Hash})");
 
 			try {
 				SetProgress(0f);
 
 				// Download
-				var path = await Main.Instance.Network
-					.DownloadAssetFile(Identifier, AssetId, Hash, null, SetProgress)
-					.AttachExternalCancellation(_cts.Token);
+				var path = await Main.Instance.NetworkAPI
+					.DownloadFile(Url, hash: Hash, progress: SetProgress, token: _cts.Token);
 
 				if (_cts.IsCancellationRequested) {
 					SetProgress(0f);
@@ -90,7 +88,7 @@ namespace api.nox.world.cache {
 				}
 
 				// Save to cache
-				Logger.Log($"Download completed for {Identifier} (AssetId: {AssetId}, Hash: {Hash}). Saving to cache...");
+				Logger.Log($"Download completed for {Url} (Hash: {Hash}). Saving to cache...");
 				Main.Instance.Cache.Save(Hash, path);
 
 				SetProgress(1f);

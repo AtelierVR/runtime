@@ -14,7 +14,7 @@ namespace api.nox.relay.types.Session {
 				instances[i] = new RelayInstance {
 					Flags          = buffer.ReadEnum<InstanceFlags>(),
 					InternalId     = buffer.ReadByte(),
-					Id             = buffer.ReadUInt(),
+					MasterId             = buffer.ReadUInt(),
 					PlayerCount    = buffer.ReadUShort(),
 					MaxPlayerCount = buffer.ReadUShort(),
 				};

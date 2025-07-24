@@ -35,8 +35,7 @@ namespace api.nox.main {
 				"worlds/default/default.unity"
 			);
 			var adapter = OfflineAPI.New();
-			adapter.AddDimension("default", world);
-			adapter.SetCurrentDimension("default");
+			adapter.SetDimension(world);
 			var session = SessionAPI.New(adapter);
 			await session.SetCurrent();
 		}

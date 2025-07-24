@@ -1,4 +1,5 @@
 using Nox.Entities;
+using Nox.Users;
 using UnityEngine;
 
 namespace Nox.Players {
@@ -13,7 +14,7 @@ namespace Nox.Players {
 		/// Get the player Identifier (ID).
 		/// </summary>
 		/// <returns></returns>
-		public string GetPlayerId();
+		public IUserIdentifier ToIdentifier();
 
 		/// <summary>
 		/// Check if the player is the master player.
@@ -32,24 +33,14 @@ namespace Nox.Players {
 		/// </summary>
 		/// <param name="display"></param>
 		public void SetDisplay(string display);
-		
+
 		/// <summary>
 		/// Teleport the player to a specific position and rotation.
 		/// </summary>
 		/// <param name="position">Target position</param>
 		/// <param name="rotation">Target rotation</param>
 		public void Teleport(Vector3 position, Quaternion rotation);
-				/// <summary>
-		/// Teleport the player to a specific position with default rotation.
-		/// </summary>
-		/// <param name="position">Target position</param>
-		public new void SetPosition(Vector3 position);
-				/// <summary>
-		/// Set the rotation of the player using a Quaternion.
-		/// </summary>
-		/// <param name="rotation">Target rotation as Quaternion</param>
-		public new void SetRotation(Quaternion rotation);
-		
+
 		/// <summary>
 		/// Teleport the player to a transform's position and rotation.
 		/// </summary>

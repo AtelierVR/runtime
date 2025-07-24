@@ -92,6 +92,9 @@ namespace api.nox.user {
 		public IUserIdentifier Make(string identifier)
 			=> UserIdentifier.FromString(identifier);
 
+		public IUserIdentifier Make(uint id, string server = "::")
+			=> new UserIdentifier(id, server);
+
 		public Nox.Users.ISearchRequest MakeSearchRequest()
 			=> new SearchRequest();
 

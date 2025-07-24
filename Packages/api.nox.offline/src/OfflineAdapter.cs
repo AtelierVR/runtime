@@ -11,27 +11,24 @@ using Nox.Worlds;
 
 namespace api.nox.offline {
 	public class OfflineAdapter : IOfflineAdapter {
-		private readonly List<OfflineDimension> _dimensions;
-		private readonly IEntityManager         _entities;
-		private          int                    _masterPlayerId;
-		private          int                    _nextPlayerId;
-		private          ISession               _session;
-		private          OfflineState           _state = new(true);
+		private          OfflineDimension _dimension;
+		private readonly IEntityManager   _entities;
+		private          int              _masterPlayerId;
+		private          int              _nextPlayerId;
+		private          ISession         _session;
+		private          OfflineState     _state = new(true);
 
 		internal OfflineAdapter() {
-			_dimensions     = new List<OfflineDimension>();
+			_dimension      = null;
 			_masterPlayerId = -1;
 			_nextPlayerId   = 0;
 			_entities       = Main.EntityAPI.New();
 		}
 
-		public void AddDimension(string key, IScene scene) {
+		public void SetDimension(IScene scene) {
 			if (scene == null) return;
-			_dimensions.Add(new OfflineDimension(key, 0, scene, true));
+			_dimension = new OfflineDimension(0, scene, true);
 		}
-
-		public void RemoveDimension(string key)
-			=> _dimensions.RemoveAll(e => e.GetName() == key);
 
 		public IAdapterState GetState()
 			=> _state;
@@ -78,28 +75,26 @@ namespace api.nox.offline {
 			return true;
 		}
 
-		public IDimension[] GetDimensions()
-			=> GetInternalDimensions().Cast<IDimension>().ToArray();
+		public IDimension GetDimension()
+			=> _dimension;
 
 		public async UniTask OnDeselect(ISession newSession) {
 			Logger.LogDebug($"OnDeselect: {this}");
-			var dimension = GetInternalCurrentDimension();
-			var main      = dimension.GetScene().GetMainScene();
-			main?.SetVisibleInstance(dimension.GetMainIndex(), false, false);
+			var main = _dimension.GetScene().GetMainScene();
+			main?.SetVisibleInstance(_dimension.GetMainIndex(), false, false);
 			await UniTask.Yield();
 		}
 
 		public async UniTask OnSelect(ISession oldSession) {
 			Logger.LogDebug($"OnSelect: {this}");
-			var dimension = GetInternalCurrentDimension();
-			if (dimension == null)
+			if (_dimension == null)
 				throw new InvalidOperationException($"No current dimension found for session {this}. Please ensure a dimension is set before selecting the session.");
 			if (GetLocalPlayer() == null) NewPlayer();
-			var main = dimension.GetScene().GetMainScene();
-			if (dimension.GetMainIndex() == 0)
-				dimension.SetMainIndex(await main.MakeInstance());
-			dimension.GetScene().SetCurrent();
-			main.SetVisibleInstance(dimension.GetMainIndex(), true, true);
+			var main = _dimension.GetScene().GetMainScene();
+			if (_dimension.GetMainIndex() == 0)
+				_dimension.SetMainIndex(await main.MakeInstance());
+			_dimension.GetScene().SetCurrent();
+			main.SetVisibleInstance(_dimension.GetMainIndex(), true, true);
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -113,14 +108,8 @@ namespace api.nox.offline {
 			await UniTask.Yield();
 			foreach (var entity in _entities.GetEntities().ToArray())
 				_entities.UnregisterEntity(entity);
-			foreach (var dimension in _dimensions.ToArray()) {
-				if (dimension.GetMainIndex() > 0)
-					dimension.GetScene()
-						.GetMainScene()
-						.RemoveInstance(dimension.GetMainIndex());
-			}
-
-			_dimensions.Clear();
+			if (_dimension.GetMainIndex() > 0)
+				_dimension.GetScene().GetMainScene().RemoveInstance(_dimension.GetMainIndex());
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -151,18 +140,7 @@ namespace api.nox.offline {
 		public int GetPlayerCount()
 			=> _entities.GetCount<IPlayer>();
 
-		public IDimension GetCurrentDimension()
-			=> GetInternalCurrentDimension();
-
-		private OfflineDimension GetInternalCurrentDimension()
-			=> GetInternalDimensions().FirstOrDefault(e => e.IsActive());
-
-		public void SetCurrentDimension(string key) { }
-
-		private OfflineDimension[] GetInternalDimensions()
-			=> _dimensions.ToArray();
-
 		public override string ToString()
-			=> $"{GetType().Name}[Entities={_entities}, Dimensions={_dimensions.Count}]";
+			=> $"{GetType().Name}[Entities={_entities}, Dimensions={_dimension?.ToString() ?? "null"}]";
 	}
 }

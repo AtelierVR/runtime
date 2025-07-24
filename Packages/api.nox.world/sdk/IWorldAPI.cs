@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -74,7 +75,7 @@ namespace Nox.Worlds {
 		/// </summary>
 		/// <returns></returns>
 		public IAssetSearchRequest MakeAssetSearchRequest();
-		
+
 		/// <summary>
 		/// Searches for worlds based on the provided search request.
 		/// </summary>
@@ -152,13 +153,13 @@ namespace Nox.Worlds {
 		/// <summary>
 		/// Downloads a file for a world asset.
 		/// </summary>
-		/// <param name="identifier"></param>
-		/// <param name="assetId"></param>
-		/// <param name="hash"></param>
+		/// <param name="url">URL of the file to download.</param>
+		/// <param name="size">Expected size of the file, used for progress tracking.</param>
+		/// <param name="hash">Expected hash of the file, used for integrity verification.</param>
 		/// <param name="from"></param>
 		/// <param name="progress"></param>
 		/// <returns></returns>
-		public ICaching DownloadSceneToCache(string identifier, uint assetId, string hash = null, string from = null, UnityAction<float> progress = null);
+		public ICaching DownloadSceneToCache(string url, string hash = null, string from = null, UnityAction<float> progress = null);
 
 		/// <summary>
 		/// Removes an asset from the cache using its hash.
@@ -179,6 +180,15 @@ namespace Nox.Worlds {
 		/// <param name="identifier"></param>
 		/// <returns></returns>
 		public IWorldIdentifier Make(string identifier);
+
+		/// <summary>
+		/// Creates a world identifier.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="meta">Optional metadata associated with the world.</param>
+		/// <param name="server"></param>
+		/// <returns></returns>
+		public IWorldIdentifier Make(uint id, Dictionary<string, string[]> meta = null, string server = "::");
 
 		/// <summary>
 		/// Adds a world to the favorites list.

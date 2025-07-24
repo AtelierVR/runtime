@@ -19,7 +19,7 @@ namespace api.nox.world.cache {
 
 		private void OnFile(object sender, FileSystemEventArgs e)
 			=> OnFileAsync(e).Forget();
-		
+
 		private async UniTask OnFileAsync(FileSystemEventArgs e) {
 			await UniTask.SwitchToMainThread();
 			var path = Path.GetRelativePath(CachePath, e.FullPath);
@@ -44,12 +44,12 @@ namespace api.nox.world.cache {
 		internal readonly List<Caching>     Caching = new();
 
 
-		public Caching GetDownload(string identifier, uint assetId)
-			=> Caching.Find(c => c.Identifier == identifier && c.AssetId == assetId);
+		public Caching GetDownload(string url, string hash = null)
+			=> Caching.Find(c => hash != null && c.Hash == hash || c.Url == url);
 
-		public Caching AddDownload(string identifier, uint assetId, string hash = null) {
-			var existing = GetDownload(identifier, assetId);
-			return existing ?? new Caching(this, identifier, assetId, hash);
+		public Caching AddDownload(string url, string hash = null) {
+			var existing = GetDownload(url, hash);
+			return existing ?? new Caching(this, url, hash);
 		}
 
 		public static string CachePath {

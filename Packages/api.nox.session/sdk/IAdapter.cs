@@ -65,22 +65,10 @@ namespace Nox.Sessions {
 		public int GetPlayerCount();
 
 		/// <summary>
-		/// Get the world associated with the session.
-		/// </summary>
-		/// <returns></returns>
-		public IDimension GetCurrentDimension();
-
-		/// <summary>
-		/// Set the current dimension of the session.
-		/// </summary>
-		/// <param name="key"></param>
-		void SetCurrentDimension(string key);
-
-		/// <summary>
 		/// Get all dimensions in the session.
 		/// </summary>
 		/// <returns></returns>
-		public IDimension[] GetDimensions();
+		public IDimension GetDimension();
 
 		/// <summary>
 		/// Called when the session is deselected (is not the current session).
@@ -95,18 +83,11 @@ namespace Nox.Sessions {
 		public UniTask OnSelect(ISession oldSession);
 
 		/// <summary>
-		/// Add a dimension to the session.
+		/// Set the dimension to the session.
 		/// </summary>
-		/// <param name="key"></param>
 		/// <param name="scene"></param>
-		public void AddDimension(string key, IScene scene);
-
-		/// <summary>
-		/// Remove a dimension from the session.
-		/// </summary>
-		/// <param name="key"></param>
-		public void RemoveDimension(string key);
-
+		public void SetDimension(IScene scene);
+		
 		/// <summary>
 		/// Get the current state of the adapter, which includes the current operation and its progress.
 		/// (used when the session is loading (e.g. loading a world or connecting to a server)).

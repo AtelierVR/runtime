@@ -1,4 +1,5 @@
 using System;
+using Nox.Users;
 
 namespace api.nox.relay.types.Player {
 	public class InstancePlayer {
@@ -7,8 +8,7 @@ namespace api.nox.relay.types.Player {
 
 		public InstancePlayerFlags Flags;
 		public ushort              Id;
-		public uint                MasterId;
-		public string              ServerAddress;
+		public IUserIdentifier     Identifier;
 		public string              Display;
 		public DateTime            CreatedAt;
 	}

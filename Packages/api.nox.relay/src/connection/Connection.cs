@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using api.nox.relay.connector;
 using api.nox.relay.Instances;
 using api.nox.relay.types;
+using api.nox.relay.types.Instance;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using Buffer = Nox.CCK.Utils.Buffer;
@@ -45,9 +47,11 @@ namespace api.nox.relay.connection {
 				case ResponseType.Teleport:
 				case ResponseType.Transform:
 				case ResponseType.CustomDataPacket:
-					var iid = buffer.ReadUShort();
-					// var instance = RelayInstanceManager.Get(iid, Id);
-					// instance?.OnInstanceEventInvoke(buffer.Clone(5, (ushort)(length - 5)));
+				case ResponseType.Traveling:
+					var iid = buffer.ReadByte();
+					Logger.LogDebug($"Received {type} for instance {iid} with state {state}");
+					var instance = Instances.FirstOrDefault(x => x.InternalId == iid);
+					instance?.OnReceived(length, state, type, buffer.Clone(5, length));
 					break;
 				case ResponseType.Disconnect:
 					var disconnect = new types.Disconnect.RelayEventDisconnect();
@@ -55,7 +59,6 @@ namespace api.nox.relay.connection {
 						Logger.Log($"Disconnect {disconnect.Reason}");
 						_lastHandshake = null;
 						_lastLatency   = null;
-						_lastSessions  = null;
 						Connector.Close().Forget();
 					} else {
 						Logger.LogError($"Failed to parse disconnect");
@@ -65,10 +68,11 @@ namespace api.nox.relay.connection {
 			}
 		}
 
+		internal readonly List<RelayInstance> Instances = new();
+
 		private DateTime                                _lastLatencyRequest = DateTime.MinValue;
 		private types.Handshakes.RelayResponseHandshake _lastHandshake;
 		private types.Latency.RelayResponseLatency      _lastLatency;
-		private types.Session.RelayResponseSessions     _lastSessions;
 
 		public ClientStatus Status
 			=> _lastHandshake?.Status ?? ClientStatus.Disconnected;
@@ -79,6 +83,7 @@ namespace api.nox.relay.connection {
 		public double Latency
 			=> _lastLatency?.GetLatency().TotalMilliseconds ?? -1;
 
+
 		public async UniTask Dispose() {
 			if (Connector.IsConnected()) {
 				await RequestDisconnect();
@@ -87,7 +92,6 @@ namespace api.nox.relay.connection {
 
 			_lastHandshake = null;
 			_lastLatency   = null;
-			_lastSessions  = null;
 			Main.Instance.Connections.Remove(this);
 			Main.OnConnectionRemoved.Invoke(this);
 		}
@@ -195,7 +199,7 @@ namespace api.nox.relay.connection {
 			);
 
 		public async UniTask<types.Session.RelayResponseSessions> RequestSessions(byte page) {
-			_lastSessions = await Request<types.Session.RelayResponseSessions>(
+			var sessions = await Request<types.Session.RelayResponseSessions>(
 				new types.Session.RelayRequestSessions {
 					ConnectionId = Id,
 					Page         = page
@@ -204,10 +208,9 @@ namespace api.nox.relay.connection {
 				ResponseType.Sessions,
 				NextState()
 			);
-			if (_lastSessions == null) return null;
-			foreach (var instance in _lastSessions.Instances) 
+			foreach (var instance in sessions.Instances)
 				instance.Connection = this;
-			return _lastSessions;
+			return sessions;
 		}
 
 		public async UniTask<types.Session.RelayResponseSessions> RequestSessions() {
@@ -222,7 +225,7 @@ namespace api.nox.relay.connection {
 			}
 
 			all.Instances = l.ToArray();
-			return _lastSessions = all;
+			return all;
 		}
 
 		public async UniTask<RelayInstance> RequestSession(uint mid) {
@@ -234,7 +237,7 @@ namespace api.nox.relay.connection {
 				if (sessions == null) return null;
 				total = sessions.PageCount;
 				foreach (var inst in sessions.Instances) {
-					if (inst.Id != mid) continue;
+					if (inst.MasterId != mid) continue;
 					instance = inst;
 					break;
 				}

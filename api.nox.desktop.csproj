@@ -52,7 +52,6 @@
     <Compile Include="Packages\api.nox.desktop\src\Client.cs" />
     <Compile Include="Packages\api.nox.desktop\src\Keybindings.cs" />
     <None Include="Packages\api.nox.desktop\api.nox.desktop.asmdef" />
-    <None Include="Packages\api.nox.desktop\assets\api.nox.desktop\desktop-controller.uxml" />
     <None Include="Packages\api.nox.desktop\package.json" />
     <None Include="Packages\api.nox.desktop\nox.mod.json" />
     <None Include="Packages\api.nox.desktop\assets\api.nox.desktop\desktop-controller-styles.uss" />

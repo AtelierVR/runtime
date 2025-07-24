@@ -101,8 +101,7 @@ namespace api.nox.offline {
 			if (!WorldAPI.HasSceneInCache(asset.GetHash())) {
 				adapter.SetState(false, $"Downloading world '{worldId.ToString()}'...", 0.15f);
 				var download = WorldAPI.DownloadSceneToCache(
-					worldId.ToString(),
-					asset.GetId(),
+					asset.GetUrl(),
 					hash: asset.GetHash(),
 					progress: arg0 => adapter.SetState(false, $"Downloading world '{worldId.ToString()}'...", 0.15f + arg0 * 0.45f)
 				);
@@ -120,8 +119,7 @@ namespace api.nox.offline {
 			adapter.SetState(false, $"World '{worldId.ToString()}' loaded successfully", 0.65f);
 
 			scene.SetIdentifier(worldId);
-			adapter.AddDimension("default", scene);
-			adapter.SetCurrentDimension("default");
+			adapter.SetDimension(scene);
 
 			if (setCurrent) {
 				adapter.SetState(false, $"Setting world '{worldId.ToString()}' as current", 0.8f);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using api.nox.world.network;
@@ -154,6 +155,11 @@ namespace api.nox.world {
 		public IWorldIdentifier Make(string identifier)
 			=> WorldIdentifier.FromString(identifier);
 
+		public IWorldIdentifier Make(uint id,
+			Dictionary<string, string[]>  meta   = null,
+			string                        server = "::")
+			=> new WorldIdentifier(id, meta, server);
+
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask<IWorldIdentifier[]> AddFavorite(string identifier, string from = null)
 			=> await Network.AddFavorite(identifier, from);
@@ -211,8 +217,8 @@ namespace api.nox.world {
 			=> GroupManager.GetCurrent();
 
 		[NoxPublic(NoxAccess.Method)]
-		public ICaching DownloadSceneToCache(string identifier, uint assetId, string hash = null, string from = null, UnityAction<float> progress = null) {
-			var caching = Cache.AddDownload(identifier, assetId, hash);
+		public ICaching DownloadSceneToCache(string url, string hash = null, string from = null, UnityAction<float> progress = null) {
+			var caching = Cache.AddDownload(url, hash);
 			if (progress != null) caching.OnProgress.AddListener(progress);
 			return caching;
 		}

@@ -16,6 +16,8 @@ namespace Nox.Users {
 
 		public IUserIdentifier Make(string identifier);
 
+		public IUserIdentifier Make(uint id, string server = "::");
+
 		public UniTask<ISearchResponse> Search(ISearchRequest request);
 
 		public UniTask<IAuthToken> GetToken(string address);

@@ -9,7 +9,7 @@ namespace api.nox.relay.types {
 		Quit                = 0x06,
 		CustomDataPacket    = 0x07,
 		PasswordRequirement = 0x08,
-		Configuration       = 0x09,
+		Traveling           = 0x09,
 		Transform           = 0x0C,
 		Teleport            = 0x0D,
 		None                = 0xFF
