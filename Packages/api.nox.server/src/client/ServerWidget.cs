@@ -17,7 +17,7 @@ namespace api.nox.server
         internal ServerWidget()
         {
             Main.Instance.OnServerUpdated.AddListener(OnServerUpdated);
-            OnServerUpdated(Main.ServerAPI.CallMethod("GetCurrentServer"));
+            // OnServerUpdated(Main.ServerAPI.CallMethod("GetCurrentServer"));
         }
 
         public void Dispose()
@@ -54,15 +54,15 @@ namespace api.nox.server
         
         private GameObject OnContent(int menuId, RectTransform rect)
         {
-            var asset = Main.CoreAPI.AssetAPI.GetAsset<GameObject>("ui", "prefabs/widgets/button.prefab");
+            var asset = Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("ui", "prefabs/widgets/button.prefab");
             var button = Object.Instantiate(asset, rect);
             var reference = Reference.GetReference("content", button);
-            asset = Main.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/widget.prefab");
+            asset = Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/widget.prefab");
             var widget = Object.Instantiate(asset, reference.transform);
             var comportment = widget.GetComponent<ServerWidgetComportment>();
             comportment.button = button.GetComponent<UnityEngine.UI.Button>();
             comportment.menuId = menuId;
-            comportment.UpdateContent(Main.ServerAPI.CallMethod("GetCurrentServer"));
+            // comportment.UpdateContent(Main.ServerAPI.CallMethod("GetCurrentServer"));
             return button;
         }
     }

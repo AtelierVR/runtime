@@ -47,8 +47,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Packages\api.nox.server\src\client\ServerWidget.cs" />
+    <Compile Include="Packages\api.nox.server\src\network\ServerSocket.cs" />
+    <Compile Include="Packages\api.nox.server\src\base\Server.cs" />
     <Compile Include="Packages\api.nox.server\src\client\ServerClient.cs" />
     <Compile Include="Packages\api.nox.server\src\client\ServerWidgetComportment.cs" />
+    <Compile Include="Packages\api.nox.server\src\base\Gateways.cs" />
+    <Compile Include="Packages\api.nox.server\src\network\Network.cs" />
     <Compile Include="Packages\api.nox.server\src\Main.cs" />
     <None Include="Packages\api.nox.server\package.json" />
     <None Include="Packages\api.nox.server\api.nox.server.asmdef" />
@@ -859,6 +863,18 @@
     <ProjectReference Include="Nox.Servers.csproj">
       <Project>{346d2d3e-9b5c-38a6-8b0c-3cee36e63af0}</Project>
       <Name>Nox.Servers</Name>
+    </ProjectReference>
+    <ProjectReference Include="api.nox.jint.csproj">
+      <Project>{050c8115-621b-df1d-ab50-aeb3cf87f6b3}</Project>
+      <Name>api.nox.jint</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Users.csproj">
+      <Project>{c237149e-58f6-bdd3-6473-3bc76e6fd9f4}</Project>
+      <Name>Nox.Users</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Network.csproj">
+      <Project>{d72e3f1d-b6a9-ae1f-6165-22b88075502b}</Project>
+      <Name>Nox.Network</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -35,10 +35,10 @@
   ],
   "entrypoints": {
     "client": [
-      "api.nox.server.ServerClient"
+      "api.nox.server.Client"
     ],
     "main": [
-      "api.nox.server.ServerSystem"
+      "api.nox.server.Main"
     ]
   },
   "references": [],

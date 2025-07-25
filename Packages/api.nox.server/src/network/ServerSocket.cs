@@ -1,0 +1,297 @@
+using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
+using Nox.CCK.Utils;
+using Nox.Servers;
+using System;
+using System.Linq;
+using System.Net.WebSockets;
+using System.Threading;
+using System.Text;
+using Nox.Users;
+using UnityEngine;
+using UnityEngine.Events;
+using Logger = Nox.CCK.Utils.Logger;
+
+namespace api.nox.server.network {
+	public class ServerSocket : IServerSocket {
+		public static readonly List<ServerSocket> Connections = new();
+
+		// Événements
+		public readonly UnityEvent            OnConnected       = new();
+		public readonly UnityEvent            OnDisconnected    = new();
+		public readonly UnityEvent<string>    OnMessageReceived = new();
+		public readonly UnityEvent<Exception> OnError           = new();
+
+		private          bool   _autoReconnect = true;
+		private          bool   _reconcilable;
+		private          bool   _isListening;
+		private readonly string _address;
+		private readonly Uri    _url;
+
+		private readonly Dictionary<string, string> _headers = new() {
+			{
+				"User-Agent",
+				string.Join(
+					' ',
+					$"{Application.productName}/{Application.version}",
+					$"{Constants.ProtocolIdentifier}/{Constants.ProtocolVersion}",
+					$"(en={EngineExtensions.CurrentEngine.GetEngineName()}; pn={PlatformExtensions.CurrentPlatform.GetPlatformName()})"
+				)
+			}, {
+				"X-UUID",
+				SystemInfo.deviceUniqueIdentifier
+			}, {
+				"X-Nox-User",
+				Main.UserAPI?.GetCurrent()?.ToIdentifier().ToString()
+				?? string.Empty
+			}, {
+				"X-Nox-Mods",
+				string.Join(
+					"; ",
+					Main.Instance.CoreAPI.ModAPI.GetMods()
+						.Where(mod => mod != null && mod.IsLoaded())
+						.Select(m => m.GetMetadata())
+						.Select(metadata => $"{metadata.GetId()}/{metadata.GetVersion()}")
+				)
+			}, {
+				"X-Powered-By",
+				"Nox"
+			}
+		};
+
+		private ClientWebSocket         _webSocket;
+		private CancellationTokenSource _cts;
+
+
+		public ServerSocket(string server, string uri, IAuthToken authToken = null, Dictionary<string, string> headers = null) {
+			_address = server;
+			if (headers != null)
+				foreach (var header in headers)
+					_headers[header.Key] = header.Value;
+			if (authToken != null)
+				_headers.Add("Authorization", authToken.ToHeader());
+			_url          = new Uri(uri);
+			_reconcilable = false;
+			Connections.Add(this);
+		}
+
+		public static async UniTask<ServerSocket> Make(string address, IAuthToken auth = null) {
+			if (string.IsNullOrEmpty(address)) {
+				Logger.LogError($"Cannot connect socket {address}: no server address provided.");
+				return null;
+			}
+
+			var server = await Main.Instance.Fetch(address);
+			if (server == null) {
+				Logger.LogError($"Cannot connect socket {address}: no server found at address.");
+				return null;
+			}
+
+			var uri = server.GetGateways().GetWs();
+			if (string.IsNullOrEmpty(uri)) {
+				Logger.LogError($"Cannot connect socket {address}: no WebSocket URI found.");
+				return null;
+			}
+
+			var socket = new ServerSocket(address, uri, auth);
+
+			return socket;
+		}
+
+		public async UniTask<bool> Connect() {
+			if (_cts != null)
+				await Close();
+
+			_webSocket = new ClientWebSocket();
+			_cts       = new CancellationTokenSource();
+
+			foreach (var header in _headers)
+				try {
+					_webSocket.Options.SetRequestHeader(header.Key, header.Value);
+				} catch (Exception ex) {
+					Logger.LogError($"Failed to set WebSocket header '{header.Key}': {ex.Message}");
+				}
+
+			try {
+				await _webSocket.ConnectAsync(_url, _cts.Token);
+			} catch (Exception ex) {
+				Logger.LogError($"Error connecting to WebSocket: {ex.Message}");
+				_reconcilable = false;
+				OnError?.Invoke(ex);
+				return false;
+			}
+
+			Logger.LogDebug($"WebSocket connection to {_url} established successfully.");
+			_reconcilable = true;
+			OnConnected.Invoke();
+
+			// Démarrer l'écoute des messages
+			StartListening();
+
+			return true;
+		}
+
+		public async UniTask<bool> Close() {
+			_isListening = false;
+
+			if (!IsConnected()) {
+				Logger.LogDebug("WebSocket is already closed or not initialized.");
+				return true;
+			}
+
+			try {
+				await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing connection", CancellationToken.None);
+			} catch (Exception ex) {
+				Logger.LogError($"Error closing WebSocket connection: {ex.Message}");
+				OnError?.Invoke(ex);
+			}
+
+			Logger.LogDebug($"WebSocket connection to {_url} closed successfully.");
+
+			// Nettoyer les ressources
+			_webSocket.Dispose();
+			_webSocket = null;
+			_cts.Cancel();
+			_cts.Dispose();
+			_cts = null;
+			OnDisconnected.Invoke();
+
+			return true;
+		}
+
+		public bool IsConnected()
+			=> _webSocket is { State: WebSocketState.Open };
+
+		public bool CanAutoReconnect()
+			=> _autoReconnect;
+
+		public void SetAutoReconnect(bool autoReconnect)
+			=> _autoReconnect = autoReconnect;
+
+		// Méthodes pour gérer les headers WebSocket
+		public void SetHeader(string name, string value) {
+			_headers[name] = value;
+		}
+
+		public void RemoveHeader(string name) {
+			_headers.Remove(name);
+		}
+
+		public void ClearHeaders() {
+			_headers.Clear();
+		}
+
+		public Dictionary<string, string> GetHeaders() {
+			return new Dictionary<string, string>(_headers);
+		}
+
+		private void StartListening() {
+			if (_isListening) return;
+			_isListening = true;
+			ListenForMessages().Forget();
+		}
+
+		private async UniTask ListenForMessages() {
+			var buffer = new byte[4096];
+
+			while (_webSocket is { State: WebSocketState.Open } && !_cts.Token.IsCancellationRequested) {
+				try {
+					var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token);
+					if (result.MessageType == WebSocketMessageType.Text) {
+						var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+						OnMessageReceived.Invoke(message);
+					} else if (result.MessageType == WebSocketMessageType.Close) {
+						Logger.LogDebug("WebSocket connection closed by server.");
+						await HandleDisconnection();
+						break;
+					}
+				} catch (OperationCanceledException) {
+					// Connexion fermée normalement
+					break;
+				} catch (WebSocketException ex) {
+					Logger.LogError($"WebSocket error: {ex.Message}");
+					OnError.Invoke(ex);
+					await HandleDisconnection();
+					break;
+				} catch (Exception ex) {
+					Logger.LogError($"Unexpected error while listening: {ex.Message}");
+					OnError.Invoke(ex);
+					await HandleDisconnection();
+					break;
+				}
+			}
+
+			_isListening = false;
+		}
+
+		private async UniTask HandleDisconnection() {
+			_isListening = false;
+			OnDisconnected.Invoke();
+
+			if (_autoReconnect && _reconcilable) {
+				Logger.LogDebug("Attempting to reconnect...");
+				await UniTask.Delay(TimeSpan.FromSeconds(5)); // Attendre 5 secondes avant de reconnecter
+				if (!_cts.Token.IsCancellationRequested)
+					await AttemptReconnect();
+			}
+		}
+
+		private async UniTask AttemptReconnect() {
+			var maxRetries = 5;
+			var retryCount = 0;
+
+			while (retryCount < maxRetries && _autoReconnect && !_cts.Token.IsCancellationRequested) {
+				try {
+					retryCount++;
+					Logger.LogDebug($"Reconnection attempt {retryCount}/{maxRetries}");
+
+					if (await Connect()) {
+						Logger.LogDebug("Reconnection successful.");
+						return;
+					}
+				} catch (Exception ex) {
+					Logger.LogError($"Reconnection attempt {retryCount} failed: {ex.Message}");
+					OnError.Invoke(ex);
+				}
+
+				if (retryCount >= maxRetries) continue;
+				var delay = Math.Min(30, retryCount * 5); // Délai progressif jusqu'à 30 secondes
+				await UniTask.Delay(TimeSpan.FromSeconds(delay));
+			}
+
+			Logger.LogError($"Failed to reconnect after {maxRetries} attempts.");
+		}
+
+		public async UniTask<bool> SendMessage(string message) {
+			if (!IsConnected()) {
+				Logger.LogError("Cannot send message: WebSocket is not connected.");
+				return false;
+			}
+
+			try {
+				var buffer = Encoding.UTF8.GetBytes(message);
+				await _webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, _cts.Token);
+				return true;
+			} catch (Exception ex) {
+				Logger.LogError($"Error sending message: {ex.Message}");
+				OnError.Invoke(ex);
+				return false;
+			}
+		}
+
+		public async UniTask Dispose() {
+			if (_cts != null)
+				await Close();
+			_isListening = false;
+
+			_webSocket?.Dispose();
+			_webSocket = null;
+			_cts?.Cancel();
+			_cts?.Dispose();
+			_cts = null;
+
+			Connections.Remove(this);
+			Logger.LogDebug($"ServerSocket for {_address} disposed.");
+		}
+	}
+}

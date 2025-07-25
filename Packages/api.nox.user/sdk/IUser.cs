@@ -15,5 +15,6 @@ namespace Nox.Users {
 		public float           GetRank();
 		public UniTask<IUser>  Refresh();
 		public IUserIdentifier ToIdentifier();
+		public string          GetCertificate();
 	}
 }

@@ -18,6 +18,7 @@ namespace api.nox.user {
 		public string[] links;
 		public string[] tags;
 		public float    rank;
+		public string   certificate;
 
 		public uint GetId()
 			=> id;
@@ -72,6 +73,23 @@ namespace api.nox.user {
 
 		public IUserIdentifier ToIdentifier()
 			=> ToInternalIdentifier();
+
+		public string GetCertificate() {
+			if (string.IsNullOrEmpty(certificate)) return null;
+			if (certificate.StartsWith("-----BEGIN CERTIFICATE-----\n"))
+				return certificate;
+
+			var lines = new string[certificate.Length / 64 + 1];
+			for (var i = 0; i < lines.Length; i++) {
+				var start  = i * 64;
+				var length = Math.Min(64, certificate.Length - start);
+				lines[i] = certificate.Substring(start, length);
+			}
+
+			return "-----BEGIN CERTIFICATE-----\n"
+				+ string.Join("\n", lines)
+				+ "\n-----END CERTIFICATE-----";
+		}
 
 		public override string ToString()
 			=> $"{GetType().Name}[id={id}, username={username}, server={server}]";

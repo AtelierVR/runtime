@@ -1,26 +1,35 @@
 ﻿using System;
 using System.Linq;
+using api.nox.server.network;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
+using Nox.Network;
 using Nox.Servers;
+using Nox.Users;
 using UnityEngine.Events;
 
 namespace api.nox.server {
 	public class Main : MainModInitializer, IServerAPI {
-		internal static MainModCoreAPI CoreAPI;
+		internal        MainModCoreAPI CoreAPI;
 		internal static Main           Instance;
 
-		internal static MainModInitializer NetworkAPI
-			=> CoreAPI.ModAPI
+		internal Network      Network;
+		internal ServerSocket Socket;
+
+		internal static INetworkAPI NetworkAPI
+			=> Instance.CoreAPI.ModAPI
 				.GetMod("network")
 				.GetMains()
-				.FirstOrDefault();
+				.FirstOrDefault() as INetworkAPI;
 
-		internal static INoxObject ServerAPI
-			=> NetworkAPI.GetField("Server");
+		internal static IUserAPI UserAPI
+			=> Instance.CoreAPI.ModAPI
+				.GetMod("user")
+				.GetMains()
+				.FirstOrDefault() as IUserAPI;
 
 		internal readonly UnityEvent<INoxObject> OnServerUpdated      = new();
 		internal readonly UnityEvent<INoxObject> OnServerFetched      = new();
@@ -32,6 +41,7 @@ namespace api.nox.server {
 		public void OnInitializeMain(MainModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
+			Network  = new Network();
 			_events = new[] {
 				CoreAPI.EventAPI.Subscribe(
 					"server_update",
@@ -64,33 +74,63 @@ namespace api.nox.server {
 							? server
 							: null
 					)
-				)
+				),
+				CoreAPI.EventAPI.Subscribe("user_update", OnCurrentUserUpdated)
 			};
 		}
 
-		public async UniTask OnPostInitializeMainAsync() {
-			var server = ServerAPI.CallMethod("GetCurrentServer");
-			server ??= await ServerAPI.CallAsyncMethod("GetMyServer");
+		private void OnCurrentUserUpdated(EventData context) {
+			var user = context.TryGet(0, out IUser u) ? u : null;
+			StartCurrentSocket(user).Forget();
+		}
 
-			if (server == null) {
-				Logger.Log("Server not detected");
+
+		public async UniTask OnPostInitializeMainAsync() {
+			var user = UserAPI.GetCurrent() ?? await UserAPI.FetchCurrent();
+			await StartCurrentSocket(user);
+		}
+
+		private async UniTask StartCurrentSocket(IUser user) {
+			if (Socket != null)
+				await Socket.Dispose();
+			Socket = null;
+
+			var address = user?.GetServerAddress();
+			if (address == null) {
+				Logger.LogWarning("Current user has no server address set, cannot connect to server.");
+				return;
+			}
+			
+			var token = await UserAPI.GetToken(address);
+
+			var socket = await ServerSocket.Make(address, token);
+			if (socket == null) {
+				Logger.LogError($"Failed to connect to server at {address}");
 				return;
 			}
 
-			var title = server.GetField<string>("title");
-			Logger.Log($"Server {title} detected");
+			Socket = socket;
+
+			socket.OnMessageReceived.AddListener(Logger.LogDebug);
+			socket.OnError.AddListener(Logger.LogException);
+			socket.OnConnected.AddListener(() => Logger.LogDebug("Connected to server"));
+			socket.OnDisconnected.AddListener(() => Logger.LogDebug("Disconnected from server"));
+
+			await Socket.Connect();
 		}
 
 		public void OnDisposeMain() {
 			foreach (var ev in _events.Where(e => e != null))
 				CoreAPI.EventAPI.Unsubscribe(ev);
+			Network  = null;
 			CoreAPI  = null;
 			Instance = null;
 		}
 
-		public async UniTask<IServer> Fetch(string from = null) {
-			await UniTask.Yield();
-			return null;
-		}
+		public async UniTask<IServer> Fetch(string from = null)
+			=> await Network.Fetch(from);
+
+		public async UniTask<IServerSocket> Connect(string address)
+			=> await ServerSocket.Make(address);
 	}
 }
