@@ -186,7 +186,8 @@ namespace api.nox.relay {
 				return;
 			}
 
-			adapter.Tps = enter.MaxTps;
+			adapter.Tps       = enter.Tps;
+			adapter.Threshold = enter.Threshold;
 
 			adapter.SetState(false, $"Connected as {enter.Player.Display} ({enter.Player.Id}) to instance {instance}", 0.325f);
 

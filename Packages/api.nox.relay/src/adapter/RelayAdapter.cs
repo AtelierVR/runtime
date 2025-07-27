@@ -36,7 +36,8 @@ namespace api.nox.relay {
 
 
 		public void OnEnter(EnterResponse ev) {
-			Tps = ev.MaxTps;
+			Tps = ev.Tps;
+			Threshold = ev.Threshold;
 			Instance.RequestTraveling(TravelingAction.Travel).Forget();
 		}
 

@@ -9,7 +9,8 @@ namespace api.nox.relay.types.Enter {
 		public DateTime       ExpireAt = DateTime.MinValue;
 		public string         Reason;
 		public InstancePlayer Player;
-		public byte           MaxTps;
+		public byte           Tps;
+		public float          Threshold;
 
 		public bool HasExpiration
 			=> ExpireAt != DateTime.MinValue;
@@ -44,7 +45,8 @@ namespace api.nox.relay.types.Enter {
 						Display      = buffer.ReadString(),
 						CreatedAt    = buffer.ReadDateTime(),
 					};
-					MaxTps = buffer.ReadByte();
+					Tps = buffer.ReadByte();
+					Threshold = buffer.ReadFloat();
 					return true;
 				case EnterResult.Blacklisted:
 					ExpireAt = buffer.ReadDateTime();
@@ -56,6 +58,6 @@ namespace api.nox.relay.types.Enter {
 		}
 
 		public override string ToString()
-			=> $"{GetType().Name}[Result={Result}, Player={Player?.ToString() ?? "null"}, MaxTps={MaxTps}]";
+			=> $"{GetType().Name}[Result={Result}, Player={Player?.ToString() ?? "null"}, MaxTps={Tps}]";
 	}
 }

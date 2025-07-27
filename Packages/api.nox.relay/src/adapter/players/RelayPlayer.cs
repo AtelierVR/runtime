@@ -69,7 +69,7 @@ namespace api.nox.relay {
 		public void SetPosition(Vector3 position) {
 			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
 				?? new NoxTransform();
-			if (tr.IsSamePosition(position, GetProperty("threshold", Adapter.Threshold))) return;
+			if (tr.IsSamePosition(position, Adapter.Threshold)) return;
 			tr.DeliveryType = TransformDeliveryType.LocalModified;
 			tr.SetPosition(position);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
@@ -79,7 +79,7 @@ namespace api.nox.relay {
 		public void SetRotation(Quaternion rotation) {
 			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
 				?? new NoxTransform();
-			if (tr.IsSameRotation(rotation, GetProperty("threshold", Adapter.Threshold))) return;
+			if (tr.IsSameRotation(rotation, Adapter.Threshold)) return;
 			tr.DeliveryType = TransformDeliveryType.LocalModified;
 			tr.SetRotation(rotation);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
@@ -89,8 +89,7 @@ namespace api.nox.relay {
 		public void Teleport(Vector3 position, Quaternion rotation) {
 			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
 				?? new NoxTransform();
-			var threshold = GetProperty("threshold", Adapter.Threshold);
-			if (tr.IsSamePosition(position, threshold) && tr.IsSameRotation(rotation, threshold)) return;
+			if (tr.IsSamePosition(position, Adapter.Threshold) && tr.IsSameRotation(rotation, Adapter.Threshold)) return;
 			tr.DeliveryType = TransformDeliveryType.LocalModified;
 			tr.SetPosition(position);
 			tr.SetRotation(rotation);
