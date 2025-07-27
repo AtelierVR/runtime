@@ -167,6 +167,7 @@ namespace api.nox.xr {
 		[NoxPublic(NoxAccess.Method)]
 		public void SetPlayer(IPlayer p) {
 			_attachedPlayer = p;
+			Client.CoreAPI.EventAPI.Emit("controller_set_player", this, _attachedPlayer);
 			if (p == null) return;
 			SynchronizeControllerFromPlayer();
 		}

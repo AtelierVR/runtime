@@ -11,12 +11,13 @@ namespace api.nox.relay.Instances {
 		public ushort        PlayerCount;
 		public ushort        MaxPlayerCount;
 		public InstanceFlags Flags;
+		public byte          Tps = byte.MaxValue;
 
 		public Connection Connection;
 
-		public UnityEvent<types.Traveling.TravelingEvent> OnTraveling = new();
-		public UnityEvent<types.Quit.QuitEvent>           OnQuit      = new();
-		public UnityEvent<types.Enter.EnterResponse>      OnEnter     = new();
+		public readonly UnityEvent<types.Traveling.TravelingEvent> OnTraveling = new();
+		public readonly UnityEvent<types.Quit.QuitEvent>           OnQuit      = new();
+		public readonly UnityEvent<types.Enter.EnterResponse>      OnEnter     = new();
 
 		internal void OnReceived(ushort length, ushort state, ResponseType type, Buffer buffer) {
 			buffer.Goto(0);
@@ -38,6 +39,9 @@ namespace api.nox.relay.Instances {
 					break;
 			}
 		}
+
+		public async UniTask<bool> SendTransform(types.Transform.InstanceRequestTransform request)
+			=> (await Connection.Emit(request.ToBuffer(), RequestType.Transform)).Item1;
 
 		public async UniTask<types.Enter.EnterResponse> RequestEnter(string display = null, string password = null, types.Enter.EnterFlags flags = types.Enter.EnterFlags.None) {
 			Connection.Instances.Add(this);

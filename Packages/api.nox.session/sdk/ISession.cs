@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Nox.Entities;
 using Nox.Players;
@@ -91,5 +92,27 @@ namespace Nox.Sessions {
 		/// <param name="state"></param>
 		/// <param name="previousState"></param>
 		void OnStateChanged(IAdapterState state, IAdapterState previousState);
+
+		/// <summary>
+		/// Called every frame.
+		/// You need call <see cref="IAdapter.OnUpdate"/> method to ensure the adapter is updated.
+		/// </summary>
+		void OnUpdate();
+
+		/// <summary>
+		/// Called when the session is selected.
+		/// Please ensure that you call <see cref="IAdapter.OnSelect"/>.
+		/// </summary>
+		/// <param name="oSession"></param>
+		/// <returns></returns>
+		UniTask OnSelect(ISession oSession);
+
+		/// <summary>
+		/// Called when the session is deselected.
+		/// Please ensure that you call <see cref="IAdapter.OnDeselect"/>.
+		/// </summary>
+		/// <param name="nSession"></param>
+		/// <returns></returns>
+		UniTask OnDeselect(ISession nSession);
 	}
 }

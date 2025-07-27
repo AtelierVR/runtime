@@ -137,6 +137,8 @@ namespace Nox.ModLoader {
 		private static void OnPlayModeStateChanged(PlayModeStateChange state, ResultLoadInfos resultInfos) {
 			if (state == PlayModeStateChange.EnteredPlayMode)
 				StartupPlayerLoop.Setup(resultInfos);
+			else if (state == PlayModeStateChange.ExitingPlayMode)
+				AsyncReloadMods().Forget();
 		}
 
 		#else

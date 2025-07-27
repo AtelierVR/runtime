@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using api.nox.offline;
 using api.nox.relay.connection;
@@ -14,7 +13,6 @@ using Nox.Entities;
 using Nox.Players;
 using Nox.Sessions;
 using Nox.Worlds;
-using src.adapter.players;
 
 namespace api.nox.relay {
 	public class RelayAdapter : IAdapter, INoxObject {
@@ -25,12 +23,35 @@ namespace api.nox.relay {
 		internal         Connection     Connection;
 		internal         RelayInstance  Instance;
 
+		private  bool     _isTraveling = true;
+		internal byte     Tps          = 0;
+		private  DateTime _lastUpdate  = DateTime.MinValue;
+		internal float    Threshold    = 0.001f;
+
+
 		internal RelayAdapter() {
 			_dimension = null;
 			_entities  = Main.EntityAPI.New();
 		}
 
-		public void OnQuit(QuitEvent ev) { }
+
+		public void OnEnter(EnterResponse ev) {
+			Tps = ev.MaxTps;
+			Instance.RequestTraveling(TravelingAction.Travel).Forget();
+		}
+
+		public void OnUpdate() {
+			if (_isTraveling || Tps == 0 || _lastUpdate.AddSeconds(1f / Tps) > DateTime.UtcNow) return;
+			_lastUpdate = DateTime.UtcNow;
+			var locals = _entities.GetEntities();
+			foreach (var player in locals)
+				if (player is RelayLocalPlayer localPlayer)
+					localPlayer.SendTransform();
+		}
+
+		public void OnQuit(QuitEvent ev) {
+			Tps = 0;
+		}
 
 		public void OnTraveling(TravelingEvent ev)
 			=> OnTravelingAsync(ev).Forget();
@@ -38,6 +59,8 @@ namespace api.nox.relay {
 		public async UniTask<bool> OnTravelingAsync(TravelingEvent ev, Action<float, string> progress = null) {
 			string hash;
 			string url;
+
+			_isTraveling = true;
 
 			if (ev.UseUrl) {
 				progress?.Invoke(0.1f, "Using provided URL for world travel");
@@ -59,6 +82,7 @@ namespace api.nox.relay {
 				if (asset == null) {
 					progress?.Invoke(0.2f, $"No master asset found for world {ev.WorldIdentifier.ToString()}");
 					Logger.LogError($"No asset found for world {ev.WorldIdentifier.ToString()}");
+					_isTraveling = false;
 					return false;
 				}
 
@@ -67,6 +91,8 @@ namespace api.nox.relay {
 			} else {
 				progress?.Invoke(0.1f, "The traveling does not contain valid URL or master asset information");
 				Logger.LogError($"{ev} does not contain valid URL or master asset information");
+
+				_isTraveling = false;
 				return false;
 			}
 
@@ -89,6 +115,8 @@ namespace api.nox.relay {
 			if (scene == null) {
 				progress?.Invoke(0.9f, "Failed to load scene for world");
 				Logger.LogError($"Failed to load scene for world {ev.WorldIdentifier.ToString()}");
+
+				_isTraveling = false;
 				return false;
 			}
 
@@ -96,11 +124,9 @@ namespace api.nox.relay {
 			SetDimension(scene);
 
 			progress?.Invoke(1f, "World loaded successfully");
-			return true;
-		}
 
-		public void OnEnter(EnterResponse ev) {
-			Instance.RequestTraveling(TravelingAction.Travel).Forget();
+			_isTraveling = false;
+			return true;
 		}
 
 		public void SetDimension(IScene scene) {
@@ -182,7 +208,7 @@ namespace api.nox.relay {
 
 		public void NewPlayer<T>(InstancePlayer player) where T : RelayPlayer, new() {
 			var np = new T();
-			np.SetReference(player);
+			np.SetReference(player, this);
 			_entities.RegisterEntity(np);
 		}
 	}

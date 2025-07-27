@@ -201,7 +201,7 @@ namespace api.nox.world.client {
 		}
 
 		public bool InCache()
-			=> Main.Instance.Cache.Has(Asset.GetHash());
+			=> Asset != null && Main.Instance.Cache.Has(Asset.GetHash());
 
 		private Caching GetDownload()
 			=> Asset != null

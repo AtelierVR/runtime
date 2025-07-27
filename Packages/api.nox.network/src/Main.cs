@@ -55,6 +55,11 @@ namespace api.nox.network {
 
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask<Texture2D> FetchTexture(string url, UnityWebRequest req = null, Action<float, ulong> progress = null, CancellationToken token = default) {
+			if (string.IsNullOrEmpty(url)) {
+				Logger.LogWarning("FetchTexture: URL is null or empty.");
+				return null;
+			}
+
 			Logger.Log($"Fetching [TEXTURE] {url}...");
 			try {
 				req     ??= new UnityWebRequest(url, "GET");
@@ -92,6 +97,11 @@ namespace api.nox.network {
 
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask<string> DownloadFile(string url, string hash, UnityWebRequest req = null, Action<float, ulong> progress = null, CancellationToken token = default) {
+			if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(hash)) {
+				Logger.LogWarning("DownloadFile: URL or hash is null or empty.");
+				return null;
+			}
+
 			Logger.Log($"Fetching [FILE] {url}...");
 			req                 ??= new UnityWebRequest(url, "GET");
 			req.url             =   url;
@@ -142,31 +152,5 @@ namespace api.nox.network {
 
 		public IRequest MakeRequest()
 			=> new Request();
-
-		public async UniTask<Texture2D> FetchTexture(string address) {
-			if (string.IsNullOrEmpty(address)) {
-				Logger.LogWarning("FetchTexture: Address is null or empty.");
-				return null;
-			}
-
-			var uri = new Uri(address);
-			if (!uri.IsAbsoluteUri) {
-				Logger.LogWarning($"FetchTexture: Invalid URI {address}.");
-				return null;
-			}
-
-			try {
-				var req = MakeRequest();
-				req.SetUrl(address);
-				await req.Send();
-				if (req.GetStatus() == 200)
-					return req.GetResponse<Texture2D>();
-				Logger.LogError($"FetchTexture: Failed to fetch texture from {address}. Status: {req.GetStatus()}");
-				return null;
-			} catch (Exception e) {
-				Logger.LogError($"FetchTexture: Failed to fetch texture from {address}. Error: {e.Message}");
-				return null;
-			}
-		}
 	}
 }

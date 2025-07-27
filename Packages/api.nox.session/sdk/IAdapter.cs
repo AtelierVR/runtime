@@ -87,7 +87,7 @@ namespace Nox.Sessions {
 		/// </summary>
 		/// <param name="scene"></param>
 		public void SetDimension(IScene scene);
-		
+
 		/// <summary>
 		/// Get the current state of the adapter, which includes the current operation and its progress.
 		/// (used when the session is loading (e.g. loading a world or connecting to a server)).
@@ -96,5 +96,13 @@ namespace Nox.Sessions {
 		/// </summary>
 		/// <returns></returns>
 		public IAdapterState GetState();
+
+		/// <summary>
+		/// Optionally called every frame.
+		/// <example>
+		///	Used to update players transform, or to update the session state.
+		/// </example>
+		/// </summary>
+		public void OnUpdate() { }
 	}
 }

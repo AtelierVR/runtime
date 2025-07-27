@@ -90,6 +90,9 @@ namespace api.nox.session {
 				Main.Instance.CoreAPI.EventAPI.Emit("session_error", this);
 		}
 
+		public void OnUpdate()
+			=> Adapter.OnUpdate();
+		
 		public bool Match(IWorldIdentifier identifier)
 			=> Adapter.GetDimension()?.GetScene().GetIdentifier().Equals(identifier)
 				?? false;
@@ -97,10 +100,10 @@ namespace api.nox.session {
 		public override string ToString()
 			=> $"{GetType().Name}[Id={Id}, Adapter={Adapter}]";
 
-		public async UniTask OnDeselect(Session nSession)
+		public async UniTask OnDeselect(ISession nSession)
 			=> await Adapter.OnDeselect(nSession);
 
-		public async UniTask OnSelect(Session oSession)
+		public async UniTask OnSelect(ISession oSession)
 			=> await Adapter.OnSelect(oSession);
 
 		private void TryTeleportPlayerToSpawn(IPlayer player) {

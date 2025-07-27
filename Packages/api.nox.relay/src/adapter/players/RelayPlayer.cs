@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using api.nox.relay;
 using api.nox.relay.types.Player;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
@@ -10,30 +11,33 @@ using Logger = Nox.CCK.Utils.Logger;
 using NoxTransform = Nox.CCK.Utils.Transform;
 using Transform = UnityEngine.Transform;
 
-namespace src.adapter.players {
+namespace api.nox.relay {
 	public abstract class RelayPlayer : IPlayer {
-		private           InstancePlayer                   _reference;
+		protected InstancePlayer Reference;
+		protected RelayAdapter   Adapter;
+
 		private readonly  Dictionary<string, object>       _properties = new();
 		internal readonly Dictionary<ushort, NoxTransform> Transforms  = new();
 
-		public void SetReference(InstancePlayer reference)
-			=> _reference = reference;
+		public void SetReference(InstancePlayer reference, RelayAdapter adapter) {
+			Reference = reference;
+			Adapter   = adapter;
+		}
 
 		public int GetId()
-			=> _reference.Id;
+			=> Reference.Id;
 
 		public string GetDisplay()
-			=> _reference.Display;
+			=> Reference.Display;
 
 		public virtual bool IsLocal()
 			=> false;
 
 		public IUserIdentifier ToIdentifier()
-			=> _reference.Identifier;
+			=> Reference.Identifier;
 
 		public bool IsMaster()
-			=> _reference.Flags.HasFlag(InstancePlayerFlags.InstanceMaster);
-
+			=> Reference.Flags.HasFlag(InstancePlayerFlags.InstanceMaster);
 
 		public Dictionary<string, object> GetProperties()
 			=> _properties;
@@ -63,22 +67,34 @@ namespace src.adapter.players {
 
 		[NoxPublic(NoxAccess.Method)]
 		public void SetPosition(Vector3 position) {
-			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
+			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
+				?? new NoxTransform();
+			if (tr.IsSamePosition(position, GetProperty("threshold", Adapter.Threshold))) return;
+			tr.DeliveryType = TransformDeliveryType.LocalModified;
 			tr.SetPosition(position);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
 
 		[NoxPublic(NoxAccess.Method)]
 		public void SetRotation(Quaternion rotation) {
-			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
+			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
+				?? new NoxTransform();
+			if (tr.IsSameRotation(rotation, GetProperty("threshold", Adapter.Threshold))) return;
+			tr.DeliveryType = TransformDeliveryType.LocalModified;
 			tr.SetRotation(rotation);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
 
 		[NoxPublic(NoxAccess.Method)]
 		public void Teleport(Vector3 position, Quaternion rotation) {
-			SetPosition(position);
-			SetRotation(rotation);
+			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
+				?? new NoxTransform();
+			var threshold = GetProperty("threshold", Adapter.Threshold);
+			if (tr.IsSamePosition(position, threshold) && tr.IsSameRotation(rotation, threshold)) return;
+			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.SetPosition(position);
+			tr.SetRotation(rotation);
+			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -90,7 +106,7 @@ namespace src.adapter.players {
 		public void SetDisplay(string display) {
 			Logger.LogWarning($"{nameof(SetDisplay)} is not currently implemented for {GetType().Name}.");
 		}
-		
+
 		public bool TryGetPhysical(out Physical physical) {
 			Logger.LogWarning($"{nameof(TryGetPhysical)} is not currently implemented for {GetType().Name}.");
 			physical = null;

@@ -8,7 +8,6 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Utils;
 using Nox.Sessions;
-using src.adapter.players;
 
 namespace api.nox.relay {
 	public class Adapting {
@@ -186,6 +185,8 @@ namespace api.nox.relay {
 				await connection.Dispose();
 				return;
 			}
+
+			adapter.Tps = enter.MaxTps;
 
 			adapter.SetState(false, $"Connected as {enter.Player.Display} ({enter.Player.Id}) to instance {instance}", 0.325f);
 

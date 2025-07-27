@@ -88,7 +88,7 @@ namespace api.nox.instance.client {
 			}
 
 			_thumbnailTokenSource = new CancellationTokenSource();
-			if (instance?.GetThumbnailUrl() != null) {
+			if (!string.IsNullOrEmpty(instance?.GetThumbnailUrl())) {
 				var texture = await Main.Instance.NetworkAPI
 					.FetchTexture(instance.GetThumbnailUrl())
 					.AttachExternalCancellation(_thumbnailTokenSource.Token);

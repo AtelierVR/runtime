@@ -199,6 +199,7 @@ namespace api.nox.desktop {
 		[NoxPublic(NoxAccess.Method)]
 		public void SetPlayer(IPlayer p) {
 			_attachedPlayer = p;
+			Client.CoreAPI.EventAPI.Emit("controller_set_player", this, _attachedPlayer);
 			if (p == null) return;
 			SynchronizeControllerFromPlayer();
 		}
@@ -212,12 +213,13 @@ namespace api.nox.desktop {
 		}
 
 		private void SynchronizePlayerFromController() {
-			_attachedPlayer?.SetPosition(transform.position);
+			_attachedPlayer.Teleport(transform.position, transform.rotation);
 		}
 
 		private void SynchronizeControllerFromPlayer() {
 			if (_attachedPlayer == null) return;
 			transform.position = _attachedPlayer.GetPosition();
+			transform.rotation = _attachedPlayer.GetRotation();
 		}
 	}
 }

@@ -24,7 +24,7 @@ namespace Nox.ModLoader.Cores.Events {
 				SourceChannel    = context.Channel,
 				CallbackFunction = context.Callback ?? (_ => { })
 			};
-			foreach (var sub in _subscriptions)
+			foreach (var sub in _subscriptions.ToArray())
 				if (sub.EventName == null || sub.EventName == context.EventName)
 					try {
 						sub.Callback(data);
