@@ -27,6 +27,7 @@ namespace api.nox.server.network {
 		private          bool   _isListening;
 		private readonly string _address;
 		private readonly Uri    _url;
+		private          int    _maxRetries = 0;
 
 		private readonly Dictionary<string, string> _headers = new() {
 			{
@@ -237,13 +238,12 @@ namespace api.nox.server.network {
 		}
 
 		private async UniTask AttemptReconnect() {
-			var maxRetries = 5;
 			var retryCount = 0;
 
-			while (retryCount < maxRetries && _autoReconnect && !_cts.Token.IsCancellationRequested) {
+			while ((retryCount < _maxRetries || _maxRetries == 0) && _autoReconnect && !_cts.Token.IsCancellationRequested) {
 				try {
 					retryCount++;
-					Logger.LogDebug($"Reconnection attempt {retryCount}/{maxRetries}");
+					Logger.LogDebug($"Reconnection attempt {retryCount}/{_maxRetries}");
 
 					if (await Connect()) {
 						Logger.LogDebug("Reconnection successful.");
@@ -254,12 +254,12 @@ namespace api.nox.server.network {
 					OnError.Invoke(ex);
 				}
 
-				if (retryCount >= maxRetries) continue;
+				if (retryCount >= _maxRetries) continue;
 				var delay = Math.Min(30, retryCount * 5); // Délai progressif jusqu'à 30 secondes
 				await UniTask.Delay(TimeSpan.FromSeconds(delay));
 			}
 
-			Logger.LogError($"Failed to reconnect after {maxRetries} attempts.");
+			Logger.LogError($"Failed to reconnect after {_maxRetries} attempts.");
 		}
 
 		public async UniTask<bool> SendMessage(string message) {
