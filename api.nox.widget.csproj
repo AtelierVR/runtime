@@ -46,11 +46,6 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.1.8f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.widget\src\WidgetManager.cs" />
-    <Compile Include="Packages\api.nox.widget\src\Client.cs" />
-    <None Include="Packages\api.nox.widget\nox.mod.json" />
-    <None Include="Packages\api.nox.widget\api.nox.widget.asmdef" />
-    <None Include="Packages\api.nox.widget\package.json" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.1.8f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -862,6 +857,9 @@
       <Project>{a08df447-4896-15b4-c4f0-1269b0cb2f56}</Project>
       <Name>Nox.Widgets</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Packages\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

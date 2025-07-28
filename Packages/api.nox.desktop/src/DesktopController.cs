@@ -213,7 +213,7 @@ namespace api.nox.desktop {
 		}
 
 		private void SynchronizePlayerFromController() {
-			_attachedPlayer.Teleport(transform.position, transform.rotation);
+			_attachedPlayer?.Teleport(transform.position, transform.rotation);
 		}
 
 		private void SynchronizeControllerFromPlayer() {

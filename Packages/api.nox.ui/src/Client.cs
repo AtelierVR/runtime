@@ -2,7 +2,6 @@
 using Nox.CCK.Mods.Initializers;
 using Nox.UI;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace api.nox.ui {
 	public class Client : IUiAPI, ClientModInitializer {

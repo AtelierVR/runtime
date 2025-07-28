@@ -5,7 +5,8 @@
         "Nox.CCK",
         "UniTask",
         "Unity.TextMeshPro",
-        "Nox.UI"
+        "Nox.UI",
+        "Nox.Widgets"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

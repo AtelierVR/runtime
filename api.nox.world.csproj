@@ -61,6 +61,7 @@
     <Compile Include="Packages\api.nox.world\src\editor\WorldBuilderPanel.cs" />
     <Compile Include="Packages\api.nox.world\src\network\Network.cs" />
     <Compile Include="Packages\api.nox.world\src\network\create\CreateAssetRequest.cs" />
+    <Compile Include="Packages\api.nox.world\src\client\widget\HomeWidget.cs" />
     <Compile Include="Packages\api.nox.world\src\search\Search.cs" />
     <Compile Include="Packages\api.nox.world\src\scene_groups\AssetSceneGroup.cs" />
     <Compile Include="Packages\api.nox.world\src\scenes\SubScene.cs" />

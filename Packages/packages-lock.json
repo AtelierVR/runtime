@@ -132,12 +132,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.widget": {
-      "version": "file:api.nox.widget",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.world": {
       "version": "file:api.nox.world",
       "depth": 0,
