@@ -16,8 +16,8 @@ namespace api.nox.server {
 		internal        MainModCoreAPI CoreAPI;
 		internal static Main           Instance;
 
-		internal Network      Network;
-		internal ServerSocket Socket;
+		internal Network                         Network;
+		internal (IUserIdentifier, ServerSocket) Socket = (null, null);
 
 		internal static INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
@@ -91,16 +91,22 @@ namespace api.nox.server {
 		}
 
 		private async UniTask StartCurrentSocket(IUser user) {
-			if (Socket != null)
-				await Socket.Dispose();
-			Socket = null;
+			if (Socket.Item2 != null && Socket.Item1.Equals(user.ToIdentifier())) {
+				Logger.LogDebug("Already connected to server for current user.");
+				return;
+			}
+
+			if (Socket.Item2 != null)
+				await Socket.Item2.Dispose();
+
+			Socket = (user.ToIdentifier(), null);
 
 			var address = user?.GetServerAddress();
 			if (address == null) {
 				Logger.LogWarning("Current user has no server address set, cannot connect to server.");
 				return;
 			}
-			
+
 			var token = await UserAPI.GetToken(address);
 
 			var socket = await ServerSocket.Make(address, token);
@@ -109,14 +115,14 @@ namespace api.nox.server {
 				return;
 			}
 
-			Socket = socket;
+			Socket = (user.ToIdentifier(), socket);
 
 			socket.OnMessageReceived.AddListener(Logger.LogDebug);
 			socket.OnError.AddListener(Logger.LogException);
 			socket.OnConnected.AddListener(() => Logger.LogDebug("Connected to server"));
 			socket.OnDisconnected.AddListener(() => Logger.LogDebug("Disconnected from server"));
 
-			await Socket.Connect();
+			await Socket.Item2.Connect();
 		}
 
 		public void OnDisposeMain() {

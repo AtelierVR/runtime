@@ -1,5 +1,4 @@
 using System.Linq;
-using Nox.CCK.Utils;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
@@ -9,10 +8,10 @@ namespace api.nox.ui.components {
 		public float      spacing    = 0;
 
 		void Start()
-			=> UpdateContent(GetItems());
+			=> UpdateLayout();
 
 		void OnValidate()
-			=> UpdateContent(GetItems());
+			=> UpdateLayout();
 
 		public Vector2 GetDimensions()
 			=> GetDimensions(GetComponentsInChildren<WidgetGridItem>(true));
@@ -34,6 +33,9 @@ namespace api.nox.ui.components {
 
 		public void UpdateLayout()
 			=> UpdateContent(GetItems());
+
+		public void OnEnable()
+			=> UpdateLayout();
 
 		public void UpdateContent(WidgetGridItem[] items) {
 			items = items.OrderBy(x => x.index).ToArray();

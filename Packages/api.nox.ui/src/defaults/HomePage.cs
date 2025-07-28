@@ -132,6 +132,9 @@ namespace api.nox.ui.defaults {
 			RequestWidgets();
 		}
 
+		public void OnDisplay(IPage lastPage) 
+			=> UpdateLayout.UpdateManually(_content);
+
 		private void RemoveWidget(EventData data) {
 			if (!_widgetContent || !_widgetPrefab) return;
 			if (!data.TryGet(0, out string key)) return;
@@ -180,17 +183,16 @@ namespace api.nox.ui.defaults {
 		private void UpdateGridder() {
 			var widgets = _widgetContent.GetComponentsInChildren<IWidget>(true).ToList();
 			widgets.Sort((b, a) => a.GetPriority().CompareTo(b.GetPriority()));
-			
+
 			for (var i = 0u; i < widgets.Count; i++) {
 				var widget = widgets[(int)i];
-				if (widget is not MonoBehaviour mb || !mb.TryGetComponent<WidgetGridItem>(out var item)) 
+				if (widget is not MonoBehaviour mb || !mb.TryGetComponent<WidgetGridItem>(out var item))
 					continue;
 				item.size  = widget.GetSize();
 				item.index = i;
 			}
 
-			var gridder = _widgetContent.GetComponent<WidgetGrid>();
-			gridder.UpdateLayout();
+			UpdateLayout.UpdateManually(_dashboardContent);
 		}
 
 		private void AddWidget(IWidget widget) {
