@@ -1,4 +1,5 @@
 using System;
+using Nox.Users;
 using Buffer = Nox.CCK.Utils.Buffer;
 
 namespace api.nox.relay.types.Authentication {
@@ -17,9 +18,8 @@ namespace api.nox.relay.types.Authentication {
 			=> ExpireAt != DateTime.MinValue;
 
 		// Player information
-		public uint   Id;
-		public string Display;
-		public string Address;
+		public IUserIdentifier Identifier;
+		public string          Display;
 
 		public static RelayResponseAuthentication CreateUnknown(ushort id, string reason)
 			=> new() {
@@ -38,9 +38,8 @@ namespace api.nox.relay.types.Authentication {
 					else Reason = "Unknown error";
 					return true;
 				case AuthenticationResult.Success:
-					Id      = buffer.ReadUShort();
-					Display = buffer.ReadString();
-					Address = buffer.ReadString();
+					Identifier = Main.UserAPI.Make(buffer.ReadUShort(), buffer.ReadString());
+					Display    = buffer.ReadString();
 					return true;
 				case AuthenticationResult.Blacklisted:
 					ExpireAt = buffer.ReadDateTime();

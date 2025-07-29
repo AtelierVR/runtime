@@ -208,7 +208,7 @@ namespace api.nox.ui.menus {
 				if (p.GetChildren().Length > 0)
 					p.SetActive(true);
 
-			UpdateLayout.UpdateManually(gameObject);
+			UpdateLayout.UpdateImmediate(gameObject);
 		}
 
 		public int GetId()
@@ -274,7 +274,7 @@ namespace api.nox.ui.menus {
 				newPage.OnDisplay(oldPage);
 				content.SetActive(true);
 
-				UpdateLayout.UpdateManually(content);
+				UpdateLayout.UpdateImmediate(content);
 			} catch (Exception e) {
 				Logger.LogException(e);
 			}

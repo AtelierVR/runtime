@@ -138,7 +138,7 @@ namespace api.nox.world.client {
 						isEmpty = false;
 						instanceInfobox.SetActive(false);
 						instanceListContainer.SetActive(true);
-						UpdateLayout.UpdateManually(instanceList);
+						UpdateLayout.UpdateImmediate(instanceList);
 					}
 				}
 			);
@@ -157,7 +157,7 @@ namespace api.nox.world.client {
 			if (isEmpty) {
 				instanceInfobox.SetActive(true);
 				instanceListContainer.SetActive(false);
-			} else UpdateLayout.UpdateManually(instanceList);
+			} else UpdateLayout.UpdateImmediate(instanceList);
 		}
 
 		private async UniTask<IInstance[]> SearchInstances(IWorld world, string server, CancellationToken token, Action<IInstance[]> callback = null) {

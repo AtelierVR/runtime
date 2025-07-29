@@ -2,6 +2,7 @@
 using System.Linq;
 using api.nox.server.network;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
@@ -17,6 +18,7 @@ namespace api.nox.server {
 		internal static Main           Instance;
 
 		internal Network                         Network;
+		private  LanguagePack                    _lang;
 		internal (IUserIdentifier, ServerSocket) Socket = (null, null);
 
 		internal static INetworkAPI NetworkAPI
@@ -41,7 +43,9 @@ namespace api.nox.server {
 		public void OnInitializeMain(MainModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
-			Network  = new Network();
+			_lang    = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
+			LanguageManager.AddPack(_lang);
+			Network = new Network();
 			_events = new[] {
 				CoreAPI.EventAPI.Subscribe(
 					"server_update",
@@ -125,9 +129,13 @@ namespace api.nox.server {
 			await Socket.Item2.Connect();
 		}
 
-		public void OnDisposeMain() {
+		public async UniTask OnDisposeMainAsync() {
 			foreach (var ev in _events.Where(e => e != null))
 				CoreAPI.EventAPI.Unsubscribe(ev);
+			LanguageManager.RemovePack(_lang);
+			if (Socket.Item2 != null)
+				await Socket.Item2.Dispose();
+			Socket   = (null, null);
 			Network  = null;
 			CoreAPI  = null;
 			Instance = null;

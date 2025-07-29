@@ -1,55 +1,51 @@
 using System;
+using Nox.CCK.Utils;
 using UnityEngine;
+using UnityEngine.UI;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.ui.components {
-	public class WidgetGridItem : MonoBehaviour {
+	public class WidgetGridItem : MonoBehaviour, IUpdateLayout {
 		public WidgetGrid Gridder
 			=> GetComponentInParent<WidgetGrid>();
 
-		public uint              index    = 0u;
+		public uint             index    = 0u;
 		public Vector2Int       position = Vector2Int.zero;
 		public Vector2Int       size     = new(1, 1);
 		public GridderItemFlags flags    = GridderItemFlags.None;
 
 		void OnValidate()
+			=> UpdateLayout();
+
+		public void UpdateLayout()
 			=> UpdatePosition();
 
 		public void UpdatePosition(Vector2Int pos, Vector2 dimensions = default) {
-			this.position = pos;
+			position = pos;
 			UpdatePosition(dimensions);
 		}
 
 		private void UpdatePosition(Vector2 dimensions = default) {
 			try {
-				if (Gridder == null) return;
-				if (Gridder.dimensions is { x: 0, y: 0 }) return;
+				var gridder = Gridder;
+				if (!gridder) return;
+				if (gridder.dimensions is { x: 0, y: 0 }) return;
 				var rect   = GetComponent<RectTransform>();
 				var parent = rect?.parent?.GetComponent<RectTransform>();
-				if (parent == null) return;
+				if (!parent) return;
 
-				dimensions = dimensions == default
-					? Gridder.GetDimensions()
-					: dimensions;
-
-				var cellWidth  = parent.rect.width  / dimensions.x;
-				var cellHeight = parent.rect.height / dimensions.y;
-
-				var totalSpacingX = Gridder.spacing * (dimensions.x - 1);
-				var totalSpacingY = Gridder.spacing * (dimensions.y - 1);
-
-				cellWidth  -= totalSpacingX / dimensions.x;
-				cellHeight -= totalSpacingY / dimensions.y;
-
+				var cellSize = gridder.GetCellSize();
+				
 				rect.anchoredPosition = new Vector2(
-					position.x  * (Gridder.dimensions.x == 0 ? cellHeight : cellWidth) + position.x * Gridder.spacing,
-					-position.y * (Gridder.dimensions.y == 0 ? cellWidth : cellHeight) - position.y * Gridder.spacing
+					position.x  * (gridder.dimensions.x == 0 ? cellSize.y : cellSize.x) + position.x * gridder.spacing,
+					-position.y * (gridder.dimensions.y == 0 ? cellSize.x : cellSize.y) - position.y * gridder.spacing
 				);
 				rect.sizeDelta = new Vector2(
-					size.x * (Gridder.dimensions.x == 0 ? cellHeight : cellWidth) + (size.x - 1) * Gridder.spacing,
-					size.y * (Gridder.dimensions.y == 0 ? cellWidth : cellHeight) + (size.y - 1) * Gridder.spacing
+					size.x * (gridder.dimensions.x == 0 ? cellSize.y : cellSize.x) + (size.x - 1) * gridder.spacing,
+					size.y * (gridder.dimensions.y == 0 ? cellSize.x : cellSize.y) + (size.y - 1) * gridder.spacing
 				);
-			} catch {
-				// ignored
+			} catch (Exception e) {
+				Logger.LogException(e, this);
 			}
 		}
 	}

@@ -129,11 +129,12 @@ namespace api.nox.ui.defaults {
 				Client.Instance.CoreAPI.EventAPI.Subscribe("widget_added", AddWidget),
 				Client.Instance.CoreAPI.EventAPI.Subscribe("widget_removed", RemoveWidget),
 			};
+			
 			RequestWidgets();
 		}
 
 		public void OnDisplay(IPage lastPage) 
-			=> UpdateLayout.UpdateManually(_content);
+			=> UpdateLayout.UpdateImmediate(_content);
 
 		private void RemoveWidget(EventData data) {
 			if (!_widgetContent || !_widgetPrefab) return;
@@ -144,9 +145,10 @@ namespace api.nox.ui.defaults {
 			foreach (var widget in widgets)
 				if (widget is Object o)
 					Object.Destroy(o);
+			UpdateGridder().Forget();
 		}
 
-		public void RequestWidgets() {
+		private void RequestWidgets() {
 			if (!_widgetContent || !_widgetPrefab) return;
 
 			List<IWidget> widgets = new();
@@ -164,7 +166,7 @@ namespace api.nox.ui.defaults {
 
 			foreach (var widget in widgets.Where(widget => widget != null))
 				AddWidget(widget);
-			UpdateGridder();
+			UpdateGridder().Forget();
 
 			return;
 
@@ -177,10 +179,10 @@ namespace api.nox.ui.defaults {
 		private void AddWidget(EventData data) {
 			if (!data.TryGet(0, out IWidget widget)) return;
 			AddWidget(widget);
-			UpdateGridder();
+			UpdateGridder().Forget();
 		}
 
-		private void UpdateGridder() {
+		private async UniTask UpdateGridder() {
 			var widgets = _widgetContent.GetComponentsInChildren<IWidget>(true).ToList();
 			widgets.Sort((b, a) => a.GetPriority().CompareTo(b.GetPriority()));
 
@@ -191,8 +193,10 @@ namespace api.nox.ui.defaults {
 				item.size  = widget.GetSize();
 				item.index = i;
 			}
-
-			UpdateLayout.UpdateManually(_dashboardContent);
+			
+			UpdateLayout.UpdateImmediate(_content);
+			await UniTask.NextFrame();
+			UpdateLayout.UpdateImmediate(_content);
 		}
 
 		private void AddWidget(IWidget widget) {

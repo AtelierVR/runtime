@@ -46,12 +46,13 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.1.8f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.server\src\client\ServerWidget.cs" />
     <Compile Include="Packages\api.nox.server\src\network\ServerSocket.cs" />
     <Compile Include="Packages\api.nox.server\src\base\Server.cs" />
-    <Compile Include="Packages\api.nox.server\src\client\ServerClient.cs" />
-    <Compile Include="Packages\api.nox.server\src\client\ServerWidgetComportment.cs" />
+    <Compile Include="Packages\api.nox.server\src\Client.cs" />
+    <Compile Include="Packages\api.nox.server\src\client\ServerPage.cs" />
+    <Compile Include="Packages\api.nox.server\src\client\ServerComponent.cs" />
     <Compile Include="Packages\api.nox.server\src\base\Gateways.cs" />
+    <Compile Include="Packages\api.nox.server\src\client\widget\HostWidget.cs" />
     <Compile Include="Packages\api.nox.server\src\network\Network.cs" />
     <Compile Include="Packages\api.nox.server\src\Main.cs" />
     <None Include="Packages\api.nox.server\package.json" />
@@ -875,6 +876,10 @@
     <ProjectReference Include="Nox.Network.csproj">
       <Project>{d72e3f1d-b6a9-ae1f-6165-22b88075502b}</Project>
       <Name>Nox.Network</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.UI.csproj">
+      <Project>{0f333b38-227b-3a61-c9e4-410cadf64208}</Project>
+      <Name>Nox.UI</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -43,7 +43,7 @@ namespace api.nox.relay.types.Enter {
 						Id           = buffer.ReadUShort(),
 						Identifier   = Main.UserAPI.Make(buffer.ReadUInt(), buffer.ReadString()),
 						Display      = buffer.ReadString(),
-						CreatedAt    = buffer.ReadDateTime(),
+						JoinedAt    = buffer.ReadDateTime(),
 					};
 					Tps = buffer.ReadByte();
 					Threshold = buffer.ReadFloat();

@@ -10,6 +10,6 @@ namespace api.nox.relay.types.Player {
 		public ushort              Id;
 		public IUserIdentifier     Identifier;
 		public string              Display;
-		public DateTime            CreatedAt;
+		public DateTime            JoinedAt;
 	}
 }

@@ -24,7 +24,7 @@ namespace api.nox.ui {
 			if (EditorApplication.isPlaying) return;
 			var canvas = Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None);
 			foreach (var c in canvas.Where(e => e.gameObject.activeInHierarchy))
-				UpdateLayout.UpdateManually(c.gameObject);
+				UpdateLayout.UpdateImmediate(c.gameObject);
 		}
 	}
 }

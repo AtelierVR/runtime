@@ -4,7 +4,6 @@ using Nox.UI;
 using Nox.UI.Widgets;
 using Nox.Users;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace api.nox.world.widget {
@@ -16,9 +15,6 @@ namespace api.nox.world.widget {
 
 		private void OnClick()
 			=> Client.UiAPI?.SendGoto(_mid, WorldPage.GetStaticKey(), "identifier", GetHomeIdentifier());
-
-		public IMenu GetMenu()
-			=> Client.UiAPI.Get<IMenu>(_mid);
 
 		public string GetKey()
 			=> GetDefaultKey();

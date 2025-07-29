@@ -3,15 +3,20 @@ using UnityEngine.UI;
 
 namespace Nox.CCK.Utils {
 	public class UpdateLayout {
-		// ReSharper disable Unity.PerformanceAnalysis
-		public static void UpdateManually(GameObject go)
-			=> UpdateManually(go.GetComponent<RectTransform>());
+		public static void UpdateImmediate(GameObject go)
+			=> UpdateImmediate(go.GetComponent<RectTransform>());
 
-		public static void UpdateManually(RectTransform rect) {
+		public static void UpdateImmediate(RectTransform rect) {
 			if (!rect || !rect.gameObject.activeInHierarchy) return;
 			foreach (UnityEngine.Transform child in rect)
-				UpdateManually(child.gameObject);
+				UpdateImmediate(child.gameObject);
+			foreach (var layout in rect.GetComponents<IUpdateLayout>())
+				layout.UpdateLayout();
 			LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
 		}
+	}
+
+	public interface IUpdateLayout {
+		void UpdateLayout();
 	}
 }

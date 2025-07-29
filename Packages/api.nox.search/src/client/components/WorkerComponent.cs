@@ -81,7 +81,7 @@ namespace api.nox.search.client {
 				message.gameObject.SetActive(true);
 			}
 
-			UpdateLayout.UpdateManually(transform as RectTransform);
+			UpdateLayout.UpdateImmediate(transform as RectTransform);
 		}
 	}
 }

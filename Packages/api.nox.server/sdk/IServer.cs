@@ -13,6 +13,12 @@ namespace Nox.Servers {
 		/// </summary>
 		/// <returns></returns>
 		public string GetTitle();
+		
+		/// <summary>
+		/// Get the address of the server.
+		/// </summary>
+		/// <returns></returns>
+		public string GetAddress();
 
 		/// <summary>
 		/// Get the description.

@@ -10,7 +10,8 @@
         "Nox.Users",
         "Nox.Servers",
         "Nox.Search",
-        "Nox.UI"
+        "Nox.UI",
+        "Nox.ModLoader"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

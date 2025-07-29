@@ -1,40 +1,41 @@
-﻿using api.nox.user.client;
+﻿using api.nox.server.client;
 using Nox.CCK.Utils;
 using Nox.UI;
 using Nox.UI.Widgets;
+using Nox.Users;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace api.nox.user.widget {
-	public class UserWidget : MonoBehaviour, IWidget {
+namespace api.nox.server.widget {
+	public class HostWidget : MonoBehaviour, IWidget {
 		public static string GetDefaultKey()
-			=> "current_user";
-
-		public string GetKey()
-			=> GetDefaultKey();
+			=> "host";
 
 		private int _mid;
 
 		private void OnClick()
-			=> Client.UiAPI?.SendGoto(_mid, UserPage.GetStaticKey(), "identifier", GetUserIdentifier());
-		
-		private static UserIdentifier GetUserIdentifier()
-			=> Main.Instance.Network.CurrentUser?.ToInternalIdentifier();
+			=> Client.UiAPI?.SendGoto(_mid, ServerPage.GetStaticKey(), "address", GetAddress());
+
+		public string GetKey()
+			=> GetDefaultKey();
 
 		public Vector2Int GetSize()
-			=> new(3, 2);
+			=> Vector2Int.one;
 
 		public int GetPriority()
-			=> 100;
+			=> 99;
+
+		private static string GetAddress(ICurrentUser current = null)
+			=> (current ?? Client.UserAPI.GetCurrent())?.GetServerAddress();
 
 		public static bool TryMake(IMenu menu, RectTransform parent, out (GameObject, IWidget) values) {
-			if (!(GetUserIdentifier()?.IsValid() ?? false)) {
+			if (string.IsNullOrEmpty(GetAddress())) {
 				values = (null, null);
 				return false;
 			}
 			var prefab    = Client.GetAsset<GameObject>("prefabs/grid_item.prefab", "ui");
 			var instance  = Instantiate(prefab, parent);
-			var component = instance.AddComponent<UserWidget>();
+			var component = instance.AddComponent<HostWidget>();
 			component._mid = menu.GetId();
 			var button = Reference.GetComponent<Button>("button", instance);
 			button.onClick.AddListener(component.OnClick);

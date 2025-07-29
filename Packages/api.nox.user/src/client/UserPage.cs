@@ -44,6 +44,8 @@ namespace api.nox.user.client {
 					return OnPageByIdentifier(menu, context, new UserIdentifier(id0, ser0));
 				case "identifier" when T(context, 1, out string id2):
 					return OnPageByIdentifier(menu, context, UserIdentifier.FromString(id2));
+				case "identifier" when T(context, 1, out IUserIdentifier ui0):
+					return OnPageByIdentifier(menu, context, UserIdentifier.FromBase(ui0));
 				case "user" when T(context, 1, out User usr3):
 					return OnPageByUser(menu, context, usr3);
 			}
@@ -77,6 +79,7 @@ namespace api.nox.user.client {
 			_isLoading = true;
 			await UniTask.Yield();
 			_isLoading = false;
+			UpdateLayout.UpdateImmediate(_content);
 		}
 
 		public object[] GetContext()

@@ -1,14 +1,13 @@
 using System.Linq;
+using Nox.CCK.Utils;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
+using NoxUpdateLayout = Nox.CCK.Utils.UpdateLayout;
 
 namespace api.nox.ui.components {
-	public class WidgetGrid : MonoBehaviour {
+	public class WidgetGrid : MonoBehaviour, IUpdateLayout {
 		public Vector2Int dimensions = new(1, 0);
-		public float      spacing    = 0;
-
-		void Start()
-			=> UpdateLayout();
+		public float      spacing    = 0f;
 
 		void OnValidate()
 			=> UpdateLayout();
@@ -22,6 +21,28 @@ namespace api.nox.ui.components {
 			return new Vector2(maxWidth, maxHeight);
 		}
 
+		public Vector2 GetCellSize() {
+			var items = GetItems();
+			if (items.Length == 0) return Vector2.zero;
+
+			var rect = GetComponent<RectTransform>();
+			if (!rect) return Vector2.zero;
+
+			var cellWidth  = dimensions.x == 0 ? 0 : rect.sizeDelta.x / dimensions.x;
+			var cellHeight = dimensions.y == 0 ? 0 : rect.sizeDelta.y / dimensions.y;
+
+			var totalSpacingX = spacing * (dimensions.x - 1);
+			var totalSpacingY = spacing * (dimensions.y - 1);
+
+			cellWidth  -= dimensions.x == 0 ? 0 : totalSpacingX / dimensions.x;
+			cellHeight -= dimensions.y == 0 ? 0 : totalSpacingY / dimensions.y;
+
+			return new Vector2(
+				cellWidth,
+				cellHeight
+			);
+		}
+
 		private int GetMaxWidth(WidgetGridItem[] items)
 			=> dimensions.x == 0 ? items.Max(x => x.size.x) : dimensions.x;
 
@@ -33,9 +54,6 @@ namespace api.nox.ui.components {
 
 		public void UpdateLayout()
 			=> UpdateContent(GetItems());
-
-		public void OnEnable()
-			=> UpdateLayout();
 
 		public void UpdateContent(WidgetGridItem[] items) {
 			items = items.OrderBy(x => x.index).ToArray();

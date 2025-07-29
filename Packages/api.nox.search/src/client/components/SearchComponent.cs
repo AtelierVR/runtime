@@ -89,7 +89,7 @@ namespace api.nox.search.client {
 
 			resultContainer.gameObject.SetActive(false);
 			workersContainer.gameObject.SetActive(true);
-			UpdateLayout.UpdateManually(workersContainer);
+			UpdateLayout.UpdateImmediate(workersContainer);
 			UpdateSearchButtons();
 		}
 
@@ -102,7 +102,7 @@ namespace api.nox.search.client {
 				component.UpdateData(task);
 			}
 
-			UpdateLayout.UpdateManually(workersContainer);
+			UpdateLayout.UpdateImmediate(workersContainer);
 			UpdateSearchButtons();
 		}
 
@@ -221,7 +221,7 @@ namespace api.nox.search.client {
 				content.SetActive(true);
 			}
 
-			UpdateLayout.UpdateManually(handlerContainer);
+			UpdateLayout.UpdateImmediate(handlerContainer);
 		}
 
 		private void OnChangeHandler(IHandler handler) {

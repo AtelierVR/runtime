@@ -910,6 +910,10 @@
       <Project>{0f333b38-227b-3a61-c9e4-410cadf64208}</Project>
       <Name>Nox.UI</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.ModLoader.csproj">
+      <Project>{93df2d39-ac68-5ba1-5007-374eca7d2969}</Project>
+      <Name>Nox.ModLoader</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

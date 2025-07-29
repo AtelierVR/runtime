@@ -60,6 +60,8 @@ namespace api.nox.world.client {
 					return OnPageByIdentifier(menu, context, new WorldIdentifier(id0, null, ser0));
 				case "identifier" when T(context, 1, out string id2):
 					return OnPageByIdentifier(menu, context, WorldIdentifier.FromString(id2));
+				case "identifier" when T(context, 1, out IWorldIdentifier wi0):
+					return OnPageByIdentifier(menu, context, WorldIdentifier.FromBase(wi0));
 				case "world" when T(context, 1, out IWorld w0):
 					var a0 = T(context, 2, out IWorldAsset asset) ? asset : null;
 					return OnPageByWorld(menu, context, w0, a0);
@@ -102,6 +104,7 @@ namespace api.nox.world.client {
 			if (!load)
 				_component.UpdateInstances(World).Forget();
 			_component.UpdateContent(World, Asset);
+			UpdateLayout.UpdateImmediate(_content);
 		}
 
 		private async UniTask FetchWorld(bool update = false) {
