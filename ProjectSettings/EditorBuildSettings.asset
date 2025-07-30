@@ -42,21 +42,6 @@ EditorBuildSettings:
     path: Assets/Samples/Worlds/New Scene.unity
     guid: b8ce853cf9a3b2b478f94ddd668c4528
   - enabled: 1
-    path: Assets/Samples/Avatars/demo/New Scene.unity
-    guid: dec68381f5851c342afc1a9c49261343
-  - enabled: 1
-    path: Assets/Samples/Avatars/demo/RINDO MOD/Rindo emission layer examples.unity
-    guid: e64e40bb456e4834bb2206f05829993c
-  - enabled: 1
-    path: Assets/AutoHand/Examples/Scenes/XR/Demo.unity
-    guid: 9935fff7a54383d4a8ca954c1411c833
-  - enabled: 1
-    path: Assets/AutoHand/Examples/Scenes/XR/Tutorial Video Scene.unity
-    guid: dc74935531a6487409eb101722a98460
-  - enabled: 1
-    path: Assets/AutoHand/Examples/Scenes/Desktop/Desktop Player.unity
-    guid: bb1eab65b7f030d4fab81d20430b0b3d
-  - enabled: 1
     path: Assets/Temp/811b848639f3d3dbfe3e6e186b30e238/1.unity
     guid: f1e091148e1e4bba8b0fed176754e6cb
   - enabled: 1
@@ -77,6 +62,18 @@ EditorBuildSettings:
   - enabled: 1
     path: Packages/dev.nox.game_builder/buildscenes/main.unity
     guid: eaaaa443d7bb2384a99758427d41bfd8
+  - enabled: 1
+    path: Assets/Samples/Avatars/HAOLAN/OpenME.unity
+    guid: dec68381f5851c342afc1a9c49261343
+  - enabled: 1
+    path: Assets/AutoHand/Examples/Scenes/XR/Demo.unity
+    guid: 9935fff7a54383d4a8ca954c1411c833
+  - enabled: 1
+    path: Assets/AutoHand/Examples/Scenes/XR/Tutorial Video Scene.unity
+    guid: dc74935531a6487409eb101722a98460
+  - enabled: 1
+    path: Assets/AutoHand/Examples/Scenes/Desktop/Desktop Player.unity
+    guid: bb1eab65b7f030d4fab81d20430b0b3d
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

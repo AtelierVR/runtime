@@ -13,7 +13,7 @@ using Nox.Players;
 namespace api.nox.xr {
 	public class XRController : MonoBehaviour, IController, INoxObject {
 		private static int DefaultPriority
-			=> Client.IsReady() && Client.Instance.HasHeadset()
+			=> Client.Instance.IsReady()
 				? Config.Load().Get("settings.controller.xr_priority", IController.DefaultPriority + 1)
 				: IController.DefaultPriority - 1;
 
@@ -23,7 +23,10 @@ namespace api.nox.xr {
 		/// Get the proxy mod API.
 		/// </summary>
 		private static IControllerAPI ControllerAPI
-			=> Client.CoreAPI.ModAPI.GetMod("controller").GetMains().FirstOrDefault() as IControllerAPI;
+			=> Client.CoreAPI.ModAPI
+				.GetMod("controller")
+				.GetMains()
+				.FirstOrDefault() as IControllerAPI;
 
 		/// <summary>
 		/// Check if the current proxy is better than XR proxy.
@@ -60,7 +63,17 @@ namespace api.nox.xr {
 		/// </summary>
 		/// <returns></returns>
 		internal static bool Make() {
-			if (!IsBetterThanCurrent()) return false;
+			if (!IsBetterThanCurrent()) {
+				Logger.LogDebug(
+					"XR proxy is not better than current controller, skipping creation\n"
+					+ $"Current: {ControllerAPI.GetCurrent()?.GetId() ?? "null"} ({ControllerAPI.GetCurrent()?.GetPriority() ?? -1})\n"
+					+ $"XR: {DefaultId} ({DefaultPriority})"
+					+ $" - {(Client.Instance.IsReady() ? "XR Ready" : "XR Not Ready")}"
+					+ $" - {(Client.Instance.HasHeadset() ? "Has Headset" : "No Headset")}"
+					+ $" ({(Client.Instance.IsXRInitialized() ? "XR Initialized" : "XR Not Initialized")})"
+				);
+				return false;
+			}
 
 			var prefab = Client.CoreAPI.AssetAPI.GetAsset<GameObject>("proxy.prefab");
 			if (!prefab) {
@@ -161,7 +174,7 @@ namespace api.nox.xr {
 				{ PlayerRig.LeftHand.ToIndex(), player.handLeft.transform },
 				{ PlayerRig.RightHand.ToIndex(), player.handRight.transform }
 			};
-		
+
 		private IPlayer _attachedPlayer;
 
 		[NoxPublic(NoxAccess.Method)]

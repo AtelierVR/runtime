@@ -1,0 +1,45 @@
+{
+  "type": "mod",
+  "id": "api.nox.avatar",
+  "provides": [
+    "fr.hactazia.sdk.avatar",
+    "avatar"
+  ],
+  "name": "Avatar",
+  "version": "1.0.0",
+  "description": "Provides the Avatar API for the game.",
+  "license": "GPL-3.0",
+  "icon": null,
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.avatar",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.avatar/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [
+  ],
+  "entrypoints": {
+    "main": [
+      "api.nox.avatar.Main"
+    ],
+    "client": [
+      "api.nox.avatar.Client"
+    ],
+    "editor": [
+      "api.nox.avatar.Editor"
+    ],
+    "instance": []
+  },
+  "references": [],
+  "sides": [],
+  "permissions": [],
+  "kernel": true
+}

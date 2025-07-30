@@ -39,49 +39,37 @@ namespace api.nox.xr {
             );
 		#endif
 
-		private static bool _isXRActive;
-		private static bool _isXRInitialized;
+		private bool _isXRInitialized;
 
-		[NoxPublic(NoxAccess.Read)] public static readonly UnityEvent<bool> OnXRHeadsetChange = new();
+		[NoxPublic(NoxAccess.Read)] public readonly UnityEvent<bool> OnXRHeadsetChange = new();
 
-		[NoxPublic(NoxAccess.Method)]
-		public static bool IsXRActive()
-			=> _isXRActive;
 
 		[NoxPublic(NoxAccess.Method)]
-		public static bool IsXRInitialized()
+		public bool IsXRInitialized()
 			=> _isXRInitialized;
 
 		[NoxPublic(NoxAccess.Method)]
-		public static bool IsReady()
-			=> _isXRInitialized && _isXRActive;
-
+		public bool IsReady()
+			=> IsXRInitialized() && HasHeadset();
 
 		public async UniTask OnInitializeClientAsync(ClientModCoreAPI api) {
-			InputDevices.deviceConnected    += OnDeviceConnected;
-			InputDevices.deviceDisconnected += OnDeviceDisconnected;
-
-			var devices = new List<InputDevice>();
-			InputDevices.GetDevices(devices);
-			foreach (var device in devices)
-				OnDeviceConnected(device);
+			CoreAPI  = api;
+			Instance = this;
 
 			if (NoVRFlag) {
 				Logger.LogWarning("VR disabled by flag.");
 				return;
 			}
 
-			await StartLoaderAsync();
+			await StartLoader();
 		}
 
 		public void OnDisposeClient() {
-			if (!XRGeneralSettings.Instance.Manager.activeLoader) return;
-			Logger.Log("Stopping XR...");
-			XRGeneralSettings.Instance.Manager.StopSubsystems();
-			XRGeneralSettings.Instance.Manager.DeinitializeLoader();
-			_isXRInitialized                =  false;
-			InputDevices.deviceConnected    -= OnDeviceConnected;
-			InputDevices.deviceDisconnected -= OnDeviceDisconnected;
+			StopLoader();
+			if (XRController.Remove())
+				Logger.Log("XR Controller has been removed.");
+			Instance = null;
+			CoreAPI  = null;
 		}
 
 		private void OnDeviceConnected(InputDevice device) {
@@ -111,6 +99,7 @@ namespace api.nox.xr {
 				OnXRHeadsetChange.Invoke(true);
 				if (XRController.Make())
 					Logger.Log("XR Controller has been created.");
+				else Logger.LogWarning("Failed to create XR Controller.");
 			}
 		}
 
@@ -120,12 +109,13 @@ namespace api.nox.xr {
 				OnXRHeadsetChange.Invoke(false);
 				if (XRController.Remove())
 					Logger.Log("XR Controller has been removed.");
+				else Logger.LogWarning("Failed to remove XR Controller.");
 			}
 		}
 
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask StartLoaderAsync() {
+		public async UniTask StartLoader() {
 			if (_isXRInitialized) {
 				Logger.LogWarning("XR already initialized.");
 				return;
@@ -145,7 +135,6 @@ namespace api.nox.xr {
 
 			Logger.Log("Loading XR...");
 
-
 			if (!loader.Initialize()) {
 				Logger.LogError("XR loader failed to initialize.");
 				return;
@@ -157,18 +146,35 @@ namespace api.nox.xr {
 			Logger.Log("XR initialized. Starting subsystems...");
 			XRGeneralSettings.Instance.Manager.StartSubsystems();
 
-			_isXRActive      = XRSettings.isDeviceActive;
 			_isXRInitialized = true;
-			OnXRHeadsetChange.Invoke(_isXRActive);
+
+			InputDevices.deviceConnected    += OnDeviceConnected;
+			InputDevices.deviceDisconnected += OnDeviceDisconnected;
+
+			var devices = new List<InputDevice>();
+			InputDevices.GetDevices(devices);
+			foreach (var device in devices)
+				OnDeviceConnected(device);
 		}
 
+		public void StopLoader() {
+			if (!_isXRInitialized) {
+				Logger.LogWarning("XR not initialized.");
+				return;
+			}
 
-		public void OnUpdateClient() {
-			if (_isXRActive == XRSettings.isDeviceActive) return;
-			_isXRActive = XRSettings.isDeviceActive;
-			Logger.Log($"XR headset change: {_isXRActive}");
-			OnXRHeadsetChange.Invoke(_isXRActive);
+			Logger.Log("Stopping XR...");
+			XRGeneralSettings.Instance.Manager.StopSubsystems();
+			XRGeneralSettings.Instance.Manager.DeinitializeLoader();
+			_isXRInitialized = false;
+
+			InputDevices.deviceConnected    -= OnDeviceConnected;
+			InputDevices.deviceDisconnected -= OnDeviceDisconnected;
+
+			OnXRHeadsetChange.Invoke(false);
+			Logger.Log("XR stopped.");
 		}
+
 
 		[NoxPublic(NoxAccess.Method)]
 		public bool HasHeadset() {
