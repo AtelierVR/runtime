@@ -191,18 +191,20 @@ namespace api.nox.relay {
 
 			adapter.SetState(false, $"Connected as {enter.Player.Display} ({enter.Player.Id}) to instance {instance}", 0.325f);
 
-			var travel = await adapter.Instance.RequestTraveling(TravelingAction.Travel);
-			if (travel.IsError) {
-				adapter.SetState(false, $"Failed to travel to instance {instance}: {travel.Reason}", -1f);
-				Logger.LogDebug($"Failed to travel to instance {instance}: {travel.Results} - {travel.Reason}");
+			var travalRequest = await adapter.Instance.RequestTraveling(TravelingAction.Travel);
+			if (travalRequest.IsError) {
+				adapter.SetState(false, $"Failed to travel to instance {instance}: {travalRequest.Reason}", -1f);
+				Logger.LogDebug($"Failed to travel to instance {instance}: {travalRequest.Results} - {travalRequest.Reason}");
 				await connection.Dispose();
 				return;
 			}
 
 			var travaling = await adapter.OnTravelingAsync(
-				travel,
+				travalRequest,
+				autoResponse: false,
 				progress: (f, s) => adapter.SetState(false, $"Traveling to instance {instance}...", 0.325f + f * 0.575f)
 			);
+
 
 			if (!travaling) {
 				adapter.SetState(false, "Failed to travel to instance", -1f);
@@ -212,6 +214,14 @@ namespace api.nox.relay {
 			}
 
 			adapter.NewPlayer<RelayLocalPlayer>(enter.Player);
+
+			var travelReady = await adapter.Instance.RequestTraveling(TravelingAction.Ready);
+			if (!travelReady.IsReady) {
+				adapter.SetState(false, $"Failed to travel to instance {instance}: {travelReady.Reason}", -1f);
+				Logger.LogDebug($"Failed to travel to instance {instance}: {travelReady.Results} - {travelReady.Reason}");
+				await connection.Dispose();
+				return;
+			}
 
 			adapter.Instance.OnTraveling.AddListener(adapter.OnTraveling);
 			adapter.Instance.OnEnter.AddListener(adapter.OnEnter);

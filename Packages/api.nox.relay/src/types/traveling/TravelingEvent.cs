@@ -11,6 +11,9 @@ namespace api.nox.relay.types.Traveling {
 		public bool IsError
 			=> Results.HasFlag(TravelingResults.Unknown);
 
+		public bool IsReady
+			=> Results.HasFlag(TravelingResults.Ready) && !IsError;
+
 		public bool UseUrl
 			=> Results.HasFlag(TravelingResults.UseUrl) && !IsError;
 

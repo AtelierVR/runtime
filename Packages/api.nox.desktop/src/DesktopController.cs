@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Nox.CCK.Players;
@@ -8,8 +7,7 @@ using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
 using Nox.Controllers;
 using Nox.Players;
-using Nox.UI;
-using UnityEngine.Serialization;
+using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.desktop {
 	public class DesktopController : MonoBehaviour, IController, INoxObject {
@@ -212,8 +210,17 @@ namespace api.nox.desktop {
 			SynchronizePlayerFromController();
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		private void SynchronizePlayerFromController() {
-			_attachedPlayer?.Teleport(transform.position, transform.rotation);
+			if (_attachedPlayer == null) return;
+			foreach (var part in GetParts())
+				_attachedPlayer.MovePart(
+					part.Key,
+					new NoxTransform(
+						part.Value,
+						part.Value.GetComponent<Rigidbody>()
+					)
+				);
 		}
 
 		private void SynchronizeControllerFromPlayer() {

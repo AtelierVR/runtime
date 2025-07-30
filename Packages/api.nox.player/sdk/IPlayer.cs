@@ -1,6 +1,7 @@
 using Nox.Entities;
 using Nox.Users;
 using UnityEngine;
+using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace Nox.Players {
 	public interface IPlayer : IEntity {
@@ -46,5 +47,12 @@ namespace Nox.Players {
 		/// </summary>
 		/// <param name="transform">Target transform</param>
 		public void Teleport(Transform transform);
+
+		/// <summary>
+		/// Move a specific part of the player to a new transform.
+		/// </summary>
+		/// <param name="part"></param>
+		/// <param name="transform"></param>
+		public void MovePart(ushort part, NoxTransform transform);
 	}
 }

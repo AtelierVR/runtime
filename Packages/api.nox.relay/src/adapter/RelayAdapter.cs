@@ -36,7 +36,7 @@ namespace api.nox.relay {
 
 
 		public void OnEnter(EnterResponse ev) {
-			Tps = ev.Tps;
+			Tps       = ev.Tps;
 			Threshold = ev.Threshold;
 			Instance.RequestTraveling(TravelingAction.Travel).Forget();
 		}
@@ -57,7 +57,13 @@ namespace api.nox.relay {
 		public void OnTraveling(TravelingEvent ev)
 			=> OnTravelingAsync(ev).Forget();
 
-		public async UniTask<bool> OnTravelingAsync(TravelingEvent ev, Action<float, string> progress = null) {
+		private async UniTask OnTravelingFailed(TravelingEvent ev, string reason)
+			=> await Instance.RequestTraveling(TravelingAction.Failed, reason);
+
+		private async UniTask OnTravelingSuccess(TravelingEvent ev)
+			=> await Instance.RequestTraveling(TravelingAction.Ready);
+		
+		public async UniTask<bool> OnTravelingAsync(TravelingEvent ev, bool autoResponse = true, Action<float, string> progress = null) {
 			string hash;
 			string url;
 
@@ -84,6 +90,8 @@ namespace api.nox.relay {
 					progress?.Invoke(0.2f, $"No master asset found for world {ev.WorldIdentifier.ToString()}");
 					Logger.LogError($"No asset found for world {ev.WorldIdentifier.ToString()}");
 					_isTraveling = false;
+					if (autoResponse)
+						await OnTravelingFailed(ev, "No master asset found");
 					return false;
 				}
 
@@ -92,8 +100,9 @@ namespace api.nox.relay {
 			} else {
 				progress?.Invoke(0.1f, "The traveling does not contain valid URL or master asset information");
 				Logger.LogError($"{ev} does not contain valid URL or master asset information");
-
 				_isTraveling = false;
+				if (autoResponse)
+					await OnTravelingFailed(ev, "Invalid traveling information");
 				return false;
 			}
 
@@ -116,17 +125,18 @@ namespace api.nox.relay {
 			if (scene == null) {
 				progress?.Invoke(0.9f, "Failed to load scene for world");
 				Logger.LogError($"Failed to load scene for world {ev.WorldIdentifier.ToString()}");
-
 				_isTraveling = false;
+				if (autoResponse)
+					await OnTravelingFailed(ev, "Failed to load scene");
 				return false;
 			}
 
 			scene.SetIdentifier(ev.UseMaster ? ev.WorldIdentifier : null);
 			SetDimension(scene);
-
 			progress?.Invoke(1f, "World loaded successfully");
-
 			_isTraveling = false;
+			if (autoResponse)
+				await OnTravelingSuccess(ev);
 			return true;
 		}
 

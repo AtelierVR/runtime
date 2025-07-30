@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "Nox.Entities",
-        "Nox.Users"
+        "Nox.Users",
+        "Nox.CCK"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

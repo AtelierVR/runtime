@@ -84,6 +84,7 @@ namespace api.nox.offline {
 		[NoxPublic(NoxAccess.Method)]
 		public void SetPosition(Vector3 position) {
 			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
+			tr.DeliveryType = TransformDeliveryType.LocalModified;
 			tr.SetPosition(position);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
@@ -91,10 +92,11 @@ namespace api.nox.offline {
 		[NoxPublic(NoxAccess.Method)]
 		public void SetRotation(Quaternion rotation) {
 			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
+			tr.DeliveryType = TransformDeliveryType.LocalModified;
 			tr.SetRotation(rotation);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
-		
+
 		public bool TryGetPhysical(out Physical physical) {
 			physical = null;
 			return false;
@@ -102,8 +104,11 @@ namespace api.nox.offline {
 
 		[NoxPublic(NoxAccess.Method)]
 		public void Teleport(Vector3 position, Quaternion rotation) {
-			SetPosition(position);
-			SetRotation(rotation);
+			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
+			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.SetPosition(position);
+			tr.SetRotation(rotation);
+			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
 
 
@@ -111,6 +116,12 @@ namespace api.nox.offline {
 		public void Teleport(UnityEngine.Transform transform) {
 			if (!transform) return;
 			Teleport(transform.position, transform.rotation);
+		}
+
+		public void MovePart(ushort part, Transform transform) {
+			if (!Transforms.TryGetValue(part, out var tr)) return;
+			transform.DeliveryType = TransformDeliveryType.LocalModified;
+			Transforms[part]       = transform;
 		}
 	}
 }

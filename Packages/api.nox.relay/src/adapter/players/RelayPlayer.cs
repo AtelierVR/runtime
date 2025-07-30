@@ -97,6 +97,16 @@ namespace api.nox.relay {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
+		public void MovePart(ushort part, NoxTransform transform) {
+			if (Transforms.TryGetValue(part, out var existing)
+			    && existing.IsSamePosition(transform.GetPosition(), Adapter.Threshold)
+			    && existing.IsSameRotation(transform.GetRotation(), Adapter.Threshold)
+			   ) return;
+			transform.DeliveryType = TransformDeliveryType.LocalModified;
+			Transforms[part]       = transform;
+		}
+
+		[NoxPublic(NoxAccess.Method)]
 		public void Teleport(Transform transform) {
 			if (!transform) return;
 			Teleport(transform.position, transform.rotation);
