@@ -1,24 +1,25 @@
 using System;
+using System.Linq;
 using Nox.CCK.Utils;
 using Nox.Instances;
 
+// ReSharper disable once InconsistentNaming
 namespace api.nox.instance {
 	[Serializable]
 	public class Instance : IInstance, INoxObject {
-		public uint      id;
-		public string    server;
-		public string    name;
-		public string    title;
-		public string    description;
-		public string    thumbnail;
-		public ushort    capacity;
-		public string    owner;
-		public string[]  tags;
-		public string    world;
-		public string    address;
-		public ushort    client_count;
-		public IPlayer[] players;
-
+		public uint             id;
+		public string           server;
+		public string           name;
+		public string           title;
+		public string           description;
+		public string           thumbnail;
+		public ushort           capacity;
+		public string           owner;
+		public string[]         tags;
+		public string           world;
+		public string           address;
+		public ushort           client_count;
+		public InstancePlayer[] players;
 
 		public uint GetId()
 			=> id;
@@ -53,8 +54,11 @@ namespace api.nox.instance {
 		public ushort GetPlayerCount()
 			=> client_count;
 
+		public ushort GetCapacity()
+			=> capacity;
+
 		public IPlayer[] GetPlayers()
-			=> players;
+			=> players.Cast<IPlayer>().ToArray();
 
 		public IInstanceIdentifier ToIdentifier()
 			=> new InstanceIdentifier(id, null, server);

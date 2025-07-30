@@ -98,8 +98,8 @@ namespace api.nox.user {
 		public Nox.Users.ISearchRequest MakeSearchRequest()
 			=> new SearchRequest();
 
-		public async UniTask<Nox.Users.ISearchResponse> Search(Nox.Users.ISearchRequest request)
-			=> await Network.Search(SearchRequest.FromBase(request));
+		public async UniTask<Nox.Users.ISearchResponse> Search(Nox.Users.ISearchRequest request, string from = null)
+			=> await Network.Search(SearchRequest.FromBase(request), from);
 
 		public async UniTask<IAuthToken> GetToken(string address)
 			=> await Network.GetToken(address);

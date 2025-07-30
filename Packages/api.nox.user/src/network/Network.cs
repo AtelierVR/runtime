@@ -114,7 +114,6 @@ namespace api.nox.user.network {
 			await request.SetMasterUrl(address, $"/api/users?{data.ToParams()}");
 			await request.Send();
 			var response = request.GetMasterResponse<SearchResponse>();
-			Logger.LogDebug(request.GetResponse<string>());
 			if (response.HasError()) {
 				Logger.LogError($"Failed to search users from {address}: {response.GetError().GetMessage()}");
 				return null;

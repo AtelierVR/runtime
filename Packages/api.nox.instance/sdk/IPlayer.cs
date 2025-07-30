@@ -1,6 +1,9 @@
+using Nox.Users;
+
 namespace Nox.Instances {
 	public interface IPlayer {
-		public string GetUserId();
+		public IUserIdentifier GetIdentifier();
+
 		public string GetDisplay();
 	}
 }

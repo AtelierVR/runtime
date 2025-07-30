@@ -76,6 +76,7 @@ namespace api.nox.world.client {
 
 
 			UpdateThumbnail(world).Forget();
+			UpdateInstances(world).Forget();
 
 			HoverCache(_isCachedHover);
 			_isHome = Page.IsHome();

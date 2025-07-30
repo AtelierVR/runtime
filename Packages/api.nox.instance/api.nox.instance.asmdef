@@ -10,7 +10,8 @@
         "Nox.UI",
         "Nox.Search",
         "Nox.Network",
-        "Nox.Sessions"
+        "Nox.Sessions",
+        "Nox.Players"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

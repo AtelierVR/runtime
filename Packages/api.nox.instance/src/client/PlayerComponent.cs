@@ -1,0 +1,95 @@
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using Nox.CCK.Language;
+using Nox.CCK.Utils;
+using Nox.Instances;
+using Nox.Users;
+using UnityEngine;
+using UnityEngine.UI;
+using Logger = Nox.CCK.Utils.Logger;
+using Transform = UnityEngine.Transform;
+
+namespace api.nox.instance.client {
+	public class PlayerComponent : MonoBehaviour {
+		public static (GameObject go, PlayerComponent comp) Generate(InstanceComponent reference, Transform parent) {
+			var instance  = Instantiate(Client.GetAsset<GameObject>("player.prefab", "player"), parent);
+			var component = instance.AddComponent<PlayerComponent>();
+			component.reference = reference;
+			component.text      = Reference.GetComponent<TextLanguage>("text", instance);
+			component.banner    = Reference.GetComponent<Image>("image", instance);
+			component.button    = Reference.GetComponent<Button>("button", instance);
+			component.button.onClick.AddListener(component.OnClick);
+			component.thumbnail          = Reference.GetComponent<Image>("thumbnail", instance);
+			component.thumbnailContainer = Reference.GetComponent<RectTransform>("thumbnail_container", instance);
+			return (instance, component);
+		}
+
+		public  InstanceComponent              reference;
+		public  TextLanguage                   text;
+		public  Button                         button;
+		public  Image                          banner;
+		public  Image                          thumbnail;
+		public  RectTransform                  thumbnailContainer;
+		private CancellationTokenSource        _bannerTokenSource;
+		private CancellationTokenSource        _thumbnailTokenSource;
+		private (IUser, IPlayer) _user;
+
+		public void UpdateContent((IUser, IPlayer) user) {
+			_user = user;
+			text.UpdateText(
+				"world.instance.text", new[] {
+					user.Item2.GetDisplay()
+					?? user.Item1?.GetDisplay()
+					?? user.Item2.GetIdentifier().ToString()
+				}
+			);
+
+			UpdateBanner(user).Forget();
+			UpdateThumbnail(user).Forget();
+		}
+
+		private void OnClick() {
+			Logger.LogDebug($"{_user} ({reference.Page.World}) clicked");
+			if (_user.Item1 == null)
+				Client.UiAPI?.SendGoto(reference.Page.MId, "user", "identifier", _user.Item2.GetIdentifier());
+			else Client.UiAPI?.SendGoto(reference.Page.MId, "user", "user", _user.Item1);
+		}
+
+		private async UniTask UpdateBanner((IUser, IPlayer) user) {
+			if (_bannerTokenSource != null) {
+				_bannerTokenSource?.Cancel();
+				_bannerTokenSource?.Dispose();
+			}
+
+			_bannerTokenSource = new CancellationTokenSource();
+			var url = user.Item1?.GetBannerUrl();
+			if (!string.IsNullOrEmpty(url)) {
+				var texture = await Main.Instance.NetworkAPI.FetchTexture(url, token: _bannerTokenSource.Token);
+				banner.sprite = texture
+					? Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero)
+					: null;
+			} else banner.sprite = null;
+
+			_bannerTokenSource = null;
+		}
+
+		private async UniTask UpdateThumbnail((IUser, IPlayer) user) {
+			if (_thumbnailTokenSource != null) {
+				_thumbnailTokenSource?.Cancel();
+				_thumbnailTokenSource?.Dispose();
+			}
+
+			_thumbnailTokenSource = new CancellationTokenSource();
+			var url = user.Item1?.GetThumbnailUrl();
+			if (!string.IsNullOrEmpty(url)) {
+				var texture = await Main.Instance.NetworkAPI.FetchTexture(url, token: _thumbnailTokenSource.Token);
+				thumbnail.sprite = texture
+					? Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero)
+					: null;
+			} else thumbnail.sprite = null;
+
+			thumbnailContainer.gameObject.SetActive(thumbnail.sprite);
+			_thumbnailTokenSource = null;
+		}
+	}
+}

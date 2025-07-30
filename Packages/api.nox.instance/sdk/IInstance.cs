@@ -12,6 +12,7 @@ namespace Nox.Instances {
 		public IConnection GetConnectionData();
 		public ushort      GetPlayerCount();
 		public IPlayer[]   GetPlayers();
+		public ushort      GetCapacity();
 
 		public IInstanceIdentifier ToIdentifier();
 	}

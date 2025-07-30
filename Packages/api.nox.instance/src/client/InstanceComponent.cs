@@ -8,11 +8,13 @@ using Nox.CCK.Language;
 using Nox.CCK.Utils;
 using Nox.Instances;
 using Nox.Instances;
+using Nox.Users;
 using Nox.Worlds;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Logger = Nox.CCK.Utils.Logger;
+using Transform = UnityEngine.Transform;
 
 namespace api.nox.instance.client {
 	public class InstanceComponent : MonoBehaviour {
@@ -26,7 +28,7 @@ namespace api.nox.instance.client {
 		public  RectTransform           content;
 		public  InstancePage            Page;
 		private CancellationTokenSource _thumbnailTokenSource;
-		private CancellationTokenSource _instanceTokenSource;
+		private CancellationTokenSource _playerListTokenSource;
 		public  RectTransform           playerList;
 		public  GameObject              playerInfobox;
 		public  GameObject              playerListContainer;
@@ -79,6 +81,7 @@ namespace api.nox.instance.client {
 
 
 			UpdateThumbnail(instance).Forget();
+			UpdatePlayerList(instance).Forget();
 		}
 
 		private async UniTask UpdateThumbnail(IInstance instance) {
@@ -244,7 +247,112 @@ namespace api.nox.instance.client {
 		}
 
 		public async UniTask UpdatePlayerList(IInstance instance) {
-			await UniTask.Yield();
+			if (_playerListTokenSource != null) {
+				_playerListTokenSource?.Cancel();
+				_playerListTokenSource?.Dispose();
+			}
+
+			_playerListTokenSource = new CancellationTokenSource();
+			var tasks = new List<UniTask<(IUser, IPlayer)[]>>();
+
+			var players = instance.GetPlayers();
+			var playersByServer = players
+				.GroupBy(p => p.GetIdentifier().GetServerAddress())
+				.ToDictionary(g => g.Key, g => g.ToArray());
+
+			var isEmpty = true;
+			var isFirst = true;
+			var action = new Action<(IUser, IPlayer)[]>(
+				users => {
+					Logger.LogDebug($"Found {users.Length} instances for world {instance.GetTitle()} ({instance.ToIdentifier()})");
+					if (isFirst)
+						foreach (Transform child in playerList.transform)
+							Destroy(child.gameObject);
+					isFirst = false;
+					foreach (var user in users) {
+						var (go, comp) = PlayerComponent.Generate(this, playerList.transform);
+						comp.UpdateContent(user);
+					}
+
+					if (users.Length > 0) {
+						isEmpty = false;
+						playerInfobox.SetActive(false);
+						playerListContainer.SetActive(true);
+						UpdateLayout.UpdateImmediate(playerList);
+					}
+				}
+			);
+
+			/*foreach (var server in GetSearchableServers()) {
+				if (_playerListTokenSource.IsCancellationRequested) {
+					_playerListTokenSource = null;
+					return;
+				}
+
+				if (!playersByServer.TryGetValue(server, out var users))
+					continue;
+
+				tasks.Add(SearchPlayers(users, server, _playerListTokenSource.Token, action));
+			}*/
+			foreach (var (server, users) in playersByServer) {
+				if (_playerListTokenSource.IsCancellationRequested) {
+					_playerListTokenSource = null;
+					return;
+				}
+
+				if (users.Length == 0) continue;
+				tasks.Add(SearchPlayers(users, server, _playerListTokenSource.Token, action));
+			}
+
+			await UniTask.WhenAll(tasks);
+			if (isEmpty) {
+				playerInfobox.SetActive(true);
+				playerListContainer.SetActive(false);
+			} else UpdateLayout.UpdateImmediate(playerList);
+		}
+
+		private async UniTask<(IUser, IPlayer)[]> SearchPlayers(IPlayer[] users, string server, CancellationToken token, Action<(IUser, IPlayer)[]> callback = null) {
+			if (token.IsCancellationRequested)
+				return Array.Empty<(IUser, IPlayer)>();
+
+			var request = Main.Instance.UserAPI
+				.MakeSearchRequest()
+				.SetIds(users.Select(p => p.GetIdentifier().GetId()).ToArray());
+
+			var response = await Main.Instance.UserAPI.Search(request, server)
+				.AttachExternalCancellation(token);
+			if (token.IsCancellationRequested)
+				return Array.Empty<(IUser, IPlayer)>();
+			var ress = response == null
+				? Array.Empty<IUser>()
+				: response.GetUsers();
+			if (ress.Length == 0)
+				return Array.Empty<(IUser, IPlayer)>();
+
+			var res = new List<(IUser, IPlayer)>();
+			foreach (var user in ress) {
+				var origin = users.FirstOrDefault(p => p.GetIdentifier().Equals(user.ToIdentifier()));
+				if (origin == null) continue;
+				res.Add((user, origin));
+			}
+
+			callback?.Invoke(res.ToArray());
+			return res.ToArray();
+		}
+
+		public string[] GetSearchableServers() {
+			var x0 = Config.Load().Get("servers");
+			if (x0 == null) return Array.Empty<string>();
+			var x1 = x0.ToObject<Dictionary<string, JObject>>();
+			var x2 = new List<string>();
+			foreach (var (address, value) in x1) {
+				var features = value["features"]?.Values<string>().ToArray() ?? Array.Empty<string>();
+				var search   = value["search"]?.ToObject<bool>()             ?? false;
+				if (!(search && features.Contains("users"))) continue;
+				x2.Add(address);
+			}
+
+			return x2.ToArray();
 		}
 	}
 }

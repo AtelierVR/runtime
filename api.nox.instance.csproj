@@ -59,6 +59,8 @@
     <Compile Include="Packages\api.nox.instance\src\search\SearchData.cs" />
     <Compile Include="Packages\api.nox.instance\src\search\SearchWorker.cs" />
     <Compile Include="Packages\api.nox.instance\src\base\Instance.cs" />
+    <Compile Include="Packages\api.nox.instance\src\base\InstancePlayer.cs" />
+    <Compile Include="Packages\api.nox.instance\src\client\PlayerComponent.cs" />
     <Compile Include="Packages\api.nox.instance\src\client\InstanceComponent.cs" />
     <Compile Include="Packages\api.nox.instance\src\Main.cs" />
     <Compile Include="Packages\api.nox.instance\src\client\InstanceCreationPage.cs" />
@@ -897,6 +899,10 @@
     <ProjectReference Include="Nox.Sessions.csproj">
       <Project>{0874ac54-00dd-a011-6c68-4b824efa4828}</Project>
       <Name>Nox.Sessions</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Players.csproj">
+      <Project>{0e499f4c-db68-9841-61eb-59e5a4ed821c}</Project>
+      <Name>Nox.Players</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
