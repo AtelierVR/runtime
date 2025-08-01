@@ -7,6 +7,7 @@ using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
 using Nox.Controllers;
 using Nox.Players;
+using UnityEngine.EventSystems;
 using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.desktop {
@@ -92,6 +93,7 @@ namespace api.nox.desktop {
 				return false;
 			}
 
+			EventSystem.current     = desktop.eventSystem;
 			desktop.gameObject.name = $"[{desktop.GetType().Name}_{desktop.GetInstanceID()}]";
 			DontDestroyOnLoad(desktop);
 			return true;
@@ -107,6 +109,7 @@ namespace api.nox.desktop {
 			=> DefaultPriority;
 
 		public DesktopPlayer player;
+		public EventSystem   eventSystem;
 
 		public void Dispose() {
 			Destroy(gameObject);
@@ -193,6 +196,7 @@ namespace api.nox.desktop {
 			};
 
 		private IPlayer _attachedPlayer;
+
 
 		[NoxPublic(NoxAccess.Method)]
 		public void SetPlayer(IPlayer p) {

@@ -20,6 +20,7 @@ namespace api.nox.ui.menus {
 		[Header("References")] public BottomOrbiter bottomOrbiter;
 		public                        TopOrbiter    topOrbiter;
 		public                        RectTransform container;
+		public                        GameObject    parent;
 
 		internal HistoryList History;
 		internal Client      Client;
@@ -183,6 +184,10 @@ namespace api.nox.ui.menus {
 			History = new HistoryList(this);
 		}
 
+		private void Awake() {
+			parent ??= gameObject;
+		}
+
 		private void Start() {
 			StartAsync().Forget();
 			Client.SendGoto(GetId(), defaultKey, defaultArguments);
@@ -215,10 +220,10 @@ namespace api.nox.ui.menus {
 			=> GetInstanceID();
 
 		public bool GetActive()
-			=> gameObject.activeSelf;
+			=> parent.activeSelf;
 
 		public void SetActive(bool active)
-			=> gameObject.SetActive(active);
+			=> parent.SetActive(active);
 
 		public IOrbiter[] GetOrbiters()
 			=> GetInternalOrbiters().Cast<IOrbiter>().ToArray();

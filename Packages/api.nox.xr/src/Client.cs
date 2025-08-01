@@ -2,7 +2,9 @@
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
+using Nox.UI;
 using UnityEngine.Events;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
@@ -13,7 +15,11 @@ namespace api.nox.xr {
 		internal static Client           Instance;
 		internal static ClientModCoreAPI CoreAPI;
 
-
+		internal static IUiAPI UiAPI
+			=> CoreAPI.ModAPI.GetMod("ui")
+				.GetClients()
+				.FirstOrDefault() as IUiAPI;
+		
 		#if UNITY_EDITOR
 		private static bool NoVRFlag {
 			get => Config.LoadEditor().Get("no-vr", false);

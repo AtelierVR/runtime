@@ -144,6 +144,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 5595254506500728190}
+  eventSystem: {fileID: 5950521326801302811}
 --- !u!114 &592085171815288062
 MonoBehaviour:
   m_ObjectHideFlags: 0

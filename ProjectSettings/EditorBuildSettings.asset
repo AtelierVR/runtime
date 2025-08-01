@@ -74,6 +74,21 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/AutoHand/Examples/Scenes/Desktop/Desktop Player.unity
     guid: bb1eab65b7f030d4fab81d20430b0b3d
+  - enabled: 1
+    path: Assets/Scenes/SampleScene.unity
+    guid: 55daccc09a3b69647bbab145b54a3ab3
+  - enabled: 1
+    path: Assets/Scenes/BasicScene.unity
+    guid: 4e9fef26e6adb88479ad1b9834a32d94
+  - enabled: 1
+    path: Assets/Samples/XR Interaction Toolkit/3.1.1/Hands Interaction Demo/HandsDemoScene.unity
+    guid: 3ff35cecbcc52cc42945cf531638a60a
+  - enabled: 1
+    path: Assets/Samples/XR Hands/1.5.1/HandVisualizer/HandVisualizer.unity
+    guid: ab7acf0d9677fbe4db51bc36647d4fcb
+  - enabled: 1
+    path: Assets/Samples/XR Interaction Toolkit/3.1.2/Starter Assets/DemoScene.unity
+    guid: 319dafa5c80f29f428dc1e0d03f04177
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

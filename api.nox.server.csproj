@@ -426,6 +426,9 @@
     <Reference Include="nunit.framework">
       <HintPath>U:\Projets\nox\runtime\Library\PackageCache\com.unity.ext.nunit@031a54704bff\net40\unity-custom\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="ReportGeneratorMerged">
+      <HintPath>U:\Projets\nox\runtime\Library\PackageCache\com.unity.testtools.codecoverage@205a02cbcb39\lib\ReportGenerator\ReportGeneratorMerged.dll</HintPath>
+    </Reference>
     <Reference Include="Jint">
       <HintPath>U:\Projets\nox\runtime\Packages\api.nox.cck\Packages\Jint.dll</HintPath>
     </Reference>

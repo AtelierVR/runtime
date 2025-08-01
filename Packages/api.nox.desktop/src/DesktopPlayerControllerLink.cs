@@ -35,9 +35,11 @@ namespace api.nox.desktop {
 		private bool  menuPressed      = false;
 
 		// Auto jump state variables
-		private bool  isAutoJumping = false;
-		private bool  wasGrounded   = true;
+		private bool isAutoJumping = false;
+		private bool wasGrounded   = true;
+
 		private float autoJumpTimer = 0f;
+
 		// Double jump to fly variables
 		private float lastJumpTime = 0f;
 		private int   jumpCount    = 0;
@@ -89,12 +91,13 @@ namespace api.nox.desktop {
 				player.Fly(flyDir);
 			}
 		}
+
 		private Vector2 GetMovementInput() {
 			// Block movement if menu is open
 			if (!useMovement) {
 				return Vector2.zero;
 			}
-			
+
 			// Use the existing Keybindings.GetMovement() method
 			var input = Keybindings.GetMovement();
 
@@ -104,12 +107,13 @@ namespace api.nox.desktop {
 
 			return input;
 		}
+
 		private void HandleMouseLook() {
 			// Block mouse look if menu is open
 			if (!useMovement) {
 				return;
 			}
-			
+
 			// Get mouse input
 			mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
 			mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
@@ -122,14 +126,16 @@ namespace api.nox.desktop {
 			verticalRotation                          =  Mathf.Clamp(verticalRotation, -maxLookAngle, maxLookAngle);
 			player.headCamera.transform.localRotation =  Quaternion.Euler(verticalRotation, 0, 0);
 		}
+
 		private void HandleJumpInput() {
 			// Block jump input if menu is open
 			if (!useMovement) {
 				return;
 			}
-			
+
 			var jumpCurrentlyPressed = Keybindings.IsPressed("jump");
-			var isGrounded           = player.IsGrounded(); // Assuming this method exists						// Start auto jumping when jump key is first pressed
+			var isGrounded           = player.IsGrounded(); // Assuming this method exists
+			// Start auto jumping when jump key is first pressed
 			if (jumpCurrentlyPressed && !jumpPressed) {
 				if (enableDoubleJumpToFly) {
 					var timeSinceLastJump = Time.time - lastJumpTime;
@@ -198,23 +204,25 @@ namespace api.nox.desktop {
 			jumpPressed = jumpCurrentlyPressed;
 			wasGrounded = isGrounded;
 		}
+
 		private void HandleCrouchInput() {
 			// Block crouch input if menu is open
 			if (!useMovement) {
 				return;
 			}
-			
+
 			var crouchPressed = Keybindings.IsPressed("crouch");
 			// Only crouch if not flying
 			if (!player.IsFlying())
 				player.SetCrouching(crouchPressed);
 		}
+
 		private void HandleSprintInput() {
 			// Block sprint input if menu is open
 			if (!useMovement) {
 				return;
 			}
-			
+
 			var sprintCurrentlyPressed = Keybindings.IsPressed("sprint");
 			player.SetSprinting(sprintCurrentlyPressed);
 			sprintPressed = sprintCurrentlyPressed;
@@ -222,32 +230,33 @@ namespace api.nox.desktop {
 
 		private void HandleMenuInput() {
 			var menuCurrentlyPressed = Keybindings.IsPressed("main");
-			
+
 			// Detect key press (not hold)
 			if (menuCurrentlyPressed && !menuPressed) {
 				// Toggle menu visibility
-				bool isMenuVisible = player.menu != null && player.menu.GetActive();
-				
+				var isMenuVisible = player.menu != null && player.menu.GetActive();
+
 				if (player.menu != null) {
 					player.menu.SetActive(!isMenuVisible);
-					
+
 					// Handle cursor lock and movement input blocking
 					if (!isMenuVisible) {
 						// Menu is being opened
 						Cursor.lockState = CursorLockMode.None;
-						Cursor.visible = true;
-						useMovement = false; // Block movement inputs
+						Cursor.visible   = true;
+						useMovement      = false; // Block movement inputs
 					} else {
 						// Menu is being closed
 						Cursor.lockState = CursorLockMode.Locked;
-						Cursor.visible = false;
-						useMovement = true; // Re-enable movement inputs
+						Cursor.visible   = false;
+						useMovement      = true; // Re-enable movement inputs
 					}
 				}
 			}
-			
+
 			menuPressed = menuCurrentlyPressed;
 		}
+
 		private void OnApplicationFocus(bool hasFocus) {
 			// Re-lock cursor when application gains focus, but only if menu is not open
 			if (hasFocus && useMovement)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autohand;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
@@ -9,6 +10,9 @@ using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
 using Nox.Controllers;
 using Nox.Players;
+using Nox.UI;
+using UnityEngine.EventSystems;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 namespace api.nox.xr {
 	public class XRController : MonoBehaviour, IController, INoxObject {
@@ -75,7 +79,7 @@ namespace api.nox.xr {
 				return false;
 			}
 
-			var prefab = Client.CoreAPI.AssetAPI.GetAsset<GameObject>("proxy.prefab");
+			var prefab = Client.CoreAPI.AssetAPI.GetAsset<GameObject>("xr_proxy.prefab");
 			if (!prefab) {
 				Logger.LogError("Failed to load desktop proxy prefab");
 				return false;
@@ -90,13 +94,27 @@ namespace api.nox.xr {
 				return false;
 			}
 
+			Logger.LogDebug("Menu: " + Client.UiAPI);
+			xr.Menu = Client.UiAPI
+				?.Make(xr.menuContainer, xr.menuParent);
+
+			if (xr.Menu == null) {
+				Logger.LogError("Failed to create desktop proxy menu");
+				Destroy(instance);
+				return false;
+			}
+
+			xr.Menu.SetActive(false);
+
+
 			if (!ControllerAPI.SetCurrent(xr)) {
 				Logger.LogError("Failed to set XR proxy as current");
 				Destroy(instance);
 				return false;
 			}
 
-			xr.gameObject.name = $"[{xr.GetType().Name}_{xr.GetInstanceID()}]";
+			EventSystem.current = xr.eventSystem;
+			xr.gameObject.name  = $"[{xr.GetType().Name}_{xr.GetInstanceID()}]";
 			DontDestroyOnLoad(xr);
 			return true;
 		}
@@ -109,8 +127,14 @@ namespace api.nox.xr {
 		public int GetPriority()
 			=> DefaultPriority;
 
-		public AutoHandPlayer player;
-		public bool           mayFly;
+		public  AutoHandPlayer       player;
+		public  bool                 mayFly;
+		public  RectTransform        menuContainer;
+		public  GameObject           menuParent;
+		public  IMenu                Menu;
+		public  EventSystem          eventSystem;
+		private IPlayer              _attachedPlayer;
+		public  XRInteractionGroup[] interactions;
 
 		public void Dispose() {
 			Destroy(gameObject);
@@ -175,7 +199,6 @@ namespace api.nox.xr {
 				{ PlayerRig.RightHand.ToIndex(), player.handRight.transform }
 			};
 
-		private IPlayer _attachedPlayer;
 
 		[NoxPublic(NoxAccess.Method)]
 		public void SetPlayer(IPlayer p) {
@@ -188,6 +211,27 @@ namespace api.nox.xr {
 		[NoxPublic(NoxAccess.Method)]
 		public IPlayer GetPlayer()
 			=> _attachedPlayer;
+
+		private void Start()
+			=> RestartInteractions().Forget();
+
+		private async UniTask RestartInteractions() {
+			foreach (var interaction in interactions) {
+				interaction.gameObject.SetActive(false);
+				foreach (var member in interaction.startingGroupMembers)
+					if (member is MonoBehaviour mb)
+						mb.gameObject.SetActive(false);
+			}
+
+			await UniTask.NextFrame();
+
+			foreach (var interaction in interactions) {
+				interaction.gameObject.SetActive(true);
+				foreach (var member in interaction.startingGroupMembers)
+					if (member is MonoBehaviour mb)
+						mb.gameObject.SetActive(true);
+			}
+		}
 
 		private void Update() {
 			SynchronizePlayerFromController();

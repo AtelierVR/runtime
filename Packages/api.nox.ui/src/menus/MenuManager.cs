@@ -56,22 +56,23 @@ namespace api.nox.ui {
 				menu.Dispose();
 			_menus.Clear();
 		}
-		
-		public Menu Make(RectTransform parent) {
+
+		public Menu Make(RectTransform container, GameObject parent = null) {
 			var prefab = PageManager.GetAsset<GameObject>("prefabs/menu.prefab");
 
-			Logger.LogDebug($"Instantiating menu {prefab?.name ?? "null"} into {parent?.name ?? "null"}");
+			Logger.LogDebug($"Instantiating menu {prefab?.name ?? "null"} into {container?.name ?? "null"}");
 
-			var instance = Object.Instantiate(prefab, parent);
+			var instance = Object.Instantiate(prefab, container);
 			var menu     = instance?.GetComponent<Menu>();
-			if (!menu) {
+			if (menu == null) {
 				Logger.LogError("Failed to get menu component from prefab");
 				Object.Destroy(instance);
 				return null;
 			}
 
-			menu.Client = _client;
+			menu.Client          = _client;
 			menu.gameObject.name = $"[{menu.GetType().Name}_{menu.GetInstanceID()}]";
+			menu.parent          = parent ?? menu.gameObject;
 			Add(menu);
 			return menu;
 		}
