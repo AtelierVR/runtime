@@ -6,6 +6,7 @@ using Nox.CCK.Utils;
 using Nox.Entities;
 using Nox.Players;
 using Nox.Users;
+using Logger = Nox.CCK.Utils.Logger;
 using Transform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.offline {
@@ -98,8 +99,18 @@ namespace api.nox.offline {
 		}
 
 		public bool TryGetPhysical(out Physical physical) {
+			Logger.LogWarning("OfflinePlayer does not support physical objects.");
 			physical = null;
 			return false;
+		}
+
+		public Physical MakePhysical() {
+			Logger.LogWarning("OfflinePlayer does not support physical objects.");
+			return null;
+		}
+
+		public void DestroyPhysical() {
+			Logger.LogWarning("OfflinePlayer does not support physical objects.");
 		}
 
 		[NoxPublic(NoxAccess.Method)]

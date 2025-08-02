@@ -50,7 +50,7 @@ namespace Nox.ModLoader.Mods {
 			if (IsMainEnabled()) return;
 			Logger.LogDebug($"Enabling main in {Metadata.GetId()}@{Metadata.GetVersion()}");
 			MainInitializers = CreateInstances<MainModInitializer>("main").ToList();
-			mainEnabled      = true;
+			mainEnabled = true;
 			CoreAPI.EventAPI.Emit(new ModEventContext("mod_enabled", this, "main"));
 		}
 
@@ -278,6 +278,22 @@ namespace Nox.ModLoader.Mods {
 
 		public virtual UniTask<bool> Load() {
 			Logger.LogDebug($"Loading {Metadata.GetId()}@{Metadata.GetVersion()}");
+			// get assemblies with mod metadata id
+			var reference = Metadata.GetReferences()
+				.Where(i => i.IsCompatible());
+			Domain = AppDomain.CurrentDomain;
+			Assemblies = Domain.GetAssemblies()
+				.Where(
+					a => a.GetName().Name       == Metadata.GetId()
+						|| a.GetName().FullName == Metadata.GetId()
+						|| a.FullName           == Metadata.GetId()
+						|| reference.Any(
+							r => r.GetNamespace()   == a.GetName().Name
+								|| r.GetNamespace() == a.GetName().FullName
+								|| r.GetNamespace() == a.FullName
+						)
+				)
+				.ToArray();
 			CoreAPI.EventAPI.Emit(new ModEventContext("mod_loaded", this));
 			return UniTask.FromResult(true);
 		}
@@ -312,11 +328,14 @@ namespace Nox.ModLoader.Mods {
 			return true;
 		}
 
+		internal Assembly[] Assemblies;
+		internal AppDomain  Domain;
+
 		public virtual AppDomain GetAppDomain()
-			=> AppDomain.CurrentDomain;
+			=> Domain;
 
 		public virtual Assembly[] GetAssemblies()
-			=> GetAppDomain().GetAssemblies();
+			=> Assemblies;
 
 		public virtual Type[] GetEntryClasses(string entry) {
 			var entries = GetMetadata().GetEntryPoints();
@@ -324,7 +343,8 @@ namespace Nox.ModLoader.Mods {
 			var namespaces = entries.Get(entry);
 
 			List<Type> modClasses = new();
-			var        t          = typeof(IModInitializer);
+
+			var t = typeof(IModInitializer);
 
 			foreach (var assembly in GetAssemblies())
 			foreach (var type in assembly.GetTypes())
@@ -949,8 +969,8 @@ namespace Nox.ModLoader.Mods {
 					try {
 						instance.OnPreDispose();
 						await instance.OnPreDisposeAsync();
-						instance.OnDisposeMain();
-						await instance.OnDisposeMainAsync();
+						instance.OnPreDisposeMain();
+						await instance.OnPreDisposeMainAsync();
 						CoreAPI.EventAPI.Emit(
 							new ModEventContext(
 								"mod_pre_dispose", this, "main",
@@ -992,8 +1012,8 @@ namespace Nox.ModLoader.Mods {
 					try {
 						instance.OnPreDispose();
 						await instance.OnPreDisposeAsync();
-						instance.OnDisposeEditor();
-						await instance.OnDisposeEditorAsync();
+						instance.OnPreDisposeEditor();
+						await instance.OnPreDisposeEditorAsync();
 						CoreAPI.EventAPI.Emit(
 							new ModEventContext(
 								"mod_pre_dispose", this, "editor",
@@ -1035,8 +1055,8 @@ namespace Nox.ModLoader.Mods {
 					try {
 						instance.OnPreDispose();
 						await instance.OnPreDisposeAsync();
-						instance.OnDisposeServer();
-						await instance.OnDisposeServerAsync();
+						instance.OnPreDisposeServer();
+						await instance.OnPreDisposeServerAsync();
 						CoreAPI.EventAPI.Emit(
 							new ModEventContext(
 								"mod_pre_dispose", this, "server",
@@ -1078,8 +1098,8 @@ namespace Nox.ModLoader.Mods {
 					try {
 						instance.OnPreDispose();
 						await instance.OnPreDisposeAsync();
-						instance.OnDisposeClient();
-						await instance.OnDisposeClientAsync();
+						instance.OnPreDisposeClient();
+						await instance.OnPreDisposeClientAsync();
 						CoreAPI.EventAPI.Emit(
 							new ModEventContext(
 								"mod_pre_dispose", this, "client",
@@ -1125,8 +1145,8 @@ namespace Nox.ModLoader.Mods {
 						try {
 							instance.OnPreDispose();
 							await instance.OnPreDisposeAsync();
-							instance.OnDisposeInstance();
-							await instance.OnDisposeInstanceAsync();
+							instance.OnPreDisposeInstance();
+							await instance.OnPreDisposeInstanceAsync();
 							CoreAPI.EventAPI.Emit(
 								new ModEventContext(
 									"mod_pre_dispose", this, "instance",
@@ -1203,169 +1223,46 @@ namespace Nox.ModLoader.Mods {
 			Logger.LogDebug($"Disposing {Metadata.GetId()}@{Metadata.GetVersion()}");
 			Profilers.Set("dispose", PerformanceManager.At.Start, DateTime.UtcNow);
 
-			if (!IsMainEnabled() && _mainState == InitializerState.PreDisposed) {
-				_mainState = InitializerState.Disposed;
-				Profilers.Set("dispose", "main", PerformanceManager.At.Start, DateTime.UtcNow);
-				CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "main", ExecutionEventStatus.Pre));
-				for (var i = 0; i < MainInitializers.Count; i++) {
-					var instance = MainInitializers[i];
-					Logger.LogDebug($"Disposing main in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
-					Profilers.Set("dispose", "main", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
-					CoreAPI.EventAPI.Emit(
-						new ModEventContext(
-							"mod_dispose", this, "main", ExecutionEventStatus.Start,
-							instance
-						)
-					);
-					try {
-						instance.OnDispose();
-						await instance.OnDisposeAsync();
-						instance.OnDisposeMain();
-						await instance.OnDisposeMainAsync();
+			foreach (var entry in CustomInitializers.Keys)
+				if (!IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.PreDisposed) {
+					SetCustomStates(entry, InitializerState.Disposed);
+					Profilers.Set("dispose", entry, PerformanceManager.At.Start, DateTime.UtcNow);
+					CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, entry, ExecutionEventStatus.Pre));
+					for (var i = 0; i < CustomInitializers[entry].Length; i++) {
+						var instance = CustomInitializers[entry][i];
+						Logger.LogDebug($"Disposing {entry} in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
+						Profilers.Set("dispose", entry, $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
 						CoreAPI.EventAPI.Emit(
 							new ModEventContext(
-								"mod_dispose", this, "main",
-								ExecutionEventStatus.Success, instance
+								"mod_dispose", this, entry,
+								ExecutionEventStatus.Start, instance
 							)
 						);
-					} catch (Exception e) {
-						Logger.LogError($"Error disposing main in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
-						CoreAPI.EventAPI.Emit(
-							new ModEventContext(
-								"mod_dispose", this, "main",
-								ExecutionEventStatus.Error, instance, e
-							)
-						);
+						try {
+							instance.OnDispose();
+							await instance.OnDisposeAsync();
+							CoreAPI.EventAPI.Emit(
+								new ModEventContext(
+									"mod_dispose", this, entry,
+									ExecutionEventStatus.Success, instance
+								)
+							);
+						} catch (Exception e) {
+							Logger.LogError($"Error disposing {entry} in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}: {e}");
+							Logger.LogException(e);
+							CoreAPI.EventAPI.Emit(
+								new ModEventContext(
+									"mod_dispose", this, entry,
+									ExecutionEventStatus.Error, instance, e
+								)
+							);
+						}
+
+						Profilers.Set("dispose", entry, $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
 					}
 
-					Profilers.Set("dispose", "main", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
+					Profilers.Set("dispose", entry, PerformanceManager.At.End, DateTime.UtcNow);
 				}
-
-				Profilers.Set("dispose", "main", PerformanceManager.At.End, DateTime.UtcNow);
-			}
-
-			if (!IsEditorEnabled() && _editorState == InitializerState.PreDisposed) {
-				_editorState = InitializerState.Disposed;
-				Profilers.Set("dispose", "editor", PerformanceManager.At.Start, DateTime.UtcNow);
-				CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "editor", ExecutionEventStatus.Pre));
-				for (var i = 0; i < EditorInitializers.Count; i++) {
-					var instance = EditorInitializers[i];
-					Logger.LogDebug($"Disposing editor in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
-					Profilers.Set("dispose", "editor", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
-					CoreAPI.EventAPI.Emit(
-						new ModEventContext(
-							"mod_dispose", this, "editor", ExecutionEventStatus.Start,
-							instance
-						)
-					);
-					try {
-						instance.OnDispose();
-						await instance.OnDisposeAsync();
-						instance.OnDisposeEditor();
-						await instance.OnDisposeEditorAsync();
-						CoreAPI.EventAPI.Emit(
-							new ModEventContext(
-								"mod_dispose", this, "editor",
-								ExecutionEventStatus.Success, instance
-							)
-						);
-					} catch (Exception e) {
-						Logger.LogError($"Error disposing editor in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
-						CoreAPI.EventAPI.Emit(
-							new ModEventContext(
-								"mod_dispose", this, "editor",
-								ExecutionEventStatus.Error, instance, e
-							)
-						);
-					}
-
-					Profilers.Set("dispose", "editor", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
-				}
-
-				Profilers.Set("dispose", "editor", PerformanceManager.At.End, DateTime.UtcNow);
-			}
-
-			if (!IsServerEnabled() && _serverState == InitializerState.PreDisposed) {
-				_serverState = InitializerState.Disposed;
-				Profilers.Set("dispose", "server", PerformanceManager.At.Start, DateTime.UtcNow);
-				CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "server", ExecutionEventStatus.Pre));
-				for (var i = 0; i < ServerInitializers.Count; i++) {
-					var instance = ServerInitializers[i];
-					Logger.LogDebug($"Disposing server in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
-					Profilers.Set("dispose", "server", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
-					CoreAPI.EventAPI.Emit(
-						new ModEventContext(
-							"mod_dispose", this, "server", ExecutionEventStatus.Start,
-							instance
-						)
-					);
-					try {
-						instance.OnDispose();
-						await instance.OnDisposeAsync();
-						instance.OnDisposeServer();
-						await instance.OnDisposeServerAsync();
-						CoreAPI.EventAPI.Emit(
-							new ModEventContext(
-								"mod_dispose", this, "server",
-								ExecutionEventStatus.Success, instance
-							)
-						);
-					} catch (Exception e) {
-						Logger.LogError($"Error disposing server in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
-						CoreAPI.EventAPI.Emit(
-							new ModEventContext(
-								"mod_dispose", this, "server",
-								ExecutionEventStatus.Error, instance, e
-							)
-						);
-					}
-
-					Profilers.Set("dispose", "server", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
-				}
-
-				Profilers.Set("dispose", "server", PerformanceManager.At.End, DateTime.UtcNow);
-			}
-
-			if (!IsClientEnabled() && _clientState == InitializerState.PreDisposed) {
-				_clientState = InitializerState.Disposed;
-				Profilers.Set("dispose", "client", PerformanceManager.At.Start, DateTime.UtcNow);
-				CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "client", ExecutionEventStatus.Pre));
-				for (var i = 0; i < ClientInitializers.Count; i++) {
-					var instance = ClientInitializers[i];
-					Logger.LogDebug($"Disposing client in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
-					Profilers.Set("dispose", "client", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
-					CoreAPI.EventAPI.Emit(
-						new ModEventContext(
-							"mod_dispose", this, "client", ExecutionEventStatus.Start,
-							instance
-						)
-					);
-					try {
-						instance.OnDispose();
-						await instance.OnDisposeAsync();
-						instance.OnDisposeClient();
-						await instance.OnDisposeClientAsync();
-						CoreAPI.EventAPI.Emit(
-							new ModEventContext(
-								"mod_dispose", this, "client",
-								ExecutionEventStatus.Success, instance
-							)
-						);
-					} catch (Exception e) {
-						Logger.LogError($"Error disposing client in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
-						CoreAPI.EventAPI.Emit(
-							new ModEventContext(
-								"mod_dispose", this, "client",
-								ExecutionEventStatus.Error, instance, e
-							)
-						);
-					}
-
-					Profilers.Set("dispose", "client", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
-				}
-
-				Profilers.Set("dispose", "client", PerformanceManager.At.End, DateTime.UtcNow);
-			}
 
 			foreach (var entry in InstanceInitializers.Keys)
 				if (!IsInstanceEnabled(entry) && GetInstanceState(entry) == InitializerState.PreDisposed) {
@@ -1415,46 +1312,169 @@ namespace Nox.ModLoader.Mods {
 					Profilers.Set("dispose", $"instance_{entry}", PerformanceManager.At.End, DateTime.UtcNow);
 				}
 
-			foreach (var entry in CustomInitializers.Keys)
-				if (!IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.PreDisposed) {
-					SetCustomStates(entry, InitializerState.Disposed);
-					Profilers.Set("dispose", entry, PerformanceManager.At.Start, DateTime.UtcNow);
-					CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, entry, ExecutionEventStatus.Pre));
-					for (var i = 0; i < CustomInitializers[entry].Length; i++) {
-						var instance = CustomInitializers[entry][i];
-						Logger.LogDebug($"Disposing {entry} in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
-						Profilers.Set("dispose", entry, $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
+			if (!IsClientEnabled() && _clientState == InitializerState.PreDisposed) {
+				_clientState = InitializerState.Disposed;
+				Profilers.Set("dispose", "client", PerformanceManager.At.Start, DateTime.UtcNow);
+				CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "client", ExecutionEventStatus.Pre));
+				for (var i = 0; i < ClientInitializers.Count; i++) {
+					var instance = ClientInitializers[i];
+					Logger.LogDebug($"Disposing client in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
+					Profilers.Set("dispose", "client", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
+					CoreAPI.EventAPI.Emit(
+						new ModEventContext(
+							"mod_dispose", this, "client", ExecutionEventStatus.Start,
+							instance
+						)
+					);
+					try {
+						instance.OnDispose();
+						await instance.OnDisposeAsync();
+						instance.OnDisposeClient();
+						await instance.OnDisposeClientAsync();
 						CoreAPI.EventAPI.Emit(
 							new ModEventContext(
-								"mod_dispose", this, entry,
-								ExecutionEventStatus.Start, instance
+								"mod_dispose", this, "client",
+								ExecutionEventStatus.Success, instance
 							)
 						);
-						try {
-							instance.OnDispose();
-							await instance.OnDisposeAsync();
-							CoreAPI.EventAPI.Emit(
-								new ModEventContext(
-									"mod_dispose", this, entry,
-									ExecutionEventStatus.Success, instance
-								)
-							);
-						} catch (Exception e) {
-							Logger.LogError($"Error disposing {entry} in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}: {e}");
-							Logger.LogException(e);
-							CoreAPI.EventAPI.Emit(
-								new ModEventContext(
-									"mod_dispose", this, entry,
-									ExecutionEventStatus.Error, instance, e
-								)
-							);
-						}
-
-						Profilers.Set("dispose", entry, $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
+					} catch (Exception e) {
+						Logger.LogError($"Error disposing client in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
+						CoreAPI.EventAPI.Emit(
+							new ModEventContext(
+								"mod_dispose", this, "client",
+								ExecutionEventStatus.Error, instance, e
+							)
+						);
 					}
 
-					Profilers.Set("dispose", entry, PerformanceManager.At.End, DateTime.UtcNow);
+					Profilers.Set("dispose", "client", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
 				}
+
+				Profilers.Set("dispose", "client", PerformanceManager.At.End, DateTime.UtcNow);
+			}
+
+			if (!IsServerEnabled() && _serverState == InitializerState.PreDisposed) {
+				_serverState = InitializerState.Disposed;
+				Profilers.Set("dispose", "server", PerformanceManager.At.Start, DateTime.UtcNow);
+				CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "server", ExecutionEventStatus.Pre));
+				for (var i = 0; i < ServerInitializers.Count; i++) {
+					var instance = ServerInitializers[i];
+					Logger.LogDebug($"Disposing server in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
+					Profilers.Set("dispose", "server", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
+					CoreAPI.EventAPI.Emit(
+						new ModEventContext(
+							"mod_dispose", this, "server", ExecutionEventStatus.Start,
+							instance
+						)
+					);
+					try {
+						instance.OnDispose();
+						await instance.OnDisposeAsync();
+						instance.OnDisposeServer();
+						await instance.OnDisposeServerAsync();
+						CoreAPI.EventAPI.Emit(
+							new ModEventContext(
+								"mod_dispose", this, "server",
+								ExecutionEventStatus.Success, instance
+							)
+						);
+					} catch (Exception e) {
+						Logger.LogError($"Error disposing server in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
+						CoreAPI.EventAPI.Emit(
+							new ModEventContext(
+								"mod_dispose", this, "server",
+								ExecutionEventStatus.Error, instance, e
+							)
+						);
+					}
+
+					Profilers.Set("dispose", "server", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
+				}
+
+				Profilers.Set("dispose", "server", PerformanceManager.At.End, DateTime.UtcNow);
+			}
+
+			if (!IsEditorEnabled() && _editorState == InitializerState.PreDisposed) {
+				_editorState = InitializerState.Disposed;
+				Profilers.Set("dispose", "editor", PerformanceManager.At.Start, DateTime.UtcNow);
+				CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "editor", ExecutionEventStatus.Pre));
+				for (var i = 0; i < EditorInitializers.Count; i++) {
+					var instance = EditorInitializers[i];
+					Logger.LogDebug($"Disposing editor in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
+					Profilers.Set("dispose", "editor", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
+					CoreAPI.EventAPI.Emit(
+						new ModEventContext(
+							"mod_dispose", this, "editor", ExecutionEventStatus.Start,
+							instance
+						)
+					);
+					try {
+						instance.OnDispose();
+						await instance.OnDisposeAsync();
+						instance.OnDisposeEditor();
+						await instance.OnDisposeEditorAsync();
+						CoreAPI.EventAPI.Emit(
+							new ModEventContext(
+								"mod_dispose", this, "editor",
+								ExecutionEventStatus.Success, instance
+							)
+						);
+					} catch (Exception e) {
+						Logger.LogError($"Error disposing editor in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
+						CoreAPI.EventAPI.Emit(
+							new ModEventContext(
+								"mod_dispose", this, "editor",
+								ExecutionEventStatus.Error, instance, e
+							)
+						);
+					}
+
+					Profilers.Set("dispose", "editor", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
+				}
+
+				Profilers.Set("dispose", "editor", PerformanceManager.At.End, DateTime.UtcNow);
+			}
+
+			if (!IsMainEnabled() && _mainState == InitializerState.PreDisposed) {
+				_mainState = InitializerState.Disposed;
+				Profilers.Set("dispose", "main", PerformanceManager.At.Start, DateTime.UtcNow);
+				CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "main", ExecutionEventStatus.Pre));
+				for (var i = 0; i < MainInitializers.Count; i++) {
+					var instance = MainInitializers[i];
+					Logger.LogDebug($"Disposing main in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
+					Profilers.Set("dispose", "main", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
+					CoreAPI.EventAPI.Emit(
+						new ModEventContext(
+							"mod_dispose", this, "main", ExecutionEventStatus.Start,
+							instance
+						)
+					);
+					try {
+						instance.OnDispose();
+						await instance.OnDisposeAsync();
+						instance.OnDisposeMain();
+						await instance.OnDisposeMainAsync();
+						CoreAPI.EventAPI.Emit(
+							new ModEventContext(
+								"mod_dispose", this, "main",
+								ExecutionEventStatus.Success, instance
+							)
+						);
+					} catch (Exception e) {
+						Logger.LogError($"Error disposing main in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
+						CoreAPI.EventAPI.Emit(
+							new ModEventContext(
+								"mod_dispose", this, "main",
+								ExecutionEventStatus.Error, instance, e
+							)
+						);
+					}
+
+					Profilers.Set("dispose", "main", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
+				}
+
+				Profilers.Set("dispose", "main", PerformanceManager.At.End, DateTime.UtcNow);
+			}
 
 			Profilers.Set("dispose", PerformanceManager.At.End, DateTime.UtcNow);
 		}
@@ -1462,77 +1482,24 @@ namespace Nox.ModLoader.Mods {
 		public void SendUpdate() {
 			Profilers.Set("update", PerformanceManager.At.Start, DateTime.UtcNow);
 
-			if (IsMainEnabled() && _mainState == InitializerState.PostInitialized) {
-				Profilers.Set("update", "main", PerformanceManager.At.Start, DateTime.UtcNow);
-				for (var i = 0; i < MainInitializers.Count; i++) {
-					var instance = MainInitializers[i];
-					Profilers.Set("update", "main", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
-					try {
-						instance.OnUpdate();
-						instance.OnUpdateMain();
-					} catch (Exception e) {
-						Logger.LogError($"Error updating main in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
+			foreach (var entry in CustomInitializers.Keys)
+				if (IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.PostInitialized) {
+					Profilers.Set("update", entry, PerformanceManager.At.Start, DateTime.UtcNow);
+					for (var i = 0; i < CustomInitializers[entry].Length; i++) {
+						var instance = CustomInitializers[entry][i];
+						Profilers.Set("update", entry, $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
+						try {
+							instance.OnUpdate();
+						} catch (Exception e) {
+							Logger.LogError($"Error updating {entry} in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}: {e}");
+							Logger.LogException(e);
+						}
+
+						Profilers.Set("update", entry, $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
 					}
 
-					Profilers.Set("update", "main", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
+					Profilers.Set("update", entry, PerformanceManager.At.End, DateTime.UtcNow);
 				}
-
-				Profilers.Set("update", "main", PerformanceManager.At.End, DateTime.UtcNow);
-			}
-
-			if (IsEditorEnabled() && _editorState == InitializerState.PostInitialized) {
-				Profilers.Set("update", "editor", PerformanceManager.At.Start, DateTime.UtcNow);
-				for (var i = 0; i < EditorInitializers.Count; i++) {
-					var instance = EditorInitializers[i];
-					Profilers.Set("update", "editor", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
-					try {
-						instance.OnUpdate();
-						instance.OnUpdateEditor();
-					} catch (Exception e) {
-						Logger.LogError($"Error updating editor in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
-					}
-
-					Profilers.Set("update", "editor", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
-				}
-
-				Profilers.Set("update", "editor", PerformanceManager.At.End, DateTime.UtcNow);
-			}
-
-			if (IsServerEnabled() && _serverState == InitializerState.PostInitialized) {
-				Profilers.Set("update", "server", PerformanceManager.At.Start, DateTime.UtcNow);
-				for (var i = 0; i < ServerInitializers.Count; i++) {
-					var instance = ServerInitializers[i];
-					Profilers.Set("update", "server", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
-					try {
-						instance.OnUpdate();
-						instance.OnUpdateServer();
-					} catch (Exception e) {
-						Logger.LogError($"Error updating server in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
-					}
-
-					Profilers.Set("update", "server", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
-				}
-
-				Profilers.Set("update", "server", PerformanceManager.At.End, DateTime.UtcNow);
-			}
-
-			if (IsClientEnabled() && _clientState == InitializerState.PostInitialized) {
-				Profilers.Set("update", "client", PerformanceManager.At.Start, DateTime.UtcNow);
-				for (var i = 0; i < ClientInitializers.Count; i++) {
-					var instance = ClientInitializers[i];
-					Profilers.Set("update", "client", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
-					try {
-						instance.OnUpdate();
-						instance.OnUpdateClient();
-					} catch (Exception e) {
-						Logger.LogError($"Error updating client in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
-					}
-
-					Profilers.Set("update", "client", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
-				}
-
-				Profilers.Set("update", "client", PerformanceManager.At.End, DateTime.UtcNow);
-			}
 
 			foreach (var entry in InstanceInitializers.Keys)
 				if (IsInstanceEnabled(entry) && GetInstanceState(entry) == InitializerState.PostInitialized) {
@@ -1554,24 +1521,77 @@ namespace Nox.ModLoader.Mods {
 					Profilers.Set("update", $"instance_{entry}", PerformanceManager.At.End, DateTime.UtcNow);
 				}
 
-			foreach (var entry in CustomInitializers.Keys)
-				if (IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.PostInitialized) {
-					Profilers.Set("update", entry, PerformanceManager.At.Start, DateTime.UtcNow);
-					for (var i = 0; i < CustomInitializers[entry].Length; i++) {
-						var instance = CustomInitializers[entry][i];
-						Profilers.Set("update", entry, $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
-						try {
-							instance.OnUpdate();
-						} catch (Exception e) {
-							Logger.LogError($"Error updating {entry} in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}: {e}");
-							Logger.LogException(e);
-						}
-
-						Profilers.Set("update", entry, $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
+			if (IsClientEnabled() && _clientState == InitializerState.PostInitialized) {
+				Profilers.Set("update", "client", PerformanceManager.At.Start, DateTime.UtcNow);
+				for (var i = 0; i < ClientInitializers.Count; i++) {
+					var instance = ClientInitializers[i];
+					Profilers.Set("update", "client", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
+					try {
+						instance.OnUpdate();
+						instance.OnUpdateClient();
+					} catch (Exception e) {
+						Logger.LogError($"Error updating client in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
 					}
 
-					Profilers.Set("update", entry, PerformanceManager.At.End, DateTime.UtcNow);
+					Profilers.Set("update", "client", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
 				}
+
+				Profilers.Set("update", "client", PerformanceManager.At.End, DateTime.UtcNow);
+			}
+
+			if (IsServerEnabled() && _serverState == InitializerState.PostInitialized) {
+				Profilers.Set("update", "server", PerformanceManager.At.Start, DateTime.UtcNow);
+				for (var i = 0; i < ServerInitializers.Count; i++) {
+					var instance = ServerInitializers[i];
+					Profilers.Set("update", "server", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
+					try {
+						instance.OnUpdate();
+						instance.OnUpdateServer();
+					} catch (Exception e) {
+						Logger.LogError($"Error updating server in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
+					}
+
+					Profilers.Set("update", "server", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
+				}
+
+				Profilers.Set("update", "server", PerformanceManager.At.End, DateTime.UtcNow);
+			}
+
+			if (IsEditorEnabled() && _editorState == InitializerState.PostInitialized) {
+				Profilers.Set("update", "editor", PerformanceManager.At.Start, DateTime.UtcNow);
+				for (var i = 0; i < EditorInitializers.Count; i++) {
+					var instance = EditorInitializers[i];
+					Profilers.Set("update", "editor", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
+					try {
+						instance.OnUpdate();
+						instance.OnUpdateEditor();
+					} catch (Exception e) {
+						Logger.LogError($"Error updating editor in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
+					}
+
+					Profilers.Set("update", "editor", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
+				}
+
+				Profilers.Set("update", "editor", PerformanceManager.At.End, DateTime.UtcNow);
+			}
+
+			if (IsMainEnabled() && _mainState == InitializerState.PostInitialized) {
+				Profilers.Set("update", "main", PerformanceManager.At.Start, DateTime.UtcNow);
+				for (var i = 0; i < MainInitializers.Count; i++) {
+					var instance = MainInitializers[i];
+					Profilers.Set("update", "main", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
+					try {
+						instance.OnUpdate();
+						instance.OnUpdateMain();
+					} catch (Exception e) {
+						Logger.LogError($"Error updating main in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
+					}
+
+					Profilers.Set("update", "main", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
+				}
+
+				Profilers.Set("update", "main", PerformanceManager.At.End, DateTime.UtcNow);
+			}
 
 			Profilers.Set("update", PerformanceManager.At.End, DateTime.UtcNow);
 		}

@@ -1,0 +1,108 @@
+.text-center {
+    -unity-text-align: middle-center;
+}
+
+.text-left {
+    -unity-text-align: middle-left;
+}
+
+.text-right {
+    -unity-text-align: middle-right;
+}
+
+.text-nowrap {
+    white-space: nowrap;
+}
+
+.text-wrap {
+    white-space: normal;
+}
+
+.text-break {
+    word-break: break-word;
+}
+
+.text-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.text-xs {
+    font-size: 10px;
+}
+
+.text-sm {
+    font-size: 14px;
+}
+
+.text-md {
+    font-size: 16px;
+}
+
+.text-lg {
+    font-size: 18px;
+}
+
+.text-xl {
+    font-size: 20px;
+}
+
+.text-2xl {
+    font-size: 24px;
+}
+
+.text-3xl {
+    font-size: 30px;
+}
+
+.text-4xl {
+    font-size: 36px;
+}
+
+.text-5xl {
+    font-size: 48px;
+}
+
+.text-6xl {
+    font-size: 60px;
+}
+
+.text-7xl {
+    font-size: 72px;
+}
+
+.text-8xl {
+    font-size: 96px;
+}
+
+.text-9xl {
+    font-size: 128px;
+}
+
+.text-danger {
+    color: var(--color-danger);
+}
+
+.text-success {
+    color: var(--color-success);
+}
+
+.text-warning {
+    color: var(--color-warning);
+}
+
+.text-info {
+    color: var(--color-info);
+}
+
+.text-black {
+    color: var(--color-black);
+}
+
+.text-white {
+    color: var(--color-white);
+}
+
+
+

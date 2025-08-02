@@ -13,6 +13,8 @@ using Nox.Entities;
 using Nox.Players;
 using Nox.Sessions;
 using Nox.Worlds;
+using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay {
 	public class RelayAdapter : IAdapter, INoxObject {
@@ -27,6 +29,7 @@ namespace api.nox.relay {
 		internal byte     Tps          = 0;
 		private  DateTime _lastUpdate  = DateTime.MinValue;
 		internal float    Threshold    = 0.001f;
+		internal float    RenderEntity = 100f;
 
 
 		internal RelayAdapter() {
@@ -36,22 +39,30 @@ namespace api.nox.relay {
 
 
 		public void OnEnter(EnterResponse ev) {
-			Tps       = ev.Tps;
-			Threshold = ev.Threshold;
+			Tps          = ev.Tps;
+			Threshold    = ev.Threshold;
+			RenderEntity = ev.RenderEntity;
 			Instance.RequestTraveling(TravelingAction.Travel).Forget();
 		}
 
 		public void OnUpdate() {
 			if (_isTraveling || Tps == 0 || _lastUpdate.AddSeconds(1f / Tps) > DateTime.UtcNow) return;
 			_lastUpdate = DateTime.UtcNow;
-			var locals = _entities.GetEntities();
-			foreach (var player in locals)
-				if (player is RelayLocalPlayer localPlayer)
-					localPlayer.SendTransform();
+			var local = _entities.GetEntities<RelayLocalPlayer>().FirstOrDefault();
+			var other = _entities.GetEntities<RelayRemotePlayer>();
+			UpdatePlayerDistance(ref local, ref other);
+			local?.SendTransform();
 		}
 
+		private static void UpdatePlayerDistance(ref RelayLocalPlayer local, ref RelayRemotePlayer[] others) {
+			foreach (var other in others) 
+				other.DistanceToLocal = Vector3.Distance(local.GetPosition(), other.GetPosition());
+		}
+		
 		public void OnQuit(QuitEvent ev) {
-			Tps = 0;
+			Tps          = 0;
+			Threshold    = 0.001f;
+			RenderEntity = 100f;
 		}
 
 		public void OnTraveling(TravelingEvent ev)
@@ -62,7 +73,7 @@ namespace api.nox.relay {
 
 		private async UniTask OnTravelingSuccess(TravelingEvent ev)
 			=> await Instance.RequestTraveling(TravelingAction.Ready);
-		
+
 		public async UniTask<bool> OnTravelingAsync(TravelingEvent ev, bool autoResponse = true, Action<float, string> progress = null) {
 			string hash;
 			string url;
@@ -175,10 +186,10 @@ namespace api.nox.relay {
 		}
 
 		public IPlayer GetPlayer(int index)
-			=> _entities.GetEntity<IPlayer>(index);
+			=> _entities.GetEntity<RelayPlayer>(index);
 
 		public IPlayer GetLocalPlayer()
-			=> _entities.GetEntities<IPlayer>().FirstOrDefault(p => p.IsLocal());
+			=> _entities.GetEntities<RelayLocalPlayer>().FirstOrDefault();
 
 		public IPlayer GetMasterPlayer()
 			=> _entities.GetEntities<IPlayer>().FirstOrDefault(p => p.IsMaster());
@@ -190,7 +201,7 @@ namespace api.nox.relay {
 			=> _entities.GetCount<IEntity>();
 
 		public int GetPlayerCount()
-			=> _entities.GetCount<IPlayer>();
+			=> _entities.GetCount<RelayPlayer>();
 
 		public async UniTask OnDeselect(ISession newSession) {
 			Logger.LogDebug($"OnDeselect: {this}");

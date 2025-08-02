@@ -17002,7 +17002,7 @@ MonoBehaviour:
   m_TimeUntilThresholdReachesMaxDistance: 3
   m_RotationFollowMode: 2
   m_MinAngleAllowed: 0.1
-  m_MaxAngleAllowed: 90
+  m_MaxAngleAllowed: 67.5
   m_TimeUntilThresholdReachesMaxAngle: 3
 --- !u!1001 &8486418442244857133
 PrefabInstance:

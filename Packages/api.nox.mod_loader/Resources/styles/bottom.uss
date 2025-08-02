@@ -1,0 +1,23 @@
+.bottom-0 {
+    bottom: 0;
+}
+
+.bottom-4 {
+    bottom: 4px;
+}
+
+.bottom-8 {
+    bottom: 8px;
+}
+
+.bottom-16 {
+    bottom: 16px;
+}
+
+.bottom-48 {
+    bottom: 48px;
+}
+
+.bottom-64 {
+    bottom: 64px;
+}

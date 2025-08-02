@@ -1,0 +1,20 @@
+
+.bg-opacity-0 {
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0);
+}
+
+.bg-opacity-25 {
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0.2);
+}
+
+.bg-opacity-50 {
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0.5);
+}
+
+.bg-opacity-75 {
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0.75);
+}
+
+.bg-opacity-100 {
+    -unity-background-image-tint-color: rgba(255, 255, 255, 1);
+}

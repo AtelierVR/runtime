@@ -53,7 +53,12 @@ namespace Nox.UI {
 
 			var widthScale  = parentSize.x / size.x;
 			var heightScale = parentSize.y / size.y;
-			RectTransform.localScale = new Vector3(widthScale, heightScale, 1f);
+			
+			RectTransform.localScale = new Vector3(
+				widthScale,
+				heightScale,
+				Mathf.Approximately(widthScale, heightScale) ? widthScale : 1f
+			);
 		}
 	}
 }

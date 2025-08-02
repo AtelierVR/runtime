@@ -67,6 +67,7 @@ namespace Nox.ModLoader {
 			DisplayProgressBar("Reloading Mods", "Unloading Mods...", 0.0f);
 
 			var mods = ModManager.Mods;
+			mods.Reverse();
 
 			foreach (var mod in ModManager.Mods)
 				await mod.SendPreDispose();

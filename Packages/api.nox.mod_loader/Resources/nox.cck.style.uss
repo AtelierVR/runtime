@@ -1,3 +1,314 @@
+@import url("project://database/Packages/vrapi.sdk/Resources/styles/index.uss?fileID=7433441132597879392&guid=30e54c0c01824f82abf07c2f9252686f&type=3#index");
+
+* {
+    white-space: normal;
+}
+
+.title {
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-font-definition: resource('fonts/Funnel_Display/static/FunnelDisplay-SemiBold');
+}
+
+.subtitle {
+    -unity-font-definition: resource('fonts/Funnel_Display/static/FunnelDisplay-Light');
+    color: rgb(153, 153, 153);
+    margin-bottom: 8px;
+    white-space: normal;
+    margin-top: 1px;
+    margin-right: 3px;
+    margin-left: 3px;
+}
+
+.section {
+    padding-top: 8px;
+    padding-right: 8px;
+    padding-bottom: 8px;
+    padding-left: 8px;
+}
+
+.margin {
+    margin-top: 1px;
+    margin-right: 3px;
+    margin-bottom: 4px;
+    margin-left: 3px;
+}
+
+.large.unity-property-field > .unity-base-field,
+.large.unity-base-field {
+    margin-top: 1px;
+    margin-right: 3px;
+    margin-bottom: 4px;
+    margin-left: 3px;
+}
+
+.large .unity-toggle__label {
+    flex-grow: 1;
+}
+
+.large.unity-button {
+    padding-top: 4px;
+    padding-right: 8px;
+    padding-bottom: 4px;
+    padding-left: 8px;
+}
+
+.large.unity-property-field > .unity-base-field .unity-object-field__input,
+.large.unity-base-field .unity-object-field__input {
+    padding-top: 4px;
+    padding-right: 8px;
+    padding-bottom: 4px;
+    padding-left: 8px;
+}
+
+.large.unity-property-field > .unity-base-field .unity-base-field .unity-base-text-field__input,
+.large.unity-property-field > .unity-base-field .unity-base-text-field__input,
+.large.unity-base-field .unity-base-field .unity-base-text-field__input,
+.large.unity-base-field .unity-base-text-field__input {
+    padding-top: 4px;
+    padding-right: 8px;
+    padding-bottom: 4px;
+    padding-left: 8px;
+}
+
+.large.unity-property-field > .unity-base-field .unity-enum-field__input,
+.large.unity-base-field .unity-enum-field__input {
+    padding-top: 4px;
+    padding-right: 8px;
+    padding-bottom: 4px;
+    padding-left: 8px;
+}
+
+.large.unity-property-field > .unity-base-field .unity-base-field__label,
+.large.unity-base-field .unity-base-field__label {
+    -unity-text-align: middle-left;
+}
+
+.large.unity-property-field > .unity-base-field .unity-object-field-display__icon,
+.large.unity-base-field .unity-object-field-display__icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    background-color: rgba(0, 0, 0, 0);
+    -unity-background-image-tint-color: rgb(159, 159, 159);
+}
+
+.large.unity-property-field > .unity-base-field .unity-object-field__selector,
+.large.unity-base-field .unity-object-field__selector {
+    background-color: rgba(0, 0, 0, 0);
+    background-image: resource('icons/add');
+    width: 16px;
+    height: 16px;
+    margin-left: 4px;
+    -unity-background-image-tint-color: rgb(159, 159, 159);
+}
+
+.large.unity-property-field > .unity-base-field .unity-object-field__selector:hover,
+.large.unity-base-field .unity-object-field__selector:hover {
+    transition-duration: 0.15s;
+    -unity-background-image-tint-color: rgb(188, 188, 188);
+}
+
+.large.unity-progress-bar .unity-progress-bar__background {
+    height: 24px;
+}
+
+.section.unity-foldout {
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 8px;
+    padding-left: 0;
+}
+
+.section.unity-foldout > .unity-foldout__toggle {
+    padding-top: 8px;
+    padding-right: 8px;
+    padding-bottom: 0;
+    padding-left: 8px;
+}
+
+.section.unity-foldout > .unity-foldout__content {
+    padding-top: 0;
+    padding-right: 8px;
+    padding-bottom: 0;
+    padding-left: 8px;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+.section.unity-foldout > .unity-foldout__toggle .unity-foldout__text {
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-font-definition: resource('fonts/Funnel_Display/static/FunnelDisplay-SemiBold');
+}
+
+.large.multiline.unity-property-field > .unity-base-field .unity-base-text-field__input--multiline,
+.large.multiline .unity-base-text-field__input--multiline {
+    min-height: 150px;
+}
+
+.border-bottom {
+    border-bottom-width: 1px;
+}
+
+.readonly .unity-object-field__selector {
+    display: none;
+}
+
+.parent-container {
+    flex-grow: 1;
+    align-items: auto;
+    align-self: center;
+}
+
+.title.unity-label {
+    margin-left: 16px;
+}
+
+.large .unity-toggle__input {
+    flex-grow: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+.large.unity-toggle .unity-toggle__input .unity-toggle__checkmark {
+    padding-top: 8px;
+    padding-right: 8px;
+    padding-bottom: 8px;
+    padding-left: 8px;
+    width: 24px;
+    height: 24px;
+    background-image: none;
+    border-left-color: rgb(48, 48, 48);
+    border-right-color: rgb(48, 48, 48);
+    border-top-color: rgb(48, 48, 48);
+    border-bottom-color: rgb(36, 36, 36);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    background-color: rgb(88, 88, 88);
+}
+
+.large.unity-toggle .unity-toggle__input:focus .unity-toggle__checkmark {
+    border-left-color: rgb(117, 165, 236);
+    border-right-color: rgb(117, 165, 236);
+    border-top-color: rgb(117, 165, 236);
+    border-bottom-color: rgb(117, 165, 236);
+}
+
+.large.unity-toggle .unity-toggle__input:focus:hover .unity-toggle__checkmark {
+    background-color: rgb(70, 96, 124);
+}
+
+.large.unity-toggle .unity-toggle__input:checked .unity-toggle__checkmark {
+    background-image: resource('icons/arrow');
+}
+
+.large.unity-toggle .unity-toggle__input:hover .unity-toggle__checkmark {
+    background-color: rgb(103, 103, 103);
+}
+
+.large.unity-base-field .unity-base-slider__input {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.icon {
+    background-image: resource('VRApiIcon');
+}
+
+.space-x-0 > * {
+    margin-left: 0;
+}
+
+.space-x-4 > .first-child {
+    margin-left: 0;
+}
+
+.space-x-8 > .first-child {
+    margin-left: 0;
+}
+
+.space-x-4 > * {
+    margin-left: 4px;
+}
+
+.space-x-8 > * {
+    margin-left: 8px;
+}
+
+.space-y-0 > * {
+    margin-top: 0;
+}
+
+.space-y-4 > .first-child {
+    margin-top: 0;
+}
+
+.space-y-8 > .first-child {
+    margin-top: 0;
+}
+
+.space-y-4 > * {
+    margin-top: 4px;
+}
+
+.space-y-8 > * {
+    margin-top: 8px;
+}
+
+.code {
+    padding: 4px;
+    border-radius: 4px;
+    -unity-text-align: middle-center;
+    font-size: 32px;
+    -unity-font-style: bold;
+    letter-spacing: 16px;
+    -unity-font-definition: resource('fonts/Funnel_Display/FunnelDisplay-VariableFont_wght SDF 1');
+}
+
+.large.unity-base-field .unity-base-field .unity-base-field__label,
+.large.unity-base-field .unity-base-field__label {
+    -unity-text-align: upper-left;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.flex-grow.unity-scroll-view > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container {
+    flex-grow: 1;
+}
+
+.icon-danger {
+    background-image: resource('icons/error');
+}
+
+.icon-warning {
+    background-image: resource('icons/warning');
+}
+
+.icon-info {
+    background-image: resource('icons/info');
+}
+
+.icon-success {
+    background-image: resource('icons/success');
+}
+
+/**/
+
 #unity-content-viewport {
     margin-top: 0;
     margin-right: 0;
@@ -25,9 +336,6 @@
     border-bottom-color: rgb(39, 39, 42);
     border-bottom-width: 1px;
     background-color: rgb(60, 60, 60);
-}
-
-.nox-content {
 }
 
 .nox-header .nox-toolbar {
@@ -124,7 +432,7 @@
     -unity-font-definition: resource('fonts/Funnel_Display/static/FunnelDisplay-Light');
     color: rgb(153, 153, 153);
     margin-bottom: 8px;
-    white-space: pre-wrap;
+    white-space: normal;
     margin-top: 1px;
     margin-right: 3px;
     margin-left: 3px;
@@ -251,7 +559,7 @@
 
 .notification .label {
     -unity-text-align: middle-left;
-    white-space: pre-wrap;
+    white-space: normal;
     flex-grow: 1;
 }
 
@@ -361,20 +669,8 @@
 }
 
 .nox-error .stack .unity-text-element {
-    white-space: pre-wrap;
+    white-space: normal;
     flex-grow: 1;
-}
-
-.multiline .unity-base-text-field__input--multiline {
-    min-height: 150px;
-}
-
-.border-bottom {
-    border-bottom-width: 1px;
-}
-
-.readonly .unity-object-field__selector {
-    display: none;
 }
 
 .notification-warning .notification * {

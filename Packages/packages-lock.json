@@ -114,6 +114,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "api.nox.settings": {
+      "version": "file:api.nox.settings",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "api.nox.table": {
       "version": "file:api.nox.table",
       "depth": 0,

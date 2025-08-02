@@ -1,0 +1,23 @@
+.right-0 {
+    right: 0;
+}
+
+.right-4 {
+    right: 4px;
+}
+
+.right-8 {
+    right: 8px;
+}
+
+.right-16 {
+    right: 16px;
+}
+
+.right-48 {
+    right: 48px;
+}
+
+.right-64 {
+    right: 64px;
+}

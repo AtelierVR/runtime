@@ -46,6 +46,11 @@ namespace Nox.ModLoader.Typing
         /// <returns></returns>
         public Platform GetPlatform() => _platform;
 
+        public bool IsCompatible() 
+            => (GetEngine().GetName() == CCK.Utils.Engine.None || EngineExtensions.CurrentEngine == GetEngine().GetName())
+                && GetEngine().GetVersion().Matches(EngineExtensions.CurrentVersion)
+                && (GetPlatform() == Platform.None || GetPlatform() == PlatformExtensions.CurrentPlatform);
+        
         public JObject ToJson()
         {
             var obj = new JObject

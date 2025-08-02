@@ -1,4 +1,5 @@
-﻿using Nox.CCK.Mods.Cores;
+﻿using Nox.CCK.Language;
+using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.UI;
 using UnityEngine;

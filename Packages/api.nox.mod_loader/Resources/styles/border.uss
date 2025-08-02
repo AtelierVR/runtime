@@ -1,0 +1,62 @@
+.border {
+    border-style: solid;
+    border-width: 1px;
+    border-color: var(--border-color);
+}
+
+.border-t {
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-top-color: var(--border-color);
+}
+
+.border-r {
+    border-right-style: solid;
+    border-right-width: 1px;
+    border-right-color: var(--border-color);
+}
+
+.border-b {
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-color);
+}
+
+.border-l {
+    border-left-style: solid;
+    border-left-width: 1px;
+    border-left-color: var(--border-color);
+}
+
+.border-t-none {
+    border-top-style: none;
+}
+
+.border-r-none {
+    border-right-style: none;
+}
+
+.border-b-none {
+    border-bottom-style: none;
+}
+
+.border-l-none {
+    border-left-style: none;
+}
+
+.border-danger {
+    border-color: var(--color-danger);
+}
+
+.border-success {
+    border-color: var(--color-success);
+}
+
+.border-warning {
+    border-color: var(--color-warning);
+}
+
+.border-info {
+    border-color: var(--color-info);
+}
+

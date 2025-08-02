@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using api.nox.relay;
 using api.nox.relay.types.Player;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
@@ -16,8 +15,8 @@ namespace api.nox.relay {
 		protected InstancePlayer Reference;
 		protected RelayAdapter   Adapter;
 
-		private readonly  Dictionary<string, object>       _properties = new();
-		internal readonly Dictionary<ushort, NoxTransform> Transforms  = new();
+		private readonly  Dictionary<string, object>       _properties     = new();
+		internal readonly Dictionary<ushort, NoxTransform> Transforms      = new();
 
 		public void SetReference(InstancePlayer reference, RelayAdapter adapter) {
 			Reference = reference;
@@ -120,6 +119,15 @@ namespace api.nox.relay {
 			Logger.LogWarning($"{nameof(TryGetPhysical)} is not currently implemented for {GetType().Name}.");
 			physical = null;
 			return false;
+		}
+
+		public Physical MakePhysical() {
+			Logger.LogWarning($"{nameof(MakePhysical)} is not currently implemented for {GetType().Name}.");
+			return null;
+		}
+
+		public void DestroyPhysical() {
+			Logger.LogWarning($"{nameof(DestroyPhysical)} is not currently implemented for {GetType().Name}.");
 		}
 	}
 }

@@ -1,0 +1,56 @@
+
+.min-w-0 {
+    min-width: 0;
+}
+
+.min-w-4 {
+    min-width: 4px;
+}
+
+.min-w-8 {
+    min-width: 8px;
+}
+
+.min-w-16 {
+    min-width: 16px;
+}
+
+.min-w-24 {
+    min-width: 24px;
+}
+
+.min-w-32 {
+    min-width: 32px;
+}
+
+.min-w-48 {
+    min-width: 48px;
+}
+
+.min-w-64 {
+    min-width: 64px;
+}
+
+.min-w-96 {
+    min-width: 96px;
+}
+
+.min-w-128 {
+    min-width: 128px;
+}
+
+.min-w-256 {
+    min-width: 256px;
+}
+
+.min-w-512 {
+    min-width: 512px;
+}
+
+.min-w-full {
+    min-width: 100%;
+}
+
+.min-w-auto {
+    min-width: auto;
+}

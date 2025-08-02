@@ -30,6 +30,9 @@
       "api.nox.ui.Client",
       "api.nox.ui.defaults.DefaultPagesClient"
     ],
+    "main": [
+      "api.nox.ui.Main"
+    ],
     "editor": [
       "api.nox.ui.Editor"
     ]

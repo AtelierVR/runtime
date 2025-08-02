@@ -1,0 +1,23 @@
+.left-0 {
+    left: 0;
+}
+
+.left-4 {
+    left: 4px;
+}
+
+.left-8 {
+    left: 8px;
+}
+
+.left-16 {
+    left: 16px;
+}
+
+.left-48 {
+    left: 48px;
+}
+
+.left-64 {
+    left: 64px;
+}

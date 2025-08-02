@@ -53,6 +53,7 @@
     <None Include="Packages\api.nox.session\nox.mod.json" />
     <None Include="Packages\api.nox.session\package.json" />
     <None Include="Packages\api.nox.session\api.nox.session.asmdef" />
+    <None Include="Packages\api.nox.session\assets\api.nox.session\sessions.uss" />
     <None Include="Packages\api.nox.session\assets\api.nox.session\sessions.uxml" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.1.8f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>

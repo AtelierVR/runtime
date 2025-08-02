@@ -1,0 +1,56 @@
+
+.max-h-0 {
+    max-height: 0;
+}
+
+.max-h-4 {
+    max-height: 4px;
+}
+
+.max-h-8 {
+    max-height: 8px;
+}
+
+.max-h-16 {
+    max-height: 16px;
+}
+
+.max-h-24 {
+    max-height: 24px;
+}
+
+.max-h-32 {
+    max-height: 32px;
+}
+
+.max-h-48 {
+    max-height: 48px;
+}
+
+.max-h-64 {
+    max-height: 64px;
+}
+
+.max-h-96 {
+    max-height: 96px;
+}
+
+.max-h-128 {
+    max-height: 128px;
+}
+
+.max-h-256 {
+    max-height: 256px;
+}
+
+.max-h-512 {
+    max-height: 512px;
+}
+
+.max-h-full {
+    max-height: 100%;
+}
+
+.max-h-none {
+    max-height: none;
+}

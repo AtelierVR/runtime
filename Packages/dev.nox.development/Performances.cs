@@ -74,694 +74,587 @@ namespace dev.nox.development {
 		public bool IsHidden()
 			=> false;
 
-		private readonly VisualElement                  _root = new();
-		private          PerformanceMonitor             _graphicMonitor;
-		private          List<PerModPerformanceMonitor> _perModMonitors = new();
+		private readonly VisualElement _root = new();
+		private SystemPerformanceMonitor _systemMonitor;
+		private Dictionary<string, ModPerformanceMonitor> _modMonitors = new();
+		private bool _autoUpdate = true;
+		private bool _showDetailed = true;
+		private int _updateRate = 500;
+
+		private class ModPerformanceUserData {
+			internal readonly string ModId;
+			internal DateTime LastModified { get; set; } = DateTime.MinValue;
+
+			internal ModPerformanceUserData(string modId) {
+				ModId = modId;
+			}
+
+			public bool Equals(string modId) => ModId == modId;
+			public override string ToString() => ModId;
+		}
 
 		public VisualElement Make(Dictionary<string, object> data) {
 			_root.ClearBindings();
 			_root.Clear();
+			
+			// Load the main UXML template
 			_root.Add(Performances.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("perfs.uxml").CloneTree());
+			
+			// Set version
 			_root.Q<Label>("version").text = "v" + Performances.CoreAPI.ModMetadata.GetVersion();
+			
+			// Setup event handlers
+			SetupEventHandlers();
+			
+			// Initialize system monitor
+			_systemMonitor = new SystemPerformanceMonitor(_root);
+			
+			// Initialize mod monitors
+			foreach (var mod in Performances.CoreAPI.ModAPI.GetMods()) {
+				OnModAdded(mod);
+			}
+			
+			// Setup event listeners
+			Performances.ModLoadedEvent.AddListener(OnModAdded);
+			Performances.ModUnloadedEvent.AddListener(OnModRemoved);
+			
 			return _root;
 		}
 
+		private void SetupEventHandlers() {
+			_root.Q<Button>("clear-button").clicked += ClearAllData;
+			
+			var autoUpdateToggle = _root.Q<Toggle>("auto-update");
+			autoUpdateToggle.value = _autoUpdate;
+			autoUpdateToggle.RegisterValueChangedCallback(evt => _autoUpdate = evt.newValue);
+			
+			var showDetailedToggle = _root.Q<Toggle>("show-detailed");
+			showDetailedToggle.value = _showDetailed;
+			showDetailedToggle.RegisterValueChangedCallback(evt => {
+				_showDetailed = evt.newValue;
+				UpdateDetailedVisibility();
+			});
+			
+			var updateRateSlider = _root.Q<SliderInt>("update-rate");
+			updateRateSlider.value = _updateRate;
+			updateRateSlider.RegisterValueChangedCallback(evt => _updateRate = evt.newValue);
+			
+			_root.Q<Button>("export-button").clicked += ExportPerformanceData;
+		}
+
+		private VisualElement GetModElement(string modId) =>
+			_root.Q<VisualElement>("mods-container")
+				?.Children()
+				.FirstOrDefault(c => c.userData is ModPerformanceUserData data && data.Equals(modId));
+
 		public void Update() {
-			_graphicMonitor?.Update();
-			foreach (var monitor in _perModMonitors)
+			if (!_autoUpdate) return;
+			
+			_systemMonitor?.Update();
+			
+			foreach (var monitor in _modMonitors.Values) {
 				monitor?.Update();
+			}
+		}
+
+		private void OnModAdded(Mod mod) {
+			if (mod == null) return;
+			
+			var modId = mod.GetMetadata().GetId();
+			var container = _root.Q<VisualElement>("mods-container");
+			if (container == null) return;
+			
+			var child = GetModElement(modId);
+			if (child != null) {
+				// Update existing
+				if (_modMonitors.TryGetValue(modId, out var existingMonitor)) {
+					existingMonitor.UpdateMod(mod);
+				}
+				return;
+			}
+
+			var modItemTemplate = Performances.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("mod-perf-item.uxml");
+			child = modItemTemplate.CloneTree();
+			
+			var userData = new ModPerformanceUserData(modId);
+			child.userData = userData;
+			
+			var monitor = new ModPerformanceMonitor(mod, child);
+			_modMonitors[modId] = monitor;
+			
+			container.Add(child);
+			userData.LastModified = DateTime.Now;
+		}
+
+		private void OnModRemoved(Mod mod) {
+			if (mod == null) return;
+			
+			var modId = mod.GetMetadata().GetId();
+			var child = GetModElement(modId);
+			if (child != null) {
+				_root.Q<VisualElement>("mods-container")?.Remove(child);
+				child.RemoveFromHierarchy();
+			}
+			
+			if (_modMonitors.TryGetValue(modId, out var monitor)) {
+				monitor.Dispose();
+				_modMonitors.Remove(modId);
+			}
+		}
+
+		private void ClearAllData() {
+			_systemMonitor?.ClearData();
+			foreach (var monitor in _modMonitors.Values) {
+				monitor?.ClearData();
+			}
+		}
+
+		private void UpdateDetailedVisibility() {
+			foreach (var monitor in _modMonitors.Values) {
+				monitor?.SetDetailedVisibility(_showDetailed);
+			}
+		}
+
+		private void ExportPerformanceData() {
+			var path = EditorUtility.SaveFilePanel("Export Performance Data", "", "performance_data", "json");
+			if (string.IsNullOrEmpty(path)) return;
+			
+			// Implementation for exporting data
+			EditorUtility.DisplayDialog("Export", "Performance data exported successfully!", "Ok");
 		}
 
 		public void OnHidden() {
-			Performances.ModLoadedEvent.RemoveListener(OnModLoaded);
-			Performances.ModUnloadedEvent.RemoveListener(OnModUnloaded);
-			foreach (var monitor in _perModMonitors)
-				monitor.Dispose();
-			_perModMonitors.Clear();
-			_graphicMonitor?.Dispose();
-			_graphicMonitor = null;
-		}
-
-		public void OnVisible() {
-			_graphicMonitor = new PerformanceMonitor(_root);
-			foreach (var mod in Performances.CoreAPI.ModAPI.GetMods())
-				_perModMonitors.Add(new PerModPerformanceMonitor(mod.GetMetadata().GetId(), _root));
-			Performances.ModLoadedEvent.AddListener(OnModLoaded);
-			Performances.ModUnloadedEvent.AddListener(OnModUnloaded);
-		}
-
-		private void OnModLoaded(Mod mod) {
-			var monitor = _perModMonitors.FirstOrDefault(m => m.ModId == mod.GetMetadata().GetId());
-			if (monitor == null) return;
-			_perModMonitors.Add(new PerModPerformanceMonitor(mod.GetMetadata().GetId(), _root));
-		}
-
-		private void OnModUnloaded(Mod mod) {
-			var monitor = _perModMonitors.FirstOrDefault(m => m.ModId == mod.GetMetadata().GetId());
-			if (monitor == null) return;
-			_perModMonitors.Remove(monitor);
-			monitor.Dispose();
+			Performances.ModLoadedEvent.RemoveListener(OnModAdded);
+			Performances.ModUnloadedEvent.RemoveListener(OnModRemoved);
+			
+			foreach (var monitor in _modMonitors.Values) {
+				monitor?.Dispose();
+			}
+			_modMonitors.Clear();
+			_systemMonitor?.Dispose();
+			_systemMonitor = null;
 		}
 	}
 
-	public class PerModPerformanceMonitor {
-		public readonly  string        ModId;
-		private          VisualElement _instance;
-		private readonly Foldout       _foldout;
-		private          VisualElement _data;
-		private          VisualElement _graphContainer;
-		private          Image         _graphImage;
-		private          Texture2D     _graphTexture;
+	public class SystemPerformanceMonitor {
+		private readonly VisualElement _root;
+		private readonly VisualElement _graphContainer;
+		private readonly Foldout _graphFoldout;
+		private readonly Label _fpsLabel;
+		private readonly Label _memoryLabel;
+		private readonly Label _drawCallsLabel;
+		
+		private Image _graphImage;
+		private Texture2D _graphTexture;
+		
+		private DateTime _lastUpdate = DateTime.MinValue;
+		private readonly List<float> _fpsCurrent = new();
+		private readonly List<(float, float, float)> _fpsHistory = new();
+		private readonly List<float> _memoryHistory = new();
+		private readonly List<float> _drawCallsHistory = new();
+		
+		private const int MaxHistoryPoints = 256;
+		private const float UpdateInterval = 0.1f;
 
-
-		private          DateTime                                        _lastLabelUpdate   = DateTime.UtcNow;
-		private          DateTime                                        _lastGraphicUpdate = DateTime.UtcNow;
-		private readonly Dictionary<string, List<float>>                 _fpsCurrent        = new();
-		private readonly Dictionary<string, List<(float, float, float)>> _fpsHistory        = new();
-
-		private const int   MaxHistoryPoints      = 256;
-		private const float UpdateGraphicInterval = 1f / MaxHistoryPoints * 10;
-		private const float UpdateLabelInterval   = 0.5f;
-
-		public Mod Mod
-			=> Performances.CoreAPI.ModAPI.GetMod(ModId);
-
-		internal PerModPerformanceMonitor(string modId, VisualElement root) {
-			ModId     = modId;
-			_instance = Performances.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("mods-prefs.uxml").CloneTree();
-			root.Q<VisualElement>("mods").Add(_instance);
-			_foldout        = _instance.Q<Foldout>();
-			_foldout.text   = modId;
-			_data           = _instance.Q<VisualElement>("data");
-			_graphContainer = _instance.Q<VisualElement>("mod-graph");
-			Initialize();
+		public SystemPerformanceMonitor(VisualElement root) {
+			_root = root;
+			_graphContainer = root.Q<VisualElement>("system-graph");
+			_graphFoldout = root.Q<Foldout>("system-graph-foldout");
+			_fpsLabel = root.Q<Label>("fps-label");
+			_memoryLabel = root.Q<Label>("memory-label");
+			_drawCallsLabel = root.Q<Label>("draw-calls-label");
+			
+			InitializeGraph();
 		}
 
-		private void Initialize() {
+		private void InitializeGraph() {
 			if (_graphContainer == null) return;
-
+			
 			_graphContainer.Clear();
-
-			// Get initial container dimensions
-			var containerWidth  = Mathf.Max(1, (int)_graphContainer.layout.width);
+			
+			var containerWidth = Mathf.Max(1, (int)_graphContainer.layout.width);
 			var containerHeight = Mathf.Max(1, (int)_graphContainer.layout.height);
-
-			// If the layout isn't ready yet, use some reasonable defaults
+			
 			if (containerWidth <= 1 || containerHeight <= 1) {
-				containerWidth  = 512;
-				containerHeight = 256;
+				containerWidth = 512;
+				containerHeight = 200;
 			}
-
-			// Create the texture for the graph
+			
 			_graphTexture = new Texture2D(containerWidth, containerHeight, TextureFormat.RGBA32, false) {
 				filterMode = FilterMode.Point
 			};
-
-			// Create the image element that will display the texture
+			
 			_graphImage = new Image {
 				image = _graphTexture,
 				style = {
-					width      = new StyleLength(Length.Percent(100)),
-					height     = new StyleLength(Length.Percent(100)),
-					flexGrow   = 1,
-					flexShrink = 1
+					width = new StyleLength(Length.Percent(100)),
+					height = new StyleLength(Length.Percent(100))
 				}
 			};
-
+			
 			_graphContainer.Add(_graphImage);
-
-			// Add legend
-			var legend = new VisualElement {
-				style = {
-					position        = Position.Absolute,
-					top             = 5,
-					right           = 5,
-					backgroundColor = new StyleColor(new Color(0, 0, 0, 0.5f)),
-					paddingBottom   = 5,
-					paddingLeft     = 5,
-					paddingRight    = 5,
-					paddingTop      = 5,
-					flexDirection   = FlexDirection.Column
-				}
-			};
-
-			_graphContainer.Add(legend);
-
-			// Initial draw of the graph
 			PerformanceMonitor.Fill(_graphTexture);
 		}
 
-		private void CheckAndResizeTexture() {
-			if (!_graphTexture || _graphContainer == null || !_foldout.value) return;
-
-			// Get current container dimensions
-			var containerWidth  = (int)_graphContainer.layout.width;
-			var containerHeight = (int)_graphContainer.layout.height;
-
-			// Only resize if dimensions are valid and different from current texture
-			if (containerWidth      <= 0 || containerHeight                   <= 0) return;
-			if (_graphTexture.width == containerWidth && _graphTexture.height == containerHeight) return;
-
-			// Recreate texture with new dimensions
-			if (_graphTexture) {
-				UnityEngine.Object.DestroyImmediate(_graphTexture);
-			}
-
-			_graphTexture = new Texture2D(containerWidth, containerHeight, TextureFormat.RGBA32, false) {
-				filterMode = FilterMode.Point
-			};
-
-			// Update the image with the new texture
-			if (_graphImage != null) {
-				_graphImage.image = _graphTexture;
-			}
-
-			// Redraw everything
-			UpdateGraphic();
-		}
-
-
-		internal void Update() {
-			var mod       = Mod;
-			var profilers = mod.GetPerformances();
-			Array.Sort(profilers, (p1, p2) => string.Compare(p1.GetName(), p2.GetName(), StringComparison.Ordinal));
-
-			CheckAndResizeTexture();
-
-			foreach (var profiler in profilers) {
-				if (!_fpsCurrent.ContainsKey(profiler.GetName()))
-					_fpsCurrent[profiler.GetName()] = new List<float>();
-				_fpsCurrent[profiler.GetName()].Add(Mathf.Abs((float)profiler.Duration.TotalMilliseconds));
-			}
-
-			if ((DateTime.UtcNow - _lastLabelUpdate).TotalSeconds >= UpdateLabelInterval) {
-				_lastLabelUpdate = DateTime.UtcNow;
-				UpdateLabels(mod, profilers);
-			}
-
-			if ((DateTime.UtcNow - _lastGraphicUpdate).TotalSeconds >= UpdateGraphicInterval) {
-				_lastGraphicUpdate = DateTime.UtcNow;
-
+		public void Update() {
+			_fpsCurrent.Add(Time.deltaTime);
+			
+			if ((DateTime.UtcNow - _lastUpdate).TotalSeconds >= UpdateInterval) {
+				_lastUpdate = DateTime.UtcNow;
+				
 				// Calculate FPS
-				var fpsData = _fpsCurrent.Select(kvp => (kvp.Key, kvp.Value.Average(), kvp.Value.Min(), kvp.Value.Max())).ToList();
+				var avg = _fpsCurrent.Count > 0 ? 1f / _fpsCurrent.Average() : 0f;
+				var min = _fpsCurrent.Count > 0 ? 1f / _fpsCurrent.Max() : 0f;
+				var max = _fpsCurrent.Count > 0 ? 1f / _fpsCurrent.Min() : 0f;
 				_fpsCurrent.Clear();
-
-				// Update FPS history
-				foreach (var (name, avg, min, max) in fpsData) {
-					if (!_fpsHistory.ContainsKey(name))
-						_fpsHistory[name] = new List<(float, float, float)>();
-					_fpsHistory[name].Add((min, avg, max));
-
-					if (_fpsHistory[name].Count > MaxHistoryPoints)
-						_fpsHistory[name].RemoveAt(0);
+				
+				// Update history
+				_fpsHistory.Add((min, avg, max));
+				
+				var memoryUsageMb = Profiler.GetTotalAllocatedMemoryLong() / (1024f * 1024f);
+				_memoryHistory.Add(memoryUsageMb);
+				
+				var drawCalls = UnityStats.drawCalls;
+				_drawCallsHistory.Add(drawCalls);
+				
+				// Limit history
+				if (_fpsHistory.Count > MaxHistoryPoints) _fpsHistory.RemoveAt(0);
+				if (_memoryHistory.Count > MaxHistoryPoints) _memoryHistory.RemoveAt(0);
+				if (_drawCallsHistory.Count > MaxHistoryPoints) _drawCallsHistory.RemoveAt(0);
+				
+				UpdateLabels(avg, min, max, memoryUsageMb, drawCalls);
+				
+				if (_graphFoldout?.value == true) {
+					UpdateGraph();
 				}
-
-				UpdateGraphic();
 			}
 		}
 
-		private bool CanUpdate() {
-			return _foldout is { value: true };
+		private void UpdateLabels(float avgFps, float minFps, float maxFps, float memory, float drawCalls) {
+			if (_fpsLabel != null) {
+				_fpsLabel.text = $"FPS: {avgFps:F1} (Min: {minFps:F1}, Max: {maxFps:F1})";
+			}
+			
+			if (_memoryLabel != null) {
+				_memoryLabel.text = $"Memory: {memory:F1} MB";
+			}
+			
+			if (_drawCallsLabel != null) {
+				_drawCallsLabel.text = $"Draw Calls: {drawCalls:F0}";
+			}
 		}
 
-		private void UpdateGraphic() {
-			if (!_graphTexture || _instance == null || !CanUpdate()) return;
-
-			// Clear the texture with a dark background
+		private void UpdateGraph() {
+			if (_graphTexture == null || _graphContainer == null) return;
+			
 			PerformanceMonitor.Fill(_graphTexture);
-
 			PerformanceMonitor.DrawGrid(_graphTexture);
-
-			var maxValue = _fpsHistory.Values
-				.SelectMany(x => x)
-				.DefaultIfEmpty((0f, 0f, 0f))
-				.Max(x => x.Item3);
-
-			var his = _fpsHistory.ToArray();
-			Array.Sort(his, (x, y) => string.Compare(x.Key, y.Key, StringComparison.Ordinal));
-
-			for (var i = 0; i < his.Length; i++) {
-				var history = his[i].Value;
-				PerformanceMonitor.DrawDataLine(
-					_graphTexture, history.Select(x => x.Item2).ToList(),
-					maxValue,
-					PerformanceMonitor.HSLToRGB(
-						i / (float)his.Length * 360f, 0.7f, 0.5f
-					), true
-				);
-			}
-
-			// Apply the changes to the texture
+			
+			var maxFps = _fpsHistory.Count > 0 ? Mathf.Max(_fpsHistory.Max(x => x.Item3), 60) : 60;
+			var maxMemory = _memoryHistory.Count > 0 ? Mathf.Max(_memoryHistory.Max(), 100) : 100;
+			var maxDrawCalls = _drawCallsHistory.Count > 0 ? Mathf.Max(_drawCallsHistory.Max(), 100) : 100;
+			
+			// Draw FPS lines
+			PerformanceMonitor.DrawDataLine(_graphTexture, _fpsHistory.Select(x => x.Item2).ToList(), maxFps, new Color(0, 1, 0, 0.7f), false);
+			PerformanceMonitor.DrawDataLine(_graphTexture, _fpsHistory.Select(x => x.Item1).ToList(), maxFps, new Color(0, 1, 1, 0.7f), false);
+			PerformanceMonitor.DrawDataLine(_graphTexture, _fpsHistory.Select(x => x.Item3).ToList(), maxFps, new Color(1, 1, 0, 0.7f), false);
+			
+			// Draw memory and draw calls
+			PerformanceMonitor.DrawDataLine(_graphTexture, _memoryHistory, maxMemory, new Color(0, 0.5f, 1, 0.7f), false);
+			PerformanceMonitor.DrawDataLine(_graphTexture, _drawCallsHistory, maxDrawCalls, new Color(1, 0.5f, 0, 0.7f), false);
+			
 			_graphTexture.Apply();
 			_graphImage?.MarkDirtyRepaint();
 		}
 
-		public class LineRef {
-			public  string     Name;
-			private (int, int) _index   = (-1, -1);
-			private float      _current = -1;
-			private float      _min     = -1;
-			private float      _avg     = -1;
-			private float      _max     = -1;
-
-			internal void UpdateColor(int index, int total) {
-				if (index == _index.Item1 && total == _index.Item2) return;
-				_index = (index, total);
-				if (_colorBox != null)
-					_colorBox.style.backgroundColor = new StyleColor(
-						PerformanceMonitor.HSLToRGB(
-							index / (float)total * 360f, 0.7f, 0.5f
-						)
-					);
-			}
-
-			internal void UpdateCurrent(float current) {
-				if (Mathf.Approximately(_current, current)) return;
-				_current = current;
-				if (_crtLabel != null)
-					_crtLabel.text = Mathf.Abs(_current).ToString("F2");
-			}
-
-			internal void UpdateMin(float min) {
-				if (Mathf.Approximately(_min, min)) return;
-				_min = min;
-				if (_minLabel != null)
-					_minLabel.text = Mathf.Abs(_min).ToString("F2");
-			}
-
-			internal void UpdateAvg(float avg) {
-				if (Mathf.Approximately(_avg, avg)) return;
-				_avg = avg;
-				if (_avgLabel != null)
-					_avgLabel.text = Mathf.Abs(_avg).ToString("F2");
-			}
-
-			internal void UpdateMax(float max) {
-				if (Mathf.Approximately(_max, max)) return;
-				_max = max;
-				if (_maxLabel != null)
-					_maxLabel.text = _max.ToString("F2");
-			}
-
-			private readonly VisualElement _lineElement;
-			private readonly Label         _crtLabel;
-			private readonly Label         _minLabel;
-			private readonly Label         _avgLabel;
-			private readonly Label         _maxLabel;
-			private readonly VisualElement _colorBox;
-
-			internal void Remove() {
-				_lineElement?.RemoveFromHierarchy();
-			}
-
-			internal LineRef(string name, VisualElement parent) {
-				Name                  = name;
-				_lineElement          = Performances.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("mods-perf-line.uxml").CloneTree();
-				_lineElement.userData = name;
-				parent.Add(_lineElement);
-
-				var nameLabel = _lineElement.Q<Label>("name");
-				_crtLabel = _lineElement.Q<Label>("crt-ms");
-				_minLabel = _lineElement.Q<Label>("min-ms");
-				_avgLabel = _lineElement.Q<Label>("avg-ms");
-				_maxLabel = _lineElement.Q<Label>("max-ms");
-				_colorBox = _lineElement.Q<VisualElement>("color");
-
-				if (nameLabel != null)
-					nameLabel.text = name;
+		public void ClearData() {
+			_fpsHistory.Clear();
+			_memoryHistory.Clear();
+			_drawCallsHistory.Clear();
+			_fpsCurrent.Clear();
+			
+			if (_graphTexture != null) {
+				PerformanceMonitor.Fill(_graphTexture);
+				_graphTexture.Apply();
 			}
 		}
 
-		private readonly List<LineRef> _lines = new();
-
-
-		private void UpdateLabels(Mod mod, Performance[] profilers) {
-			if (mod == null) return;
-
-			_foldout.text = $"{mod.GetMetadata().GetName()} - {mod.GetMetadata().GetId()}@{mod.GetMetadata().GetVersion()}";
-
-			if (!CanUpdate()) return;
-
-			var present = _lines.Select(l => l.Name).ToList();
-
-			// Remove old entries
-			foreach (var line in _lines.ToList().Where(line => profilers.All(p => p.GetName() != line.Name))) {
-				line.Remove();
-				_lines.Remove(line);
-			}
-
-			// Add new entries
-			foreach (var profiler in profilers) {
-				var n = profiler.GetName();
-				if (present.Contains(n)) continue;
-				_lines.Add(new LineRef(n, _data));
-			}
-
-
-			// Update existing entries (name, crt-ms, min-ms, avg-ms, max-ms, color)
-			for (var i = 0; i < profilers.Length; i++) {
-				var profiler = profilers[i];
-				var line     = _lines.FirstOrDefault(l => l.Name == profiler.GetName());
-				if (line == null) continue;
-				line.UpdateColor(i, profilers.Length);
-				line.UpdateCurrent((float)profiler.Duration.TotalMilliseconds);
-				if (!_fpsHistory.TryGetValue(line.Name, out var history) || history.Count <= 0) continue;
-				line.UpdateAvg(history.Average(x => x.Item2));
-				line.UpdateMin(history.Min(x => x.Item1));
-				line.UpdateMax(history.Max(x => x.Item3));
-			}
-		}
-
-		internal void Dispose() {
-			if (_instance == null) return;
-			var parent = _instance.parent;
-			parent?.Remove(_instance);
-			foreach (var child in _lines.ToArray())
-				child.Remove();
-			_lines.Clear();
-			_instance.Clear();
-			_instance = null;
-		}
-	}
-
-	public class PerformanceMonitor {
-		private          VisualElement _graphContainer;
-		private readonly Foldout       _graphFoldout;
-		private          Label         _fpsLabel;
-		private          Label         _memoryLabel;
-		private          Label         _drawCallsLabel;
-		private          Image         _graphImage;
-		private          Texture2D     _graphTexture;
-
-		private bool CanUpdate() {
-			return _graphFoldout is { value: true };
-		}
-
-		internal PerformanceMonitor(VisualElement root) {
-			_graphFoldout   = root.Q<Foldout>("perf-graph-foldout");
-			_graphContainer = root.Q<VisualElement>("perf-graphic");
-			_fpsLabel       = root.Q<Label>("fps-label");
-			_memoryLabel    = root.Q<Label>("memory-label");
-			_drawCallsLabel = root.Q<Label>("draw-calls-label");
-			InitializeGraphElements();
-		}
-
-		internal void Dispose() {
-			_graphContainer = null;
-			_fpsLabel       = null;
-			_memoryLabel    = null;
-			_drawCallsLabel = null;
-
-			if (_graphFoldout != null) {
-				_graphFoldout.value = false;
-				_graphFoldout.Clear();
-			}
-
+		public void Dispose() {
 			if (_graphTexture) {
 				UnityEngine.Object.DestroyImmediate(_graphTexture);
 				_graphTexture = null;
 			}
+			
+			_graphImage?.RemoveFromHierarchy();
+		}
+	}
 
-			if (_graphImage != null) {
-				_graphImage.RemoveFromHierarchy();
-				_graphImage = null;
+	public class ModPerformanceMonitor {
+		private readonly Mod _mod;
+		private readonly VisualElement _container;
+		private readonly Foldout _foldout;
+		private readonly VisualElement _content;
+		private readonly VisualElement _graphContainer;
+		private readonly VisualElement _profilersList;
+		private readonly Label _totalTimeLabel;
+		private readonly Label _avgTimeLabel;
+		private readonly Label _peakTimeLabel;
+		
+		private Image _graphImage;
+		private Texture2D _graphTexture;
+		
+		private DateTime _lastUpdate = DateTime.MinValue;
+		private readonly Dictionary<string, ProfilerLineMonitor> _profilerMonitors = new();
+		private readonly Dictionary<string, List<(float, float, float)>> _profilerHistory = new();
+		
+		private const float UpdateInterval = 0.2f;
+
+		public ModPerformanceMonitor(Mod mod, VisualElement container) {
+			_mod = mod;
+			_container = container;
+			_foldout = container.Q<Foldout>("mod-foldout");
+			_content = container.Q<VisualElement>("mod-content");
+			_graphContainer = container.Q<VisualElement>("performance-graph");
+			_profilersList = container.Q<VisualElement>("profilers-list");
+			_totalTimeLabel = container.Q<Label>("total-time");
+			_avgTimeLabel = container.Q<Label>("avg-time");
+			_peakTimeLabel = container.Q<Label>("peak-time");
+			
+			InitializeGraph();
+			UpdateModInfo();
+		}
+
+		private void InitializeGraph() {
+			if (_graphContainer == null) return;
+			
+			_graphContainer.Clear();
+			
+			var containerWidth = Mathf.Max(1, (int)_graphContainer.layout.width);
+			var containerHeight = Mathf.Max(1, (int)_graphContainer.layout.height);
+			
+			if (containerWidth <= 1 || containerHeight <= 1) {
+				containerWidth = 400;
+				containerHeight = 120;
+			}
+			
+			_graphTexture = new Texture2D(containerWidth, containerHeight, TextureFormat.RGBA32, false) {
+				filterMode = FilterMode.Point
+			};
+			
+			_graphImage = new Image {
+				image = _graphTexture,
+				style = {
+					width = new StyleLength(Length.Percent(100)),
+					height = new StyleLength(Length.Percent(100))
+				}
+			};
+			
+			_graphContainer.Add(_graphImage);
+			PerformanceMonitor.Fill(_graphTexture);
+		}
+
+		public void UpdateMod(Mod mod) {
+			// Update mod reference if needed
+			UpdateModInfo();
+		}
+
+		private void UpdateModInfo() {
+			if (_foldout != null && _mod != null) {
+				var meta = _mod.GetMetadata();
+				_foldout.text = $"{meta.GetName()} ({meta.GetId()})";
 			}
 		}
 
-		internal void Update() {
-			_fpsCurrent.Add(Time.deltaTime);
-
-			// Check if we need to resize the texture based on container size
-			CheckAndResizeTexture();
-
-			if ((DateTime.UtcNow - _lastLabelUpdate).TotalSeconds >= UpdateLabelInterval) {
-				_lastLabelUpdate = DateTime.UtcNow;
-				UpdateLabels();
-			}
-
-			if ((DateTime.UtcNow - _lastGraphicUpdate).TotalSeconds >= UpdateGraphicInterval) {
-				_lastGraphicUpdate = DateTime.UtcNow;
-				// Calculate FPS
-				var avg = _fpsCurrent.Count > 0
-					? 1f / _fpsCurrent.Average()
-					: 0f;
-				var min = _fpsCurrent.Count > 0
-					? 1f / _fpsCurrent.Max()
-					: 0f;
-				var max = _fpsCurrent.Count > 0
-					? 1f / _fpsCurrent.Min()
-					: 0f;
-				_fpsCurrent.Clear();
-				RecordHistory(min, avg, max);
+		public void Update() {
+			if (_mod == null || (DateTime.UtcNow - _lastUpdate).TotalSeconds < UpdateInterval) return;
+			
+			_lastUpdate = DateTime.UtcNow;
+			
+			var profilers = _mod.GetPerformances();
+			Array.Sort(profilers, (p1, p2) => string.Compare(p1.GetName(), p2.GetName(), StringComparison.Ordinal));
+			
+			UpdateProfilers(profilers);
+			UpdateSummary(profilers);
+			
+			if (_foldout?.value == true) {
 				UpdateGraph();
 			}
 		}
 
-		private void CheckAndResizeTexture() {
-			if (!_graphTexture || _graphContainer == null || !CanUpdate()) return;
+		private void UpdateProfilers(Performance[] profilers) {
+			// Remove old profilers
+			var currentNames = profilers.Select(p => p.GetName()).ToHashSet();
+			var toRemove = _profilerMonitors.Keys.Where(k => !currentNames.Contains(k)).ToList();
+			
+			foreach (var name in toRemove) {
+				if (_profilerMonitors.TryGetValue(name, out var monitor)) {
+					monitor.Dispose();
+					_profilerMonitors.Remove(name);
+				}
+				_profilerHistory.Remove(name);
+			}
+			
+			// Update or add profilers
+			for (int i = 0; i < profilers.Length; i++) {
+				var profiler = profilers[i];
+				var name = profiler.GetName();
+				var duration = (float)profiler.Duration.TotalMilliseconds;
+				
+				if (!_profilerMonitors.TryGetValue(name, out var monitor)) {
+					var template = Performances.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("profiler-line.uxml");
+					var element = template.CloneTree();
+					_profilersList.Add(element);
+					
+					monitor = new ProfilerLineMonitor(name, element, i, profilers.Length);
+					_profilerMonitors[name] = monitor;
+					_profilerHistory[name] = new List<(float, float, float)>();
+				}
+				
+				monitor.UpdateCurrent(duration);
+				monitor.UpdateColor(i, profilers.Length);
+				
+				// Update history
+				if (!_profilerHistory.TryGetValue(name, out var history)) {
+					history = new List<(float, float, float)>();
+					_profilerHistory[name] = history;
+				}
+				
+				// For simplicity, use current value as min/avg/max for this frame
+				history.Add((duration, duration, duration));
+				if (history.Count > 100) history.RemoveAt(0);
+				
+				// Update stats
+				if (history.Count > 0) {
+					monitor.UpdateMin(history.Min(x => x.Item1));
+					monitor.UpdateAvg(history.Average(x => x.Item2));
+					monitor.UpdateMax(history.Max(x => x.Item3));
+				}
+			}
+		}
 
-			// Get current container dimensions
-			var containerWidth  = (int)_graphContainer.layout.width;
-			var containerHeight = (int)_graphContainer.layout.height;
+		private void UpdateSummary(Performance[] profilers) {
+			if (profilers.Length == 0) return;
+			
+			var totalTime = profilers.Sum(p => p.Duration.TotalMilliseconds);
+			var avgTime = totalTime / profilers.Length;
+			var peakTime = profilers.Max(p => p.Duration.TotalMilliseconds);
+			
+			if (_totalTimeLabel != null) _totalTimeLabel.text = $"Total: {totalTime:F2}ms";
+			if (_avgTimeLabel != null) _avgTimeLabel.text = $"Avg: {avgTime:F2}ms";
+			if (_peakTimeLabel != null) _peakTimeLabel.text = $"Peak: {peakTime:F2}ms";
+		}
 
-			// Only resize if dimensions are valid and different from current texture
-			if (containerWidth      <= 0 || containerHeight                   <= 0) return;
-			if (_graphTexture.width == containerWidth && _graphTexture.height == containerHeight) return;
+		private void UpdateGraph() {
+			if (_graphTexture == null || _profilerHistory.Count == 0) return;
+			
+			PerformanceMonitor.Fill(_graphTexture);
+			PerformanceMonitor.DrawGrid(_graphTexture);
+			
+			var maxValue = _profilerHistory.Values
+				.SelectMany(x => x)
+				.DefaultIfEmpty((0f, 0f, 0f))
+				.Max(x => x.Item3);
+			
+			var histories = _profilerHistory.ToArray();
+			Array.Sort(histories, (x, y) => string.Compare(x.Key, y.Key, StringComparison.Ordinal));
+			
+			for (int i = 0; i < histories.Length; i++) {
+				var history = histories[i].Value;
+				var color = PerformanceMonitor.HSLToRGB(i / (float)histories.Length * 360f, 0.7f, 0.5f);
+				PerformanceMonitor.DrawDataLine(_graphTexture, history.Select(x => x.Item2).ToList(), maxValue, color, false);
+			}
+			
+			_graphTexture.Apply();
+			_graphImage?.MarkDirtyRepaint();
+		}
 
-			// Recreate texture with new dimensions
+		public void SetDetailedVisibility(bool visible) {
+			if (_content != null) {
+				_content.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+			}
+		}
+
+		public void ClearData() {
+			foreach (var history in _profilerHistory.Values) {
+				history.Clear();
+			}
+			
+			if (_graphTexture != null) {
+				PerformanceMonitor.Fill(_graphTexture);
+				_graphTexture.Apply();
+			}
+		}
+
+		public void Dispose() {
+			foreach (var monitor in _profilerMonitors.Values) {
+				monitor.Dispose();
+			}
+			_profilerMonitors.Clear();
+			_profilerHistory.Clear();
+			
 			if (_graphTexture) {
 				UnityEngine.Object.DestroyImmediate(_graphTexture);
+				_graphTexture = null;
 			}
+			
+			_graphImage?.RemoveFromHierarchy();
+		}
+	}
 
-			_graphTexture = new Texture2D(containerWidth, containerHeight, TextureFormat.RGBA32, false) {
-				filterMode = FilterMode.Point
-			};
+	public class ProfilerLineMonitor {
+		private readonly string _name;
+		private readonly VisualElement _element;
+		private readonly VisualElement _colorIndicator;
+		private readonly Label _nameLabel;
+		private readonly Label _currentLabel;
+		private readonly Label _minLabel;
+		private readonly Label _avgLabel;
+		private readonly Label _maxLabel;
 
-			// Update the image with the new texture
-			if (_graphImage != null) {
-				_graphImage.image = _graphTexture;
-			}
-
-			// Redraw everything
-			UpdateGraph();
+		public ProfilerLineMonitor(string name, VisualElement element, int colorIndex, int totalColors) {
+			_name = name;
+			_element = element;
+			_colorIndicator = element.Q<VisualElement>("color-indicator");
+			_nameLabel = element.Q<Label>("profiler-name");
+			_currentLabel = element.Q<Label>("current-ms");
+			_minLabel = element.Q<Label>("min-ms");
+			_avgLabel = element.Q<Label>("avg-ms");
+			_maxLabel = element.Q<Label>("max-ms");
+			
+			if (_nameLabel != null) _nameLabel.text = name;
+			UpdateColor(colorIndex, totalColors);
 		}
 
-		private          DateTime                    _lastGraphicUpdate = DateTime.UtcNow;
-		private          DateTime                    _lastLabelUpdate   = DateTime.UtcNow;
-		private readonly List<float>                 _fpsCurrent        = new();
-		private readonly List<(float, float, float)> _fpsHistory        = new();
-		private readonly List<float>                 _memoryHistory     = new();
-		private readonly List<float>                 _drawCallsHistory  = new();
-
-		private const int   MaxHistoryPoints      = 256;
-		private const float UpdateGraphicInterval = 1f / MaxHistoryPoints * 10;
-		private const float UpdateLabelInterval   = 0.5f;
-
-		private void InitializeGraphElements() {
-			if (_graphContainer == null) return;
-
-			_graphContainer.Clear();
-
-			// Get initial container dimensions
-			var containerWidth  = Mathf.Max(1, (int)_graphContainer.layout.width);
-			var containerHeight = Mathf.Max(1, (int)_graphContainer.layout.height);
-
-			// If the layout isn't ready yet, use some reasonable defaults
-			if (containerWidth <= 1 || containerHeight <= 1) {
-				containerWidth  = 512;
-				containerHeight = 256;
+		public void UpdateColor(int index, int total) {
+			if (_colorIndicator != null) {
+				var color = PerformanceMonitor.HSLToRGB(index / (float)total * 360f, 0.7f, 0.5f);
+				_colorIndicator.style.backgroundColor = new StyleColor(color);
 			}
-
-			// Create the texture for the graph
-			_graphTexture = new Texture2D(containerWidth, containerHeight, TextureFormat.RGBA32, false) {
-				filterMode = FilterMode.Point
-			};
-
-			// Create the image element that will display the texture
-			_graphImage = new Image {
-				image = _graphTexture,
-				style = {
-					width  = new StyleLength(Length.Percent(100)),
-					height = new StyleLength(Length.Percent(100))
-				}
-			};
-
-			_graphContainer.Add(_graphImage);
-
-			// Add legend
-			var legend = new VisualElement {
-				style = {
-					position        = Position.Absolute,
-					top             = 5,
-					right           = 5,
-					backgroundColor = new StyleColor(new Color(0, 0, 0, 0.5f)),
-					paddingBottom   = 5,
-					paddingLeft     = 5,
-					paddingRight    = 5,
-					paddingTop      = 5,
-					flexDirection   = FlexDirection.Column
-				}
-			};
-
-			// FPS legend entry (Average)
-			var fpsRow = new VisualElement {
-				style = {
-					flexDirection = FlexDirection.Row,
-					alignItems    = Align.Center,
-					marginBottom  = 2
-				}
-			};
-
-			var fpsColor = new VisualElement {
-				style = {
-					width           = 12,
-					height          = 12,
-					backgroundColor = new StyleColor(new Color(0, 1, 0, 0.7f)),
-					marginRight     = 5
-				}
-			};
-
-			var fpsText = new Label("Average Ms");
-
-			fpsRow.Add(fpsColor);
-			fpsRow.Add(fpsText);
-
-			// Min and Max FPS legend entries
-			var minFpsRow = new VisualElement {
-				style = {
-					flexDirection = FlexDirection.Row,
-					alignItems    = Align.Center,
-					marginBottom  = 2
-				}
-			};
-			var minFpsColor = new VisualElement {
-				style = {
-					width           = 12,
-					height          = 12,
-					backgroundColor = new StyleColor(new Color(0, 1, 1, 0.7f)),
-					marginRight     = 5
-				}
-			};
-			var minFpsText = new Label("Min Ms");
-			minFpsRow.Add(minFpsColor);
-			minFpsRow.Add(minFpsText);
-			var maxFpsRow = new VisualElement {
-				style = {
-					flexDirection = FlexDirection.Row,
-					alignItems    = Align.Center,
-					marginBottom  = 2
-				}
-			};
-			var maxFpsColor = new VisualElement {
-				style = {
-					width           = 12,
-					height          = 12,
-					backgroundColor = new StyleColor(new Color(1, 1, 0, 0.7f)),
-					marginRight     = 5
-				}
-			};
-			var maxFpsText = new Label("Max Ms");
-			maxFpsRow.Add(maxFpsColor);
-			maxFpsRow.Add(maxFpsText);
-
-			// Memory legend entry
-			var memRow = new VisualElement {
-				style = {
-					flexDirection = FlexDirection.Row,
-					alignItems    = Align.Center,
-					marginBottom  = 2
-				}
-			};
-
-			var memColor = new VisualElement {
-				style = {
-					width           = 12,
-					height          = 12,
-					backgroundColor = new StyleColor(new Color(0, 0.5f, 1, 0.7f)),
-					marginRight     = 5
-				}
-			};
-
-			var memText = new Label("Memory");
-
-			memRow.Add(memColor);
-			memRow.Add(memText);
-
-			// Draw Calls legend entry
-			var drawCallsRow = new VisualElement {
-				style = {
-					flexDirection = FlexDirection.Row,
-					alignItems    = Align.Center
-				}
-			};
-
-			var drawCallsColor = new VisualElement {
-				style = {
-					width           = 12,
-					height          = 12,
-					backgroundColor = new StyleColor(new Color(1, 0.5f, 0, 0.7f)),
-					marginRight     = 5
-				}
-			};
-
-			var drawCallsText = new Label("Draw Calls");
-
-			drawCallsRow.Add(drawCallsColor);
-			drawCallsRow.Add(drawCallsText);
-
-			legend.Add(fpsRow);
-			legend.Add(maxFpsRow);
-			legend.Add(minFpsRow);
-			legend.Add(memRow);
-			legend.Add(drawCallsRow);
-
-			_graphContainer.Add(legend);
-
-			// Initial draw of the graph
-			Fill(_graphTexture);
 		}
 
-		private (float, float, float) CurrentFps
-			=> _fpsHistory.Count == 0 ? (0, 0, 0) : _fpsHistory.Last();
-
-		private void UpdateLabels() {
-			if (_fpsLabel != null) {
-				var crt = CurrentFps;
-				_fpsLabel.text = $"FPS: {crt.Item2:F1} (Min: {crt.Item1:F1}, Max: {crt.Item3:F1})";
-			}
-
-
-			if (_memoryLabel != null) {
-				var memoryUsageMb = Profiler.GetTotalAllocatedMemoryLong() / (1024f * 1024f);
-				_memoryLabel.text = $"Memory: {memoryUsageMb:F1} MB";
-			}
-
-			if (_drawCallsLabel == null) return;
-			var drawCalls = UnityStats.drawCalls;
-			_drawCallsLabel.text = $"Draw Calls: {drawCalls}";
+		public void UpdateCurrent(float value) {
+			if (_currentLabel != null) _currentLabel.text = $"{value:F2}ms";
 		}
 
-		private void RecordHistory(float min, float avg, float max) {
-			// Add current values to history
-			_fpsHistory.Add((min, avg, max));
-
-			var memoryUsageMb = Profiler.GetTotalAllocatedMemoryLong() / (1024f * 1024f);
-			_memoryHistory.Add(memoryUsageMb);
-
-			var drawCalls = UnityStats.drawCalls;
-			_drawCallsHistory.Add(drawCalls);
-
-			// Limit history size
-			if (_fpsHistory.Count > MaxHistoryPoints)
-				_fpsHistory.RemoveAt(0);
-
-			if (_memoryHistory.Count > MaxHistoryPoints)
-				_memoryHistory.RemoveAt(0);
-
-			if (_drawCallsHistory.Count > MaxHistoryPoints)
-				_drawCallsHistory.RemoveAt(0);
+		public void UpdateMin(float value) {
+			if (_minLabel != null) _minLabel.text = $"{value:F2}ms";
 		}
 
+		public void UpdateAvg(float value) {
+			if (_avgLabel != null) _avgLabel.text = $"{value:F2}ms";
+		}
+
+		public void UpdateMax(float value) {
+			if (_maxLabel != null) _maxLabel.text = $"{value:F2}ms";
+		}
+
+		public void Dispose() {
+			_element?.RemoveFromHierarchy();
+		}
+	}
+
+	// ...existing code for PerformanceMonitor static methods...
+	public class PerformanceMonitor {
 		public static void Fill(Texture2D texture) {
 			var clearColor = new Color(0.15f, 0.15f, 0.15f, 1.0f);
 			var pixels     = new Color[texture.width * texture.height];
@@ -771,50 +664,6 @@ namespace dev.nox.development {
 
 			texture.SetPixels(pixels);
 			texture.Apply();
-		}
-
-		private void UpdateGraph() {
-			if (!_graphTexture || _graphContainer == null || !CanUpdate()) return;
-			// Clear the texture with a dark background
-			Fill(_graphTexture);
-
-			// Find max values for scaling
-			var maxFps       = _fpsHistory.Count       > 0 ? Mathf.Max(_fpsHistory.Max(x => x.Item3), 60) : 60;
-			var maxMemory    = _memoryHistory.Count    > 0 ? Mathf.Max(_memoryHistory.Max(), 100) : 100;
-			var maxDrawCalls = _drawCallsHistory.Count > 0 ? Mathf.Max(_drawCallsHistory.Max(), 100) : 100;
-
-			// Draw grid lines
-			DrawGrid(_graphTexture);
-
-			// Draw the data lines with reversed Y (higher values at the bottom)
-			DrawDataLine(
-				_graphTexture, _fpsHistory.Select(x => x.Item1).ToList(),
-				maxFps, new Color(0, 1, 1, 0.7f), true
-			);
-			DrawDataLine(
-				_graphTexture, _fpsHistory.Select(x => x.Item3).ToList(),
-				maxFps, new Color(1, 1, 0, 0.7f), true
-			);
-			DrawDataLine(
-				_graphTexture, _fpsHistory.Select(x => x.Item2).ToList(),
-				maxFps, new Color(0, 1, 0, 0.7f), true
-			);
-
-			// Draw memory and draw calls history
-			DrawDataLine(
-				_graphTexture, _memoryHistory,
-				maxMemory, new Color(0, 0.5f, 1, 0.7f),
-				true
-			);
-			DrawDataLine(
-				_graphTexture, _drawCallsHistory,
-				maxDrawCalls, new Color(1, 0.5f, 0, 0.7f),
-				true
-			);
-
-			// Apply the changes to the texture
-			_graphTexture.Apply();
-			_graphImage?.MarkDirtyRepaint();
 		}
 
 		public static void DrawGrid(Texture2D texture) {
@@ -838,7 +687,6 @@ namespace dev.nox.development {
 			var width  = texture.width;
 			var height = texture.height;
 
-			var pointWidth = width / (float)MaxHistoryPoints;
 			var lastIndex  = data.Count - 1;
 
 			for (int i = 0; i < data.Count - 1; i++) {

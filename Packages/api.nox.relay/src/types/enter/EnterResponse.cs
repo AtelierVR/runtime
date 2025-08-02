@@ -11,12 +11,17 @@ namespace api.nox.relay.types.Enter {
 		public InstancePlayer Player;
 		public byte           Tps;
 		public float          Threshold;
+		
+		// is a constant at the moment, but can be changed in the future
+		public float          RenderEntity = 100f;
 
 		public bool HasExpiration
 			=> ExpireAt != DateTime.MinValue;
 
 		public bool IsError
 			=> Result is not EnterResult.Success;
+
+		
 
 		public static EnterResponse CreateUnknown(ushort id, byte iid, string reason)
 			=> new() {

@@ -62,7 +62,7 @@ namespace Nox.ModLoader
                     results.Add(new ResultLoad
                     {
                         Type = ResultLoad.ResultType.MissingDependency,
-                        Message = $"Missing dependency {dependency.GetId()}({dependency.GetVersion()})",
+                        Message = $"Missing dependency {dependency.GetId()}@{dependency.GetVersion()} for {metadata.GetId()}@{metadata.GetVersion()}",
                         CausedBy = metadata.GetId(),
                         ForMod = dependency.GetId()
                     });
@@ -96,7 +96,7 @@ namespace Nox.ModLoader
                     {
                         Type = ResultLoad.ResultType.MissingDependency,
                         Message =
-                            $"Mod {metadata.GetId()}({metadata.GetVersion()}) breaks {dependency.GetId()}({dependency.GetVersion()})",
+                            $"Mod {metadata.GetId()}@{metadata.GetVersion()} breaks {dependency.GetId()}@{dependency.GetVersion()}",
                         CausedBy = metadata.GetId(),
                         ForMod = dependency.GetId()
                     })
@@ -128,7 +128,7 @@ namespace Nox.ModLoader
                     {
                         Type = ResultLoad.ResultType.MissingDependency,
                         Message =
-                            $"Mod {metadata.GetId()}({metadata.GetVersion()}) conflicts with {dependency.GetId()}({dependency.GetVersion()})",
+                            $"Mod {metadata.GetId()}@{metadata.GetVersion()} conflicts with {dependency.GetId()}@{dependency.GetVersion()}",
                         CausedBy = metadata.GetId(),
                         ForMod = dependency.GetId()
                     })
@@ -149,7 +149,7 @@ namespace Nox.ModLoader
                 return new ResultLoad
                 {
                     Type = ResultLoad.ResultType.AlreadyLoaded,
-                    Message = $"Mod {metadata.GetId()}({metadata.GetVersion()}) is already loaded",
+                    Message = $"Mod {metadata.GetId()}@{metadata.GetVersion()} is already loaded",
                     ForMod = metadata.GetId()
                 };
 

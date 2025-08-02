@@ -1,0 +1,24 @@
+@import "variables.uss";
+@import "height.uss";
+@import "width.uss";
+@import "text.uss";
+@import "padding.uss";
+@import "margin.uss";
+@import "flex.uss";
+@import "justify.uss";
+@import "align.uss";
+@import "position.uss";
+@import "rounded.uss";
+@import "opacity.uss";
+@import "background.uss";
+@import "border.uss";
+@import "display.uss";
+
+.container {
+    width: 100%;
+    max-width: 512px;
+}
+
+.transition {
+    transition-duration: 0.1s;
+}

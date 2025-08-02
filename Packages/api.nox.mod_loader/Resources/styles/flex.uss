@@ -1,0 +1,64 @@
+
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    flex-direction: column;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.flex-nowrap {
+    flex-wrap: nowrap;
+}
+
+.flex-basis-auto {
+    flex-basis: auto;
+}
+
+.flex-basis-0 {
+    flex-basis: 0;
+}
+
+.flex-basis-full {
+    flex-basis: 100%;
+}
+
+.flex-basis-4 {
+    flex-basis: 4px;
+}
+
+.flex-basis-8 {
+    flex-basis: 8px;
+}
+
+.flex-basis-16 {
+    flex-basis: 16px;
+}
+
+.flex-basis-48 {
+    flex-basis: 48px;
+}
+
+.flex-basis-64 {
+    flex-basis: 64px;
+}
+
+.flex-shrink {
+    flex-shrink: 1;
+}
+
+.flex-grow {
+    flex-grow: 1;
+}
+
+.flex-shrink {
+    flex-shrink: 1;
+}
