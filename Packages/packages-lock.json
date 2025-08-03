@@ -175,12 +175,34 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.earnestrobot.autohand": {
+      "version": "file:com.earnestrobot.autohand",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "com.hecomi.ulipsync": {
+      "version": "https://github.com/hecomi/uLipSync.git#upm",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.burst": "1.4.11",
+        "com.unity.mathematics": "1.2.5"
+      },
+      "hash": "ece3272762f2148dd8d3e658ec04fcbd79d4d97e"
+    },
     "com.jint.unity": {
       "version": "https://github.com/magicblock-labs/Jint-Unity.git",
       "depth": 0,
       "source": "git",
       "dependencies": {},
       "hash": "9b16e8d86afaffb7fba80ec91894534781719c02"
+    },
+    "com.keviniglesias.basicmotions": {
+      "version": "file:com.keviniglesias.basicmotions",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
     },
     "com.unity.2d.sprite": {
       "version": "1.0.0",

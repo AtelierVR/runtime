@@ -18,6 +18,16 @@ namespace api.nox.desktop {
 		[Tooltip("Maximum look angle up/down")]
 		public float maxLookAngle = 90f;
 
+		[Header("Mouse Look Settings")]
+		[Tooltip("Mouse smoothing factor (0 = no smoothing, higher = more smoothing)")]
+		public float mouseSmoothing = 0.1f;
+
+		[Tooltip("Use frame rate independent mouse sensitivity")]
+		public bool frameRateIndependentMouse = true;
+
+		[Tooltip("Mouse input deadzone")]
+		public float mouseDeadzone = 0.001f;
+
 		[Header("Auto Jump Settings")] [Tooltip("Delay between auto jumps after landing")]
 		public float autoJumpDelay = 0.3f;
 
@@ -45,6 +55,7 @@ namespace api.nox.desktop {
 		private int   jumpCount    = 0;
 		private bool  useMovement  = true;
 
+		// Smoothing variables for mouse input
 		private void Start() {
 			if (player == null) {
 				player = GetComponent<DesktopPlayer>();

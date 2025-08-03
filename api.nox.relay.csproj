@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Packages\api.nox.relay\src\editor\RelayEditor.cs" />
     <Compile Include="Packages\api.nox.relay\src\adapter\players\RelayLocalPlayer.cs" />
+    <Compile Include="Packages\api.nox.relay\src\types\join\JoinEvent.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\authentication\AuthenticationResult.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\session\RelayResponseSessions.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\RelayResponse.cs" />
@@ -77,8 +78,10 @@
     <Compile Include="Packages\api.nox.relay\src\types\RequestType.cs" />
     <Compile Include="Packages\api.nox.relay\src\Main.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\traveling\InstanceRequestTraveling.cs" />
+    <Compile Include="Packages\api.nox.relay\src\types\leave\LeaveEvent.cs" />
     <Compile Include="Packages\api.nox.relay\src\connection\ConnectionFlags.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\latency\RelayResponseLatency.cs" />
+    <Compile Include="Packages\api.nox.relay\src\adapter\players\RelayPhysicalPlayer.cs" />
     <Compile Include="Packages\api.nox.relay\src\adapter\RelayDimension.cs" />
     <Compile Include="Packages\api.nox.relay\src\instances\RelayInstance.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\transform\TransformEvent.cs" />

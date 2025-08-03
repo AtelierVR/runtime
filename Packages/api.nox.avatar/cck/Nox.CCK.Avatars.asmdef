@@ -1,11 +1,10 @@
 {
-    "name": "api.nox.avatar",
+    "name": "Nox.CCK.Avatars",
     "rootNamespace": "",
     "references": [
         "Nox.CCK",
-        "UniTask",
         "Nox.Avatars",
-        "Nox.CCK.Avatars"
+        "Nox.Players"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

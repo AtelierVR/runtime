@@ -1,5 +1,5 @@
 using UnityEngine;
 
 namespace Nox.Entities {
-	public abstract class Physical : Object { }
+	public abstract class Physical : MonoBehaviour { }
 }

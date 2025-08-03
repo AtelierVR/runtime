@@ -18,6 +18,8 @@ namespace api.nox.relay.Instances {
 		public readonly UnityEvent<types.Traveling.TravelingEvent> OnTraveling = new();
 		public readonly UnityEvent<types.Quit.QuitEvent>           OnQuit      = new();
 		public readonly UnityEvent<types.Enter.EnterResponse>      OnEnter     = new();
+		public readonly UnityEvent<types.Join.JoinEvent>           OnJoin      = new();
+		public readonly UnityEvent<types.Leave.LeaveEvent>         OnLeave     = new();
 
 		internal void OnReceived(ushort length, ushort state, ResponseType type, Buffer buffer) {
 			buffer.Goto(0);
@@ -33,6 +35,14 @@ namespace api.nox.relay.Instances {
 				case ResponseType.Enter:
 					var enter = new types.Enter.EnterResponse { ConnectionId = Connection.Id, InternalId = InternalId };
 					if (enter.FromBuffer(buffer)) OnEnter.Invoke(enter);
+					break;
+				case ResponseType.Join:
+					var join = new types.Join.JoinEvent { ConnectionId = Connection.Id, InternalId = InternalId };
+					if (join.FromBuffer(buffer)) OnJoin.Invoke(join);
+					break;
+				case ResponseType.Leave:
+					var leave = new types.Leave.LeaveEvent { ConnectionId = Connection.Id, InternalId = InternalId };
+					if (leave.FromBuffer(buffer)) OnLeave.Invoke(leave);
 					break;
 				default:
 					Logger.LogDebug($"Received unknown response type {type} for instance {InternalId}");

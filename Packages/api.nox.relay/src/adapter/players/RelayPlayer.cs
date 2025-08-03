@@ -15,8 +15,11 @@ namespace api.nox.relay {
 		protected InstancePlayer Reference;
 		protected RelayAdapter   Adapter;
 
-		private readonly  Dictionary<string, object>       _properties     = new();
-		internal readonly Dictionary<ushort, NoxTransform> Transforms      = new();
+		private readonly  Dictionary<string, object>       _properties = new();
+		internal readonly Dictionary<ushort, NoxTransform> Transforms  = new();
+
+		// Physical component reference
+		private RelayPhysicalPlayer _physicalComponent;
 
 		public void SetReference(InstancePlayer reference, RelayAdapter adapter) {
 			Reference = reference;
@@ -116,18 +119,32 @@ namespace api.nox.relay {
 		}
 
 		public bool TryGetPhysical(out Physical physical) {
-			Logger.LogWarning($"{nameof(TryGetPhysical)} is not currently implemented for {GetType().Name}.");
-			physical = null;
-			return false;
+			physical = _physicalComponent;
+			return _physicalComponent;
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		public Physical MakePhysical() {
-			Logger.LogWarning($"{nameof(MakePhysical)} is not currently implemented for {GetType().Name}.");
-			return null;
+			if (_physicalComponent)
+				return _physicalComponent;
+			var parent   = Adapter.EntitiesRoot;
+			var prefab   = Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("physical/player.prefab");
+			var instance = Object.Instantiate(prefab, GetPosition(), GetRotation(), parent.transform);
+			_physicalComponent = instance.GetComponent<RelayPhysicalPlayer>();
+			instance.name = $"[{_physicalComponent.GetType().Name}_{GetId()}]";
+			_physicalComponent.SetReference(this);
+			Logger.Log($"Created physical component for player {GetDisplay()} ({GetId()}) at {GetPosition()}");
+			return _physicalComponent;
 		}
 
 		public void DestroyPhysical() {
-			Logger.LogWarning($"{nameof(DestroyPhysical)} is not currently implemented for {GetType().Name}.");
+			if (!_physicalComponent) return;
+			Logger.Log($"Destroying physical component for player {GetDisplay()} ({GetId()}) at {GetPosition()}");
+			Object.Destroy(_physicalComponent);
+			_physicalComponent = null;
 		}
+
+		public bool HasPhysical()
+			=> _physicalComponent;
 	}
 }

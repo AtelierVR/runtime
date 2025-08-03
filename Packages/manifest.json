@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+    "com.hecomi.ulipsync": "https://github.com/hecomi/uLipSync.git#upm",
     "com.jint.unity": "https://github.com/magicblock-labs/Jint-Unity.git",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.ai.navigation": "2.0.8",

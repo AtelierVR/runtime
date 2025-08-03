@@ -172,6 +172,8 @@ namespace api.nox.relay {
 			}
 
 			adapter.Instance.OnQuit.AddListener(adapter.OnQuit);
+			adapter.Instance.OnJoin.AddListener(adapter.OnJoin);
+			adapter.Instance.OnLeave.AddListener(adapter.OnLeave);
 
 			Logger.LogDebug($"Got instance {adapter.Instance} from relay");
 			adapter.SetState(false, $"Got instance {instance} from relay", 0.275f);

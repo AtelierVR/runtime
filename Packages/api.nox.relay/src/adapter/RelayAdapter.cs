@@ -4,6 +4,8 @@ using api.nox.offline;
 using api.nox.relay.connection;
 using api.nox.relay.Instances;
 using api.nox.relay.types.Enter;
+using api.nox.relay.types.Join;
+using api.nox.relay.types.Leave;
 using api.nox.relay.types.Player;
 using api.nox.relay.types.Quit;
 using api.nox.relay.types.Traveling;
@@ -15,26 +17,30 @@ using Nox.Sessions;
 using Nox.Worlds;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
+using Object = System.Object;
 
 namespace api.nox.relay {
 	public class RelayAdapter : IAdapter, INoxObject {
-		private          RelayDimension _dimension;
+		internal         RelayDimension Dimension;
 		private readonly IEntityManager _entities;
 		private          ISession       _session;
 		private          RelayState     _state = new(true);
 		internal         Connection     Connection;
 		internal         RelayInstance  Instance;
 
-		private  bool     _isTraveling = true;
-		internal byte     Tps          = 0;
-		private  DateTime _lastUpdate  = DateTime.MinValue;
-		internal float    Threshold    = 0.001f;
-		internal float    RenderEntity = 100f;
+		private  bool       _isTraveling = true;
+		internal byte       Tps          = 0;
+		private  DateTime   _lastUpdate  = DateTime.MinValue;
+		internal float      Threshold    = 0.001f;
+		internal float      RenderEntity = 100f;
+		internal GameObject EntitiesRoot;
 
 
 		internal RelayAdapter() {
-			_dimension = null;
-			_entities  = Main.EntityAPI.New();
+			Dimension    = null;
+			_entities    = Main.EntityAPI.New();
+			EntitiesRoot = new GameObject($"[{GetType().Name}Entities]");
+			UnityEngine.Object.DontDestroyOnLoad(EntitiesRoot);
 		}
 
 
@@ -45,20 +51,46 @@ namespace api.nox.relay {
 			Instance.RequestTraveling(TravelingAction.Travel).Forget();
 		}
 
+		public void OnJoin(JoinEvent ev) {
+			Logger.LogDebug($"OnJoin: {ev}");
+			NewPlayer<RelayRemotePlayer>(ev.Player);
+		}
+
+		public void OnLeave(LeaveEvent ev) {
+			Logger.LogDebug($"OnLeave: {ev}");
+			var player = _entities.GetEntity<RelayPlayer>(ev.PlayerId);
+			if (player != null) {
+				_entities.UnregisterEntity(player);
+			}
+		}
+
 		public void OnUpdate() {
-			if (_isTraveling || Tps == 0 || _lastUpdate.AddSeconds(1f / Tps) > DateTime.UtcNow) return;
-			_lastUpdate = DateTime.UtcNow;
 			var local = _entities.GetEntities<RelayLocalPlayer>().FirstOrDefault();
 			var other = _entities.GetEntities<RelayRemotePlayer>();
 			UpdatePlayerDistance(ref local, ref other);
+			UpdatePhysicalPlayers(ref local, ref other);
+			if (_isTraveling || Tps == 0 || _lastUpdate.AddSeconds(1f / Tps) > DateTime.UtcNow) return;
+			_lastUpdate = DateTime.UtcNow;
 			local?.SendTransform();
 		}
 
+		private void UpdatePhysicalPlayers(ref RelayLocalPlayer local, ref RelayRemotePlayer[] others) {
+			if (!local.HasPhysical())
+				local.MakePhysical();
+			foreach (var other in others) {
+				var physical = other.HasPhysical();
+				if (other.DistanceToLocal > RenderEntity && physical)
+					other.DestroyPhysical();
+				else if (other.DistanceToLocal <= RenderEntity && !physical)
+					other.MakePhysical();
+			}
+		}
+
 		private static void UpdatePlayerDistance(ref RelayLocalPlayer local, ref RelayRemotePlayer[] others) {
-			foreach (var other in others) 
+			foreach (var other in others)
 				other.DistanceToLocal = Vector3.Distance(local.GetPosition(), other.GetPosition());
 		}
-		
+
 		public void OnQuit(QuitEvent ev) {
 			Tps          = 0;
 			Threshold    = 0.001f;
@@ -153,7 +185,7 @@ namespace api.nox.relay {
 
 		public void SetDimension(IScene scene) {
 			if (scene == null) return;
-			_dimension = new RelayDimension(0, scene, true);
+			Dimension = new RelayDimension(0, scene, true);
 		}
 
 		public IAdapterState GetState()
@@ -169,11 +201,12 @@ namespace api.nox.relay {
 		[NoxPublic(NoxAccess.Method)]
 		public void SetSession(ISession session) {
 			Logger.LogDebug($"SetSession: {this} -> {session}");
-			_session = session;
+			EntitiesRoot.name = $"[{GetType().Name}Entities_{session.GetId()}]";
+			_session          = session;
 		}
 
 		public IDimension GetDimension()
-			=> _dimension;
+			=> Dimension;
 
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask Dispose() {
@@ -181,8 +214,11 @@ namespace api.nox.relay {
 			if (Connection != null) await Connection.RequestDisconnect();
 			foreach (var entity in _entities.GetEntities().ToArray())
 				_entities.UnregisterEntity(entity);
-			if (_dimension.GetMainIndex() > 0)
-				_dimension.GetScene().GetMainScene().RemoveInstance(_dimension.GetMainIndex());
+			if (Dimension.GetMainIndex() > 0)
+				Dimension.GetScene().GetMainScene().RemoveInstance(Dimension.GetMainIndex());
+			Dimension = null;
+			UnityEngine.Object.Destroy(EntitiesRoot);
+			EntitiesRoot = null;
 		}
 
 		public IPlayer GetPlayer(int index)
@@ -205,21 +241,21 @@ namespace api.nox.relay {
 
 		public async UniTask OnDeselect(ISession newSession) {
 			Logger.LogDebug($"OnDeselect: {this}");
-			var main = _dimension.GetScene().GetMainScene();
-			main?.SetVisibleInstance(_dimension.GetMainIndex(), false, false);
+			var main = Dimension.GetScene().GetMainScene();
+			main?.SetVisibleInstance(Dimension.GetMainIndex(), false, false);
 			await UniTask.Yield();
 		}
 
 		public async UniTask OnSelect(ISession oldSession) {
 			Logger.LogDebug($"OnSelect: {this}");
-			if (_dimension == null)
+			if (Dimension == null)
 				throw new InvalidOperationException($"No current dimension found for session {this}. Please ensure a dimension is set before selecting the session.");
 			// if (GetLocalPlayer() == null) NewPlayer();
-			var main = _dimension.GetScene().GetMainScene();
-			if (_dimension.GetMainIndex() == 0)
-				_dimension.SetMainIndex(await main.MakeInstance());
-			_dimension.GetScene().SetCurrent();
-			main.SetVisibleInstance(_dimension.GetMainIndex(), true, true);
+			var main = Dimension.GetScene().GetMainScene();
+			if (Dimension.GetMainIndex() == 0)
+				Dimension.SetMainIndex(await main.MakeInstance());
+			Dimension.GetScene().SetCurrent();
+			main.SetVisibleInstance(Dimension.GetMainIndex(), true, true);
 		}
 
 		public async UniTask<bool> TransferAuthority(IPlayer player) {

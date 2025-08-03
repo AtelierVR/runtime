@@ -3,8 +3,6 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 using System.Collections.Generic;
-using Nox.CCK.Avatars;
-using Nox.CCK.Worlds;
 
 #if UNITY_EDITOR
 using Nox.CCK.Utils;

@@ -63,15 +63,6 @@ EditorBuildSettings:
     path: Packages/dev.nox.game_builder/buildscenes/main.unity
     guid: eaaaa443d7bb2384a99758427d41bfd8
   - enabled: 1
-    path: Assets/AutoHand/Examples/Scenes/XR/Demo.unity
-    guid: 9935fff7a54383d4a8ca954c1411c833
-  - enabled: 1
-    path: Assets/AutoHand/Examples/Scenes/XR/Tutorial Video Scene.unity
-    guid: dc74935531a6487409eb101722a98460
-  - enabled: 1
-    path: Assets/AutoHand/Examples/Scenes/Desktop/Desktop Player.unity
-    guid: bb1eab65b7f030d4fab81d20430b0b3d
-  - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 55daccc09a3b69647bbab145b54a3ab3
   - enabled: 1
@@ -87,8 +78,21 @@ EditorBuildSettings:
     path: Assets/Samples/XR Interaction Toolkit/3.1.2/Starter Assets/DemoScene.unity
     guid: 319dafa5c80f29f428dc1e0d03f04177
   - enabled: 1
-    path: Assets/Samples/Avatars/1.0.0/OpenME.unity
-    guid: dec68381f5851c342afc1a9c49261343
+    path: Packages/com.earnestrobot.autohand/Examples/Scenes/XR/Tutorial Video Scene.unity
+    guid: dc74935531a6487409eb101722a98460
+  - enabled: 1
+    path: Packages/com.earnestrobot.autohand/Examples/Scenes/Desktop/Desktop Player.unity
+    guid: bb1eab65b7f030d4fab81d20430b0b3d
+  - enabled: 1
+    path: Packages/com.earnestrobot.autohand/Examples/Scenes/XR/Demo.unity
+    guid: 9935fff7a54383d4a8ca954c1411c833
+  - enabled: 1
+    path: Assets/Samples/Avatars/1.0.0/OpenMe.unity
+    guid: d1daeea0afdffe74c9af7111ca457ca0
+  - enabled: 1
+    path: Packages/com.keviniglesias.basicmotions/Unity Demo Scenes/Human Basic Motions/Human
+      Basic Motions - Unity Demo Scene.unity
+    guid: cc778ff8e7d7b874d9ef5cf06279e322
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

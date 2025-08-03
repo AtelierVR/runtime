@@ -1,44 +1,68 @@
 using System.Collections.Generic;
-using System.Linq;
-using Nox.ModLoader;
 using UnityEngine;
 
 namespace DefaultNamespace {
-	public class FPSGraph : MonoBehaviour {
-		public int graphWidth  = 200;
-		public int graphHeight = 100;
-		public int maxSamples  = 200;
+	using System.Collections.Generic;
+	using UnityEngine;
+	using UnityEngine.UI;
+
+	[RequireComponent(typeof(CanvasRenderer))]
+	public class UGUIFPSGraph : Graphic {
+		public int   maxSamples  = 200;
+		public float graphHeight = 100f;
 
 		private List<float> fpsSamples = new List<float>();
 		private float       deltaTime;
 
+		protected override void OnPopulateMesh(VertexHelper vh) {
+			vh.Clear();
+
+			if (fpsSamples.Count < 2)
+				return;
+
+			float widthPerSample = rectTransform.rect.width / (float)(maxSamples - 1);
+			float height         = rectTransform.rect.height;
+
+			for (int i = 1; i < fpsSamples.Count; i++) {
+				float x1 = (i - 1)                                 * widthPerSample;
+				float y1 = Mathf.Clamp01(fpsSamples[i - 1] / 100f) * graphHeight;
+
+				float x2 = i                                   * widthPerSample;
+				float y2 = Mathf.Clamp01(fpsSamples[i] / 100f) * graphHeight;
+
+				AddLine(vh, new Vector2(x1, y1), new Vector2(x2, y2), 1.5f, color);
+			}
+		}
+
 		void Update() {
 			deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
-			float fps = 1.0f / deltaTime;
+			float fps = 1f / deltaTime;
 
 			if (fpsSamples.Count >= maxSamples)
 				fpsSamples.RemoveAt(0);
-			
+
 			fpsSamples.Add(fps);
+			SetVerticesDirty();
 		}
 
-		void OnGUI() {
-			GUI.color = Color.black;
-			GUI.DrawTexture(new Rect(10, 10, graphWidth, graphHeight), Texture2D.whiteTexture);
+		private void AddLine(VertexHelper vh, Vector2 start, Vector2 end, float thickness, Color col) {
+			Vector2 dir    = (end - start).normalized;
+			Vector2 normal = new Vector2(-dir.y, dir.x) * thickness * 0.5f;
 
-			GUI.color = Color.green;
-			for (int i = 1; i < fpsSamples.Count; i++) {
-				float x1 = 10               + (graphWidth * (i - 1)                  / (float)maxSamples);
-				float y1 = 10 + graphHeight - Mathf.Clamp(fpsSamples[i - 1], 0, 100) * graphHeight / 100f;
+			UIVertex[] quad = new UIVertex[4];
 
-				float x2 = 10               + (graphWidth * i                    / (float)maxSamples);
-				float y2 = 10 + graphHeight - Mathf.Clamp(fpsSamples[i], 0, 100) * graphHeight / 100f;
+			quad[0].position = start - normal;
+			quad[1].position = start + normal;
+			quad[2].position = end   + normal;
+			quad[3].position = end   - normal;
 
-				Drawing.DrawLine(new Vector2(x1, y1), new Vector2(x2, y2), Color.green, 1f);
+			for (int i = 0; i < 4; i++) {
+				quad[i].color = col;
 			}
 
-			GUI.color = Color.white;
-			GUI.Label(new Rect(10, 10, 100, 20), $"FPS: {(1.0f / deltaTime):0.0}");
+			int idx = vh.currentVertCount;
+			vh.AddUIVertexQuad(quad);
 		}
 	}
+
 }

@@ -175,7 +175,7 @@ namespace Nox.CCK.Avatars {
 			eyeLookType.Init(descriptor.eyeLookType);
 			eyeLookType.RegisterValueChangedCallback(
 				e => {
-					descriptor.eyeLookType = (AvatarDescriptor.EyeLookType)e.newValue;
+					descriptor.eyeLookType = (EyeLookType)e.newValue;
 					UpdateEyeList();
 					UpdateEyeLookPreview();
 					EditorUtility.SetDirty(target);
@@ -285,7 +285,7 @@ namespace Nox.CCK.Avatars {
 						? -previewEyeLook.y
 						: 0;
 
-				if (descriptor.eyeLookType == AvatarDescriptor.EyeLookType.Muscle) {
+				if (descriptor.eyeLookType == EyeLookType.Muscle) {
 					var animator = GetAnimator(descriptor);
 					if (!animator) continue;
 
@@ -299,15 +299,15 @@ namespace Nox.CCK.Avatars {
 						1f,
 						0.5f
 					);
-				} else if (descriptor.eyeLookType == AvatarDescriptor.EyeLookType.Transform) {
+				} else if (descriptor.eyeLookType == EyeLookType.Transform) {
 					if (!eye.target) continue;
 
 					eye.target.localRotation = Quaternion.Euler(
-						down - up,
+						down  - up,
 						right - left,
 						0
 					);
-				} else if (descriptor.eyeLookType == AvatarDescriptor.EyeLookType.BlendShape) {
+				} else if (descriptor.eyeLookType == EyeLookType.BlendShape) {
 					var mesh = eye.mesh;
 					if (!mesh) continue;
 
@@ -330,17 +330,17 @@ namespace Nox.CCK.Avatars {
 			if (!descriptor) return;
 
 			eyes.makeItem = () => {
-				if (descriptor.eyeLookType == AvatarDescriptor.EyeLookType.Transform)
+				if (descriptor.eyeLookType == EyeLookType.Transform)
 					return MakeEyeTransform(descriptor);
-				if (descriptor.eyeLookType == AvatarDescriptor.EyeLookType.BlendShape)
+				if (descriptor.eyeLookType == EyeLookType.BlendShape)
 					return MakeEyeBlendShape(descriptor);
 				return new VisualElement();
 			};
 
 			eyes.bindItem = (e, i) => {
-				if (descriptor.eyeLookType == AvatarDescriptor.EyeLookType.Transform)
+				if (descriptor.eyeLookType == EyeLookType.Transform)
 					BindEyeTransform(descriptor, e, i);
-				else if (descriptor.eyeLookType == AvatarDescriptor.EyeLookType.BlendShape)
+				else if (descriptor.eyeLookType == EyeLookType.BlendShape)
 					BindEyeBlendShape(descriptor, e, i);
 			};
 
@@ -349,7 +349,7 @@ namespace Nox.CCK.Avatars {
 				var eye = selectedIndex >= 0 && selectedIndex < descriptor.eyeLooks.Length
 					? descriptor.eyeLooks[selectedIndex]
 					: descriptor.eyeLooks.Length == 0
-						? new AvatarDescriptor.EyeLook { mesh = descriptor.faceMesh }
+						? new EyeLook { mesh = descriptor.faceMesh }
 						: descriptor.eyeLooks[^1];
 				var newEyes = descriptor.eyeLooks.ToList();
 				newEyes.Add(eye);
@@ -480,11 +480,11 @@ namespace Nox.CCK.Avatars {
 			label.text = "Eye #-";
 
 			var placement = item.Q<EnumField>("placement");
-			placement.Init(AvatarDescriptor.EyePlacement.Other);
+			placement.Init(EyePlacement.Other);
 			placement.RegisterValueChangedCallback(
 				e => {
 					if (item.userData is not (int i and >= 0) || i >= descriptor.eyeLooks.Length) return;
-					descriptor.eyeLooks[i].placement = (AvatarDescriptor.EyePlacement)e.newValue;
+					descriptor.eyeLooks[i].placement = (EyePlacement)e.newValue;
 					EditorUtility.SetDirty(descriptor);
 				}
 			);
@@ -632,11 +632,11 @@ namespace Nox.CCK.Avatars {
 			label.text = "Eye #-";
 
 			var placement = item.Q<EnumField>("placement");
-			placement.Init(AvatarDescriptor.EyePlacement.Other);
+			placement.Init(EyePlacement.Other);
 			placement.RegisterValueChangedCallback(
 				e => {
 					if (item.userData is not (int i and >= 0) || i >= descriptor.eyeLooks.Length) return;
-					descriptor.eyeLooks[i].placement = (AvatarDescriptor.EyePlacement)e.newValue;
+					descriptor.eyeLooks[i].placement = (EyePlacement)e.newValue;
 					EditorUtility.SetDirty(descriptor);
 				}
 			);
@@ -655,7 +655,7 @@ namespace Nox.CCK.Avatars {
 			targetDetect.clicked += () => {
 				if (item.userData is not (int i and >= 0) || i >= descriptor.eyeLooks.Length) return;
 
-				if (descriptor.eyeLooks[i].placement == AvatarDescriptor.EyePlacement.Left) {
+				if (descriptor.eyeLooks[i].placement == EyePlacement.Left) {
 					var animator = GetAnimator(descriptor);
 					if (!animator) {
 						EditorUtility.DisplayDialog("Error", "Avatar must have an Animator component", "OK");
@@ -666,7 +666,7 @@ namespace Nox.CCK.Avatars {
 					objectField.value             = descriptor.eyeLooks[i].target;
 
 					EditorUtility.SetDirty(descriptor);
-				} else if (descriptor.eyeLooks[i].placement == AvatarDescriptor.EyePlacement.Right) {
+				} else if (descriptor.eyeLooks[i].placement == EyePlacement.Right) {
 					var animator = GetAnimator(descriptor);
 					if (!animator) {
 						EditorUtility.DisplayDialog("Error", "Avatar must have an Animator component", "OK");
@@ -813,17 +813,17 @@ namespace Nox.CCK.Avatars {
 				}
 			}
 
-			if (descriptor.eyeLookType == AvatarDescriptor.EyeLookType.BlendShape) {
+			if (descriptor.eyeLookType == EyeLookType.BlendShape) {
 				var eyes = descriptor.eyeLooks;
 				if (eyes == null || eyes.Length == 0) return;
 
 				foreach (var eye in eyes) {
 					var eyeTarget = eye.placement switch {
-						AvatarDescriptor.EyePlacement.Left   => GetAnimator(descriptor).GetBoneTransform(HumanBodyBones.LeftEye).position,
-						AvatarDescriptor.EyePlacement.Right  => GetAnimator(descriptor).GetBoneTransform(HumanBodyBones.RightEye).position,
-						AvatarDescriptor.EyePlacement.Center => descriptor.viewPosition,
-						AvatarDescriptor.EyePlacement.Other  => eye.mesh?.rootBone.position ?? Vector3.zero,
-						_                                    => eye.target.position
+						EyePlacement.Left   => GetAnimator(descriptor).GetBoneTransform(HumanBodyBones.LeftEye).position,
+						EyePlacement.Right  => GetAnimator(descriptor).GetBoneTransform(HumanBodyBones.RightEye).position,
+						EyePlacement.Center => descriptor.viewPosition,
+						EyePlacement.Other  => eye.mesh?.rootBone.position ?? Vector3.zero,
+						_                   => eye.target.position
 					};
 
 					Handles.color = Color.green;
@@ -832,14 +832,14 @@ namespace Nox.CCK.Avatars {
 					var position = eyeTarget + forward * 0.1f;
 					Handles.DrawLine(eyeTarget, position);
 				}
-			} else if (descriptor.eyeLookType == AvatarDescriptor.EyeLookType.Transform) {
+			} else if (descriptor.eyeLookType == EyeLookType.Transform) {
 				var eyes = descriptor.eyeLooks;
 				if (eyes == null || eyes.Length == 0) return;
 
 				foreach (var eye in eyes) {
 					var eyeTarget = eye.target;
 					if (!eyeTarget) continue;
-					
+
 					var eyePosition = eyeTarget.position;
 					Handles.color = Color.green;
 					var rotation = Quaternion.Euler(-previewEyeLook.y, previewEyeLook.x, 0);
@@ -852,7 +852,6 @@ namespace Nox.CCK.Avatars {
 					Handles.DrawWireDisc(eyePosition, Vector3.forward, 0.01f);
 					Handles.Label(eyePosition, eyeTarget.name);
 					Handles.color = Color.white;
-					
 				}
 			}
 		}
