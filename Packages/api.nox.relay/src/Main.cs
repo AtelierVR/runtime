@@ -7,7 +7,9 @@ using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using api.nox.relay.connection;
 using api.nox.relay.connector;
+using Nox.Avatars;
 using Nox.CCK.Mods.Events;
+using Nox.Controllers;
 using Nox.Entities;
 using Nox.Sessions;
 using Nox.Users;
@@ -34,8 +36,12 @@ namespace api.nox.relay {
 		internal static ISessionAPI SessionAPI
 			=> Instance.CoreAPI.ModAPI.GetMod("session").GetMains().FirstOrDefault() as ISessionAPI;
 
+		internal static IControllerAPI ControllerAPI
+			=> Instance.CoreAPI.ModAPI.GetMod("controller").GetMains().FirstOrDefault() as IControllerAPI;
+
 		public static UnityEvent<Connection> OnConnectionAdded   = new();
 		public static UnityEvent<Connection> OnConnectionRemoved = new();
+
 
 		public void OnInitializeMain(MainModCoreAPI api) {
 			Instance = this;

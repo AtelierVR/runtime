@@ -31,8 +31,8 @@ TagManager:
   - Hand
   - HandPlayer
   - Player
-  - 
-  - 
+  - LocalAvatar
+  - RemoteAvatar
   - 
   - 
   - 

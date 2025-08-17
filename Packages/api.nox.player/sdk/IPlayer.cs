@@ -54,6 +54,5 @@ namespace Nox.Players {
 		/// <param name="part"></param>
 		/// <param name="transform"></param>
 		public void MovePart(ushort part, NoxTransform transform);
-
 	}
 }

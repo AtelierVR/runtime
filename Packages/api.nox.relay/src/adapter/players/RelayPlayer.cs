@@ -118,20 +118,20 @@ namespace api.nox.relay {
 			Logger.LogWarning($"{nameof(SetDisplay)} is not currently implemented for {GetType().Name}.");
 		}
 
-		public bool TryGetPhysical(out Physical physical) {
-			physical = _physicalComponent;
-			return _physicalComponent;
+		public bool TryGetPhysical<T>(out T physical) where T : Physical {
+			physical = _physicalComponent as T;
+			return physical;
 		}
 
 		// ReSharper disable Unity.PerformanceAnalysis
-		public Physical MakePhysical() {
+		public virtual bool MakePhysical() {
 			if (_physicalComponent)
 				return _physicalComponent;
 			var parent   = Adapter.EntitiesRoot;
 			var prefab   = Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("physical/player.prefab");
 			var instance = Object.Instantiate(prefab, GetPosition(), GetRotation(), parent.transform);
 			_physicalComponent = instance.GetComponent<RelayPhysicalPlayer>();
-			instance.name = $"[{_physicalComponent.GetType().Name}_{GetId()}]";
+			instance.name      = $"[{_physicalComponent.GetType().Name}_{GetId()}]";
 			_physicalComponent.SetReference(this);
 			Logger.Log($"Created physical component for player {GetDisplay()} ({GetId()}) at {GetPosition()}");
 			return _physicalComponent;

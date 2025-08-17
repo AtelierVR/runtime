@@ -1,4 +1,5 @@
 using System.Linq;
+using Nox.Avatars;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.Controllers;
@@ -13,6 +14,9 @@ namespace api.nox.desktop {
 
 		internal static IUiAPI UiAPI
 			=> CoreAPI.ModAPI.GetMod("ui").GetClients().FirstOrDefault() as IUiAPI;
+
+		internal static IAvatarAPI AvatarAPI
+			=> CoreAPI.ModAPI.GetMod("avatar").GetClients().FirstOrDefault() as IAvatarAPI;
 
 		public void OnInitializeClient(ClientModCoreAPI api) {
 			CoreAPI = api;

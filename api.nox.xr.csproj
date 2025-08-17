@@ -893,6 +893,10 @@
       <Project>{0f333b38-227b-3a61-c9e4-410cadf64208}</Project>
       <Name>Nox.UI</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.Avatars.csproj">
+      <Project>{4639ae99-1e29-e1b6-9533-34a9b7a24feb}</Project>
+      <Name>Nox.Avatars</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

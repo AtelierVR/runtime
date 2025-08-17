@@ -12,7 +12,8 @@
         "Nox.Players",
         "Nox.Entities",
         "Nox.UI",
-        "Unity.XR.Interaction.Toolkit"
+        "Unity.XR.Interaction.Toolkit",
+        "Nox.Avatars"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

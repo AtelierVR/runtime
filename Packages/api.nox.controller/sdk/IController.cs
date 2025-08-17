@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Nox.Avatars;
 using Nox.CCK.Players;
 using Nox.Players;
 using UnityEngine;
@@ -71,8 +72,28 @@ namespace Nox.Controllers {
 		/// <param name="value"></param>
 		public void SetAbilities(string key, object value);
 
+		/// <summary>
+		/// Get the current player associated with the controller.
+		/// </summary>
+		/// <returns></returns>
 		public IPlayer GetPlayer();
 
+		/// <summary>
+		/// Set the player currently associated with the controller.
+		/// </summary>
+		/// <param name="player"></param>
 		public void SetPlayer(IPlayer player);
+
+		/// <summary>
+		/// Get the avatar associated with the controller.
+		/// </summary>
+		/// <returns></returns>
+		public IAvatar GetAvatar();
+
+		/// <summary>
+		/// Set the avatar for the controller.
+		/// </summary>
+		/// <param name="avatar"></param>
+		public void SetAvatar(IAvatar avatar);
 	}
 }

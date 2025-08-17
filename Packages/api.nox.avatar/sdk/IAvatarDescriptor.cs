@@ -1,18 +1,12 @@
-using Nox.Players;
+using UnityEngine;
 
 namespace Nox.Avatars {
 	public interface IAvatarDescriptor {
 		/// <summary>
-		/// Sets the reference to the player that this avatar is associated with.
-		/// </summary>
-		/// <param name="player"></param>
-		public void SetPlayer(IPlayer player);
-
-		/// <summary>
-		/// Gets the player associated with this avatar descriptor.
+		/// Get the root GameObject of the avatar.
 		/// </summary>
 		/// <returns></returns>
-		public IPlayer GetPlayer();
+		public GameObject GetRoot();
 
 		/// <summary>
 		/// Gets the avatar modules of a specific type.
@@ -21,7 +15,18 @@ namespace Nox.Avatars {
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public IAvatarModule[] GetModules<T>() where T : IAvatarModule;
+		public T[] GetModules<T>() where T : IAvatarModule;
+
+		/// <summary>
+		/// Gets all avatar modules.
+		/// </summary>
+		/// <returns></returns>
 		public IAvatarModule[] GetModules();
+
+		/// <summary>
+		/// Gets the animator component associated with this avatar descriptor.
+		/// </summary>
+		/// <returns></returns>
+		public Animator GetAnimator();
 	}
 }

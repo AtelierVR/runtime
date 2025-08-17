@@ -162,6 +162,9 @@ MonoBehaviour:
   turnDeadzone: 0.1
   mouseSensitivity: 2
   maxLookAngle: 90
+  mouseSmoothing: 0.1
+  frameRateIndependentMouse: 1
+  mouseDeadzone: 0.001
   autoJumpDelay: 0.05
   doubleJumpWindow: 0.3
   enableDoubleJumpToFly: 1
@@ -281,7 +284,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -471,11 +474,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4176749210758014426, guid: c6e954dcb82fcbf43833dd84cbe39430, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.22685187
+      value: 0.20989583
       objectReference: {fileID: 0}
     - target: {fileID: 4176749210758014426, guid: c6e954dcb82fcbf43833dd84cbe39430, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.22685185
+      value: 0.20989583
+      objectReference: {fileID: 0}
+    - target: {fileID: 4176749210758014426, guid: c6e954dcb82fcbf43833dd84cbe39430, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.20989583
       objectReference: {fileID: 0}
     - target: {fileID: 5479599693753372345, guid: c6e954dcb82fcbf43833dd84cbe39430, type: 3}
       propertyPath: m_AnchorMax.x

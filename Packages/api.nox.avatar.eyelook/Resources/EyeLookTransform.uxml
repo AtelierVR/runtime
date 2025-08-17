@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Packages/api.nox.mod_loader/Resources/nox.cck.style.uss?fileID=7433441132597879392&amp;guid=ee18ab989d89a1a479332bd224e51c94&amp;type=3#nox.cck.style" />
+    
+    <ui:VisualElement name="eyelook-transform">
+        <ui:Foldout text="Limits">
+            <ui:VisualElement class="flex-row align-center">
+                <ui:FloatField label="Vertical&#10;" name="min-limit-vertical" class="large" />
+                <ui:MinMaxSlider name="limit-vertical" min-value="-180" max-value="180" low-limit="-90" high-limit="90" class="large flex-grow" />
+                <ui:FloatField name="max-limit-vertical" class="large" />
+            </ui:VisualElement>
+            <ui:VisualElement class="flex-row align-center">
+                <ui:FloatField label="Horizontal" name="min-limit-horizontal" class="large" />
+                <ui:MinMaxSlider name="limit-horizontal" min-value="-180" max-value="180" low-limit="-90" high-limit="90" class="large flex-grow" />
+                <ui:FloatField name="max-limit-horizontal" class="large" />
+            </ui:VisualElement>
+        </ui:Foldout>
+        
+        <uie:ObjectField label="Target Transform" name="target-field" type="UnityEngine.Transform, UnityEngine.CoreModule" class="mb-8 large" />
+    </ui:VisualElement>
+</ui:UXML>
+

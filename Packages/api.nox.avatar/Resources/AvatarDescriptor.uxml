@@ -1,0 +1,13 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Packages/api.nox.mod_loader/Resources/nox.cck.style.uss?fileID=7433441132597879392&amp;guid=ee18ab989d89a1a479332bd224e51c94&amp;type=3#nox.cck.style" />
+    <engine:VisualElement style="flex-grow: 1;">
+        <engine:GroupBox class="m-0 p-0">
+            <engine:Foldout text="Main Settings">
+                <engine:VisualElement class="flex-row" style="flex-grow: 1;">
+                    <engine:Vector3Field label="View Position" name="view-position" class="large flex-grow" />
+                    <engine:Button text="Edit" name="view-position-edit" class="large" />
+                </engine:VisualElement>
+            </engine:Foldout>
+        </engine:GroupBox>
+    </engine:VisualElement>
+</engine:UXML>

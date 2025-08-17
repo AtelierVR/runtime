@@ -850,6 +850,9 @@
     <Reference Include="Unity.InputSystem">
       <HintPath>U:\Projets\nox\runtime\Library\ScriptAssemblies\Unity.InputSystem.dll</HintPath>
     </Reference>
+    <Reference Include="UniTask">
+      <HintPath>U:\Projets\nox\runtime\Library\ScriptAssemblies\UniTask.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>U:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
     </Reference>
@@ -881,6 +884,10 @@
     <ProjectReference Include="Nox.Entities.csproj">
       <Project>{57446f06-06b0-94aa-6dd3-4195fbeb0f71}</Project>
       <Name>Nox.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Avatars.csproj">
+      <Project>{4639ae99-1e29-e1b6-9533-34a9b7a24feb}</Project>
+      <Name>Nox.Avatars</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

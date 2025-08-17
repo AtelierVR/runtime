@@ -43,6 +43,10 @@ namespace Nox.CCK.Worlds {
 		#region Build
 
 		#if UNITY_EDITOR
+		
+		int CompileOrder
+			=> 9999;
+		
 		public override void Compile() {
 			if (target == Platform.None)
 				target = PlatformExtensions.CurrentPlatform;

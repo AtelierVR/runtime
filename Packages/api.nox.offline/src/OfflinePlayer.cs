@@ -98,15 +98,15 @@ namespace api.nox.offline {
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
 
-		public bool TryGetPhysical(out Physical physical) {
+		public bool TryGetPhysical<T>(out T physical) where T : Physical {
 			Logger.LogWarning("OfflinePlayer does not support physical objects.");
 			physical = null;
 			return false;
 		}
 
-		public Physical MakePhysical() {
+		public bool MakePhysical() {
 			Logger.LogWarning("OfflinePlayer does not support physical objects.");
-			return null;
+			return false;
 		}
 
 		public void DestroyPhysical() {

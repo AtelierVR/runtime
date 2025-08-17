@@ -59,7 +59,6 @@
     <Compile Include="Packages\api.nox.ui\src\Client.cs" />
     <Compile Include="Packages\api.nox.ui\src\pages\PageManager.cs" />
     <Compile Include="Packages\api.nox.ui\src\layouts\bottom\Applications.cs" />
-    <Compile Include="Packages\api.nox.ui\src\examples\KeyboardExample.cs" />
     <Compile Include="Packages\api.nox.ui\src\defaults\DefaultPagesClient.cs" />
     <Compile Include="Packages\api.nox.ui\src\menus\Menu.cs" />
     <Compile Include="Packages\api.nox.ui\src\colors\ThemeSetter.cs" />

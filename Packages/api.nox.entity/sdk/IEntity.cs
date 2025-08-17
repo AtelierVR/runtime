@@ -67,14 +67,14 @@ namespace Nox.Entities {
 		/// </summary>
 		/// <param name="physical"></param>
 		/// <returns></returns>
-		public bool TryGetPhysical(out Physical physical);
+		public bool TryGetPhysical<T>(out T physical) where T : Physical;
 
 		/// <summary>
 		/// Create a new physical component for the entity.
 		/// (only one physical component can exist at a time for an entity)
 		/// </summary>
 		/// <returns></returns>
-		public Physical MakePhysical();
+		public bool MakePhysical();
 
 		/// <summary>
 		/// Destroy the physical component of the entity.

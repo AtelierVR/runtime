@@ -1,4 +1,4 @@
 {
 	"name": "Nox.Controllers",
-	"references":[ "GUID:1f5c4ea7910ca214c8bbca97bce87a2d", "GUID:498355fe69f140dd80d42b6d5a92f3bb" ]
+	"references":[ "GUID:1f5c4ea7910ca214c8bbca97bce87a2d", "GUID:498355fe69f140dd80d42b6d5a92f3bb", "GUID:4792fe99b5fd471e8575849004f76a10" ]
 }

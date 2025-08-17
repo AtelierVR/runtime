@@ -10,7 +10,9 @@
         "Nox.Worlds",
         "Nox.Players",
         "Nox.Entities",
-        "Nox.CCK.Worlds"
+        "Nox.CCK.Worlds",
+        "Nox.Avatars",
+        "Nox.Controllers"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

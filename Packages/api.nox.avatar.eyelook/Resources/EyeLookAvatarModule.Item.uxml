@@ -1,0 +1,37 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+
+    <ui:VisualElement name="eyelook-item" style="background-color: rgba(0.2, 0.2, 0.2, 0.3); margin-bottom: 5px; padding-left: 8px; padding-right: 8px; padding-top: 8px; padding-bottom: 8px; border-top-left-radius: 3px; border-bottom-left-radius: 3px; border-top-right-radius: 3px; border-bottom-right-radius: 3px;">
+        <!-- Header avec type et bouton de suppression -->
+        <ui:VisualElement name="header" style="flex-direction: row; margin-bottom: 8px; align-items: center;">
+            <ui:Label text="EyeLook Type" name="type-label" style="font-size: 12px; -unity-font-style: bold; flex-grow: 1;" />
+            <ui:Button text="✖" name="delete-button" style="width: 24px; height: 24px; font-size: 14px;" />
+        </ui:VisualElement>
+        
+        <!-- Limites communes -->
+        <uie:Vector4Field label="Limits (Down, Up, Left, Right)" name="limits-field" style="margin-bottom: 8px;" />
+        
+        <!-- Contenu spécifique au type -->
+        <ui:VisualElement name="type-content" style="margin-left: 10px;">
+            <!-- Transform Content -->
+            <ui:VisualElement name="transform-content" style="display: none;">
+                <uie:ObjectField label="Target Transform" name="target-field" type="UnityEngine.Transform, UnityEngine.CoreModule" />
+            </ui:VisualElement>
+            
+            <!-- BlendShape Content -->
+            <ui:VisualElement name="blendshape-content" style="display: none;">
+                <uie:ObjectField label="Skinned Mesh Renderer" name="mesh-field" type="UnityEngine.SkinnedMeshRenderer, UnityEngine.CoreModule" style="margin-bottom: 8px;" />
+                <ui:Label text="Blend Shapes" style="margin-bottom: 5px; -unity-font-style: bold;" />
+                <ui:TextField label="Up" name="shape-up" />
+                <ui:TextField label="Down" name="shape-down" />
+                <ui:TextField label="Left" name="shape-left" />
+                <ui:TextField label="Right" name="shape-right" />
+            </ui:VisualElement>
+            
+            <!-- Muscle Content -->
+            <ui:VisualElement name="muscle-content" style="display: none;">
+                <uie:ObjectField label="Animator" name="animator-field" type="UnityEngine.Animator, UnityEngine.CoreModule" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
+

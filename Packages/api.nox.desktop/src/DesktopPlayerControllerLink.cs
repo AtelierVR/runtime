@@ -44,6 +44,15 @@ namespace api.nox.desktop {
 		private bool  sprintPressed    = false;
 		private bool  menuPressed      = false;
 
+		// Smoothing variables for mouse input
+		private Vector2 smoothMouseDelta = Vector2.zero;
+		private Vector2 currentMouseDelta = Vector2.zero;
+		private Vector2 targetMouseDelta = Vector2.zero;
+		
+		// Frame time tracking for lag compensation
+		private float lastFrameTime = 0f;
+		private float smoothDeltaTime = 0f;
+
 		// Auto jump state variables
 		private bool isAutoJumping = false;
 		private bool wasGrounded   = true;
@@ -55,7 +64,6 @@ namespace api.nox.desktop {
 		private int   jumpCount    = 0;
 		private bool  useMovement  = true;
 
-		// Smoothing variables for mouse input
 		private void Start() {
 			if (player == null) {
 				player = GetComponent<DesktopPlayer>();
@@ -125,17 +133,57 @@ namespace api.nox.desktop {
 				return;
 			}
 
-			// Get mouse input
-			mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
-			mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
-
-			// Rotate the player body left and right
-			player.transform.Rotate(Vector3.up * mouseX);
-
-			// Rotate the camera up and down
-			verticalRotation                          -= mouseY;
-			verticalRotation                          =  Mathf.Clamp(verticalRotation, -maxLookAngle, maxLookAngle);
-			player.headCamera.transform.localRotation =  Quaternion.Euler(verticalRotation, 0, 0);
+			// Calculate smooth deltaTime for lag compensation
+			float currentTime = Time.unscaledTime;
+			float actualDeltaTime = currentTime - lastFrameTime;
+			lastFrameTime = currentTime;
+			
+			// Smooth deltaTime to prevent spikes during lag
+			smoothDeltaTime = Mathf.Lerp(smoothDeltaTime, actualDeltaTime, 0.1f);
+			
+			// Get raw mouse input
+			float rawMouseX = Input.GetAxis("Mouse X");
+			float rawMouseY = Input.GetAxis("Mouse Y");
+			
+			// Apply deadzone to prevent micro-movements
+			if (Mathf.Abs(rawMouseX) < mouseDeadzone) rawMouseX = 0f;
+			if (Mathf.Abs(rawMouseY) < mouseDeadzone) rawMouseY = 0f;
+			
+			// Calculate target mouse delta with sensitivity
+			targetMouseDelta = new Vector2(rawMouseX, rawMouseY) * mouseSensitivity;
+			
+			// Limit maximum mouse delta per frame to prevent huge jumps during lag
+			float maxMouseDelta = 10f; // Maximum degrees per frame
+			targetMouseDelta.x = Mathf.Clamp(targetMouseDelta.x, -maxMouseDelta, maxMouseDelta);
+			targetMouseDelta.y = Mathf.Clamp(targetMouseDelta.y, -maxMouseDelta, maxMouseDelta);
+			
+			// Apply frame rate compensation if enabled
+			if (frameRateIndependentMouse && smoothDeltaTime > 0f) {
+				float targetFrameRate = 60f; // Target 60 FPS
+				float frameRateMultiplier = (smoothDeltaTime * targetFrameRate);
+				frameRateMultiplier = Mathf.Clamp(frameRateMultiplier, 0.1f, 3f); // Prevent extreme values
+				targetMouseDelta *= frameRateMultiplier;
+			}
+			
+			// Smooth the mouse input to reduce jitter
+			if (mouseSmoothing > 0f) {
+				currentMouseDelta = Vector2.Lerp(currentMouseDelta, targetMouseDelta, 
+					Mathf.Clamp01(1f - mouseSmoothing));
+			} else {
+				currentMouseDelta = targetMouseDelta;
+			}
+			
+			// Apply horizontal rotation to player body
+			if (Mathf.Abs(currentMouseDelta.x) > 0.001f) {
+				player.transform.Rotate(Vector3.up * currentMouseDelta.x);
+			}
+			
+			// Apply vertical rotation to camera
+			if (Mathf.Abs(currentMouseDelta.y) > 0.001f) {
+				verticalRotation -= currentMouseDelta.y;
+				verticalRotation = Mathf.Clamp(verticalRotation, -maxLookAngle, maxLookAngle);
+				player.headCamera.transform.localRotation = Quaternion.Euler(verticalRotation, 0, 0);
+			}
 		}
 
 		private void HandleJumpInput() {

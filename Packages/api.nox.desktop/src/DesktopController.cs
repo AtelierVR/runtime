@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
+using Nox.Avatars;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
@@ -93,6 +95,9 @@ namespace api.nox.desktop {
 				return false;
 			}
 
+			if (desktop._attachedAvatar == null)
+				desktop.SetupAvatar().Forget();
+
 			EventSystem.current     = desktop.eventSystem;
 			desktop.gameObject.name = $"[{desktop.GetType().Name}_{desktop.GetInstanceID()}]";
 			DontDestroyOnLoad(desktop);
@@ -113,6 +118,19 @@ namespace api.nox.desktop {
 
 		public void Dispose() {
 			Destroy(gameObject);
+			_attachedAvatar?.Dispose();
+		}
+
+		private async UniTask SetupAvatar() {
+			if (_attachedAvatar != null) return;
+
+			var avatar = await Client.AvatarAPI.MakeLoading();
+			if (avatar == null) {
+				Logger.LogError("Failed to create avatar for DesktopController");
+				return;
+			}
+
+			_attachedAvatar = avatar;
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -126,6 +144,8 @@ namespace api.nox.desktop {
 		public void Restore(IController controller) {
 			foreach (var ability in controller.GetAbilities())
 				SetAbilities(ability.Key, ability.Value);
+			SetAvatar(controller.GetAvatar());
+			controller.SetAvatar(null);
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -196,7 +216,7 @@ namespace api.nox.desktop {
 			};
 
 		private IPlayer _attachedPlayer;
-
+		private IAvatar _attachedAvatar;
 
 		[NoxPublic(NoxAccess.Method)]
 		public void SetPlayer(IPlayer p) {
@@ -204,6 +224,14 @@ namespace api.nox.desktop {
 			Client.CoreAPI.EventAPI.Emit("controller_set_player", this, _attachedPlayer);
 			if (p == null) return;
 			SynchronizeControllerFromPlayer();
+		}
+
+		public IAvatar GetAvatar() {
+			throw new System.NotImplementedException();
+		}
+
+		public void SetAvatar(IAvatar avatar) {
+			throw new System.NotImplementedException();
 		}
 
 		[NoxPublic(NoxAccess.Method)]

@@ -1,0 +1,20 @@
+{
+  "name": "api.nox.avatar.modules",
+  "rootNamespace": "",
+  "references": [
+    "Nox.Avatars",
+    "Nox.CCK",
+    "Nox.CCK.Avatars.EyeLooks",
+    "Nox.CCK.Avatars.Parameters",
+    "Nox.Avatars.Parameters"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

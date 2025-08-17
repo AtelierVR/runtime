@@ -1035,7 +1035,6 @@ namespace api.nox.world {
 			if (_progressLabel != null)
 				_progressLabel.text = status;
 			_publishButton?.SetEnabled(false);
-			Logger.Log($"Progress: {progress * 100f:F1}%, Status: {status}");
 		}
 
 		private void HideProgress() {

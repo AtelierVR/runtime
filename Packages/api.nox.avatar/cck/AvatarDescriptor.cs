@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Nox.Avatars;
 using Nox.CCK.Build;
 using UnityEngine;
@@ -9,6 +11,9 @@ using Nox.Players;
 
 namespace Nox.CCK.Avatars {
 	public class AvatarDescriptor : MonoBehaviour, IAvatarDescriptor, ICompilable {
+		public GameObject GetRoot()
+			=> gameObject;
+
 		#region Publisher
 
 		#if UNITY_EDITOR
@@ -25,9 +30,17 @@ namespace Nox.CCK.Avatars {
 		#if UNITY_EDITOR
 		public bool isCompiled;
 
+		public int CompileOrder
+			=> 9999;
+
+		// ReSharper disable Unity.PerformanceAnalysis
 		public virtual void Compile() {
 			if (target == Platform.None)
 				target = PlatformExtensions.CurrentPlatform;
+			var modules = new List<IAvatarModule>();
+			modules.AddRange(GetComponents<IAvatarModule>());
+			modules.AddRange(GetComponentsInChildren<IAvatarModule>(true));
+			Modules    = modules.ToArray();
 			isCompiled = true;
 		}
 		#endif
@@ -38,38 +51,14 @@ namespace Nox.CCK.Avatars {
 
 		private Animator _animator;
 
-		public Animator Animator {
-			get {
-				if (!_animator)
-					_animator = GetComponent<Animator>();
-				return _animator;
-			}
+		// ReSharper disable Unity.PerformanceAnalysis
+		public Animator GetAnimator() {
+			if (!_animator)
+				_animator = GetComponent<Animator>();
+			return _animator;
 		}
 
 		#endregion Animator
-
-		#region Eyes
-
-		public bool                useEyeMovements   = false;
-		public Vector3             viewPosition      = new(0, 1.6f, 0);
-		public Vector2Int          eyeIntervalTarget = new(5, 10);
-		public EyeLookType         eyeLookType       = EyeLookType.Transform;
-		public EyeLook[]           eyeLooks          = Array.Empty<EyeLook>();
-		public SkinnedMeshRenderer faceMesh;
-
-		public EyeLook GetLeftEye()
-			=> Array.Find(eyeLooks, e => e.placement == EyePlacement.Left);
-
-		public EyeLook GetRightEye()
-			=> Array.Find(eyeLooks, e => e.placement == EyePlacement.Right);
-
-		public EyeLook[] GetEyes(EyePlacement placement)
-			=> Array.FindAll(eyeLooks, e => e.placement == placement);
-
-		public EyeLook[] GetEyes()
-			=> eyeLooks;
-
-		#endregion Eyes
 
 		#region Voice
 
@@ -82,27 +71,26 @@ namespace Nox.CCK.Avatars {
 
 		private IPlayer _player;
 
-		public void SetPlayer(IPlayer player)
+		public void AttachPlayer(IPlayer player)
 			=> _player = player;
 
-		public IPlayer GetPlayer()
+		public IPlayer GetAttachedPlayer()
 			=> _player;
-
-		#region Modules
-
-		private readonly IAvatarModule[] _modules = Array.Empty<IAvatarModule>();
-
-		public IAvatarModule[] GetModules<T>() where T : IAvatarModule
-			=> Array.FindAll(_modules, m => m is T);
-
-		public IAvatarModule[] GetModules()
-			=> _modules;
-
-		#endregion Modules
 
 		#endregion
 
-		public AvatarMenu       menu;
-		public AvatarParameters parameters;
+		#region Modules
+
+		public IAvatarModule[] Modules = Array.Empty<IAvatarModule>();
+
+		public T[] GetModules<T>() where T : IAvatarModule
+			=> Modules.OfType<T>().ToArray();
+
+		public IAvatarModule[] GetModules()
+			=> Modules;
+
+		#endregion Modules
+		
+		public Vector3 viewPosition = new(0, 1.6f, 0);
 	}
 }

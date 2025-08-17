@@ -6,6 +6,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "api.nox.avatar.modules": {
+      "version": "file:api.nox.avatar.eyelook",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "api.nox.cck": {
       "version": "file:api.nox.cck",
       "depth": 0,

@@ -1,0 +1,43 @@
+using Nox.Avatars.Parameters;
+using Nox.CCK.Utils;
+using UnityEngine;
+
+namespace Nox.CCK.Avatars.Rigging.Parameters {
+	public class RiggingActiveParameter : IParameter {
+		private readonly HumanBodyBones      _bone;
+		private readonly RiggingAvatarModule _module;
+		private readonly string              _parameterName;
+
+		public RiggingActiveParameter(HumanBodyBones bone, RiggingAvatarModule module) {
+			_bone          = bone;
+			_module        = module;
+			_parameterName = $"tracking/{bone.ToString().ToSnakeCase()}/active";
+		}
+
+		public string GetName()
+			=> _parameterName;
+
+		public int GetHash()
+			=> _parameterName.GetHashCode();
+
+		public ParameterType GetValueType()
+			=> ParameterType.Bool;
+
+		public bool IsReadOnly()
+			=> false;
+
+		public bool IsSyncable()
+			=> true;
+
+		public bool IsSavable()
+			=> true;
+
+		public object Get()
+			=> _module && _module.IsActive(_bone);
+
+		public void Set(object value) {
+			if (!_module || value is not bool active) return;
+			_module.SetActive(_bone, active);
+		}
+	}
+}

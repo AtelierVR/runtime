@@ -1,22 +1,24 @@
 {
-  "name": "api.nox.desktop",
-  "rootNamespace": "",
-  "references": [
-    "Nox.CCK",
-    "Nox.Controllers",
-    "Nox.KeyBindings",
-    "Unity.InputSystem",
-    "Nox.UI",
-    "Nox.Players",
-    "Nox.Entities"
-  ],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": [],
-  "versionDefines": [],
-  "noEngineReferences": false
+    "name": "api.nox.desktop",
+    "rootNamespace": "",
+    "references": [
+        "Nox.CCK",
+        "Nox.Controllers",
+        "Nox.KeyBindings",
+        "Unity.InputSystem",
+        "Nox.UI",
+        "Nox.Players",
+        "Nox.Entities",
+        "Nox.Avatars",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

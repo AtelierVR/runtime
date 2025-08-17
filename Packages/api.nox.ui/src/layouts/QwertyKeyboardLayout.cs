@@ -3,11 +3,11 @@ using Nox.CCK.Language;
 using UnityEngine;
 using UnityEngine.UI;
 using Nox.CCK.Utils;
-using UnityEditor.PackageManager;
+using Nox.UI;
 using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
 
-namespace Nox.UI {
+namespace api.nox.ui {
 	/// <summary>
 	/// Basic QWERTY keyboard layout implementation
 	/// Supports text input mode with standard QWERTY key arrangement
@@ -227,9 +227,9 @@ namespace Nox.UI {
 			var image   = Reference.GetComponent<Image>("image", keyObj);
 			var text    = Reference.GetComponent<TextLanguage>("text", keyObj);
 			var display = GetDisplayText(keyValue);
-			
+
 			if (image && display.Item2 != null) {
-				image.sprite = api.nox.ui.Editor.CoreAPI.AssetAPI.GetAsset<Sprite>(display.Item2);
+				image.sprite = Main.Instance.CoreAPI.AssetAPI.GetAsset<Sprite>(display.Item2);
 				image.gameObject.SetActive(true);
 				text.gameObject.SetActive(false);
 			} else {

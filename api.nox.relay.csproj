@@ -47,9 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Packages\api.nox.relay\src\editor\RelayEditor.cs" />
-    <Compile Include="Packages\api.nox.relay\src\adapter\players\RelayLocalPlayer.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\join\JoinEvent.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\authentication\AuthenticationResult.cs" />
+    <Compile Include="Packages\api.nox.relay\src\adapter\players\local\RelayPhysicalLocalPlayer.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\session\RelayResponseSessions.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\RelayResponse.cs" />
     <Compile Include="Packages\api.nox.relay\src\adapter\RelayState.cs" />
@@ -66,7 +66,6 @@
     <Compile Include="Packages\api.nox.relay\src\types\traveling\TravelingAction.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\player\InstancePlayerFlags.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\traveling\TravelingEvent.cs" />
-    <Compile Include="Packages\api.nox.relay\src\adapter\players\RelayRemotePlayer.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\RelayRequest.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\instance\RelayInstanceResponse.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\disconnect\RelayRequestDisconnect.cs" />
@@ -75,8 +74,11 @@
     <Compile Include="Packages\api.nox.relay\src\types\quit\InstanceRequestQuit.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\handshakes\RelayRequestHandshake.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\ResponseType.cs" />
+    <Compile Include="Packages\api.nox.relay\src\adapter\players\remote\RelayPhysicalRemotePlayer.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\RequestType.cs" />
     <Compile Include="Packages\api.nox.relay\src\Main.cs" />
+    <Compile Include="Packages\api.nox.relay\src\adapter\players\remote\RelayRemotePlayer.cs" />
+    <Compile Include="Packages\api.nox.relay\src\adapter\players\local\RelayLocalPlayer.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\traveling\InstanceRequestTraveling.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\leave\LeaveEvent.cs" />
     <Compile Include="Packages\api.nox.relay\src\connection\ConnectionFlags.cs" />
@@ -941,6 +943,14 @@
     <ProjectReference Include="Nox.CCK.Worlds.csproj">
       <Project>{e3f3b769-9bd6-c46f-3578-54823274209d}</Project>
       <Name>Nox.CCK.Worlds</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Avatars.csproj">
+      <Project>{4639ae99-1e29-e1b6-9533-34a9b7a24feb}</Project>
+      <Name>Nox.Avatars</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Controllers.csproj">
+      <Project>{7876f9af-a4fc-8e9f-76eb-a1ac927434f2}</Project>
+      <Name>Nox.Controllers</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

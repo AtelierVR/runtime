@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Packages/api.nox.mod_loader/Resources/nox.cck.style.uss?fileID=7433441132597879392&amp;guid=ee18ab989d89a1a479332bd224e51c94&amp;type=3#nox.cck.style" />
+    <ui:VisualElement name="root">
+        <uie:Toolbar class="border-l border-t mb-4">
+            <uie:ToolbarSpacer class="flex-grow" />
+            <uie:ToolbarMenu name="add-menu" />
+        </uie:Toolbar>
+        <ui:ListView name="eyelook-list" header-title="Eye Looks" virtualization-method="DynamicHeight" class="margin" />
+    </ui:VisualElement>
+</ui:UXML>

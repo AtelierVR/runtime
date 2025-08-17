@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Autohand;
 using Cysharp.Threading.Tasks;
+using Nox.Avatars;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
@@ -206,6 +207,14 @@ namespace api.nox.xr {
 			Client.CoreAPI.EventAPI.Emit("controller_set_player", this, _attachedPlayer);
 			if (p == null) return;
 			SynchronizeControllerFromPlayer();
+		}
+
+		public IAvatar GetAvatar() {
+			throw new NotImplementedException();
+		}
+
+		public void SetAvatar(IAvatar avatar) {
+			throw new NotImplementedException();
 		}
 
 		[NoxPublic(NoxAccess.Method)]

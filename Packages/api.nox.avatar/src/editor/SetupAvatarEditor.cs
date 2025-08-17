@@ -4,7 +4,7 @@ using UnityEditor;
 using Nox.CCK.Avatars;
 using Nox.CCK.Language;
 
-namespace src.editor {
+namespace api.nox.avatar.editor {
 	[CustomEditor(typeof(Animator))]
 	public class SetupAvatarEditor : UnityEditor.Editor {
 		public static bool IsHuman(Animator animator)

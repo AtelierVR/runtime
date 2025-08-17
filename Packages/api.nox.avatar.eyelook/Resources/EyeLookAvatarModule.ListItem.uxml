@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Packages/api.nox.mod_loader/Resources/nox.cck.style.uss?fileID=7433441132597879392&amp;guid=ee18ab989d89a1a479332bd224e51c94&amp;type=3#nox.cck.style" />
+    <ui:VisualElement name="eyelook-item" class="p-2 mb-1 rounded">
+        <ui:VisualElement name="header" class="flex-row align-center mb-2">
+            <ui:Label name="type-label" text="EyeLook Type" class="flex-grow font-bold text-sm margin" />
+            <ui:Button name="delete-button" text="✖" class="w-6 h-6 text-sm large" />
+        </ui:VisualElement>
+        <ui:VisualElement name="content-container" class="ml-2" />
+    </ui:VisualElement>
+</ui:UXML>

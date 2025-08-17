@@ -48,8 +48,12 @@
   <ItemGroup>
     <Compile Include="Packages\api.nox.avatar\src\editor\Editor.cs" />
     <Compile Include="Packages\api.nox.avatar\src\editor\SetupAvatarEditor.cs" />
+    <Compile Include="Packages\api.nox.avatar\src\editor\TestAvatar.cs" />
+    <Compile Include="Packages\api.nox.avatar\src\Client.cs" />
+    <Compile Include="Packages\api.nox.avatar\src\Avatar.cs" />
     <Compile Include="Packages\api.nox.avatar\src\editor\AvatarParametersEditor.cs" />
     <Compile Include="Packages\api.nox.avatar\src\editor\AvatarDescriptorEditor.cs" />
+    <None Include="Packages\api.nox.avatar\Resources\AvatarDescriptor.uxml" />
     <None Include="Packages\api.nox.avatar\package.json" />
     <None Include="Packages\api.nox.avatar\api.nox.avatar.asmdef" />
     <Reference Include="UnityEngine">
@@ -866,6 +870,18 @@
     <ProjectReference Include="Nox.CCK.Avatars.csproj">
       <Project>{2186926e-046f-8d8d-a515-4b317ca99ba3}</Project>
       <Name>Nox.CCK.Avatars</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Players.csproj">
+      <Project>{0e499f4c-db68-9841-61eb-59e5a4ed821c}</Project>
+      <Name>Nox.Players</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Entities.csproj">
+      <Project>{57446f06-06b0-94aa-6dd3-4195fbeb0f71}</Project>
+      <Name>Nox.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Users.csproj">
+      <Project>{c237149e-58f6-bdd3-6473-3bc76e6fd9f4}</Project>
+      <Name>Nox.Users</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
