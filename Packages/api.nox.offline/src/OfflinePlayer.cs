@@ -98,6 +98,34 @@ namespace api.nox.offline {
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
 
+		[NoxPublic(NoxAccess.Method)]
+		public Vector3 GetVelocity()
+			=> Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var transform)
+				? transform.GetVelocity()
+				: Vector3.zero;
+
+		[NoxPublic(NoxAccess.Method)]
+		public void SetVelocity(Vector3 velocity) {
+			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
+			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.SetVelocity(velocity);
+			Transforms[PlayerRig.Base.ToIndex()] = tr;
+		}
+
+		[NoxPublic(NoxAccess.Method)]
+		public Vector3 GetAngularVelocity()
+			=> Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var transform)
+				? transform.GetAngularVelocity()
+				: Vector3.zero;
+
+		[NoxPublic(NoxAccess.Method)]
+		public void SetAngularVelocity(Vector3 angular) {
+			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
+			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.SetAngularVelocity(angular);
+			Transforms[PlayerRig.Base.ToIndex()] = tr;
+		}
+
 		public bool TryGetPhysical<T>(out T physical) where T : Physical {
 			Logger.LogWarning("OfflinePlayer does not support physical objects.");
 			physical = null;

@@ -1,11 +1,16 @@
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
+using Nox.Entities;
+using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay {
 	public class RelayLocalPlayer : RelayPlayer {
 		public override bool IsLocal()
 			=> true;
+
+		private RelayPhysicalLocalPlayer _physicalComponent;
 
 		public void SendTransform() {
 			var trs = Transforms
@@ -19,5 +24,34 @@ namespace api.nox.relay {
 				Transforms[tr.Key]    = tr.Value;
 			}
 		}
+
+		public override bool TryGetPhysical<T>(out T physical) {
+			physical = _physicalComponent as T;
+			return physical;
+		}
+
+		// ReSharper disable Unity.PerformanceAnalysis
+		public override bool MakePhysical() {
+			if (_physicalComponent)
+				return _physicalComponent;
+			var parent   = Adapter.EntitiesRoot;
+			var prefab   = Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("physical/local_player.prefab");
+			var instance = Object.Instantiate(prefab, GetPosition(), GetRotation(), parent.transform);
+			_physicalComponent = instance.GetComponent<RelayPhysicalLocalPlayer>();
+			instance.name      = $"[{_physicalComponent.GetType().Name}_{GetId()}]";
+			_physicalComponent.SetReference(this);
+			Logger.Log($"Created physical component for player {GetDisplay()} ({GetId()}) at {GetPosition()}");
+			return _physicalComponent;
+		}
+
+		public override void DestroyPhysical() {
+			if (!_physicalComponent) return;
+			Logger.Log($"Destroying physical component for player {GetDisplay()} ({GetId()}) at {GetPosition()}");
+			Object.Destroy(_physicalComponent);
+			_physicalComponent = null;
+		}
+
+		public override bool HasPhysical()
+			=> _physicalComponent;
 	}
 }

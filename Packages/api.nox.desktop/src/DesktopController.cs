@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
+using Nox.Avatars.Camera;
+using Nox.Avatars.Parameters;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
@@ -122,7 +125,12 @@ namespace api.nox.desktop {
 		}
 
 		private async UniTask SetupAvatar() {
-			if (_attachedAvatar != null) return;
+			if (_attachedAvatar != null) {
+				Logger.LogDebug("Avatar already set for DesktopController");
+				return;
+			}
+
+			Logger.LogDebug("Creating avatar");
 
 			var avatar = await Client.AvatarAPI.MakeLoading();
 			if (avatar == null) {
@@ -130,7 +138,7 @@ namespace api.nox.desktop {
 				return;
 			}
 
-			_attachedAvatar = avatar;
+			SetAvatar(avatar);
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -179,10 +187,8 @@ namespace api.nox.desktop {
 					player.SetSprinting((bool)value);
 					break;
 				case "flying":
-					if ((bool)value != player.IsFlying()) {
+					if ((bool)value != player.IsFlying())
 						player.ToggleFlying();
-					}
-
 					break;
 				case "may_fly":
 					player.SetMayFly((bool)value);
@@ -226,12 +232,47 @@ namespace api.nox.desktop {
 			SynchronizeControllerFromPlayer();
 		}
 
-		public IAvatar GetAvatar() {
-			throw new System.NotImplementedException();
-		}
+		public IAvatar GetAvatar()
+			=> _attachedAvatar;
 
 		public void SetAvatar(IAvatar avatar) {
-			throw new System.NotImplementedException();
+			_attachedAvatar = avatar;
+			if (_attachedAvatar == null) return;
+			var root = _attachedAvatar.GetDescriptor()?.GetRoot();
+			if (!root) {
+				Logger.LogError("Avatar descriptor root is null, cannot set avatar.");
+				return;
+			}
+
+			root.transform.SetParent(transform, false);
+			root.transform.localPosition = Vector3.zero;
+			root.transform.localRotation = Quaternion.identity;
+
+			var parameterModule = _attachedAvatar?.GetDescriptor()
+				?.GetModules<IParameterModule>()
+				.FirstOrDefault();
+			if (parameterModule == null) return;
+			var parameters = parameterModule.GetParameters();
+			foreach (var param in parameters) {
+				var n = param.GetName();
+				switch (n) {
+					case "tracking/head/active":
+						param.Set(true);
+						break;
+					case "tracking/left_hand/active":
+						param.Set(false);
+						break;
+					case "tracking/right_hand/active":
+						param.Set(false);
+						break;
+					case "tracking/left_foot/active":
+						param.Set(false);
+						break;
+					case "tracking/right_foot/active":
+						param.Set(false);
+						break;
+				}
+			}
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -240,7 +281,11 @@ namespace api.nox.desktop {
 
 		private void Update() {
 			SynchronizePlayerFromController();
+			SynchronizeParametersAvatar();
 		}
+
+		private void LateUpdate()
+			=> UpdateCamera();
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		private void SynchronizePlayerFromController() {
@@ -248,17 +293,88 @@ namespace api.nox.desktop {
 			foreach (var part in GetParts())
 				_attachedPlayer.MovePart(
 					part.Key,
-					new NoxTransform(
-						part.Value,
-						part.Value.GetComponent<Rigidbody>()
-					)
+					new NoxTransform(part.Value, part.Value.GetComponent<Rigidbody>())
 				);
 		}
 
 		private void SynchronizeControllerFromPlayer() {
 			if (_attachedPlayer == null) return;
+			Logger.LogDebug("Synchronizing player from controller");
 			transform.position = _attachedPlayer.GetPosition();
 			transform.rotation = _attachedPlayer.GetRotation();
+		}
+
+		// ReSharper disable Unity.PerformanceAnalysis
+		private void SynchronizeParametersAvatar() {
+			var parameterModule = _attachedAvatar?.GetDescriptor()
+				?.GetModules<IParameterModule>()
+				.FirstOrDefault();
+			if (parameterModule == null) return;
+			var parameters = parameterModule.GetParameters();
+			foreach (var param in parameters) {
+				var n = param.GetName();
+				switch (n) {
+					case "grounded" or "Grounded": {
+						var grounded = player.IsGrounded();
+						var value    = (bool)param.Get();
+						if (value == grounded) continue;
+						param.Set(grounded);
+						break;
+					}
+					case "VelocityX" or "velocity_x": {
+						var velocity = player.body?.linearVelocity ?? Vector3.zero;
+						var value    = (float)param.Get();
+						if (Mathf.Approximately(value, velocity.x)) continue;
+						param.Set(velocity.x);
+						break;
+					}
+					case "VelocityY" or "velocity_y": {
+						var velocity = player.body?.linearVelocity ?? Vector3.zero;
+						var value    = (float)param.Get();
+						if (Mathf.Approximately(value, velocity.y)) continue;
+						param.Set(velocity.y);
+						break;
+					}
+					case "VelocityZ" or "velocity_z": {
+						var velocity = player.body?.linearVelocity ?? Vector3.zero;
+						var value    = (float)param.Get();
+						if (Mathf.Approximately(value, velocity.z)) continue;
+						param.Set(velocity.z);
+						break;
+					}
+					case "Velocity" or "velocity": {
+						var velocity = player.body?.linearVelocity ?? Vector3.zero;
+						var value    = (Vector3)param.Get();
+						if (value == velocity) continue;
+						param.Set(velocity);
+						break;
+					}
+					case "tracking/head/rotation": {
+						var cRot  = player.headCamera.transform.rotation;
+						var value = (Quaternion)param.Get();
+						if (Quaternion.Angle(value, cRot) < 0.001f) continue;
+						param.Set(cRot);
+						break;
+					}
+				}
+			}
+		}
+
+		private void UpdateCamera() {
+			var cameraModule = _attachedAvatar?.GetDescriptor()
+				?.GetModules<ICameraModule>()
+				.FirstOrDefault();
+
+			if (cameraModule == null)
+				return;
+
+			var offset = cameraModule.GetOffset();
+			var anchor = cameraModule.GetAnchor();
+			anchor.GetPositionAndRotation(out var pos, out var rot);
+
+			pos += anchor.TransformDirection(offset);
+
+			player.headCamera.transform.position = pos;
 		}
 	}
 }

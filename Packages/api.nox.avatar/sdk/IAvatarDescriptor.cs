@@ -24,6 +24,11 @@ namespace Nox.Avatars {
 		public IAvatarModule[] GetModules();
 
 		/// <summary>
+		/// Updates all avatar modules.
+		/// </summary>
+		public IAvatarModule[] FindModules();
+
+		/// <summary>
 		/// Gets the animator component associated with this avatar descriptor.
 		/// </summary>
 		/// <returns></returns>

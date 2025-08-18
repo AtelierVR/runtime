@@ -18,9 +18,6 @@ namespace api.nox.relay {
 		private readonly  Dictionary<string, object>       _properties = new();
 		internal readonly Dictionary<ushort, NoxTransform> Transforms  = new();
 
-		// Physical component reference
-		private RelayPhysicalPlayer _physicalComponent;
-
 		public void SetReference(InstancePlayer reference, RelayAdapter adapter) {
 			Reference = reference;
 			Adapter   = adapter;
@@ -88,6 +85,38 @@ namespace api.nox.relay {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
+		public Vector3 GetVelocity()
+			=> Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var transform)
+				? transform.GetVelocity()
+				: Vector3.zero;
+
+		[NoxPublic(NoxAccess.Method)]
+		public void SetVelocity(Vector3 velocity) {
+			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
+				?? new NoxTransform();
+			if (tr.IsSameVelocity(velocity, Adapter.Threshold)) return;
+			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.SetVelocity(velocity);
+			Transforms[PlayerRig.Base.ToIndex()] = tr;
+		}
+
+		[NoxPublic(NoxAccess.Method)]
+		public Vector3 GetAngularVelocity()
+			=> Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var transform)
+				? transform.GetAngularVelocity()
+				: Vector3.zero;
+
+		[NoxPublic(NoxAccess.Method)]
+		public void SetAngularVelocity(Vector3 angular) {
+			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
+				?? new NoxTransform();
+			if (tr.IsSameAngularVelocity(angular, Adapter.Threshold)) return;
+			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.SetAngularVelocity(angular);
+			Transforms[PlayerRig.Base.ToIndex()] = tr;
+		}
+
+		[NoxPublic(NoxAccess.Method)]
 		public void Teleport(Vector3 position, Quaternion rotation) {
 			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
 				?? new NoxTransform();
@@ -118,33 +147,12 @@ namespace api.nox.relay {
 			Logger.LogWarning($"{nameof(SetDisplay)} is not currently implemented for {GetType().Name}.");
 		}
 
-		public bool TryGetPhysical<T>(out T physical) where T : Physical {
-			physical = _physicalComponent as T;
-			return physical;
-		}
+		public abstract bool TryGetPhysical<T>(out T physical) where T : Physical;
 
-		// ReSharper disable Unity.PerformanceAnalysis
-		public virtual bool MakePhysical() {
-			if (_physicalComponent)
-				return _physicalComponent;
-			var parent   = Adapter.EntitiesRoot;
-			var prefab   = Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("physical/player.prefab");
-			var instance = Object.Instantiate(prefab, GetPosition(), GetRotation(), parent.transform);
-			_physicalComponent = instance.GetComponent<RelayPhysicalPlayer>();
-			instance.name      = $"[{_physicalComponent.GetType().Name}_{GetId()}]";
-			_physicalComponent.SetReference(this);
-			Logger.Log($"Created physical component for player {GetDisplay()} ({GetId()}) at {GetPosition()}");
-			return _physicalComponent;
-		}
+		public abstract bool MakePhysical();
 
-		public void DestroyPhysical() {
-			if (!_physicalComponent) return;
-			Logger.Log($"Destroying physical component for player {GetDisplay()} ({GetId()}) at {GetPosition()}");
-			Object.Destroy(_physicalComponent);
-			_physicalComponent = null;
-		}
+		public abstract void DestroyPhysical();
 
-		public bool HasPhysical()
-			=> _physicalComponent;
+		public abstract bool HasPhysical();
 	}
 }

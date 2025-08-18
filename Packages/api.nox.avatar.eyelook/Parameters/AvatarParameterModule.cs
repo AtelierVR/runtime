@@ -10,13 +10,32 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace Nox.CCK.Avatars.Parameters {
 	public class AvatarParameterModule : MonoBehaviour, IParameterModule {
+		public static bool Check(IAvatarDescriptor descriptor) {
+			var modules = descriptor.GetModules<AvatarParameterModule>();
+
+			var module = modules.Length switch {
+				1 => modules.FirstOrDefault(),
+				0 => descriptor.GetRoot().AddComponent<AvatarParameterModule>(),
+				_ => null
+			};
+
+			if (!module) {
+				Logger.LogError("Verify that the Avatar prefab has a valid AvatarParameterModule component.");
+				return false;
+			}
+
+			return true;
+		}
+
 		public AvatarParameters  parameters;
 		public IAvatarDescriptor Descriptor;
 
 		private readonly Dictionary<int, object> _history = new();
 
-		public void OnPlay(IAvatarDescriptor descriptor)
-			=> Descriptor = descriptor;
+		public bool OnPlay(IAvatar avatar) {
+			Descriptor = avatar.GetDescriptor();
+			return true;
+		}
 
 
 		public IParameter[] GetParameters() {
@@ -87,7 +106,7 @@ namespace Nox.CCK.Avatars.Parameters {
 			return controllers.ToArray();
 		}
 
-		private static AnimatorControllerPlayable[] RecursiveController(UnityEngine.Playables.Playable playable) {
+		private static AnimatorControllerPlayable[] RecursiveController(Playable playable) {
 			var controllers = new List<AnimatorControllerPlayable>();
 
 			if (!playable.IsValid())

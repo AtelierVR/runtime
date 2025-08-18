@@ -24,14 +24,12 @@ namespace api.nox.server {
 		internal static INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("network")
-				.GetMains()
-				.FirstOrDefault() as INetworkAPI;
+				?.GetEntry<INetworkAPI>();
 
 		internal static IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("user")
-				.GetMains()
-				.FirstOrDefault() as IUserAPI;
+				?.GetEntry<IUserAPI>();
 
 		internal readonly UnityEvent<INoxObject> OnServerUpdated      = new();
 		internal readonly UnityEvent<INoxObject> OnServerFetched      = new();

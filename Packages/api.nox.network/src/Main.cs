@@ -22,8 +22,7 @@ namespace api.nox.network {
 
 		internal static IUserAPI UserAPI
 			=> Main.Instance.CoreAPI.ModAPI.GetMod("user")
-				?.GetMains()
-				.FirstOrDefault() as IUserAPI;
+				?.GetEntry<IUserAPI>();
 
 		public void OnInitialize(ModCoreAPI api) {
 			CoreAPI  = api;

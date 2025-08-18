@@ -46,12 +46,18 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.1.8f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Packages\api.nox.avatar\src\AvatarLoader.cs" />
+    <Compile Include="Packages\api.nox.avatar\src\AvatarCache.cs" />
+    <Compile Include="Packages\api.nox.avatar\src\Main.cs" />
     <Compile Include="Packages\api.nox.avatar\src\editor\Editor.cs" />
     <Compile Include="Packages\api.nox.avatar\src\editor\SetupAvatarEditor.cs" />
+    <Compile Include="Packages\api.nox.avatar\src\AvatarSetup.cs" />
     <Compile Include="Packages\api.nox.avatar\src\editor\TestAvatar.cs" />
-    <Compile Include="Packages\api.nox.avatar\src\Client.cs" />
     <Compile Include="Packages\api.nox.avatar\src\Avatar.cs" />
     <Compile Include="Packages\api.nox.avatar\src\editor\AvatarParametersEditor.cs" />
+    <Compile Include="Packages\api.nox.avatar\src\AssetBundleAvatar.cs" />
+    <Compile Include="Packages\api.nox.avatar\src\BaseAvatar.cs" />
+    <Compile Include="Packages\api.nox.avatar\src\AssetAvatar.cs" />
     <Compile Include="Packages\api.nox.avatar\src\editor\AvatarDescriptorEditor.cs" />
     <None Include="Packages\api.nox.avatar\Resources\AvatarDescriptor.uxml" />
     <None Include="Packages\api.nox.avatar\package.json" />
@@ -882,6 +888,22 @@
     <ProjectReference Include="Nox.Users.csproj">
       <Project>{c237149e-58f6-bdd3-6473-3bc76e6fd9f4}</Project>
       <Name>Nox.Users</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Avatars.Parameters.csproj">
+      <Project>{4529f0c5-1b18-9167-4b55-e6354399f380}</Project>
+      <Name>Nox.CCK.Avatars.Parameters</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Avatars.EyeLooks.csproj">
+      <Project>{4db92ae7-7c95-55f2-88c9-86b289bad12b}</Project>
+      <Name>Nox.CCK.Avatars.EyeLooks</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Avatars.Rigging.csproj">
+      <Project>{db98858f-e749-e6e6-7e1e-10519fc0cd70}</Project>
+      <Name>Nox.CCK.Avatars.Rigging</Name>
+    </ProjectReference>
+    <ProjectReference Include="api.nox.avatar.modules.csproj">
+      <Project>{d733aa82-66c3-c095-cafc-faebd11fbddb}</Project>
+      <Name>api.nox.avatar.modules</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

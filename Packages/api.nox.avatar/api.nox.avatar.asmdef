@@ -8,7 +8,11 @@
         "Nox.CCK.Avatars",
         "Nox.Players",
         "Nox.Entities",
-        "Nox.Users"
+        "Nox.Users",
+        "Nox.CCK.Avatars.Parameters",
+        "Nox.CCK.Avatars.EyeLooks",
+        "Nox.CCK.Avatars.Rigging",
+        "api.nox.avatar.modules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

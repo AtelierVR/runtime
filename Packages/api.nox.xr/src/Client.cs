@@ -17,8 +17,7 @@ namespace api.nox.xr {
 
 		internal static IUiAPI UiAPI
 			=> CoreAPI.ModAPI.GetMod("ui")
-				.GetClients()
-				.FirstOrDefault() as IUiAPI;
+				?.GetEntry<IUiAPI>();
 		
 		#if UNITY_EDITOR
 		private static bool NoVRFlag {

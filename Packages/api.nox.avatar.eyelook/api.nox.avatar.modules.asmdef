@@ -6,7 +6,10 @@
     "Nox.CCK",
     "Nox.CCK.Avatars.EyeLooks",
     "Nox.CCK.Avatars.Parameters",
-    "Nox.Avatars.Parameters"
+    "Nox.CCK.Avatars.Rigging",
+    "Nox.CCK.Avatars.Camera",
+    "Nox.Avatars.Parameters",
+    "Nox.CCK.Avatars.Playable"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

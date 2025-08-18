@@ -19,14 +19,12 @@ namespace api.nox.table {
 		internal static INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("network")
-				?.GetMains()
-				.FirstOrDefault() as INetworkAPI;
+				?.GetEntry<INetworkAPI>();
 
 		internal static IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("user")
-				?.GetMains()
-				.FirstOrDefault() as IUserAPI;
+				?.GetEntry<IUserAPI>();
 
 		internal Network Network;
 

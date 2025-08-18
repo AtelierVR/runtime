@@ -58,7 +58,7 @@ namespace api.nox.relay {
 
 		public void OnLeave(LeaveEvent ev) {
 			Logger.LogDebug($"OnLeave: {ev}");
-			var player = _entities.GetEntity<RelayPlayer>(ev.PlayerId);
+			var player = _entities.GetEntity<RelayRemotePlayer>(ev.PlayerId);
 			if (player != null) {
 				_entities.UnregisterEntity(player);
 			}
@@ -75,6 +75,7 @@ namespace api.nox.relay {
 		}
 
 		private void UpdatePhysicalPlayers(ref RelayLocalPlayer local, ref RelayRemotePlayer[] others) {
+			if (local == null || others == null || others.Length == 0) return;
 			if (!local.HasPhysical())
 				local.MakePhysical();
 			foreach (var other in others) {
@@ -87,6 +88,7 @@ namespace api.nox.relay {
 		}
 
 		private static void UpdatePlayerDistance(ref RelayLocalPlayer local, ref RelayRemotePlayer[] others) {
+			if (local == null || others == null || others.Length == 0) return;
 			foreach (var other in others)
 				other.DistanceToLocal = Vector3.Distance(local.GetPosition(), other.GetPosition());
 		}

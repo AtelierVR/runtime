@@ -13,8 +13,10 @@ namespace AnimationControllers {
 	public class ControllersMergerAvatarModule : MonoBehaviour, IAvatarModule, ICompilable {
 		private IAvatarDescriptor _descriptor;
 
-		public void OnPlay(IAvatarDescriptor descriptor)
-			=> SetDescriptor(descriptor);
+		public bool OnPlay(IAvatar avatar) {
+			SetDescriptor(avatar.GetDescriptor());
+			return true;
+		}
 
 		public void SetDescriptor(IAvatarDescriptor descriptor)
 			=> _descriptor = descriptor;

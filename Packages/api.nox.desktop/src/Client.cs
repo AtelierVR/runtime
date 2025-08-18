@@ -16,7 +16,7 @@ namespace api.nox.desktop {
 			=> CoreAPI.ModAPI.GetMod("ui").GetClients().FirstOrDefault() as IUiAPI;
 
 		internal static IAvatarAPI AvatarAPI
-			=> CoreAPI.ModAPI.GetMod("avatar").GetClients().FirstOrDefault() as IAvatarAPI;
+			=> CoreAPI.ModAPI.GetMod("avatar").GetMains().FirstOrDefault() as IAvatarAPI;
 
 		public void OnInitializeClient(ClientModCoreAPI api) {
 			CoreAPI = api;

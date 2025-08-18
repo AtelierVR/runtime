@@ -19,6 +19,12 @@ namespace api.nox.avatar.editor {
 		public          IAvatarDescriptor          Descriptor;
 		public readonly Dictionary<string, object> Properties = new();
 
+		public Transform GetTransform()
+			=> transform;
+
+		public Rigidbody GetRigidbody()
+			=> GetComponent<Rigidbody>();
+
 		public Dictionary<string, object> GetProperties()
 			=> Properties;
 
@@ -44,6 +50,24 @@ namespace api.nox.avatar.editor {
 
 		public void SetRotation(Quaternion rotation)
 			=> transform.rotation = rotation;
+
+		public Vector3 GetVelocity()
+			=> GetRigidbody()?.linearVelocity ?? Vector3.zero;
+
+		public void SetVelocity(Vector3 velocity) {
+			var rb = GetRigidbody();
+			if (rb)
+				rb.linearVelocity = velocity;
+		}
+
+		public Vector3 GetAngularVelocity()
+			=> GetRigidbody()?.angularVelocity ?? Vector3.zero;
+
+		public void SetAngularVelocity(Vector3 angular) {
+			var rb = GetRigidbody();
+			if (rb)
+				rb.angularVelocity = angular;
+		}
 
 		public bool TryGetPhysical<T>(out T physical) where T : Physical {
 			physical = this as T;

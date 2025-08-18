@@ -37,10 +37,7 @@ namespace Nox.CCK.Avatars {
 		public virtual void Compile() {
 			if (target == Platform.None)
 				target = PlatformExtensions.CurrentPlatform;
-			var modules = new List<IAvatarModule>();
-			modules.AddRange(GetComponents<IAvatarModule>());
-			modules.AddRange(GetComponentsInChildren<IAvatarModule>(true));
-			Modules    = modules.ToArray();
+			Modules    = FindModules(this);
 			isCompiled = true;
 		}
 		#endif
@@ -59,13 +56,6 @@ namespace Nox.CCK.Avatars {
 		}
 
 		#endregion Animator
-
-		#region Voice
-
-		public Vector3   voicePosition;
-		public Transform voiceParent;
-
-		#endregion Voice
 
 		#region Runtime
 
@@ -89,8 +79,19 @@ namespace Nox.CCK.Avatars {
 		public IAvatarModule[] GetModules()
 			=> Modules;
 
+		// ReSharper disable Unity.PerformanceAnalysis
+		public static IAvatarModule[] FindModules(IAvatarDescriptor descriptor) {
+			var modules = new HashSet<IAvatarModule>(descriptor.GetModules());
+			var root    = descriptor.GetRoot();
+			modules.UnionWith(root.GetComponents<IAvatarModule>());
+			modules.UnionWith(root.GetComponentsInChildren<IAvatarModule>(true));
+			return modules.ToArray();
+		}
+
+		// ReSharper disable Unity.PerformanceAnalysis
+		public IAvatarModule[] FindModules()
+			=> Modules = FindModules(this);
+
 		#endregion Modules
-		
-		public Vector3 viewPosition = new(0, 1.6f, 0);
 	}
 }

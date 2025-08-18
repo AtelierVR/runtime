@@ -393,7 +393,7 @@ namespace dev.nox.game_builder
 
                 noMain.style.display = mod.GetMains().Length == 0 ? DisplayStyle.Flex : DisplayStyle.None;
                 noClient.style.display = mod.GetClients().Length == 0 ? DisplayStyle.Flex : DisplayStyle.None;
-                hasCustom.style.display = mod.GetCustomEntries().Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+                hasCustom.style.display = mod.GetCustomsEntries().Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
                 isEditor.style.display = mod.GetEditors().Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
 
                 container.Add(item);

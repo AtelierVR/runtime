@@ -28,8 +28,7 @@ namespace api.nox.relay.editor {
 		private static IUserAPI UserAPI
 			=> Main.Instance.CoreAPI.ModAPI
 				.GetMod("user")
-				.GetMains()
-				.FirstOrDefault() as IUserAPI;
+				?.GetEntry<IUserAPI>();
 
 		public void OnUpdate() {
 			if (DateTime.UtcNow - _lastUpdate < TimeSpan.FromSeconds(2.5)) return;

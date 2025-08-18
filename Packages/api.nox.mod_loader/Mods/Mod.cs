@@ -40,17 +40,36 @@ namespace Nox.ModLoader.Mods {
 
 		private bool mainEnabled;
 
+		public T GetEntry<T>() {
+			T entry = default;
+			
+			entry ??= GetMain<T>();
+			entry ??= GetClient<T>();
+			entry ??= GetEditor<T>();
+			entry ??= GetServer<T>();
+			
+			foreach (var custom in GetCustomsEntries()) {
+				entry ??= GetCustom<T>(custom);
+				if (entry != null) break;
+			}
+
+			return entry;
+		}
+
 		public bool IsMainEnabled()
 			=> mainEnabled;
 
 		public MainModInitializer[] GetMains()
 			=> MainInitializers.ToArray();
 
+		public T GetMain<T>()
+			=> MainInitializers.OfType<T>().FirstOrDefault();
+
 		public void EnableMain() {
 			if (IsMainEnabled()) return;
 			Logger.LogDebug($"Enabling main in {Metadata.GetId()}@{Metadata.GetVersion()}");
 			MainInitializers = CreateInstances<MainModInitializer>("main").ToList();
-			mainEnabled = true;
+			mainEnabled      = true;
 			CoreAPI.EventAPI.Emit(new ModEventContext("mod_enabled", this, "main"));
 		}
 
@@ -80,6 +99,9 @@ namespace Nox.ModLoader.Mods {
 
 		public EditorModInitializer[] GetEditors()
 			=> EditorInitializers.ToArray();
+
+		public T GetEditor<T>()
+			=> EditorInitializers.OfType<T>().FirstOrDefault();
 
 		public void EnableEditor() {
 			if (IsEditorEnabled()) return;
@@ -115,6 +137,9 @@ namespace Nox.ModLoader.Mods {
 		public ServerModInitializer[] GetServers()
 			=> ServerInitializers.ToArray();
 
+		public T GetServer<T>()
+			=> ServerInitializers.OfType<T>().FirstOrDefault();
+
 		public void EnableServer() {
 			if (IsServerEnabled()) return;
 			Logger.LogDebug($"Enabling server in {Metadata.GetId()}@{Metadata.GetVersion()}");
@@ -143,6 +168,9 @@ namespace Nox.ModLoader.Mods {
 
 		public ClientModInitializer[] GetClients()
 			=> ClientInitializers.ToArray();
+
+		public T GetClient<T>()
+			=> ClientInitializers.OfType<T>().FirstOrDefault();
 
 		private bool clientEnabled;
 
@@ -218,47 +246,52 @@ namespace Nox.ModLoader.Mods {
 		internal Dictionary<string, IModInitializer[]> CustomInitializers = new();
 		private  Dictionary<string, InitializerState>  _customStates      = new();
 
-		private InitializerState GetCustomState(string entry)
+		private InitializerState GetCustomsState(string entry)
 			=> _customStates.ContainsKey(entry) ? _customStates[entry] : InitializerState.None;
 
-		private void SetCustomStates(string entry, InitializerState state)
+		private void SetCustomsStates(string entry, InitializerState state)
 			=> _customStates[entry] = state;
 
 		private Dictionary<string, bool> customEnabled = new();
 
-		public bool IsCustomEnabled(string entry)
+		public bool IsCustomsEnabled(string entry)
 			=> customEnabled.ContainsKey(entry) && customEnabled[entry];
 
-		public IModInitializer[] GetCustom(string entry)
+		public IModInitializer[] GetCustoms(string entry)
 			=> CustomInitializers.ContainsKey(entry)
 				? CustomInitializers[entry]
 				: Array.Empty<IModInitializer>();
 
-		public string[] GetCustomEntries()
+		public string[] GetCustomsEntries()
 			=> CustomInitializers.Keys.ToArray();
 
-		public T[] GetCustom<T>(string entry) where T : IModInitializer
+		public T[] GetCustoms<T>(string entry) where T : IModInitializer
 			=> CustomInitializers.ContainsKey(entry)
 				? CustomInitializers[entry].Where(i => i.GetType() == typeof(T)).Cast<T>().ToArray()
 				: Array.Empty<T>();
 
-		public void DisableCustom(string entry) {
-			if (!IsCustomEnabled(entry)) return;
+		public T GetCustom<T>(string entry)
+			=> CustomInitializers.ContainsKey(entry)
+				? CustomInitializers[entry].OfType<T>().FirstOrDefault()
+				: default;
+
+		public void DisableCustoms(string entry) {
+			if (!IsCustomsEnabled(entry)) return;
 			Logger.LogDebug($"Disabling {entry} in {Metadata.GetId()}@{Metadata.GetVersion()}");
 			customEnabled[entry] = false;
 			CoreAPI.EventAPI.Emit(new ModEventContext("mod_disabled", this, entry));
 		}
 
-		public void EnableCustom<T>(string entry) where T : IModInitializer {
-			if (IsCustomEnabled(entry)) return;
+		public void EnableCustoms<T>(string entry) where T : IModInitializer {
+			if (IsCustomsEnabled(entry)) return;
 			Logger.LogDebug($"Enabling {entry} in {Metadata.GetId()}@{Metadata.GetVersion()}");
 			CustomInitializers[entry] = CreateInstances<T>(entry).Cast<IModInitializer>().ToArray();
 			customEnabled[entry]      = true;
 			CoreAPI.EventAPI.Emit(new ModEventContext("mod_enabled", this, entry));
 		}
 
-		public void ClearCustom(string entry) {
-			if (!IsCustomEnabled(entry)) return;
+		public void ClearCustoms(string entry) {
+			if (!IsCustomsEnabled(entry)) return;
 			Logger.LogDebug($"Clearing {entry} in {Metadata.GetId()}@{Metadata.GetVersion()}");
 			foreach (var instance in CustomInitializers[entry].ToArray()) {
 				var list = CustomInitializers[entry].ToList();
@@ -309,7 +342,7 @@ namespace Nox.ModLoader.Mods {
 			foreach (var entry in InstanceInitializers.Keys)
 				DisableInstance(entry);
 			foreach (var entry in CustomInitializers.Keys)
-				DisableCustom(entry);
+				DisableCustoms(entry);
 
 			// send pre-dispose and dispose
 			await SendPreDispose();
@@ -322,7 +355,7 @@ namespace Nox.ModLoader.Mods {
 			foreach (var entry in InstanceInitializers.Keys)
 				ClearInstance(entry);
 			foreach (var entry in CustomInitializers.Keys)
-				ClearCustom(entry);
+				ClearCustoms(entry);
 
 			CoreAPI.EventAPI.Emit(new ModEventContext("mod_unloaded", this));
 			return true;
@@ -627,8 +660,8 @@ namespace Nox.ModLoader.Mods {
 				}
 
 			foreach (var entry in CustomInitializers.Keys)
-				if (IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.None) {
-					SetCustomStates(entry, InitializerState.Initialized);
+				if (IsCustomsEnabled(entry) && GetCustomsState(entry) == InitializerState.None) {
+					SetCustomsStates(entry, InitializerState.Initialized);
 					Profilers.Set("initialize", entry, PerformanceManager.At.Start, DateTime.UtcNow);
 					CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, entry, ExecutionEventStatus.Pre));
 					for (var i = 0; i < CustomInitializers[entry].Length; i++) {
@@ -905,8 +938,8 @@ namespace Nox.ModLoader.Mods {
 				}
 
 			foreach (var entry in CustomInitializers.Keys)
-				if (IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.Initialized) {
-					SetCustomStates(entry, InitializerState.PostInitialized);
+				if (IsCustomsEnabled(entry) && GetCustomsState(entry) == InitializerState.Initialized) {
+					SetCustomsStates(entry, InitializerState.PostInitialized);
 					Profilers.Set("post_initialize", entry, PerformanceManager.At.Start, DateTime.UtcNow);
 					CoreAPI.EventAPI.Emit(new ModEventContext("mod_post_initialize", this, entry, ExecutionEventStatus.Pre));
 					for (var i = 0; i < CustomInitializers[entry].Length; i++) {
@@ -1171,8 +1204,8 @@ namespace Nox.ModLoader.Mods {
 				}
 
 			foreach (var entry in CustomInitializers.Keys)
-				if (!IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.PostInitialized) {
-					SetCustomStates(entry, InitializerState.PreDisposed);
+				if (!IsCustomsEnabled(entry) && GetCustomsState(entry) == InitializerState.PostInitialized) {
+					SetCustomsStates(entry, InitializerState.PreDisposed);
 					Profilers.Set("pre_dispose", entry, PerformanceManager.At.Start, DateTime.UtcNow);
 					CoreAPI.EventAPI.Emit(
 						new ModEventContext(
@@ -1224,8 +1257,8 @@ namespace Nox.ModLoader.Mods {
 			Profilers.Set("dispose", PerformanceManager.At.Start, DateTime.UtcNow);
 
 			foreach (var entry in CustomInitializers.Keys)
-				if (!IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.PreDisposed) {
-					SetCustomStates(entry, InitializerState.Disposed);
+				if (!IsCustomsEnabled(entry) && GetCustomsState(entry) == InitializerState.PreDisposed) {
+					SetCustomsStates(entry, InitializerState.Disposed);
 					Profilers.Set("dispose", entry, PerformanceManager.At.Start, DateTime.UtcNow);
 					CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, entry, ExecutionEventStatus.Pre));
 					for (var i = 0; i < CustomInitializers[entry].Length; i++) {
@@ -1483,7 +1516,7 @@ namespace Nox.ModLoader.Mods {
 			Profilers.Set("update", PerformanceManager.At.Start, DateTime.UtcNow);
 
 			foreach (var entry in CustomInitializers.Keys)
-				if (IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.PostInitialized) {
+				if (IsCustomsEnabled(entry) && GetCustomsState(entry) == InitializerState.PostInitialized) {
 					Profilers.Set("update", entry, PerformanceManager.At.Start, DateTime.UtcNow);
 					for (var i = 0; i < CustomInitializers[entry].Length; i++) {
 						var instance = CustomInitializers[entry][i];
@@ -1692,7 +1725,7 @@ namespace Nox.ModLoader.Mods {
 				}
 
 			foreach (var entry in CustomInitializers.Keys)
-				if (IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.PostInitialized) {
+				if (IsCustomsEnabled(entry) && GetCustomsState(entry) == InitializerState.PostInitialized) {
 					Profilers.Set("late_update", entry, PerformanceManager.At.Start, DateTime.UtcNow);
 					for (var i = 0; i < CustomInitializers[entry].Length; i++) {
 						var instance = CustomInitializers[entry][i];
@@ -1809,7 +1842,7 @@ namespace Nox.ModLoader.Mods {
 				}
 
 			foreach (var entry in CustomInitializers.Keys)
-				if (IsCustomEnabled(entry) && GetCustomState(entry) == InitializerState.PostInitialized) {
+				if (IsCustomsEnabled(entry) && GetCustomsState(entry) == InitializerState.PostInitialized) {
 					Profilers.Set("fixed_update", entry, PerformanceManager.At.Start, DateTime.UtcNow);
 					for (var i = 0; i < CustomInitializers[entry].Length; i++) {
 						var instance = CustomInitializers[entry][i];

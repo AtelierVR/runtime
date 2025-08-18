@@ -42,38 +42,32 @@ namespace api.nox.world {
 		internal INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("network")
-				?.GetMains()
-				.FirstOrDefault() as INetworkAPI;
+				?.GetEntry<INetworkAPI>();
 
 		internal IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("user")
-				?.GetMains()
-				.FirstOrDefault() as IUserAPI;
+				?.GetEntry<IUserAPI>();
 
 		internal ISearchAPI SearchAPI
-			=> Main.Instance.CoreAPI.ModAPI
+			=> Instance.CoreAPI.ModAPI
 				.GetMod("search")
-				.GetMains()
-				.FirstOrDefault() as ISearchAPI;
+				?.GetEntry<ISearchAPI>();
 
 		internal ITableAPI TableAPI
-			=> Main.Instance.CoreAPI.ModAPI
+			=> Instance.CoreAPI.ModAPI
 				.GetMod("table")
-				.GetMains()
-				.FirstOrDefault() as ITableAPI;
+				?.GetEntry<ITableAPI>();
 
 		internal IOfflineAPI OfflineAPI
-			=> Main.Instance.CoreAPI.ModAPI
+			=> Instance.CoreAPI.ModAPI
 				.GetMod("offline")
-				.GetMains()
-				.FirstOrDefault() as IOfflineAPI;
+				?.GetEntry<IOfflineAPI>();
 
 		internal ISessionAPI SessionAPI
-			=> Main.Instance.CoreAPI.ModAPI
+			=> Instance.CoreAPI.ModAPI
 				.GetMod("session")
-				.GetMains()
-				.FirstOrDefault() as ISessionAPI;
+				?.GetEntry<ISessionAPI>();
 
 		public readonly UnityEvent<BaseSceneDescriptor, Scene> OnWorldLoaded     = new();
 		public readonly UnityEvent<MainSceneDescriptor, Scene> OnMainWorldLoaded = new();

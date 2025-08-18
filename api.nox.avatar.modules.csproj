@@ -46,13 +46,15 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.1.8f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.avatar.eyelook\Playable\PlayableAvatarModule.cs" />
+    <Compile Include="Packages\api.nox.avatar.eyelook\Editor\CameraAvatarModuleEditor.cs" />
     <Compile Include="Packages\api.nox.avatar.eyelook\Editor\ControllersMergerAvatarModuleEditor.cs" />
+    <Compile Include="Packages\api.nox.avatar.eyelook\src\Main.cs" />
     <Compile Include="Packages\api.nox.avatar.eyelook\Editor\EyeLookAvatarModuleEditor.cs" />
     <Compile Include="Packages\api.nox.avatar.eyelook\AnimationControllers\ControllersMergerAvatarModule.cs" />
     <Compile Include="Packages\api.nox.avatar.eyelook\Editor\AvatarParametersEditor.cs" />
     <Compile Include="Packages\api.nox.avatar.eyelook\Editor\AvatarParameterModuleEditor.cs" />
     <None Include="Packages\api.nox.avatar.eyelook\Resources\EyeLookAvatarModule.Item.uxml" />
+    <None Include="Packages\api.nox.avatar.eyelook\nox.mod.json" />
     <None Include="Packages\api.nox.avatar.eyelook\Resources\EyeLookAvatarModule.uxml" />
     <None Include="Packages\api.nox.avatar.eyelook\Resources\EyeLookTransform.uxml" />
     <None Include="Packages\api.nox.avatar.eyelook\package.json" />
@@ -879,9 +881,21 @@
       <Project>{4529f0c5-1b18-9167-4b55-e6354399f380}</Project>
       <Name>Nox.CCK.Avatars.Parameters</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Avatars.Rigging.csproj">
+      <Project>{db98858f-e749-e6e6-7e1e-10519fc0cd70}</Project>
+      <Name>Nox.CCK.Avatars.Rigging</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Avatars.Camera.csproj">
+      <Project>{3b377493-b16a-c755-2342-e67c8deff876}</Project>
+      <Name>Nox.CCK.Avatars.Camera</Name>
+    </ProjectReference>
     <ProjectReference Include="Nox.Avatars.Parameters.csproj">
       <Project>{cb480378-d253-f3ad-3348-902862002b9e}</Project>
       <Name>Nox.Avatars.Parameters</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Avatars.Playable.csproj">
+      <Project>{081d2e66-4bed-13c3-4d74-00ac065f1d55}</Project>
+      <Name>Nox.CCK.Avatars.Playable</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

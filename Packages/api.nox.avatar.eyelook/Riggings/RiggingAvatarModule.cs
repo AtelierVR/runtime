@@ -17,7 +17,7 @@ namespace Nox.CCK.Avatars.Rigging {
 		private readonly List<IParameter>  _parameters = new();
 
 		public GameObject Anchor
-			=> (_descriptor as MonoBehaviour ?? this).gameObject;
+			=> _descriptor.GetRoot();
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		public RigBuilder GetRigBuilder()
@@ -51,11 +51,12 @@ namespace Nox.CCK.Avatars.Rigging {
 		public Transform spineTarget;
 		public Transform neckTarget;
 
-		public void OnPlay(IAvatarDescriptor descriptor) {
-			_descriptor = descriptor;
+		public bool OnPlay(IAvatar avatar) {
+			_descriptor = avatar.GetDescriptor();
 			SetupRigBuilder();
 			GenerateAutoRig();
 			SetupParameters();
+			return true;
 		}
 
 
@@ -344,6 +345,23 @@ namespace Nox.CCK.Avatars.Rigging {
 			if (!lineDirection.HasValue) return;
 			var direction = lineDirection.Value;
 			Gizmos.DrawLine(target.position, target.position + direction * lineLength);
+		}
+
+		public static bool Check(IAvatarDescriptor descriptor) {
+			var modules = descriptor.GetModules<RiggingAvatarModule>();
+
+			var module = modules.Length switch {
+				1 => modules.FirstOrDefault(),
+				0 => descriptor.GetRoot().AddComponent<RiggingAvatarModule>(),
+				_ => null
+			};
+
+			if (!module) {
+				Logger.LogError("Verify that the Avatar prefab has a valid RiggingAvatarModule component.");
+				return false;
+			}
+
+			return true;
 		}
 	}
 }

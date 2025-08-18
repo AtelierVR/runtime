@@ -34,6 +34,11 @@
       "id": "ui",
       "type": "depends",
       "version": ">=1.0.0"
+    },
+    {
+      "id": "avatar",
+      "type": "depends",
+      "version": ">=1.0.0"
     }
   ],
   "entrypoints": {

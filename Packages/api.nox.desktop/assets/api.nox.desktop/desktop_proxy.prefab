@@ -49,7 +49,7 @@ Rigidbody:
   serializedVersion: 5
   m_Mass: 1
   m_LinearDamping: 0
-  m_AngularDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -63,9 +63,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 1
-  m_Constraints: 112
-  m_CollisionDetection: 2
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!136 &5443068678273811606
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -130,6 +130,7 @@ MonoBehaviour:
   flySpeed: 5
   flyAcceleration: 20
   verticalFlySpeed: 3
+  body: {fileID: 0}
   menuContainer: {fileID: 6777837100936130096}
 --- !u!114 &2431568659011632666
 MonoBehaviour:
@@ -160,12 +161,10 @@ MonoBehaviour:
   player: {fileID: 5595254506500728190}
   movementDeadzone: 0.1
   turnDeadzone: 0.1
-  mouseSensitivity: 2
+  mouseSensitivity: 0.25
   maxLookAngle: 90
-  mouseSmoothing: 0.1
-  frameRateIndependentMouse: 1
-  mouseDeadzone: 0.001
-  autoJumpDelay: 0.05
+  mouseDeadzone: 0.1
+  autoJumpDelay: 0.3
   doubleJumpWindow: 0.3
   enableDoubleJumpToFly: 1
 --- !u!1 &8245987812308401856
@@ -180,6 +179,7 @@ GameObject:
   - component: {fileID: 7474082929669559642}
   - component: {fileID: 6487993353166639963}
   - component: {fileID: 7277400281162284148}
+  - component: {fileID: 3360053333185057792}
   m_Layer: 0
   m_Name: Head Camera
   m_TagString: Untagged
@@ -305,6 +305,29 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!1773428102 &3360053333185057792
+ParentConstraint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8245987812308401856}
+  m_Enabled: 0
+  serializedVersion: 2
+  m_Weight: 1
+  m_TranslationAtRest: {x: 0, y: 1.6, z: 0}
+  m_RotationAtRest: {x: 0, y: 0, z: 0}
+  m_TranslationOffsets: []
+  m_RotationOffsets: []
+  m_AffectTranslationX: 1
+  m_AffectTranslationY: 1
+  m_AffectTranslationZ: 1
+  m_AffectRotationX: 0
+  m_AffectRotationY: 0
+  m_AffectRotationZ: 0
+  m_Active: 1
+  m_IsLocked: 1
+  m_Sources: []
 --- !u!1 &8392372968726701753
 GameObject:
   m_ObjectHideFlags: 0
@@ -474,15 +497,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4176749210758014426, guid: c6e954dcb82fcbf43833dd84cbe39430, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.20989583
+      value: 0.7111111
       objectReference: {fileID: 0}
     - target: {fileID: 4176749210758014426, guid: c6e954dcb82fcbf43833dd84cbe39430, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.20989583
+      value: 0.7111111
       objectReference: {fileID: 0}
     - target: {fileID: 4176749210758014426, guid: c6e954dcb82fcbf43833dd84cbe39430, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.20989583
+      value: 0.7111111
       objectReference: {fileID: 0}
     - target: {fileID: 5479599693753372345, guid: c6e954dcb82fcbf43833dd84cbe39430, type: 3}
       propertyPath: m_AnchorMax.x

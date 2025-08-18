@@ -30,8 +30,7 @@ namespace api.nox.xr {
 		private static IControllerAPI ControllerAPI
 			=> Client.CoreAPI.ModAPI
 				.GetMod("controller")
-				.GetMains()
-				.FirstOrDefault() as IControllerAPI;
+				?.GetEntry<IControllerAPI>();
 
 		/// <summary>
 		/// Check if the current proxy is better than XR proxy.

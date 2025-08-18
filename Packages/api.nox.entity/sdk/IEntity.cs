@@ -63,6 +63,30 @@ namespace Nox.Entities {
 		public void SetRotation(Quaternion rotation);
 
 		/// <summary>
+		/// Get the velocity of the entity.
+		/// </summary>
+		/// <returns></returns>
+		public Vector3 GetVelocity();
+
+		/// <summary>
+		/// Set the velocity of the entity.
+		/// </summary>
+		/// <param name="velocity"></param>
+		public void SetVelocity(Vector3 velocity);
+
+		/// <summary>
+		/// Get the angular velocity of the entity.
+		/// </summary>
+		/// <returns></returns>
+		public Vector3 GetAngularVelocity();
+
+		/// <summary>
+		/// Set the angular velocity of the entity.
+		/// </summary>
+		/// <param name="angular"></param>
+		public void SetAngularVelocity(Vector3 angular);
+
+		/// <summary>
 		/// Try to get the physical component of the entity.
 		/// </summary>
 		/// <param name="physical"></param>

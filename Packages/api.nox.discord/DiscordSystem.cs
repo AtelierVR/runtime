@@ -18,8 +18,7 @@ namespace api.nox.discord {
 		internal static IUserAPI UserAPI
 			=> CoreAPI.ModAPI
 				.GetMod("user")
-				.GetMains()
-				.FirstOrDefault() as IUserAPI;
+				?.GetEntry<IUserAPI>();
 
 		private EventSubscription _userFetchSub;
 

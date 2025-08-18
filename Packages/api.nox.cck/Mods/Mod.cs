@@ -23,31 +23,38 @@ namespace Nox.CCK.Mods {
 
 		public AppDomain GetAppDomain();
 
+		public T GetEntry<T>();
+
 		public bool                 IsMainEnabled();
 		public MainModInitializer[] GetMains();
+		public T                    GetMain<T>();
 		public void                 EnableMain();
 		public void                 DisableMain();
 
 		public bool                   IsEditorEnabled();
 		public EditorModInitializer[] GetEditors();
+		public T                      GetEditor<T>();
 		public void                   EnableEditor();
 		public void                   DisableEditor();
 
 		public bool                   IsServerEnabled();
 		public ServerModInitializer[] GetServers();
+		public T                      GetServer<T>();
 		public void                   EnableServer();
 		public void                   DisableServer();
 
 		public bool                   IsClientEnabled();
 		public ClientModInitializer[] GetClients();
+		public T                      GetClient<T>();
 		public void                   EnableClient();
 		public void                   DisableClient();
 
-		public bool              IsCustomEnabled(string entry);
-		public string[]          GetCustomEntries();
-		public IModInitializer[] GetCustom(string       entry);
-		public T[]               GetCustom<T>(string    entry) where T : IModInitializer;
-		public void              DisableCustom(string   entry);
-		public void              EnableCustom<T>(string entry) where T : IModInitializer;
+		public bool              IsCustomsEnabled(string entry);
+		public string[]          GetCustomsEntries();
+		public IModInitializer[] GetCustoms(string       entry);
+		public T[]               GetCustoms<T>(string    entry) where T : IModInitializer;
+		public T                 GetCustom<T>(string     entry);
+		public void              DisableCustoms(string   entry);
+		public void              EnableCustoms<T>(string entry) where T : IModInitializer;
 	}
 }

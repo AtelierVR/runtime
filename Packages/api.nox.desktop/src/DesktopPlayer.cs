@@ -10,47 +10,64 @@ using Transform = UnityEngine.Transform;
 namespace api.nox.desktop {
 	[RequireComponent(typeof(Rigidbody)), RequireComponent(typeof(CapsuleCollider))]
 	public class DesktopPlayer : MonoBehaviour {
-		[Header("Desktop Player")] public Camera          headCamera;
-		public                            Transform       forwardFollow;
-		public                            CapsuleCollider bodyCollider;
-		[Header("Movement")] public       bool            useMovement                = true;
-		public                            float           maxMoveSpeed               = 2.3f;
-		public                            float           moveAcceleration           = 100000f;
-		public                            float           jumpForce                  = 5f;
-		public                            float           sprintMultiplier           = 1.5f;
-		public                            float           airControl                 = 0.3f;
-		public                            float           movementDeadzone           = 0.2f;
-		[Header("Height")] public         float           heightOffset               = 0f;
-		public                            bool            crouching                  = false;
-		public                            float           crouchHeight               = 0.6f;
-		public                            float           heightSmoothSpeed          = 10f;
-		public                            bool            autoAdjustColliderHeight   = true;
-		public                            Vector2         minMaxHeight               = new Vector2(0.5f, 2.5f);
-		[Header("Grounding")] public      bool            useGrounding               = true;
-		public                            float           maxStepHeight              = 0.3f;
-		public                            float           groundingPenetrationOffset = 0.1f;
-		public                            float           maxStepAngle               = 45f;
-		public                            LayerMask       groundLayerMask            = -1;
-		public                            float           groundedDrag               = 10000f;
-		public                            float           flyingDrag                 = 4f;
-		[Header("Flying")] public         bool            mayFly                     = false;
-		public                            float           flySpeed                   = 5f;
-		public                            float           flyAcceleration            = 20f;
-		public                            float           verticalFlySpeed           = 3f; // Private fields
-		private                           Rigidbody       body;
-		private                           Vector3         moveDirection;
-		private                           Vector3         flyDirection;
-		private                           float           turningAxis;
-		private                           bool            isGrounded  = false;
-		private                           bool            isFlying    = false;
-		private                           bool            isSprinting = false;
-		private                           bool            lastCrouching;
-		private                           RaycastHit      lastGroundHit;
-		private                           bool            tempDisableGrounding  = false;
-		private                           bool            isGroundedWhileFlying = false;
-		private                           RaycastHit      lastFlyingGroundHit;
-		[Header("Menu")] public           IMenu           menu;
-		public                            RectTransform   menuContainer;
+		[Header("Desktop Player")]
+		public Camera headCamera;
+
+		public Transform       forwardFollow;
+		public CapsuleCollider bodyCollider;
+
+		[Header("Movement")]
+		public bool useMovement = true;
+
+		public float maxMoveSpeed     = 2.3f;
+		public float moveAcceleration = 100000f;
+		public float jumpForce        = 5f;
+		public float sprintMultiplier = 1.5f;
+		public float airControl       = 0.3f;
+		public float movementDeadzone = 0.2f;
+
+		[Header("Height")]
+		public float heightOffset = 0f;
+
+		public bool    crouching                = false;
+		public float   crouchHeight             = 0.6f;
+		public float   heightSmoothSpeed        = 10f;
+		public bool    autoAdjustColliderHeight = true;
+		public Vector2 minMaxHeight             = new Vector2(0.5f, 2.5f);
+
+		[Header("Grounding")]
+		public bool useGrounding = true;
+
+		public float     maxStepHeight              = 0.3f;
+		public float     groundingPenetrationOffset = 0.1f;
+		public float     maxStepAngle               = 45f;
+		public LayerMask groundLayerMask            = -1;
+		public float     groundedDrag               = 10000f;
+		public float     flyingDrag                 = 4f;
+
+		[Header("Flying")]
+		public bool mayFly = false;
+
+		public  float      flySpeed         = 5f;
+		public  float      flyAcceleration  = 20f;
+		public  float      verticalFlySpeed = 3f; // Private fields
+		public  Rigidbody  body;
+		private Vector3    moveDirection;
+		private Vector3    flyDirection;
+		private float      turningAxis;
+		private bool       isGrounded  = false;
+		private bool       isFlying    = false;
+		private bool       isSprinting = false;
+		private bool       lastCrouching;
+		private RaycastHit lastGroundHit;
+		private bool       tempDisableGrounding  = false;
+		private bool       isGroundedWhileFlying = false;
+		private RaycastHit lastFlyingGroundHit;
+
+		[Header("Menu")]
+		public IMenu menu;
+
+		public RectTransform menuContainer;
 
 		public virtual void Awake() {
 			body = GetComponent<Rigidbody>();
@@ -138,12 +155,11 @@ namespace api.nox.desktop {
 		}
 
 		protected virtual void FixedUpdate() {
-			if (useMovement) {
-				UpdateRigidbody();
-				Ground();
-				CheckGroundWhileFlying(); // Always check ground even when flying
-				UpdatePlayerHeight();
-			}
+			if (!useMovement) return;
+			UpdateRigidbody();
+			Ground();
+			CheckGroundWhileFlying(); // Always check ground even when flying
+			UpdatePlayerHeight();
 		}
 
 		protected virtual void UpdateRigidbody() {
@@ -195,9 +211,9 @@ namespace api.nox.desktop {
 
 			// Apply drag
 			UpdateDrag();
-
+			
 			// Handle turning
-			if (Mathf.Abs(turningAxis) > 0.1f) {
+			if (Mathf.Abs(turningAxis) > 0.001f) {
 				transform.Rotate(0, turningAxis * 90f * Time.fixedDeltaTime, 0);
 			}
 		}
@@ -367,12 +383,12 @@ namespace api.nox.desktop {
 		}
 
 		public void DisableGrounding(float seconds) {
-			if (disableGroundingRoutine != null)
-				StopCoroutine(disableGroundingRoutine);
-			disableGroundingRoutine = StartCoroutine(DisableGroundingSecondsRoutine(seconds));
+			if (_disableGroundingRoutine != null)
+				StopCoroutine(_disableGroundingRoutine);
+			_disableGroundingRoutine = StartCoroutine(DisableGroundingSecondsRoutine(seconds));
 		}
 
-		Coroutine disableGroundingRoutine;
+		private Coroutine _disableGroundingRoutine;
 
 		IEnumerator DisableGroundingSecondsRoutine(float seconds) {
 			tempDisableGrounding = true;

@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.CCK.Build;
-using Nox.Players;
 using UnityEngine;
 
 namespace api.nox.avatar {
-	public class Avatar : IDisposable {
+	public class Avatar : IAvatar {
 		public const string LocalLayer  = "LocalAvatar";
 		public const string RemoteLayer = "RemoteAvatar";
 
@@ -21,7 +21,7 @@ namespace api.nox.avatar {
 		}
 
 		private static void SetupLayers(Avatar avatar) {
-			var gameObject = (avatar.Descriptor as MonoBehaviour)?.gameObject;
+			var gameObject = avatar.Descriptor.GetRoot();
 
 			if (!gameObject) {
 				Debug.LogError("Avatar descriptor is not a MonoBehaviour, cannot set layers.");
@@ -32,7 +32,7 @@ namespace api.nox.avatar {
 		}
 
 		private static void Build(Avatar avatar) {
-			var gameObject = (avatar.Descriptor as MonoBehaviour)?.gameObject;
+			var gameObject = avatar.Descriptor.GetRoot();
 			if (!gameObject) return;
 			var compilable = gameObject
 				.GetComponentsInChildren<ICompilable>(true)
@@ -44,10 +44,18 @@ namespace api.nox.avatar {
 		private static void SetPlay(Avatar avatar) {
 			var modules = avatar.Descriptor.GetModules();
 			foreach (var module in modules)
-				module.OnPlay(avatar.Descriptor);
+				module.OnPlay(avatar);
 		}
 
-		public void Dispose() {
+		public string GetId()
+			=> Descriptor?.GetRoot()?.GetInstanceID().ToString() ?? "0";
+
+		public IAvatarDescriptor GetDescriptor()
+			=> Descriptor;
+
+
+		public async UniTask Dispose() {
+			await UniTask.Yield();
 			Descriptor = null;
 		}
 	}
