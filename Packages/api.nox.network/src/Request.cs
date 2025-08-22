@@ -1,49 +1,64 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using Nox.Network;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Text;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.network {
 	public class Request : INoxObject, IRequest {
-		public Request()
-			=> SetHeaders(
-				new Dictionary<string, string> {
-					{
-						"User-Agent",
-						string.Join(
-							' ',
-							$"{Application.productName}/{Application.version}",
-							$"{Constants.ProtocolIdentifier}/{Constants.ProtocolVersion}",
-							$"(en={EngineExtensions.CurrentEngine.GetEngineName()}; pn={PlatformExtensions.CurrentPlatform.GetPlatformName()})"
-						)
-					}, {
-						"X-UUID",
-						SystemInfo.deviceUniqueIdentifier
-					}, {
-						"X-Nox-User",
-						Main.UserAPI?.GetCurrent()?.ToIdentifier().ToString()
-						?? string.Empty
-					}, {
-						"X-Nox-Mods",
-						string.Join(
-							"; ",
-							Main.Instance.CoreAPI.ModAPI.GetMods()
-								.Where(mod => mod != null && mod.IsLoaded())
-								.Select(m => m.GetMetadata())
-								.Select(metadata => $"{metadata.GetId()}/{metadata.GetVersion()}")
-						)
-					}, {
-						"X-Powered-By",
-						"Nox"
-					}
-				}
-			);
+		// Cache statiques pour éviter les allocations répétées
+		private static readonly StringBuilder StringBuilder = new(1024);
+		private static readonly UTF8Encoding UTF8Encoding = new(false, false);
+		private static readonly Dictionary<Type, Func<byte[], object>> TypeConverters = new() {
+			{ typeof(string), data => UTF8Encoding.GetString(data) },
+			{ typeof(byte[]), data => data },
+			{ typeof(Texture2D), data => {
+				var texture = new Texture2D(2, 2);
+				return texture.LoadImage(data) ? texture : null;
+			}}
+		};
+		
+		// Headers par défaut calculés une seule fois au démarrage statique
+		private static readonly Dictionary<string, string> DefaultHeaders = new();
+		private static bool _defaultHeadersInitialized;
+		
+		public Request() {
+			InitializeDefaultHeaders();
+			SetHeaders(DefaultHeaders);
+		}
+		
+		private static void InitializeDefaultHeaders() {
+			if (_defaultHeadersInitialized) return;
+			
+			lock (DefaultHeaders) {
+				if (_defaultHeadersInitialized) return;
+				
+				StringBuilder.Clear();
+				StringBuilder.Append(Application.productName);
+				StringBuilder.Append('/');
+				StringBuilder.Append(Application.version);
+				StringBuilder.Append(' ');
+				StringBuilder.Append(Constants.ProtocolIdentifier);
+				StringBuilder.Append('/');
+				StringBuilder.Append(Constants.ProtocolVersion);
+				StringBuilder.Append(" (en=");
+				StringBuilder.Append(EngineExtensions.CurrentEngine.GetEngineName());
+				StringBuilder.Append("; pn=");
+				StringBuilder.Append(PlatformExtensions.CurrentPlatform.GetPlatformName());
+				StringBuilder.Append(')');
+				
+				DefaultHeaders["user-agent"] = StringBuilder.ToString();
+				DefaultHeaders["x-uuid"] = SystemInfo.deviceUniqueIdentifier;
+				DefaultHeaders["x-powered-by"] = "Nox";
+				
+				_defaultHeadersInitialized = true;
+			}
+		}
 
 		internal readonly UnityWebRequest RequestObject = new() {
 			downloadHandler = new DownloadHandlerBuffer(),
@@ -119,13 +134,25 @@ namespace api.nox.network {
 		private Cache _responseCache;
 
 		public async UniTask Send(bool force = false, CancellationToken token = default) {
-			if (!force && CacheDuration > 0 && _responseCache != null) {
-				_responseCache = Main.Instance.Cache.Get(Cache.CalculateId(this));
-				if (_responseCache != null) return;
-			} else _responseCache = null;
+			// Optimisation du cache - éviter les double vérifications
+			if (!force && CacheDuration > 0) {
+				var cachedResponse = Main.Instance.Cache.Get(Cache.CalculateId(this));
+				if (cachedResponse != null) {
+					_responseCache = cachedResponse;
+					return;
+				}
+			}
+			_responseCache = null;
 
-			foreach (var header in GetHeaders().Where(header => !string.IsNullOrEmpty(header.Value)))
-				RequestObject.SetRequestHeader(header.Key, header.Value);
+			// Mettre à jour les headers dynamiques seulement si nécessaire
+			UpdateDynamicHeaders();
+
+			// Optimiser l'application des headers - éviter LINQ
+			foreach (var kvp in RequestHeaders) {
+				if (!string.IsNullOrEmpty(kvp.Value)) {
+					RequestObject.SetRequestHeader(kvp.Key, kvp.Value);
+				}
+			}
 
 			try {
 				Logger.Log($"Sending request to {GetMethod()} {RequestObject.url}...");
@@ -135,9 +162,42 @@ namespace api.nox.network {
 				Logger.LogError($"Failed to send request to {RequestObject.url}: {e.Message}");
 			}
 
-			_responseCache = CacheDuration > 0
-				? Main.Instance.Cache.Set(this)
-				: null;
+			// Cache seulement si nécessaire
+			if (CacheDuration > 0) {
+				_responseCache = Main.Instance.Cache.Set(this);
+			}
+		}
+
+		private void UpdateDynamicHeaders() {
+			// Mise à jour des headers qui peuvent changer entre les requêtes
+			var currentUser = Main.UserAPI?.GetCurrent()?.ToIdentifier().ToString();
+			if (!string.IsNullOrEmpty(currentUser)) {
+				RequestHeaders["x-nox-user"] = currentUser;
+			}
+
+			// Optimiser la construction de la liste des mods
+			if (Main.Instance?.CoreAPI?.ModAPI != null) {
+				lock (StringBuilder) {
+					StringBuilder.Clear();
+					var mods = Main.Instance.CoreAPI.ModAPI.GetMods();
+					bool first = true;
+					
+					foreach (var mod in mods) {
+						if (mod?.IsLoaded() == true) {
+							var metadata = mod.GetMetadata();
+							if (metadata != null) {
+								if (!first) StringBuilder.Append("; ");
+								StringBuilder.Append(metadata.GetId());
+								StringBuilder.Append('/');
+								StringBuilder.Append(metadata.GetVersion());
+								first = false;
+							}
+						}
+					}
+					
+					RequestHeaders["x-nox-mods"] = StringBuilder.ToString();
+				}
+			}
 		}
 
 		public ushort GetStatus()
@@ -159,18 +219,9 @@ namespace api.nox.network {
 			if (data == null || data.Length == 0)
 				return default;
 
-			if (typeof(T) == typeof(Texture2D)) {
-				var texture = new Texture2D(2, 2);
-				if (texture.LoadImage(data))
-					return (T)(object)texture;
-				Logger.LogError("Failed to load texture from response data.");
-				return default;
+			if (TypeConverters.TryGetValue(typeof(T), out var converter)) {
+				return (T)converter(data);
 			}
-
-			if (typeof(T) == typeof(string))
-				return (T)(object)System.Text.Encoding.UTF8.GetString(data);
-			if (typeof(T) == typeof(byte[]))
-				return (T)(object)data;
 
 			try {
 				var json = System.Text.Encoding.UTF8.GetString(data);
@@ -185,13 +236,28 @@ namespace api.nox.network {
 		public void SetBody(string text, string contentType = null) {
 			if (!string.IsNullOrEmpty(contentType))
 				RequestObject.SetRequestHeader("Content-Type", contentType);
-			RequestObject.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(text ?? ""));
+			
+			// Utiliser l'encodage UTF8 optimisé
+			var data = UTF8Encoding.GetBytes(text ?? "");
+			RequestObject.uploadHandler = new UploadHandlerRaw(data);
+			
+			// Ajuster automatiquement le timeout pour les gros uploads
+			if (data.Length > 1024 * 1024) { // Plus de 1MB
+				SetTimeoutForUpload(data.Length);
+			}
 		}
 
 		public void SetBody(byte[] data, string contentType = null) {
 			if (!string.IsNullOrEmpty(contentType))
 				RequestObject.SetRequestHeader("Content-Type", contentType);
-			RequestObject.uploadHandler = new UploadHandlerRaw(data ?? Array.Empty<byte>());
+			
+			var uploadData = data ?? Array.Empty<byte>();
+			RequestObject.uploadHandler = new UploadHandlerRaw(uploadData);
+			
+			// Ajuster automatiquement le timeout pour les gros uploads
+			if (uploadData.Length > 1024 * 1024) { // Plus de 1MB
+				SetTimeoutForUpload(uploadData.Length);
+			}
 		}
 
 		public void SetMethod(string method) {
@@ -233,17 +299,87 @@ namespace api.nox.network {
 		public static string MergeUrl(Uri url, string path)
 			=> MergeUrl(url.ToString(), path);
 
+		private static readonly char[] _urlTrimChars = { '/' };
+		
 		public static string MergeUrl(string url, string path) {
-			if (url.EndsWith("/"))
-				url = url[..^1];
-			if (path.StartsWith("/"))
-				path = path[1..];
-			return $"{url}/{path}";
+			if (string.IsNullOrEmpty(url)) return path ?? string.Empty;
+			if (string.IsNullOrEmpty(path)) return url;
+				
+			// Optimisation : éviter les allocations de string avec EndsWith/StartsWith
+			bool urlEndsWithSlash = url[url.Length - 1] == '/';
+			bool pathStartsWithSlash = path[0] == '/';
+			
+			// Utiliser StringBuilder pour une seule allocation
+			lock (StringBuilder) {
+				StringBuilder.Clear();
+				StringBuilder.EnsureCapacity(url.Length + path.Length + 1);
+				
+				if (urlEndsWithSlash) {
+					StringBuilder.Append(url, 0, url.Length - 1);
+				} else {
+					StringBuilder.Append(url);
+				}
+				
+				StringBuilder.Append('/');
+				
+				if (pathStartsWithSlash && path.Length > 1) {
+					StringBuilder.Append(path, 1, path.Length - 1);
+				} else if (!pathStartsWithSlash) {
+					StringBuilder.Append(path);
+				}
+				
+				return StringBuilder.ToString();
+			}
 		}
 
 		public void SetDownloadHandler(DownloadHandler handler) {
 			if (handler == null) return;
 			RequestObject.downloadHandler = handler;
+		}
+
+		/// <summary>
+		/// Sets the timeout for the request in seconds.
+		/// Use 0 for no timeout, which is recommended for file uploads.
+		/// </summary>
+		/// <param name="timeoutSeconds">Timeout in seconds (0 = no timeout)</param>
+		public void SetTimeout(int timeoutSeconds) {
+			RequestObject.timeout = timeoutSeconds;
+		}
+
+		/// <summary>
+		/// Gets the current timeout setting in seconds.
+		/// </summary>
+		/// <returns>Current timeout in seconds</returns>
+		public int GetTimeout() {
+			return RequestObject.timeout;
+		}
+
+		/// <summary>
+		/// Sets an appropriate timeout based on the upload data size.
+		/// Automatically calculates timeout based on file size for uploads.
+		/// </summary>
+		/// <param name="dataSizeBytes">Size of data being uploaded in bytes</param>
+		public void SetTimeoutForUpload(long dataSizeBytes) {
+			// Pour les uploads, on calcule un timeout basé sur la taille
+			// Estimation: 1MB par seconde minimum + 60 secondes de buffer
+			const int minTimeoutSeconds = 60;
+			const int bytesPerSecond = 1024 * 1024; // 1MB/s minimum
+			
+			var calculatedTimeout = Math.Max(minTimeoutSeconds, (int)(dataSizeBytes / bytesPerSecond) + 60);
+			
+			// Cap à 30 minutes maximum pour éviter les timeouts infinis
+			var maxTimeout = 30 * 60; // 30 minutes
+			RequestObject.timeout = Math.Min(calculatedTimeout, maxTimeout);
+			
+			Logger.Log($"Set upload timeout to {RequestObject.timeout} seconds for {dataSizeBytes} bytes");
+		}
+
+		/// <summary>
+		/// Disables timeout completely. Use this for large file uploads.
+		/// </summary>
+		public void DisableTimeout() {
+			RequestObject.timeout = 0;
+			Logger.Log("Timeout disabled for this request");
 		}
 	}
 }

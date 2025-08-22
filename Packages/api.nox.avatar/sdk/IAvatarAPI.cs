@@ -6,18 +6,18 @@ namespace Nox.Avatars {
 		/// Creates a loading avatar.
 		/// </summary>
 		/// <returns></returns>
-		public UniTask<IAvatar> MakeLoading();
+		public UniTask<IRuntimeAvatar> MakeLoading();
 
 		/// <summary>
 		/// Creates a default avatar.
 		/// </summary>
 		/// <returns></returns>
-		public UniTask<IAvatar> MakeDefault();
+		public UniTask<IRuntimeAvatar> MakeDefault();
 
 		/// <summary>
 		/// Creates an error avatar.
 		/// </summary>
 		/// <returns></returns>
-		public UniTask<IAvatar> MakeError();
+		public UniTask<IRuntimeAvatar> MakeError();
 	}
 }

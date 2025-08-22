@@ -283,7 +283,7 @@ MonoBehaviour:
   target: 1
   publishId: 1
   publishServer: hactazia.fr
-  publishVersion: 3
+  publishVersion: 1
 --- !u!1 &570465809
 GameObject:
   m_ObjectHideFlags: 0
@@ -859,6 +859,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 232a1b93921d4ca3b599db705bbf2b5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  eyeLooks: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!4 &2144385838
 Transform:
   m_ObjectHideFlags: 0

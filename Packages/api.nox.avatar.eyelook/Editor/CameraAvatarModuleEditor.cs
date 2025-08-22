@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using Nox.Avatars;
 using Nox.CCK.Avatars.Camera;
 using UnityEditor;
@@ -81,3 +82,4 @@ namespace api.nox.avatar.modules {
 		}
 	}
 }
+#endif

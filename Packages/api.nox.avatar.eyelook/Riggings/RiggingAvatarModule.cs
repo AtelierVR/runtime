@@ -51,8 +51,8 @@ namespace Nox.CCK.Avatars.Rigging {
 		public Transform spineTarget;
 		public Transform neckTarget;
 
-		public bool OnPlay(IAvatar avatar) {
-			_descriptor = avatar.GetDescriptor();
+		public bool OnPlay(IRuntimeAvatar runtimeAvatar) {
+			_descriptor = runtimeAvatar.GetDescriptor();
 			SetupRigBuilder();
 			GenerateAutoRig();
 			SetupParameters();

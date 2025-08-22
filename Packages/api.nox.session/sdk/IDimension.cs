@@ -13,7 +13,7 @@ namespace Nox.Sessions {
 		/// Get the scene of the dimension.
 		/// </summary>
 		/// <returns></returns>
-		public IScene GetScene();
+		public IRuntimeWorld GetScene();
 
 		/// <summary>
 		/// Indicate if the dimension is active.

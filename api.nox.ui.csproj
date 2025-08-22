@@ -56,6 +56,8 @@
     <Compile Include="Packages\api.nox.ui\src\menus\MenuManager.cs" />
     <Compile Include="Packages\api.nox.ui\src\layouts\QwertyKeyboardLayout.cs" />
     <Compile Include="Packages\api.nox.ui\src\elements\MenuGridder.cs" />
+    <Compile Include="Packages\api.nox.ui\assets\api.nox.ui\Scripts\BackdropBlurExample.cs" />
+    <Compile Include="Packages\api.nox.ui\assets\api.nox.ui\Scripts\UIBackdropBlur.cs" />
     <Compile Include="Packages\api.nox.ui\src\Client.cs" />
     <Compile Include="Packages\api.nox.ui\src\pages\PageManager.cs" />
     <Compile Include="Packages\api.nox.ui\src\layouts\bottom\Applications.cs" />
@@ -82,6 +84,7 @@
     <None Include="Packages\api.nox.ui\assets\api.nox.ui\obsolete\textures\NewSurfaceShader.shader" />
     <None Include="Packages\api.nox.ui\api.nox.ui.asmdef" />
     <None Include="Packages\api.nox.ui\assets\api.nox.ui\obsolete\textures\NewSurfaceShader 1.shader" />
+    <None Include="Packages\api.nox.ui\assets\api.nox.ui\Shaders\UIBlur.shader" />
     <None Include="Packages\api.nox.ui\nox.mod.json" />
     <None Include="Packages\api.nox.ui\package.json" />
     <Reference Include="UnityEngine">

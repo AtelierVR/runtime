@@ -8,10 +8,10 @@ using UnityEngine.Events;
 
 namespace api.nox.world {
 	public class SceneGroupManager : INoxObject {
-		public readonly List<SceneGroup> Groups = new();
+		public readonly List<RuntimeWorldGroup> Groups = new();
 
-		internal readonly UnityEvent<SceneGroup> OnGroupAdded   = new();
-		internal readonly UnityEvent<SceneGroup> OnGroupRemoved = new();
+		internal readonly UnityEvent<RuntimeWorldGroup> OnGroupAdded   = new();
+		internal readonly UnityEvent<RuntimeWorldGroup> OnGroupRemoved = new();
 
 		public async UniTask Dispose() {
 			foreach (var world in Groups) {
@@ -23,11 +23,11 @@ namespace api.nox.world {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public SceneGroup GetWorld(string id)
+		public RuntimeWorldGroup GetWorld(string id)
 			=> Groups.Find(w => w.Id == id);
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<AssetBundleSceneGroup> LoadWorldFromCache(string hash, Action<float> progress = null, CancellationToken token = default) {
+		public async UniTask<AssetBundleRuntimeWorldGroup> LoadWorldFromCache(string hash, Action<float> progress = null, CancellationToken token = default) {
 			var path = WorldCache.GetWorldFromCache(hash);
 			if (!string.IsNullOrEmpty(path))
 				return await LoadWorldFromPath(path, progress, token);
@@ -36,14 +36,14 @@ namespace api.nox.world {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<AssetBundleSceneGroup> LoadWorldFromPath(string path, Action<float> progress = null, CancellationToken token = default) {
-			var existingWorld = GetWorld(AssetBundleSceneGroup.ParseGroup(path));
+		public async UniTask<AssetBundleRuntimeWorldGroup> LoadWorldFromPath(string path, Action<float> progress = null, CancellationToken token = default) {
+			var existingWorld = GetWorld(AssetBundleRuntimeWorldGroup.ParseGroup(path));
 			if (existingWorld != null) {
 				Logger.LogWarning($"World {path} is already loaded.");
-				return existingWorld as AssetBundleSceneGroup;
+				return existingWorld as AssetBundleRuntimeWorldGroup;
 			}
 
-			var world = await AssetBundleSceneGroup.Load(path, progress, token);
+			var world = await AssetBundleRuntimeWorldGroup.Load(path, progress, token);
 
 			if (world == null) {
 				Logger.LogError($"Failed to load world from path: {path}");
@@ -58,14 +58,14 @@ namespace api.nox.world {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<AssetSceneGroup> LoadWorldFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default) {
-			var existingWorld = GetWorld(AssetSceneGroup.ParseId(ns, path));
+		public async UniTask<AssetRuntimeWorldGroup> LoadWorldFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default) {
+			var existingWorld = GetWorld(AssetRuntimeWorldGroup.ParseId(ns, path));
 			if (existingWorld != null) {
 				Logger.LogWarning($"World {ns}:{path} is already loaded.");
-				return existingWorld as AssetSceneGroup;
+				return existingWorld as AssetRuntimeWorldGroup;
 			}
 
-			var world = await AssetSceneGroup.Load(ns, path, progress, token);
+			var world = await AssetRuntimeWorldGroup.Load(ns, path, progress, token);
 
 			if (world == null) {
 				Logger.LogError($"Failed to load world from assets: {ns}:{path}");
@@ -80,7 +80,7 @@ namespace api.nox.world {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public SceneGroup GetCurrent() {
+		public RuntimeWorldGroup GetCurrent() {
 			var currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
 			if (!currentScene.IsValid()) return null;
 			return (from world in Groups

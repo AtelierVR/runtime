@@ -17,8 +17,8 @@ namespace Nox.Worlds {
 		/// <param name="path">Path to the world file.</param>
 		/// <param name="progress">Progress callback to report loading progress.</param>
 		/// <param name="token">Cancellation token to cancel the loading operation.</param>
-		/// <returns>Returns a <see cref="IScene"/> instance representing the loaded world.</returns>
-		public UniTask<IScene> LoadSceneFromPath(string path, Action<float> progress = null, CancellationToken token = default);
+		/// <returns>Returns a <see cref="IRuntimeWorld"/> instance representing the loaded world.</returns>
+		public UniTask<IRuntimeWorld> LoadSceneFromPath(string path, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Loads a world from the given path in the assets.
@@ -28,8 +28,8 @@ namespace Nox.Worlds {
 		/// <param name="path">Path to the world file in the assets.</param>
 		/// <param name="progress">Progress callback to report loading progress.</param>
 		/// <param name="token">Cancellation token to cancel the loading operation.</param>
-		/// <returns>Returns a <see cref="IScene"/> instance representing the loaded world.</returns>
-		public UniTask<IScene> LoadSceneFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default);
+		/// <returns>Returns a <see cref="IRuntimeWorld"/> instance representing the loaded world.</returns>
+		public UniTask<IRuntimeWorld> LoadSceneFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Loads a world from the cache using its hash.
@@ -38,14 +38,14 @@ namespace Nox.Worlds {
 		/// <param name="hash">Hash of the world to load.</param>
 		/// <param name="progress">Progress callback to report loading progress.</param>
 		/// <param name="token">Cancellation token to cancel the loading operation.</param>
-		/// <returns>Returns a <see cref="IScene"/> instance representing the loaded world, or null if not found.</returns>
-		public UniTask<IScene> LoadSceneFromCache(string hash, Action<float> progress = null, CancellationToken token = default);
+		/// <returns>Returns a <see cref="IRuntimeWorld"/> instance representing the loaded world, or null if not found.</returns>
+		public UniTask<IRuntimeWorld> LoadSceneFromCache(string hash, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Gets the currently active world.
 		/// </summary>
 		/// <returns></returns>
-		public IScene GetCurrent();
+		public IRuntimeWorld GetCurrent();
 
 		/// <summary>
 		/// Sets the current world by its ID.

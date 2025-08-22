@@ -46,33 +46,33 @@ namespace api.nox.world {
 			_root.RemoveFromHierarchy();
 		}
 
-		private void OnWorldAdded(SceneGroup sceneGroup) {
+		private void OnWorldAdded(RuntimeWorldGroup runtimeWorldGroup) {
 			var list = _root.Q("list");
 			if (list == null) return;
-			var child = list.Children().FirstOrDefault(c => c.userData is string id && id == sceneGroup.Id);
+			var child = list.Children().FirstOrDefault(c => c.userData is string id && id == runtimeWorldGroup.Id);
 			if (child != null) {
-				UpdateWorld(child, sceneGroup);
+				UpdateWorld(child, runtimeWorldGroup);
 				return;
 			}
 
 			child                = Main.Instance.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("world.uxml").CloneTree();
 			child.style.flexGrow = 1;
-			child.userData       = sceneGroup.Id;
-			UpdateWorld(child, sceneGroup);
+			child.userData       = runtimeWorldGroup.Id;
+			UpdateWorld(child, runtimeWorldGroup);
 			list.Add(child);
 		}
 
 
-		private void OnWorldRemoved(SceneGroup sceneGroup) {
+		private void OnWorldRemoved(RuntimeWorldGroup runtimeWorldGroup) {
 			var list = _root.Q("list");
 			if (list == null) return;
-			var child = _root.Children().FirstOrDefault(c => c.userData is string id && id == sceneGroup.Id);
+			var child = _root.Children().FirstOrDefault(c => c.userData is string id && id == runtimeWorldGroup.Id);
 			child?.RemoveFromHierarchy();
 		}
 
-		private void UpdateWorld(VisualElement child, SceneGroup sceneGroup) {
+		private void UpdateWorld(VisualElement child, RuntimeWorldGroup runtimeWorldGroup) {
 			var label = child.Q<Label>("id");
-			label.text = sceneGroup.Id;
+			label.text = runtimeWorldGroup.Id;
 		}
 	}
 }

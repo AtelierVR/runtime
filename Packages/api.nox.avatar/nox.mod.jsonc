@@ -30,9 +30,6 @@
     "main": [
       "api.nox.avatar.Main"
     ],
-    "client": [
-      "api.nox.avatar.Client"
-    ],
     "editor": [
       "api.nox.avatar.Editor"
     ],

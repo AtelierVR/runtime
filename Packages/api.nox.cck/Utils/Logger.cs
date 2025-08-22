@@ -5,6 +5,10 @@ using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif // UNITY_EDITOR
+
 namespace Nox.CCK.Utils {
 	public class Logger {
 		public const long MaxLogSize = 1024 * 1024 * 10; // 10 MB
@@ -21,27 +25,65 @@ namespace Nox.CCK.Utils {
 		private static readonly object fileLock = new();
 
 		#if UNITY_EDITOR
-		[UnityEditor.MenuItem("Nox/Logger/Open Latest Log")]
+		[MenuItem("Nox/Logger/Open Latest Log")]
 		private static void OpenLatestLog() {
 			if (File.Exists(LogFile))
-				UnityEditor.EditorUtility.OpenWithDefaultApp(LogFile);
-			else UnityEditor.EditorUtility.DisplayDialog("Nox Logger", "No log file found.", "OK");
+				EditorUtility.OpenWithDefaultApp(LogFile);
+			else OpenDialog("Nox Logger", "No log file found.", "OK");
 		}
 
-		[UnityEditor.MenuItem("Nox/Logger/Reveal Latest Log")]
+		[MenuItem("Nox/Logger/Reveal Latest Log")]
 		private static void RevealLatestLog() {
 			if (File.Exists(LogFile))
-				UnityEditor.EditorUtility.RevealInFinder(LogFile);
-			else UnityEditor.EditorUtility.DisplayDialog("Nox Logger", "No log file found.", "OK");
+				EditorUtility.RevealInFinder(LogFile);
+			else OpenDialog("Nox Logger", "No log file found.", "OK");
 		}
 
-		[UnityEditor.MenuItem("Nox/Logger/Clear Logs")]
+		[MenuItem("Nox/Logger/Clear Logs")]
 		private static void ClearLog() {
 			var files = Directory.GetFiles(LogDir);
 			foreach (var file in files)
 				File.Delete(file);
 			Init();
 		}
+
+		[MenuItem("Nox/Logger/Open Unity Log")]
+		private static void OpenUnityLog() {
+			var logPath = Application.consoleLogPath;
+			if (File.Exists(logPath))
+				EditorUtility.OpenWithDefaultApp(logPath);
+			else OpenDialog("Nox Logger", "No Unity log file found.", "OK");
+		}
+
+		/// <summary>
+		/// Opens a dialog in the Editor with a title, message, and buttons.
+		/// If cancel is null, it will only have an OK button.
+		/// </summary>
+		/// <param name="title"></param>
+		/// <param name="message"></param>
+		/// <param name="ok"></param>
+		/// <param name="cancel"></param>
+		/// <returns></returns>
+		public static bool OpenDialog(string title, string message, string ok, string cancel = null)
+			=> string.IsNullOrEmpty(cancel)
+				? EditorUtility.DisplayDialog(title, message, ok)
+				: EditorUtility.DisplayDialog(title, message, ok, cancel);
+
+		/// <summary>
+		/// Displays a progress bar in the Editor.
+		/// </summary>
+		/// <param name="title"></param>
+		/// <param name="message"></param>
+		/// <param name="progress"></param>
+		public static void ShowProgress(string title, string message, float progress)
+			=> EditorUtility.DisplayProgressBar(title, message, progress);
+
+		/// <summary>
+		/// Clears the progress bar in the Editor.
+		/// </summary>
+		public static void ClearProgress()
+			=> EditorUtility.ClearProgressBar();
+
 		#endif
 
 		public static void Init() {

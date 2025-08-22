@@ -66,8 +66,8 @@ namespace Nox.CCK.Avatars.Playable {
 			_graph.Destroy();
 		}
 
-		public bool OnPlay(IAvatar avatar) {
-			_descriptor = avatar.GetDescriptor();
+		public bool OnPlay(IRuntimeAvatar runtimeAvatar) {
+			_descriptor = runtimeAvatar.GetDescriptor();
 			
 			if (_descriptor == null) {
 				Debug.LogError("Avatar descriptor is not set, cannot play avatar module.");

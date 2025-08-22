@@ -88,12 +88,12 @@ namespace Nox.Controllers {
 		/// Get the avatar associated with the controller.
 		/// </summary>
 		/// <returns></returns>
-		public IAvatar GetAvatar();
+		public IRuntimeAvatar GetAvatar();
 
 		/// <summary>
 		/// Set the avatar for the controller.
 		/// </summary>
-		/// <param name="avatar"></param>
-		public void SetAvatar(IAvatar avatar);
+		/// <param name="runtimeAvatar"></param>
+		public void SetAvatar(IRuntimeAvatar runtimeAvatar);
 	}
 }

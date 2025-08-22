@@ -3,7 +3,7 @@ using Nox.Entities;
 
 namespace Nox.Players {
 	public abstract class PlayerPhysical : Physical {
-		public virtual IAvatar GetAvatar()
+		public virtual IRuntimeAvatar GetAvatar()
 			=> null;
 	}
 }

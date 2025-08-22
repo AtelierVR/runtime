@@ -109,7 +109,7 @@ namespace api.nox.session {
 		private void TryTeleportPlayerToSpawn(IPlayer player) {
 			// Rechercher un descripteur de scène dans la scène active
 			var activeScene = SceneManager.GetActiveScene();
-			if (!SceneDescriptorExtension.TryGetDescriptor<BaseSceneDescriptor>(activeScene, out var descriptor)) {
+			if (!WorldDescriptorExtension.TryGetDescriptor<BaseWorldDescriptor>(activeScene, out var descriptor)) {
 				Logger.LogDebug("No scene descriptor found in active scene for spawn teleportation");
 				return;
 			}

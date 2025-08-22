@@ -208,11 +208,11 @@ namespace api.nox.xr {
 			SynchronizeControllerFromPlayer();
 		}
 
-		public IAvatar GetAvatar() {
+		public IRuntimeAvatar GetAvatar() {
 			throw new NotImplementedException();
 		}
 
-		public void SetAvatar(IAvatar avatar) {
+		public void SetAvatar(IRuntimeAvatar runtimeAvatar) {
 			throw new NotImplementedException();
 		}
 

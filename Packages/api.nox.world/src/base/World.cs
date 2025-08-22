@@ -14,6 +14,7 @@ namespace api.nox.world {
 		public string   owner;
 		public string   server;
 		public string   thumbnail;
+		public string[] contributors;
 
 		public uint GetId()
 			=> id;
@@ -36,8 +37,8 @@ namespace api.nox.world {
 		public string GetOwnerId()
 			=> owner;
 
-		public string[] GetContributorIds() 
-		=> new []{ owner }; // Assuming only owner is a contributor for now, can be extended later
+		public string[] GetContributorIds()
+			=> contributors ?? Array.Empty<string>();
 
 		public string GetThumbnailUrl()
 			=> thumbnail;
@@ -50,8 +51,7 @@ namespace api.nox.world {
 
 		public async UniTask<World> InternalRefresh()
 			=> await Main.Instance.Network.Fetch(ToInternalIdentifier(), server);
-
-
+		
 		public WorldIdentifier ToInternalIdentifier()
 			=> new(server: server, id: id);
 	}

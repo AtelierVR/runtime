@@ -4,9 +4,7 @@
     "references": [
         "Nox.CCK",
         "UniTask",
-        "Nox.Worlds.Components",
-        "Nox.Servers",
-        "Nox.CCK.Worlds"
+        "Nox.Servers"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

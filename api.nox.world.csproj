@@ -47,6 +47,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Packages\api.nox.world\src\obsolete\client\WorldClient.cs" />
+    <Compile Include="Packages\api.nox.world\src\scene_groups\AssetBundleRuntimeWorldGroup.cs" />
+    <Compile Include="Packages\api.nox.world\src\scene_groups\RuntimeWorldGroup.cs" />
     <Compile Include="Packages\api.nox.world\src\search\SearchData.cs" />
     <Compile Include="Packages\api.nox.world\src\client\WorldPage.cs" />
     <Compile Include="Packages\api.nox.world\src\Client.cs" />
@@ -56,15 +58,13 @@
     <Compile Include="Packages\api.nox.world\src\network\update\UpdateWorldRequest.cs" />
     <Compile Include="Packages\api.nox.world\src\obsolete\WorldCache.cs" />
     <Compile Include="Packages\api.nox.world\src\network\search\SearchRequest.cs" />
-    <Compile Include="Packages\api.nox.world\src\scenes\MainScene.cs" />
     <Compile Include="Packages\api.nox.world\src\network\search\AssetSearchResponse.cs" />
     <Compile Include="Packages\api.nox.world\src\editor\WorldBuilderPanel.cs" />
     <Compile Include="Packages\api.nox.world\src\network\Network.cs" />
+    <Compile Include="Packages\api.nox.world\src\scenes\SubRuntimeWorldInstance.cs" />
     <Compile Include="Packages\api.nox.world\src\network\create\CreateAssetRequest.cs" />
     <Compile Include="Packages\api.nox.world\src\client\widget\HomeWidget.cs" />
     <Compile Include="Packages\api.nox.world\src\search\Search.cs" />
-    <Compile Include="Packages\api.nox.world\src\scene_groups\AssetSceneGroup.cs" />
-    <Compile Include="Packages\api.nox.world\src\scenes\SubScene.cs" />
     <Compile Include="Packages\api.nox.world\src\client\WorldComponent.cs" />
     <Compile Include="Packages\api.nox.world\src\editor\Notification.cs" />
     <Compile Include="Packages\api.nox.world\src\obsolete\client\HomeWidgetComportment.cs" />
@@ -77,25 +77,25 @@
     <Compile Include="Packages\api.nox.world\src\obsolete\SceneManager.cs" />
     <Compile Include="Packages\api.nox.world\src\obsolete\WorldLoader.cs" />
     <Compile Include="Packages\api.nox.world\src\base\WorldIdentifier.cs" />
+    <Compile Include="Packages\api.nox.world\src\scenes\BaseRuntimeWorldInstance.cs" />
     <Compile Include="Packages\api.nox.world\src\search\SearchWorker.cs" />
     <Compile Include="Packages\api.nox.world\src\network\search\SearchResponse.cs" />
     <Compile Include="Packages\api.nox.world\src\search\SearchResult.cs" />
     <Compile Include="Packages\api.nox.world\src\cache\Cache.cs" />
     <Compile Include="Packages\api.nox.world\src\editor\WorldLoaderPanel.cs" />
-    <Compile Include="Packages\api.nox.world\src\scene_groups\SceneGroup.cs" />
-    <Compile Include="Packages\api.nox.world\src\scenes\BaseScene.cs" />
+    <Compile Include="Packages\api.nox.world\src\scene_groups\AssetRuntimeWorldGroup.cs" />
     <Compile Include="Packages\api.nox.world\src\editor\Editor.cs" />
     <Compile Include="Packages\api.nox.world\src\scenes\InstanceScene.cs" />
     <Compile Include="Packages\api.nox.world\src\cache\Caching.cs" />
     <Compile Include="Packages\api.nox.world\src\obsolete\client\WorldPage.cs" />
     <Compile Include="Packages\api.nox.world\src\network\create\CreateWorldRequest.cs" />
+    <Compile Include="Packages\api.nox.world\src\scenes\MainRuntimeWorldInstance.cs" />
     <Compile Include="Packages\api.nox.world\src\obsolete\client\HomeWidget.cs" />
     <Compile Include="Packages\api.nox.world\src\network\search\AssetSearchRequest.cs" />
     <Compile Include="Packages\api.nox.world\src\base\World.cs" />
     <Compile Include="Packages\api.nox.world\src\builder\BuildResult.cs" />
     <Compile Include="Packages\api.nox.world\src\editor\WorldPublisherPanel.cs" />
     <Compile Include="Packages\api.nox.world\src\builder\BuildData.cs" />
-    <Compile Include="Packages\api.nox.world\src\scene_groups\AssetBundleSceneGroup.cs" />
     <None Include="Packages\api.nox.world\assets\api.nox.world\loader-styles.uss" />
     <None Include="Packages\api.nox.world\assets\api.nox.world\world.uxml" />
     <None Include="Packages\api.nox.world\assets\api.nox.world\manager.uxml" />

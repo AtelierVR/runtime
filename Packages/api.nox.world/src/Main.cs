@@ -69,9 +69,9 @@ namespace api.nox.world {
 				.GetMod("session")
 				?.GetEntry<ISessionAPI>();
 
-		public readonly UnityEvent<BaseSceneDescriptor, Scene> OnWorldLoaded     = new();
-		public readonly UnityEvent<MainSceneDescriptor, Scene> OnMainWorldLoaded = new();
-		public readonly UnityEvent<SubSceneDescriptor, Scene>  OnSubWorldLoaded  = new();
+		public readonly UnityEvent<BaseWorldDescriptor, Scene> OnWorldLoaded     = new();
+		public readonly UnityEvent<MainWorldDescriptor, Scene> OnMainWorldLoaded = new();
+		public readonly UnityEvent<SubWorldDescriptor, Scene>  OnSubWorldLoaded  = new();
 
 		#endregion
 
@@ -106,15 +106,15 @@ namespace api.nox.world {
 
 
 		private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-			if (!SceneDescriptorExtension.TryGetDescriptor<BaseSceneDescriptor>(scene, out var descriptor)) {
+			if (!WorldDescriptorExtension.TryGetDescriptor<BaseWorldDescriptor>(scene, out var descriptor)) {
 				Logger.LogWarning("WorldSystem.OnSceneLoaded: Scene does not have a valid descriptor.");
 				return;
 			}
 
 			OnWorldLoaded.Invoke(descriptor, scene);
-			if (descriptor is MainSceneDescriptor mainDescriptor)
+			if (descriptor is MainWorldDescriptor mainDescriptor)
 				OnMainWorldLoaded.Invoke(mainDescriptor, scene);
-			else if (descriptor is SubSceneDescriptor subDescriptor)
+			else if (descriptor is SubWorldDescriptor subDescriptor)
 				OnSubWorldLoaded.Invoke(subDescriptor, scene);
 		}
 
@@ -123,15 +123,15 @@ namespace api.nox.world {
 		#endregion
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<IScene> LoadSceneFromPath(string path, Action<float> progress = null, CancellationToken token = default)
+		public async UniTask<IRuntimeWorld> LoadSceneFromPath(string path, Action<float> progress = null, CancellationToken token = default)
 			=> await GroupManager.LoadWorldFromPath(path, progress, token);
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<IScene> LoadSceneFromAssets(string modId, string path, Action<float> progress = null, CancellationToken token = default)
+		public async UniTask<IRuntimeWorld> LoadSceneFromAssets(string modId, string path, Action<float> progress = null, CancellationToken token = default)
 			=> await GroupManager.LoadWorldFromAssets(modId, path, progress, token);
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<IScene> LoadSceneFromCache(string hash, Action<float> progress = null, CancellationToken token = default)
+		public async UniTask<IRuntimeWorld> LoadSceneFromCache(string hash, Action<float> progress = null, CancellationToken token = default)
 			=> await GroupManager.LoadWorldFromCache(hash, progress, token);
 
 		[NoxPublic(NoxAccess.Method)]
@@ -207,7 +207,7 @@ namespace api.nox.world {
 			=> await Network.CreateAsset(identifier, CreateAssetRequest.FromBase(data), from);
 
 		[NoxPublic(NoxAccess.Method)]
-		public IScene GetCurrent()
+		public IRuntimeWorld GetCurrent()
 			=> GroupManager.GetCurrent();
 
 		[NoxPublic(NoxAccess.Method)]

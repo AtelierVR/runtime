@@ -12,7 +12,11 @@
         "Nox.CCK.Avatars.Parameters",
         "Nox.CCK.Avatars.EyeLooks",
         "Nox.CCK.Avatars.Rigging",
-        "api.nox.avatar.modules"
+        "api.nox.avatar.modules",
+        "Unity.ScriptableBuildPipeline",
+        "Unity.ScriptableBuildPipeline.Editor",
+        "Nox.Network",
+        "Nox.Tables"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

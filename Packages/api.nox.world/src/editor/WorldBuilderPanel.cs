@@ -71,8 +71,8 @@ namespace api.nox.world {
 			["PlatformMismatch"]         = "PlatformMismatch"
 		};
 
-		internal static MainSceneDescriptor[] Descriptors
-			=> SceneDescriptorExtension.GetDescriptors<MainSceneDescriptor>();
+		internal static MainWorldDescriptor[] Descriptors
+			=> WorldDescriptorExtension.GetDescriptors<MainWorldDescriptor>();
 
 		// Helper methods for notification management
 		private static void SetNotificationIfNotExists(string uid, NotificationType type, string messageKey, params object[] args) {
@@ -119,7 +119,7 @@ namespace api.nox.world {
 				SetNotificationWithActions(
 					_notificationIds["NoWorldDescriptor"], NotificationType.Error,
 					"world.builder.no_descriptor", new List<VisualElement> {
-						new Button(SceneDescriptorExtension.MakeMainSceneDescriptor)
+						new Button(WorldDescriptorExtension.MakeMainSceneDescriptor)
 							{ text = LanguageManager.Get("world.builder.create") }
 					}
 				);
@@ -140,7 +140,7 @@ namespace api.nox.world {
 			UpdateUI(descriptor);
 		}
 
-		private void CheckMultipleDescriptors(MainSceneDescriptor[] descriptors) {
+		private void CheckMultipleDescriptors(MainWorldDescriptor[] descriptors) {
 			if (descriptors.Length > 1)
 				SetNotificationWithActions(
 					_notificationIds["MultipleWorldDescriptors"], NotificationType.Warning,
@@ -189,7 +189,7 @@ namespace api.nox.world {
 			}
 		}
 
-		private void CheckSpawns(MainSceneDescriptor descriptor) {
+		private void CheckSpawns(MainWorldDescriptor descriptor) {
 			var esSpawn = descriptor.EstimateSpawns();
 
 			if (esSpawn.Count == 1 && esSpawn[0] == descriptor.gameObject)
@@ -226,7 +226,7 @@ namespace api.nox.world {
 			}
 		}
 
-		private void CheckScenes(MainSceneDescriptor descriptor) {
+		private void CheckScenes(MainWorldDescriptor descriptor) {
 			var esScene = descriptor.EstimateScenes();
 
 			if (esScene.Count == 1)
@@ -274,7 +274,7 @@ namespace api.nox.world {
 			else RemoveNotificationIfExists(_notificationIds["PlayMode"]);
 		}
 
-		private void CheckBuildPlatform(MainSceneDescriptor descriptor) {
+		private void CheckBuildPlatform(MainWorldDescriptor descriptor) {
 			var buildPlatform = descriptor?.target ?? Platform.None;
 
 			if (buildPlatform == Platform.None)
@@ -292,7 +292,7 @@ namespace api.nox.world {
 			else RemoveNotificationIfExists(_notificationIds["UseActivePlatform"]);
 		}
 
-		private void CheckUnsupportedPlatform(MainSceneDescriptor descriptor) {
+		private void CheckUnsupportedPlatform(MainWorldDescriptor descriptor) {
 			// Determine the platform to check
 			var platformToCheck = descriptor?.target ?? Platform.None;
 
@@ -333,7 +333,7 @@ namespace api.nox.world {
 			}
 		}
 
-		private void CheckPlatformMismatch(MainSceneDescriptor descriptor) {
+		private void CheckPlatformMismatch(MainWorldDescriptor descriptor) {
 			// Skip check if descriptor is null or target is None
 			if (!descriptor || descriptor.target == Platform.None) {
 				RemoveNotificationIfExists(_notificationIds["PlatformMismatch"]);
@@ -364,12 +364,10 @@ namespace api.nox.world {
 						) { text = LanguageManager.Get("world.builder.switch_platform") }
 					}, currentPlatform.GetPlatformName(), targetPlatform.GetPlatformName()
 				);
-			} else {
-				RemoveNotificationIfExists(_notificationIds["PlatformMismatch"]);
-			}
+			} else RemoveNotificationIfExists(_notificationIds["PlatformMismatch"]);
 		}
 
-		private void UpdateUI(MainSceneDescriptor descriptor) {
+		private void UpdateUI(MainWorldDescriptor descriptor) {
 			if (_root.childCount == 0) return;
 
 			// Cache UI elements if not already cached
@@ -409,16 +407,16 @@ namespace api.nox.world {
 			_lastHashNotify = hash;
 		}
 
-		private void CreateNotificationItem(Notification notification, VisualTreeAsset asset) {
-			var item = CreateModernNotificationItem(notification, asset.CloneTree());
+		private void CreateNotificationItem(Notification notificationManager, VisualTreeAsset asset) {
+			var item = CreateModernNotificationItem(notificationManager, asset.CloneTree());
 			_notificationList.Add(item);
 		}
 
-		private VisualElement CreateModernNotificationItem(Notification notification, VisualElement item) {
+		private VisualElement CreateModernNotificationItem(Notification notificationManager, VisualElement item) {
 			var content = item.Q<VisualElement>("content");
 			// var actions = item.Q<VisualElement>("actions");
-			content.Add(notification.Content);
-			item.AddToClassList($"notification-{notification.Type.ToString().ToLowerInvariant()}");
+			content.Add(notificationManager.Content);
+			item.AddToClassList($"notification-{notificationManager.Type.ToString().ToLowerInvariant()}");
 			// actions.Clear();
 			return item;
 		}
@@ -428,16 +426,6 @@ namespace api.nox.world {
 			_lastHashNotify = "";
 			_root.ClearBindings();
 			_root.Clear();
-
-			// Reset cached UI elements
-			_descriptorField   = null;
-			_platformField     = null;
-			_outputFolderField = null;
-			_notificationList  = null;
-			_progressContainer = null;
-			_progressBar       = null;
-			_progressLabel     = null;
-			_buildButton       = null;
 
 			var child = Editor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("builder.uxml").CloneTree();
 			child.style.flexGrow = 1;
@@ -538,10 +526,8 @@ namespace api.nox.world {
 			var currentFolder  = _outputFolderField?.value ?? "";
 			var selectedFolder = EditorUtility.OpenFolderPanel("Select Output Folder", currentFolder, "");
 
-			if (!string.IsNullOrEmpty(selectedFolder) && _outputFolderField != null) {
+			if (!string.IsNullOrEmpty(selectedFolder) && _outputFolderField != null)
 				_outputFolderField.value = selectedFolder;
-				// The OnOutputFolderChanged callback will be triggered automatically
-			}
 		}
 
 		private void OnOutputFolderChanged(ChangeEvent<string> e) {
@@ -633,9 +619,8 @@ namespace api.nox.world {
 			}
 		}
 
-		private void OnBuildButtonClicked(ClickEvent _) {
-			OnBuildButtonClickedAsync().Forget();
-		}
+		private void OnBuildButtonClicked(ClickEvent _)
+			=> OnBuildButtonClickedAsync().Forget();
 
 		private async UniTaskVoid OnBuildButtonClickedAsync() {
 			var descriptors    = Descriptors;

@@ -8,25 +8,25 @@ using UnityEngine.Events;
 
 namespace api.nox.avatar {
 	public class AvatarLoader {
-		public static readonly List<IAvatar> Avatar = new();
+		public static readonly List<IRuntimeAvatar> Avatar = new();
 
-		public static readonly UnityEvent<IAvatar> OnAdded   = new();
-		public static readonly UnityEvent<IAvatar> OnRemoved = new();
+		public static readonly UnityEvent<IRuntimeAvatar> OnAdded   = new();
+		public static readonly UnityEvent<IRuntimeAvatar> OnRemoved = new();
 
-		internal static void InvokeAdded(IAvatar avatar) {
-			Avatar.Add(avatar);
-			OnAdded.Invoke(avatar);
-			Main.Instance.CoreAPI.EventAPI.Emit("avatar_added", avatar);
+		internal static void InvokeAdded(IRuntimeAvatar runtimeAvatar) {
+			Avatar.Add(runtimeAvatar);
+			OnAdded.Invoke(runtimeAvatar);
+			Main.Instance.CoreAPI.EventAPI.Emit("avatar_added", runtimeAvatar);
 		}
 
-		internal static void InvokeRemoved(IAvatar avatar) {
-			Avatar.Remove(avatar);
-			OnRemoved.Invoke(avatar);
-			Main.Instance.CoreAPI.EventAPI.Emit("avatar_removed", avatar);
+		internal static void InvokeRemoved(IRuntimeAvatar runtimeAvatar) {
+			Avatar.Remove(runtimeAvatar);
+			OnRemoved.Invoke(runtimeAvatar);
+			Main.Instance.CoreAPI.EventAPI.Emit("avatar_removed", runtimeAvatar);
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public static async UniTask<AssetBundleAvatar> LoadFromCache(string hash, Action<float> progress = null, CancellationToken token = default) {
+		public static async UniTask<AssetBundleRuntimeRuntimeAvatar> LoadFromCache(string hash, Action<float> progress = null, CancellationToken token = default) {
 			Logger.Log($"Loading avatar from cache: {hash}");
 
 			var path = AvatarCache.GetIfExist(hash);
@@ -39,10 +39,10 @@ namespace api.nox.avatar {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public static async UniTask<AssetBundleAvatar> LoadFromPath(string path, Action<float> progress = null, CancellationToken token = default) {
+		public static async UniTask<AssetBundleRuntimeRuntimeAvatar> LoadFromPath(string path, Action<float> progress = null, CancellationToken token = default) {
 			Logger.Log($"Loading avatar from path: {path}");
 
-			var avatar = await AssetBundleAvatar.Load(path, progress, token);
+			var avatar = await AssetBundleRuntimeRuntimeAvatar.Load(path, progress, token);
 			if (avatar == null) {
 				Logger.LogError($"Failed to load world from path: {path}");
 				return null;
@@ -53,10 +53,10 @@ namespace api.nox.avatar {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public static async UniTask<AssetAvatar> LoadFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default) {
+		public static async UniTask<AssetRuntimeRuntimeAvatar> LoadFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default) {
 			Logger.Log($"Loading avatar from assets: {ns}:{path}");	
 			
-			var avatar = await AssetAvatar.Load(ns, path, progress, token);
+			var avatar = await AssetRuntimeRuntimeAvatar.Load(ns, path, progress, token);
 
 			if (avatar == null) {
 				Logger.LogError($"Failed to load world from assets: {ns}:{path}");

@@ -18,8 +18,8 @@ namespace Nox.CCK.Avatars.EyeLooks {
 		public void SetEyeLooks(BaseEyeLook[] value)
 			=> eyeLooks = value ?? Array.Empty<BaseEyeLook>();
 
-		public bool OnPlay(IAvatar avatar) {
-			_descriptor = avatar.GetDescriptor();;
+		public bool OnPlay(IRuntimeAvatar runtimeAvatar) {
+			_descriptor = runtimeAvatar.GetDescriptor();;
 			return true;
 		}
 

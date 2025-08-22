@@ -133,7 +133,7 @@ namespace api.nox.world {
 
 			if (world != null) {
 				var user          = Main.Instance.UserAPI.GetCurrent();
-				var isContributor = user != null && world.GetContributorIds().Any(contributor => user.ToIdentifier().Equals(contributor));
+				var isContributor = user != null && (user.ToIdentifier().Equals(world.GetOwnerId()) || world.GetContributorIds().Any(contributor => user.ToIdentifier().Equals(contributor)));
 
 				if (!isContributor) {
 					EditorUtility.DisplayDialog(
@@ -731,32 +731,34 @@ namespace api.nox.world {
 				Logger.LogError($"Texture encoding test failed: {ex.Message}");
 				return;
 			}
-		try {
-			SetDisplay(DisplayFlags.Loading);
-			Logger.Log("Uploading thumbnail...");
 
-			var success = await Main.Instance.Network.UploadThumbnail(
-				_world.GetId(), 
-				texture, 
-				_world.GetServerAddress(),
-				progress => ShowProgress(progress, $"Uploading thumbnail... {progress * 100:F0}%")
-			);			if (success) {
-				ShowProgress(1.0f, "Thumbnail uploaded successfully!");
-				await UniTask.Delay(1000); // Show success message briefly
-				Logger.Log("Thumbnail uploaded successfully.");
-				// Refresh the thumbnail preview
-				UpdateThumbnailPreview();
-			} else {
-				EditorUtility.DisplayDialog("Error", "Failed to upload thumbnail.", "Ok");
-				Logger.LogError("Failed to upload thumbnail.");
+			try {
+				SetDisplay(DisplayFlags.Loading);
+				Logger.Log("Uploading thumbnail...");
+
+				var success = await Main.Instance.Network.UploadThumbnail(
+					_world.GetId(),
+					texture,
+					_world.GetServerAddress(),
+					progress => ShowProgress(progress, $"Uploading thumbnail... {progress * 100:F0}%")
+				);
+				if (success) {
+					ShowProgress(1.0f, "Thumbnail uploaded successfully!");
+					await UniTask.Delay(1000); // Show success message briefly
+					Logger.Log("Thumbnail uploaded successfully.");
+					// Refresh the thumbnail preview
+					UpdateThumbnailPreview();
+				} else {
+					EditorUtility.DisplayDialog("Error", "Failed to upload thumbnail.", "Ok");
+					Logger.LogError("Failed to upload thumbnail.");
+				}
+			} catch (Exception ex) {
+				EditorUtility.DisplayDialog("Error", $"An error occurred while uploading thumbnail: {ex.Message}", "Ok");
+				Logger.LogError($"An error occurred while uploading thumbnail: {ex.Message}");
+			} finally {
+				HideProgress();
+				SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
 			}
-		} catch (Exception ex) {
-			EditorUtility.DisplayDialog("Error", $"An error occurred while uploading thumbnail: {ex.Message}", "Ok");
-			Logger.LogError($"An error occurred while uploading thumbnail: {ex.Message}");
-		} finally {
-			HideProgress();
-			SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
-		}
 		}
 
 		private async UniTask OnPublishAsync() {
@@ -825,12 +827,12 @@ namespace api.nox.world {
 
 			var search = await Main.Instance.Network.SearchAssets(
 				_world.GetId(), new AssetSearchRequest {
-					Versions   = new[] { version },
-					Platforms  = new[] { target.GetPlatformName() },
-					Engines    = new[] { Constants.CurrentEngine.GetEngineName() },
+					Versions  = new[] { version },
+					Platforms = new[] { target.GetPlatformName() },
+					Engines   = new[] { Constants.CurrentEngine.GetEngineName() },
 					ShowEmpty = true,
-					Limit      = 1,
-					Offset     = 0
+					Limit     = 1,
+					Offset    = 0
 				}, _world.GetServerAddress()
 			);
 
@@ -851,12 +853,12 @@ namespace api.nox.world {
 					ShowProgress(0.1f + ((version - originalVersion) * 0.01f), $"Checking version {version}...");
 					search = await Main.Instance.Network.SearchAssets(
 						_world.GetId(), new AssetSearchRequest {
-							Versions   = new[] { version },
-							Platforms  = new[] { target.GetPlatformName() },
-							Engines    = new[] { Constants.CurrentEngine.GetEngineName() },
+							Versions  = new[] { version },
+							Platforms = new[] { target.GetPlatformName() },
+							Engines   = new[] { Constants.CurrentEngine.GetEngineName() },
 							ShowEmpty = true,
-							Limit      = 1,
-							Offset     = 0
+							Limit     = 1,
+							Offset    = 0
 						}, _world.GetServerAddress()
 					);
 					if (search == null) {
@@ -869,18 +871,19 @@ namespace api.nox.world {
 
 					asset = search.GetAssets().FirstOrDefault();
 				}
+
 				ShowProgress(0.15f, $"Using version {version}...");
 			}
 
 			_root.Q<UnsignedIntegerField>("asset-version").value = version;
-			
+
 			// Log asset information for debugging
 			if (asset != null) {
 				Logger.Log($"Found asset version {version}: IsEmpty={asset.IsEmpty()}, StrictMode={strictVersion}");
 			} else {
 				Logger.Log($"No asset found for version {version}, will create new asset.");
 			}
-			
+
 			if (asset != null && strictVersion && !asset.IsEmpty()) {
 				HideProgress();
 				ShowErrorDialog("Asset version already exists and has a file assigned. Disable 'Publication only if there is no assigned file to it' to allow overwriting.", useDirectMessage: true);
@@ -942,7 +945,7 @@ namespace api.nox.world {
 					SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
 					return;
 				}
-				
+
 				Logger.Log($"Built file: {builtFilePath}");
 
 				ShowProgress(0.7f, "Creating asset...");
@@ -975,12 +978,12 @@ namespace api.nox.world {
 				Logger.Log("Uploading asset file...");
 
 				// Read the built file as byte array
-				var fileData = File.ReadAllBytes(builtFilePath);
+				var fileData   = File.ReadAllBytes(builtFilePath);
 				var fileSizeMB = fileData.Length / (1024.0 * 1024.0);
 				Logger.Log($"File size: {fileSizeMB:F2} MB");
-				
+
 				ShowProgress(0.78f, $"Calculating file hash for {fileSizeMB:F1} MB file...");
-				
+
 				// Calculate file hash for validation
 				string fileHash = null;
 				using (var sha256 = System.Security.Cryptography.SHA256.Create()) {
@@ -1086,9 +1089,8 @@ namespace api.nox.world {
 				if (!string.IsNullOrEmpty(tempPath) && Directory.Exists(tempPath)) {
 					Directory.Delete(tempPath, true);
 					// delete folder
-					
-					
-					
+
+
 					Logger.Log($"Cleaned up temporary build directory: {tempPath}");
 				}
 			} catch (Exception ex) {

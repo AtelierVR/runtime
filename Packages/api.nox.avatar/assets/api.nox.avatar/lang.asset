@@ -16,7 +16,66 @@ MonoBehaviour:
   - IETF: en-US
     entries:
     - key: nox.avatar.no_avatar_descriptor
-      value: This Animator has a humanoid rig but no AvatarDescriptor. Would you
-        like to add an AvatarDescriptor?
+      value: "This Animator has a humanoid rig but no AvatarDescriptor. Would you like to add an AvatarDescriptor?"
     - key: nox.avatar.add_avatar_descriptor
-      value: Add AvatarDescriptor
+      value: "Add AvatarDescriptor"
+    - key: avatar.builder.title
+      value: "Avatar Builder"
+    - key: avatar.builder.error_no_descriptor
+      value: "No avatar descriptor found. Please ensure your avatar has an AvatarDescriptor component."
+    - key: avatar.builder.error_unsupported_target
+      value: "The selected build target is not supported for avatar building."
+    - key: avatar.builder.error_no_output_folder
+      value: "No output folder specified. Please select an output folder for the build."
+    - key: avatar.builder.success_build
+      value: "Avatar built successfully! The avatar package has been created in the specified output folder."
+    - key: avatar.builder.error_already_building
+      value: "A build is already in progress. Please wait for the current build to complete."
+    - key: avatar.builder.error_editor_compiling
+      value: "Unity is currently compiling scripts. Please wait until the compilation is complete before building."
+    - key: avatar.builder.error_invalid_target
+      value: "Invalid build target specified. Please select a valid target platform."
+    - key: avatar.builder.error_invalid_game_object
+      value: "The avatar GameObject is not valid for building. Please check your avatar setup."
+    - key: avatar.builder.error_unknown
+      value: "An unknown error occurred during the build process."
+    - key: avatar.builder.error
+      value: "Build Error"
+    - key: avatar.builder.ok
+      value: "OK"
+    - key: avatar.builder.success
+      value: "Build Success"
+    - key: avatar.builder.error_platform_not_supported
+      value: "Platform \"{0}\" is not supported. Please select a different platform."
+    - key: avatar.builder.use_current
+      value: "Use Current Platform"
+    - key: avatar.builder.switch_platform
+      value: "Switch Platform"
+    - key: avatar.builder.platform_mismatch
+      value: "Platform mismatch detected. Unity is set to \"{0}\" but avatar target is \"{1}\"."
+    - key: avatar.builder.no_descriptor
+      value: "No AvatarDescriptor found in the current scene. Please add an AvatarDescriptor to your avatar."
+    - key: avatar.builder.multiple_descriptors
+      value: "Multiple AvatarDescriptors found. Only one AvatarDescriptor should be present in the scene."
+    - key: avatar.builder.select
+      value: "Select"
+    - key: avatar.builder.remove_other
+      value: "Remove Others"
+    - key: avatar.builder.no_user
+      value: "You are not logged in. Please log in to build and publish avatars."
+    - key: avatar.builder.login
+      value: "Login"
+    - key: avatar.builder.logged_in
+      value: "Logged in as {0} (ID: {1})"
+    - key: avatar.builder.use_active_platform
+      value: "Platform is set to None. Using current Unity platform \"{0}\"."
+    - key: avatar.builder.detect
+      value: "Detect Platform"
+    - key: avatar.builder.play_mode
+      value: "Unity is in play mode. Please exit play mode before building avatars."
+    - key: avatar.builder.exit
+      value: "Exit Play Mode"
+    - key: avatar.builder.unsupported_platform
+      value: "Platform \"{0}\" is not supported on this system."
+    - key: avatar.builder.use_supported
+      value: "Use Supported Platform"

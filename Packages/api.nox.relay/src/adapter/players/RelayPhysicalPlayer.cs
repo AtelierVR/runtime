@@ -23,7 +23,7 @@ namespace api.nox.relay {
 			Gizmos.DrawLine(transform.position, Reference.GetPosition());
 		}
 
-		public override IAvatar GetAvatar()
+		public override IRuntimeAvatar GetAvatar()
 			=> null;
 	}
 }

@@ -132,7 +132,7 @@ namespace api.nox.world.builder {
 			=> BuildMenuAsync().Forget();
 
 		public async static UniTask BuildMenuAsync() {
-			if (!SceneDescriptorExtension.TryGetDescriptor(SceneManager.GetActiveScene(), out MainSceneDescriptor descriptor)) {
+			if (!WorldDescriptorExtension.TryGetDescriptor(SceneManager.GetActiveScene(), out MainWorldDescriptor descriptor)) {
 				EditorUtility.DisplayDialog("Build Failed", "No valid main scene descriptor found in the current scene.", "OK");
 				return;
 			}

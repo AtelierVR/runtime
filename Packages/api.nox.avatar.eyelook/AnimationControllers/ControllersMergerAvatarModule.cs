@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +14,8 @@ namespace AnimationControllers {
 	public class ControllersMergerAvatarModule : MonoBehaviour, IAvatarModule, ICompilable {
 		private IAvatarDescriptor _descriptor;
 
-		public bool OnPlay(IAvatar avatar) {
-			SetDescriptor(avatar.GetDescriptor());
+		public bool OnPlay(IRuntimeAvatar runtimeAvatar) {
+			SetDescriptor(runtimeAvatar.GetDescriptor());
 			return true;
 		}
 
@@ -368,3 +369,4 @@ namespace AnimationControllers {
 		}
 	}
 }
+#endif

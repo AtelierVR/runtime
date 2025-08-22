@@ -46,40 +46,5 @@ namespace api.nox.world {
 			if (Directory.Exists(Path.Combine(Constants.AppPath, "cache", "worlds")))
 				Directory.Delete(Path.Combine(Constants.AppPath, "cache", "worlds"), true);
 		}
-
-
-		/*
-		public static async UniTask<DownloadWorldResult> DownloadWorld(string hash, string url, Action<float, ulong> progress = null, CancellationToken token = default)
-		{
-		    if (HasWorldInCache(hash))
-		        return new DownloadWorldResult { Success = true, Hash = hash, URL = url };
-
-		    // Download world
-		    var t0 = DateTime.Now;
-		    var res = await Main.NetworkAPI.CallAsyncMethod<string>("DownloadFile",
-		        url, hash, null,
-		        new Action<float, ulong>((p, b) => progress?.Invoke(p, b)),
-		        token);
-		    var t1 = DateTime.Now;
-
-		    if (res == null)
-		        return new DownloadWorldResult { Success = false, Hash = hash, URL = url, Error = "Failed to download world" };
-
-		    // Check if downloaded file is correct
-		    if (Hashing.HashFile(res) != hash)
-		    {
-		        File.Delete(res);
-		        return new DownloadWorldResult { Success = false, Hash = hash, URL = url, Error = "Downloaded world hash mismatch" };
-		    }
-
-		    // Save world to cache
-		    SaveWorldToCache(hash, res);
-
-		    var t2 = DateTime.Now;
-
-		    Logger.Log($"Downloaded world {hash} from {url} in {t1 - t0} and saved in cache in {t2 - t1}");
-
-		    return new DownloadWorldResult { Success = true, Hash = hash, URL = url };
-		}*/
 	}
 }

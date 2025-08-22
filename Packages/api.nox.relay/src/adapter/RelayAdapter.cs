@@ -185,9 +185,9 @@ namespace api.nox.relay {
 			return true;
 		}
 
-		public void SetDimension(IScene scene) {
-			if (scene == null) return;
-			Dimension = new RelayDimension(0, scene, true);
+		public void SetDimension(IRuntimeWorld runtimeWorld) {
+			if (runtimeWorld == null) return;
+			Dimension = new RelayDimension(0, runtimeWorld, true);
 		}
 
 		public IAdapterState GetState()

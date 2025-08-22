@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -9,7 +8,7 @@ using Nox.CCK.Utils;
 
 namespace api.nox.avatar {
 	public class AvatarSetup {
-		public static async UniTask<bool> Prepare(BaseAvatar avatar, Action<float> progress, CancellationToken token) {
+		public static async UniTask<bool> Prepare(IRuntimeAvatar avatar, Action<float> progress, CancellationToken token) {
 			if (avatar == null) {
 				Logger.LogError("Avatar descriptor is null.");
 				return false;

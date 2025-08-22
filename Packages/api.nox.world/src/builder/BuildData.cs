@@ -6,7 +6,7 @@ using UnityEditor;
 #if UNITY_EDITOR
 namespace api.nox.world.builder {
 	public class BuildData {
-		public MainSceneDescriptor Descriptor;
+		public MainWorldDescriptor Descriptor;
 		public bool                ShowDialog;
 		public string              OutputPath;
 		public Platform            Target;

@@ -1,0 +1,1047 @@
+#if UNITY_EDITOR
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using Cysharp.Threading.Tasks;
+using Nox.CCK.Avatars;
+using Nox.CCK.Build;
+using Nox.CCK.Utils;
+using UnityEditor;
+using UnityEditor.Build.Pipeline;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using Logger = Nox.CCK.Utils.Logger;
+using Random = System.Random;
+using Transform = UnityEngine.Transform;
+
+namespace api.nox.avatar.builder {
+	public static class Builder {
+		public static bool IsBuilding;
+
+		private static readonly Dictionary<string, string> SceneBackups = new();
+
+		/// <summary>
+		/// Creates backup copies of scenes before compilation
+		/// </summary>
+		/// <param name="scene">The scene to backup</param>
+		/// <returns>True if backup was created successfully, false otherwise</returns>
+		private static bool CreateSceneBackup(Scene scene) {
+			SceneBackups.Clear();
+
+			try {
+				const string backupPath = "Temp/SceneBackups/";
+				if (Directory.Exists(backupPath)) {
+					Directory.Delete(backupPath, true);
+				}
+
+				Directory.CreateDirectory(backupPath);
+
+				var originalPath = scene.path;
+				if (string.IsNullOrEmpty(originalPath) || !File.Exists(originalPath)) {
+					Logger.LogError($"Scene {scene.name} is not valid or does not exist at path {originalPath}.");
+					return false;
+				}
+
+				var backupFilePath = backupPath + $"scene_avatar_backup.unity";
+				var backupMetaPath = backupFilePath + ".meta";
+
+				// Copier le fichier de scène
+				File.Copy(originalPath, backupFilePath);
+
+				// Créer un nouveau fichier .meta avec un GUID unique pour le backup
+				var originalMetaContent = File.ReadAllText(originalPath + ".meta");
+				var newGuid = Guid.NewGuid().ToString("N");
+
+				// Remplacer le GUID dans le contenu du .meta
+				var lines = originalMetaContent.Split('\n');
+				for (var i = 0; i < lines.Length; i++) {
+					if (!lines[i].StartsWith("guid:")) continue;
+					lines[i] = $"guid: {newGuid}";
+					break;
+				}
+
+				var newMetaContent = string.Join("\n", lines);
+				File.WriteAllText(backupMetaPath, newMetaContent);
+
+				SceneBackups.Add(originalPath, backupFilePath);
+				Logger.Log($"Created backup for scene {scene.name} with unique GUID {newGuid}: {originalPath} -> {backupFilePath}");
+
+				return true;
+			} catch (Exception e) {
+				Logger.LogError($"Failed to create scene backup: {e.Message}");
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Restores scene from backup copy
+		/// </summary>
+		/// <returns>True if restoration was successful, false otherwise</returns>
+		private static bool RestoreSceneBackup() {
+			if (SceneBackups.Count == 0) {
+				Logger.LogWarning("No scene backup found to restore.");
+				return true;
+			}
+
+			try {
+				foreach (var (originalPath, backupPath) in SceneBackups) {
+					if (!File.Exists(backupPath)) {
+						Logger.LogError($"Backup file not found: {backupPath}");
+						continue;
+					}
+
+					// Restaurer seulement le fichier de scène (.unity)
+					// Ne pas restaurer le .meta pour éviter les conflits de GUID
+					File.Copy(backupPath, originalPath, true);
+
+					Logger.Log($"Restored scene from backup: {backupPath} -> {originalPath}");
+				}
+
+				AssetDatabase.Refresh();
+				return true;
+			} catch (Exception e) {
+				Logger.LogError($"Failed to restore scene backup: {e.Message}");
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Cleans up backup files
+		/// </summary>
+		private static void CleanupSceneBackups() {
+			try {
+				const string backupPath = "Temp/SceneBackups/";
+				if (Directory.Exists(backupPath)) {
+					Directory.Delete(backupPath, true);
+					Logger.Log("Scene backups cleaned up successfully.");
+				}
+
+				SceneBackups.Clear();
+			} catch (Exception e) {
+				Logger.LogWarning($"Failed to cleanup scene backups: {e.Message}");
+			}
+		}
+
+		[MenuItem("Nox/Avatar/Build Avatar")]
+		public static void BuildMenu()
+			=> BuildMenuAsync().Forget();
+
+		public async static UniTask BuildMenuAsync() {
+			if (!SceneManager.GetActiveScene().TryGetComponentInChildren<AvatarDescriptor>(out var descriptor)) {
+				Logger.OpenDialog("Build Failed", "No valid avatar descriptor found in the current scene.", "OK");
+				return;
+			}
+
+			const string path = "Assets/Builds/";
+			if (!Directory.Exists(path)) {
+				try {
+					Directory.CreateDirectory(path);
+				} catch (Exception e) {
+					Logger.OpenDialog("Build Failed", $"Failed to create output directory: {e.Message}", "OK");
+					return;
+				}
+			}
+
+			var data = new BuildData {
+				Descriptor = descriptor,
+				ShowDialog = true,
+				OutputPath = path
+			};
+
+			BuildResult result;
+			try {
+				result = await Build(data);
+			} catch (Exception e) {
+				result = new BuildResult {
+					Type    = BuildResultType.Failed,
+					Message = $"Build failed with exception: {e.Message}"
+				};
+				Logger.LogError(result.Message);
+			} finally {
+				IsBuilding = false;
+			}
+
+			if (result.Type == BuildResultType.Success) {
+				Logger.OpenDialog("Build Success", "The world has been built successfully!", "OK");
+			} else Logger.OpenDialog("Build Failed", result.Message, "OK");
+		}
+
+		public static async UniTask<BuildResult> Build(BuildData data) {
+			if (data.Target == Platform.None)
+				data.Target = PlatformExtensions.CurrentPlatform; // Set default filename if not provided
+			if (string.IsNullOrEmpty(data.Filename))
+				data.Filename = GenerateDefaultFilename(data.Descriptor.gameObject.scene.name, data.Target); // Set randomized temp path if not provided
+			if (string.IsNullOrEmpty(data.TempPath))
+				data.TempPath = $"Assets/Temp/{GenerateRandomHash()}/"; // Report progress: Validation
+			data.ProgressCallback?.Invoke(0.05f, "Validating build prerequisites...");
+			await UniTask.Yield();
+
+			// Validation des prérequis
+			var validation = ValidateBuildPrerequisites(data);
+			if (validation.Type != BuildResultType.Success)
+				return validation;
+
+			IsBuilding = true;
+			var rollback = EditorSceneManager.GetSceneManagerSetup();
+
+			try {
+				// Report progress: Preparation
+				data.ProgressCallback?.Invoke(0.10f, "Preparing temporary directories...");
+				await UniTask.Yield();
+
+				// Préparation des répertoires temporaires
+				var preparation = PrepareTemporaryDirectories(data);
+				if (preparation.Type != BuildResultType.Success)
+					return preparation; 
+				
+				// Sauvegarde initiale des scènes
+				if (!EditorSceneManager.SaveOpenScenes()) {
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = "Failed to save open scenes. Please ensure all scenes are saved before building."
+					};
+				}
+
+				AssetDatabase.Refresh(); 
+				
+				// Report progress: Scene backup
+				data.ProgressCallback?.Invoke(0.15f, "Creating scene backup...");
+				await UniTask.Yield();
+
+				// Création de la sauvegarde de scène
+				var scene = data.Descriptor.gameObject.scene;
+				Logger.Log("Creating scene backup before compilation...");
+				if (!CreateSceneBackup(scene)) {
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = "Failed to create scene backup. Build aborted for safety."
+					};
+				}
+				
+				// Report progress: Compiling scripts
+				data.ProgressCallback?.Invoke(0.40f, "Compiling scripts...");
+				await UniTask.Yield();
+
+				// Compilation des scripts
+				var compilation = await CompileScripts(data.Descriptor.gameObject);
+				if (compilation.Type != BuildResultType.Success)
+					return compilation; 
+				
+				// Report progress: Processing scenes
+				data.ProgressCallback?.Invoke(0.60f, "Processing prefab and dependencies...");
+				await UniTask.Yield();
+
+				var processing = await ProcessPrefabAndDependencies(data);
+				if (processing.Type != BuildResultType.Success)
+					return processing; 
+				
+				// Report progress: Building AssetBundle
+				data.ProgressCallback?.Invoke(0.80f, "Building AssetBundle...");
+				await UniTask.Yield();
+
+				// Création de l'AssetBundle des scènes
+				var assetBundleResult = await BuildPrefabsAssetBundle(data);
+				if (assetBundleResult.Type != BuildResultType.Success)
+					return assetBundleResult; 
+				
+				// Report progress: Cleanup
+				data.ProgressCallback?.Invoke(0.95f, "Cleaning up...");
+				await UniTask.Yield();
+
+				// Report progress: Complete
+				data.ProgressCallback?.Invoke(1.0f, "Build completed successfully!");
+				await UniTask.Yield();
+
+				return new BuildResult {
+					Type = BuildResultType.Success,
+				};
+			} finally {
+				// S'assurer que le nettoyage se fait toujours, même en cas d'erreur ou de retour anticipé
+				CleanupAndRestoreState(rollback, true, data.TempPath);
+			}
+		}
+
+		/// <summary>
+		/// Validates build prerequisites and parameters
+		/// </summary>
+		private static BuildResult ValidateBuildPrerequisites(BuildData data) {
+			if (IsBuilding)
+				return new BuildResult {
+					Type    = BuildResultType.AlreadyBuilding,
+					Message = "A build is already in progress."
+				};
+
+			if (EditorApplication.isCompiling)
+				return new BuildResult {
+					Type    = BuildResultType.EditorCompiling,
+					Message = "Unity is currently compiling scripts. Please wait until the compilation is complete."
+				};
+
+			if (EditorApplication.isPlaying)
+				return new BuildResult {
+					Type    = BuildResultType.EditorPlaying,
+					Message = "Unity is currently in play mode. Please stop playing before building."
+				};
+
+			if (data.Target == Platform.None)
+				return new BuildResult {
+					Type    = BuildResultType.InvalidTarget,
+					Message = "No build target specified. Please select a valid target platform."
+				};
+
+			if (!data.Target.IsSupported())
+				return new BuildResult {
+					Type    = BuildResultType.UnsupportedTarget,
+					Message = $"The build target {data.Target} is not supported."
+				};
+
+			return new BuildResult { Type = BuildResultType.Success };
+		}
+
+		/// <summary>
+		/// Prepares temporary directories and validates scene
+		/// </summary>
+		private static BuildResult PrepareTemporaryDirectories(BuildData data) {
+			if (!data.Descriptor || !data.Descriptor.gameObject)
+				return new BuildResult {
+					Type    = BuildResultType.InvalidGameObject,
+					Message = "The AvatarDescriptor is not set or the game object is invalid."
+				};
+
+			var mainScene = data.Descriptor.gameObject.scene;
+			if (!mainScene.IsValid() || !mainScene.isLoaded) {
+				return new BuildResult {
+					Type    = BuildResultType.InvalidGameObject,
+					Message = "The scene is not valid. Please ensure the scene is properly set up."
+				};
+			}
+
+			var tempPath = data.TempPath;
+			var depPath  = tempPath + "Dependencies/";
+			if (Directory.Exists(tempPath))
+				try {
+					Directory.Delete(tempPath, true);
+				} catch (Exception e) {
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = $"Failed to delete temporary directory: {e.Message}"
+					};
+				}
+
+			Directory.CreateDirectory(tempPath);
+			if (!Directory.Exists(depPath))
+				Directory.CreateDirectory(depPath);
+
+			return new BuildResult { Type = BuildResultType.Success };
+		}
+
+		/// <summary>
+		/// Compiles all ICompilable scripts in the loaded scenes
+		/// </summary>
+		private static async UniTask<BuildResult> CompileScripts(GameObject mainObject) {
+			var compilableScripts = mainObject
+				.GetComponentsInChildren<ICompilable>(true)
+				.OrderBy(s => s.CompileOrder)
+				.ToList();
+
+			if (compilableScripts.Count == 0)
+				Logger.Log("No compilable scripts found in the loaded scenes.");
+
+			var compilationFailed = false;
+			foreach (var script in compilableScripts)
+				try {
+					Logger.Log($"Compiling script: {script.GetType().Name} (Order: {script.CompileOrder})");
+					script.Compile();
+					await script.CompileAsync();
+				} catch (Exception e) {
+					Logger.LogError($"Failed to compile script {script.GetType().Name}: {e.Message}");
+					compilationFailed = true;
+					break;
+				}
+
+			if (compilationFailed) {
+				return new BuildResult {
+					Type    = BuildResultType.Failed,
+					Message = "Script compilation failed. Original scenes have been restored from backup."
+				};
+			}
+
+			if (!EditorSceneManager.SaveOpenScenes()) {
+				Logger.LogError("Failed to save scenes after compilation. Restoring backups...");
+				return new BuildResult {
+					Type    = BuildResultType.Failed,
+					Message = "Failed to save open scenes after compilation. Original scenes have been restored from backup."
+				};
+			}
+
+			// Force asset database refresh to ensure files are written to disk
+			AssetDatabase.SaveAssets();
+			AssetDatabase.Refresh();
+
+			// Wait a frame to ensure file operations are complete
+			await UniTask.Yield();
+
+			return new BuildResult { Type = BuildResultType.Success };
+		}
+
+		/// <summary>
+		/// Saves compiled scenes and copies dependencies to temporary directory
+		/// </summary>
+		private static async UniTask<BuildResult> ProcessPrefabAndDependencies(BuildData data) {
+			var tempPath = data.TempPath;
+			var depPath  = tempPath + "Dependencies/";
+
+			// Ensure the Dependencies directory exists
+			Directory.CreateDirectory(depPath);
+
+			try {
+				// Create prefab from the avatar descriptor GameObject
+				var avatarGameObject = data.Descriptor.gameObject;
+				var prefabPath       = tempPath + "Avatar.prefab";
+
+				// Validate avatar GameObject before creating prefab
+				if (!avatarGameObject) {
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = "Avatar GameObject is null or invalid."
+					};
+				}
+
+				if (!avatarGameObject.activeInHierarchy)
+					Logger.LogWarning("Avatar GameObject is not active in hierarchy. This might cause prefab creation to fail.");
+
+				// Nettoyage complet des composants manquants AVANT de vérifier les problèmes
+				Logger.Log("Cleaning up missing components from Avatar GameObject and its children...");
+				CleanupMissingComponents(avatarGameObject);
+
+				var problematicComponents = new List<(GameObject, int)>();
+				CheckForProblematicComponents(avatarGameObject);
+
+				if (problematicComponents.Count > 0) {
+					Logger.LogError($"Found {problematicComponents.Count} missing/null components that might cause prefab creation issues.", avatarGameObject);
+					foreach (var go in problematicComponents)
+						Logger.LogError($" - {go.Item1.name} at component index {go.Item2}", go.Item1);
+
+					var res = Logger.OpenDialog(
+						"Prefab Creation Warning",
+						"Prefab creation may fail due to missing/null components on the Avatar.\n"
+						+ "Please check the console for details and ensure all components are properly set up.",
+						"Clean and Continue",
+						"Cancel"
+					);
+
+					if (!res)
+						return new BuildResult {
+							Type    = BuildResultType.Failed,
+							Message = "Prefab creation cancelled due to missing/null components on Avatar. Please check the console for details."
+						};
+
+					Logger.Log("Force cleaning remaining problematic components from Avatar GameObject...");
+					ForceCleanProblematicComponents(problematicComponents);
+				}
+
+				// Ensure the temp directory exists and is writable
+				if (!Directory.Exists(tempPath)) {
+					Directory.CreateDirectory(tempPath);
+				}
+
+				// Check if we can write to the temp directory
+				var testFile = Path.Combine(tempPath, "test.tmp");
+				try {
+					await File.WriteAllTextAsync(testFile, "test");
+					File.Delete(testFile);
+				} catch (Exception e) {
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = $"Cannot write to temporary directory '{tempPath}': {e.Message}"
+					};
+				}
+
+				Logger.Log($"Creating avatar prefab from GameObject '{avatarGameObject.name}' at: {prefabPath}");
+
+				// Final cleanup of any remaining null components
+				CleanupNullComponents(avatarGameObject);
+
+				// Créer le prefab d'abord
+				var prefab = PrefabUtility.SaveAsPrefabAsset(avatarGameObject, prefabPath);
+				if (!prefab) {
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = $"Failed to create avatar prefab.\nCheck Unity Console for detailed errors."
+					};
+				}
+
+				Logger.Log($"Successfully created avatar prefab at: {prefabPath}");
+				
+				// Rafraîchir pour que Unity reconnaisse le nouveau prefab
+				AssetDatabase.Refresh();
+				await UniTask.Yield();
+
+				// Récupérer toutes les dépendances du prefab sans manipulation de GUID
+				var dependencies = AssetDatabase.GetDependencies(prefabPath, true);
+				Logger.Log($"Found {dependencies.Length} dependencies for avatar prefab");
+
+				var copiedAssets = new List<string> { prefabPath };
+
+				// Copier les dépendances dans le dossier Dependencies avec leurs noms originaux
+				foreach (var dependency in dependencies) {
+					// Skip certain file types that shouldn't be included
+					var extension = Path.GetExtension(dependency).ToLower();
+					switch (extension) {
+						case ".cs":     // Script files
+						case ".dll":    // Compiled assemblies
+						case ".meta":   // Meta files (Unity les gère automatiquement)
+						case ".unity":  // Scene files
+						case ".asmdef": // Assembly definition files
+						case ".asmref": // Assembly reference files
+							continue;
+					}
+
+					// Skip if this is the prefab itself
+					if (dependency == prefabPath) continue;
+
+					// Utiliser le nom original du fichier pour éviter les conflits
+					var fileName = Path.GetFileName(dependency);
+					var destinationPath = Path.Combine(depPath, fileName);
+					
+					// Skip if already processed or if it's a package asset that we shouldn't copy
+					if (copiedAssets.Contains(destinationPath) || dependency.StartsWith("Packages/")) continue;
+
+					// Copy the asset if it exists and is not in a package
+					if (File.Exists(dependency)) {
+						try {
+							File.Copy(dependency, destinationPath, true);
+							
+							// Let Unity handle the .meta file creation automatiquement
+							Logger.Log($"Copied dependency: {dependency} -> {destinationPath}");
+							copiedAssets.Add(destinationPath);
+						} catch (Exception e) {
+							Logger.LogWarning($"Failed to copy dependency {dependency}: {e.Message}");
+						}
+					} else {
+						Logger.LogWarning($"Dependency file not found: {dependency}");
+					}
+				}
+
+				// Rafraîchir pour que Unity reconnaisse les nouvelles dépendances et crée leurs .meta
+				AssetDatabase.Refresh();
+				await UniTask.Yield();
+
+				Logger.Log($"Successfully processed avatar prefab with {copiedAssets.Count} total assets");
+				return new BuildResult { Type = BuildResultType.Success };
+
+				void CheckForProblematicComponents(GameObject go) {
+					if (!go) return;
+
+					// Check if the GameObject has any components that might prevent prefab creation
+					var components = go.GetComponents<Component>();
+					for (var i = 0; i < components.Length; i++) {
+						var component = components[i];
+						if (!component) {
+							problematicComponents.Add((go, i));
+						}
+					}
+
+					// Recursively check children
+					foreach (Transform child in go.transform)
+						CheckForProblematicComponents(child.gameObject);
+				}
+
+			} catch (Exception e) {
+				Logger.LogException(e);
+				return new BuildResult {
+					Type    = BuildResultType.Failed,
+					Message = $"Failed to process avatar prefab: {e.Message}"
+				};
+			}
+		}
+
+		/// <summary>
+		/// Processes GUID replacements in assets (simplified version)
+		/// </summary>
+		private static async UniTask ProcessGuidReplacements(List<string> assets, Dictionary<string, string> initialGUIDs, Dictionary<string, string> endGUIDs) {
+			// Cette méthode est maintenant simplifiée car nous laissons Unity gérer les GUID automatiquement
+			AssetDatabase.Refresh();
+			await UniTask.Yield();
+			
+			Logger.Log("GUID processing completed - using Unity's automatic GUID management");
+		}
+
+		/// <summary>
+		/// Builds an AssetBundle containing the avatar prefab and its dependencies
+		/// </summary>
+		/// <param name="data">Build data containing target platform and descriptor info</param>
+		/// <returns>BuildResult indicating success or failure</returns>
+		private static async UniTask<BuildResult> BuildPrefabsAssetBundle(BuildData data) {
+			try {
+				// Validate input data
+				if (data == null)
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = "BuildData is null."
+					};
+
+				if (string.IsNullOrEmpty(data.TempPath))
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = "Temporary path is null or empty."
+					};
+
+				if (string.IsNullOrEmpty(data.OutputPath))
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = "Output path is null or empty."
+					};
+
+				if (string.IsNullOrEmpty(data.Filename))
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = "Filename is null or empty."
+					};
+
+				var tempPath = data.TempPath;
+				Logger.Log("Building AssetBundle for avatar prefab...");
+
+				// Report progress: Collecting prefab files
+				data.ProgressCallback?.Invoke(0.82f, "Collecting avatar prefab and dependencies...");
+				await UniTask.Yield();
+
+				// Collect the main avatar prefab
+				var prefabFiles = Directory.GetFiles(tempPath, "*.prefab", SearchOption.TopDirectoryOnly)
+					.Where(f => !f.EndsWith(".meta"))
+					.ToArray();
+
+				if (prefabFiles.Length == 0)
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = "No avatar prefab found to bundle."
+					};
+
+				// Collect all dependencies
+				var dependencyPath  = Path.Combine(tempPath, "Dependencies");
+				var dependencyFiles = new List<string>();
+				if (Directory.Exists(dependencyPath))
+					dependencyFiles = Directory.GetFiles(dependencyPath, "*.*", SearchOption.AllDirectories)
+						.Where(f => !f.EndsWith(".meta"))
+						.ToList();
+
+				// Report progress: Preparing AssetBundle
+				data.ProgressCallback?.Invoke(0.84f, "Preparing AssetBundle build...");
+				await UniTask.Yield();
+
+				Logger.Log($"Found {prefabFiles.Length} prefab file(s) and {dependencyFiles.Count} dependencies to bundle:");
+				foreach (var prefabFile in prefabFiles)
+					Logger.Log($"  - Prefab: {prefabFile}");
+
+				Logger.Log($"  - Dependencies: {dependencyFiles.Count} files");
+
+				// Combine all assets for the bundle
+				var allAssets = new List<string>();
+				allAssets.AddRange(prefabFiles);
+				allAssets.AddRange(dependencyFiles);
+
+				// Validate all files exist and convert to relative paths for Unity
+				var validAssetFiles = new List<string>();
+				foreach (var assetFile in allAssets)
+					if (File.Exists(assetFile)) {
+						// Convert absolute path to relative path for Unity AssetDatabase
+						var relativePath = assetFile.Replace('\\', '/');
+						if (relativePath.StartsWith(Application.dataPath.Replace('\\', '/')))
+							relativePath = "Assets" + relativePath[Application.dataPath.Length..];
+						validAssetFiles.Add(relativePath);
+						Logger.Log($"  Valid asset: {relativePath}");
+					} else Logger.LogWarning($"Asset file does not exist: {assetFile}");
+
+				if (validAssetFiles.Count == 0)
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = "No valid asset files found for bundling."
+					};
+
+				// Create AssetBundleBuild
+				var assetBundleBuilds = new AssetBundleBuild[1];
+				assetBundleBuilds[0] = new AssetBundleBuild {
+					assetBundleName = data.Filename,
+					assetNames      = validAssetFiles.ToArray(),
+					addressableNames = validAssetFiles.Select(
+							path => {
+								var fileName = Path.GetFileNameWithoutExtension(path);
+								// Special handling for the main avatar prefab
+								if (path.EndsWith(".prefab") && path.Contains(tempPath)) {
+									return "Avatar"; // Main addressable name for the avatar
+								}
+
+								return fileName;
+							}
+						)
+						.ToArray()
+				};
+
+				Logger.Log($"Created AssetBundle build: {data.Filename} with {assetBundleBuilds[0].assetNames.Length} assets");
+				
+				// Limit logging to avoid infinite loops and excessive output
+				var maxAssetsToLog = Math.Min(10, assetBundleBuilds[0].assetNames.Length);
+				for (int i = 0; i < maxAssetsToLog; i++) {
+					Logger.Log($"  - Asset: {assetBundleBuilds[0].assetNames[i]}");
+				}
+				if (assetBundleBuilds[0].assetNames.Length > maxAssetsToLog) {
+					Logger.Log($"  ... and {assetBundleBuilds[0].assetNames.Length - maxAssetsToLog} more assets");
+				}
+				
+				var maxAddressablesToLog = Math.Min(10, assetBundleBuilds[0].addressableNames.Length);
+				for (int i = 0; i < maxAddressablesToLog; i++) {
+					Logger.Log($"  - Addressable: {assetBundleBuilds[0].addressableNames[i]}");
+				}
+				if (assetBundleBuilds[0].addressableNames.Length > maxAddressablesToLog) {
+					Logger.Log($"  ... and {assetBundleBuilds[0].addressableNames.Length - maxAddressablesToLog} more addressables");
+				}
+
+				// Validate the AssetBundleBuild
+				if (assetBundleBuilds[0].assetNames.Length == 0)
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = "No valid assets found for AssetBundle build."
+					};
+
+				if (string.IsNullOrEmpty(assetBundleBuilds[0].assetBundleName))
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = "AssetBundle name is null or empty."
+					};
+
+				// Report progress: Creating output directory
+				data.ProgressCallback?.Invoke(0.86f, "Creating output directory...");
+				await UniTask.Yield();
+
+				// Create output directory
+				var outputPath = data.OutputPath;
+				Directory.CreateDirectory(outputPath);
+
+				// Build options optimized for avatars
+				var options = BuildAssetBundleOptions.None | BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.StrictMode;
+
+				// Report progress: Building AssetBundle (this is the long operation)
+				data.ProgressCallback?.Invoke(0.88f, "Building avatar AssetBundle (this may take a while)...");
+				await UniTask.Yield();
+
+				// Validate build target
+				var buildTarget = data.Target.GetBuildTarget();
+				Logger.Log($"Building avatar AssetBundle with target: {buildTarget}");
+
+				// Build the AssetBundle
+				var buildSuccess = BuildAssetBundleInternal(
+					outputPath,
+					assetBundleBuilds,
+					options,
+					buildTarget
+				);
+
+				data.ProgressCallback?.Invoke(0.92f, "Finalizing avatar AssetBundle...");
+
+				if (!buildSuccess) {
+					Logger.LogError("Avatar AssetBundle build failed. Check console for details.");
+					return new BuildResult {
+						Type    = BuildResultType.Failed,
+						Message = "Failed to build avatar AssetBundle. Check console for details."
+					};
+				}
+
+				Logger.Log($"Avatar AssetBundle '{data.Filename}' built successfully at: {outputPath}");
+				Logger.Log($"Avatar prefab and {dependencyFiles.Count} dependencies included");
+				return new BuildResult { Type = BuildResultType.Success };
+			} catch (Exception e) {
+				Logger.LogError($"Avatar AssetBundle build failed: {e.Message}");
+				return new BuildResult {
+					Type    = BuildResultType.Failed,
+					Message = $"Avatar AssetBundle build failed: {e.Message}"
+				};
+			}
+		}
+
+		/// <summary>
+		/// Builds an AssetBundle and returns whether the operation was successful
+		/// Thanks for "https://light11.hatenadiary.com/entry/2021/03/30/201333" to fix the issue with BuildPipeline.BuildAssetBundles and UniTask
+		/// </summary>
+		/// <param name="outputPath">The output path for the AssetBundle</param>
+		/// <param name="assetBundleBuilds">The AssetBundle builds to create</param>
+		/// <param name="options">Build options</param>
+		/// <param name="buildTarget">Target platform</param>
+		/// <returns>True if the build was successful, false otherwise</returns>
+		private static bool BuildAssetBundleInternal(string outputPath, AssetBundleBuild[] assetBundleBuilds, BuildAssetBundleOptions options, BuildTarget buildTarget) {
+			try {
+				Logger.Log($"Starting AssetBundle build with {assetBundleBuilds.Length} bundles to path: {outputPath}");
+				Logger.Log($"Build target: {buildTarget}, Options: {options}");
+				
+				// Validate output path exists
+				if (!Directory.Exists(outputPath)) {
+					Logger.LogError($"Output directory does not exist: {outputPath}");
+					return false;
+				}
+
+				// Validate each asset bundle
+				foreach (var bundle in assetBundleBuilds) {
+					Logger.Log($"Validating bundle '{bundle.assetBundleName}' with {bundle.assetNames.Length} assets");
+					
+					if (string.IsNullOrEmpty(bundle.assetBundleName)) {
+						Logger.LogError("AssetBundle name is null or empty");
+						return false;
+					}
+					
+					if (bundle.assetNames == null || bundle.assetNames.Length == 0) {
+						Logger.LogError($"Bundle '{bundle.assetBundleName}' has no assets");
+						return false;
+					}
+
+					// Validate each asset exists and is importable by Unity
+					foreach (var asset in bundle.assetNames) {
+						if (!File.Exists(asset)) {
+							Logger.LogError($"Asset file does not exist: {asset}");
+							return false;
+						}
+						
+						// Check if Unity can recognize this asset
+						var guid = AssetDatabase.AssetPathToGUID(asset);
+						if (string.IsNullOrEmpty(guid)) {
+							Logger.LogError($"Unity cannot recognize asset (no GUID): {asset}");
+							return false;
+						}
+						
+						Logger.Log($"  - Valid asset: {asset} (GUID: {guid})");
+					}
+				}
+
+				// Force a final asset database refresh before building
+				AssetDatabase.Refresh();
+				AssetDatabase.SaveAssets();
+
+				// Use the legacy BuildPipeline first as fallback
+				Logger.Log("Attempting AssetBundle build with legacy BuildPipeline...");
+				var legacyManifest = BuildPipeline.BuildAssetBundles(
+					outputPath,
+					assetBundleBuilds,
+					options,
+					buildTarget
+				);
+
+				if (legacyManifest != null) {
+					Logger.Log("AssetBundle build completed successfully with legacy BuildPipeline.");
+					return true;
+				}
+
+				// If legacy fails, try with CompatibilityBuildPipeline
+				Logger.Log("Legacy BuildPipeline failed, trying CompatibilityBuildPipeline...");
+				var manifest = CompatibilityBuildPipeline.BuildAssetBundles(
+					outputPath,
+					assetBundleBuilds,
+					options,
+					buildTarget
+				);
+				
+				bool success = manifest != null;
+				
+				if (success) {
+					Logger.Log("AssetBundle build completed successfully with CompatibilityBuildPipeline.");
+				} else {
+					Logger.LogError("Both BuildPipeline methods failed. No manifest was created.");
+					
+					// Additional debugging information
+					Logger.LogError($"Output path contents:");
+					if (Directory.Exists(outputPath)) {
+						var files = Directory.GetFiles(outputPath, "*", SearchOption.AllDirectories);
+						foreach (var file in files) {
+							Logger.LogError($"  - {file}");
+						}
+					}
+				}
+				
+				return success;
+			} catch (Exception e) {
+				Logger.LogError($"AssetBundle build failed with exception: {e.Message}");
+				Logger.LogError($"Stack trace: {e.StackTrace}");
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Cleans up missing components from GameObject and its children
+		/// </summary>
+		private static void CleanupMissingComponents(GameObject rootObject) {
+			if (!rootObject) return;
+
+			var allGameObjects = new List<GameObject> { rootObject };
+			GetAllChildren(rootObject, allGameObjects);
+
+			foreach (var go in allGameObjects) {
+				if (!go) continue;
+
+				// Count removed components for logging
+				var initialComponentCount = go.GetComponentCount();
+				
+				// Remove missing MonoBehaviours
+				GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
+				
+				var finalComponentCount = go.GetComponentCount();
+				var removedCount = initialComponentCount - finalComponentCount;
+				
+				if (removedCount > 0) {
+					Logger.Log($"Removed {removedCount} missing component(s) from GameObject '{go.name}'");
+				}
+			}
+
+			static void GetAllChildren(GameObject parent, List<GameObject> list) {
+				foreach (Transform child in parent.transform) {
+					if (child && child.gameObject) {
+						list.Add(child.gameObject);
+						GetAllChildren(child.gameObject, list);
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Force cleanup of remaining problematic components
+		/// </summary>
+		private static void ForceCleanProblematicComponents(List<(GameObject go, int index)> problematicComponents) {
+			foreach (var (go, index) in problematicComponents) {
+				if (!go) continue;
+
+				try {
+					// Try to get component at index and remove if null
+					var components = go.GetComponents<Component>();
+					if (index < components.Length && !components[index]) {
+						// Component is null, we need to remove it manually
+						// Since we can't remove by index directly, we'll use GameObjectUtility again
+						GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
+						Logger.Log($"Force removed null component at index {index} from GameObject '{go.name}'");
+					}
+				} catch (Exception e) {
+					Logger.LogWarning($"Failed to force clean component at index {index} from GameObject '{go.name}': {e.Message}");
+				}
+			}
+		}
+
+		/// <summary>
+		/// Final cleanup of any remaining null components
+		/// </summary>
+		private static void CleanupNullComponents(GameObject rootObject) {
+			if (!rootObject) return;
+
+			var allGameObjects = new List<GameObject> { rootObject };
+			GetAllChildren(rootObject, allGameObjects);
+
+			foreach (var go in allGameObjects) {
+				if (!go) continue;
+
+				try {
+					// Check for any remaining null components
+					var components = go.GetComponents<Component>();
+					var hasNullComponents = components.Any(c => !c);
+					
+					if (hasNullComponents) {
+						// Final attempt to clean
+						GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
+						Logger.Log($"Final cleanup of null components on GameObject '{go.name}'");
+					}
+				} catch (Exception e) {
+					Logger.LogWarning($"Failed to perform final cleanup on GameObject '{go.name}': {e.Message}");
+				}
+			}
+
+			static void GetAllChildren(GameObject parent, List<GameObject> list) {
+				foreach (Transform child in parent.transform) {
+					if (child && child.gameObject) {
+						list.Add(child.gameObject);
+						GetAllChildren(child.gameObject, list);
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Helper method to cleanup and restore state before returning a build result
+		/// </summary>
+		/// <param name="rollback">The scene manager setup to restore</param>
+		/// <param name="restoreScenes">Whether to restore scenes from backup</param>
+		/// <param name="tempPath">The temporary path to cleanup (optional)</param>
+		/// <param name="cleanupOnError">Whether to cleanup temp files on error (false for debugging)</param>
+		private static void CleanupAndRestoreState(SceneSetup[] rollback, bool restoreScenes = true, string tempPath = null, bool cleanupOnError = false) {
+			Logger.LogWarning("Restoring scene backup...");
+			if (restoreScenes && !RestoreSceneBackup())
+				Logger.LogError("Failed to restore scene backup. Please check the backup files.");
+			CleanupSceneBackups();
+
+			// Nettoyer le répertoire temporaire spécifique si fourni ET si cleanupOnError est true
+			if (cleanupOnError && !string.IsNullOrEmpty(tempPath) && Directory.Exists(tempPath)) {
+				try {
+					Directory.Delete(tempPath, true);
+					Logger.Log($"Cleaned up temporary directory: {tempPath}");
+				} catch (Exception e) {
+					Logger.LogWarning($"Failed to cleanup temporary directory {tempPath}: {e.Message}");
+				}
+			} else if (!cleanupOnError && !string.IsNullOrEmpty(tempPath) && Directory.Exists(tempPath)) {
+				Logger.LogWarning($"Temporary directory preserved for debugging: {tempPath}");
+			}
+
+			// Nettoyer aussi le répertoire Assets/Temp/ de base pour éviter l'accumulation
+			// Mais seulement les anciens dossiers, pas celui en cours de debug
+			if (cleanupOnError) {
+				try {
+					const string baseTempPath = "Assets/Temp/";
+					if (Directory.Exists(baseTempPath)) {
+						// Nettoyer seulement les dossiers plus anciens que 1 heure pour éviter les conflits avec des builds concurrents
+						var directories = Directory.GetDirectories(baseTempPath);
+						foreach (var dir in directories) {
+							var dirInfo = new DirectoryInfo(dir);
+							if (DateTime.Now - dirInfo.CreationTime > TimeSpan.FromHours(1)) {
+								try {
+									Directory.Delete(dir, true);
+									Logger.Log($"Cleaned up old temporary directory: {dir}");
+								} catch {
+									// Ignore errors for individual directory cleanup
+								}
+							}
+						}
+					}
+				} catch (Exception e) {
+					Logger.LogWarning($"Failed to cleanup base temporary directory: {e.Message}");
+				}
+			} else {
+				Logger.LogWarning("Skipping cleanup of temporary directories for debugging purposes");
+			}
+
+			IsBuilding = false;
+			EditorSceneManager.RestoreSceneManagerSetup(rollback);
+		}
+
+		/// <summary>
+		/// Generates a default filename for the asset bundle based on date, random int, and main scene name
+		/// </summary>
+		/// <param name="mainSceneName">The name of the main scene</param>
+		/// <param name="platform"></param>
+		/// <returns>A filename in the format: date-sceneName.noxw</returns>
+		private static string GenerateDefaultFilename(string mainSceneName, Platform platform) {
+			var date      = DateTime.Now.ToString("yyyy-MM-dd-HHmm");
+			var sceneName = mainSceneName.ToLowerInvariant();
+
+			// Remove any invalid filename characters from scene name
+			sceneName = Regex.Replace(sceneName, @"[^a-z0-9\-_]", "");
+
+			return $"{date}-{sceneName}-{platform.GetPlatformName()}.noxw";
+		}
+
+		/// <summary>
+		/// Generates a random hash for temporary directory
+		/// </summary>
+		/// <returns>A random hash string</returns>
+		private static string GenerateRandomHash() {
+			var random = new Random();
+			var bytes  = new byte[16];
+			random.NextBytes(bytes);
+			return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
+		}
+	}
+}
+#endif

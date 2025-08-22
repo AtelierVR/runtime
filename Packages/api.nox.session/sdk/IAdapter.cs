@@ -85,8 +85,8 @@ namespace Nox.Sessions {
 		/// <summary>
 		/// Set the dimension to the session.
 		/// </summary>
-		/// <param name="scene"></param>
-		public void SetDimension(IScene scene);
+		/// <param name="runtimeWorld"></param>
+		public void SetDimension(IRuntimeWorld runtimeWorld);
 
 		/// <summary>
 		/// Get the current state of the adapter, which includes the current operation and its progress.

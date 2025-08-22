@@ -98,7 +98,7 @@ namespace api.nox.desktop {
 				return false;
 			}
 
-			if (desktop._attachedAvatar == null)
+			if (desktop._attachedRuntimeAvatar == null)
 				desktop.SetupAvatar().Forget();
 
 			EventSystem.current     = desktop.eventSystem;
@@ -121,11 +121,11 @@ namespace api.nox.desktop {
 
 		public void Dispose() {
 			Destroy(gameObject);
-			_attachedAvatar?.Dispose();
+			_attachedRuntimeAvatar?.Dispose();
 		}
 
 		private async UniTask SetupAvatar() {
-			if (_attachedAvatar != null) {
+			if (_attachedRuntimeAvatar != null) {
 				Logger.LogDebug("Avatar already set for DesktopController");
 				return;
 			}
@@ -222,7 +222,7 @@ namespace api.nox.desktop {
 			};
 
 		private IPlayer _attachedPlayer;
-		private IAvatar _attachedAvatar;
+		private IRuntimeAvatar _attachedRuntimeAvatar;
 
 		[NoxPublic(NoxAccess.Method)]
 		public void SetPlayer(IPlayer p) {
@@ -232,13 +232,13 @@ namespace api.nox.desktop {
 			SynchronizeControllerFromPlayer();
 		}
 
-		public IAvatar GetAvatar()
-			=> _attachedAvatar;
+		public IRuntimeAvatar GetAvatar()
+			=> _attachedRuntimeAvatar;
 
-		public void SetAvatar(IAvatar avatar) {
-			_attachedAvatar = avatar;
-			if (_attachedAvatar == null) return;
-			var root = _attachedAvatar.GetDescriptor()?.GetRoot();
+		public void SetAvatar(IRuntimeAvatar runtimeAvatar) {
+			_attachedRuntimeAvatar = runtimeAvatar;
+			if (_attachedRuntimeAvatar == null) return;
+			var root = _attachedRuntimeAvatar.GetDescriptor()?.GetRoot();
 			if (!root) {
 				Logger.LogError("Avatar descriptor root is null, cannot set avatar.");
 				return;
@@ -248,7 +248,7 @@ namespace api.nox.desktop {
 			root.transform.localPosition = Vector3.zero;
 			root.transform.localRotation = Quaternion.identity;
 
-			var parameterModule = _attachedAvatar?.GetDescriptor()
+			var parameterModule = _attachedRuntimeAvatar?.GetDescriptor()
 				?.GetModules<IParameterModule>()
 				.FirstOrDefault();
 			if (parameterModule == null) return;
@@ -306,7 +306,7 @@ namespace api.nox.desktop {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		private void SynchronizeParametersAvatar() {
-			var parameterModule = _attachedAvatar?.GetDescriptor()
+			var parameterModule = _attachedRuntimeAvatar?.GetDescriptor()
 				?.GetModules<IParameterModule>()
 				.FirstOrDefault();
 			if (parameterModule == null) return;
@@ -361,7 +361,7 @@ namespace api.nox.desktop {
 		}
 
 		private void UpdateCamera() {
-			var cameraModule = _attachedAvatar?.GetDescriptor()
+			var cameraModule = _attachedRuntimeAvatar?.GetDescriptor()
 				?.GetModules<ICameraModule>()
 				.FirstOrDefault();
 

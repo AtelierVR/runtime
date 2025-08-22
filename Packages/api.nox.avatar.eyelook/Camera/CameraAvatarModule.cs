@@ -10,8 +10,8 @@ namespace Nox.CCK.Avatars.Camera {
 		public Transform headTransform;
 
 
-		public bool OnPlay(IAvatar avatar) {
-			var descriptor = avatar.GetDescriptor();
+		public bool OnPlay(IRuntimeAvatar runtimeAvatar) {
+			var descriptor = runtimeAvatar.GetDescriptor();
 			headTransform ??= descriptor
 				.GetAnimator()
 				?.GetBoneTransform(HumanBodyBones.Head);

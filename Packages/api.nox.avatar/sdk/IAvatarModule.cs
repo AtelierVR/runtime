@@ -1,5 +1,5 @@
 namespace Nox.Avatars {
 	public interface IAvatarModule {
-		public bool OnPlay(IAvatar avatar);
+		public bool OnPlay(IRuntimeAvatar runtimeAvatar);
 	}
 }

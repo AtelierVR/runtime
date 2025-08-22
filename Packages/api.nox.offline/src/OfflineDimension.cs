@@ -3,22 +3,22 @@ using Nox.Worlds;
 
 namespace api.nox.offline {
 	public class OfflineDimension : IDimension {
-		public OfflineDimension(int index, IScene scene, bool isActive) {
+		public OfflineDimension(int index, IRuntimeWorld runtimeWorld, bool isActive) {
 			_index    = index;
-			_scene    = scene;
+			_runtimeWorld    = runtimeWorld;
 			_isActive = isActive;
 		}
 
 		private          int    _index;
-		private readonly IScene _scene;
+		private readonly IRuntimeWorld _runtimeWorld;
 		private          bool   _isActive;
 
 
 		public int GetMainIndex()
 			=> _index;
 
-		public IScene GetScene()
-			=> _scene;
+		public IRuntimeWorld GetScene()
+			=> _runtimeWorld;
 
 		public bool IsActive()
 			=> _isActive;

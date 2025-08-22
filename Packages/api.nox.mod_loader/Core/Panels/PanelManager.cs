@@ -73,6 +73,7 @@ namespace Nox.ModLoader.Cores.Panels {
 				headers.Add(headerElement);
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		public static bool Goto(string id, Dictionary<string, object> data = null) {
 			Logger.Log($"Goto panel {id}");
 			var panel = GetPanel(id);

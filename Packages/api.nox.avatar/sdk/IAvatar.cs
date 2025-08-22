@@ -1,26 +1,27 @@
 using System;
-using Cysharp.Threading.Tasks;
 
 namespace Nox.Avatars {
 	public interface IAvatar {
-		/// <summary>
-		/// Gets the unique identifier of the avatar.
-		/// </summary>
-		/// <returns></returns>
-		public string GetId();
+		public uint GetId();
 
-		/// <summary>
-		/// Gets the avatar descriptor, which contains metadata about the avatar.
-		/// </summary>
-		/// <returns></returns>
-		public IAvatarDescriptor GetDescriptor();
-		
-		
+		public string GetTitle();
 
-		/// <summary>
-		/// Disposes of the avatar and releases any resources it holds.
-		/// </summary>
-		/// <returns></returns>
-		public UniTask Dispose();
+		public string GetServerAddress();
+
+		public string GetDescription();
+
+		public string GetThumbnailUrl();
+
+		public string[] GetTags();
+
+		public string GetOwnerId();
+
+		public DateTime GetCreatedAt();
+
+		public DateTime GetUpdatedAt();
+
+		public string GetServer();
+
+		public IAvatarIdentifier GetIdentifier();
 	}
 }

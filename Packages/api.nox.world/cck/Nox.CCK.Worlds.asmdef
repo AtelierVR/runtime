@@ -2,7 +2,8 @@
     "name": "Nox.CCK.Worlds",
     "rootNamespace": "",
     "references": [
-        "Nox.CCK"
+        "Nox.CCK",
+        "Nox.Worlds"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

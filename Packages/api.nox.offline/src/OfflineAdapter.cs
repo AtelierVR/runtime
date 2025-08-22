@@ -25,9 +25,9 @@ namespace api.nox.offline {
 			_entities       = Main.EntityAPI.New();
 		}
 
-		public void SetDimension(IScene scene) {
-			if (scene == null) return;
-			_dimension = new OfflineDimension(0, scene, true);
+		public void SetDimension(IRuntimeWorld runtimeWorld) {
+			if (runtimeWorld == null) return;
+			_dimension = new OfflineDimension(0, runtimeWorld, true);
 		}
 
 		public IAdapterState GetState()

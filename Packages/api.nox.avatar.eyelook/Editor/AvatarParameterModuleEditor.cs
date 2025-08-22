@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using Nox.CCK.Avatars.Parameters;
 using Nox.Avatars.Parameters;
@@ -211,3 +212,4 @@ namespace api.nox.avatar.modules {
 		}
 	}
 }
+#endif

@@ -32,8 +32,8 @@ namespace Nox.CCK.Avatars.Parameters {
 
 		private readonly Dictionary<int, object> _history = new();
 
-		public bool OnPlay(IAvatar avatar) {
-			Descriptor = avatar.GetDescriptor();
+		public bool OnPlay(IRuntimeAvatar runtimeAvatar) {
+			Descriptor = runtimeAvatar.GetDescriptor();
 			return true;
 		}
 
