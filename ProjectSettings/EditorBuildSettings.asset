@@ -23,6 +23,78 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/GitIgnore_Avatar/OpenMe.unity
     guid: 02fdcea21931f7d4fadf43d9f72c15b6
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_subtractive.unity
+    guid: 45aa0e03fa1fe7647ae7082762469969
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_volumes_simple.unity
+    guid: c6fba692dc3a2964c96737e437ed1d10
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/Bitgem/StylisedWater/URP/Examples/Example-Scene-01.unity
+    guid: fc967860e2508924e943ba0223c2ed3b
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_mixed_directional_mode.unity
+    guid: b6d0d1a43af2d244aa8ac1c6720a0f8f
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/AVProVideo/Demos/Scenes/Demo_Playlist.unity
+    guid: 0317dfde9ab745b4e9ef01be5f43c7ce
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_sectors.unity
+    guid: aae617f31cf646c4c817c4e736ab26bb
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_shadowmask.unity
+    guid: d844b56241baf404ebdb72952a6d36bc
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/VRCDefaultWorldScene.unity
+    guid: 3a376bda79aebc04da612b859a4aab40
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_prefabs_bake.unity
+    guid: 29e5a3ce23ab52a4ba39d5fe748fb285
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/OpenMe.unity
+    guid: f76a4b4cc6fed0a4eb97657257962a00
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_prefabs_assembled.unity
+    guid: 54e902f5ffcf9db41b5cd80bc3a1f44b
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_directional_SH.unity
+    guid: f9f2e7fffc7e92d46bbe3f4432caac5d
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_volumes_simple_shadowmask.unity
+    guid: 2d4c1b419571ced4fb22590daa0a4df4
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_sponza_day.unity
+    guid: cc3cbea1023df6745a187e42a862ddb4
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_volumes_advanced.unity
+    guid: 08e1a8759246eea46b5e8551caa4a4d4
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/AVProVideo/Demos/Scenes/Demo_MediaPlayer.unity
+    guid: 839cc75f049d0ea44a78c639e529d44a
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/AVProVideo/Demos/Scenes/Demo_360Stereo.unity
+    guid: ca8fdd4aa85509743878be7fbacf5a4f
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_directional.unity
+    guid: 6fffe8781aea4a4478119c93c97e35a4
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_lights.unity
+    guid: 4c752a895116f7f468595f01e2df48d6
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/AVProVideo/Demos/Scenes/Demo_DisplayComponents.unity
+    guid: 4313ef3d8aef8764ea98fd3a15361c9b
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_directional_RNM.unity
+    guid: dd4e6ce35782a5344be540357d6f9698
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/Bakery/examples/example_sponza_evening2.unity
+    guid: 4920176bc2be2e64c9e95ff242319c21
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/FastSky/Demo/FastSkyDemo.unity
+    guid: 66ba89bf341ac754b8002ea71a6aa1e1
+  - enabled: 1
+    path: Assets/Samples/XR Interaction Toolkit/3.2.0/Starter Assets/DemoScene.unity
+    guid: 319dafa5c80f29f428dc1e0d03f04177
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

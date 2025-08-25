@@ -1,8 +1,11 @@
+
+#if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
 
+namespace dev.nox.development {
 public class FBXAnimationExporter : EditorWindow
 {
     private GameObject selectedFBX;
@@ -232,7 +235,6 @@ public class FBXAnimationExporter : EditorWindow
     }
 }
 
-#if UNITY_EDITOR
 [System.Serializable]
 public class AnimationExportSettings
 {
@@ -242,5 +244,6 @@ public class AnimationExportSettings
     public float compressionTolerance = 0.01f;
     public string customPrefix = "";
     public string customSuffix = "";
+}
 }
 #endif

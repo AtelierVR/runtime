@@ -314,7 +314,6 @@ namespace api.nox.world.builder {
 			}
 
 			var tempPath = data.TempPath;
-			var depPath  = tempPath + "Dependencies/";
 			if (Directory.Exists(tempPath))
 				try {
 					Directory.Delete(tempPath, true);
@@ -326,8 +325,6 @@ namespace api.nox.world.builder {
 				}
 
 			Directory.CreateDirectory(tempPath);
-			if (!Directory.Exists(depPath))
-				Directory.CreateDirectory(depPath);
 
 			return new BuildResult { Type = BuildResultType.Success };
 		}
@@ -414,15 +411,11 @@ namespace api.nox.world.builder {
 		}
 
 		/// <summary>
-		/// Saves compiled scenes and copies dependencies to temporary directory
+		/// Saves compiled scenes to temporary directory
 		/// </summary>
 		private static async UniTask<BuildResult> ProcessScenesAndDependencies(
 			BuildData data, Dictionary<byte, SceneAsset> sceneAssets, List<Scene> loadedScenes, SceneSetup[] rollback) {
 			var tempPath = data.TempPath;
-			var depPath  = tempPath + "Dependencies/";
-
-			// Ensure the Dependencies directory exists
-			Directory.CreateDirectory(depPath);
 
 			var assets       = new List<string>();
 			var scenes       = new List<string>();
@@ -441,7 +434,7 @@ namespace api.nox.world.builder {
 						Type    = BuildResultType.InvalidScene,
 						Message = $"Scene {sceneAsset.name} is not valid or does not exist at path {path}."
 					};
-				} // Trouver la scène chargée correspondante et la sauvegarder
+				}
 
 				var loadedScene = loadedScenes.FirstOrDefault(s => s.path == path);
 				if (loadedScene.IsValid()) {
@@ -463,27 +456,6 @@ namespace api.nox.world.builder {
 				scenes.Add(destination);
 				initialGUIDs.Add(destination, AssetDatabase.AssetPathToGUID(path));
 				endGUIDs.Add(destination, Guid.NewGuid().ToString("N"));
-
-				// Copy dependencies
-				foreach (var dependency in AssetDatabase.GetDependencies(path)) {
-					var gui             = Guid.NewGuid().ToString("N");
-					var destinationPath = depPath + gui + Path.GetExtension(dependency);
-					if (assets.Contains(destinationPath)) continue;
-					switch (Path.GetExtension(dependency)) {
-						case ".cs":
-						case ".dll":
-						case ".meta":
-						case ".unity":
-							continue;
-					}
-
-					File.Copy(dependency, destinationPath);
-					File.Copy(dependency + ".meta", destinationPath + ".meta");
-					Logger.Log("Copied " + dependency               + " to " + destinationPath);
-					assets.Add(destinationPath);
-					initialGUIDs.Add(destinationPath, AssetDatabase.AssetPathToGUID(dependency));
-					endGUIDs.Add(destinationPath, gui);
-				}
 			}
 
 			// Process GUID replacements
@@ -517,27 +489,6 @@ namespace api.nox.world.builder {
 				await File.WriteAllTextAsync(asset + ".meta", meta);
 			}
 
-			AssetDatabase.Refresh();
-
-			// Get all new UIDs
-			var newGUIDs = new Dictionary<string, string>();
-			foreach (var asset in assets)
-				if (asset.StartsWith("Assets/Temp/Dependencies/")) {
-					var fileName = Path.GetFileNameWithoutExtension(asset);
-					newGUIDs.Add(fileName, AssetDatabase.AssetPathToGUID(asset));
-					Logger.Log("Dependency: " + fileName + " -> " + newGUIDs[fileName]);
-				}
-
-			// Set updated UIDs
-			foreach (var asset in assets) {
-				if (!new[] {
-					".unity", ".prefab", ".asset",
-					".mat", ".anim", ".controller"
-				}.Contains(Path.GetExtension(asset))) continue;
-				var text = await File.ReadAllTextAsync(asset);
-				text = newGUIDs.Aggregate(text, (current, guid) => new Regex(guid.Key).Replace(current, guid.Value));
-				await File.WriteAllTextAsync(asset, text);
-			}
 
 			AssetDatabase.Refresh();
 		}
