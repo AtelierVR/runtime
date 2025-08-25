@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using api.nox.relay.types.Player;
+using Nox.Avatars;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using Nox.Entities;
@@ -154,5 +155,7 @@ namespace api.nox.relay {
 		public abstract void DestroyPhysical();
 
 		public abstract bool HasPhysical();
+
+		public abstract void SetAvatar(IRuntimeAvatar avatar, IAvatarIdentifier identifier = null);
 	}
 }

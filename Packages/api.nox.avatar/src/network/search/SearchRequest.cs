@@ -1,64 +1,81 @@
 using System.Collections.Generic;
-using System.Text;
+using Nox.Avatars;
 using Nox.CCK.Utils;
 
 namespace api.nox.avatar.network {
-    [System.Serializable]
-    public class SearchRequest : INoxObject {
-        public string search = "";
-        public string[] tags = null;
-        public string ids = "";
-        public int limit = 10;
-        public int offset = 0;
+	[System.Serializable]
+	public class SearchRequest : ISearchRequest, INoxObject {
+		internal string query;
+		internal uint[] ids;
+		internal uint   offset;
+		internal uint   limit;
 
-        public SearchRequest SetSearch(string s) {
-            search = s;
-            return this;
-        }
+		public string ToParams() {
+			var text = "";
+			if (!string.IsNullOrEmpty(query))
+				text += (text.Length > 0 ? "&" : "") + $"query={query}";
+			if (ids != null)
+				foreach (var u in ids)
+					text += (text.Length > 0 ? "&" : "") + $"id={u}";
+			if (offset > 0) text += (text.Length > 0 ? "&" : "") + $"offset={offset}";
+			if (limit  > 0) text += (text.Length > 0 ? "&" : "") + $"limit={limit}";
+			return string.IsNullOrEmpty(text) ? "" : $"?{text}";
+		}
 
-        public SearchRequest SetTags(string[] t) {
-            tags = t;
-            return this;
-        }
+		public static SearchRequest From(Dictionary<string, object> data) {
+			var req = new SearchRequest();
+			if (data.TryGetValue("query", out var query) && query is string q)
+				req.query = q;
+			if (data.TryGetValue("ids", out var userIds) && userIds is uint[] u)
+				req.ids = u;
+			if (data.TryGetValue("offset", out var offset) && offset is uint o)
+				req.offset = o;
+			if (data.TryGetValue("limit", out var limit) && limit is uint l)
+				req.limit = l;
+			return req;
+		}
 
-        public SearchRequest SetIds(string i) {
-            ids = i;
-            return this;
-        }
+		public ISearchRequest SetQuery(string query) {
+			this.query = query;
+			return this;
+		}
 
-        public SearchRequest SetLimit(int l) {
-            limit = l;
-            return this;
-        }
+		public ISearchRequest SetIds(uint[] userIds) {
+			ids = userIds;
+			return this;
+		}
 
-        public SearchRequest SetOffset(int o) {
-            offset = o;
-            return this;
-        }
+		public ISearchRequest SetOffset(uint offset) {
+			this.offset = offset;
+			return this;
+		}
 
-        public string ToParams() {
-            var parameters = new List<string>();
+		public ISearchRequest SetLimit(uint limit) {
+			this.limit = limit;
+			return this;
+		}
 
-            if (!string.IsNullOrEmpty(search))
-                parameters.Add($"search={System.Uri.EscapeDataString(search)}");
+		public string GetQuery()
+			=> query;
 
-            if (tags != null && tags.Length > 0)
-                parameters.Add($"tags={System.Uri.EscapeDataString(string.Join(",", tags))}");
+		public uint[] GetIds()
+			=> ids;
 
-            if (!string.IsNullOrEmpty(ids))
-                parameters.Add($"ids={System.Uri.EscapeDataString(ids)}");
+		public uint GetOffset()
+			=> offset;
 
-            if (limit != 10)
-                parameters.Add($"limit={limit}");
+		public uint GetLimit()
+			=> limit;
 
-            if (offset > 0)
-                parameters.Add($"offset={offset}");
-
-            return parameters.Count > 0 ? "?" + string.Join("&", parameters) : "";
-        }
-
-        public string ToJson() {
-            return UnityEngine.JsonUtility.ToJson(this);
-        }
-    }
+		public static SearchRequest FromBase(ISearchRequest request) {
+			if (request is SearchRequest sr) return sr;
+			var req = new SearchRequest {
+				query  = request.GetQuery(),
+				ids    = request.GetIds(),
+				offset = request.GetOffset(),
+				limit  = request.GetLimit()
+			};
+			return req;
+		}
+	}
 }

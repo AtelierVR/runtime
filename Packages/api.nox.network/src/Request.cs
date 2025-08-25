@@ -363,12 +363,12 @@ namespace api.nox.network {
 			// Pour les uploads, on calcule un timeout basé sur la taille
 			// Estimation: 1MB par seconde minimum + 60 secondes de buffer
 			const int minTimeoutSeconds = 60;
-			const int bytesPerSecond = 1024 * 1024; // 1MB/s minimum
+			const int bytesPerSecond = 1024; // 1MB/s minimum
 			
 			var calculatedTimeout = Math.Max(minTimeoutSeconds, (int)(dataSizeBytes / bytesPerSecond) + 60);
 			
 			// Cap à 30 minutes maximum pour éviter les timeouts infinis
-			var maxTimeout = 30 * 60; // 30 minutes
+			const int maxTimeout = 30 * 60; // 30 minutes
 			RequestObject.timeout = Math.Min(calculatedTimeout, maxTimeout);
 			
 			Logger.Log($"Set upload timeout to {RequestObject.timeout} seconds for {dataSizeBytes} bytes");

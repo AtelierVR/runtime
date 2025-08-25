@@ -209,11 +209,18 @@ namespace api.nox.xr {
 		}
 
 		public IRuntimeAvatar GetAvatar() {
-			throw new NotImplementedException();
+			Logger.LogWarning("This method is not implemented.");
+			return null;
 		}
 
-		public void SetAvatar(IRuntimeAvatar runtimeAvatar) {
-			throw new NotImplementedException();
+		public IAvatarIdentifier GetAvatarIdentifier() {
+			Logger.LogWarning("This method is not implemented.");
+			return null;
+		}
+
+
+		public void SetAvatar(IRuntimeAvatar runtimeAvatar, IAvatarIdentifier identifier = null) {
+			Logger.LogWarning("This method is not implemented.");
 		}
 
 		[NoxPublic(NoxAccess.Method)]

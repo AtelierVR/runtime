@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using api.nox.relay.connection;
 using api.nox.relay.types;
 using Cysharp.Threading.Tasks;
@@ -15,11 +16,12 @@ namespace api.nox.relay.Instances {
 
 		public Connection Connection;
 
-		public readonly UnityEvent<types.Traveling.TravelingEvent> OnTraveling = new();
-		public readonly UnityEvent<types.Quit.QuitEvent>           OnQuit      = new();
-		public readonly UnityEvent<types.Enter.EnterResponse>      OnEnter     = new();
-		public readonly UnityEvent<types.Join.JoinEvent>           OnJoin      = new();
-		public readonly UnityEvent<types.Leave.LeaveEvent>         OnLeave     = new();
+		public readonly UnityEvent<types.Traveling.TravelingEvent>  OnTraveling     = new();
+		public readonly UnityEvent<types.Quit.QuitEvent>            OnQuit          = new();
+		public readonly UnityEvent<types.Enter.EnterResponse>       OnEnter         = new();
+		public readonly UnityEvent<types.Join.JoinEvent>            OnJoin          = new();
+		public readonly UnityEvent<types.Leave.LeaveEvent>          OnLeave         = new();
+		public readonly UnityEvent<types.Avatar.AvatarChangedEvent> OnAvatarChanged = new();
 
 		internal void OnReceived(ushort length, ushort state, ResponseType type, Buffer buffer) {
 			buffer.Goto(0);
@@ -43,6 +45,10 @@ namespace api.nox.relay.Instances {
 				case ResponseType.Leave:
 					var leave = new types.Leave.LeaveEvent { ConnectionId = Connection.Id, InternalId = InternalId };
 					if (leave.FromBuffer(buffer)) OnLeave.Invoke(leave);
+					break;
+				case ResponseType.AvatarChanged:
+					var avatar = new types.Avatar.AvatarChangedEvent { ConnectionId = Connection.Id, InternalId = InternalId };
+					if (avatar.FromBuffer(buffer)) OnAvatarChanged.Invoke(avatar);
 					break;
 				default:
 					Logger.LogDebug($"Received unknown response type {type} for instance {InternalId}");
@@ -113,5 +119,19 @@ namespace api.nox.relay.Instances {
 					Connection.NextState()
 				)
 				?? types.Traveling.TravelingEvent.CreateUnknown(Connection.Id, InternalId, "Unknown traveling request");
+
+		public async UniTask<types.Avatar.AvatarChangedEvent> RequestAvatarChange(types.Avatar.AvatarChangedAction action, string reason = null)
+			=> await Connection.Request<types.Avatar.AvatarChangedEvent>(
+					new types.Avatar.InstanceRequestAvatarChanged {
+						ConnectionId = Connection.Id,
+						InternalId   = InternalId,
+						Action       = action,
+						Reason       = reason
+					},
+					RequestType.AvatarChanged,
+					ResponseType.AvatarChanged,
+					Connection.NextState()
+				)
+				?? types.Avatar.AvatarChangedEvent.CreateUnknown(Connection.Id, InternalId, "Unknown avatar change request");
 	}
 }

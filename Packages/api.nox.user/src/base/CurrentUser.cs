@@ -9,6 +9,7 @@ namespace api.nox.user {
 		public string email;
 		public long   created_at;
 		public string home;
+		public string avatar;
 
 		public string GetEmail()
 			=> email;
@@ -20,7 +21,7 @@ namespace api.nox.user {
 		public string GetHomeId()
 			=> home;
 
-		public UniTask<IWorld> GetHome()
-			=> Main.Instance.WorldAPI.Fetch(home);
+		public string GetAvatarId()
+			=> avatar;
 	}
 }

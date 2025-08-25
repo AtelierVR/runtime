@@ -123,15 +123,15 @@ namespace api.nox.world {
 		#endregion
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<IRuntimeWorld> LoadSceneFromPath(string path, Action<float> progress = null, CancellationToken token = default)
+		public async UniTask<IRuntimeWorld> LoadFromPath(string path, Action<float> progress = null, CancellationToken token = default)
 			=> await GroupManager.LoadWorldFromPath(path, progress, token);
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<IRuntimeWorld> LoadSceneFromAssets(string modId, string path, Action<float> progress = null, CancellationToken token = default)
+		public async UniTask<IRuntimeWorld> LoadFromAssets(string modId, string path, Action<float> progress = null, CancellationToken token = default)
 			=> await GroupManager.LoadWorldFromAssets(modId, path, progress, token);
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<IRuntimeWorld> LoadSceneFromCache(string hash, Action<float> progress = null, CancellationToken token = default)
+		public async UniTask<IRuntimeWorld> LoadFromCache(string hash, Action<float> progress = null, CancellationToken token = default)
 			=> await GroupManager.LoadWorldFromCache(hash, progress, token);
 
 		[NoxPublic(NoxAccess.Method)]

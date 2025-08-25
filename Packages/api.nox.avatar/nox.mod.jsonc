@@ -25,6 +25,26 @@
   ],
   "contributors": [],
   "relations": [
+    {
+      "id": "network",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "ui",
+      "type": "recommends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "search",
+      "type": "recommends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "table",
+      "type": "recommends",
+      "version": ">=1.0.0"
+    }
   ],
   "entrypoints": {
     "main": [
@@ -33,7 +53,9 @@
     "editor": [
       "api.nox.avatar.Editor"
     ],
-    "instance": []
+    "client": [
+      "api.nox.avatar.Client"
+    ]
   },
   "references": [],
   "sides": [],

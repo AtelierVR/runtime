@@ -872,7 +872,7 @@ namespace api.nox.avatar.editor {
 				Logger.Log("Uploading avatar file...");
 
 				// Read the built file as byte array
-				var fileData   = File.ReadAllBytes(builtFilePath);
+				var fileData   = await File.ReadAllBytesAsync(builtFilePath);
 				var fileSizeMB = fileData.Length / (1024.0 * 1024.0);
 				Logger.Log($"File size: {fileSizeMB:F2} MB");
 

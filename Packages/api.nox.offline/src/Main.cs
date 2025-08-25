@@ -110,7 +110,7 @@ namespace api.nox.offline {
 			}
 
 			adapter.SetState(false, $"Loading world '{worldId}'...", 0.6f);
-			var scene = await WorldAPI.LoadSceneFromCache(asset.GetHash());
+			var scene = await WorldAPI.LoadFromCache(asset.GetHash());
 			if (scene == null) {
 				Logger.LogError($"Failed to load scene for world {worldId.ToString()} with version {worldId.GetVersion()}");
 				return;

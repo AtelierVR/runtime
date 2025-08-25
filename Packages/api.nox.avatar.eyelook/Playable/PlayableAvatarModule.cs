@@ -6,9 +6,8 @@ using UnityEngine.Animations;
 
 namespace Nox.CCK.Avatars.Playable {
 	public class PlayableAvatarModule : MonoBehaviour, IAvatarModule {
-		
 		public static Func<RuntimeAnimatorController> GetAssetController;
-		
+
 		public  RuntimeAnimatorController[] controllers;
 		private PlayableGraph               _graph;
 		private AnimationLayerMixerPlayable _mixer;
@@ -22,6 +21,13 @@ namespace Nox.CCK.Avatars.Playable {
 			}
 
 			var animator = _descriptor.GetAnimator();
+
+			if (!animator) {
+				Debug.LogWarning("Animator is not set, cannot play avatar module.");
+				return;
+			}
+
+			animator.runtimeAnimatorController ??= GetAssetController();
 
 			if (!animator.playableGraph.IsValid()) {
 				Debug.LogError("Animator's playable graph is not valid, cannot play avatar module.");
@@ -68,15 +74,16 @@ namespace Nox.CCK.Avatars.Playable {
 
 		public bool OnPlay(IRuntimeAvatar runtimeAvatar) {
 			_descriptor = runtimeAvatar.GetDescriptor();
-			
+
 			if (_descriptor == null) {
-				Debug.LogError("Avatar descriptor is not set, cannot play avatar module.");
+				Utils.Logger.LogError("Avatar descriptor is not set, cannot play avatar module.");
 				return false;
 			}
 
 			var animator = _descriptor.GetAnimator();
+
 			if (!animator) {
-				Debug.LogError("Animator is not set, cannot play avatar module.");
+				Utils.Logger.LogWarning("Animator is not set, PlayableAvatarModule will be disabled for this avatar.");
 				return false;
 			}
 

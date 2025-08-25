@@ -18,7 +18,7 @@ namespace api.nox.world.network {
 					text += (text.Length > 0 ? "&" : "") + $"id={u}";
 			if (offset > 0) text += (text.Length > 0 ? "&" : "") + $"offset={offset}";
 			if (limit  > 0) text += (text.Length > 0 ? "&" : "") + $"limit={limit}";
-			return text;
+			return string.IsNullOrEmpty(text) ? "" : "?" + text;
 		}
 
 		public static SearchRequest From(Dictionary<string, object> data) {

@@ -12,7 +12,8 @@
         "Nox.Avatars",
         "UniTask",
         "Nox.Avatars.Parameters",
-        "Nox.Avatars.Camera"
+        "Nox.Avatars.Camera",
+        "Nox.Users"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

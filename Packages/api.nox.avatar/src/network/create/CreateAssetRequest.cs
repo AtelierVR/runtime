@@ -1,8 +1,9 @@
 using Newtonsoft.Json.Linq;
+using Nox.Avatars;
 using Nox.CCK.Utils;
 
 namespace api.nox.avatar.network {
-	public class CreateAssetRequest : INoxObject {
+	public class CreateAssetRequest : ICreateAssetRequest, INoxObject {
 		private  uint   _id;
 		internal ushort Version;
 		internal string Engine;
@@ -11,38 +12,38 @@ namespace api.nox.avatar.network {
 		private  string _hash;
 		private  long   _size;
 
-		public CreateAssetRequest SetId(uint i) {
-			_id = i;
+		public ICreateAssetRequest SetId(uint id) {
+			_id = id;
 			return this;
 		}
 
-		public CreateAssetRequest SetVersion(ushort v) {
-			Version = v;
+		public ICreateAssetRequest SetVersion(ushort version) {
+			Version = version;
 			return this;
 		}
 
-		public CreateAssetRequest SetEngine(string e) {
-			Engine = e;
+		public ICreateAssetRequest SetEngine(string engine) {
+			Engine = engine;
 			return this;
 		}
 
-		public CreateAssetRequest SetPlatform(string p) {
-			Platform = p;
+		public ICreateAssetRequest SetPlatform(string platform) {
+			Platform = platform;
 			return this;
 		}
 
-		public CreateAssetRequest SetUrl(string u) {
-			_url = u;
+		public ICreateAssetRequest SetUrl(string url) {
+			_url = url;
 			return this;
 		}
 
-		public CreateAssetRequest SetHash(string h) {
-			_hash = h;
+		public ICreateAssetRequest SetHash(string hash) {
+			_hash = hash;
 			return this;
 		}
 
-		public CreateAssetRequest SetSize(long s) {
-			_size = s;
+		public ICreateAssetRequest SetSize(long size) {
+			_size = size;
 			return this;
 		}
 
@@ -68,12 +69,14 @@ namespace api.nox.avatar.network {
 			=> _size;
 
 		public string ToJson() {
-			var obj = new JObject();
+			var obj = new JObject {
+				["version"]  = Version,
+				["engine"]   = Engine,
+				["platform"] = Platform
+			};
 
-			if (_id > 0)
-				obj["id"] = _id;
-
-			obj["version"] = Version;
+			if (_id   > 0) obj["id"]   = _id;
+			if (_size > 0) obj["size"] = _size;
 
 			if (!string.IsNullOrEmpty(Engine))
 				obj["engine"] = Engine;
@@ -87,10 +90,18 @@ namespace api.nox.avatar.network {
 			if (!string.IsNullOrEmpty(_hash))
 				obj["hash"] = _hash;
 
-			if (_size > 0)
-				obj["size"] = _size;
-
 			return obj.ToString();
 		}
+
+		public static CreateAssetRequest FromBase(ICreateAssetRequest data)
+			=> new() {
+				_id      = data.GetId(),
+				Version  = data.GetVersion(),
+				Engine   = data.GetEngine(),
+				Platform = data.GetPlatform(),
+				_url     = data.GetUrl(),
+				_hash    = data.GetHash(),
+				_size    = data.GetSize()
+			};
 	}
 }

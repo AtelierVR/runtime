@@ -91,9 +91,16 @@ namespace Nox.Controllers {
 		public IRuntimeAvatar GetAvatar();
 
 		/// <summary>
+		/// Get the identifier for the avatar associated with the controller.
+		/// </summary>
+		/// <returns></returns>
+		public IAvatarIdentifier GetAvatarIdentifier();
+
+		/// <summary>
 		/// Set the avatar for the controller.
 		/// </summary>
 		/// <param name="runtimeAvatar"></param>
-		public void SetAvatar(IRuntimeAvatar runtimeAvatar);
+		/// <param name="identifier">Optional identifier for the avatar, used for determinate metadatas.</param>
+		public void SetAvatar(IRuntimeAvatar runtimeAvatar, IAvatarIdentifier identifier = null);
 	}
 }

@@ -45,7 +45,7 @@ namespace api.nox.avatar.builder {
 					return false;
 				}
 
-				var backupFilePath = backupPath + $"scene_avatar_backup.unity";
+				var backupFilePath = backupPath     + $"scene_avatar_backup.unity";
 				var backupMetaPath = backupFilePath + ".meta";
 
 				// Copier le fichier de scène
@@ -53,7 +53,7 @@ namespace api.nox.avatar.builder {
 
 				// Créer un nouveau fichier .meta avec un GUID unique pour le backup
 				var originalMetaContent = File.ReadAllText(originalPath + ".meta");
-				var newGuid = Guid.NewGuid().ToString("N");
+				var newGuid             = Guid.NewGuid().ToString("N");
 
 				// Remplacer le GUID dans le contenu du .meta
 				var lines = originalMetaContent.Split('\n');
@@ -195,8 +195,8 @@ namespace api.nox.avatar.builder {
 				// Préparation des répertoires temporaires
 				var preparation = PrepareTemporaryDirectories(data);
 				if (preparation.Type != BuildResultType.Success)
-					return preparation; 
-				
+					return preparation;
+
 				// Sauvegarde initiale des scènes
 				if (!EditorSceneManager.SaveOpenScenes()) {
 					return new BuildResult {
@@ -205,8 +205,8 @@ namespace api.nox.avatar.builder {
 					};
 				}
 
-				AssetDatabase.Refresh(); 
-				
+				AssetDatabase.Refresh();
+
 				// Report progress: Scene backup
 				data.ProgressCallback?.Invoke(0.15f, "Creating scene backup...");
 				await UniTask.Yield();
@@ -220,7 +220,7 @@ namespace api.nox.avatar.builder {
 						Message = "Failed to create scene backup. Build aborted for safety."
 					};
 				}
-				
+
 				// Report progress: Compiling scripts
 				data.ProgressCallback?.Invoke(0.40f, "Compiling scripts...");
 				await UniTask.Yield();
@@ -228,16 +228,16 @@ namespace api.nox.avatar.builder {
 				// Compilation des scripts
 				var compilation = await CompileScripts(data.Descriptor.gameObject);
 				if (compilation.Type != BuildResultType.Success)
-					return compilation; 
-				
+					return compilation;
+
 				// Report progress: Processing scenes
 				data.ProgressCallback?.Invoke(0.60f, "Processing prefab and dependencies...");
 				await UniTask.Yield();
 
 				var processing = await ProcessPrefabAndDependencies(data);
 				if (processing.Type != BuildResultType.Success)
-					return processing; 
-				
+					return processing;
+
 				// Report progress: Building AssetBundle
 				data.ProgressCallback?.Invoke(0.80f, "Building AssetBundle...");
 				await UniTask.Yield();
@@ -245,8 +245,8 @@ namespace api.nox.avatar.builder {
 				// Création de l'AssetBundle des scènes
 				var assetBundleResult = await BuildPrefabsAssetBundle(data);
 				if (assetBundleResult.Type != BuildResultType.Success)
-					return assetBundleResult; 
-				
+					return assetBundleResult;
+
 				// Report progress: Cleanup
 				data.ProgressCallback?.Invoke(0.95f, "Cleaning up...");
 				await UniTask.Yield();
@@ -320,7 +320,6 @@ namespace api.nox.avatar.builder {
 			}
 
 			var tempPath = data.TempPath;
-			var depPath  = tempPath + "Dependencies/";
 			if (Directory.Exists(tempPath))
 				try {
 					Directory.Delete(tempPath, true);
@@ -332,8 +331,6 @@ namespace api.nox.avatar.builder {
 				}
 
 			Directory.CreateDirectory(tempPath);
-			if (!Directory.Exists(depPath))
-				Directory.CreateDirectory(depPath);
 
 			return new BuildResult { Type = BuildResultType.Success };
 		}
@@ -392,10 +389,6 @@ namespace api.nox.avatar.builder {
 		/// </summary>
 		private static async UniTask<BuildResult> ProcessPrefabAndDependencies(BuildData data) {
 			var tempPath = data.TempPath;
-			var depPath  = tempPath + "Dependencies/";
-
-			// Ensure the Dependencies directory exists
-			Directory.CreateDirectory(depPath);
 
 			try {
 				// Create prefab from the avatar descriptor GameObject
@@ -421,26 +414,24 @@ namespace api.nox.avatar.builder {
 				CheckForProblematicComponents(avatarGameObject);
 
 				if (problematicComponents.Count > 0) {
-					Logger.LogError($"Found {problematicComponents.Count} missing/null components that might cause prefab creation issues.", avatarGameObject);
-					foreach (var go in problematicComponents)
-						Logger.LogError($" - {go.Item1.name} at component index {go.Item2}", go.Item1);
+					Logger.LogWarning($"Found {problematicComponents.Count} problematic component(s). Attempting to clean them up...");
+					ForceCleanProblematicComponents(problematicComponents);
 
-					var res = Logger.OpenDialog(
-						"Prefab Creation Warning",
-						"Prefab creation may fail due to missing/null components on the Avatar.\n"
-						+ "Please check the console for details and ensure all components are properly set up.",
-						"Clean and Continue",
-						"Cancel"
-					);
+					// Re-check after cleanup
+					problematicComponents.Clear();
+					CheckForProblematicComponents(avatarGameObject);
 
-					if (!res)
+					if (problematicComponents.Count > 0) {
+						Logger.LogError($"Still found {problematicComponents.Count} problematic component(s) after cleanup attempt:");
+						foreach (var (go, index) in problematicComponents) {
+							Logger.LogError($"  - GameObject '{go?.name}' at component index {index}");
+						}
+
 						return new BuildResult {
 							Type    = BuildResultType.Failed,
-							Message = "Prefab creation cancelled due to missing/null components on Avatar. Please check the console for details."
+							Message = $"Avatar GameObject contains {problematicComponents.Count} problematic component(s) that prevent prefab creation. Please fix these issues manually."
 						};
-
-					Logger.Log("Force cleaning remaining problematic components from Avatar GameObject...");
-					ForceCleanProblematicComponents(problematicComponents);
+					}
 				}
 
 				// Ensure the temp directory exists and is writable
@@ -475,62 +466,12 @@ namespace api.nox.avatar.builder {
 				}
 
 				Logger.Log($"Successfully created avatar prefab at: {prefabPath}");
-				
+
 				// Rafraîchir pour que Unity reconnaisse le nouveau prefab
 				AssetDatabase.Refresh();
 				await UniTask.Yield();
 
-				// Récupérer toutes les dépendances du prefab sans manipulation de GUID
-				var dependencies = AssetDatabase.GetDependencies(prefabPath, true);
-				Logger.Log($"Found {dependencies.Length} dependencies for avatar prefab");
-
-				var copiedAssets = new List<string> { prefabPath };
-
-				// Copier les dépendances dans le dossier Dependencies avec leurs noms originaux
-				foreach (var dependency in dependencies) {
-					// Skip certain file types that shouldn't be included
-					var extension = Path.GetExtension(dependency).ToLower();
-					switch (extension) {
-						case ".cs":     // Script files
-						case ".dll":    // Compiled assemblies
-						case ".meta":   // Meta files (Unity les gère automatiquement)
-						case ".unity":  // Scene files
-						case ".asmdef": // Assembly definition files
-						case ".asmref": // Assembly reference files
-							continue;
-					}
-
-					// Skip if this is the prefab itself
-					if (dependency == prefabPath) continue;
-
-					// Utiliser le nom original du fichier pour éviter les conflits
-					var fileName = Path.GetFileName(dependency);
-					var destinationPath = Path.Combine(depPath, fileName);
-					
-					// Skip if already processed or if it's a package asset that we shouldn't copy
-					if (copiedAssets.Contains(destinationPath) || dependency.StartsWith("Packages/")) continue;
-
-					// Copy the asset if it exists and is not in a package
-					if (File.Exists(dependency)) {
-						try {
-							File.Copy(dependency, destinationPath, true);
-							
-							// Let Unity handle the .meta file creation automatiquement
-							Logger.Log($"Copied dependency: {dependency} -> {destinationPath}");
-							copiedAssets.Add(destinationPath);
-						} catch (Exception e) {
-							Logger.LogWarning($"Failed to copy dependency {dependency}: {e.Message}");
-						}
-					} else {
-						Logger.LogWarning($"Dependency file not found: {dependency}");
-					}
-				}
-
-				// Rafraîchir pour que Unity reconnaisse les nouvelles dépendances et crée leurs .meta
-				AssetDatabase.Refresh();
-				await UniTask.Yield();
-
-				Logger.Log($"Successfully processed avatar prefab with {copiedAssets.Count} total assets");
+				Logger.Log($"Successfully processed avatar prefab");
 				return new BuildResult { Type = BuildResultType.Success };
 
 				void CheckForProblematicComponents(GameObject go) {
@@ -549,7 +490,6 @@ namespace api.nox.avatar.builder {
 					foreach (Transform child in go.transform)
 						CheckForProblematicComponents(child.gameObject);
 				}
-
 			} catch (Exception e) {
 				Logger.LogException(e);
 				return new BuildResult {
@@ -560,18 +500,7 @@ namespace api.nox.avatar.builder {
 		}
 
 		/// <summary>
-		/// Processes GUID replacements in assets (simplified version)
-		/// </summary>
-		private static async UniTask ProcessGuidReplacements(List<string> assets, Dictionary<string, string> initialGUIDs, Dictionary<string, string> endGUIDs) {
-			// Cette méthode est maintenant simplifiée car nous laissons Unity gérer les GUID automatiquement
-			AssetDatabase.Refresh();
-			await UniTask.Yield();
-			
-			Logger.Log("GUID processing completed - using Unity's automatic GUID management");
-		}
-
-		/// <summary>
-		/// Builds an AssetBundle containing the avatar prefab and its dependencies
+		/// Builds an AssetBundle containing the avatar prefab
 		/// </summary>
 		/// <param name="data">Build data containing target platform and descriptor info</param>
 		/// <returns>BuildResult indicating success or failure</returns>
@@ -606,7 +535,7 @@ namespace api.nox.avatar.builder {
 				Logger.Log("Building AssetBundle for avatar prefab...");
 
 				// Report progress: Collecting prefab files
-				data.ProgressCallback?.Invoke(0.82f, "Collecting avatar prefab and dependencies...");
+				data.ProgressCallback?.Invoke(0.82f, "Collecting avatar prefab...");
 				await UniTask.Yield();
 
 				// Collect the main avatar prefab
@@ -620,32 +549,17 @@ namespace api.nox.avatar.builder {
 						Message = "No avatar prefab found to bundle."
 					};
 
-				// Collect all dependencies
-				var dependencyPath  = Path.Combine(tempPath, "Dependencies");
-				var dependencyFiles = new List<string>();
-				if (Directory.Exists(dependencyPath))
-					dependencyFiles = Directory.GetFiles(dependencyPath, "*.*", SearchOption.AllDirectories)
-						.Where(f => !f.EndsWith(".meta"))
-						.ToList();
-
 				// Report progress: Preparing AssetBundle
 				data.ProgressCallback?.Invoke(0.84f, "Preparing AssetBundle build...");
 				await UniTask.Yield();
 
-				Logger.Log($"Found {prefabFiles.Length} prefab file(s) and {dependencyFiles.Count} dependencies to bundle:");
+				Logger.Log($"Found {prefabFiles.Length} prefab file(s) to bundle:");
 				foreach (var prefabFile in prefabFiles)
 					Logger.Log($"  - Prefab: {prefabFile}");
 
-				Logger.Log($"  - Dependencies: {dependencyFiles.Count} files");
-
-				// Combine all assets for the bundle
-				var allAssets = new List<string>();
-				allAssets.AddRange(prefabFiles);
-				allAssets.AddRange(dependencyFiles);
-
 				// Validate all files exist and convert to relative paths for Unity
 				var validAssetFiles = new List<string>();
-				foreach (var assetFile in allAssets)
+				foreach (var assetFile in prefabFiles)
 					if (File.Exists(assetFile)) {
 						// Convert absolute path to relative path for Unity AssetDatabase
 						var relativePath = assetFile.Replace('\\', '/');
@@ -681,23 +595,6 @@ namespace api.nox.avatar.builder {
 				};
 
 				Logger.Log($"Created AssetBundle build: {data.Filename} with {assetBundleBuilds[0].assetNames.Length} assets");
-				
-				// Limit logging to avoid infinite loops and excessive output
-				var maxAssetsToLog = Math.Min(10, assetBundleBuilds[0].assetNames.Length);
-				for (int i = 0; i < maxAssetsToLog; i++) {
-					Logger.Log($"  - Asset: {assetBundleBuilds[0].assetNames[i]}");
-				}
-				if (assetBundleBuilds[0].assetNames.Length > maxAssetsToLog) {
-					Logger.Log($"  ... and {assetBundleBuilds[0].assetNames.Length - maxAssetsToLog} more assets");
-				}
-				
-				var maxAddressablesToLog = Math.Min(10, assetBundleBuilds[0].addressableNames.Length);
-				for (int i = 0; i < maxAddressablesToLog; i++) {
-					Logger.Log($"  - Addressable: {assetBundleBuilds[0].addressableNames[i]}");
-				}
-				if (assetBundleBuilds[0].addressableNames.Length > maxAddressablesToLog) {
-					Logger.Log($"  ... and {assetBundleBuilds[0].addressableNames.Length - maxAddressablesToLog} more addressables");
-				}
 
 				// Validate the AssetBundleBuild
 				if (assetBundleBuilds[0].assetNames.Length == 0)
@@ -720,8 +617,10 @@ namespace api.nox.avatar.builder {
 				var outputPath = data.OutputPath;
 				Directory.CreateDirectory(outputPath);
 
-				// Build options optimized for avatars
-				var options = BuildAssetBundleOptions.None | BuildAssetBundleOptions.ChunkBasedCompression | BuildAssetBundleOptions.StrictMode;
+				// Build options optimized for avatars with maximum compression
+				var options = BuildAssetBundleOptions.None | 
+				             BuildAssetBundleOptions.ForceRebuildAssetBundle |
+				             BuildAssetBundleOptions.StrictMode;
 
 				// Report progress: Building AssetBundle (this is the long operation)
 				data.ProgressCallback?.Invoke(0.88f, "Building avatar AssetBundle (this may take a while)...");
@@ -750,7 +649,7 @@ namespace api.nox.avatar.builder {
 				}
 
 				Logger.Log($"Avatar AssetBundle '{data.Filename}' built successfully at: {outputPath}");
-				Logger.Log($"Avatar prefab and {dependencyFiles.Count} dependencies included");
+				Logger.Log($"Avatar prefab built without dependencies");
 				return new BuildResult { Type = BuildResultType.Success };
 			} catch (Exception e) {
 				Logger.LogError($"Avatar AssetBundle build failed: {e.Message}");
@@ -774,7 +673,7 @@ namespace api.nox.avatar.builder {
 			try {
 				Logger.Log($"Starting AssetBundle build with {assetBundleBuilds.Length} bundles to path: {outputPath}");
 				Logger.Log($"Build target: {buildTarget}, Options: {options}");
-				
+
 				// Validate output path exists
 				if (!Directory.Exists(outputPath)) {
 					Logger.LogError($"Output directory does not exist: {outputPath}");
@@ -784,12 +683,12 @@ namespace api.nox.avatar.builder {
 				// Validate each asset bundle
 				foreach (var bundle in assetBundleBuilds) {
 					Logger.Log($"Validating bundle '{bundle.assetBundleName}' with {bundle.assetNames.Length} assets");
-					
+
 					if (string.IsNullOrEmpty(bundle.assetBundleName)) {
 						Logger.LogError("AssetBundle name is null or empty");
 						return false;
 					}
-					
+
 					if (bundle.assetNames == null || bundle.assetNames.Length == 0) {
 						Logger.LogError($"Bundle '{bundle.assetBundleName}' has no assets");
 						return false;
@@ -801,14 +700,14 @@ namespace api.nox.avatar.builder {
 							Logger.LogError($"Asset file does not exist: {asset}");
 							return false;
 						}
-						
+
 						// Check if Unity can recognize this asset
 						var guid = AssetDatabase.AssetPathToGUID(asset);
 						if (string.IsNullOrEmpty(guid)) {
 							Logger.LogError($"Unity cannot recognize asset (no GUID): {asset}");
 							return false;
 						}
-						
+
 						Logger.Log($"  - Valid asset: {asset} (GUID: {guid})");
 					}
 				}
@@ -839,14 +738,14 @@ namespace api.nox.avatar.builder {
 					options,
 					buildTarget
 				);
-				
+
 				bool success = manifest != null;
-				
+
 				if (success) {
 					Logger.Log("AssetBundle build completed successfully with CompatibilityBuildPipeline.");
 				} else {
 					Logger.LogError("Both BuildPipeline methods failed. No manifest was created.");
-					
+
 					// Additional debugging information
 					Logger.LogError($"Output path contents:");
 					if (Directory.Exists(outputPath)) {
@@ -856,7 +755,7 @@ namespace api.nox.avatar.builder {
 						}
 					}
 				}
-				
+
 				return success;
 			} catch (Exception e) {
 				Logger.LogError($"AssetBundle build failed with exception: {e.Message}");
@@ -879,13 +778,13 @@ namespace api.nox.avatar.builder {
 
 				// Count removed components for logging
 				var initialComponentCount = go.GetComponentCount();
-				
+
 				// Remove missing MonoBehaviours
 				GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
-				
+
 				var finalComponentCount = go.GetComponentCount();
-				var removedCount = initialComponentCount - finalComponentCount;
-				
+				var removedCount        = initialComponentCount - finalComponentCount;
+
 				if (removedCount > 0) {
 					Logger.Log($"Removed {removedCount} missing component(s) from GameObject '{go.name}'");
 				}
@@ -937,9 +836,9 @@ namespace api.nox.avatar.builder {
 
 				try {
 					// Check for any remaining null components
-					var components = go.GetComponents<Component>();
+					var components        = go.GetComponents<Component>();
 					var hasNullComponents = components.Any(c => !c);
-					
+
 					if (hasNullComponents) {
 						// Final attempt to clean
 						GameObjectUtility.RemoveMonoBehavioursWithMissingScript(go);
@@ -1045,3 +944,4 @@ namespace api.nox.avatar.builder {
 	}
 }
 #endif
+

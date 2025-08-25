@@ -69,7 +69,7 @@ namespace api.nox.world.network {
 			}
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
-			await request.SetMasterUrl(address, $"/api/worlds?{data.ToParams()}");
+			await request.SetMasterUrl(address, $"/api/worlds{data.ToParams()}");
 			await request.Send();
 			var response = request.GetMasterResponse<SearchResponse>();
 			Logger.LogDebug(request.GetResponse<string>());

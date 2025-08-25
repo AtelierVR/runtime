@@ -1,53 +1,69 @@
 using Newtonsoft.Json.Linq;
+using Nox.Avatars;
 using Nox.CCK.Utils;
 
 namespace api.nox.avatar.network {
-    public class CreateAvatarRequest : INoxObject {
-        internal uint Id;
-        private string _title;
-        private string _description;
-        private string _thumbnail;
+	public class CreateAvatarRequest : ICreateAvatarRequest, INoxObject {
+		internal uint   Id;
+		private  string _title;
+		private  string _description;
+		private  string _thumbnail;
 
-        public CreateAvatarRequest SetId(uint i) {
-            Id = i;
-            return this;
-        }
+		public ICreateAvatarRequest SetId(uint i) {
+			Id = i;
+			return this;
+		}
 
-        public CreateAvatarRequest SetTitle(string t) {
-            _title = t;
-            return this;
-        }
+		public ICreateAvatarRequest SetTitle(string t) {
+			_title = t;
+			return this;
+		}
 
-        public CreateAvatarRequest SetDescription(string d) {
-            _description = d;
-            return this;
-        }
+		public ICreateAvatarRequest SetDescription(string d) {
+			_description = d;
+			return this;
+		}
 
-        public CreateAvatarRequest SetThumbnail(string t) {
-            _thumbnail = t;
-            return this;
-        }
+		public ICreateAvatarRequest SetThumbnail(string t) {
+			_thumbnail = t;
+			return this;
+		}
 
-        public uint GetId() => Id;
-        public string GetTitle() => _title;
-        public string GetDescription() => _description;
-        public string GetThumbnail() => _thumbnail;
+		public uint GetId()
+			=> Id;
 
-        public string ToJson() {
-            var obj = new JObject();
+		public string GetTitle()
+			=> _title;
 
-            if (Id > 0) obj["id"] = Id;
+		public string GetDescription()
+			=> _description;
 
-            if (!string.IsNullOrEmpty(_title))
-                obj["title"] = _title;
+		public string GetThumbnail()
+			=> _thumbnail;
 
-            if (!string.IsNullOrEmpty(_description))
-                obj["description"] = _description;
+		public string ToJson() {
+			var obj = new JObject();
 
-            if (!string.IsNullOrEmpty(_thumbnail))
-                obj["thumbnail"] = _thumbnail;
+			if (Id > 0) obj["id"] = Id;
 
-            return obj.ToString();
-        }
-    }
+			if (!string.IsNullOrEmpty(_title))
+				obj["title"] = _title;
+
+			if (!string.IsNullOrEmpty(_description))
+				obj["description"] = _description;
+
+			if (!string.IsNullOrEmpty(_thumbnail))
+				obj["thumbnail"] = _thumbnail;
+
+			return obj.ToString();
+		}
+
+		public static CreateAvatarRequest FromBase(ICreateAvatarRequest data)
+			=> new() {
+				Id           = data.GetId(),
+				_title       = data.GetTitle(),
+				_description = data.GetDescription(),
+				_thumbnail   = data.GetThumbnail()
+			};
+	}
 }

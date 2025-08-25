@@ -16,7 +16,9 @@
         "Unity.ScriptableBuildPipeline",
         "Unity.ScriptableBuildPipeline.Editor",
         "Nox.Network",
-        "Nox.Tables"
+        "Nox.Tables",
+        "Nox.Search",
+        "Nox.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

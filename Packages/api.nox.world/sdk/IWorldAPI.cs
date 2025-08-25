@@ -18,7 +18,7 @@ namespace Nox.Worlds {
 		/// <param name="progress">Progress callback to report loading progress.</param>
 		/// <param name="token">Cancellation token to cancel the loading operation.</param>
 		/// <returns>Returns a <see cref="IRuntimeWorld"/> instance representing the loaded world.</returns>
-		public UniTask<IRuntimeWorld> LoadSceneFromPath(string path, Action<float> progress = null, CancellationToken token = default);
+		public UniTask<IRuntimeWorld> LoadFromPath(string path, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Loads a world from the given path in the assets.
@@ -29,7 +29,7 @@ namespace Nox.Worlds {
 		/// <param name="progress">Progress callback to report loading progress.</param>
 		/// <param name="token">Cancellation token to cancel the loading operation.</param>
 		/// <returns>Returns a <see cref="IRuntimeWorld"/> instance representing the loaded world.</returns>
-		public UniTask<IRuntimeWorld> LoadSceneFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default);
+		public UniTask<IRuntimeWorld> LoadFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Loads a world from the cache using its hash.
@@ -39,7 +39,7 @@ namespace Nox.Worlds {
 		/// <param name="progress">Progress callback to report loading progress.</param>
 		/// <param name="token">Cancellation token to cancel the loading operation.</param>
 		/// <returns>Returns a <see cref="IRuntimeWorld"/> instance representing the loaded world, or null if not found.</returns>
-		public UniTask<IRuntimeWorld> LoadSceneFromCache(string hash, Action<float> progress = null, CancellationToken token = default);
+		public UniTask<IRuntimeWorld> LoadFromCache(string hash, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Gets the currently active world.

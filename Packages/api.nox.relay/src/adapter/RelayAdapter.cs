@@ -3,6 +3,7 @@ using System.Linq;
 using api.nox.offline;
 using api.nox.relay.connection;
 using api.nox.relay.Instances;
+using api.nox.relay.types.Avatar;
 using api.nox.relay.types.Enter;
 using api.nox.relay.types.Join;
 using api.nox.relay.types.Leave;
@@ -59,10 +60,108 @@ namespace api.nox.relay {
 		public void OnLeave(LeaveEvent ev) {
 			Logger.LogDebug($"OnLeave: {ev}");
 			var player = _entities.GetEntity<RelayRemotePlayer>(ev.PlayerId);
-			if (player != null) {
-				_entities.UnregisterEntity(player);
-			}
+			if (player == null) return;
+			_entities.UnregisterEntity(player);
 		}
+
+		public void OnAvatarChanged(AvatarChangedEvent ev)
+			=> OnAvatarChangedAsync(ev).Forget();
+
+		private async UniTask<bool> OnAvatarChangedAsync(AvatarChangedEvent ev, bool autoResponse = true, Action<float, string> progress = null) {
+			Logger.LogDebug($"OnAvatarChanged: {ev}");
+
+			string hash;
+			string url;
+
+			var player = _entities.GetEntity<RelayPlayer>(ev.InternalId);
+			if (player == null) {
+				progress?.Invoke(0f, $"Player with id {ev.InternalId} not found");
+				Logger.LogError($"Player with id {ev.InternalId} not found to change avatar");
+				if (autoResponse)
+					await OnAvatarChangedFailed(ev, "Player not found");
+				return false;
+			}
+
+			if (ev.UseUrl) {
+				progress?.Invoke(0.1f, "Using provided URL for avatar");
+				hash = ev.Hash;
+				url  = ev.DownloadUrl;
+			} else if (ev.UseMaster) {
+				progress?.Invoke(0.1f, "Searching for master asset for avatar");
+				var asset = (await Main.AvatarAPI.SearchAssets(
+						ev.AvatarIdentifier.GetId().ToString(),
+						Main.AvatarAPI.MakeAssetSearchRequest()
+							.SetEngines(new[] { EngineExtensions.CurrentEngine.GetEngineName() })
+							.SetPlatforms(new[] { PlatformExtensions.CurrentPlatform.GetPlatformName() })
+							.SetVersions(new[] { ev.AvatarIdentifier.GetVersion() })
+							.SetLimit(1)
+					)).GetAssets()
+					.FirstOrDefault();
+
+				if (asset == null) {
+					progress?.Invoke(0.2f, $"No master asset found for avatar {ev.AvatarIdentifier.ToString()}");
+					Logger.LogError($"No asset found for avatar {ev.AvatarIdentifier.ToString()}");
+					if (autoResponse)
+						await OnAvatarChangedFailed(ev, "No master asset found");
+					return false;
+				}
+
+				hash = asset.GetHash();
+				url  = asset.GetUrl();
+			} else {
+				progress?.Invoke(0.1f, "The avatar change does not contain valid URL or master asset information");
+				Logger.LogError($"{ev} does not contain valid URL or master asset information");
+				if (autoResponse)
+					await OnAvatarChangedFailed(ev, "Invalid avatar change information");
+				return false;
+			}
+
+			progress?.Invoke(0.2f, "Searching for avatar");
+			if (!Main.AvatarAPI.HasInCache(hash)) {
+				var download = Main.AvatarAPI.DownloadToCache(
+					url,
+					hash: hash,
+					progress: f => progress?.Invoke(0.2f + f * 0.45f, "Downloading avatar...")
+				);
+				download.Start();
+				await download.Wait();
+			}
+
+			progress?.Invoke(0.65f, "Loading avatar");
+			var avatar = await Main.AvatarAPI.LoadFromCache(
+				hash,
+				progress: f => progress?.Invoke(0.65f + f * 0.25f, "Loading avatar...")
+			);
+
+			if (avatar == null) {
+				progress?.Invoke(0.9f, "Failed to load avatar");
+				Logger.LogError($"Failed to load avatar {ev.AvatarIdentifier.ToString()}");
+				if (autoResponse)
+					await OnAvatarChangedFailed(ev, "Failed to load avatar");
+				return false;
+			}
+
+			player = _entities.GetEntity<RelayPlayer>(ev.InternalId);
+			if (player == null) {
+				Logger.LogError($"Failed to find player with id {ev.InternalId} to change avatar");
+				if (autoResponse)
+					await OnAvatarChangedFailed(ev, "Player not found");
+				return false;
+			}
+
+			player.SetAvatar(avatar, ev.UseMaster ? ev.AvatarIdentifier : null);
+			progress?.Invoke(1f, "Avatar loaded successfully");
+			if (autoResponse)
+				await OnAvatarChangedSuccess(ev);
+			return true;
+		}
+
+		private async UniTask OnAvatarChangedSuccess(AvatarChangedEvent ev)
+			=> await Instance.RequestAvatarChange(AvatarChangedAction.Ready);
+
+		private async UniTask OnAvatarChangedFailed(AvatarChangedEvent ev, string reason)
+			=> await Instance.RequestAvatarChange(AvatarChangedAction.Failed, reason);
+
 
 		public void OnUpdate() {
 			var local = _entities.GetEntities<RelayLocalPlayer>().FirstOrDefault();
@@ -126,8 +225,7 @@ namespace api.nox.relay {
 							.SetEngines(new[] { EngineExtensions.CurrentEngine.GetEngineName() })
 							.SetPlatforms(new[] { PlatformExtensions.CurrentPlatform.GetPlatformName() })
 							.SetVersions(new[] { ev.WorldIdentifier.GetVersion() })
-							.SetLimit(1),
-						ev.WorldIdentifier.GetServerAddress()
+							.SetLimit(1)
 					)).GetAssets()
 					.FirstOrDefault();
 
@@ -163,7 +261,7 @@ namespace api.nox.relay {
 			}
 
 			progress?.Invoke(0.65f, "Loading world");
-			var scene = await Main.WorldAPI.LoadSceneFromCache(
+			var scene = await Main.WorldAPI.LoadFromCache(
 				hash,
 				progress: f => progress?.Invoke(0.65f + f * 0.25f, "Loading world...")
 			);

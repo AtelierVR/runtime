@@ -25,19 +25,34 @@ namespace api.nox.relay {
 		private         EventSubscription[] _events = Array.Empty<EventSubscription>();
 
 		internal static IEntityAPI EntityAPI
-			=> Instance.CoreAPI.ModAPI.GetMod("entity").GetMains().FirstOrDefault() as IEntityAPI;
+			=> Instance.CoreAPI.ModAPI
+				.GetMod("entity")
+				.GetEntry<IEntityAPI>();
 
 		internal static IUserAPI UserAPI
-			=> Instance.CoreAPI.ModAPI.GetMod("user").GetMains().FirstOrDefault() as IUserAPI;
+			=> Instance.CoreAPI.ModAPI
+				.GetMod("user")
+				.GetEntry<IUserAPI>();
 
 		internal static IWorldAPI WorldAPI
-			=> Instance.CoreAPI.ModAPI.GetMod("world").GetMains().FirstOrDefault() as IWorldAPI;
+			=> Instance.CoreAPI.ModAPI
+				.GetMod("world")
+				.GetEntry<IWorldAPI>();
+
+		internal static IAvatarAPI AvatarAPI
+			=> Instance.CoreAPI.ModAPI
+				.GetMod("avatar")
+				.GetEntry<IAvatarAPI>();
 
 		internal static ISessionAPI SessionAPI
-			=> Instance.CoreAPI.ModAPI.GetMod("session").GetMains().FirstOrDefault() as ISessionAPI;
+			=> Instance.CoreAPI.ModAPI
+				.GetMod("session")
+				.GetEntry<ISessionAPI>();
 
 		internal static IControllerAPI ControllerAPI
-			=> Instance.CoreAPI.ModAPI.GetMod("controller").GetMains().FirstOrDefault() as IControllerAPI;
+			=> Instance.CoreAPI.ModAPI
+				.GetMod("controller")
+				.GetEntry<IControllerAPI>();
 
 		public static UnityEvent<Connection> OnConnectionAdded   = new();
 		public static UnityEvent<Connection> OnConnectionRemoved = new();

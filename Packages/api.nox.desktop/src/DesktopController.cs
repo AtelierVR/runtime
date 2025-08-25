@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.Avatars.Camera;
 using Nox.Avatars.Parameters;
+using Nox.CCK.Mods.Events;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
@@ -12,6 +14,7 @@ using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
 using Nox.Controllers;
 using Nox.Players;
+using Nox.Users;
 using UnityEngine.EventSystems;
 using NoxTransform = Nox.CCK.Utils.Transform;
 
@@ -101,10 +104,75 @@ namespace api.nox.desktop {
 			if (desktop._attachedRuntimeAvatar == null)
 				desktop.SetupAvatar().Forget();
 
+			desktop._onUserUpdate = Client.CoreAPI.EventAPI.Subscribe("user_update", desktop.OnUserUpdate);
+
 			EventSystem.current     = desktop.eventSystem;
 			desktop.gameObject.name = $"[{desktop.GetType().Name}_{desktop.GetInstanceID()}]";
 			DontDestroyOnLoad(desktop);
 			return true;
+		}
+
+		private void OnUserUpdate(EventData context) {
+			if (!context.TryGet(0, out ICurrentUser user) || user == null || !IsCurrent()) return;
+			LoadAvatarFromUser(user);
+		}
+
+		private void LoadAvatarFromUser(ICurrentUser user)
+			=> LoadAvatar(Client.AvatarAPI.Make(user?.GetAvatarId())).Forget();
+
+		private async UniTask LoadAvatar(IAvatarIdentifier identifier) {
+			Logger.LogDebug($"Loading avatar for identifier {identifier?.ToString() ?? "null"}");
+			if (identifier == null || !identifier.IsValid()) return;
+			if (identifier.Equals(_avatarIdentifier)) return;
+
+			_avatarLoadingCts?.Cancel();
+			_avatarLoadingCts = new CancellationTokenSource();
+
+			var asset = (await Client.AvatarAPI.SearchAssets(
+						identifier.ToString(),
+						Client.AvatarAPI.MakeAssetSearchRequest()
+							.SetEngines(new[] { EngineExtensions.CurrentEngine.GetEngineName() })
+							.SetPlatforms(new[] { PlatformExtensions.CurrentPlatform.GetPlatformName() })
+							.SetLimit(1)
+							.SetVersions(new[] { identifier.GetVersion() })
+					)
+					.AttachExternalCancellation(_avatarLoadingCts.Token)).GetAssets()
+				.FirstOrDefault();
+			if (_avatarLoadingCts.IsCancellationRequested) return;
+
+			if (asset == null) {
+				Logger.LogWarning($"Avatar asset not found for identifier {identifier.ToString()}");
+				SetAvatar(await Client.AvatarAPI.LoadError(), identifier);
+				return;
+			}
+
+			if (!Client.AvatarAPI.HasInCache(asset.GetHash())) {
+				var download = Client.AvatarAPI.DownloadToCache(
+					asset.GetUrl(),
+					hash: asset.GetHash(),
+					progress: p => Logger.LogDebug($"Downloading avatar {identifier.ToString()}: {p:P1}"),
+					token: _avatarLoadingCts.Token
+				);
+				download.Start();
+				await download.Wait();
+				if (_avatarLoadingCts.IsCancellationRequested) return;
+			}
+
+			var avatar = await Client.AvatarAPI.LoadFromCache(
+				asset.GetHash(),
+				progress: p => Logger.LogDebug($"Loading avatar {identifier.ToString()}: {p:P1}"),
+				token: _avatarLoadingCts.Token
+			);
+			if (_avatarLoadingCts.IsCancellationRequested) return;
+
+			if (avatar == null) {
+				Logger.LogError($"Failed to load avatar from cache for identifier {identifier.ToString()}");
+				SetAvatar(await Client.AvatarAPI.LoadError(), identifier);
+				return;
+			}
+
+			Logger.LogDebug($"Avatar loaded: {identifier.ToString()}");
+			SetAvatar(avatar, identifier);
 		}
 
 
@@ -120,8 +188,14 @@ namespace api.nox.desktop {
 		public EventSystem   eventSystem;
 
 		public void Dispose() {
-			Destroy(gameObject);
+			Client.CoreAPI.EventAPI.Unsubscribe(_onUserUpdate);
+			_onUserUpdate = null;
+			_avatarLoadingCts?.Cancel();
+			_avatarLoadingCts?.Dispose();
+			_avatarLoadingCts = null;
 			_attachedRuntimeAvatar?.Dispose();
+			_attachedRuntimeAvatar = null;
+			Destroy(gameObject);
 		}
 
 		private async UniTask SetupAvatar() {
@@ -132,13 +206,15 @@ namespace api.nox.desktop {
 
 			Logger.LogDebug("Creating avatar");
 
-			var avatar = await Client.AvatarAPI.MakeLoading();
+			var avatar = await Client.AvatarAPI.LoadLoading();
 			if (avatar == null) {
 				Logger.LogError("Failed to create avatar for DesktopController");
 				return;
 			}
 
 			SetAvatar(avatar);
+
+			LoadAvatarFromUser(Client.UserAPI.GetCurrent());
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -152,7 +228,7 @@ namespace api.nox.desktop {
 		public void Restore(IController controller) {
 			foreach (var ability in controller.GetAbilities())
 				SetAbilities(ability.Key, ability.Value);
-			SetAvatar(controller.GetAvatar());
+			SetAvatar(controller.GetAvatar(), controller.GetAvatarIdentifier());
 			controller.SetAvatar(null);
 		}
 
@@ -221,8 +297,11 @@ namespace api.nox.desktop {
 				{ PlayerRig.Head.ToIndex(), player.headCamera.transform }
 			};
 
-		private IPlayer _attachedPlayer;
-		private IRuntimeAvatar _attachedRuntimeAvatar;
+		private IPlayer                 _attachedPlayer;
+		private IRuntimeAvatar          _attachedRuntimeAvatar;
+		private IAvatarIdentifier       _avatarIdentifier;
+		private CancellationTokenSource _avatarLoadingCts;
+		private EventSubscription       _onUserUpdate;
 
 		[NoxPublic(NoxAccess.Method)]
 		public void SetPlayer(IPlayer p) {
@@ -235,15 +314,33 @@ namespace api.nox.desktop {
 		public IRuntimeAvatar GetAvatar()
 			=> _attachedRuntimeAvatar;
 
-		public void SetAvatar(IRuntimeAvatar runtimeAvatar) {
+		public IAvatarIdentifier GetAvatarIdentifier()
+			=> _avatarIdentifier;
+
+		public void SetAvatar(IRuntimeAvatar runtimeAvatar, IAvatarIdentifier identifier = null) {
+			Logger.LogDebug("Setting avatar for DesktopController");
+			if (runtimeAvatar == _attachedRuntimeAvatar) return;
+
+			var old = _attachedRuntimeAvatar;
 			_attachedRuntimeAvatar = runtimeAvatar;
-			if (_attachedRuntimeAvatar == null) return;
-			var root = _attachedRuntimeAvatar.GetDescriptor()?.GetRoot();
-			if (!root) {
-				Logger.LogError("Avatar descriptor root is null, cannot set avatar.");
+
+			if (_attachedRuntimeAvatar == null) {
+				Logger.LogWarning("Setting avatar to null, removing current avatar.");
+				_attachedRuntimeAvatar = old;
 				return;
 			}
 
+			var root = _attachedRuntimeAvatar.GetDescriptor().GetRoot();
+			if (!root) {
+				Logger.LogError("Avatar descriptor root is null, cannot set avatar.");
+				_attachedRuntimeAvatar = old;
+				return;
+			}
+
+			_avatarIdentifier = identifier;
+			old?.Dispose();
+
+			Logger.LogDebug($"Attaching avatar to {runtimeAvatar.GetDescriptor()}", runtimeAvatar.GetDescriptor().GetRoot());
 			root.transform.SetParent(transform, false);
 			root.transform.localPosition = Vector3.zero;
 			root.transform.localRotation = Quaternion.identity;
@@ -251,7 +348,11 @@ namespace api.nox.desktop {
 			var parameterModule = _attachedRuntimeAvatar?.GetDescriptor()
 				?.GetModules<IParameterModule>()
 				.FirstOrDefault();
-			if (parameterModule == null) return;
+			if (parameterModule == null) {
+				Logger.LogWarning("Avatar has no parameter module, cannot configure tracking parameters.");
+				return;
+			}
+
 			var parameters = parameterModule.GetParameters();
 			foreach (var param in parameters) {
 				var n = param.GetName();
@@ -322,31 +423,35 @@ namespace api.nox.desktop {
 						break;
 					}
 					case "VelocityX" or "velocity_x": {
-						var velocity = player.body?.linearVelocity ?? Vector3.zero;
-						var value    = (float)param.Get();
-						if (Mathf.Approximately(value, velocity.x)) continue;
-						param.Set(velocity.x);
+						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
+						var localVelocity = transform.InverseTransformDirection(worldVelocity);
+						var value = (float)param.Get();
+						if (Mathf.Approximately(value, localVelocity.x)) continue;
+						param.Set(localVelocity.x);
 						break;
 					}
 					case "VelocityY" or "velocity_y": {
-						var velocity = player.body?.linearVelocity ?? Vector3.zero;
-						var value    = (float)param.Get();
-						if (Mathf.Approximately(value, velocity.y)) continue;
-						param.Set(velocity.y);
+						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
+						var localVelocity = transform.InverseTransformDirection(worldVelocity);
+						var value = (float)param.Get();
+						if (Mathf.Approximately(value, localVelocity.y)) continue;
+						param.Set(localVelocity.y);
 						break;
 					}
 					case "VelocityZ" or "velocity_z": {
-						var velocity = player.body?.linearVelocity ?? Vector3.zero;
-						var value    = (float)param.Get();
-						if (Mathf.Approximately(value, velocity.z)) continue;
-						param.Set(velocity.z);
+						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
+						var localVelocity = transform.InverseTransformDirection(worldVelocity);
+						var value = (float)param.Get();
+						if (Mathf.Approximately(value, localVelocity.z)) continue;
+						param.Set(localVelocity.z);
 						break;
 					}
 					case "Velocity" or "velocity": {
-						var velocity = player.body?.linearVelocity ?? Vector3.zero;
-						var value    = (Vector3)param.Get();
-						if (value == velocity) continue;
-						param.Set(velocity);
+						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
+						var localVelocity = transform.InverseTransformDirection(worldVelocity);
+						var value = (Vector3)param.Get();
+						if (value == localVelocity) continue;
+						param.Set(localVelocity);
 						break;
 					}
 					case "tracking/head/rotation": {

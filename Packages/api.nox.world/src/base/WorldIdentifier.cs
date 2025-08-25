@@ -20,7 +20,7 @@ namespace api.nox.world {
 			=> _id != InvalidId;
 
 		public bool IsLocal()
-			=> Server == LocalServer;
+			=> Server == LocalServer || string.IsNullOrEmpty(Server);
 
 		public uint GetId()
 			=> IsValid() ? _id : InvalidId;

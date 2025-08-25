@@ -45,10 +45,18 @@ namespace api.nox.avatar {
 				return null;
 			}
 
+			foreach (var asset in avatar.Bundle.GetAllAssetNames())
+				Logger.LogDebug($"Bundle Asset: {asset}");
+
+
 			// Load the avatar from the bundle (prefab)
-			var prefab = (from a1 in avatar.Bundle.GetAllAssetNames()
-				where a1.EndsWith(".prefab", StringComparison.OrdinalIgnoreCase)
-				select avatar.Bundle.LoadAsset<GameObject>(a1)).FirstOrDefault();
+			var obj = await avatar.Bundle.LoadAssetAsync<GameObject>("Avatar")
+				.ToUniTask(
+					progress: new Progress<float>(p => progress?.Invoke(.25f + p * .5f)),
+					cancellationToken: token
+				);
+
+			var prefab = obj as GameObject;
 
 			if (!prefab) {
 				Logger.LogError($"No prefab found in avatar bundle: {path}");
@@ -56,11 +64,14 @@ namespace api.nox.avatar {
 				return null;
 			}
 
-			prefab.SetActive(false);
+			prefab.SetActive(true);
 
 			avatar.Root = (await Object.InstantiateAsync(prefab)
-					.ToUniTask(progress: new Progress<float>(p => progress?.Invoke(.25f + p * .75f)), cancellationToken: token))
-				.FirstOrDefault();
+					.ToUniTask(
+						progress: new Progress<float>(p => progress?.Invoke(.75f + p * .25f)),
+						cancellationToken: token
+					)
+				).FirstOrDefault();
 
 			if (!avatar.Root) {
 				Logger.LogError($"Failed to instantiate avatar prefab from bundle: {path}");
@@ -90,8 +101,6 @@ namespace api.nox.avatar {
 			}
 
 			progress?.Invoke(1);
-
-			avatar.Root.SetActive(false);
 
 			return avatar;
 		}

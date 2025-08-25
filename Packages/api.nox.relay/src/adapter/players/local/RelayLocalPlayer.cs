@@ -1,7 +1,7 @@
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Nox.Avatars;
 using Nox.CCK.Utils;
-using Nox.Entities;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
@@ -53,5 +53,9 @@ namespace api.nox.relay {
 
 		public override bool HasPhysical()
 			=> _physicalComponent;
+
+		public override void SetAvatar(IRuntimeAvatar avatar, IAvatarIdentifier identifier = null) {
+			Logger.Log($"Setting avatar for local player {GetDisplay()} ({GetId()}) to {(identifier != null ? identifier.ToString() : "null")}");
+		}
 	}
 }

@@ -48,6 +48,6 @@ namespace api.nox.avatar.network {
 			=> server;
 
 		public IAvatarIdentifier GetIdentifier()
-			=> new AvatarIdentifier(server, id);
+			=> new AvatarIdentifier(id, null, server);
 	}
 }

@@ -79,3 +79,17 @@ MonoBehaviour:
       value: "Platform \"{0}\" is not supported on this system."
     - key: avatar.builder.use_supported
       value: "Use Supported Platform"
+    - key: avatar.search.data.title
+      value: "{0}"
+    - key: avatar.search.title
+      value: "Avatars"
+    - key: avatar.search.placeholder
+      value: "Search avatars..."
+    - key: avatar.search.description
+      value: "Search for avatars by title, or description."
+    - key: avatar.search.worker.title
+      value: "{0}"
+    - key: avatar.loader.search_label
+      value: "Search"
+    - key: avatar.loader.search_placeholder
+      value: "Filter avatars..."

@@ -170,21 +170,17 @@ namespace api.nox.server.network {
 			=> _autoReconnect = autoReconnect;
 
 		// Méthodes pour gérer les headers WebSocket
-		public void SetHeader(string name, string value) {
-			_headers[name] = value;
-		}
+		public void SetHeader(string name, string value)
+			=> _headers[name] = value;
 
-		public void RemoveHeader(string name) {
-			_headers.Remove(name);
-		}
+		public void RemoveHeader(string name)
+			=> _headers.Remove(name);
 
-		public void ClearHeaders() {
-			_headers.Clear();
-		}
+		public void ClearHeaders()
+			=> _headers.Clear();
 
-		public Dictionary<string, string> GetHeaders() {
-			return new Dictionary<string, string>(_headers);
-		}
+		public Dictionary<string, string> GetHeaders()
+			=> new(_headers);
 
 		private void StartListening() {
 			if (_isListening) return;
@@ -254,7 +250,7 @@ namespace api.nox.server.network {
 					OnError.Invoke(ex);
 				}
 
-				if (retryCount >= _maxRetries) continue;
+				if (retryCount >= _maxRetries && _maxRetries != 0) continue;
 				var delay = Math.Min(30, retryCount * 5); // Délai progressif jusqu'à 30 secondes
 				await UniTask.Delay(TimeSpan.FromSeconds(delay));
 			}

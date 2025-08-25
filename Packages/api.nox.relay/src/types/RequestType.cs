@@ -12,6 +12,7 @@ namespace api.nox.relay.types {
 		Traveling           = 0x09,
 		Transform           = 0x0C,
 		Teleport            = 0x0D,
+		AvatarChanged       = 0x0E,
 		None                = 0xFF
 	}
 }
