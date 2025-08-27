@@ -73,6 +73,9 @@ namespace api.nox.avatar.editor {
 			_root.ClearBindings();
 			_root.Clear();
 
+			// S'abonner aux événements de l'AvatarEditorHelper
+			AvatarEditorHelper.OnAvatarSelected.AddListener(OnAvatarSelected);
+
 			var child = Editor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("builder.uxml").CloneTree();
 			child.style.flexGrow = 1;
 			_root.Add(child);
@@ -94,16 +97,18 @@ namespace api.nox.avatar.editor {
 			if (versionLabel != null)
 				versionLabel.text = "v" + Editor.CoreAPI.ModMetadata.GetVersion();
 
-			var descriptors = Descriptors;
-			var descriptor  = descriptors.Length > 0 ? descriptors[0] : null;
+			// Utiliser l'avatar courant de l'AvatarEditorHelper
+			var descriptor = AvatarEditorHelper.CurrentAvatar;
 
 			if (_platformField != null) {
 				_platformField.Init(descriptor?.target ?? Platform.None);
 				_platformField.RegisterValueChangedCallback(OnPlatformChanged);
 			}
 
-			if (_descriptorField != null)
+			if (_descriptorField != null) {
 				_descriptorField.value = descriptor;
+				_descriptorField.RegisterValueChangedCallback(OnDescriptorFieldChanged);
+			}
 
 			// Initialize output folder field
 			if (_outputFolderField != null) {
@@ -119,9 +124,25 @@ namespace api.nox.avatar.editor {
 			return _root;
 		}
 
+		private void OnAvatarSelected(AvatarDescriptor newAvatar) {
+			// Mettre à jour l'UI quand un nouvel avatar est sélectionné
+			if (_descriptorField != null)
+				_descriptorField.SetValueWithoutNotify(newAvatar);
+			
+			if (_platformField != null)
+				_platformField.SetValueWithoutNotify(newAvatar?.target ?? Platform.None);
+		}
+
+		private void OnDescriptorFieldChanged(ChangeEvent<Object> e) {
+			// Quand l'utilisateur change l'avatar dans le champ, mettre à jour l'AvatarEditorHelper
+			if (e.newValue is AvatarDescriptor newDescriptor) {
+				AvatarEditorHelper.CurrentAvatar = newDescriptor;
+			}
+		}
+
 		private async UniTask OnBuildButtonClickedAsync() {
-			var descriptors = Descriptors;
-			var descriptor  = descriptors.Length > 0 ? descriptors[0] : null;
+			// Utiliser l'avatar courant de l'AvatarEditorHelper
+			var descriptor = AvatarEditorHelper.CurrentAvatar;
 
 			if (!descriptor) {
 				ShowErrorDialog("avatar.builder.error_no_descriptor");
@@ -285,8 +306,8 @@ namespace api.nox.avatar.editor {
 			=> ShowErrorDialog(messageKey, false, args);
 
 		private void OnPlatformChanged(ChangeEvent<Enum> e) {
-			var descriptors    = Descriptors;
-			var mainDescriptor = descriptors.Length > 0 ? descriptors[0] : null;
+			// Utiliser l'avatar courant de l'AvatarEditorHelper
+			var mainDescriptor = AvatarEditorHelper.CurrentAvatar;
 			if (!mainDescriptor) return;
 
 			var plat = (Platform)e.newValue;
@@ -437,10 +458,19 @@ namespace api.nox.avatar.editor {
 			return path;
 		}
 
-		internal static AvatarDescriptor[] Descriptors
-			=> ComponentExtension.GetComponentsInChildren<AvatarDescriptor>();
+		internal static AvatarDescriptor[] Descriptors {
+			get {
+				if (AvatarEditorHelper.CurrentAvatar != null) {
+					return new[] { AvatarEditorHelper.CurrentAvatar };
+				}
+				return ComponentExtension.GetComponentsInChildren<AvatarDescriptor>();
+			}
+		}
 
 		public void Dispose() {
+			// Se désabonner des événements
+			AvatarEditorHelper.OnAvatarSelected.RemoveListener(OnAvatarSelected);
+			
 			// Clear cached references
 			_descriptorField   = null;
 			_platformField     = null;
@@ -460,8 +490,8 @@ namespace api.nox.avatar.editor {
 		internal void Update() {
 			if (!Editor.HasOnePanelOpened() || _root.childCount == 0) return;
 
-			var descriptors = Descriptors;
-			var descriptor  = descriptors.Length > 0 ? descriptors[0] : null;
+			// Utiliser l'avatar courant de l'AvatarEditorHelper
+			var descriptor = AvatarEditorHelper.CurrentAvatar;
 			var user        = Main.Instance.UserAPI.GetCurrent();
 
 			// Check if a scene has a avatar descriptor
@@ -473,7 +503,7 @@ namespace api.nox.avatar.editor {
 			else RemoveNotificationIfExists(NotificationIds["NoAvatarDescriptor"]);
 
 			if (descriptor) {
-				CheckMultipleDescriptors(descriptors);
+				CheckMultipleDescriptors(Descriptors);
 				CheckUserLogin(user);
 			}
 

@@ -18,7 +18,8 @@
         "Nox.Network",
         "Nox.Tables",
         "Nox.Search",
-        "Nox.UI"
+        "Nox.UI",
+        "Nox.Avatars.Parameters"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

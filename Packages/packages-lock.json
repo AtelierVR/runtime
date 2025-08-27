@@ -7,7 +7,7 @@
       "dependencies": {}
     },
     "api.nox.avatar.modules": {
-      "version": "file:api.nox.avatar.eyelook",
+      "version": "file:api.nox.avatar.modules",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
@@ -122,6 +122,12 @@
     },
     "api.nox.settings": {
       "version": "file:api.nox.settings",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "api.nox.statistics": {
+      "version": "file:api.nox.statistics",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

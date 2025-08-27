@@ -4,7 +4,10 @@ using Nox.CCK.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Nox.Avatars;
 using Nox.UI;
+using Nox.Users;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
@@ -18,6 +21,14 @@ namespace api.nox.xr {
 		internal static IUiAPI UiAPI
 			=> CoreAPI.ModAPI.GetMod("ui")
 				?.GetEntry<IUiAPI>();
+		
+		internal static IAvatarAPI AvatarAPI
+			=> CoreAPI.ModAPI.GetMod("avatar")
+				?.GetEntry<IAvatarAPI>();
+		
+		internal static IUserAPI UserAPI
+			=> CoreAPI.ModAPI.GetMod("user")
+				?.GetEntry<IUserAPI>();
 		
 		#if UNITY_EDITOR
 		private static bool NoVRFlag {
@@ -205,5 +216,39 @@ namespace api.nox.xr {
 		[NoxPublic(NoxAccess.Method)]
 		public bool HasHand()
 			=> HasHandRight() && HasHandLeft();
+
+		[NoxPublic(NoxAccess.Method)]
+		public bool HasTracker(XRNode node) {
+			var devices = new List<InputDevice>();
+			InputDevices.GetDevicesAtXRNode(node, devices);
+			return devices.Count > 0;
+		}
+
+		[NoxPublic(NoxAccess.Method)]
+		public List<InputDevice> GetAllTrackers() {
+			var devices = new List<InputDevice>();
+			InputDevices.GetDevices(devices);
+			return devices.Where(d => d.characteristics.HasFlag(InputDeviceCharacteristics.TrackedDevice) 
+				&& !d.characteristics.HasFlag(InputDeviceCharacteristics.HeadMounted)
+				&& !d.characteristics.HasFlag(InputDeviceCharacteristics.Left)
+				&& !d.characteristics.HasFlag(InputDeviceCharacteristics.Right)).ToList();
+		}
+
+		[NoxPublic(NoxAccess.Method)]
+		public bool GetTrackerPose(XRNode node, out Vector3 position, out Quaternion rotation) {
+			position = Vector3.zero;
+			rotation = Quaternion.identity;
+			
+			var devices = new List<InputDevice>();
+			InputDevices.GetDevicesAtXRNode(node, devices);
+			
+			if (devices.Count == 0) return false;
+			
+			var device = devices[0];
+			bool hasPosition = device.TryGetFeatureValue(CommonUsages.devicePosition, out position);
+			bool hasRotation = device.TryGetFeatureValue(CommonUsages.deviceRotation, out rotation);
+			
+			return hasPosition && hasRotation;
+		}
 	}
 }

@@ -1,0 +1,15 @@
+{
+    "name": "Nox.Avatars.StateMachines",
+    "rootNamespace": "",
+    "references": [
+    "GUID:4792fe99b5fd471e8575849004f76a10"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -44,7 +44,7 @@ namespace api.nox.avatar {
 
 			var avatar = await AssetBundleRuntimeRuntimeAvatar.Load(path, progress, token);
 			if (avatar == null) {
-				Logger.LogError($"Failed to load world from path: {path}");
+				Logger.LogError($"Failed to load avatar from path: {path}");
 				return null;
 			}
 
@@ -59,7 +59,7 @@ namespace api.nox.avatar {
 			var avatar = await AssetRuntimeRuntimeAvatar.Load(ns, path, progress, token);
 
 			if (avatar == null) {
-				Logger.LogError($"Failed to load world from assets: {ns}:{path}");
+				Logger.LogError($"Failed to load avatar from assets: {ns}:{path}");
 				return null;
 			}
 

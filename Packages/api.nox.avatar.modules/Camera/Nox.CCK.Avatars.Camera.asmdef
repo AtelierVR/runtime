@@ -1,0 +1,19 @@
+{
+  "name": "Nox.CCK.Avatars.Camera",
+  "rootNamespace": "",
+  "references": [
+    "Nox.CCK",
+    "Nox.Avatars",
+    "Nox.Avatars.Camera",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

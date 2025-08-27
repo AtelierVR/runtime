@@ -52,6 +52,7 @@
     <Compile Include="Packages\api.nox.avatar\src\editor\Notification.cs" />
     <Compile Include="Packages\api.nox.avatar\src\network\search\AssetSearchRequest.cs" />
     <Compile Include="Packages\api.nox.avatar\src\search\Search.cs" />
+    <Compile Include="Packages\api.nox.avatar\src\editor\PlayModeAvatar.cs" />
     <Compile Include="Packages\api.nox.avatar\src\AvatarLoader.cs" />
     <Compile Include="Packages\api.nox.avatar\src\AvatarCache.cs" />
     <Compile Include="Packages\api.nox.avatar\src\network\create\CreateAvatarRequest.cs" />
@@ -74,7 +75,6 @@
     <Compile Include="Packages\api.nox.avatar\src\base\AvatarAsset.cs" />
     <Compile Include="Packages\api.nox.avatar\src\search\SearchData.cs" />
     <Compile Include="Packages\api.nox.avatar\src\cache\Caching.cs" />
-    <Compile Include="Packages\api.nox.avatar\src\editor\AvatarParametersEditor.cs" />
     <Compile Include="Packages\api.nox.avatar\src\base\Avatar.cs" />
     <Compile Include="Packages\api.nox.avatar\src\network\update\UpdateAvatarRequest.cs" />
     <Compile Include="Packages\api.nox.avatar\src\search\SearchWorker.cs" />
@@ -83,6 +83,7 @@
     <Compile Include="Packages\api.nox.avatar\src\runtime\BaseRuntimeRuntimeAvatar.cs" />
     <Compile Include="Packages\api.nox.avatar\src\runtime\AssetRuntimeRuntimeAvatar.cs" />
     <Compile Include="Packages\api.nox.avatar\src\editor\AvatarDescriptorEditor.cs" />
+    <Compile Include="Packages\api.nox.avatar\src\editor\AvatarEditorHelper.cs" />
     <None Include="Packages\api.nox.avatar\assets\api.nox.avatar\publisher.uxml" />
     <None Include="Packages\api.nox.avatar\Resources\AvatarDescriptor.uxml" />
     <None Include="Packages\api.nox.avatar\assets\api.nox.avatar\builder.uxml" />
@@ -964,6 +965,10 @@
     <ProjectReference Include="Nox.UI.csproj">
       <Project>{0f333b38-227b-3a61-c9e4-410cadf64208}</Project>
       <Name>Nox.UI</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Avatars.Parameters.csproj">
+      <Project>{cb480378-d253-f3ad-3348-902862002b9e}</Project>
+      <Name>Nox.Avatars.Parameters</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,0 +1,21 @@
+{
+    "name": "Nox.CCK.Avatars.StateMachines",
+    "rootNamespace": "",
+    "references": [
+        "Nox.Avatars",
+        "Nox.CCK",
+        "Nox.Avatars.Parameters",
+        "Nox.Avatars.Rigging",
+        "Nox.CCK.Avatars.Parameters",
+        "Nox.Avatars.StateMachines"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

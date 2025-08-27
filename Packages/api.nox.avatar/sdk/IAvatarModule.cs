@@ -1,5 +1,7 @@
+using Cysharp.Threading.Tasks;
+
 namespace Nox.Avatars {
 	public interface IAvatarModule {
-		public bool OnPlay(IRuntimeAvatar runtimeAvatar);
+		public UniTask<bool> Setup(IRuntimeAvatar runtimeAvatar);
 	}
 }

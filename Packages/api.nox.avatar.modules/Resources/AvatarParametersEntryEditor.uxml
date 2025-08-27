@@ -1,0 +1,10 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Packages/api.nox.mod_loader/Resources/nox.cck.style.uss?fileID=7433441132597879392&amp;guid=ee18ab989d89a1a479332bd224e51c94&amp;type=3#nox.cck.style" />
+    <ui:VisualElement class="flex flex-row">
+        <ui:TextField placeholder-text="filler text" name="name" class="large" style="min-width: 128px;" />
+        <ui:EnumField value="Center" type="Nox.Avatars.Parameters.ParameterType, Nox.Avatars.Parameters" name="type" class="large" style="min-width: 128px;" />
+        <ui:VisualElement name="default-value" style="flex-grow: 1;" />
+        <ui:Toggle name="savable" class="large" />
+        <ui:Toggle name="synced" class="large" />
+    </ui:VisualElement>
+</ui:UXML>

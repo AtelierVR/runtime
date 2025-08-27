@@ -909,6 +909,22 @@
       <Project>{4639ae99-1e29-e1b6-9533-34a9b7a24feb}</Project>
       <Name>Nox.Avatars</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.Avatars.Parameters.csproj">
+      <Project>{cb480378-d253-f3ad-3348-902862002b9e}</Project>
+      <Name>Nox.Avatars.Parameters</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Users.csproj">
+      <Project>{c237149e-58f6-bdd3-6473-3bc76e6fd9f4}</Project>
+      <Name>Nox.Users</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Avatars.Camera.csproj">
+      <Project>{8bb0f9df-ba5e-a99b-e3a5-f5fbf938ba01}</Project>
+      <Name>Nox.Avatars.Camera</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Avatars.Rigging.csproj">
+      <Project>{0970b8b2-a75c-7ef9-703c-c1e421066a92}</Project>
+      <Name>Nox.Avatars.Rigging</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

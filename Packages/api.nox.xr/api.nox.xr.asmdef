@@ -13,7 +13,11 @@
         "Nox.Entities",
         "Nox.UI",
         "Unity.XR.Interaction.Toolkit",
-        "Nox.Avatars"
+        "Nox.Avatars",
+        "Nox.Avatars.Parameters",
+        "Nox.Users",
+        "Nox.Avatars.Camera",
+        "Nox.Avatars.Rigging"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

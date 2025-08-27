@@ -8,7 +8,7 @@ using Nox.CCK.Utils;
 
 namespace api.nox.avatar {
 	public class AvatarSetup {
-		public static async UniTask<bool> Prepare(IRuntimeAvatar avatar, Action<float> progress, CancellationToken token) {
+		public static async UniTask<bool> Prepare(IRuntimeAvatar avatar, Action<float> progress = null, CancellationToken token = default) {
 			if (avatar == null) {
 				Logger.LogError("Avatar descriptor is null.");
 				return false;
@@ -82,7 +82,7 @@ namespace api.nox.avatar {
 				if (token.IsCancellationRequested)
 					return false;
 
-				if (!moduleArray[i].OnPlay(avatar)) {
+				if (!await moduleArray[i].Setup(avatar)) {
 					Logger.LogError($"Module {moduleArray[i].GetType().Name} failed to initialize.");
 					return false;
 				}

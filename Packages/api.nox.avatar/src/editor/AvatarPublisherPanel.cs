@@ -44,6 +44,9 @@ namespace api.nox.avatar.editor {
 			_root.ClearBindings();
 			_root.Clear();
 
+			// S'abonner aux événements de l'AvatarEditorHelper
+			AvatarEditorHelper.OnAvatarSelected.AddListener(OnAvatarSelected);
+
 			// Reset cached UI elements
 			_progressContainer = null;
 			_progressBar       = null;
@@ -68,7 +71,8 @@ namespace api.nox.avatar.editor {
 			if (assignedIcon != null)
 				assignedIcon.image = Editor.CoreAPI.AssetAPI.GetAsset<Texture2D>("ui", "icons/warning.png");
 
-			var descriptor    = AvatarBuilderPanel.Descriptors.Length > 0 ? AvatarBuilderPanel.Descriptors[0] : null;
+			// Utiliser l'avatar courant de l'AvatarEditorHelper
+			var descriptor    = AvatarEditorHelper.CurrentAvatar;
 			var platformField = _root.Q<EnumField>("platform-field");
 			if (platformField != null)
 				platformField.Init(descriptor?.target ?? Platform.None);
@@ -82,8 +86,10 @@ namespace api.nox.avatar.editor {
 				};
 
 			var descriptorField = _root.Q<ObjectField>("descriptor-field");
-			if (descriptorField != null)
+			if (descriptorField != null) {
 				descriptorField.value = descriptor;
+				descriptorField.RegisterValueChangedCallback(OnDescriptorFieldChanged);
+			}
 			platformField?.RegisterValueChangedCallback(
 				e => {
 					var mainDescriptor = AvatarBuilderPanel.Descriptors.Length > 0 ? AvatarBuilderPanel.Descriptors[0] : null;
@@ -306,7 +312,9 @@ namespace api.nox.avatar.editor {
 				OnLogged().Forget();
 			if (_lastDisplay != DisplayFlags.NotLogged && user == null)
 				SetDisplay(DisplayFlags.NotLogged);
-			var descriptor = AvatarBuilderPanel.Descriptors.Length > 0 ? AvatarBuilderPanel.Descriptors[0] : null;
+			
+			// Utiliser l'avatar courant de l'AvatarEditorHelper
+			var descriptor = AvatarEditorHelper.CurrentAvatar;
 
 			var descriptorField = _root.Q<ObjectField>("descriptor-field");
 			if (descriptorField != null)
@@ -322,7 +330,8 @@ namespace api.nox.avatar.editor {
 		}
 
 		private async UniTask OnLogged() {
-			var descriptor = AvatarBuilderPanel.Descriptors.Length > 0 ? AvatarBuilderPanel.Descriptors[0] : null;
+			// Utiliser l'avatar courant de l'AvatarEditorHelper
+			var descriptor = AvatarEditorHelper.CurrentAvatar;
 			if (!descriptor) {
 				SetDisplay(DisplayFlags.NoDescriptor);
 				return;
@@ -335,7 +344,8 @@ namespace api.nox.avatar.editor {
 		}
 
 		private async UniTask<INoxObject> AttachAvatar(string server, uint id, bool create = false) {
-			var descriptor = AvatarBuilderPanel.Descriptors.Length > 0 ? AvatarBuilderPanel.Descriptors[0] : null;
+			// Utiliser l'avatar courant de l'AvatarEditorHelper
+			var descriptor = AvatarEditorHelper.CurrentAvatar;
 			if (!descriptor) {
 				SetDisplay(DisplayFlags.NoDescriptor);
 				_avatar = null;
@@ -745,7 +755,8 @@ namespace api.nox.avatar.editor {
 		}
 
 		private async UniTask OnPublishAsync() {
-			var descriptor = AvatarBuilderPanel.Descriptors.Length > 0 ? AvatarBuilderPanel.Descriptors[0] : null;
+			// Utiliser l'avatar courant de l'AvatarEditorHelper
+			var descriptor = AvatarEditorHelper.CurrentAvatar;
 			if (!descriptor || descriptor == null) {
 				ShowErrorDialog("No descriptor found.", useDirectMessage: true);
 				Logger.LogError("No descriptor found.");
@@ -1033,6 +1044,35 @@ namespace api.nox.avatar.editor {
 				Logger.LogError($"Failed to cleanup temporary directory {tempPath}: {ex.Message}");
 			}
 		}
+
+		// Méthodes pour gérer les événements de l'AvatarEditorHelper
+		private void OnAvatarSelected(AvatarDescriptor newAvatar) {
+			// Mettre à jour l'UI quand un nouvel avatar est sélectionné
+			var descriptorField = _root.Q<ObjectField>("descriptor-field");
+			if (descriptorField != null)
+				descriptorField.SetValueWithoutNotify(newAvatar);
+			
+			var platformField = _root.Q<EnumField>("platform-field");
+			if (platformField != null)
+				platformField.SetValueWithoutNotify(newAvatar?.target ?? Platform.None);
+
+			// Recharger les informations de l'avatar si nécessaire
+			OnLogged().Forget();
+		}
+
+		private void OnDescriptorFieldChanged(ChangeEvent<UnityEngine.Object> e) {
+			// Quand l'utilisateur change l'avatar dans le champ, mettre à jour l'AvatarEditorHelper
+			if (e.newValue is AvatarDescriptor newDescriptor) {
+				AvatarEditorHelper.CurrentAvatar = newDescriptor;
+			}
+		}
+
+		// Ajouter une méthode Dispose pour se désabonner des événements
+		public void Dispose() {
+			// Se désabonner des événements
+			AvatarEditorHelper.OnAvatarSelected.RemoveListener(OnAvatarSelected);
+		}
 	}
 }
 #endif
+

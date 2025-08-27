@@ -82,6 +82,7 @@ crashlytics-build.properties
 /[Aa]ssets/[Tt]emp/
 /[Aa]ssets/[Aa]uto[Hh]and/
 /[Aa]ssets/[Pp]olygonmaker/
+/[Tt]hry/*
 
 [Gg]it[Ii]gnore_*
 

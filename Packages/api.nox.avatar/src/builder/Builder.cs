@@ -14,6 +14,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Logger = Nox.CCK.Utils.Logger;
+using Object = UnityEngine.Object;
 using Random = System.Random;
 using Transform = UnityEngine.Transform;
 
@@ -359,20 +360,40 @@ namespace api.nox.avatar.builder {
 					break;
 				}
 
-			if (compilationFailed) {
+			if (compilationFailed)
 				return new BuildResult {
 					Type    = BuildResultType.Failed,
 					Message = "Script compilation failed. Original scenes have been restored from backup."
 				};
-			}
 
-			if (!EditorSceneManager.SaveOpenScenes()) {
-				Logger.LogError("Failed to save scenes after compilation. Restoring backups...");
+
+			var removeScripts = mainObject
+				.GetComponentsInChildren<IRemoveOnBuild>(true)
+				.ToList();
+
+			foreach (var script in removeScripts)
+				try {
+					Logger.Log($"Removing script: {script.GetType().Name}");
+					script.OnRemoveOnBuild();
+					if (script is Object scriptObject) // In case the script removed itself
+						Object.DestroyImmediate(scriptObject, true);
+				} catch (Exception e) {
+					Logger.LogError($"Failed to remove script {script.GetType().Name}: {e.Message}");
+					compilationFailed = true;
+					break;
+				}
+
+			if (compilationFailed)
+				return new BuildResult {
+					Type    = BuildResultType.Failed,
+					Message = "Script removal failed. Original scenes have been restored from backup."
+				};
+
+			if (!EditorSceneManager.SaveOpenScenes())
 				return new BuildResult {
 					Type    = BuildResultType.Failed,
 					Message = "Failed to save open scenes after compilation. Original scenes have been restored from backup."
 				};
-			}
 
 			// Force asset database refresh to ensure files are written to disk
 			AssetDatabase.SaveAssets();
@@ -618,9 +639,7 @@ namespace api.nox.avatar.builder {
 				Directory.CreateDirectory(outputPath);
 
 				// Build options optimized for avatars with maximum compression
-				var options = BuildAssetBundleOptions.None | 
-				             BuildAssetBundleOptions.ForceRebuildAssetBundle |
-				             BuildAssetBundleOptions.StrictMode;
+				var options = BuildAssetBundleOptions.None | BuildAssetBundleOptions.ForceRebuildAssetBundle | BuildAssetBundleOptions.StrictMode;
 
 				// Report progress: Building AssetBundle (this is the long operation)
 				data.ProgressCallback?.Invoke(0.88f, "Building avatar AssetBundle (this may take a while)...");
@@ -944,4 +963,3 @@ namespace api.nox.avatar.builder {
 	}
 }
 #endif
-

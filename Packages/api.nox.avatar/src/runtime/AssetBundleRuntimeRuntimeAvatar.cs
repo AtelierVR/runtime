@@ -64,7 +64,7 @@ namespace api.nox.avatar {
 				return null;
 			}
 
-			prefab.SetActive(true);
+			prefab.SetActive(false);
 
 			avatar.Root = (await Object.InstantiateAsync(prefab)
 					.ToUniTask(
@@ -78,6 +78,7 @@ namespace api.nox.avatar {
 				await avatar.Dispose();
 				return null;
 			}
+
 
 			avatar.Root.name  = $"[{avatar.GetType().Name}_{avatar.GetId()}]";
 			avatar.Descriptor = avatar.Root.GetComponent<IAvatarDescriptor>();
@@ -101,6 +102,7 @@ namespace api.nox.avatar {
 			}
 
 			progress?.Invoke(1);
+			avatar.Root.SetActive(true);
 
 			return avatar;
 		}

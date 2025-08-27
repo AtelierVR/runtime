@@ -46,25 +46,27 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.1f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.avatar.eyelook\Editor\CameraAvatarModuleEditor.cs" />
-    <Compile Include="Packages\api.nox.avatar.eyelook\Editor\ControllersMergerAvatarModuleEditor.cs" />
-    <Compile Include="Packages\api.nox.avatar.eyelook\src\Main.cs" />
-    <Compile Include="Packages\api.nox.avatar.eyelook\Editor\EyeLookAvatarModuleEditor.cs" />
-    <Compile Include="Packages\api.nox.avatar.eyelook\AnimationControllers\ControllersMergerAvatarModule.cs" />
-    <Compile Include="Packages\api.nox.avatar.eyelook\Editor\AvatarParametersEditor.cs" />
-    <Compile Include="Packages\api.nox.avatar.eyelook\Editor\AvatarParameterModuleEditor.cs" />
-    <None Include="Packages\api.nox.avatar.eyelook\Resources\EyeLookAvatarModule.Item.uxml" />
-    <None Include="Packages\api.nox.avatar.eyelook\nox.mod.json" />
-    <None Include="Packages\api.nox.avatar.eyelook\Resources\EyeLookAvatarModule.uxml" />
-    <None Include="Packages\api.nox.avatar.eyelook\Resources\EyeLookTransform.uxml" />
-    <None Include="Packages\api.nox.avatar.eyelook\package.json" />
-    <None Include="Packages\api.nox.avatar.eyelook\Resources\AvatarParametersEntryEditor.uxml" />
-    <None Include="Packages\api.nox.avatar.eyelook\Resources\EyeLookAvatarModule.ListItem.uxml" />
-    <None Include="Packages\api.nox.avatar.eyelook\Resources\EyeLookMuscle.uxml" />
-    <None Include="Packages\api.nox.avatar.eyelook\Resources\AvatarParametersEditor.uxml" />
-    <None Include="Packages\api.nox.avatar.eyelook\Resources\ControllersMergerAvatarModule.uxml" />
-    <None Include="Packages\api.nox.avatar.eyelook\Resources\EyeLookBlendShape.uxml" />
-    <None Include="Packages\api.nox.avatar.eyelook\api.nox.avatar.modules.asmdef" />
+    <Compile Include="Packages\api.nox.avatar.modules\Editor\SetParameterEditor.cs" />
+    <Compile Include="Packages\api.nox.avatar.modules\Editor\CameraAvatarModuleEditor.cs" />
+    <Compile Include="Packages\api.nox.avatar.modules\Editor\ControllersMergerAvatarModuleEditor.cs" />
+    <Compile Include="Packages\api.nox.avatar.modules\Editor\PlayableAvatarModuleEditor.cs" />
+    <Compile Include="Packages\api.nox.avatar.modules\src\Main.cs" />
+    <Compile Include="Packages\api.nox.avatar.modules\Editor\EyeLookAvatarModuleEditor.cs" />
+    <Compile Include="Packages\api.nox.avatar.modules\AnimationControllers\ControllersMergerAvatarModule.cs" />
+    <Compile Include="Packages\api.nox.avatar.modules\Editor\AvatarParametersEditor.cs" />
+    <Compile Include="Packages\api.nox.avatar.modules\Editor\AvatarParameterModuleEditor.cs" />
+    <None Include="Packages\api.nox.avatar.modules\Resources\EyeLookAvatarModule.Item.uxml" />
+    <None Include="Packages\api.nox.avatar.modules\nox.mod.json" />
+    <None Include="Packages\api.nox.avatar.modules\Resources\EyeLookAvatarModule.uxml" />
+    <None Include="Packages\api.nox.avatar.modules\Resources\EyeLookTransform.uxml" />
+    <None Include="Packages\api.nox.avatar.modules\package.json" />
+    <None Include="Packages\api.nox.avatar.modules\Resources\AvatarParametersEntryEditor.uxml" />
+    <None Include="Packages\api.nox.avatar.modules\Resources\EyeLookAvatarModule.ListItem.uxml" />
+    <None Include="Packages\api.nox.avatar.modules\Resources\EyeLookMuscle.uxml" />
+    <None Include="Packages\api.nox.avatar.modules\Resources\AvatarParametersEditor.uxml" />
+    <None Include="Packages\api.nox.avatar.modules\Resources\ControllersMergerAvatarModule.uxml" />
+    <None Include="Packages\api.nox.avatar.modules\Resources\EyeLookBlendShape.uxml" />
+    <None Include="Packages\api.nox.avatar.modules\api.nox.avatar.modules.asmdef" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.1f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -869,6 +871,9 @@
     <Reference Include="System.Xml.XPath.XDocument">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.1f1\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\Facades\System.Xml.XPath.XDocument.dll</HintPath>
     </Reference>
+    <Reference Include="UniTask">
+      <HintPath>U:\Projets\nox\runtime\Library\ScriptAssemblies\UniTask.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>U:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
     </Reference>
@@ -908,6 +913,14 @@
     <ProjectReference Include="Nox.CCK.Avatars.Playable.csproj">
       <Project>{081d2e66-4bed-13c3-4d74-00ac065f1d55}</Project>
       <Name>Nox.CCK.Avatars.Playable</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Avatars.StateMachines.csproj">
+      <Project>{b79220a4-2afb-25e0-cd75-81dbcab4e8d1}</Project>
+      <Name>Nox.CCK.Avatars.StateMachines</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Avatars.StateMachines.csproj">
+      <Project>{6cd663db-20cf-2183-e5d6-ac2d1f2c53e0}</Project>
+      <Name>Nox.Avatars.StateMachines</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

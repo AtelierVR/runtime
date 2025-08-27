@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using api.nox.xr;
 using UnityEditor;
+using UnityEngine;
 
 namespace Mods.api.nox.xr.editor {
 	[CustomEditor(typeof(XRController))]
@@ -24,6 +25,10 @@ namespace Mods.api.nox.xr.editor {
 						ability.Value.ToString()
 					);
 			}
+			
+			EditorGUILayout.Space();
+			
+			EditorGUILayout.ObjectField(controller.GetAvatar()?.GetDescriptor().GetRoot(), typeof(GameObject), true);
 		}
 		
 		public override bool RequiresConstantRepaint() {

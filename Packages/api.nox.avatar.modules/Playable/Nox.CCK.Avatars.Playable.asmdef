@@ -1,0 +1,20 @@
+{
+    "name": "Nox.CCK.Avatars.Playable",
+    "rootNamespace": "",
+    "references": [
+        "Nox.CCK",
+        "Nox.Avatars",
+        "Nox.CCK.Avatars.StateMachines",
+        "Nox.Avatars.StateMachines",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

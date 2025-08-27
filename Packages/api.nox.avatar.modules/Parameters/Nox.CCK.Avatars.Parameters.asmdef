@@ -1,0 +1,19 @@
+{
+    "name": "Nox.CCK.Avatars.Parameters",
+    "rootNamespace": "",
+    "references": [
+        "Nox.Avatars",
+        "Nox.Avatars.Parameters",
+        "Nox.CCK",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
