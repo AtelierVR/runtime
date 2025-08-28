@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using api.nox.offline;
 using api.nox.relay.connection;
 using api.nox.relay.Instances;
@@ -67,6 +69,8 @@ namespace api.nox.relay {
 		public void OnAvatarChanged(AvatarChangedEvent ev)
 			=> OnAvatarChangedAsync(ev).Forget();
 
+		private readonly Dictionary<int, CancellationTokenSource> _cancelAvatarTokens = new();
+
 		private async UniTask<bool> OnAvatarChangedAsync(AvatarChangedEvent ev, bool autoResponse = true, Action<float, string> progress = null) {
 			Logger.LogDebug($"OnAvatarChanged: {ev}");
 
@@ -82,6 +86,22 @@ namespace api.nox.relay {
 				return false;
 			}
 
+			if (player.IsLocal()) {
+				progress?.Invoke(0f, "Cannot change avatar of local player");
+				Logger.LogError($"Cannot change avatar of local player {player}");
+				if (autoResponse)
+					await OnAvatarChangedFailed(ev, "Cannot change avatar of local player");
+				return false;
+			}
+
+			if (_cancelAvatarTokens.TryGetValue(ev.InternalId, out var oldToken)) {
+				oldToken.Cancel();
+				oldToken.Dispose();
+			}
+
+			var tokenSource = new CancellationTokenSource();
+			_cancelAvatarTokens[ev.InternalId] = tokenSource;
+
 			if (ev.UseUrl) {
 				progress?.Invoke(0.1f, "Using provided URL for avatar");
 				hash = ev.Hash;
@@ -89,20 +109,30 @@ namespace api.nox.relay {
 			} else if (ev.UseMaster) {
 				progress?.Invoke(0.1f, "Searching for master asset for avatar");
 				var asset = (await Main.AvatarAPI.SearchAssets(
-						ev.AvatarIdentifier.GetId().ToString(),
-						Main.AvatarAPI.MakeAssetSearchRequest()
-							.SetEngines(new[] { EngineExtensions.CurrentEngine.GetEngineName() })
-							.SetPlatforms(new[] { PlatformExtensions.CurrentPlatform.GetPlatformName() })
-							.SetVersions(new[] { ev.AvatarIdentifier.GetVersion() })
-							.SetLimit(1)
-					)).GetAssets()
+							ev.AvatarIdentifier.GetId().ToString(),
+							Main.AvatarAPI.MakeAssetSearchRequest()
+								.SetEngines(new[] { EngineExtensions.CurrentEngine.GetEngineName() })
+								.SetPlatforms(new[] { PlatformExtensions.CurrentPlatform.GetPlatformName() })
+								.SetVersions(new[] { ev.AvatarIdentifier.GetVersion() })
+								.SetLimit(1)
+						)
+						.AttachExternalCancellation(tokenSource.Token))
+					?.GetAssets()
 					.FirstOrDefault();
+
+				if (tokenSource.IsCancellationRequested) {
+					progress?.Invoke(0f, "Avatar change cancelled");
+					tokenSource.Dispose();
+					_cancelAvatarTokens.Remove(ev.InternalId);
+					return false;
+				}
 
 				if (asset == null) {
 					progress?.Invoke(0.2f, $"No master asset found for avatar {ev.AvatarIdentifier.ToString()}");
 					Logger.LogError($"No asset found for avatar {ev.AvatarIdentifier.ToString()}");
 					if (autoResponse)
 						await OnAvatarChangedFailed(ev, "No master asset found");
+					_cancelAvatarTokens.Remove(ev.InternalId);
 					return false;
 				}
 
@@ -113,6 +143,7 @@ namespace api.nox.relay {
 				Logger.LogError($"{ev} does not contain valid URL or master asset information");
 				if (autoResponse)
 					await OnAvatarChangedFailed(ev, "Invalid avatar change information");
+				_cancelAvatarTokens.Remove(ev.InternalId);
 				return false;
 			}
 
@@ -121,23 +152,40 @@ namespace api.nox.relay {
 				var download = Main.AvatarAPI.DownloadToCache(
 					url,
 					hash: hash,
-					progress: f => progress?.Invoke(0.2f + f * 0.45f, "Downloading avatar...")
+					progress: f => progress?.Invoke(0.2f + f * 0.45f, "Downloading avatar..."),
+					token: tokenSource.Token
 				);
 				download.Start();
 				await download.Wait();
 			}
 
+			if (tokenSource.IsCancellationRequested) {
+				progress?.Invoke(0f, "Avatar change cancelled");
+				tokenSource.Dispose();
+				_cancelAvatarTokens.Remove(ev.InternalId);
+				return false;
+			}
+
 			progress?.Invoke(0.65f, "Loading avatar");
 			var avatar = await Main.AvatarAPI.LoadFromCache(
 				hash,
-				progress: f => progress?.Invoke(0.65f + f * 0.25f, "Loading avatar...")
+				progress: f => progress?.Invoke(0.65f + f * 0.25f, "Loading avatar..."),
+				token: tokenSource.Token
 			);
+
+			if (tokenSource.IsCancellationRequested) {
+				progress?.Invoke(0f, "Avatar change cancelled");
+				tokenSource.Dispose();
+				_cancelAvatarTokens.Remove(ev.InternalId);
+				return false;
+			}
 
 			if (avatar == null) {
 				progress?.Invoke(0.9f, "Failed to load avatar");
 				Logger.LogError($"Failed to load avatar {ev.AvatarIdentifier.ToString()}");
 				if (autoResponse)
 					await OnAvatarChangedFailed(ev, "Failed to load avatar");
+				_cancelAvatarTokens.Remove(ev.InternalId);
 				return false;
 			}
 
@@ -146,6 +194,7 @@ namespace api.nox.relay {
 				Logger.LogError($"Failed to find player with id {ev.InternalId} to change avatar");
 				if (autoResponse)
 					await OnAvatarChangedFailed(ev, "Player not found");
+				_cancelAvatarTokens.Remove(ev.InternalId);
 				return false;
 			}
 
@@ -153,6 +202,7 @@ namespace api.nox.relay {
 			progress?.Invoke(1f, "Avatar loaded successfully");
 			if (autoResponse)
 				await OnAvatarChangedSuccess(ev);
+			_cancelAvatarTokens.Remove(ev.InternalId);
 			return true;
 		}
 
