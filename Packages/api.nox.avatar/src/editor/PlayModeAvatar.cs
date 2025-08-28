@@ -13,6 +13,7 @@ namespace api.nox.avatar.editor {
 		public string GetId()
 			=> GetInstanceID().ToString();
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		public IAvatarDescriptor GetDescriptor()
 			=> GetComponent<IAvatarDescriptor>();
 

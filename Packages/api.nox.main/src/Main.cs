@@ -12,11 +12,11 @@ using UnityEditor;
 namespace api.nox.main {
 	public class Main : MainModInitializer {
 		private LanguagePack _lang;
-		private ModCoreAPI   _coreAPI;
+		private IModCoreAPI   _coreAPI;
 
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
 
-		public void OnInitialize(ModCoreAPI api) {
+		public void OnInitialize(IModCoreAPI api) {
 			_coreAPI = api;
 
 			_lang = api.AssetAPI.GetAsset<LanguagePack>("pack.asset");

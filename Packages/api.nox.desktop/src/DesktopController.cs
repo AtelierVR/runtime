@@ -17,6 +17,7 @@ using Nox.Players;
 using Nox.Users;
 using UnityEngine.EventSystems;
 using NoxTransform = Nox.CCK.Utils.Transform;
+using Object = UnityEngine.Object;
 
 namespace api.nox.desktop {
 	public class DesktopController : MonoBehaviour, IController, INoxObject {
@@ -26,9 +27,15 @@ namespace api.nox.desktop {
 		private const string DefaultId = "desktop";
 
 		[Header("Zoom Settings")]
-		[SerializeField] private float zoomSpeed = 2f;
-		[SerializeField] private float minZoom = 2f;
-		[SerializeField] private float maxZoom = 60f;
+		[SerializeField]
+		private float zoomSpeed = 2f;
+
+		[SerializeField]
+		private float minZoom = 2f;
+
+		[SerializeField]
+		private float maxZoom = 60f;
+
 		private float currentZoom = 60f;
 
 		/// <summary>
@@ -367,14 +374,8 @@ namespace api.nox.desktop {
 						param.Set(true);
 						break;
 					case "tracking/left_hand/active":
-						param.Set(false);
-						break;
 					case "tracking/right_hand/active":
-						param.Set(false);
-						break;
 					case "tracking/left_foot/active":
-						param.Set(false);
-						break;
 					case "tracking/right_foot/active":
 						param.Set(false);
 						break;
@@ -394,21 +395,19 @@ namespace api.nox.desktop {
 
 		private void HandleZoomInput() {
 			// Vérifier si la souris n'est pas sur l'UI
-			if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+			if (EventSystem.current && EventSystem.current.IsPointerOverGameObject())
 				return;
 
 			// Gérer le zoom avec la molette de la souris
-			float scrollInput = Input.GetAxis("Mouse ScrollWheel");
-			if (Mathf.Abs(scrollInput) > 0.01f) {
-				// Calculer le nouveau zoom
-				currentZoom -= scrollInput * zoomSpeed * 10f;
-				currentZoom = Mathf.Clamp(currentZoom, minZoom, maxZoom);
-				
-				// Appliquer le zoom à la caméra
-				if (player?.headCamera != null) {
-					player.headCamera.fieldOfView = currentZoom;
-				}
-			}
+			var scrollInput = Input.GetAxis("Mouse ScrollWheel");
+			if (!(Mathf.Abs(scrollInput) > 0.01f)) return;
+			// Calculer le nouveau zoom
+			currentZoom -= scrollInput * zoomSpeed * 10f;
+			currentZoom =  Mathf.Clamp(currentZoom, minZoom, maxZoom);
+
+			// Appliquer le zoom à la caméra
+			if (player?.headCamera)
+				player.headCamera.fieldOfView = currentZoom;
 		}
 
 		private void LateUpdate()
@@ -426,9 +425,10 @@ namespace api.nox.desktop {
 
 		private void SynchronizeControllerFromPlayer() {
 			if (_attachedPlayer == null) return;
-			Logger.LogDebug("Synchronizing player from controller");
-			transform.position = _attachedPlayer.GetPosition();
-			transform.rotation = _attachedPlayer.GetRotation();
+			Logger.LogDebug($"Synchronizing controller from player at {_attachedPlayer.GetPosition()} with rotation {_attachedPlayer.GetRotation()}");
+			var part = GetParts().FirstOrDefault(p => p.Key == PlayerRig.Base.ToIndex());
+			player.SetPosition(_attachedPlayer.GetPosition());
+			part.Value.rotation = _attachedPlayer.GetRotation();
 		}
 
 		// ReSharper disable Unity.PerformanceAnalysis
@@ -451,7 +451,7 @@ namespace api.nox.desktop {
 					case "VelocityX" or "velocity_x": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
-						var value = (float)param.Get();
+						var value         = (float)param.Get();
 						if (Mathf.Approximately(value, localVelocity.x)) continue;
 						param.Set(localVelocity.x);
 						break;
@@ -459,7 +459,7 @@ namespace api.nox.desktop {
 					case "VelocityY" or "velocity_y": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
-						var value = (float)param.Get();
+						var value         = (float)param.Get();
 						if (Mathf.Approximately(value, localVelocity.y)) continue;
 						param.Set(localVelocity.y);
 						break;
@@ -467,7 +467,7 @@ namespace api.nox.desktop {
 					case "VelocityZ" or "velocity_z": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
-						var value = (float)param.Get();
+						var value         = (float)param.Get();
 						if (Mathf.Approximately(value, localVelocity.z)) continue;
 						param.Set(localVelocity.z);
 						break;
@@ -475,7 +475,7 @@ namespace api.nox.desktop {
 					case "Velocity" or "velocity": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
-						var value = (Vector3)param.Get();
+						var value         = (Vector3)param.Get();
 						if (value == localVelocity) continue;
 						param.Set(localVelocity);
 						break;
@@ -509,4 +509,3 @@ namespace api.nox.desktop {
 		}
 	}
 }
-

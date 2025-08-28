@@ -15,7 +15,7 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.network {
 	public class Main : MainModInitializer, INetworkAPI {
-		internal        ModCoreAPI   CoreAPI;
+		internal        IModCoreAPI   CoreAPI;
 		internal static Main         Instance;
 		private         LanguagePack _language;
 		internal        CacheManager Cache;
@@ -24,7 +24,7 @@ namespace api.nox.network {
 			=> Main.Instance.CoreAPI.ModAPI.GetMod("user")
 				?.GetEntry<IUserAPI>();
 
-		public void OnInitialize(ModCoreAPI api) {
+		public void OnInitialize(IModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
 			Cache    = new CacheManager();

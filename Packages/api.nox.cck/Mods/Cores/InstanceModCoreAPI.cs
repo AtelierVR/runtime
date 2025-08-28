@@ -1,6 +1,6 @@
 namespace Nox.CCK.Mods.Cores
 {
-    public interface InstanceModCoreAPI : ModCoreAPI
+    public interface InstanceModCoreAPI : IModCoreAPI
     {
 
     }

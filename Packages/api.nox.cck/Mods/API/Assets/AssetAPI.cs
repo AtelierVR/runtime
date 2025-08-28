@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 namespace Nox.CCK.Mods.Assets
 {
-    public interface AssetAPI
+    public interface IAssetAPI
     {
         public KeyValuePair<string, string>[] GetAssetNames(); // get all asset names
         public KeyValuePair<string, string>[] GetAssetNames(string ns); // get all asset names in namespace

@@ -80,8 +80,6 @@ namespace api.nox.session {
 				await nSession.OnSelect(oSession);
 
 			var local = nSession?.GetAdapter()?.GetLocalPlayer();
-			CoreAPI.EventAPI.Emit("session_current_player_changed", local);
-
 			ControllerAPI.GetCurrent()?.SetPlayer(local);
 
 			CoreAPI.EventAPI.Emit("session_current_changed", nSession, oSession);

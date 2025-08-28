@@ -157,5 +157,8 @@ namespace api.nox.relay {
 		public abstract bool HasPhysical();
 
 		public abstract void SetAvatar(IRuntimeAvatar avatar, IAvatarIdentifier identifier = null);
+		
+		public override string ToString()
+			=> $"{GetType().Name}[Id={GetId()}, Display={GetDisplay()}, Identifier={ToIdentifier()}, IsMaster={IsMaster()}]";
 	}
 }

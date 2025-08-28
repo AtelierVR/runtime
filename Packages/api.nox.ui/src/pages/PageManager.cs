@@ -29,7 +29,7 @@ namespace api.nox.ui {
 				? GetCoreAPI().AssetAPI.GetAsset<T>(path)
 				: GetCoreAPI().AssetAPI.GetAsset<T>(ns, path);
 
-		public static ModCoreAPI GetCoreAPI()
+		public static IModCoreAPI GetCoreAPI()
 			#if UNITY_EDITOR
 			=> Editor.CoreAPI;
 		#else

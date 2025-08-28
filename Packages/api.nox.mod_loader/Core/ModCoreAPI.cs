@@ -1,47 +1,59 @@
 using System.Collections.Generic;
-using Nox.CCK.Mods;
 using Nox.CCK.Mods.Assets;
 using Nox.CCK.Mods.Chats;
+using Nox.CCK.Mods.Configs;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
-using Nox.CCK.Mods.Groups;
 using Nox.CCK.Mods.Libs;
+using Nox.CCK.Mods.Loggers;
 using Nox.CCK.Mods.Metadata;
 using Nox.CCK.Mods.Mods;
 using Nox.CCK.Mods.Panels;
-using Nox.ModLoader.Cores.Panels;
 
-namespace Nox.ModLoader
-{
-    public class CoreAPI : ModCoreAPI, MainModCoreAPI, ServerModCoreAPI, ClientModCoreAPI, InstanceModCoreAPI, EditorModCoreAPI
-    {
-        internal Mods.Mod Mod;
-        internal PanelAPI LocalPanelAPI;
-        internal Cores.Mods.ModAPI LocalModAPI;
-        internal Cores.Events.EventAPI LocalEventAPI;
+namespace Nox.ModLoader {
+	public class CoreAPI : IModCoreAPI, MainModCoreAPI, ServerModCoreAPI, ClientModCoreAPI, InstanceModCoreAPI, EditorModCoreAPI {
+		internal readonly Mods.Mod                Mod;
+		internal readonly Cores.Panels.PanelAPI   LocalPanelAPI;
+		internal readonly Cores.Mods.ModAPI       LocalModAPI;
+		internal readonly Cores.Events.EventAPI   LocalEventAPI;
+		internal readonly Cores.Configs.ConfigAPI LocalConfigAPI;
+		internal readonly Cores.Loggers.LoggerAPI LocalLoggerAPI;
 
-        public CoreAPI(Mods.Mod mod)
-        {
-            Mod = mod;
-            LocalPanelAPI = new PanelAPI(mod);
-            LocalModAPI = new Cores.Mods.ModAPI(mod);
-            LocalEventAPI = new Cores.Events.EventAPI(mod, EventEntryFlags.Main);
-        }
+		public CoreAPI(Mods.Mod mod) {
+			Mod            = mod;
+			LocalPanelAPI  = new Cores.Panels.PanelAPI(mod);
+			LocalModAPI    = new Cores.Mods.ModAPI(mod);
+			LocalEventAPI  = new Cores.Events.EventAPI(mod, EventEntryFlags.Main);
+			LocalConfigAPI = new Cores.Configs.ConfigAPI(mod);
+			LocalLoggerAPI = new Cores.Loggers.LoggerAPI(mod);
+		}
 
-        public Dictionary<string, object> Data = new();
+		public ModMetadata ModMetadata
+			=> Mod.Metadata;
 
-        public ModMetadata ModMetadata => Mod.Metadata;
+		public IChatAPI ChatAPI
+			=> throw new System.NotImplementedException();
 
-        public ChatAPI ChatAPI => throw new System.NotImplementedException();
-
-        public GroupAPI GroupAPI => throw new System.NotImplementedException();
-
-        public EditorLibsAPI LibsAPI => throw new System.NotImplementedException();
+		public EditorLibsAPI LibsAPI
+			=> throw new System.NotImplementedException();
 
 
-        public AssetAPI AssetAPI => Mod.AssetAPI;
-        public EditorModPanelAPI PanelAPI => LocalPanelAPI;
-        public ModAPI ModAPI => LocalModAPI;
-        public EventAPI EventAPI => LocalEventAPI;
-    }
+		public IAssetAPI AssetAPI
+			=> Mod.AssetAPI;
+
+		public IConfigAPI ConfigAPI
+			=> LocalConfigAPI;
+
+		public ILoggerAPI LoggerAPI
+			=> LocalLoggerAPI;
+
+		public EditorModPanelAPI PanelAPI
+			=> LocalPanelAPI;
+
+		public IModAPI ModAPI
+			=> LocalModAPI;
+
+		public IEventAPI EventAPI
+			=> LocalEventAPI;
+	}
 }

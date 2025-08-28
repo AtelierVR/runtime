@@ -1,16 +1,11 @@
-using System;
-using System.Collections.Generic;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
-using Nox.CCK.Utils;
 using Nox.Terminals;
-using UnityEngine.Events;
-using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.terminal {
 	public class Main : MainModInitializer, ITerminalAPI {
-		internal static MainModCoreAPI CoreAPI;
-		internal        Main           Instance;
+		internal        MainModCoreAPI CoreAPI;
+		internal static Main           Instance;
 		private         CommandManager _manager;
 
 		public void OnInitializeMain(MainModCoreAPI api) {

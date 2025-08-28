@@ -231,22 +231,69 @@ namespace dev.nox.development {
 		}
 
 		private void SetupStatusIndicators(VisualElement item, object mod) {
-			var isLoaded = (bool)mod.GetType().GetMethod("IsLoaded").Invoke(mod, null);
-			var mainCount = ((Array)mod.GetType().GetMethod("GetMains").Invoke(mod, null)).Length;
-			var clientCount = ((Array)mod.GetType().GetMethod("GetClients").Invoke(mod, null)).Length;
-			var serverCount = ((Array)mod.GetType().GetMethod("GetServers").Invoke(mod, null)).Length;
-			var editorCount = ((Array)mod.GetType().GetMethod("GetEditors").Invoke(mod, null)).Length;
-			var customEntries = (Array)mod.GetType().GetMethod("GetCustomEntries").Invoke(mod, null);
+			if (item == null || mod == null) return;
 			
-			// Update status indicators visibility and colors
-			var statusLoaded = item.Q("status-loaded");
-			statusLoaded.style.backgroundColor = isLoaded ? new Color(0, 1, 0) : new Color(0.5f, 0.5f, 0.5f);
-			
-			item.Q("status-main").style.display = mainCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
-			item.Q("status-client").style.display = clientCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
-			item.Q("status-server").style.display = serverCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
-			item.Q("status-editor").style.display = editorCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
-			item.Q("status-custom").style.display = customEntries.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+			try {
+				var modType = mod.GetType();
+				
+				// Safe method invocation with null checks
+				var isLoadedMethod = modType.GetMethod("IsLoaded");
+				var isLoaded       = isLoadedMethod != null && (bool)isLoadedMethod.Invoke(mod, null);
+				
+				var getMainsMethod = modType.GetMethod("GetMains");
+				var mains = getMainsMethod?.Invoke(mod, null) as Array;
+				var mainCount = mains?.Length ?? 0;
+				
+				var getClientsMethod = modType.GetMethod("GetClients");
+				var clients = getClientsMethod?.Invoke(mod, null) as Array;
+				var clientCount = clients?.Length ?? 0;
+				
+				var getServersMethod = modType.GetMethod("GetServers");
+				var servers = getServersMethod?.Invoke(mod, null) as Array;
+				var serverCount = servers?.Length ?? 0;
+				
+				var getEditorsMethod = modType.GetMethod("GetEditors");
+				var editors = getEditorsMethod?.Invoke(mod, null) as Array;
+				var editorCount = editors?.Length ?? 0;
+				
+				var getCustomEntriesMethod = modType.GetMethod("GetCustomEntries");
+				var customEntries = getCustomEntriesMethod?.Invoke(mod, null) as Array;
+				var customCount = customEntries?.Length ?? 0;
+				
+				// Update status indicators visibility and colors with null checks
+				var statusLoaded = item.Q("status-loaded");
+				if (statusLoaded != null) {
+					statusLoaded.style.backgroundColor = isLoaded ? new Color(0, 1, 0) : new Color(0.5f, 0.5f, 0.5f);
+				}
+				
+				var statusMain = item.Q("status-main");
+				if (statusMain != null) {
+					statusMain.style.display = mainCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+				}
+				
+				var statusClient = item.Q("status-client");
+				if (statusClient != null) {
+					statusClient.style.display = clientCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+				}
+				
+				var statusServer = item.Q("status-server");
+				if (statusServer != null) {
+					statusServer.style.display = serverCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+				}
+				
+				var statusEditor = item.Q("status-editor");
+				if (statusEditor != null) {
+					statusEditor.style.display = editorCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+				}
+				
+				var statusCustom = item.Q("status-custom");
+				if (statusCustom != null) {
+					statusCustom.style.display = customCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+				}
+			}
+			catch (System.Exception ex) {
+				UnityEngine.Debug.LogError($"Error in SetupStatusIndicators: {ex.Message}");
+			}
 		}
 
 		private void SetupProvidesList(VisualElement item, dynamic meta) {
@@ -267,56 +314,100 @@ namespace dev.nox.development {
 		}
 
 		private void SetupEntryPoints(VisualElement item, object mod) {
-			SetupEntryPointSection(item, "main", mod.GetType().GetMethod("GetMains").Invoke(mod, null) as Array);
-			SetupEntryPointSection(item, "client", mod.GetType().GetMethod("GetClients").Invoke(mod, null) as Array);
-			SetupEntryPointSection(item, "server", mod.GetType().GetMethod("GetServers").Invoke(mod, null) as Array);
-			SetupEntryPointSection(item, "editor", mod.GetType().GetMethod("GetEditors").Invoke(mod, null) as Array);
+			if (item == null || mod == null) return;
 			
-			// Setup custom entries
-			var customEntries = mod.GetType().GetMethod("GetCustomEntries").Invoke(mod, null) as Array;
-			var customContainer = item.Q<VisualElement>("custom-entries");
-			var customList = item.Q<VisualElement>("custom-list");
-			
-			if (customEntries.Length == 0) {
-				customContainer.style.display = DisplayStyle.None;
-			} else {
-				customList.Clear();
-				foreach (var customEntry in customEntries) {
-					var customArray = mod.GetType().GetMethod("GetCustom").Invoke(mod, new object[] { customEntry }) as Array;
-					var isEnabled = (bool)mod.GetType().GetMethod("IsCustomEnabled").Invoke(mod, new object[] { customEntry });
+			try {
+				var modType = mod.GetType();
+				
+				// Safe method invocation for entry points
+				var getMainsMethod = modType.GetMethod("GetMains");
+				var mains = getMainsMethod?.Invoke(mod, null) as Array;
+				SetupEntryPointSection(item, "main", mains);
+				
+				var getClientsMethod = modType.GetMethod("GetClients");
+				var clients = getClientsMethod?.Invoke(mod, null) as Array;
+				SetupEntryPointSection(item, "client", clients);
+				
+				var getServersMethod = modType.GetMethod("GetServers");
+				var servers = getServersMethod?.Invoke(mod, null) as Array;
+				SetupEntryPointSection(item, "server", servers);
+				
+				var getEditorsMethod = modType.GetMethod("GetEditors");
+				var editors = getEditorsMethod?.Invoke(mod, null) as Array;
+				SetupEntryPointSection(item, "editor", editors);
+				
+				// Setup custom entries with null checks
+				var getCustomEntriesMethod = modType.GetMethod("GetCustomEntries");
+				var customEntries = getCustomEntriesMethod?.Invoke(mod, null) as Array;
+				var customContainer = item.Q<VisualElement>("custom-entries");
+				var customList = item.Q<VisualElement>("custom-list");
+				
+				if (customContainer == null || customList == null || customEntries == null || customEntries.Length == 0) {
+					if (customContainer != null) {
+						customContainer.style.display = DisplayStyle.None;
+					}
+				} else {
+					customContainer.style.display = DisplayStyle.Flex;
+					customList.Clear();
 					
-					var entryLabel = new Label($"{customEntry} ({(isEnabled ? "enabled" : "disabled")}):");
-					entryLabel.style.fontSize = 11;
-					entryLabel.style.color = isEnabled ? new Color(1, 1, 1) : new Color(0.6f, 0.6f, 0.6f);
-					customList.Add(entryLabel);
-					
-					foreach (var entry in customArray) {
-						var label = new Label($"  • {entry}");
-						label.style.fontSize = 10;
-						label.style.color = new Color(0.8f, 0.8f, 0.8f);
-						customList.Add(label);
+					foreach (var customEntry in customEntries) {
+						if (customEntry == null) continue;
+						
+						var getCustomMethod = modType.GetMethod("GetCustom");
+						var customArray = getCustomMethod?.Invoke(mod, new object[] { customEntry }) as Array;
+						
+						var isCustomEnabledMethod = modType.GetMethod("IsCustomEnabled");
+						var isEnabled = isCustomEnabledMethod != null && (bool)isCustomEnabledMethod.Invoke(mod, new object[] { customEntry });
+						
+						var entryLabel = new Label($"{customEntry} ({(isEnabled ? "enabled" : "disabled")}):");
+						entryLabel.style.fontSize = 11;
+						entryLabel.style.color = isEnabled ? new Color(1, 1, 1) : new Color(0.6f, 0.6f, 0.6f);
+						customList.Add(entryLabel);
+						
+						if (customArray != null) {
+							foreach (var entry in customArray) {
+								if (entry == null) continue;
+								var label = new Label($"  • {entry}");
+								label.style.fontSize = 10;
+								label.style.color = new Color(0.8f, 0.8f, 0.8f);
+								customList.Add(label);
+							}
+						}
 					}
 				}
+			}
+			catch (System.Exception ex) {
+				UnityEngine.Debug.LogError($"Error in SetupEntryPoints: {ex.Message}");
 			}
 		}
 
 		private void SetupEntryPointSection(VisualElement item, string sectionName, Array entries) {
-			var container = item.Q<VisualElement>($"{sectionName}-entries");
-			var list = item.Q<VisualElement>($"{sectionName}-list");
+			if (item == null || string.IsNullOrEmpty(sectionName)) return;
 			
-			if (entries.Length == 0) {
-				container.style.display = DisplayStyle.None;
-			} else {
-				list.Clear();
-				foreach (var entry in entries) {
-					var label = new Label($"• {entry}");
-					label.style.fontSize = 10;
-					label.style.color = new Color(0.8f, 0.8f, 0.8f);
-					list.Add(label);
+			try {
+				var container = item.Q<VisualElement>($"{sectionName}-entries");
+				var list = item.Q<VisualElement>($"{sectionName}-list");
+				
+				if (container == null || list == null || entries == null || entries.Length == 0) {
+					if (container != null) {
+						container.style.display = DisplayStyle.None;
+					}
+				} else {
+					container.style.display = DisplayStyle.Flex;
+					list.Clear();
+					foreach (var entry in entries) {
+						if (entry == null) continue;
+						var label = new Label($"• {entry}");
+						label.style.fontSize = 10;
+						label.style.color = new Color(0.8f, 0.8f, 0.8f);
+						list.Add(label);
+					}
 				}
+			}
+			catch (System.Exception ex) {
+				UnityEngine.Debug.LogError($"Error in SetupEntryPointSection for {sectionName}: {ex.Message}");
 			}
 		}
 	}
 }
 #endif
-

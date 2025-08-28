@@ -11,7 +11,7 @@ namespace api.nox.search {
 	public class Main : MainModInitializer, ISearchAPI {
 		internal readonly List<IHandler> Handlers = new();
 		internal static   Main           Instance;
-		internal          ModCoreAPI     CoreAPI;
+		internal          IModCoreAPI     CoreAPI;
 		private           LanguagePack   _languagePack;
 
 		internal static readonly UnityEvent<IHandler> OnHandlerAdded   = new();
@@ -66,7 +66,7 @@ namespace api.nox.search {
 			=> Handlers.Exists(b => b.GetId() == id);
 
 
-		public void OnInitialize(ModCoreAPI api) {
+		public void OnInitialize(IModCoreAPI api) {
 			CoreAPI       = api;
 			Instance      = this;
 			_languagePack = api.AssetAPI.GetAsset<LanguagePack>("lang.asset");

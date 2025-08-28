@@ -5,7 +5,7 @@ using Nox.CCK.Utils;
 
 
 namespace Nox.ModLoader.Cores.Events {
-	public class EventAPI : CCK.Mods.Events.EventAPI {
+	public class EventAPI : CCK.Mods.Events.IEventAPI {
 		private readonly ModLoader.Mods.Mod              _mod;
 		private readonly CCK.Mods.Events.EventEntryFlags _channel;
 		private readonly List<EventSubscription>         _subscriptions = new();

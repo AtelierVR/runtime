@@ -5,7 +5,8 @@
     "Nox.CCK",
     "UniTask",
     "Nox.Terminals",
-    "Nox.KeyBindings"
+    "Nox.KeyBindings",
+    "Nox.UI"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

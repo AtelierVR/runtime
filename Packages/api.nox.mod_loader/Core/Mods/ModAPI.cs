@@ -6,7 +6,7 @@ using IMod = Nox.ModLoader.Mods.Mod;
 
 namespace Nox.ModLoader.Cores.Mods
 {
-    public class ModAPI : CCK.Mods.Mods.ModAPI
+    public class ModAPI : CCK.Mods.Mods.IModAPI
     {
         internal IMod Mod;
 

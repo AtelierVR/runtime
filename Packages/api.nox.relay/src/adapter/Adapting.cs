@@ -228,6 +228,8 @@ namespace api.nox.relay {
 
 			adapter.Instance.OnTraveling.AddListener(adapter.OnTraveling);
 			adapter.Instance.OnEnter.AddListener(adapter.OnEnter);
+			
+			
 
 			if (setCurrent) {
 				adapter.SetState(false, "Setting instance as current", 0.9f);

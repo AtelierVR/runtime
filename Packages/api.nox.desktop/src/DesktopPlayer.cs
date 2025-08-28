@@ -382,6 +382,25 @@ namespace api.nox.desktop {
 			}
 		}
 
+		/// <summary>
+		/// Force la position du Transform et du Rigidbody, en ignorant temporairement le grounding
+		/// </summary>
+		/// <param name="position">Nouvelle position à appliquer</param>
+		/// <param name="disableGroundingDuration">Durée en secondes pour désactiver le grounding (par défaut 0.1s)</param>
+		public void SetPosition(Vector3 position, float disableGroundingDuration = 0.1f) {
+			// Désactiver temporairement le grounding pour éviter qu'il corrige la position
+			DisableGrounding(disableGroundingDuration);
+			
+			// Appliquer la nouvelle position au Transform et au Rigidbody
+			transform.position = position;
+			body.position = position;
+			
+			// Réinitialiser la vitesse verticale pour éviter des comportements étranges
+			if (body.useGravity && !isFlying) {
+				body.linearVelocity = new Vector3(body.linearVelocity.x, 0, body.linearVelocity.z);
+			}
+		}
+
 		public void DisableGrounding(float seconds) {
 			if (_disableGroundingRoutine != null)
 				StopCoroutine(_disableGroundingRoutine);

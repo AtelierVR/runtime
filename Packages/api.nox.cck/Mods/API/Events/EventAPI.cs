@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 namespace Nox.CCK.Mods.Events {
-	public interface EventAPI {
+	public interface IEventAPI {
 		public void Emit(string                     eventName, params object[] data);
 		public void Emit(EventContext               context);
 		public void Emit(Dictionary<string, object> context);

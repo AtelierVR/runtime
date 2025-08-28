@@ -2,6 +2,7 @@ using ULogger = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 using System.IO;
 using System;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -22,7 +23,7 @@ namespace Nox.CCK.Utils {
 		public static byte LogID         { get; private set; } = 0;
 		public static bool IsInitialized { get; private set; } = false;
 
-		private static readonly object fileLock = new();
+		private static readonly object FileLock = new();
 
 		#if UNITY_EDITOR
 		[MenuItem("Nox/Logger/Open Latest Log")]
@@ -87,13 +88,13 @@ namespace Nox.CCK.Utils {
 		#endif
 
 		public static void Init() {
-			lock (fileLock) {
+			lock (FileLock) {
 				if (!Directory.Exists(LogDir))
 					Directory.CreateDirectory(LogDir);
 
 				if (File.Exists(LogFile)) {
 					var    creationTime = File.GetCreationTime(LogFile);
-					int    i            = 0;
+					var    i            = 0;
 					string newFileName;
 					do {
 						newFileName = Path.Combine(LogDir, $"log_{creationTime:yyyy-MM-dd_HH-mm-ss}_{i++}.log");
@@ -116,61 +117,77 @@ namespace Nox.CCK.Utils {
 			}
 		}
 
-		public static void Log(object message)
-			=> OnLog(LogType.Log, message);
+		public static void Log(object message, string tag = null)
+			=> OnLog(LogType.Log, message, tag: tag);
 
-		public static void LogWarning(object message)
-			=> OnLog(LogType.Warning, message);
+		public static void LogWarning(object message, string tag = null)
+			=> OnLog(LogType.Warning, message, tag: tag);
 
-		public static void LogError(object message)
-			=> OnLog(LogType.Error, message);
+		public static void LogError(object message, string tag = null)
+			=> OnLog(LogType.Error, message, tag: tag);
 
-		public static void LogDebug(object message)
-			=> OnLog(LogType.Debug, message);
+		public static void LogDebug(object message, string tag = null)
+			=> OnLog(LogType.Debug, message, tag: tag);
 
-		public static void LogException(Exception exception)
-			=> OnLog(LogType.Exception, exception);
+		public static void LogException(Exception exception, string tag = null)
+			=> OnLog(LogType.Exception, exception, tag: tag);
 
-		public static void Log(object message, Object context)
-			=> OnLog(LogType.Log, message, context);
+		public static void Log(object message, Object context, string tag = null)
+			=> OnLog(LogType.Log, message, context, tag: tag);
 
-		public static void LogWarning(object message, Object context)
-			=> OnLog(LogType.Warning, message, context);
+		public static void LogWarning(object message, Object context, string tag = null)
+			=> OnLog(LogType.Warning, message, context, tag: tag);
 
-		public static void LogError(object message, Object context)
-			=> OnLog(LogType.Error, message, context);
+		public static void LogError(object message, Object context, string tag = null)
+			=> OnLog(LogType.Error, message, context, tag: tag);
 
-		public static void LogException(Exception exception, Object context)
-			=> OnLog(LogType.Exception, exception, context);
+		public static void LogException(Exception exception, Object context, string tag = null)
+			=> OnLog(LogType.Exception, exception, context, tag: tag);
 
-		public static void LogDebug(object message, Object context)
-			=> OnLog(LogType.Debug, message, context);
+		public static void LogDebug(object message, Object context, string tag = null)
+			=> OnLog(LogType.Debug, message, context, tag: tag);
+
+		public static readonly string[] IgnoreStack = {
+			"AsyncUniTask",
+			"AwaiterActions",
+			"CompletionSource",
+			"InvokableCall.Invoke",
+			"AsyncUniTask`1.Run",
+			"AsyncUniTask`2.Run",
+			"AsyncUniTaskMethodBuilder.Start",
+			"UnityEvent.Invoke",
+			"UnityWebRequestAsyncOperationConfiguredSource.MoveNext",
+			"UnityWebRequestAsyncOperationConfiguredSource.Continuation",
+			"AsyncOperation.InvokeCompletionEvent",
+			"AsyncOperation.InvokeCompletionEvent",
+			"PlayerLoopRunner.RunCore"
+		};
 
 		// ReSharper disable Unity.PerformanceAnalysis
-		public static void OnLog(LogType type, object message, Object context = null) {
+		public static void OnLog(LogType type, object message, Object context = null, string tag = null) {
 			if (type == LogType.Debug && !Config.Load().Get(new[] { "debug_logging" }, Application.isEditor))
 				return;
 
 			message ??= "<null>";
 
 			try {
-				lock (fileLock) {
+				lock (FileLock) {
 					if (!IsInitialized) {
 						Init();
 						IsInitialized = true;
 					} else if (!File.Exists(LogFile) || new FileInfo(LogFile).Length > MaxLogSize)
 						Init();
 
-					var    stackTrace = new System.Diagnostics.StackTrace(2, true);
-					var    frames     = stackTrace.GetFrames();
-					int    old        = 0;
-					string methodName = "<UnknownMethod>";
-					string className  = "<UnknownClass>";
+					var stackTrace = new System.Diagnostics.StackTrace(2, true);
+					var frames     = stackTrace.GetFrames();
+					var old        = 0;
+					var methodName = "<UnknownMethod>";
+					var className  = "<UnknownClass>";
 
-					if (frames != null && frames.Length > 0) {
+					if (frames is { Length: > 0 }) {
 						methodName = frames[old].GetMethod().Name;
 						className  = frames[old].GetMethod().DeclaringType?.Name ?? className;
-						while ((className.StartsWith("<") || className.Contains("AsyncUniTask") || className.Contains("AwaiterActions") || className.Contains("CompletionSource")) && frames.Length > ++old) {
+						while ((className.StartsWith("<") || IgnoreStack.Any(s => $"{className}.{methodName}".Contains(s))) && frames.Length > ++old) {
 							methodName = frames[old].GetMethod().Name;
 							className  = frames[old].GetMethod().DeclaringType?.Name ?? className;
 						}
@@ -178,20 +195,25 @@ namespace Nox.CCK.Utils {
 
 					File.AppendAllText(
 						LogFile,
-						$"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} {LogID:X2}] [{type}] [{className}.{methodName}] {message}{Environment.NewLine}"
+						$"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} {LogID:X2}] [{type}] [{(string.IsNullOrEmpty(tag) ? "" : tag + ":")}{className}.{methodName}] {message}{Environment.NewLine}"
 					);
 
-					if (type == LogType.Error || type == LogType.Exception)
+					if (type is LogType.Error or LogType.Exception)
 						File.AppendAllText(LogFile, stackTrace + "\n");
 				}
 
 				// Log côté Unity
 				switch (type) {
-					case LogType.Log:       ULogger.Log($"[<color=cyan>{type}</color>] {message}", context); break;
+					case LogType.Log:       ULogger.Log($"[<color=cyan>{type}</color>] {(string.IsNullOrEmpty(tag) ? "" : $"[{tag}]")} {message}", context); break;
 					case LogType.Warning:   ULogger.LogWarning($"[<color=yellow>{type}</color>] {message}", context); break;
 					case LogType.Error:     ULogger.LogError($"[<color=red>{type}</color>] {message}", context); break;
 					case LogType.Exception: ULogger.LogException(message as Exception, context); break;
 					case LogType.Debug:     ULogger.Log($"[<color=green>{type}</color>] {message}", context); break;
+					case LogType.Assert:    ULogger.LogAssertion($"[<color=magenta>{type}</color>] {message}", context); break;
+					#if UNITY_EDITOR
+					case LogType.Editor: ULogger.Log($"[<color=blue>{type}</color>] {message}", context); break;
+					#endif
+					default: ULogger.Log($"[<color=white>{type}</color>] {message}", context); break;
 				}
 			} catch (Exception e) {
 				ULogger.LogException(e);

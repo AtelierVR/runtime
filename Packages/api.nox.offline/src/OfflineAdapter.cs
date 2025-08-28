@@ -50,11 +50,13 @@ namespace api.nox.offline {
 		private void RemovePlayer(IPlayer player) {
 			if (player == null) return;
 			_entities.UnregisterEntity(player);
-			if (player.GetId() != _masterPlayerId) return;
-			var newMaster = _entities.GetEntities<OfflinePlayer>()
-				.OrderBy(p => p.CreationTime)
-				.FirstOrDefault();
-			TransferOfflineAuthority(newMaster);
+			if (player.GetId() == _masterPlayerId) {
+				var newMaster = _entities.GetEntities<OfflinePlayer>()
+					.OrderBy(p => p.CreationTime)
+					.FirstOrDefault();
+				TransferOfflineAuthority(newMaster);
+			}
+
 			_session.OnPlayerLeft(player);
 		}
 

@@ -3,7 +3,7 @@ using Nox.CCK.Mods.Metadata;
 
 namespace Nox.CCK.Mods.Mods
 {
-    public interface ModAPI
+    public interface IModAPI
     {
         public Mod GetMod(string id);
         public Mod[] GetMods();

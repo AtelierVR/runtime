@@ -14,7 +14,7 @@ namespace api.nox.table {
 		#region Variables
 
 		internal static Main       Instance;
-		internal        ModCoreAPI CoreAPI;
+		internal        IModCoreAPI CoreAPI;
 
 		internal static INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
@@ -32,7 +32,7 @@ namespace api.nox.table {
 
 		#region ModInitializer
 
-		public void OnInitialize(ModCoreAPI api) {
+		public void OnInitialize(IModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
 			Network  = new Network();

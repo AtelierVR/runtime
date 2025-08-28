@@ -6,8 +6,8 @@ namespace Nox.CCK.Mods.Initializers
 {
     public interface IModInitializer : INoxObject
     {
-        public void OnInitialize(ModCoreAPI api) { }
-        public UniTask OnInitializeAsync(ModCoreAPI api) => UniTask.CompletedTask;
+        public void OnInitialize(IModCoreAPI api) { }
+        public UniTask OnInitializeAsync(IModCoreAPI api) => UniTask.CompletedTask;
         public void OnPostInitialize() { }
         public UniTask OnPostInitializeAsync() => UniTask.CompletedTask;
         

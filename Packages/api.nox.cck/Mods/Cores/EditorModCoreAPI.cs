@@ -3,7 +3,7 @@ using Nox.CCK.Mods.Panels;
 
 namespace Nox.CCK.Mods.Cores
 {
-    public interface EditorModCoreAPI : ModCoreAPI
+    public interface EditorModCoreAPI : IModCoreAPI
     {
         public EditorModPanelAPI PanelAPI { get; }
         public EditorLibsAPI LibsAPI { get; }

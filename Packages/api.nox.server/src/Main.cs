@@ -119,8 +119,8 @@ namespace api.nox.server {
 
 			Socket = (user.ToIdentifier(), socket);
 
-			socket.OnMessageReceived.AddListener(Logger.LogDebug);
-			socket.OnError.AddListener(Logger.LogException);
+			socket.OnMessageReceived.AddListener(Instance.CoreAPI.LoggerAPI.LogDebug);
+			socket.OnError.AddListener(Instance.CoreAPI.LoggerAPI.LogException);
 			socket.OnConnected.AddListener(() => Logger.LogDebug("Connected to server"));
 			socket.OnDisconnected.AddListener(() => Logger.LogDebug("Disconnected from server"));
 

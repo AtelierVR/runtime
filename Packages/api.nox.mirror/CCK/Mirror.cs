@@ -181,12 +181,12 @@ namespace Nox.CCK.Mirror {
 			if (ReflectingLayers != 0) return;
 
 			int defaultLayer = LayerMask.NameToLayer("Default");
-
-			if (remoteLayer < 0 || localLayer < 0 || defaultLayer < 0) {
-				Debug.LogError("One or more required layers are missing.");
-			} else {
-				ReflectingLayers = (1 << remoteLayer) | (1 << localLayer) | (1 << defaultLayer);
-			}
+			//
+			// if (remoteLayer < 0 || localLayer < 0 || defaultLayer < 0) {
+			// 	Debug.LogError("One or more required layers are missing.");
+			// } else {
+			// 	ReflectingLayers = (1 << remoteLayer) | (1 << localLayer) | (1 << defaultLayer);
+			// }
 		}
 
 		private bool Initialize(Camera sourceCamera) {

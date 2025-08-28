@@ -368,6 +368,13 @@ namespace api.nox.relay {
 			var np = new T();
 			np.SetReference(player, this);
 			_entities.RegisterEntity(np);
+			_session.OnPlayerJoined(np);
+		}
+
+		public void RemovePlayer(IPlayer player) {
+			if (player == null) return;
+			_entities.UnregisterEntity(player);
+			_session.OnPlayerLeft(player);
 		}
 	}
 }

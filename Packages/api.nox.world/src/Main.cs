@@ -32,7 +32,7 @@ namespace api.nox.world {
 		#region Variables
 
 		internal static Main              Instance;
-		internal        ModCoreAPI        CoreAPI;
+		internal        IModCoreAPI        CoreAPI;
 		internal        SceneGroupManager GroupManager;
 		internal        Network           Network;
 		internal        Cache             Cache;
@@ -77,7 +77,7 @@ namespace api.nox.world {
 
 		#region ModInitializer
 
-		public void OnInitialize(ModCoreAPI api) {
+		public void OnInitialize(IModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
 			_lang    = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
