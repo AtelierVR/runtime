@@ -72,6 +72,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "api.nox.mirror": {
+      "version": "file:api.nox.mirror",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "api.nox.mod_loader": {
       "version": "file:api.nox.mod_loader",
       "depth": 0,

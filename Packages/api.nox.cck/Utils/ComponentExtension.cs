@@ -9,6 +9,12 @@ namespace Nox.CCK.Utils {
 		public static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component
 			=> gameObject.GetComponent<T>() ?? gameObject.AddComponent<T>();
 
+		public static bool IsActive(this GameObject gameObject)
+			=> gameObject && gameObject.activeInHierarchy;
+
+		public static bool IsActive(this Component component)
+			=> component && IsActive(component.gameObject);
+		
 		public static T GetComponentInParents<T>(this GameObject gameObject) {
 			if (gameObject.TryGetComponent<T>(out var component))
 				return component;

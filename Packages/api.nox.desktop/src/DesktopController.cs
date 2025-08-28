@@ -25,6 +25,12 @@ namespace api.nox.desktop {
 
 		private const string DefaultId = "desktop";
 
+		[Header("Zoom Settings")]
+		[SerializeField] private float zoomSpeed = 2f;
+		[SerializeField] private float minZoom = 2f;
+		[SerializeField] private float maxZoom = 60f;
+		private float currentZoom = 60f;
+
 		/// <summary>
 		/// Get the proxy mod API.
 		/// </summary>
@@ -381,8 +387,28 @@ namespace api.nox.desktop {
 			=> _attachedPlayer;
 
 		private void Update() {
+			HandleZoomInput();
 			SynchronizePlayerFromController();
 			SynchronizeParametersAvatar();
+		}
+
+		private void HandleZoomInput() {
+			// Vérifier si la souris n'est pas sur l'UI
+			if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+				return;
+
+			// Gérer le zoom avec la molette de la souris
+			float scrollInput = Input.GetAxis("Mouse ScrollWheel");
+			if (Mathf.Abs(scrollInput) > 0.01f) {
+				// Calculer le nouveau zoom
+				currentZoom -= scrollInput * zoomSpeed * 10f;
+				currentZoom = Mathf.Clamp(currentZoom, minZoom, maxZoom);
+				
+				// Appliquer le zoom à la caméra
+				if (player?.headCamera != null) {
+					player.headCamera.fieldOfView = currentZoom;
+				}
+			}
 		}
 
 		private void LateUpdate()
@@ -483,3 +509,4 @@ namespace api.nox.desktop {
 		}
 	}
 }
+
