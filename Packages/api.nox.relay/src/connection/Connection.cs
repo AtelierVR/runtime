@@ -40,8 +40,6 @@ namespace api.nox.relay.connection {
 			var type   = buffer.ReadEnum<ResponseType>();
 			if (length < 5 || length > buffer.length) return;
 			
-			Logger.LogDebug($"bb Received {type} response (length={length}, state={state})");
-
 			switch (type)
 			{
 				case ResponseType.MultiPacketStart:
@@ -230,7 +228,6 @@ namespace api.nox.relay.connection {
 					var responseState = buffer.ReadUShort();
 					var responseType  = buffer.ReadEnum<ResponseType>();
 					if (responseType != iType) return;
-					Logger.LogDebug($"aa Received {responseType} response (length={length}, state={state}) responseState={responseState}");
 					if (state != ushort.MaxValue && responseState != state) return;
 					var response = new T { ConnectionId = Id, State = state };
 					res = response.FromBuffer(buffer.Clone(5, length)) ? response : null;
