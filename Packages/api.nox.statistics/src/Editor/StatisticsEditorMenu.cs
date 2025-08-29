@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.statistics.Editor {
@@ -31,6 +33,9 @@ namespace api.nox.statistics.Editor {
 
 			var message = "Nox Statistics\n\n";
 			message += $"Save Directory: {saveDirectory}\n\n";
+			var total = 0f;
+			var play  = 0f;
+			var edit  = 0f;
 
 			if (File.Exists(currentSessionFile)) {
 				try {
@@ -42,6 +47,9 @@ namespace api.nox.statistics.Editor {
 						message += $"Total Time: {TimeStatistics.FormatTime(stats.totalTime)}\n";
 						message += $"Play Time: {TimeStatistics.FormatTime(stats.playTime)}\n";
 						message += $"Editor Time: {TimeStatistics.FormatTime(stats.editorTime)}\n\n";
+						total   += stats.totalTime;
+						play    += stats.playTime;
+						edit    += stats.editorTime;
 					}
 				} catch (System.Exception ex) {
 					message += $"Error reading current session: {ex.Message}\n\n";
@@ -55,6 +63,10 @@ namespace api.nox.statistics.Editor {
 					if (history is { Count: > 0 }) {
 						message += $"History: {history.Count} sessions saved\n";
 						message += $"Latest session: {history[^1].SessionDate:yyyy-MM-dd HH:mm:ss}";
+						total   += history.Sum(entry => entry.totalTime);
+						play    += history.Sum(entry => entry.playTime);
+						edit    += history.Sum(entry => entry.editorTime);
+						message += $"\nTotal Time in History: {TimeStatistics.FormatTime(total)}";
 					}
 				} catch (System.Exception ex) {
 					message += $"Error reading history: {ex.Message}";
@@ -64,7 +76,12 @@ namespace api.nox.statistics.Editor {
 			if (Logger.OpenDialog("Nox Statistics", message, "OK", "Copy to Clipboard"))
 				return;
 
-			GUIUtility.systemCopyBuffer = message;
+			var copy = new StringBuilder();
+			copy.AppendLine("Nox Statistics");
+			copy.AppendLine($"Total Time: {TimeStatistics.FormatTime(total)}");
+			copy.AppendLine($"Play Time: {TimeStatistics.FormatTime(play)}");
+			copy.AppendLine($"Editor Time: {TimeStatistics.FormatTime(edit)}");
+			GUIUtility.systemCopyBuffer = copy.ToString();
 			Logger.Log("Statistics copied to clipboard");
 		}
 	}
