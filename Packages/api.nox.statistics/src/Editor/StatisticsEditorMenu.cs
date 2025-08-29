@@ -52,16 +52,20 @@ namespace api.nox.statistics.Editor {
 				try {
 					var json    = File.ReadAllText(historyFile);
 					var history = Newtonsoft.Json.JsonConvert.DeserializeObject<System.Collections.Generic.List<TimeStatistics>>(json);
-					if (history != null && history.Count > 0) {
+					if (history is { Count: > 0 }) {
 						message += $"History: {history.Count} sessions saved\n";
-						message += $"Latest session: {history[^1].sessionDate:yyyy-MM-dd HH:mm:ss}";
+						message += $"Latest session: {history[^1].SessionDate:yyyy-MM-dd HH:mm:ss}";
 					}
 				} catch (System.Exception ex) {
 					message += $"Error reading history: {ex.Message}";
 				}
 			} else message += "No history found";
 
-			Logger.OpenDialog("Nox Statistics", message, "OK");
+			if (Logger.OpenDialog("Nox Statistics", message, "OK", "Copy to Clipboard"))
+				return;
+
+			GUIUtility.systemCopyBuffer = message;
+			Logger.Log("Statistics copied to clipboard");
 		}
 	}
 }
