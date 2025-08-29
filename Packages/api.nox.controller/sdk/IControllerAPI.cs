@@ -1,3 +1,5 @@
+using Cysharp.Threading.Tasks;
+
 namespace Nox.Controllers {
 	public interface IControllerAPI {
 		/// <summary>
@@ -11,6 +13,6 @@ namespace Nox.Controllers {
 		/// </summary>
 		/// <param name="controller"></param>
 		/// <returns>True if the controller was set successfully, false otherwise.</returns>
-		public bool SetCurrent(IController controller);
+		public UniTask<bool> SetCurrent(IController controller);
 	}
 }

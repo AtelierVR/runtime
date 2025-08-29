@@ -21,15 +21,15 @@ namespace api.nox.xr {
 		internal static IUiAPI UiAPI
 			=> CoreAPI.ModAPI.GetMod("ui")
 				?.GetEntry<IUiAPI>();
-		
+
 		internal static IAvatarAPI AvatarAPI
 			=> CoreAPI.ModAPI.GetMod("avatar")
 				?.GetEntry<IAvatarAPI>();
-		
+
 		internal static IUserAPI UserAPI
 			=> CoreAPI.ModAPI.GetMod("user")
 				?.GetEntry<IUserAPI>();
-		
+
 		#if UNITY_EDITOR
 		private static bool NoVRFlag {
 			get => Config.LoadEditor().Get("no-vr", false);
@@ -57,7 +57,8 @@ namespace api.nox.xr {
 
 		private bool _isXRInitialized;
 
-		[NoxPublic(NoxAccess.Read)] public readonly UnityEvent<bool> OnXRHeadsetChange = new();
+		[NoxPublic(NoxAccess.Read)]
+		public readonly UnityEvent<bool> OnXRHeadsetChange = new();
 
 
 		[NoxPublic(NoxAccess.Method)]
@@ -80,15 +81,18 @@ namespace api.nox.xr {
 			await StartLoader();
 		}
 
-		public void OnDisposeClient() {
+		public async UniTask OnDisposeClientAsync() {
 			StopLoader();
-			if (XRController.Remove())
+			if (await XRController.Remove())
 				Logger.Log("XR Controller has been removed.");
 			Instance = null;
 			CoreAPI  = null;
 		}
 
-		private void OnDeviceConnected(InputDevice device) {
+		private void OnDeviceConnected(InputDevice device)
+			=> OnDeviceConnectedAsync(device).Forget();
+
+		private async UniTask OnDeviceConnectedAsync(InputDevice device) {
 			Logger.LogDebug($"New XR Device:");
 			Logger.LogDebug(" - name: "            + device.name);
 			Logger.LogDebug(" - characteristics: " + device.characteristics);
@@ -113,17 +117,20 @@ namespace api.nox.xr {
 
 			if (device.characteristics.HasFlag(InputDeviceCharacteristics.HeadMounted)) {
 				OnXRHeadsetChange.Invoke(true);
-				if (XRController.Make())
+				if (await XRController.Make())
 					Logger.Log("XR Controller has been created.");
 				else Logger.LogWarning("Failed to create XR Controller.");
 			}
 		}
 
-		private void OnDeviceDisconnected(InputDevice device) {
+		private void OnDeviceDisconnected(InputDevice device)
+			=> OnDeviceDisconnectedAsync(device).Forget();
+
+		private async UniTask OnDeviceDisconnectedAsync(InputDevice device) {
 			Logger.Log($"XR Device disconnected: {device.name} {device.characteristics}");
 			if (device.characteristics.HasFlag(InputDeviceCharacteristics.HeadMounted)) {
 				OnXRHeadsetChange.Invoke(false);
-				if (XRController.Remove())
+				if (await XRController.Remove())
 					Logger.Log("XR Controller has been removed.");
 				else Logger.LogWarning("Failed to remove XR Controller.");
 			}
@@ -228,26 +235,29 @@ namespace api.nox.xr {
 		public List<InputDevice> GetAllTrackers() {
 			var devices = new List<InputDevice>();
 			InputDevices.GetDevices(devices);
-			return devices.Where(d => d.characteristics.HasFlag(InputDeviceCharacteristics.TrackedDevice) 
-				&& !d.characteristics.HasFlag(InputDeviceCharacteristics.HeadMounted)
-				&& !d.characteristics.HasFlag(InputDeviceCharacteristics.Left)
-				&& !d.characteristics.HasFlag(InputDeviceCharacteristics.Right)).ToList();
+			return devices.Where(
+					d => d.characteristics.HasFlag(InputDeviceCharacteristics.TrackedDevice)
+						&& !d.characteristics.HasFlag(InputDeviceCharacteristics.HeadMounted)
+						&& !d.characteristics.HasFlag(InputDeviceCharacteristics.Left)
+						&& !d.characteristics.HasFlag(InputDeviceCharacteristics.Right)
+				)
+				.ToList();
 		}
 
 		[NoxPublic(NoxAccess.Method)]
 		public bool GetTrackerPose(XRNode node, out Vector3 position, out Quaternion rotation) {
 			position = Vector3.zero;
 			rotation = Quaternion.identity;
-			
+
 			var devices = new List<InputDevice>();
 			InputDevices.GetDevicesAtXRNode(node, devices);
-			
+
 			if (devices.Count == 0) return false;
-			
-			var device = devices[0];
+
+			var  device      = devices[0];
 			bool hasPosition = device.TryGetFeatureValue(CommonUsages.devicePosition, out position);
 			bool hasRotation = device.TryGetFeatureValue(CommonUsages.deviceRotation, out rotation);
-			
+
 			return hasPosition && hasRotation;
 		}
 	}

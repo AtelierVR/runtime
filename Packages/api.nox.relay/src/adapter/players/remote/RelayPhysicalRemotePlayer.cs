@@ -1,9 +1,119 @@
+using System.Linq;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Nox.Avatars;
+using Nox.Avatars.Parameters;
+using Nox.CCK.Utils;
+using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay {
 	public class RelayPhysicalRemotePlayer : RelayPhysicalPlayer {
-		public override IRuntimeAvatar GetAvatar() {
-			return null;
+		public IRuntimeAvatar Avatar;
+
+		public override IRuntimeAvatar GetAvatar()
+			=> Avatar;
+
+		private CancellationTokenSource _avatarLoadingCts;
+
+		public async UniTask<IRuntimeAvatar> SetAvatar(IAvatarIdentifier identifier) {
+			Logger.LogDebug($"Loading avatar for identifier {identifier?.ToString() ?? "null"}");
+
+			if (identifier == null || !identifier.IsValid())
+				return null;
+
+			if (identifier.Equals(Avatar?.GetIdentifier()))
+				return Avatar;
+
+			_avatarLoadingCts?.Cancel();
+			_avatarLoadingCts = new CancellationTokenSource();
+
+			var asset = (await Main.AvatarAPI.SearchAssets(
+						identifier.ToString(),
+						Main.AvatarAPI.MakeAssetSearchRequest()
+							.SetEngines(new[] { EngineExtensions.CurrentEngine.GetEngineName() })
+							.SetPlatforms(new[] { PlatformExtensions.CurrentPlatform.GetPlatformName() })
+							.SetLimit(1)
+							.SetVersions(new[] { identifier.GetVersion() })
+					)
+					.AttachExternalCancellation(_avatarLoadingCts.Token)).GetAssets()
+				.FirstOrDefault();
+			if (_avatarLoadingCts.IsCancellationRequested)
+				return null;
+
+			if (asset == null) {
+				Logger.LogWarning($"Avatar asset not found for identifier {identifier.ToString()}");
+				var err = await Main.AvatarAPI.LoadError();
+				err.SetIdentifier(identifier);
+				await SetAvatar(err);
+				return null;
+			}
+
+			if (!Main.AvatarAPI.HasInCache(asset.GetHash())) {
+				var download = Main.AvatarAPI.DownloadToCache(
+					asset.GetUrl(),
+					hash: asset.GetHash(),
+					progress: p => Logger.LogDebug($"Downloading avatar {identifier.ToString()}: {p:P1}"),
+					token: _avatarLoadingCts.Token
+				);
+				download.Start();
+				await download.Wait();
+				if (_avatarLoadingCts.IsCancellationRequested)
+					return null;
+			}
+
+			var avatar = await Main.AvatarAPI.LoadFromCache(
+				asset.GetHash(),
+				progress: p => Logger.LogDebug($"Loading avatar {identifier.ToString()}: {p:P1}"),
+				token: _avatarLoadingCts.Token
+			);
+			if (_avatarLoadingCts.IsCancellationRequested)
+				return null;
+
+			if (avatar == null) {
+				Logger.LogError($"Failed to load avatar from cache for identifier {identifier.ToString()}");
+				var err = await Main.AvatarAPI.LoadError();
+				err.SetIdentifier(identifier);
+				await SetAvatar(err);
+				return null;
+			}
+
+			Logger.LogDebug($"Avatar loaded: {identifier.ToString()}");
+			avatar.SetIdentifier(identifier);
+			await SetAvatar(avatar);
+			return avatar;
+		}
+
+		private async UniTask<bool> SetAvatar(IRuntimeAvatar runtimeAvatar) {
+			Logger.LogDebug("Setting avatar for XRController");
+			if (runtimeAvatar == Avatar)
+				return true;
+
+			var old = Avatar;
+			Avatar = runtimeAvatar;
+
+			if (Avatar == null) {
+				Logger.LogWarning("Setting avatar to null, removing current avatar.");
+				Avatar = old;
+				return false;
+			}
+
+			var root = Avatar.GetDescriptor().GetRoot();
+			if (!root) {
+				Logger.LogError("Avatar descriptor root is null, cannot set avatar.");
+				Avatar = old;
+				return false;
+			}
+
+			if (old != null)
+				await old.Dispose();
+
+			Logger.LogDebug($"Attaching avatar to {runtimeAvatar.GetDescriptor()}", runtimeAvatar.GetDescriptor().GetRoot());
+			root.transform.SetParent(transform, false);
+			root.transform.localPosition = Vector3.zero;
+			root.transform.localRotation = Quaternion.identity;
+
+			return true;
 		}
 	}
 }

@@ -1,4 +1,5 @@
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
@@ -24,21 +25,21 @@ namespace api.nox.desktop {
 			=> CoreAPI.ModAPI
 				.GetMod("avatar")
 				.GetEntry<IAvatarAPI>();
-		
+
 		internal static IUserAPI UserAPI
 			=> CoreAPI.ModAPI
 				.GetMod("user")
 				.GetEntry<IUserAPI>();
 
-		public void OnInitializeClient(ClientModCoreAPI api) {
+		public async UniTask OnInitializeClientAsync(ClientModCoreAPI api) {
 			CoreAPI = api;
 			Keybindings.Rebind();
-			DesktopController.Make();
+			await DesktopController.Make();
 		}
 
-		public void OnDisposeClient() {
+		public async UniTask OnDisposeClientAsync() {
 			if (ControllerAPI.GetCurrent() is DesktopController)
-				ControllerAPI.SetCurrent(null);
+				await ControllerAPI.SetCurrent(null);
 			Keybindings.Clear();
 			CoreAPI = null;
 		}

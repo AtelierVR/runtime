@@ -49,7 +49,9 @@ namespace api.nox.terminal.client {
 			input.interactable = false;
 
 			command = command.Trim();
-			var printExecuting = _page.GetEnvironment("print_executing", "true") is "true" or "1";
+			
+			_page.AddToHistory(command);
+			var printExecuting = _page.CanPrinting();
 
 			if (printExecuting)
 				_page.PrintLn(
@@ -74,10 +76,33 @@ namespace api.nox.terminal.client {
 		}
 
 		private void OnValueChanged(string value) {
+			if (!string.IsNullOrEmpty(value)) 
+				_page.ResetHistoryIndex();
+			
 			_page._auto = !string.IsNullOrEmpty(value)
 				? Main.Instance.AutoComplete(value, _page)
 				: Array.Empty<string>();
+			
 			Logger.LogDebug($"Autocomplete: {string.Join(", ", _page._auto)}");
+		}
+
+		private void Update() {
+			if (input.isFocused) 
+				HandleHistoryNavigation();
+		}
+
+		private void HandleHistoryNavigation() {
+			if (Input.GetKeyDown(KeyCode.UpArrow)) {
+				var previousCommand = _page.GetPreviousCommand();
+				if (string.IsNullOrEmpty(previousCommand)) return;
+				input.text          = previousCommand;
+				input.caretPosition = input.text.Length;
+			}
+			else if (Input.GetKeyDown(KeyCode.DownArrow)) {
+				var nextCommand = _page.GetNextCommand();
+				input.text = nextCommand;
+				input.caretPosition = input.text.Length;
+			}
 		}
 
 

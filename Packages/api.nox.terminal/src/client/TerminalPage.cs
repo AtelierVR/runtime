@@ -40,6 +40,9 @@ namespace api.nox.terminal.client {
 		internal string   _draft = string.Empty;
 		internal string[] _auto  = Array.Empty<string>();
 
+		private readonly List<string> _commandHistory = new();
+		private          int          _historyIndex   = -1;
+
 		public object[] GetContext()
 			=> _context;
 
@@ -104,5 +107,43 @@ namespace api.nox.terminal.client {
 
 		public void SetPrinting(bool printing)
 			=> SetEnvironment("print_executing", printing);
+
+		public void AddToHistory(string command) {
+			if (string.IsNullOrWhiteSpace(command)) return;
+
+			if (_commandHistory.Count > 0 && _commandHistory[^1] == command)
+				return;
+
+			_commandHistory.Add(command);
+			_historyIndex = _commandHistory.Count;
+		}
+
+		public string GetPreviousCommand() {
+			if (_commandHistory.Count == 0)
+				return string.Empty;
+
+			if (_historyIndex > 0)
+				_historyIndex--;
+
+			return _historyIndex < _commandHistory.Count 
+				? _commandHistory[_historyIndex] 
+				: string.Empty;
+		}
+
+		public string GetNextCommand() {
+			if (_commandHistory.Count == 0)
+				return string.Empty;
+
+			if (_historyIndex < _commandHistory.Count - 1) {
+				_historyIndex++;
+				return _commandHistory[_historyIndex];
+			}
+
+			_historyIndex = _commandHistory.Count;
+			return string.Empty;
+		}
+
+		public void ResetHistoryIndex()
+			=> _historyIndex = _commandHistory.Count;
 	}
 }

@@ -17,6 +17,13 @@ namespace api.nox.avatar.editor {
 		public IAvatarDescriptor GetDescriptor()
 			=> GetComponent<IAvatarDescriptor>();
 
+		public IAvatarIdentifier GetIdentifier()
+			=> null;
+
+		public void SetIdentifier(IAvatarIdentifier identifier) {
+			Logger.LogWarning($"PlayModeAvatar does not support setting an identifier.");
+		}
+
 		public async UniTask Dispose()
 			=> await UniTask.Yield();
 

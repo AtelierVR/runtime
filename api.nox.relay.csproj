@@ -50,6 +50,7 @@
     <Compile Include="Packages\api.nox.relay\src\types\join\JoinEvent.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\authentication\AuthenticationResult.cs" />
     <Compile Include="Packages\api.nox.relay\src\adapter\players\local\RelayPhysicalLocalPlayer.cs" />
+    <Compile Include="Packages\api.nox.relay\src\types\avatar\AvatarChangedResult.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\session\RelayResponseSessions.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\RelayResponse.cs" />
     <Compile Include="Packages\api.nox.relay\src\connection\ClientMultiPacketManager.cs" />
@@ -66,7 +67,6 @@
     <Compile Include="Packages\api.nox.relay\src\editor\ListConnectionPanel.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\traveling\TravelingAction.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\player\InstancePlayerFlags.cs" />
-    <Compile Include="Packages\api.nox.relay\src\types\avatar\TravelingResults.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\traveling\TravelingEvent.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\avatar\InstanceRequestTraveling.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\RelayRequest.cs" />
@@ -90,7 +90,6 @@
     <Compile Include="Packages\api.nox.relay\src\adapter\RelayDimension.cs" />
     <Compile Include="Packages\api.nox.relay\src\instances\RelayInstance.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\transform\TransformEvent.cs" />
-    <Compile Include="Packages\api.nox.relay\src\types\avatar\TravelingAction.cs" />
     <Compile Include="Packages\api.nox.relay\src\connector\TcpConnector.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\enter\EnterResult.cs" />
     <Compile Include="Packages\api.nox.relay\src\adapter\RelayAdapter.cs" />
@@ -109,6 +108,7 @@
     <Compile Include="Packages\api.nox.relay\src\types\avatar\AvatarChangedEvent.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\enter\InstanceRequestEnter.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\ClientStatus.cs" />
+    <Compile Include="Packages\api.nox.relay\src\types\avatar\AvatarChangedAction.cs" />
     <None Include="Packages\api.nox.relay\api.nox.relay.asmdef" />
     <None Include="Packages\api.nox.relay\package.json" />
     <None Include="Packages\api.nox.relay\nox.mod.json" />
@@ -968,6 +968,10 @@
     <ProjectReference Include="Nox.Controllers.csproj">
       <Project>{7876f9af-a4fc-8e9f-76eb-a1ac927434f2}</Project>
       <Name>Nox.Controllers</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Avatars.Parameters.csproj">
+      <Project>{cb480378-d253-f3ad-3348-902862002b9e}</Project>
+      <Name>Nox.Avatars.Parameters</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

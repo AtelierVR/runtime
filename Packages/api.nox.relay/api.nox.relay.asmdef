@@ -12,7 +12,8 @@
         "Nox.Entities",
         "Nox.CCK.Worlds",
         "Nox.Avatars",
-        "Nox.Controllers"
+        "Nox.Controllers",
+        "Nox.Avatars.Parameters"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

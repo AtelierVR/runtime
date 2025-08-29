@@ -1,10 +1,13 @@
+using Cysharp.Threading.Tasks;
 using Nox.Avatars;
+using Nox.Avatars.Players;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay {
-	public class RelayRemotePlayer : RelayPlayer {
+	public class RelayRemotePlayer : RelayPlayer, IPlayerAvatar {
 		internal float                     DistanceToLocal = -1f;
+		private  IAvatarIdentifier         AvatarIdentifier;
 		private  RelayPhysicalRemotePlayer _physicalComponent;
 
 		public override bool TryGetPhysical<T>(out T physical) {
@@ -36,8 +39,15 @@ namespace api.nox.relay {
 		public override bool HasPhysical()
 			=> _physicalComponent;
 
-		public override void SetAvatar(IRuntimeAvatar avatar, IAvatarIdentifier identifier = null) {
-			Logger.Log($"Setting avatar for player {GetDisplay()} ({GetId()}) to {(identifier != null ? identifier.ToString() : "null")}");
+		public override async UniTask<bool> SetAvatar(IAvatarIdentifier identifier) {
+			if (_physicalComponent && await _physicalComponent.SetAvatar(identifier) == null)
+				return false;
+
+			AvatarIdentifier = identifier;
+			return true;
 		}
+
+		public override IAvatarIdentifier GetAvatar()
+			=> AvatarIdentifier;
 	}
 }

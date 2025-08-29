@@ -59,6 +59,9 @@ namespace api.nox.relay.Instances {
 		public async UniTask<bool> SendTransform(types.Transform.InstanceRequestTransform request)
 			=> (await Connection.Emit(request.ToBuffer(), RequestType.Transform)).Item1;
 
+		public async UniTask<bool> SendAvatarChange(types.Avatar.InstanceRequestAvatarChanged request)
+			=> (await Connection.Emit(request.ToBuffer(), RequestType.AvatarChanged)).Item1;
+
 		public async UniTask<types.Enter.EnterResponse> RequestEnter(string display = null, string password = null, types.Enter.EnterFlags flags = types.Enter.EnterFlags.None) {
 			Connection.Instances.Add(this);
 

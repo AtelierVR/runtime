@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Nox.Avatars;
 using UnityEngine;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
@@ -161,6 +162,10 @@ namespace api.nox.offline {
 			if (!Transforms.TryGetValue(part, out var tr)) return;
 			transform.DeliveryType = TransformDeliveryType.LocalModified;
 			Transforms[part]       = transform;
+		}
+
+		public void SetAvatar(IAvatarIdentifier avatar) {
+			Logger.LogWarning("OfflinePlayer does not support avatars.");
 		}
 	}
 }

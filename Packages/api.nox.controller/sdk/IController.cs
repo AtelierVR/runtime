@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.CCK.Players;
 using Nox.Players;
@@ -37,7 +38,7 @@ namespace Nox.Controllers {
 		/// Set data for the controller.
 		/// </summary>
 		/// <param name="controller"></param>
-		public void Restore(IController controller);
+		public UniTask Restore(IController controller);
 
 		/// <summary>
 		/// Dispose the controller.
@@ -83,24 +84,5 @@ namespace Nox.Controllers {
 		/// </summary>
 		/// <param name="player"></param>
 		public void SetPlayer(IPlayer player);
-
-		/// <summary>
-		/// Get the avatar associated with the controller.
-		/// </summary>
-		/// <returns></returns>
-		public IRuntimeAvatar GetAvatar();
-
-		/// <summary>
-		/// Get the identifier for the avatar associated with the controller.
-		/// </summary>
-		/// <returns></returns>
-		public IAvatarIdentifier GetAvatarIdentifier();
-
-		/// <summary>
-		/// Set the avatar for the controller.
-		/// </summary>
-		/// <param name="runtimeAvatar"></param>
-		/// <param name="identifier">Optional identifier for the avatar, used for determinate metadatas.</param>
-		public void SetAvatar(IRuntimeAvatar runtimeAvatar, IAvatarIdentifier identifier = null);
 	}
 }

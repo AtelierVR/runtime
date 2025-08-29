@@ -1,12 +1,14 @@
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
+using Nox.Avatars.Controllers;
+using Nox.Avatars.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay {
-	public class RelayLocalPlayer : RelayPlayer {
+	public class RelayLocalPlayer : RelayPlayer, ILocalPlayerAvatar {
 		public override bool IsLocal()
 			=> true;
 
@@ -51,11 +53,37 @@ namespace api.nox.relay {
 			_physicalComponent = null;
 		}
 
+		internal static bool TryCurrentController(out IControllerAvatar controller) {
+			if (Main.ControllerAPI.GetCurrent() is IControllerAvatar ca) {
+				controller = ca;
+				return true;
+			}
+
+			controller = null;
+			return false;
+		}
+
+		public override async UniTask<bool> SetAvatar(IAvatarIdentifier identifier) {
+			var packet = types.Avatar.InstanceRequestAvatarChanged.CreateRequest(Reference.Id, identifier);
+			if (!await Adapter.Instance.SendAvatarChange(packet) || !TryCurrentController(out var controller))
+				return false;
+			return await controller.SetAvatar(identifier) != null;
+		}
+
+		public override IAvatarIdentifier GetAvatar()
+			=> TryCurrentController(out var controller) ? controller.GetAvatar().GetIdentifier() : null;
+
 		public override bool HasPhysical()
 			=> _physicalComponent;
 
-		public override void SetAvatar(IRuntimeAvatar avatar, IAvatarIdentifier identifier = null) {
-			Logger.Log($"Setting avatar for local player {GetDisplay()} ({GetId()}) to {(identifier != null ? identifier.ToString() : "null")}");
+		public async UniTask<bool> SendAvatarReady() {
+			var packet = types.Avatar.InstanceRequestAvatarChanged.CreateReady();
+			return await Adapter.Instance.SendAvatarChange(packet);
+		}
+
+		public UniTask<bool> SendAvatarFailed(string reason) {
+			var packet = types.Avatar.InstanceRequestAvatarChanged.CreateFailed(reason);
+			return Adapter.Instance.SendAvatarChange(packet);
 		}
 	}
 }

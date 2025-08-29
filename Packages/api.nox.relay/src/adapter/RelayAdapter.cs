@@ -13,6 +13,7 @@ using api.nox.relay.types.Player;
 using api.nox.relay.types.Quit;
 using api.nox.relay.types.Traveling;
 using Cysharp.Threading.Tasks;
+using Nox.Avatars;
 using Nox.CCK.Utils;
 using Nox.Entities;
 using Nox.Players;
@@ -24,12 +25,13 @@ using Object = System.Object;
 
 namespace api.nox.relay {
 	public class RelayAdapter : IAdapter, INoxObject {
-		internal         RelayDimension Dimension;
-		private readonly IEntityManager _entities;
-		private          ISession       _session;
-		private          RelayState     _state = new(true);
-		internal         Connection     Connection;
-		internal         RelayInstance  Instance;
+		internal         RelayDimension    Dimension;
+		private readonly IEntityManager    _entities;
+		internal         ISession          Session;
+		private          RelayState        _state = new(true);
+		internal         Connection        Connection;
+		internal         RelayInstance     Instance;
+		internal         IAvatarIdentifier Avatar;
 
 		private  bool       _isTraveling = true;
 		internal byte       Tps          = 0;
@@ -69,149 +71,12 @@ namespace api.nox.relay {
 		public void OnAvatarChanged(AvatarChangedEvent ev)
 			=> OnAvatarChangedAsync(ev).Forget();
 
-		private readonly Dictionary<int, CancellationTokenSource> _cancelAvatarTokens = new();
-
-		private async UniTask<bool> OnAvatarChangedAsync(AvatarChangedEvent ev, bool autoResponse = true, Action<float, string> progress = null) {
+		private async UniTask<bool> OnAvatarChangedAsync(AvatarChangedEvent ev, bool autoResponse = true) {
 			Logger.LogDebug($"OnAvatarChanged: {ev}");
-
-			string hash;
-			string url;
-
-			var player = _entities.GetEntity<RelayPlayer>(ev.InternalId);
-			if (player == null) {
-				progress?.Invoke(0f, $"Player with id {ev.InternalId} not found");
-				Logger.LogError($"Player with id {ev.InternalId} not found to change avatar");
-				if (autoResponse)
-					await OnAvatarChangedFailed(ev, "Player not found");
-				return false;
-			}
-
-			if (player.IsLocal()) {
-				progress?.Invoke(0f, "Cannot change avatar of local player");
-				Logger.LogError($"Cannot change avatar of local player {player}");
-				if (autoResponse)
-					await OnAvatarChangedFailed(ev, "Cannot change avatar of local player");
-				return false;
-			}
-
-			if (_cancelAvatarTokens.TryGetValue(ev.InternalId, out var oldToken)) {
-				oldToken.Cancel();
-				oldToken.Dispose();
-			}
-
-			var tokenSource = new CancellationTokenSource();
-			_cancelAvatarTokens[ev.InternalId] = tokenSource;
-
-			if (ev.UseUrl) {
-				progress?.Invoke(0.1f, "Using provided URL for avatar");
-				hash = ev.Hash;
-				url  = ev.DownloadUrl;
-			} else if (ev.UseMaster) {
-				progress?.Invoke(0.1f, "Searching for master asset for avatar");
-				var asset = (await Main.AvatarAPI.SearchAssets(
-							ev.AvatarIdentifier.GetId().ToString(),
-							Main.AvatarAPI.MakeAssetSearchRequest()
-								.SetEngines(new[] { EngineExtensions.CurrentEngine.GetEngineName() })
-								.SetPlatforms(new[] { PlatformExtensions.CurrentPlatform.GetPlatformName() })
-								.SetVersions(new[] { ev.AvatarIdentifier.GetVersion() })
-								.SetLimit(1)
-						)
-						.AttachExternalCancellation(tokenSource.Token))
-					?.GetAssets()
-					.FirstOrDefault();
-
-				if (tokenSource.IsCancellationRequested) {
-					progress?.Invoke(0f, "Avatar change cancelled");
-					tokenSource.Dispose();
-					_cancelAvatarTokens.Remove(ev.InternalId);
-					return false;
-				}
-
-				if (asset == null) {
-					progress?.Invoke(0.2f, $"No master asset found for avatar {ev.AvatarIdentifier.ToString()}");
-					Logger.LogError($"No asset found for avatar {ev.AvatarIdentifier.ToString()}");
-					if (autoResponse)
-						await OnAvatarChangedFailed(ev, "No master asset found");
-					_cancelAvatarTokens.Remove(ev.InternalId);
-					return false;
-				}
-
-				hash = asset.GetHash();
-				url  = asset.GetUrl();
-			} else {
-				progress?.Invoke(0.1f, "The avatar change does not contain valid URL or master asset information");
-				Logger.LogError($"{ev} does not contain valid URL or master asset information");
-				if (autoResponse)
-					await OnAvatarChangedFailed(ev, "Invalid avatar change information");
-				_cancelAvatarTokens.Remove(ev.InternalId);
-				return false;
-			}
-
-			progress?.Invoke(0.2f, "Searching for avatar");
-			if (!Main.AvatarAPI.HasInCache(hash)) {
-				var download = Main.AvatarAPI.DownloadToCache(
-					url,
-					hash: hash,
-					progress: f => progress?.Invoke(0.2f + f * 0.45f, "Downloading avatar..."),
-					token: tokenSource.Token
-				);
-				download.Start();
-				await download.Wait();
-			}
-
-			if (tokenSource.IsCancellationRequested) {
-				progress?.Invoke(0f, "Avatar change cancelled");
-				tokenSource.Dispose();
-				_cancelAvatarTokens.Remove(ev.InternalId);
-				return false;
-			}
-
-			progress?.Invoke(0.65f, "Loading avatar");
-			var avatar = await Main.AvatarAPI.LoadFromCache(
-				hash,
-				progress: f => progress?.Invoke(0.65f + f * 0.25f, "Loading avatar..."),
-				token: tokenSource.Token
-			);
-
-			if (tokenSource.IsCancellationRequested) {
-				progress?.Invoke(0f, "Avatar change cancelled");
-				tokenSource.Dispose();
-				_cancelAvatarTokens.Remove(ev.InternalId);
-				return false;
-			}
-
-			if (avatar == null) {
-				progress?.Invoke(0.9f, "Failed to load avatar");
-				Logger.LogError($"Failed to load avatar {ev.AvatarIdentifier.ToString()}");
-				if (autoResponse)
-					await OnAvatarChangedFailed(ev, "Failed to load avatar");
-				_cancelAvatarTokens.Remove(ev.InternalId);
-				return false;
-			}
-
-			player = _entities.GetEntity<RelayPlayer>(ev.InternalId);
-			if (player == null) {
-				Logger.LogError($"Failed to find player with id {ev.InternalId} to change avatar");
-				if (autoResponse)
-					await OnAvatarChangedFailed(ev, "Player not found");
-				_cancelAvatarTokens.Remove(ev.InternalId);
-				return false;
-			}
-
-			player.SetAvatar(avatar, ev.UseMaster ? ev.AvatarIdentifier : null);
-			progress?.Invoke(1f, "Avatar loaded successfully");
-			if (autoResponse)
-				await OnAvatarChangedSuccess(ev);
-			_cancelAvatarTokens.Remove(ev.InternalId);
-			return true;
+			var player = _entities.GetEntity<RelayPlayer>(ev.PlayerId);
+			if (player == null) return false;
+			return await player.SetAvatar(ev.AvatarIdentifier);
 		}
-
-		private async UniTask OnAvatarChangedSuccess(AvatarChangedEvent ev)
-			=> await Instance.RequestAvatarChange(AvatarChangedAction.Ready);
-
-		private async UniTask OnAvatarChangedFailed(AvatarChangedEvent ev, string reason)
-			=> await Instance.RequestAvatarChange(AvatarChangedAction.Failed, reason);
-
 
 		public void OnUpdate() {
 			var local = _entities.GetEntities<RelayLocalPlayer>().FirstOrDefault();
@@ -344,7 +209,7 @@ namespace api.nox.relay {
 		internal void SetState(bool isReady, string message = "", float progress = 1f) {
 			var old = _state;
 			_state = new RelayState(isReady, message, progress);
-			_session.OnStateChanged(_state, old);
+			Session.OnStateChanged(_state, old);
 			Logger.LogDebug($"SetState: {this} -> {_state}");
 		}
 
@@ -352,7 +217,7 @@ namespace api.nox.relay {
 		public void SetSession(ISession session) {
 			Logger.LogDebug($"SetSession: {this} -> {session}");
 			EntitiesRoot.name = $"[{GetType().Name}Entities_{session.GetId()}]";
-			_session          = session;
+			Session           = session;
 		}
 
 		public IDimension GetDimension()
@@ -418,13 +283,13 @@ namespace api.nox.relay {
 			var np = new T();
 			np.SetReference(player, this);
 			_entities.RegisterEntity(np);
-			_session.OnPlayerJoined(np);
+			Session.OnPlayerJoined(np);
 		}
 
 		public void RemovePlayer(IPlayer player) {
 			if (player == null) return;
 			_entities.UnregisterEntity(player);
-			_session.OnPlayerLeft(player);
+			Session.OnPlayerLeft(player);
 		}
 	}
 }

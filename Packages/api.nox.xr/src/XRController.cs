@@ -4,8 +4,9 @@ using System.Threading;
 using Autohand;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
-using Nox.Avatars.Camera;
+using Nox.Avatars.Controllers;
 using Nox.Avatars.Parameters;
+using Nox.Avatars.Players;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
@@ -17,12 +18,11 @@ using Nox.Players;
 using Nox.UI;
 using Nox.Users;
 using UnityEngine.EventSystems;
-using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.xr {
-	public class XRController : MonoBehaviour, IController, INoxObject {
+	public class XRController : MonoBehaviour, IController, IControllerAvatar, INoxObject {
 		private static int DefaultPriority
 			=> Client.Instance.IsReady()
 				? Config.Load().Get("settings.controller.xr_priority", IController.DefaultPriority + 1)
@@ -62,9 +62,9 @@ namespace api.nox.xr {
 		/// <summary>
 		/// Remove the current proxy if it is the XR proxy.
 		/// </summary>
-		internal static bool Remove() {
+		internal static async UniTask<bool> Remove() {
 			if (!IsCurrent()) return false;
-			ControllerAPI.SetCurrent(null);
+			await ControllerAPI.SetCurrent(null);
 			return true;
 		}
 
@@ -72,7 +72,7 @@ namespace api.nox.xr {
 		/// Create the XR proxy if it is not already created.
 		/// </summary>
 		/// <returns></returns>
-		internal static bool Make() {
+		internal static async UniTask<bool> Make() {
 			if (!IsBetterThanCurrent()) {
 				Logger.LogDebug(
 					"XR proxy is not better than current controller, skipping creation\n"
@@ -113,7 +113,7 @@ namespace api.nox.xr {
 			xr.Menu.SetActive(false);
 
 
-			if (!ControllerAPI.SetCurrent(xr)) {
+			if (!await ControllerAPI.SetCurrent(xr)) {
 				Logger.LogError("Failed to set XR proxy as current");
 				Destroy(instance);
 				return false;
@@ -172,11 +172,15 @@ namespace api.nox.xr {
 		public Collider GetCollider()
 			=> player.bodyCollider;
 
-		public void Restore(IController controller) {
+		public async UniTask Restore(IController controller) {
 			foreach (var ability in controller.GetAbilities())
 				SetAbilities(ability.Key, ability.Value);
-			SetAvatar(controller.GetAvatar(), controller.GetAvatarIdentifier());
-			controller.SetAvatar(null);
+
+			if (controller is IControllerAvatar ca) {
+				await SetAvatar(ca.GetAvatar());
+				ca.SetAvatar((IRuntimeAvatar)null);
+			}
+
 			var p = controller.GetPlayer();
 			controller.SetPlayer(null);
 			SetPlayer(p);
@@ -240,13 +244,10 @@ namespace api.nox.xr {
 		public IRuntimeAvatar GetAvatar()
 			=> _attachedRuntimeAvatar;
 
-		public IAvatarIdentifier GetAvatarIdentifier()
-			=> _avatarIdentifier;
-
-
-		public void SetAvatar(IRuntimeAvatar runtimeAvatar, IAvatarIdentifier identifier = null) {
+		public async UniTask<bool> SetAvatar(IRuntimeAvatar runtimeAvatar) {
 			Logger.LogDebug("Setting avatar for XRController");
-			if (runtimeAvatar == _attachedRuntimeAvatar) return;
+			if (runtimeAvatar == _attachedRuntimeAvatar)
+				return true;
 
 			var old = _attachedRuntimeAvatar;
 			_attachedRuntimeAvatar = runtimeAvatar;
@@ -254,18 +255,18 @@ namespace api.nox.xr {
 			if (_attachedRuntimeAvatar == null) {
 				Logger.LogWarning("Setting avatar to null, removing current avatar.");
 				_attachedRuntimeAvatar = old;
-				return;
+				return false;
 			}
 
 			var root = _attachedRuntimeAvatar.GetDescriptor().GetRoot();
 			if (!root) {
 				Logger.LogError("Avatar descriptor root is null, cannot set avatar.");
 				_attachedRuntimeAvatar = old;
-				return;
+				return false;
 			}
 
-			_avatarIdentifier = identifier;
-			old?.Dispose();
+			if (old != null)
+				await old.Dispose();
 
 			Logger.LogDebug($"Attaching avatar to {runtimeAvatar.GetDescriptor()}", runtimeAvatar.GetDescriptor().GetRoot());
 			root.transform.SetParent(transform, false);
@@ -275,9 +276,10 @@ namespace api.nox.xr {
 			var parameterModule = _attachedRuntimeAvatar?.GetDescriptor()
 				?.GetModules<IParameterModule>()
 				.FirstOrDefault();
+
 			if (parameterModule == null) {
 				Logger.LogWarning("Avatar has no parameter module, cannot configure tracking parameters.");
-				return;
+				return true;
 			}
 
 			var parameters = parameterModule.GetParameters();
@@ -303,6 +305,8 @@ namespace api.nox.xr {
 						break;
 				}
 			}
+
+			return true;
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -345,12 +349,25 @@ namespace api.nox.xr {
 		}
 
 		private void LoadAvatarFromUser(ICurrentUser user)
-			=> LoadAvatar(Client.AvatarAPI.Make(user?.GetAvatarId())).Forget();
+			=> SetAvatar(Client.AvatarAPI.Make(user?.GetAvatarId())).Forget();
 
-		private async UniTask LoadAvatar(IAvatarIdentifier identifier) {
+		public async UniTask<IRuntimeAvatar> SetAvatar(IAvatarIdentifier identifier) {
 			Logger.LogDebug($"Loading avatar for identifier {identifier?.ToString() ?? "null"}");
-			if (identifier == null || !identifier.IsValid()) return;
-			if (identifier.Equals(_avatarIdentifier)) return;
+
+			if (_attachedPlayer is not ILocalPlayerAvatar playerAvatar) {
+				Logger.LogError("The local player is not an ILocalPlayerAvatar, cannot set avatar.");
+				return null;
+			}
+
+			if (identifier == null || !identifier.IsValid()) {
+				await playerAvatar.SendAvatarFailed("Invalid avatar identifier.");
+				return null;
+			}
+
+			if (identifier.Equals(_avatarIdentifier)) {
+				await playerAvatar.SendAvatarReady();
+				return _attachedRuntimeAvatar;
+			}
 
 			_avatarLoadingCts?.Cancel();
 			_avatarLoadingCts = new CancellationTokenSource();
@@ -365,12 +382,16 @@ namespace api.nox.xr {
 					)
 					.AttachExternalCancellation(_avatarLoadingCts.Token)).GetAssets()
 				.FirstOrDefault();
-			if (_avatarLoadingCts.IsCancellationRequested) return;
+			if (_avatarLoadingCts.IsCancellationRequested)
+				return null;
 
 			if (asset == null) {
 				Logger.LogWarning($"Avatar asset not found for identifier {identifier.ToString()}");
-				SetAvatar(await Client.AvatarAPI.LoadError(), identifier);
-				return;
+				var err = await Client.AvatarAPI.LoadError();
+				err.SetIdentifier(identifier);
+				await SetAvatar(err);
+				await playerAvatar.SendAvatarFailed("Avatar asset not found.");
+				return null;
 			}
 
 			if (!Client.AvatarAPI.HasInCache(asset.GetHash())) {
@@ -382,7 +403,8 @@ namespace api.nox.xr {
 				);
 				download.Start();
 				await download.Wait();
-				if (_avatarLoadingCts.IsCancellationRequested) return;
+				if (_avatarLoadingCts.IsCancellationRequested)
+					return null;
 			}
 
 			var avatar = await Client.AvatarAPI.LoadFromCache(
@@ -390,16 +412,23 @@ namespace api.nox.xr {
 				progress: p => Logger.LogDebug($"Loading avatar {identifier.ToString()}: {p:P1}"),
 				token: _avatarLoadingCts.Token
 			);
-			if (_avatarLoadingCts.IsCancellationRequested) return;
+			if (_avatarLoadingCts.IsCancellationRequested)
+				return null;
 
 			if (avatar == null) {
 				Logger.LogError($"Failed to load avatar from cache for identifier {identifier.ToString()}");
-				SetAvatar(await Client.AvatarAPI.LoadError(), identifier);
-				return;
+				var err = await Client.AvatarAPI.LoadError();
+				err.SetIdentifier(identifier);
+				await SetAvatar(err);
+				await playerAvatar.SendAvatarFailed("Failed to load avatar from cache.");
+				return null;
 			}
 
 			Logger.LogDebug($"Avatar loaded: {identifier.ToString()}");
-			SetAvatar(avatar, identifier);
+			avatar.SetIdentifier(identifier);
+			await SetAvatar(avatar);
+			await playerAvatar.SendAvatarReady();
+			return avatar;
 		}
 
 		private async UniTask SetupAvatar() {

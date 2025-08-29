@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
@@ -10,13 +11,15 @@ namespace api.nox.controller {
 
 		private IController    _current;
 		private MainModCoreAPI _coreAPI;
+
 		public void OnInitializeMain(MainModCoreAPI api) {
 			Instance = this;
 			_coreAPI = api;
 			_current = null;
 		}
-		public void OnDisposeMain() {
-			SetCurrent(null);
+
+		public async UniTask OnDisposeMainAsync() {
+			await SetCurrent(null);
 			_coreAPI = null;
 			Instance = null;
 		}
@@ -24,7 +27,7 @@ namespace api.nox.controller {
 		public IController GetCurrent()
 			=> _current;
 
-		public bool SetCurrent(IController controller) {
+		public async UniTask<bool> SetCurrent(IController controller) {
 			if (_current == controller)
 				return true;
 
@@ -36,7 +39,7 @@ namespace api.nox.controller {
 			}
 
 			if (_current != null) {
-				controller?.Restore(_current);
+				await controller.Restore(_current);
 				_current.Dispose();
 			}
 

@@ -14,8 +14,18 @@ namespace Nox.Avatars {
 		/// </summary>
 		/// <returns></returns>
 		public IAvatarDescriptor GetDescriptor();
-		
-		
+
+		/// <summary>
+		/// Converts the avatar to its identifier representation.
+		/// </summary>
+		/// <returns></returns>
+		public IAvatarIdentifier GetIdentifier();
+
+		/// <summary>
+		/// Sets the avatar's identifier.
+		/// </summary>
+		/// <param name="identifier"></param>
+		public void SetIdentifier(IAvatarIdentifier identifier);
 
 		/// <summary>
 		/// Disposes of the avatar and releases any resources it holds.

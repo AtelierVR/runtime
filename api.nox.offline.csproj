@@ -901,6 +901,10 @@
       <Project>{c237149e-58f6-bdd3-6473-3bc76e6fd9f4}</Project>
       <Name>Nox.Users</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.Avatars.csproj">
+      <Project>{4639ae99-1e29-e1b6-9533-34a9b7a24feb}</Project>
+      <Name>Nox.Avatars</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
