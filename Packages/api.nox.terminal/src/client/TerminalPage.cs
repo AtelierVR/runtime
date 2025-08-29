@@ -35,7 +35,7 @@ namespace api.nox.terminal.client {
 		private GameObject        _content;
 		private TerminalComponent _component;
 
-		private readonly Dictionary<string, string> _environments = new();
+		private readonly Dictionary<string, object> _environments = new();
 
 		internal string   _draft = string.Empty;
 		internal string[] _auto  = Array.Empty<string>();
@@ -55,10 +55,17 @@ namespace api.nox.terminal.client {
 		public int GetId()
 			=> _component.GetInstanceID();
 
-		public Dictionary<string, string> GetEnvironments()
+		public Dictionary<string, object> GetEnvironments()
 			=> _environments;
 
-		public void SetEnvironment(string key, string value) {
+
+		public T GetEnvironment<T>(string key, T defaultValue = default)
+			=> _environments.TryGetValue(key.ToUpperInvariant(), out var value) && value is T t
+				? t
+				: defaultValue;
+
+		public void SetEnvironment(string key, object value) {
+			key = key.ToUpperInvariant();
 			if (value == null) _environments.Remove(key);
 			else _environments[key] = value;
 		}
@@ -77,5 +84,25 @@ namespace api.nox.terminal.client {
 			_component.output.text = string.Empty;
 			_component.output.ForceMeshUpdate();
 		}
+
+		public string GetTitle()
+			=> _component.label.arguments.Length > 0
+				? _component.label.arguments[0]
+				: string.Empty;
+
+		public void SetTitle(string title)
+			=> _component.label.UpdateText("terminal.page.title", new[] { title });
+
+		public object GetResult()
+			=> GetEnvironment<object>("result");
+
+		public void SetResult(object result)
+			=> SetEnvironment("result", result);
+
+		public bool CanPrinting()
+			=> GetEnvironment("print_executing", true);
+
+		public void SetPrinting(bool printing)
+			=> SetEnvironment("print_executing", printing);
 	}
 }

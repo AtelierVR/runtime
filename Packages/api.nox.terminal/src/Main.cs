@@ -25,7 +25,13 @@ namespace api.nox.terminal {
 			_defaultCommands = new (uint, ICommand)[] {
 				(0u, new TestCommand()),
 				(0u, new CurlCommand()),
-				(0u, new HelpCommand())
+				(0u, new HelpCommand()),
+				(0u, new TitleCommand()),
+				(0u, new ClearCommand()),
+				(0u, new EchoCommand()),
+				(0u, new SetEnvCommand()),
+				(0u, new GetEnvCommand()),
+				(0u, new UnsetEnvCommand()),
 			};
 
 			for (var i = 0; i < _defaultCommands.Length; i++)

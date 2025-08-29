@@ -13,7 +13,15 @@ namespace Nox.Terminals {
 		/// Get environment variables for the context.
 		/// </summary>
 		/// <returns></returns>
-		public Dictionary<string, string> GetEnvironments();
+		public Dictionary<string, object> GetEnvironments();
+
+		/// <summary>
+		/// Get an environment variable by key.
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="defaultValue"></param>
+		/// <returns></returns>
+		public T GetEnvironment<T>(string key, T defaultValue = default);
 
 		/// <summary>
 		/// Get an environment variable by key.
@@ -21,7 +29,7 @@ namespace Nox.Terminals {
 		/// </summary>
 		/// <param name="key"></param>
 		/// <param name="value"></param>
-		public void SetEnvironment(string key, string value);
+		public void SetEnvironment(string key, object value);
 
 		/// <summary>
 		/// Add text to the terminal output.
@@ -39,5 +47,33 @@ namespace Nox.Terminals {
 		/// Clear the terminal output.
 		/// </summary>
 		public void Clear();
+
+		/// <summary>
+		/// Get the title of the terminal.
+		/// </summary>
+		/// <returns></returns>
+		public string GetTitle();
+
+		/// <summary>
+		/// Set the title of the terminal.
+		/// </summary>
+		/// <param name="title"></param>
+		public void SetTitle(string title);
+
+		/// <summary>
+		/// Get the result of the last executed command.
+		/// </summary>
+		/// <returns></returns>
+		public object GetResult();
+
+		/// <summary>
+		/// Set the result of the last executed command.
+		/// </summary>
+		/// <param name="result"></param>
+		public void SetResult(object result);
+
+		public bool CanPrinting();
+
+		public void SetPrinting(bool printing);
 	}
 }

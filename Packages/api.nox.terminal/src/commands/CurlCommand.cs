@@ -33,9 +33,11 @@ namespace api.nox.terminal.commands {
 			if (parts.Length != 2 || !parts[0].Equals(CommandWithPrefix, StringComparison.OrdinalIgnoreCase))
 				return false;
 
+			var printing = context.CanPrinting();
+
 			var url = parts[1].Trim();
 			if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)) {
-				context.PrintLn($"Invalid URL: {url}");
+				if (printing) context.PrintLn($"Invalid URL: {url}");
 				return true;
 			}
 
@@ -43,12 +45,17 @@ namespace api.nox.terminal.commands {
 				using var httpClient = new System.Net.Http.HttpClient();
 				var       response   = await httpClient.GetAsync(uri);
 				var       content    = await response.Content.ReadAsStringAsync();
+				if (printing) {
+					context.PrintLn($"Response Status: {(int)response.StatusCode} {response.ReasonPhrase}");
+					context.PrintLn("Response Body:");
+					context.PrintLn(content);
+				}
 
-				context.PrintLn($"Response Status: {(int)response.StatusCode} {response.ReasonPhrase}");
-				context.PrintLn("Response Body:");
-				context.PrintLn(content);
+				context.SetResult(content);
 			} catch (Exception ex) {
-				context.PrintLn($"Error fetching URL: {ex.Message}");
+				if (printing)
+					context.PrintLn($"Error fetching URL: {ex.Message}");
+				context.SetResult(ex);
 			}
 
 			return true;

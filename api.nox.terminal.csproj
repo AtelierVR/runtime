@@ -46,6 +46,7 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.1f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Packages\api.nox.terminal\src\commands\EchoCommand.cs" />
     <Compile Include="Packages\api.nox.terminal\src\commands\TestCommand.cs" />
     <Compile Include="Packages\api.nox.terminal\src\client\TerminalComponent.cs" />
     <Compile Include="Packages\api.nox.terminal\src\commands\HelpCommand.cs" />
@@ -54,7 +55,12 @@
     <Compile Include="Packages\api.nox.terminal\src\Main.cs" />
     <Compile Include="Packages\api.nox.terminal\src\client\widget\TerminalWidget.cs" />
     <Compile Include="Packages\api.nox.terminal\src\CommandManager.cs" />
+    <Compile Include="Packages\api.nox.terminal\src\commands\GetEnvCommand.cs" />
+    <Compile Include="Packages\api.nox.terminal\src\commands\ClearCommand.cs" />
+    <Compile Include="Packages\api.nox.terminal\src\commands\SetEnvCommand.cs" />
     <Compile Include="Packages\api.nox.terminal\src\Client.cs" />
+    <Compile Include="Packages\api.nox.terminal\src\commands\UnsetEnvCommand.cs" />
+    <Compile Include="Packages\api.nox.terminal\src\commands\TitleCommand.cs" />
     <None Include="Packages\api.nox.terminal\api.nox.terminal.asmdef" />
     <None Include="Packages\api.nox.terminal\package.json" />
     <None Include="Packages\api.nox.terminal\nox.mod.json" />

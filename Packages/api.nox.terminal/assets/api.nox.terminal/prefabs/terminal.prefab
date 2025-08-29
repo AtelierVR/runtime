@@ -990,7 +990,7 @@ MonoBehaviour:
     m_Left: 16
     m_Right: 16
     m_Top: 8
-    m_Bottom: 16
+    m_Bottom: 24
   m_ChildAlignment: 0
   m_Spacing: 0
   m_ChildForceExpandWidth: 1
@@ -1014,7 +1014,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
   m_IgnoreLayout: 0
   m_MinWidth: -1
-  m_MinHeight: 48
+  m_MinHeight: 56
   m_PreferredWidth: -1
   m_PreferredHeight: -1
   m_FlexibleWidth: -1

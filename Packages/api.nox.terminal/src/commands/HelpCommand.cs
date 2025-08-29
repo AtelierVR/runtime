@@ -38,10 +38,14 @@ namespace api.nox.terminal.commands {
 				return false;
 
 			var commandName = parts.Length == 2 ? parts[1] : null;
-			var commands    = Main.Instance.GetRegistered();
+			var commands = Main.Instance.GetRegistered()
+				.Select(c => c is IHelper ch ? ch : null)
+				.Where(c => c != null)
+				.ToArray();
 
 			if (!string.IsNullOrEmpty(commandName)) {
-				if (commands.FirstOrDefault(c => c is IHelper ch && ch.GetName().Equals(commandName, StringComparison.OrdinalIgnoreCase)) is not IHelper command) {
+				var command = commands.FirstOrDefault(c => c.GetName().Equals(commandName, StringComparison.OrdinalIgnoreCase));
+				if (command == null) {
 					context.PrintLn(LanguageManager.Get("terminal.command.help.no_help", commands.Length));
 					return true;
 				}
@@ -59,11 +63,19 @@ namespace api.nox.terminal.commands {
 				return true;
 			}
 
-			context.PrintLn(LanguageManager.Get("terminal.command.help.list_header"));
-			foreach (var command in commands) {
-				if (command is not IHelper ch) continue;
-				context.PrintLn(LanguageManager.Get("terminal.command.help.list_item", new object[] { ch.GetName(), ch.GetShort() }));
+			if (commands.Length == 0) {
+				context.PrintLn(LanguageManager.Get("terminal.command.help.no_commands"));
+				return true;
 			}
+
+			context.PrintLn(LanguageManager.Get("terminal.command.help.list_header", commands.Length));
+			foreach (var command in commands)
+				context.PrintLn(
+					LanguageManager.Get(
+						"terminal.command.help.list_item",
+						new object[] { command.GetName(), command.GetShort() }
+					)
+				);
 
 			return true;
 		}

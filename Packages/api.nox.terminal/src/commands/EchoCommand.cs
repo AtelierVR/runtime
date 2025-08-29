@@ -4,9 +4,9 @@ using Nox.CCK.Language;
 using Nox.Terminals;
 
 namespace api.nox.terminal.commands {
-	public class TestCommand : ICommand, IHelper {
+	public class EchoCommand : ICommand, IHelper {
 		public string GetName()
-			=> "test";
+			=> "echo";
 
 		public string GetDescription()
 			=> LanguageManager.Get($"terminal.command.{GetName()}.description");
@@ -15,7 +15,7 @@ namespace api.nox.terminal.commands {
 			=> LanguageManager.Get($"terminal.command.{GetName()}.short");
 
 		public string GetUsage()
-			=> CommandWithPrefix;
+			=> $"{CommandWithPrefix} <string>";
 
 		private string CommandWithPrefix
 			=> $"{CommandManager.CommandPrefix}{GetName()}";
@@ -25,13 +25,19 @@ namespace api.nox.terminal.commands {
 				? new[] { CommandWithPrefix }
 				: Array.Empty<string>();
 
-		public UniTask<bool> Execute(string input, IContext context = null) {
-			if (input.ToLower() != CommandWithPrefix)
-				return UniTask.FromResult(false);
+		public UniTask<bool> Execute(string input, IContext context = null)
+			=> UniTask.FromResult(ExecuteInternal(input, context));
 
-			context?.PrintLn("Test command executed successfully!");
-			context?.SetResult(true);
-			return UniTask.FromResult(true);
+		private bool ExecuteInternal(string input, IContext context = null) {
+			if (string.IsNullOrWhiteSpace(input) || context == null)
+				return false;
+
+			var parts = input.Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+			if (parts.Length != 2 || !parts[0].Equals(CommandWithPrefix, StringComparison.OrdinalIgnoreCase))
+				return false;
+
+			context.PrintLn(parts[1].Trim());
+			return true;
 		}
 	}
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
 using Nox.CCK.Utils;
@@ -47,12 +48,27 @@ namespace api.nox.terminal.client {
 			if (string.IsNullOrWhiteSpace(command)) return;
 			input.interactable = false;
 
-			if (await Main.Instance.Execute(command.Trim(), _page)) {
-				input.text  = string.Empty;
-				_page._auto = Array.Empty<string>();
-				Logger.LogDebug($"Command executed: {command}");
-			} else Logger.LogWarning($"Command execution failed: {command}");
+			command = command.Trim();
+			var printExecuting = _page.GetEnvironment("print_executing", "true") is "true" or "1";
 
+			if (printExecuting)
+				_page.PrintLn(
+					LanguageManager.Get(
+						"terminal.command.executing",
+						new object[] { command }
+					)
+				);
+
+			if (await Main.Instance.Execute(command.Trim(), _page)) {
+				Logger.LogDebug($"Command executed: {command}");
+			} else {
+				if (printExecuting)
+					_page.PrintLn(LanguageManager.Get("terminal.command.not_found"));
+				Logger.LogWarning($"Command execution failed: {command}");
+			}
+
+			input.text         = string.Empty;
+			_page._auto        = Array.Empty<string>();
 			input.interactable = true;
 			input.ActivateInputField();
 		}
@@ -94,11 +110,16 @@ namespace api.nox.terminal.client {
 			component.labelIcon        = Reference.GetComponent<Image>("image", icon);
 			component.label            = Reference.GetComponent<TextLanguage>("text", label);
 			component.labelIcon.sprite = Client.GetAsset<Sprite>("icons/terminal.png", "ui");
+			component.label.UpdateText(
+				"terminal.page.title",
+				new[] { LanguageManager.Get("terminal.page.title.default") }
+			);
 
 			var terminal = Instantiate(
 				Client.GetAsset<GameObject>("prefabs/terminal.prefab"),
 				Reference.GetComponent<RectTransform>("content", withTitle)
 			);
+
 			component.input    = Reference.GetComponent<TMPro.TMP_InputField>("input", terminal);
 			component.output   = Reference.GetComponent<TMPro.TextMeshProUGUI>("output", terminal);
 			component.content  = Reference.GetComponent<HorizontalOrVerticalLayoutGroup>("content", terminal);
@@ -109,6 +130,8 @@ namespace api.nox.terminal.client {
 
 			component.input.onSubmit.AddListener(component.OnSubmit);
 			component.input.onValueChanged.AddListener(component.OnValueChanged);
+			component.input.text  = component._page._draft ?? string.Empty;
+			component.output.text = string.Empty;
 
 			return (content, component);
 		}

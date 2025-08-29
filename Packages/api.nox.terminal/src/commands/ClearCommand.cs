@@ -4,9 +4,9 @@ using Nox.CCK.Language;
 using Nox.Terminals;
 
 namespace api.nox.terminal.commands {
-	public class TestCommand : ICommand, IHelper {
+	public class ClearCommand : ICommand, IHelper {
 		public string GetName()
-			=> "test";
+			=> "clear";
 
 		public string GetDescription()
 			=> LanguageManager.Get($"terminal.command.{GetName()}.description");
@@ -29,8 +29,7 @@ namespace api.nox.terminal.commands {
 			if (input.ToLower() != CommandWithPrefix)
 				return UniTask.FromResult(false);
 
-			context?.PrintLn("Test command executed successfully!");
-			context?.SetResult(true);
+			context?.Clear();
 			return UniTask.FromResult(true);
 		}
 	}

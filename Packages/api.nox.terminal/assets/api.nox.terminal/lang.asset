@@ -23,3 +23,23 @@ MonoBehaviour:
       value: "{0} available commands:"
     - key: terminal.command.help.list_item
       value: " - {0} - {1}"
+    - key: terminal.command.not_found
+      value: "Command not found."
+    - key: terminal.command.executing
+      value: "\n> {0}"
+    - key: terminal.page.title
+      value: "{0}"
+    - key: terminal.page.title.default
+      value: "Terminal"
+    - key: terminal.command.help.no_commands
+      value: "No commands available."
+    - key: terminal.command.getenv.label
+      value: "Environment variable '{0}' is '{1}'."
+    - key: terminal.command.setenv.success
+      value: "Environment variable '{0}' set to '{1}'."
+    - key: terminal.command.unsetenv.success
+      value: "Environment variable '{0}' has been removed."
+    - key: terminal.command.title.get
+      value: "The title is '{0}'."
+    - key: terminal.command.title.set
+      value: "The title has been set to '{0}'."
