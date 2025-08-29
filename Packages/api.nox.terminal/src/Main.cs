@@ -1,3 +1,7 @@
+using System;
+using api.nox.terminal.commands;
+using Cysharp.Threading.Tasks;
+using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.Terminals;
@@ -7,29 +11,55 @@ namespace api.nox.terminal {
 		internal        MainModCoreAPI CoreAPI;
 		internal static Main           Instance;
 		private         CommandManager _manager;
+		private         LanguagePack   _lang;
+
+		private (uint, ICommand)[] _defaultCommands = Array.Empty<(uint, ICommand)>();
 
 		public void OnInitializeMain(MainModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
 			_manager = new CommandManager();
+			_lang    = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
+			LanguageManager.AddPack(_lang);
+
+			_defaultCommands = new (uint, ICommand)[] {
+				(0u, new TestCommand()),
+				(0u, new CurlCommand()),
+				(0u, new HelpCommand())
+			};
+
+			for (var i = 0; i < _defaultCommands.Length; i++)
+				_defaultCommands[i].Item1 = _manager.Register(_defaultCommands[i].Item2);
 		}
 
 		public void OnDisposeMain() {
+			for (var i = 0; i < _defaultCommands.Length; i++)
+				_manager.Unregister(_defaultCommands[i].Item1);
+			_defaultCommands = Array.Empty<(uint, ICommand)>();
+			LanguageManager.RemovePack(_lang);
 			CoreAPI  = null;
 			Instance = null;
 			_manager = null;
 		}
 
-		public bool Execute(string args)
-			=> _manager.ExecuteCommand(args);
+		public ICommand[] GetRegistered()
+			=> _manager.Commands
+				.ConvertAll(c => c.Item2)
+				.ToArray();
 
-		public string[] AutoComplete(string args)
-			=> _manager.AutoComplete(args);
+		public async UniTask<bool> Execute(string args, IContext context = null)
+			=> await _manager.ExecuteCommand(args, context);
+
+		public string[] AutoComplete(string args, IContext context = null)
+			=> _manager.AutoComplete(args, context);
 
 		public uint Register(ICommand command)
 			=> _manager.Register(command);
 
 		public void Unregister(uint id)
 			=> _manager.Unregister(id);
+
+		public string GetPrefix()
+			=> CommandManager.CommandPrefix;
 	}
 }

@@ -1,8 +1,14 @@
+using Cysharp.Threading.Tasks;
+
 namespace Nox.Terminals {
 	public interface ITerminalAPI {
-		public bool Execute(string args);
+		public string GetPrefix();
 
-		public string[] AutoComplete(string args);
+		public ICommand[] GetRegistered();
+
+		public UniTask<bool> Execute(string args, IContext context = null);
+
+		public string[] AutoComplete(string args, IContext context = null);
 
 		public uint Register(ICommand command);
 

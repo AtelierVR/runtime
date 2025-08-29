@@ -1,8 +1,11 @@
+using System;
+using System.Collections.Generic;
+using Nox.Terminals;
 using Nox.UI;
 using UnityEngine;
 
 namespace api.nox.terminal.client {
-	public class TerminalPage : IPage {
+	public class TerminalPage : IPage, IContext {
 		internal static string GetStaticKey()
 			=> "terminal";
 
@@ -29,9 +32,13 @@ namespace api.nox.terminal.client {
 
 		private int               _mId;
 		private object[]          _context;
-		private string            _draft;
 		private GameObject        _content;
 		private TerminalComponent _component;
+
+		private readonly Dictionary<string, string> _environments = new();
+
+		internal string   _draft = string.Empty;
+		internal string[] _auto  = Array.Empty<string>();
 
 		public object[] GetContext()
 			=> _context;
@@ -44,5 +51,31 @@ namespace api.nox.terminal.client {
 
 		public IMenu GetMenu()
 			=> Client.UiAPI.Get<IMenu>(_mId);
+
+		public int GetId()
+			=> _component.GetInstanceID();
+
+		public Dictionary<string, string> GetEnvironments()
+			=> _environments;
+
+		public void SetEnvironment(string key, string value) {
+			if (value == null) _environments.Remove(key);
+			else _environments[key] = value;
+		}
+
+		public void Print(string message) {
+			if (!_component) return;
+			_component.output.text += message;
+			_component.output.ForceMeshUpdate();
+		}
+
+		public void PrintLn(string message)
+			=> Print(message + Environment.NewLine);
+
+		public void Clear() {
+			if (!_component) return;
+			_component.output.text = string.Empty;
+			_component.output.ForceMeshUpdate();
+		}
 	}
 }

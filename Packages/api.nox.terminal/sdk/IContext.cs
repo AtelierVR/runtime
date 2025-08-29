@@ -13,7 +13,7 @@ namespace Nox.Terminals {
 		/// Get environment variables for the context.
 		/// </summary>
 		/// <returns></returns>
-		public Dictionary<string, object> GetEnvironments();
+		public Dictionary<string, string> GetEnvironments();
 
 		/// <summary>
 		/// Get an environment variable by key.
@@ -21,13 +21,19 @@ namespace Nox.Terminals {
 		/// </summary>
 		/// <param name="key"></param>
 		/// <param name="value"></param>
-		public void SetEnvironment(string key, object value);
+		public void SetEnvironment(string key, string value);
 
 		/// <summary>
 		/// Add text to the terminal output.
 		/// </summary>
 		/// <param name="message"></param>
 		public void Print(string message);
+
+		/// <summary>
+		/// Add text to the terminal output with a newline.
+		/// </summary>
+		/// <param name="message"></param>
+		public void PrintLn(string message);
 
 		/// <summary>
 		/// Clear the terminal output.
