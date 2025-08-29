@@ -14,6 +14,9 @@ namespace api.nox.relay.types {
 		Transform        = 0x0C,
 		Teleport         = 0x0D,
 		AvatarChanged    = 0x0E,
+		MultiPacketStart = 0x0F,
+		MultiPacketData  = 0x10,
+		MultiPacketEnd   = 0x11,
 		None             = 0xFF
 	}
 }

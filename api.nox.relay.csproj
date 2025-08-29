@@ -52,6 +52,7 @@
     <Compile Include="Packages\api.nox.relay\src\adapter\players\local\RelayPhysicalLocalPlayer.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\session\RelayResponseSessions.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\RelayResponse.cs" />
+    <Compile Include="Packages\api.nox.relay\src\connection\ClientMultiPacketManager.cs" />
     <Compile Include="Packages\api.nox.relay\src\adapter\RelayState.cs" />
     <Compile Include="Packages\api.nox.relay\src\adapter\Adapting.cs" />
     <Compile Include="Packages\api.nox.relay\src\connection\Connection.cs" />

@@ -39,7 +39,20 @@ namespace api.nox.relay.connection {
 			var state  = buffer.ReadUShort();
 			var type   = buffer.ReadEnum<ResponseType>();
 			if (length < 5 || length > buffer.length) return;
-			switch (type) {
+			
+			Logger.LogDebug($"bb Received {type} response (length={length}, state={state})");
+
+			switch (type)
+			{
+				case ResponseType.MultiPacketStart:
+					HandleMultiPacketStart(buffer, state, length);
+					break;
+				case ResponseType.MultiPacketData:
+					HandleMultiPacketData(buffer, state, length);
+					break;
+				case ResponseType.MultiPacketEnd:
+					HandleMultiPacketEnd(buffer, state, length);
+					break;
 				case ResponseType.Enter:
 				case ResponseType.Quit:
 				case ResponseType.Join:
@@ -47,6 +60,7 @@ namespace api.nox.relay.connection {
 				case ResponseType.Teleport:
 				case ResponseType.Transform:
 				case ResponseType.CustomDataPacket:
+				case ResponseType.AvatarChanged:
 				case ResponseType.Traveling:
 					var iid = buffer.ReadByte();
 					Logger.LogDebug($"Received {type} for instance {iid} with state {state}");
@@ -55,17 +69,88 @@ namespace api.nox.relay.connection {
 					break;
 				case ResponseType.Disconnect:
 					var disconnect = new types.Disconnect.RelayEventDisconnect();
-					if (disconnect.FromBuffer(buffer.Clone(5, length))) {
+					if (disconnect.FromBuffer(buffer.Clone(5, length)))
+					{
 						Logger.Log($"Disconnect {disconnect.Reason}");
 						_lastHandshake = null;
-						_lastLatency   = null;
+						_lastLatency = null;
 						Connector.Close().Forget();
-					} else {
+					}
+					else
+					{
 						Logger.LogError($"Failed to parse disconnect");
 					}
 
 					break;
 			}
+		}
+
+		private void HandleMultiPacketStart(Buffer buffer, ushort state, ushort length)
+		{
+			var sessionId = buffer.ReadUShort();
+			var totalPackets = buffer.ReadUShort();
+			var totalSize = (uint)buffer.ReadInt();
+			var originalType = buffer.ReadEnum<ResponseType>();
+			var originalUid = buffer.ReadUShort();
+
+			ClientMultiPacketManager.StartSession(sessionId, totalPackets, totalSize, originalType, state);
+			Logger.LogDebug($"Started receiving multipacket session {sessionId} with {totalPackets} packets, size {totalSize}");
+		}
+
+		private void HandleMultiPacketData(Buffer buffer, ushort state, ushort length)
+		{
+			var sessionId = buffer.ReadUShort();
+			var packetIndex = buffer.ReadUShort();
+			var dataLength = buffer.ReadUShort();
+			var remainingLength = length - 9; // 5 (header) + 2 (sessionId) + 2 (packetIndex)
+			var actualLength = Math.Min(dataLength, remainingLength);
+			
+			if (actualLength <= 0)
+			{
+				Logger.LogWarning($"Invalid data length for multipacket session {sessionId}, packet {packetIndex}");
+				return;
+			}
+
+			var data = new byte[actualLength];
+			for (int i = 0; i < actualLength; i++)
+			{
+				data[i] = buffer.ReadByte();
+			}
+
+			ClientMultiPacketManager.AddPacket(sessionId, packetIndex, data);
+			Logger.LogDebug($"Received multipacket data {packetIndex} for session {sessionId}");
+		}
+
+		private void HandleMultiPacketEnd(Buffer buffer, ushort state, ushort length)
+		{
+			var sessionId = buffer.ReadUShort();
+			var session = ClientMultiPacketManager.CompleteSession(sessionId);
+
+			if (session == null)
+			{
+				Logger.LogWarning($"Failed to complete multipacket session {sessionId}");
+				return;
+			}
+
+			var mergedData = session.GetMergedData();
+			if (mergedData == null)
+			{
+				Logger.LogError($"Failed to merge data for session {sessionId}");
+				return;
+			}
+
+			Logger.LogDebug($"Successfully merged {mergedData.Length} bytes for session {sessionId}");
+
+			// Create a new buffer with the merged data and process it as the original type
+			var mergedBuffer = new Buffer((ushort)(mergedData.Length + 5));
+			mergedBuffer.Write((ushort)(mergedData.Length + 5));
+			mergedBuffer.Write(session.OriginalState);
+			mergedBuffer.Write(session.OriginalType);
+			mergedBuffer.Write(mergedData);
+			mergedBuffer.Goto(0);
+
+			// Process the merged packet recursively
+			OnReceived(mergedBuffer);
 		}
 
 		internal readonly List<RelayInstance> Instances = new();
@@ -111,7 +196,7 @@ namespace api.nox.relay.connection {
 
 		public ushort NextState() {
 			if (_nextState == ushort.MaxValue)
-				_nextState = ushort.MinValue + 1;
+				_nextState = 0;
 			return _nextState++;
 		}
 
@@ -145,6 +230,7 @@ namespace api.nox.relay.connection {
 					var responseState = buffer.ReadUShort();
 					var responseType  = buffer.ReadEnum<ResponseType>();
 					if (responseType != iType) return;
+					Logger.LogDebug($"aa Received {responseType} response (length={length}, state={state}) responseState={responseState}");
 					if (state != ushort.MaxValue && responseState != state) return;
 					var response = new T { ConnectionId = Id, State = state };
 					res = response.FromBuffer(buffer.Clone(5, length)) ? response : null;
