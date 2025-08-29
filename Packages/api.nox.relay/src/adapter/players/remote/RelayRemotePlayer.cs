@@ -25,6 +25,7 @@ namespace api.nox.relay {
 			_physicalComponent = instance.GetComponent<RelayPhysicalRemotePlayer>();
 			instance.name      = $"[{_physicalComponent.GetType().Name}_{GetId()}]";
 			_physicalComponent.SetReference(this);
+			_physicalComponent.SetAvatar(AvatarIdentifier).Forget();
 			Logger.Log($"Created physical component for player {GetDisplay()} ({GetId()}) at {GetPosition()}");
 			return _physicalComponent;
 		}
@@ -32,7 +33,7 @@ namespace api.nox.relay {
 		public override void DestroyPhysical() {
 			if (!_physicalComponent) return;
 			Logger.Log($"Destroying physical component for player {GetDisplay()} ({GetId()}) at {GetPosition()}");
-			Object.Destroy(_physicalComponent);
+			Object.Destroy(_physicalComponent.gameObject);
 			_physicalComponent = null;
 		}
 
@@ -40,6 +41,14 @@ namespace api.nox.relay {
 			=> _physicalComponent;
 
 		public override async UniTask<bool> SetAvatar(IAvatarIdentifier identifier) {
+			if (identifier == null || !identifier.IsValid()) {
+				Logger.LogWarning($"Tried to set invalid avatar identifier to player {GetDisplay()} ({GetId()})");
+				return false;
+			}
+
+			if (identifier.Equals(AvatarIdentifier))
+				return true;
+
 			if (_physicalComponent && await _physicalComponent.SetAvatar(identifier) == null)
 				return false;
 

@@ -197,7 +197,7 @@ namespace api.nox.avatar.network {
 			}
 
 			if (address == ide.GetServerAddress())
-				ide.Server = "::"; // Use "::" to indicate local server in the identifier
+				ide.Server = AvatarIdentifier.LocalServer; // Use "::" to indicate local server in the identifier
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, $"/api/avatars/{ide.ToString()}/assets{data.ToParams()}");

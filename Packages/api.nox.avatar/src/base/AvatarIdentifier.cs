@@ -4,7 +4,7 @@ using Nox.Avatars;
 namespace api.nox.avatar {
 	public class AvatarIdentifier : IAvatarIdentifier {
 		private const uint   InvalidId   = 0;
-		private const string LocalServer = "::";
+		public const  string LocalServer = "::";
 
 		private readonly uint                         _id;
 		internal         string                       Server;
@@ -28,7 +28,6 @@ namespace api.nox.avatar {
 
 		public string ToString(string fallbackServer = null)
 			=> $"{_id.ToString()}{(IsLocal() ? string.IsNullOrEmpty(fallbackServer) ? "" : "@" + fallbackServer : "@" + Server)}";
-
 
 		public string GetServerAddress()
 			=> Server;

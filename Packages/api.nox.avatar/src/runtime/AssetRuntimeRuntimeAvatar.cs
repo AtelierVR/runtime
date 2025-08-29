@@ -63,7 +63,6 @@ namespace api.nox.avatar {
 			}
 
 			progress?.Invoke(1);
-			avatar.Root.SetActive(true);
 
 			return avatar;
 		}

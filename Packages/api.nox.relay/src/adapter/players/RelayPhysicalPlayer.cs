@@ -10,7 +10,7 @@ namespace api.nox.relay {
 	/// Component physique pour les joueurs relay, permettant l'interaction avec le système physique Unity
 	/// </summary>
 	[Gizmos("relay.physical.player")]
-	public class RelayPhysicalPlayer : PlayerPhysical, IPlayerPhysicalAvatar  {
+	public class RelayPhysicalPlayer : PlayerPhysical, IPlayerPhysicalAvatar {
 		protected RelayPlayer Reference;
 
 		public void SetReference(RelayPlayer player) {

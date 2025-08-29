@@ -1,7 +1,8 @@
 namespace api.nox.relay.types.Avatar {
 	public enum AvatarChangedResult : byte {
-		Success = 1 << 0,
-		Unknown = 1 << 1,
-		Failed  = 1 << 2
+		Changing = 0,
+		Unknown  = 1,
+		Failed   = 2,
+		Success  = 3
 	}
 }

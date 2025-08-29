@@ -59,9 +59,6 @@ namespace api.nox.relay.Instances {
 		public async UniTask<bool> SendTransform(types.Transform.InstanceRequestTransform request)
 			=> (await Connection.Emit(request.ToBuffer(), RequestType.Transform)).Item1;
 
-		public async UniTask<bool> SendAvatarChange(types.Avatar.InstanceRequestAvatarChanged request)
-			=> (await Connection.Emit(request.ToBuffer(), RequestType.AvatarChanged)).Item1;
-
 		public async UniTask<types.Enter.EnterResponse> RequestEnter(string display = null, string password = null, types.Enter.EnterFlags flags = types.Enter.EnterFlags.None) {
 			Connection.Instances.Add(this);
 
@@ -123,18 +120,16 @@ namespace api.nox.relay.Instances {
 				)
 				?? types.Traveling.TravelingEvent.CreateUnknown(Connection.Id, InternalId, "Unknown traveling request");
 
-		public async UniTask<types.Avatar.AvatarChangedEvent> RequestAvatarChange(types.Avatar.AvatarChangedAction action, string reason = null)
-			=> await Connection.Request<types.Avatar.AvatarChangedEvent>(
-					new types.Avatar.InstanceRequestAvatarChanged {
-						ConnectionId = Connection.Id,
-						InternalId   = InternalId,
-						Action       = action,
-						Reason       = reason
-					},
+		public async UniTask<types.Avatar.AvatarChangedEvent> RequestAvatarChange(types.Avatar.InstanceRequestAvatarChanged request) {
+			request.InternalId   = InternalId;
+			request.ConnectionId = Connection.Id;
+			return await Connection.Request<types.Avatar.AvatarChangedEvent>(
+					request,
 					RequestType.AvatarChanged,
 					ResponseType.AvatarChanged,
 					Connection.NextState()
 				)
 				?? types.Avatar.AvatarChangedEvent.CreateUnknown(Connection.Id, InternalId, "Unknown avatar change request");
+		}
 	}
 }

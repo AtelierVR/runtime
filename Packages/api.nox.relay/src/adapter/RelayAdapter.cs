@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using api.nox.offline;
 using api.nox.relay.connection;
 using api.nox.relay.Instances;
@@ -21,28 +19,27 @@ using Nox.Sessions;
 using Nox.Worlds;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
-using Object = System.Object;
 
 namespace api.nox.relay {
 	public class RelayAdapter : IAdapter, INoxObject {
-		internal         RelayDimension    Dimension;
+		private          RelayDimension    _dimension;
 		private readonly IEntityManager    _entities;
-		internal         ISession          Session;
+		private          ISession          _session;
 		private          RelayState        _state = new(true);
 		internal         Connection        Connection;
 		internal         RelayInstance     Instance;
 		internal         IAvatarIdentifier Avatar;
 
 		private  bool       _isTraveling = true;
-		internal byte       Tps          = 0;
+		internal byte       Tps          = 24;
 		private  DateTime   _lastUpdate  = DateTime.MinValue;
 		internal float      Threshold    = 0.001f;
-		internal float      RenderEntity = 100f;
+		private  float      _renderEntity = 100f;
 		internal GameObject EntitiesRoot;
 
 
 		internal RelayAdapter() {
-			Dimension    = null;
+			_dimension    = null;
 			_entities    = Main.EntityAPI.New();
 			EntitiesRoot = new GameObject($"[{GetType().Name}Entities]");
 			UnityEngine.Object.DontDestroyOnLoad(EntitiesRoot);
@@ -52,7 +49,7 @@ namespace api.nox.relay {
 		public void OnEnter(EnterResponse ev) {
 			Tps          = ev.Tps;
 			Threshold    = ev.Threshold;
-			RenderEntity = ev.RenderEntity;
+			_renderEntity = ev.RenderEntity;
 			Instance.RequestTraveling(TravelingAction.Travel).Forget();
 		}
 
@@ -65,17 +62,18 @@ namespace api.nox.relay {
 			Logger.LogDebug($"OnLeave: {ev}");
 			var player = _entities.GetEntity<RelayRemotePlayer>(ev.PlayerId);
 			if (player == null) return;
-			_entities.UnregisterEntity(player);
+			RemovePlayer(player);
 		}
 
 		public void OnAvatarChanged(AvatarChangedEvent ev)
 			=> OnAvatarChangedAsync(ev).Forget();
 
-		private async UniTask<bool> OnAvatarChangedAsync(AvatarChangedEvent ev, bool autoResponse = true) {
+		private async UniTask OnAvatarChangedAsync(AvatarChangedEvent ev) {
+			if (ev.Result != AvatarChangedResult.Changing) return;
 			Logger.LogDebug($"OnAvatarChanged: {ev}");
 			var player = _entities.GetEntity<RelayPlayer>(ev.PlayerId);
-			if (player == null) return false;
-			return await player.SetAvatar(ev.AvatarIdentifier);
+			if (player == null) return;
+			await player.SetAvatar(ev.AvatarIdentifier);
 		}
 
 		public void OnUpdate() {
@@ -94,9 +92,9 @@ namespace api.nox.relay {
 				local.MakePhysical();
 			foreach (var other in others) {
 				var physical = other.HasPhysical();
-				if (other.DistanceToLocal > RenderEntity && physical)
+				if (other.DistanceToLocal > _renderEntity && physical)
 					other.DestroyPhysical();
-				else if (other.DistanceToLocal <= RenderEntity && !physical)
+				else if (other.DistanceToLocal <= _renderEntity && !physical)
 					other.MakePhysical();
 			}
 		}
@@ -110,16 +108,16 @@ namespace api.nox.relay {
 		public void OnQuit(QuitEvent ev) {
 			Tps          = 0;
 			Threshold    = 0.001f;
-			RenderEntity = 100f;
+			_renderEntity = 100f;
 		}
 
 		public void OnTraveling(TravelingEvent ev)
 			=> OnTravelingAsync(ev).Forget();
 
-		private async UniTask OnTravelingFailed(TravelingEvent ev, string reason)
+		private async UniTask OnTravelingFailed(TravelingEvent _, string reason)
 			=> await Instance.RequestTraveling(TravelingAction.Failed, reason);
 
-		private async UniTask OnTravelingSuccess(TravelingEvent ev)
+		private async UniTask OnTravelingSuccess(TravelingEvent _)
 			=> await Instance.RequestTraveling(TravelingAction.Ready);
 
 		public async UniTask<bool> OnTravelingAsync(TravelingEvent ev, bool autoResponse = true, Action<float, string> progress = null) {
@@ -200,7 +198,7 @@ namespace api.nox.relay {
 
 		public void SetDimension(IRuntimeWorld runtimeWorld) {
 			if (runtimeWorld == null) return;
-			Dimension = new RelayDimension(0, runtimeWorld, true);
+			_dimension = new RelayDimension(0, runtimeWorld, true);
 		}
 
 		public IAdapterState GetState()
@@ -209,7 +207,7 @@ namespace api.nox.relay {
 		internal void SetState(bool isReady, string message = "", float progress = 1f) {
 			var old = _state;
 			_state = new RelayState(isReady, message, progress);
-			Session.OnStateChanged(_state, old);
+			_session.OnStateChanged(_state, old);
 			Logger.LogDebug($"SetState: {this} -> {_state}");
 		}
 
@@ -217,11 +215,11 @@ namespace api.nox.relay {
 		public void SetSession(ISession session) {
 			Logger.LogDebug($"SetSession: {this} -> {session}");
 			EntitiesRoot.name = $"[{GetType().Name}Entities_{session.GetId()}]";
-			Session           = session;
+			_session           = session;
 		}
 
 		public IDimension GetDimension()
-			=> Dimension;
+			=> _dimension;
 
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask Dispose() {
@@ -229,9 +227,9 @@ namespace api.nox.relay {
 			if (Connection != null) await Connection.RequestDisconnect();
 			foreach (var entity in _entities.GetEntities().ToArray())
 				_entities.UnregisterEntity(entity);
-			if (Dimension.GetMainIndex() > 0)
-				Dimension.GetScene().GetMainScene().RemoveInstance(Dimension.GetMainIndex());
-			Dimension = null;
+			if (_dimension.GetMainIndex() > 0)
+				_dimension.GetScene().GetMainScene().RemoveInstance(_dimension.GetMainIndex());
+			_dimension = null;
 			UnityEngine.Object.Destroy(EntitiesRoot);
 			EntitiesRoot = null;
 		}
@@ -256,21 +254,21 @@ namespace api.nox.relay {
 
 		public async UniTask OnDeselect(ISession newSession) {
 			Logger.LogDebug($"OnDeselect: {this}");
-			var main = Dimension.GetScene().GetMainScene();
-			main?.SetVisibleInstance(Dimension.GetMainIndex(), false, false);
+			var main = _dimension.GetScene().GetMainScene();
+			main?.SetVisibleInstance(_dimension.GetMainIndex(), false, false);
 			await UniTask.Yield();
 		}
 
 		public async UniTask OnSelect(ISession oldSession) {
 			Logger.LogDebug($"OnSelect: {this}");
-			if (Dimension == null)
+			if (_dimension == null)
 				throw new InvalidOperationException($"No current dimension found for session {this}. Please ensure a dimension is set before selecting the session.");
 			// if (GetLocalPlayer() == null) NewPlayer();
-			var main = Dimension.GetScene().GetMainScene();
-			if (Dimension.GetMainIndex() == 0)
-				Dimension.SetMainIndex(await main.MakeInstance());
-			Dimension.GetScene().SetCurrent();
-			main.SetVisibleInstance(Dimension.GetMainIndex(), true, true);
+			var main = _dimension.GetScene().GetMainScene();
+			if (_dimension.GetMainIndex() == 0)
+				_dimension.SetMainIndex(await main.MakeInstance());
+			_dimension.GetScene().SetCurrent();
+			main.SetVisibleInstance(_dimension.GetMainIndex(), true, true);
 		}
 
 		public async UniTask<bool> TransferAuthority(IPlayer player) {
@@ -279,17 +277,19 @@ namespace api.nox.relay {
 			return false;
 		}
 
-		public void NewPlayer<T>(InstancePlayer player) where T : RelayPlayer, new() {
+		public T NewPlayer<T>(InstancePlayer player) where T : RelayPlayer, new() {
 			var np = new T();
 			np.SetReference(player, this);
 			_entities.RegisterEntity(np);
-			Session.OnPlayerJoined(np);
+			_session.OnPlayerJoined(np);
+			return np;
 		}
 
-		public void RemovePlayer(IPlayer player) {
+		private void RemovePlayer(RelayPlayer player) {
 			if (player == null) return;
 			_entities.UnregisterEntity(player);
-			Session.OnPlayerLeft(player);
+			_session.OnPlayerLeft(player);
+			player.Dispose();
 		}
 	}
 }

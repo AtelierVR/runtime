@@ -176,10 +176,6 @@ namespace api.nox.relay {
 			adapter.Instance.OnLeave.AddListener(adapter.OnLeave);
 			adapter.Instance.OnAvatarChanged.AddListener(adapter.OnAvatarChanged);
 
-			Logger.LogDebug($"Got instance {adapter.Instance} from relay");
-			adapter.SetState(false, $"Got instance {instance} from relay", 0.275f);
-
-
 			adapter.SetState(false, "Connecting to an instance...", 0.3f);
 			var enter = await adapter.Instance.RequestEnter();
 			if (enter.IsError) {
@@ -191,7 +187,7 @@ namespace api.nox.relay {
 
 			adapter.Tps       = enter.Tps;
 			adapter.Threshold = enter.Threshold;
-
+			
 			adapter.SetState(false, $"Connected as {enter.Player.Display} ({enter.Player.Id}) to instance {instance}", 0.325f);
 
 			var travalRequest = await adapter.Instance.RequestTraveling(TravelingAction.Travel);
@@ -216,8 +212,6 @@ namespace api.nox.relay {
 				return;
 			}
 
-			adapter.NewPlayer<RelayLocalPlayer>(enter.Player);
-
 			var travelReady = await adapter.Instance.RequestTraveling(TravelingAction.Ready);
 			if (!travelReady.IsReady) {
 				adapter.SetState(false, $"Failed to travel to instance {instance}: {travelReady.Reason}", -1f);
@@ -228,9 +222,19 @@ namespace api.nox.relay {
 
 			adapter.Instance.OnTraveling.AddListener(adapter.OnTraveling);
 			adapter.Instance.OnEnter.AddListener(adapter.OnEnter);
-			
+
+			var player = adapter.NewPlayer<RelayLocalPlayer>(enter.Player);
+
+			adapter.SetState(false, "Setting local player avatar...", 0.9f);
+			if (!await player.SetAvatar(player.GetAvatar())) {
+				adapter.SetState(false, "Failed to set local player avatar", -1f);
+				Logger.LogDebug($"Failed to set local player avatar for instance {instance}");
+				await connection.Dispose();
+				return;
+			}
+
 			if (setCurrent) {
-				adapter.SetState(false, "Setting instance as current", 0.9f);
+				adapter.SetState(false, "Setting instance as current", 0.95f);
 				await session.SetCurrent();
 			}
 

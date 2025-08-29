@@ -136,18 +136,17 @@ namespace api.nox.desktop {
 		public async UniTask<IRuntimeAvatar> SetAvatar(IAvatarIdentifier identifier) {
 			Logger.LogDebug($"Loading avatar for identifier {identifier?.ToString() ?? "null"}");
 
-			if (_attachedPlayer is not ILocalPlayerAvatar playerAvatar) {
-				Logger.LogError("The local player is not an ILocalPlayerAvatar, cannot set avatar.");
-				return null;
-			}
+			var playerAvatar = _attachedPlayer as ILocalPlayerAvatar;
 
 			if (identifier == null || !identifier.IsValid()) {
-				await playerAvatar.SendAvatarFailed("Invalid avatar identifier.");
+				if (playerAvatar != null)
+					await playerAvatar.SendAvatarFailed("Invalid avatar identifier.");
 				return null;
 			}
 
 			if (identifier.Equals(_attachedRuntimeAvatar?.GetIdentifier())) {
-				await playerAvatar.SendAvatarReady();
+				if (playerAvatar != null)
+					await playerAvatar.SendAvatarReady();
 				return _attachedRuntimeAvatar;
 			}
 
@@ -173,7 +172,8 @@ namespace api.nox.desktop {
 				var err = await Client.AvatarAPI.LoadError();
 				err.SetIdentifier(identifier);
 				await SetAvatar(err);
-				await playerAvatar.SendAvatarFailed("Avatar asset not found.");
+				if (playerAvatar != null)
+					await playerAvatar.SendAvatarFailed("Avatar asset not found.");
 				return null;
 			}
 
@@ -203,14 +203,16 @@ namespace api.nox.desktop {
 				var err = await Client.AvatarAPI.LoadError();
 				err.SetIdentifier(identifier);
 				await SetAvatar(err);
-				await playerAvatar.SendAvatarFailed("Failed to load avatar from cache.");
+				if (playerAvatar != null)
+					await playerAvatar.SendAvatarFailed("Failed to load avatar from cache.");
 				return null;
 			}
 
 			Logger.LogDebug($"Avatar loaded: {identifier.ToString()}");
 			avatar.SetIdentifier(identifier);
 			await SetAvatar(avatar);
-			await playerAvatar.SendAvatarReady();
+			if (playerAvatar != null)
+				await playerAvatar.SendAvatarReady();
 			return avatar;
 		}
 
@@ -407,6 +409,8 @@ namespace api.nox.desktop {
 						break;
 				}
 			}
+			
+			root.SetActive(true);
 
 			return true;
 		}

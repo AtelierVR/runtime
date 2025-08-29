@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using api.nox.relay.types.Player;
 using Cysharp.Threading.Tasks;
@@ -14,7 +15,7 @@ using NoxTransform = Nox.CCK.Utils.Transform;
 using Transform = UnityEngine.Transform;
 
 namespace api.nox.relay {
-	public abstract class RelayPlayer : IPlayer, IPlayerAvatar {
+	public abstract class RelayPlayer : IPlayer, IPlayerAvatar, IDisposable {
 		protected InstancePlayer Reference;
 		protected RelayAdapter   Adapter;
 
@@ -161,8 +162,16 @@ namespace api.nox.relay {
 		public abstract UniTask<bool> SetAvatar(IAvatarIdentifier identifier);
 
 		public abstract IAvatarIdentifier GetAvatar();
-		
+
 		public override string ToString()
 			=> $"{GetType().Name}[Id={GetId()}, Display={GetDisplay()}, Identifier={ToIdentifier()}, IsMaster={IsMaster()}]";
+
+		public void Dispose() {
+			DestroyPhysical();
+			Transforms.Clear();
+			_properties.Clear();
+			Reference = null;
+			Adapter   = null;
+		}
 	}
 }

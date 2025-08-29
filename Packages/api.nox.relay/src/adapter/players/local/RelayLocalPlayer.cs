@@ -49,7 +49,7 @@ namespace api.nox.relay {
 		public override void DestroyPhysical() {
 			if (!_physicalComponent) return;
 			Logger.Log($"Destroying physical component for player {GetDisplay()} ({GetId()}) at {GetPosition()}");
-			Object.Destroy(_physicalComponent);
+			Object.Destroy(_physicalComponent.gameObject);
 			_physicalComponent = null;
 		}
 
@@ -64,26 +64,43 @@ namespace api.nox.relay {
 		}
 
 		public override async UniTask<bool> SetAvatar(IAvatarIdentifier identifier) {
-			var packet = types.Avatar.InstanceRequestAvatarChanged.CreateRequest(Reference.Id, identifier);
-			if (!await Adapter.Instance.SendAvatarChange(packet) || !TryCurrentController(out var controller))
+			if (identifier == null) {
+				Logger.LogWarning("Cannot set avatar: identifier is null");
 				return false;
-			return await controller.SetAvatar(identifier) != null;
+			}
+			
+			var packet = types.Avatar.InstanceRequestAvatarChanged.CreateRequest(Reference.Id, identifier);
+
+			if (!TryCurrentController(out var controller)) {
+				Logger.LogWarning("Cannot set avatar: no controller available");
+				return false;
+			}
+
+			var response = await Adapter.Instance.RequestAvatarChange(packet);
+
+			if (response.IsSuccess)
+				return await controller.SetAvatar(identifier) != null;
+
+			Logger.LogWarning($"Failed to request avatar change: {response}");
+			return false;
 		}
 
 		public override IAvatarIdentifier GetAvatar()
-			=> TryCurrentController(out var controller) ? controller.GetAvatar().GetIdentifier() : null;
+			=> TryCurrentController(out var controller)
+				? controller.GetAvatar().GetIdentifier()
+				: null;
 
 		public override bool HasPhysical()
 			=> _physicalComponent;
 
 		public async UniTask<bool> SendAvatarReady() {
 			var packet = types.Avatar.InstanceRequestAvatarChanged.CreateReady();
-			return await Adapter.Instance.SendAvatarChange(packet);
+			return !(await Adapter.Instance.RequestAvatarChange(packet)).IsError;
 		}
 
-		public UniTask<bool> SendAvatarFailed(string reason) {
+		public async UniTask<bool> SendAvatarFailed(string reason) {
 			var packet = types.Avatar.InstanceRequestAvatarChanged.CreateFailed(reason);
-			return Adapter.Instance.SendAvatarChange(packet);
+			return !(await Adapter.Instance.RequestAvatarChange(packet)).IsError;
 		}
 	}
 }

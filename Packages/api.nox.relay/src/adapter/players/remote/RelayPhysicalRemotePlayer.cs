@@ -28,6 +28,13 @@ namespace api.nox.relay {
 			_avatarLoadingCts?.Cancel();
 			_avatarLoadingCts = new CancellationTokenSource();
 
+			if (Avatar == null) {
+				var loading = await Main.AvatarAPI.LoadLoading(token: _avatarLoadingCts.Token);
+				if (loading == null) {
+					Logger.LogWarning("Failed to create loading avatar for PhysicalRemotePlayer", this);
+				} else await SetAvatar(loading);
+			}
+
 			var asset = (await Main.AvatarAPI.SearchAssets(
 						identifier.ToString(),
 						Main.AvatarAPI.MakeAssetSearchRequest()
@@ -46,6 +53,7 @@ namespace api.nox.relay {
 				var err = await Main.AvatarAPI.LoadError();
 				err.SetIdentifier(identifier);
 				await SetAvatar(err);
+				_avatarLoadingCts = null;
 				return null;
 			}
 
@@ -75,12 +83,15 @@ namespace api.nox.relay {
 				var err = await Main.AvatarAPI.LoadError();
 				err.SetIdentifier(identifier);
 				await SetAvatar(err);
+				_avatarLoadingCts = null;
 				return null;
 			}
 
 			Logger.LogDebug($"Avatar loaded: {identifier.ToString()}");
 			avatar.SetIdentifier(identifier);
 			await SetAvatar(avatar);
+			_avatarLoadingCts = null;
+
 			return avatar;
 		}
 
@@ -110,9 +121,35 @@ namespace api.nox.relay {
 
 			Logger.LogDebug($"Attaching avatar to {runtimeAvatar.GetDescriptor()}", runtimeAvatar.GetDescriptor().GetRoot());
 			root.transform.SetParent(transform, false);
-			root.transform.localPosition = Vector3.zero;
-			root.transform.localRotation = Quaternion.identity;
+			root.transform.position      = Reference.GetPosition();
+			root.transform.localRotation = Reference.GetRotation();
 
+			var parameterModule = Avatar?.GetDescriptor()
+				?.GetModules<IParameterModule>()
+				.FirstOrDefault();
+
+			if (parameterModule == null) {
+				Logger.LogWarning("Avatar has no parameter module, cannot configure tracking parameters.");
+				return true;
+			}
+
+			var parameters = parameterModule.GetParameters();
+			foreach (var param in parameters) {
+				var n = param.GetName();
+				switch (n) {
+					case "tracking/head/active":
+						param.Set(true);
+						break;
+					case "tracking/left_hand/active":
+					case "tracking/right_hand/active":
+					case "tracking/left_foot/active":
+					case "tracking/right_foot/active":
+						param.Set(false);
+						break;
+				}
+			}
+
+			root.SetActive(true);
 			return true;
 		}
 	}

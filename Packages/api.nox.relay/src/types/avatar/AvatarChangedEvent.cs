@@ -2,6 +2,7 @@ using System;
 using Nox.Avatars;
 using System.Collections.Generic;
 using api.nox.relay.types.Instance;
+using Nox.CCK.Utils;
 using Buffer = Nox.CCK.Utils.Buffer;
 
 namespace api.nox.relay.types.Avatar {
@@ -12,20 +13,21 @@ namespace api.nox.relay.types.Avatar {
 		public IAvatarIdentifier   AvatarIdentifier;
 
 		public bool IsError
-			=> Result != AvatarChangedResult.Success;
+			=> Result != AvatarChangedResult.Changing;
+
+		public bool IsSuccess
+			=> Result == AvatarChangedResult.Success;
 
 		public override bool FromBuffer(Buffer buffer) {
+			Logger.LogDebug($"Received {buffer}");
 			buffer.Goto(0);
 			InternalId = buffer.ReadByte();
 			Result     = buffer.ReadEnum<AvatarChangedResult>();
-			PlayerId   = buffer.ReadUShort();
 			switch (Result) {
-				default:
-				case AvatarChangedResult.Unknown:
-				case AvatarChangedResult.Failed when buffer.Remaining > 2:
-					Reason = buffer.ReadString();
+				case AvatarChangedResult.Success:
 					break;
-				case AvatarChangedResult.Success: {
+				case AvatarChangedResult.Changing: {
+					PlayerId = buffer.ReadUShort();
 					var id      = buffer.ReadUInt();
 					var server  = buffer.ReadString();
 					var version = buffer.ReadUShort();
@@ -34,6 +36,12 @@ namespace api.nox.relay.types.Avatar {
 					AvatarIdentifier = Main.AvatarAPI.Make(id, meta, server);
 					break;
 				}
+				case AvatarChangedResult.Unknown:
+				case AvatarChangedResult.Failed:
+				default:
+					if (buffer.Remaining > 2)
+						Reason = buffer.ReadString();
+					break;
 			}
 
 			return true;
@@ -46,5 +54,11 @@ namespace api.nox.relay.types.Avatar {
 				Result       = AvatarChangedResult.Unknown,
 				Reason       = reason
 			};
+
+		public override string ToString()
+			=> $"{GetType().Name}[InternalId={InternalId}, Result={Result}"
+				+ (IsError ? $", Reason={Reason}" : "")
+				+ (Result == AvatarChangedResult.Changing ? $", PlayerId={PlayerId}, AvatarIdentifier={AvatarIdentifier?.ToString()}" : "")
+				+ "]";
 	}
 }

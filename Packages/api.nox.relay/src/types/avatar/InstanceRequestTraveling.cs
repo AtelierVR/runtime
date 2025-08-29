@@ -16,13 +16,20 @@ namespace api.nox.relay.types.Avatar {
 			var buffer = new Buffer();
 			buffer.Write(InternalId);
 			buffer.Write(Action);
-			if (Action == AvatarChangedAction.Failed && !string.IsNullOrEmpty(Reason))
-				buffer.Write(Reason);
-			else if (Action == AvatarChangedAction.Request) {
-				buffer.Write(PlayerId);
-				buffer.Write(AvatarIdentifier.GetId());
-				buffer.Write(AvatarIdentifier.GetServerAddress());
-				buffer.Write(AvatarIdentifier.GetVersion());
+			
+			switch (Action) {
+				case AvatarChangedAction.Ready:
+					break;
+				case AvatarChangedAction.Failed:
+					if (!string.IsNullOrEmpty(Reason))
+						buffer.Write(Reason);
+					break;
+				case AvatarChangedAction.Change:
+					buffer.Write(PlayerId);
+					buffer.Write(AvatarIdentifier.GetId());
+					buffer.Write(AvatarIdentifier.GetServerAddress());
+					buffer.Write(AvatarIdentifier.GetVersion());
+					break;
 			}
 
 			return buffer;
@@ -31,7 +38,7 @@ namespace api.nox.relay.types.Avatar {
 		public static InstanceRequestAvatarChanged CreateRequest(ushort pid, IAvatarIdentifier avatar)
 			=> new() {
 				PlayerId         = pid,
-				Action           = AvatarChangedAction.Request,
+				Action           = AvatarChangedAction.Change,
 				AvatarIdentifier = avatar
 			};
 
