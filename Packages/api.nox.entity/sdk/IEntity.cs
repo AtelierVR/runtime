@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace Nox.Entities {
 	public interface IEntity {
@@ -104,5 +105,12 @@ namespace Nox.Entities {
 		/// Destroy the physical component of the entity.
 		/// </summary>
 		public void DestroyPhysical();
+		
+		/// <summary>
+		/// Move a specific part of the player to a new transform.
+		/// </summary>
+		/// <param name="part"></param>
+		/// <param name="transform"></param>
+		public void Move(NoxTransform transform);
 	}
 }

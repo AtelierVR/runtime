@@ -132,14 +132,27 @@ namespace api.nox.relay {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public void MovePart(ushort part, NoxTransform transform) {
+		public void MovePart(ushort part, NoxTransform transform)
+			=> MovePart(part, transform, TransformDeliveryType.LocalModified);
+
+		public void MovePart(ushort part, NoxTransform transform, TransformDeliveryType delivery) {
 			if (Transforms.TryGetValue(part, out var existing)
 			    && existing.IsSamePosition(transform.GetPosition(), Adapter.Threshold)
 			    && existing.IsSameRotation(transform.GetRotation(), Adapter.Threshold)
 			   ) return;
-			transform.DeliveryType = TransformDeliveryType.LocalModified;
+			transform.DeliveryType = delivery;
 			Transforms[part]       = transform;
+
+			if (delivery != TransformDeliveryType.RemoteModified || !TryGetPhysical<RelayPhysicalPlayer>(out var physical))
+				return;
+
+			physical.OnMove(part, transform);
+			transform.DeliveryType = TransformDeliveryType.None;
 		}
+
+		[NoxPublic(NoxAccess.Method)]
+		public void Move(NoxTransform transform)
+			=> MovePart(PlayerRig.Base.ToIndex(), transform);
 
 		[NoxPublic(NoxAccess.Method)]
 		public void Teleport(Transform transform) {
@@ -147,6 +160,7 @@ namespace api.nox.relay {
 			Teleport(transform.position, transform.rotation);
 		}
 
+		[NoxPublic(NoxAccess.Method)]
 		public void SetDisplay(string display) {
 			Logger.LogWarning($"{nameof(SetDisplay)} is not currently implemented for {GetType().Name}.");
 		}

@@ -61,7 +61,6 @@ namespace api.nox.relay.connection {
 				case ResponseType.AvatarChanged:
 				case ResponseType.Traveling:
 					var iid = buffer.ReadByte();
-					Logger.LogDebug($"Received {type} for instance {iid} with state {state}");
 					var instance = Instances.FirstOrDefault(x => x.InternalId == iid);
 					instance?.OnReceived(length, state, type, buffer.Clone(5, length));
 					break;

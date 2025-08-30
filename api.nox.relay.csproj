@@ -103,6 +103,7 @@
     <Compile Include="Packages\api.nox.relay\src\types\enter\EnterFlags.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\transform\TransformType.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\authentication\RelayResponseAuthentication.cs" />
+    <Compile Include="Packages\api.nox.relay\src\adapter\entity\RelayEntity.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\disconnect\RelayEventDisconnect.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\quit\QuitType.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\avatar\AvatarChangedEvent.cs" />

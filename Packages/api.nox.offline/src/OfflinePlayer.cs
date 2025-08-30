@@ -164,6 +164,9 @@ namespace api.nox.offline {
 			Transforms[part]       = transform;
 		}
 
+		public void Move(Transform transform)
+			=> MovePart(PlayerRig.Base.ToIndex(), transform);
+
 		public void SetAvatar(IAvatarIdentifier avatar) {
 			Logger.LogWarning("OfflinePlayer does not support avatars.");
 		}

@@ -9,6 +9,7 @@ using api.nox.relay.types.Join;
 using api.nox.relay.types.Leave;
 using api.nox.relay.types.Player;
 using api.nox.relay.types.Quit;
+using api.nox.relay.types.Transform;
 using api.nox.relay.types.Traveling;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
@@ -30,16 +31,16 @@ namespace api.nox.relay {
 		internal         RelayInstance     Instance;
 		internal         IAvatarIdentifier Avatar;
 
-		private  bool       _isTraveling = true;
-		internal byte       Tps          = 24;
-		private  DateTime   _lastUpdate  = DateTime.MinValue;
-		internal float      Threshold    = 0.001f;
+		private  bool       _isTraveling  = true;
+		internal byte       Tps           = 24;
+		private  DateTime   _lastUpdate   = DateTime.MinValue;
+		internal float      Threshold     = 0.001f;
 		private  float      _renderEntity = 100f;
 		internal GameObject EntitiesRoot;
 
 
 		internal RelayAdapter() {
-			_dimension    = null;
+			_dimension   = null;
 			_entities    = Main.EntityAPI.New();
 			EntitiesRoot = new GameObject($"[{GetType().Name}Entities]");
 			UnityEngine.Object.DontDestroyOnLoad(EntitiesRoot);
@@ -47,8 +48,8 @@ namespace api.nox.relay {
 
 
 		public void OnEnter(EnterResponse ev) {
-			Tps          = ev.Tps;
-			Threshold    = ev.Threshold;
+			Tps           = ev.Tps;
+			Threshold     = ev.Threshold;
 			_renderEntity = ev.RenderEntity;
 			Instance.RequestTraveling(TravelingAction.Travel).Forget();
 		}
@@ -56,6 +57,47 @@ namespace api.nox.relay {
 		public void OnJoin(JoinEvent ev) {
 			Logger.LogDebug($"OnJoin: {ev}");
 			NewPlayer<RelayRemotePlayer>(ev.Player);
+		}
+
+		public void OnTransform(TransformEvent ev) {
+			switch (ev.Type) {
+				case TransformType.Player: {
+					var player = _entities.GetEntity<RelayPlayer>(ev.PlayerId);
+					if (player == null) return;
+					player.MovePart(ev.PlayerRig, ev.Transform, TransformDeliveryType.RemoteModified);
+					break;
+				}
+				case TransformType.Entity: {
+					var entity = _entities.GetEntity<RelayEntity>(ev.EntityId);
+					if (entity == null) return;
+					entity.Move(ev.Transform, TransformDeliveryType.RemoteModified);
+					break;
+				}
+				case TransformType.ByPath: {
+					var path = ev.Path.Split(ComponentExtension.PathSeparator);
+					if (!int.TryParse(path[0], out var index)) {
+						Logger.LogWarning($"Invalid entity path received: {ev.Path}");
+						return;
+					}
+
+					var scene = _dimension.GetScene().GetScene(index)?.GetScene();
+					if (!scene.HasValue) {
+						Logger.LogWarning($"No scene found for entity path: {ev.Path}");
+						return;
+					}
+
+					var transform = scene.Value.GetByPath(path.Skip(1).ToArray());
+					if (!transform) {
+						Logger.LogWarning($"No transform found for entity path: {ev.Path}");
+						return;
+					}
+
+					transform.Move(ev.Transform);
+					break;
+				}
+				default:
+					break;
+			}
 		}
 
 		public void OnLeave(LeaveEvent ev) {
@@ -106,8 +148,8 @@ namespace api.nox.relay {
 		}
 
 		public void OnQuit(QuitEvent ev) {
-			Tps          = 0;
-			Threshold    = 0.001f;
+			Tps           = 0;
+			Threshold     = 0.001f;
 			_renderEntity = 100f;
 		}
 
@@ -215,7 +257,7 @@ namespace api.nox.relay {
 		public void SetSession(ISession session) {
 			Logger.LogDebug($"SetSession: {this} -> {session}");
 			EntitiesRoot.name = $"[{GetType().Name}Entities_{session.GetId()}]";
-			_session           = session;
+			_session          = session;
 		}
 
 		public IDimension GetDimension()

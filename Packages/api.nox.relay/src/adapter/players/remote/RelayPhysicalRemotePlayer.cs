@@ -1,11 +1,14 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.Avatars.Parameters;
+using Nox.CCK.Players;
 using Nox.CCK.Utils;
-using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
+using NoxTransform = Nox.CCK.Utils.Transform;
+using Transform = UnityEngine.Transform;
 
 namespace api.nox.relay {
 	public class RelayPhysicalRemotePlayer : RelayPhysicalPlayer {
@@ -13,6 +16,11 @@ namespace api.nox.relay {
 
 		public override IRuntimeAvatar GetAvatar()
 			=> Avatar;
+
+		public override void OnMove(ushort part, NoxTransform move) {
+			if (part == PlayerRig.Base.ToIndex())
+				transform.Move(move);
+		}
 
 		private CancellationTokenSource _avatarLoadingCts;
 

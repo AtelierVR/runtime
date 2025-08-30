@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Nox.CCK.Utils;
 using Nox.Users;
 
@@ -13,9 +14,8 @@ namespace api.nox.user.network {
 			var text = "";
 			if (!string.IsNullOrEmpty(query))
 				text += (text.Length > 0 ? "&" : "") + $"query={query}";
-			if (ids != null)
-				foreach (var u in ids)
-					text += (text.Length > 0 ? "&" : "") + $"id={u}";
+			foreach (var u in ids?.Distinct() ?? Enumerable.Empty<uint>())
+				text += (text.Length > 0 ? "&" : "") + $"id={u}";
 			if (offset > 0) text += (text.Length > 0 ? "&" : "") + $"offset={offset}";
 			if (limit  > 0) text += (text.Length > 0 ? "&" : "") + $"limit={limit}";
 			return text;
@@ -26,7 +26,7 @@ namespace api.nox.user.network {
 			if (data.TryGetValue("query", out var query) && query is string q)
 				req.query = q;
 			if (data.TryGetValue("ids", out var userIds) && userIds is uint[] u)
-				req.ids = u;
+				req.ids = u?.Distinct().ToArray();
 			if (data.TryGetValue("offset", out var offset) && offset is uint o)
 				req.offset = o;
 			if (data.TryGetValue("limit", out var limit) && limit is uint l)
@@ -70,7 +70,7 @@ namespace api.nox.user.network {
 			if (request is SearchRequest sr) return sr;
 			var req = new SearchRequest {
 				query  = request.GetQuery(),
-				ids    = request.GetIds(),
+				ids    = request.GetIds()?.Distinct().ToArray(),
 				offset = request.GetOffset(),
 				limit  = request.GetLimit()
 			};

@@ -1,8 +1,11 @@
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.Avatars.Players;
+using Nox.CCK.Utils;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
+using NoxTransform = Nox.CCK.Utils.Transform;
+using Transform = UnityEngine.Transform;
 
 namespace api.nox.relay {
 	public class RelayRemotePlayer : RelayPlayer, IPlayerAvatar {

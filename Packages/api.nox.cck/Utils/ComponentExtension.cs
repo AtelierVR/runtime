@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityTransform = UnityEngine.Transform;
+using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace Nox.CCK.Utils {
 	public static class ComponentExtension {
@@ -14,7 +17,7 @@ namespace Nox.CCK.Utils {
 
 		public static bool IsActive(this Component component)
 			=> component && IsActive(component.gameObject);
-		
+
 		public static T GetComponentInParents<T>(this GameObject gameObject) {
 			if (gameObject.TryGetComponent<T>(out var component))
 				return component;
@@ -92,6 +95,48 @@ namespace Nox.CCK.Utils {
 			foreach (var go in scene.GetRootGameObjects())
 				components.AddRange(go.GetComponentsInChildren<T>());
 			return components.ToArray();
+		}
+
+		public const char PathSeparator = '/';
+
+		public static UnityTransform GetByPath(this Scene scene, string path)
+			=> string.IsNullOrEmpty(path) ? null : scene.GetByPath(path.Split(PathSeparator));
+
+		public static UnityTransform GetByPath(this UnityTransform transform, string path)
+			=> string.IsNullOrEmpty(path) ? null : transform.GetByPath(path.Split(PathSeparator));
+
+		public static UnityTransform GetByPath(this Scene scene, string[] path) {
+			if (!scene.isLoaded || path.Length == 0)
+				return null;
+			return (from go in scene.GetRootGameObjects()
+				where go.name == path[0]
+				select go.transform.GetByPath(path.Skip(1).ToArray())).FirstOrDefault();
+		}
+
+		public static UnityTransform GetByPath(this UnityTransform transform, string[] path) {
+			if (path.Length == 0)
+				return transform;
+			return (from UnityTransform child in transform
+				where child.name == path[0]
+				select child.GetByPath(path.Skip(1).ToArray())).FirstOrDefault();
+		}
+
+		public static void Move(this UnityTransform transform, NoxTransform move, float threshold = float.Epsilon) {
+			if (!transform || move == null) return;
+
+			if (!move.IsSamePosition(transform.position, threshold))
+				transform.position = move.GetPosition();
+			if (!move.IsSameRotation(transform.rotation, threshold))
+				transform.rotation = move.GetRotation();
+			if (!move.IsSameScale(transform.localScale, threshold))
+				transform.localScale = move.GetScale();
+
+			if (!transform.TryGetComponent<Rigidbody>(out var rb)) return;
+
+			if (!move.IsSameVelocity(rb.linearVelocity, threshold))
+				rb.linearVelocity = move.GetVelocity();
+			if (!move.IsSameAngularVelocity(rb.angularVelocity, threshold))
+				rb.angularVelocity = move.GetAngularVelocity();
 		}
 	}
 }

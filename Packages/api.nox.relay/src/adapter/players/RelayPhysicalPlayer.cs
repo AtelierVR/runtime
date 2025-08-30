@@ -4,13 +4,14 @@ using Nox.CCK.Development;
 using Nox.Players;
 using UnityEngine;
 using Gizmos = Nox.CCK.Development.Gizmos;
+using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.relay {
 	/// <summary>
 	/// Component physique pour les joueurs relay, permettant l'interaction avec le système physique Unity
 	/// </summary>
 	[Gizmos("relay.physical.player")]
-	public class RelayPhysicalPlayer : PlayerPhysical, IPlayerPhysicalAvatar {
+	public abstract class RelayPhysicalPlayer : PlayerPhysical, IPlayerPhysicalAvatar {
 		protected RelayPlayer Reference;
 
 		public void SetReference(RelayPlayer player) {
@@ -24,7 +25,8 @@ namespace api.nox.relay {
 			Gizmos.DrawLine(transform.position, Reference.GetPosition());
 		}
 
-		public override IRuntimeAvatar GetAvatar()
-			=> null;
+		public abstract IRuntimeAvatar GetAvatar();
+
+		public abstract void OnMove(ushort part, NoxTransform move);
 	}
 }

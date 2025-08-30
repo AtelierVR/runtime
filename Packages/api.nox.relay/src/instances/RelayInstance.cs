@@ -22,6 +22,7 @@ namespace api.nox.relay.Instances {
 		public readonly UnityEvent<types.Join.JoinEvent>            OnJoin          = new();
 		public readonly UnityEvent<types.Leave.LeaveEvent>          OnLeave         = new();
 		public readonly UnityEvent<types.Avatar.AvatarChangedEvent> OnAvatarChanged = new();
+		public readonly UnityEvent<types.Transform.TransformEvent>  OnTransform     = new();
 
 		internal void OnReceived(ushort length, ushort state, ResponseType type, Buffer buffer) {
 			buffer.Goto(0);
@@ -49,6 +50,10 @@ namespace api.nox.relay.Instances {
 				case ResponseType.AvatarChanged:
 					var avatar = new types.Avatar.AvatarChangedEvent { ConnectionId = Connection.Id, InternalId = InternalId };
 					if (avatar.FromBuffer(buffer)) OnAvatarChanged.Invoke(avatar);
+					break;
+				case ResponseType.Transform:
+					var transform = new types.Transform.TransformEvent { ConnectionId = Connection.Id, InternalId = InternalId };
+					if (transform.FromBuffer(buffer)) OnTransform.Invoke(transform);
 					break;
 				default:
 					Logger.LogDebug($"Received unknown response type {type} for instance {InternalId}");

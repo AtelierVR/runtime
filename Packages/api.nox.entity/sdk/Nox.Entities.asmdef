@@ -1,7 +1,9 @@
 {
     "name": "Nox.Entities",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "Nox.CCK"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
