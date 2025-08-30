@@ -283,17 +283,6 @@ namespace api.nox.instance.client {
 				}
 			);
 
-			/*foreach (var server in GetSearchableServers()) {
-				if (_playerListTokenSource.IsCancellationRequested) {
-					_playerListTokenSource = null;
-					return;
-				}
-
-				if (!playersByServer.TryGetValue(server, out var users))
-					continue;
-
-				tasks.Add(SearchPlayers(users, server, _playerListTokenSource.Token, action));
-			}*/
 			foreach (var (server, users) in playersByServer) {
 				if (_playerListTokenSource.IsCancellationRequested) {
 					_playerListTokenSource = null;
@@ -331,9 +320,8 @@ namespace api.nox.instance.client {
 
 			var res = new List<(IUser, IPlayer)>();
 			foreach (var user in ress) {
-				var origin = users.FirstOrDefault(p => p.GetIdentifier().Equals(user.ToIdentifier()));
-				if (origin == null) continue;
-				res.Add((user, origin));
+				var matchingPlayers = users.Where(p => p.GetIdentifier().Equals(user.ToIdentifier()));
+				res.AddRange(matchingPlayers.Select(player => (user, player)));
 			}
 
 			callback?.Invoke(res.ToArray());
