@@ -8,7 +8,7 @@ using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay {
-	public class RelayLocalPlayer : RelayPlayer, ILocalPlayerAvatar {
+	public class RelayLocalPlayer : RelayPlayer {
 		public override bool IsLocal()
 			=> true;
 
@@ -68,7 +68,7 @@ namespace api.nox.relay {
 				Logger.LogWarning("Cannot set avatar: identifier is null");
 				return false;
 			}
-			
+
 			var packet = types.Avatar.InstanceRequestAvatarChanged.CreateRequest(Reference.Id, identifier);
 
 			if (!TryCurrentController(out var controller)) {
@@ -92,15 +92,5 @@ namespace api.nox.relay {
 
 		public override bool HasPhysical()
 			=> _physicalComponent;
-
-		public async UniTask<bool> SendAvatarReady() {
-			var packet = types.Avatar.InstanceRequestAvatarChanged.CreateReady();
-			return !(await Adapter.Instance.RequestAvatarChange(packet)).IsError;
-		}
-
-		public async UniTask<bool> SendAvatarFailed(string reason) {
-			var packet = types.Avatar.InstanceRequestAvatarChanged.CreateFailed(reason);
-			return !(await Adapter.Instance.RequestAvatarChange(packet)).IsError;
-		}
 	}
 }

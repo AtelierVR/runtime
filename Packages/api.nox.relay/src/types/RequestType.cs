@@ -1,21 +1,23 @@
 namespace api.nox.relay.types {
-	public enum RequestType : byte {
-		Disconnect          = 0x00,
-		Handshake           = 0x01,
-		Sessions            = 0x02,
-		Latency             = 0x03,
-		Authentication      = 0x04,
-		Enter               = 0x05,
-		Quit                = 0x06,
-		CustomDataPacket    = 0x07,
-		PasswordRequirement = 0x08,
-		Traveling           = 0x09,
-		Transform           = 0x0C,
-		Teleport            = 0x0D,
-		AvatarChanged       = 0x0E,
-		MultiPacketStart    = 0x0F,
-		MultiPacketData     = 0x10,
-		MultiPacketEnd      = 0x11,
-		None                = 0xFF
+	public enum RequestType : byte {		None = 0xFF,
+
+		// System Messages
+		Disconnect   = 0x00,
+		Handshake    = 0x01,
+		Segmentation = 0x02,
+		Reliable     = 0x03,
+		Latency      = 0x04,
+
+		Authentification    = 0x05,
+		Enter               = 0x06,
+		Quit                = 0x07,
+		Custom              = 0x08,
+		PasswordRequirement = 0x09,
+		Traveling           = 0x0A,
+		Transform           = 0x0B,
+		Teleport            = 0x0C,
+		AvatarChanged       = 0x0D,
+		ServerConfig        = 0x0E,
+		Status              = 0x11,
 	}
 }

@@ -42,22 +42,13 @@ namespace api.nox.relay.connection {
 			
 			switch (type)
 			{
-				case ResponseType.MultiPacketStart:
-					HandleMultiPacketStart(buffer, state, length);
-					break;
-				case ResponseType.MultiPacketData:
-					HandleMultiPacketData(buffer, state, length);
-					break;
-				case ResponseType.MultiPacketEnd:
-					HandleMultiPacketEnd(buffer, state, length);
-					break;
 				case ResponseType.Enter:
 				case ResponseType.Quit:
 				case ResponseType.Join:
 				case ResponseType.Leave:
 				case ResponseType.Teleport:
 				case ResponseType.Transform:
-				case ResponseType.CustomDataPacket:
+				case ResponseType.Custom:
 				case ResponseType.AvatarChanged:
 				case ResponseType.Traveling:
 					var iid = buffer.ReadByte();
@@ -286,8 +277,8 @@ namespace api.nox.relay.connection {
 					ConnectionId = Id,
 					Page         = page
 				},
-				RequestType.Sessions,
-				ResponseType.Sessions,
+				RequestType.Status,
+				ResponseType.Status,
 				NextState()
 			);
 			foreach (var instance in sessions.Instances)
@@ -342,8 +333,8 @@ namespace api.nox.relay.connection {
 		public async UniTask<types.Authentication.RelayResponseAuthentication> RequestAuthentication(types.Authentication.RelayRequestAuthentication request)
 			=> await Request<types.Authentication.RelayResponseAuthentication>(
 					request,
-					RequestType.Authentication,
-					ResponseType.Authentication,
+					RequestType.Authentification,
+					ResponseType.Authentification,
 					NextState()
 				)
 				?? types.Authentication.RelayResponseAuthentication.CreateUnknown(Id, "Unknown authentication request");

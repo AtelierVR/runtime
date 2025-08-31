@@ -160,7 +160,7 @@ namespace Nox.CCK.Utils {
 
 		public string ReadString() {
 			var length = ReadUShort();
-			if (offset + length > this.length) return null;
+			if (offset + length > this.length) return string.Empty;
 			var value = System.Text.Encoding.UTF8.GetString(data, offset, length);
 			offset += length;
 			return value;

@@ -109,7 +109,6 @@
     <Compile Include="Packages\api.nox.relay\src\types\avatar\AvatarChangedEvent.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\enter\InstanceRequestEnter.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\ClientStatus.cs" />
-    <Compile Include="Packages\api.nox.relay\src\types\avatar\AvatarChangedAction.cs" />
     <None Include="Packages\api.nox.relay\api.nox.relay.asmdef" />
     <None Include="Packages\api.nox.relay\package.json" />
     <None Include="Packages\api.nox.relay\nox.mod.json" />

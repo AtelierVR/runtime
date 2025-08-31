@@ -35,10 +35,19 @@ namespace api.nox.relay.types.Enter {
 			InternalId = buffer.ReadByte();
 			Result     = buffer.ReadEnum<EnterResult>();
 			switch (Result) {
+				case EnterResult.NotFound:
+				case EnterResult.Full:
+				case EnterResult.NotWhitelisted:
+				case EnterResult.InvalidGame:
+				case EnterResult.IncorrectPassword:
+				case EnterResult.Refused:
+				case EnterResult.InvalidPseudonyme:
 				case EnterResult.Unknown:
-					if (buffer.Remaining >= 2) // ushort of the string length of optional string
-						Reason  = buffer.ReadString();
-					else Reason = "Unknown error";
+					Reason = buffer.Remaining >= 2 ? buffer.ReadString() : "Unknown error"; 
+					return true;
+				case EnterResult.Blacklisted:
+					Reason   = buffer.ReadString();
+					ExpireAt = buffer.ReadDateTime();
 					return true;
 				case EnterResult.Success:
 					Player = new InstancePlayer {
@@ -53,10 +62,8 @@ namespace api.nox.relay.types.Enter {
 					Tps = buffer.ReadByte();
 					Threshold = buffer.ReadFloat();
 					return true;
-				case EnterResult.Blacklisted:
-					ExpireAt = buffer.ReadDateTime();
-					Reason   = buffer.ReadString();
-					return true;
+				default:
+					return false;
 			}
 
 			return false;
