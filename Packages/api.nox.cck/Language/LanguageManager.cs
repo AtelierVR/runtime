@@ -158,5 +158,19 @@ namespace Nox.CCK.Language {
 
 			return null;
 		}
+
+		public static bool Has(string language, string key, List<LanguagePack> packs = null) {
+			packs ??= LanguagePacks;
+			for (var i = packs.Count - 1; i >= 0; i--) {
+				if (!packs[i]) continue;
+				if (packs[i].HasLocalizationString(language, key))
+					return true;
+			}
+
+			return false;
+		}
+
+		public static bool Has(string key, List<LanguagePack> packs = null)
+			=> Has(CurrentLanguage, key, packs);
 	}
 }

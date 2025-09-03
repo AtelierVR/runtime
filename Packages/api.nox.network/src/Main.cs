@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -15,7 +16,7 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.network {
 	public class Main : MainModInitializer, INetworkAPI {
-		internal        IModCoreAPI   CoreAPI;
+		internal        IModCoreAPI  CoreAPI;
 		internal static Main         Instance;
 		private         LanguagePack _language;
 		internal        CacheManager Cache;
@@ -52,6 +53,8 @@ namespace api.nox.network {
 			Instance = null;
 		}
 
+		private readonly List<(string, UnityWebRequest)> _activeRequests = new();
+
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask<Texture2D> FetchTexture(string url, UnityWebRequest req = null, Action<float, ulong> progress = null, CancellationToken token = default) {
 			if (string.IsNullOrEmpty(url)) {
@@ -60,38 +63,53 @@ namespace api.nox.network {
 			}
 
 			Logger.Log($"Fetching [TEXTURE] {url}...");
-			try {
-				req     ??= new UnityWebRequest(url, "GET");
-				req.url =   url;
-				var dt = new DownloadHandlerTexture();
-				req.downloadHandler = dt;
+			var                    request = _activeRequests.FirstOrDefault(r => r.Item1 == url);
+			DownloadHandlerTexture dt;
 
-				var asc = req.SendWebRequest();
+			bool isMain;
+
+			if (request != default) {
+				isMain = false;
+				req    = request.Item2;
+				Logger.LogDebug($"Reusing existing request for {url}...");
+				dt = req.downloadHandler as DownloadHandlerTexture;
 				await UniTask.WaitUntil(
 					() => {
-						CoreAPI.EventAPI.Emit(
-							new NetEventContext(
-								"network.download",
-								url,
-								req.downloadProgress,
-								req.downloadedBytes
-							)
-						);
 						progress?.Invoke(req.downloadProgress, req.downloadedBytes);
-						return asc.isDone || token.IsCancellationRequested;
+						return req.isDone || token.IsCancellationRequested;
 					}, cancellationToken: token
 				);
-
-				if (!token.IsCancellationRequested)
-					return req.responseCode != 200 ? null : dt.texture;
-
-				req.Abort();
-				return null;
-			} catch {
-				// ignored
+			} else {
+				isMain              =   true;
+				req                 ??= new UnityWebRequest(url, "GET");
+				req.url             =   url;
+				dt                  =   new DownloadHandlerTexture();
+				req.downloadHandler =   dt;
+				_activeRequests.Add((url, req));
+				try {
+					var asc = req.SendWebRequest();
+					await UniTask.WaitUntil(
+						() => {
+							CoreAPI.EventAPI.Emit(
+								new NetEventContext(
+									"network.download",
+									url,
+									req.downloadProgress,
+									req.downloadedBytes
+								)
+							);
+							progress?.Invoke(req.downloadProgress, req.downloadedBytes);
+							return asc.isDone || token.IsCancellationRequested;
+						}, cancellationToken: token
+					);
+				} catch {
+					// ignored
+				}
 			}
 
-			return null;
+			if (token.IsCancellationRequested && isMain) req.Abort();
+			_activeRequests.RemoveAll(r => r.Item1 == url);
+			return req.responseCode != 200 ? null : dt!.texture;
 		}
 
 		[NoxPublic(NoxAccess.Method)]

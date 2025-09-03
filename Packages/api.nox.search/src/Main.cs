@@ -11,7 +11,7 @@ namespace api.nox.search {
 	public class Main : MainModInitializer, ISearchAPI {
 		internal readonly List<IHandler> Handlers = new();
 		internal static   Main           Instance;
-		internal          IModCoreAPI     CoreAPI;
+		internal          IModCoreAPI    CoreAPI;
 		private           LanguagePack   _languagePack;
 
 		internal static readonly UnityEvent<IHandler> OnHandlerAdded   = new();
@@ -47,7 +47,7 @@ namespace api.nox.search {
 			InvokeHandlerAdded(handler);
 			return handler;
 		}
-		
+
 		public void Remove(string id) {
 			var handler = Get(id);
 			if (handler == null) {
@@ -66,18 +66,22 @@ namespace api.nox.search {
 			=> Handlers.Exists(b => b.GetId() == id);
 
 
-		public void OnInitialize(IModCoreAPI api) {
+		public void OnInitializeMain(IModCoreAPI api) {
 			CoreAPI       = api;
 			Instance      = this;
 			_languagePack = api.AssetAPI.GetAsset<LanguagePack>("lang.asset");
 			LanguageManager.AddPack(_languagePack);
 		}
 
-		public void OnDispose() {
+		public void OnDisposeMain() {
 			if (_languagePack) {
 				LanguageManager.RemovePack(_languagePack);
 				_languagePack = null;
 			}
+
+			foreach (var handler in Handlers)
+				InvokeHandlerRemoved(handler);
+			Handlers.Clear();
 
 			CoreAPI  = null;
 			Instance = null;

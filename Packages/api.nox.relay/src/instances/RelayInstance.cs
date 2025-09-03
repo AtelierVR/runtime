@@ -24,36 +24,44 @@ namespace api.nox.relay.Instances {
 		public readonly UnityEvent<types.Avatar.AvatarChangedEvent> OnAvatarChanged = new();
 		public readonly UnityEvent<types.Transform.TransformEvent>  OnTransform     = new();
 
-		internal void OnReceived(ushort length, ushort state, ResponseType type, Buffer buffer) {
+		internal async UniTask OnReceived(ushort length, ushort state, ResponseType type, Buffer buffer) {
+			await UniTask.SwitchToMainThread();
 			buffer.Goto(0);
 			switch (type) {
 				case ResponseType.Quit:
 					var quit = new types.Quit.QuitEvent { ConnectionId = Connection.Id, InternalId = InternalId };
 					if (quit.FromBuffer(buffer)) OnQuit.Invoke(quit);
+					else Logger.LogWarning($"Failed to parse quit event for instance {InternalId}");
 					break;
 				case ResponseType.Traveling:
 					var traveling = new types.Traveling.TravelingEvent { ConnectionId = Connection.Id, InternalId = InternalId };
 					if (traveling.FromBuffer(buffer)) OnTraveling.Invoke(traveling);
+					else Logger.LogWarning($"Failed to parse traveling event for instance {InternalId}");
 					break;
 				case ResponseType.Enter:
 					var enter = new types.Enter.EnterResponse { ConnectionId = Connection.Id, InternalId = InternalId };
 					if (enter.FromBuffer(buffer)) OnEnter.Invoke(enter);
+					else Logger.LogWarning($"Failed to parse enter response for instance {InternalId}");
 					break;
 				case ResponseType.Join:
 					var join = new types.Join.JoinEvent { ConnectionId = Connection.Id, InternalId = InternalId };
 					if (join.FromBuffer(buffer)) OnJoin.Invoke(join);
+					else Logger.LogWarning($"Failed to parse join event for instance {InternalId}");
 					break;
 				case ResponseType.Leave:
 					var leave = new types.Leave.LeaveEvent { ConnectionId = Connection.Id, InternalId = InternalId };
 					if (leave.FromBuffer(buffer)) OnLeave.Invoke(leave);
+					else Logger.LogWarning($"Failed to parse leave event for instance {InternalId}");
 					break;
 				case ResponseType.AvatarChanged:
 					var avatar = new types.Avatar.AvatarChangedEvent { ConnectionId = Connection.Id, InternalId = InternalId };
 					if (avatar.FromBuffer(buffer)) OnAvatarChanged.Invoke(avatar);
+					else Logger.LogWarning($"Failed to parse avatar changed event for instance {InternalId}");
 					break;
 				case ResponseType.Transform:
 					var transform = new types.Transform.TransformEvent { ConnectionId = Connection.Id, InternalId = InternalId };
 					if (transform.FromBuffer(buffer)) OnTransform.Invoke(transform);
+					else Logger.LogWarning($"Failed to parse transform event for instance {InternalId}");
 					break;
 				default:
 					Logger.LogDebug($"Received unknown response type {type} for instance {InternalId}");
@@ -61,8 +69,11 @@ namespace api.nox.relay.Instances {
 			}
 		}
 
-		public async UniTask<bool> SendTransform(types.Transform.InstanceRequestTransform request)
-			=> (await Connection.Emit(request.ToBuffer(), RequestType.Transform)).Item1;
+		public async UniTask<bool> SendTransform(types.Transform.InstanceRequestTransform request) {
+			request.InternalId   = InternalId;
+			request.ConnectionId = Connection.Id;
+			return (await Connection.Emit(request.ToBuffer(), RequestType.Transform)).Item1;
+		}
 
 		public async UniTask<types.Enter.EnterResponse> RequestEnter(string display = null, string password = null, types.Enter.EnterFlags flags = types.Enter.EnterFlags.None) {
 			Connection.Instances.Add(this);

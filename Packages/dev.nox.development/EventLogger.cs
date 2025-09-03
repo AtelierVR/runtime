@@ -113,15 +113,15 @@ namespace dev.nox.development {
 		public void OnClosed() { }
 
 		private string ParseData(object obj) {
-			if (obj == null) 
+			if (obj == null)
 				return "null";
-			
-			if (obj is string s) 
+
+			if (obj is string s)
 				return $"\"{s}\"";
-			
-			if (obj is Enum e) 
+
+			if (obj is Enum e)
 				return e.ToString();
-			
+
 			if (obj is IList<object> list) {
 				var items = string.Join(", ", list.Select(ParseData));
 				return $"{obj.GetType().Name}[{items}]";
@@ -132,7 +132,11 @@ namespace dev.nox.development {
 				return $"{obj.GetType().Name}[{items}]";
 			}
 
-			return obj.ToString();
+			try {
+				return obj.ToString();
+			} catch {
+				return obj.GetType().Name;
+			}
 		}
 
 		private static string CustomLabel(EventData context)

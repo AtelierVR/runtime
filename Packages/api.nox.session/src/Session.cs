@@ -7,11 +7,12 @@ using Nox.Players;
 using Nox.Sessions;
 using Nox.Worlds;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.session {
-	public class Session : ISession, INoxObject {
+	public class Session : ISession, INoxObject, ISessionEvents {
 		public Session(Main manager, ushort id, IAdapter adapter) {
 			Id      = id;
 			Adapter = adapter;
@@ -23,6 +24,35 @@ namespace api.nox.session {
 		public readonly ushort   Id;
 		public readonly IAdapter Adapter;
 		public readonly Main     Manager;
+
+		public readonly UnityEvent<IPlayer>                      OnPlayerJoinedEvent         = new();
+		public readonly UnityEvent<IPlayer>                      OnPlayerLeftEvent           = new();
+		public readonly UnityEvent<IPlayer>                      OnAuthorityTransferredEvent = new();
+		public readonly UnityEvent<IAdapterState, IAdapterState> OnStateChangedEvent         = new();
+
+		public void AddPlayerJoinedListener(UnityAction<IPlayer> action)
+			=> OnPlayerJoinedEvent.AddListener(action);
+
+		public void AddPlayerLeftListener(UnityAction<IPlayer> action)
+			=> OnPlayerLeftEvent.AddListener(action);
+
+		public void AddAuthorityTransferredListener(UnityAction<IPlayer> action)
+			=> OnAuthorityTransferredEvent.AddListener(action);
+
+		public void AddStateChangedListener(UnityAction<IAdapterState, IAdapterState> action)
+			=> OnStateChangedEvent.AddListener(action);
+
+		public void RemovePlayerJoinedListener(UnityAction<IPlayer> action)
+			=> OnPlayerJoinedEvent.RemoveListener(action);
+
+		public void RemovePlayerLeftListener(UnityAction<IPlayer> action)
+			=> OnPlayerLeftEvent.RemoveListener(action);
+
+		public void RemoveAuthorityTransferredListener(UnityAction<IPlayer> action)
+			=> OnAuthorityTransferredEvent.RemoveListener(action);
+
+		public void RemoveStateChangedListener(UnityAction<IAdapterState, IAdapterState> action)
+			=> OnStateChangedEvent.RemoveListener(action);
 
 		[NoxPublic(NoxAccess.Method)]
 		public ushort GetId()
@@ -38,7 +68,7 @@ namespace api.nox.session {
 
 		[NoxPublic(NoxAccess.Method)]
 		public bool IsCurrent()
-			=> Manager.GetCurrent()?.GetId() == Id;
+			=> Manager.CurrentId == Id;
 
 		[NoxPublic(NoxAccess.Method)]
 		public IPlayer GetPlayer(int id)
@@ -70,16 +100,19 @@ namespace api.nox.session {
 				TryTeleportPlayerToSpawn(player);
 
 			Main.Instance.CoreAPI.EventAPI.Emit("session_player_joined", this, player);
+			OnPlayerJoinedEvent.Invoke(player);
 		}
 
 		public void OnPlayerLeft(IPlayer player) {
 			Logger.LogDebug($"OnPlayerLeft: {player}");
 			Main.Instance.CoreAPI.EventAPI.Emit("session_player_left", this, player);
+			OnPlayerLeftEvent.Invoke(player);
 		}
 
 		public void OnAuthorityTransferred(IPlayer player) {
 			Logger.LogDebug($"OnAuthorityTransferred: {player}");
 			Main.Instance.CoreAPI.EventAPI.Emit("session_authority_transferred", this, player);
+			OnAuthorityTransferredEvent.Invoke(player);
 		}
 
 		public void OnStateChanged(IAdapterState state, IAdapterState previousState) {
@@ -88,11 +121,12 @@ namespace api.nox.session {
 				Main.Instance.CoreAPI.EventAPI.Emit("session_ready", this);
 			else if (!state.IsReady() && Mathf.Approximately(state.GetProgress(), -1))
 				Main.Instance.CoreAPI.EventAPI.Emit("session_error", this);
+			OnStateChangedEvent.Invoke(state, previousState);
 		}
 
 		public void OnUpdate()
 			=> Adapter.OnUpdate();
-		
+
 		public bool Match(IWorldIdentifier identifier)
 			=> Adapter.GetDimension()?.GetScene().GetIdentifier().Equals(identifier)
 				?? false;

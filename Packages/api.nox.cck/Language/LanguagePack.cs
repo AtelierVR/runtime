@@ -31,5 +31,8 @@ namespace Nox.CCK.Language {
 			value = GetLocalizedString(key, language);
 			return value != null;
 		}
+		
+		public bool HasLocalizationString(string language, string key)
+			=> GetLocalizedString(key, language) != null;
 	}
 }

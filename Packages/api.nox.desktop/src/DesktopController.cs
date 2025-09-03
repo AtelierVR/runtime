@@ -409,7 +409,7 @@ namespace api.nox.desktop {
 						break;
 				}
 			}
-			
+
 			root.SetActive(true);
 
 			return true;

@@ -18,16 +18,6 @@ namespace Nox.CCK.Utils {
 	}
 
 	public static class PlatformExtensions {
-		public static string CurrentArchitecture
-			=> RuntimeInformation.OSArchitecture switch {
-				Architecture.X64   => "x64",
-				Architecture.X86   => "x86",
-				Architecture.Arm   => "arm",
-				Architecture.Arm64 => "arm64",
-				_                  => null,
-			};
-
-
 		public static string GetPlatformName(this Platform platform)
 			=> platform switch {
 				Platform.Windows  => "windows",

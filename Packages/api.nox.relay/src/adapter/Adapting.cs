@@ -85,7 +85,7 @@ namespace api.nox.relay {
 
 			var adapter = new RelayAdapter();
 			var session = Main.SessionAPI.New(adapter);
-			adapter.SetState(false, "Preparing offline session...", 0f);
+			adapter.SetState(false, "Preparing relay session...", 0f);
 			context.Callback(adapter, session);
 			PrepareAsync(session, adapter, connections, address, server, instance, setCurrent).Forget();
 		}
@@ -113,6 +113,7 @@ namespace api.nox.relay {
 			var token = await Main.UserAPI.GetToken(server);
 			if (token == null) {
 				adapter.SetState(false, "Failed to fetch token", -1f);
+				Logger.LogError($"Failed to fetch token for server {server}");
 				return;
 			}
 
@@ -150,6 +151,7 @@ namespace api.nox.relay {
 			var hand = await connection.RequestHandshake();
 			if (hand == null) {
 				adapter.SetState(false, "Failed to handshake with relay", -1f);
+				Logger.LogError("Failed to handshake with relay");
 				await connection.Dispose();
 				return;
 			}
@@ -159,6 +161,7 @@ namespace api.nox.relay {
 			var auth    = await connection.RequestAuthentication(request);
 			if (auth.IsError) {
 				adapter.SetState(false, $"Authentication failed: {auth.Reason}", -1f);
+				Logger.LogError($"Authentication failed: {auth.Result} - {auth.Reason}");
 				await connection.Dispose();
 				return;
 			}
@@ -167,6 +170,7 @@ namespace api.nox.relay {
 			adapter.Instance = await connection.RequestSession(instance);
 			if (adapter.Instance == null) {
 				adapter.SetState(false, $"Failed to get instance {instance}", -1f);
+				Logger.LogError($"Failed to get instance {instance} from relay");
 				await connection.Dispose();
 				return;
 			}
@@ -181,42 +185,43 @@ namespace api.nox.relay {
 			var enter = await adapter.Instance.RequestEnter();
 			if (enter.IsError) {
 				adapter.SetState(false, "Failed to connect to instance", -1f);
-				Logger.LogDebug($"Failed to connect to instance {instance}: {enter.Result} - {enter.Reason}");
+				Logger.LogError($"Failed to connect to instance {instance}: {enter.Result} - {enter.Reason}");
 				await connection.Dispose();
 				return;
 			}
 
 			adapter.Tps       = enter.Tps;
 			adapter.Threshold = enter.Threshold;
-			
+
 			adapter.SetState(false, $"Connected as {enter.Player.Display} ({enter.Player.Id}) to instance {instance}", 0.325f);
 
 			var travalRequest = await adapter.Instance.RequestTraveling(TravelingAction.Travel);
-			if (travalRequest.IsError) {
+			if (!travalRequest.IsSuccess) {
 				adapter.SetState(false, $"Failed to travel to instance {instance}: {travalRequest.Reason}", -1f);
-				Logger.LogDebug($"Failed to travel to instance {instance}: {travalRequest.Results} - {travalRequest.Reason}");
+				Logger.LogError($"Failed to travel to instance {instance}: {travalRequest.Results} - {travalRequest.Reason}");
 				await connection.Dispose();
 				return;
 			}
 
-			var travaling = await adapter.OnTravelingAsync(
+			var traveling = await adapter.OnTravelingAsync(
 				travalRequest,
 				autoResponse: false,
-				progress: (f, s) => adapter.SetState(false, $"Traveling to instance {instance}...", 0.325f + f * 0.575f)
+				progress: (f, s) => adapter.SetState(false, s, 0.325f + f * 0.575f)
 			);
 
-
-			if (!travaling) {
+			if (!traveling) {
 				adapter.SetState(false, "Failed to travel to instance", -1f);
-				Logger.LogDebug($"Failed to travel to instance {instance}");
+				Logger.LogError($"Failed to travel to instance {instance}");
 				await connection.Dispose();
 				return;
 			}
+
+			adapter.SetState(false, $"Making ready in instance {instance}...", 0.9f);
 
 			var travelReady = await adapter.Instance.RequestTraveling(TravelingAction.Ready);
 			if (!travelReady.IsReady) {
 				adapter.SetState(false, $"Failed to travel to instance {instance}: {travelReady.Reason}", -1f);
-				Logger.LogDebug($"Failed to travel to instance {instance}: {travelReady.Results} - {travelReady.Reason}");
+				Logger.LogError($"Failed to travel to instance {instance}: {travelReady.Results} - {travelReady.Reason}");
 				await connection.Dispose();
 				return;
 			}
@@ -226,10 +231,10 @@ namespace api.nox.relay {
 
 			var player = adapter.NewPlayer<RelayLocalPlayer>(enter.Player);
 
-			adapter.SetState(false, "Setting local player avatar...", 0.9f);
+			adapter.SetState(false, "Setting local player avatar...", 0.925f);
 			if (!await player.SetAvatar(player.GetAvatar())) {
 				adapter.SetState(false, "Failed to set local player avatar", -1f);
-				Logger.LogDebug($"Failed to set local player avatar for instance {instance}");
+				Logger.LogError($"Failed to set local player avatar for instance {instance}");
 				await connection.Dispose();
 				return;
 			}

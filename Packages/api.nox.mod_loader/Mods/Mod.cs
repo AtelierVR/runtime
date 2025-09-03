@@ -42,12 +42,12 @@ namespace Nox.ModLoader.Mods {
 
 		public T GetEntry<T>() {
 			T entry = default;
-			
+
 			entry ??= GetMain<T>();
 			entry ??= GetClient<T>();
 			entry ??= GetEditor<T>();
 			entry ??= GetServer<T>();
-			
+
 			foreach (var custom in GetCustomsEntries()) {
 				entry ??= GetCustom<T>(custom);
 				if (entry != null) break;
@@ -475,7 +475,8 @@ namespace Nox.ModLoader.Mods {
 							)
 						);
 					} catch (Exception e) {
-						Logger.LogError($"Error initializing main in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
+						Logger.LogError($"Error initializing main in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
+						Logger.LogException(e);
 						CoreAPI.EventAPI.Emit(
 							new ModEventContext(
 								"mod_initialize", this, "main",
@@ -524,7 +525,8 @@ namespace Nox.ModLoader.Mods {
 								ExecutionEventStatus.Error, instance, e
 							)
 						);
-						Logger.LogError($"Error initializing editor in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
+						Logger.LogError($"Error initializing editor in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
+						Logger.LogException(e);
 					}
 
 					Profilers.Set("initialize", "editor", $"{i}", PerformanceManager.At.End, DateTime.UtcNow);
@@ -560,7 +562,8 @@ namespace Nox.ModLoader.Mods {
 							)
 						);
 					} catch (Exception e) {
-						Logger.LogError($"Error initializing server in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
+						Logger.LogError($"Error initializing server in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
+						Logger.LogException(e);
 						CoreAPI.EventAPI.Emit(
 							new ModEventContext(
 								"mod_initialize", this, "server",
@@ -603,7 +606,8 @@ namespace Nox.ModLoader.Mods {
 							)
 						);
 					} catch (Exception e) {
-						Logger.LogError($"Error initializing client in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}:\n{e}");
+						Logger.LogError($"Error initializing client in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
+						Logger.LogException(e);
 						CoreAPI.EventAPI.Emit(
 							new ModEventContext(
 								"mod_initialize", this, "client",

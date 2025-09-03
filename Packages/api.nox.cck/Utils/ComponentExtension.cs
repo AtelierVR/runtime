@@ -18,14 +18,13 @@ namespace Nox.CCK.Utils {
 		public static bool IsActive(this Component component)
 			=> component && IsActive(component.gameObject);
 
-		public static T GetComponentInParents<T>(this GameObject gameObject) {
-			if (gameObject.TryGetComponent<T>(out var component))
-				return component;
-
-			var parent = gameObject.transform.parent;
+		public static T GetComponentInParents<T>(this GameObject gameObject, bool includeInactive = false) {
+			var parent = gameObject.transform;
 
 			while (parent) {
-				if (parent.TryGetComponent(out component))
+				if (!includeInactive && !parent.gameObject.activeInHierarchy)
+					return default;
+				if (parent.TryGetComponent<T>(out var component))
 					return component;
 				parent = parent.parent;
 			}
@@ -33,67 +32,75 @@ namespace Nox.CCK.Utils {
 			return default;
 		}
 
-		public static bool TryGetComponentInChildren<T>(out T component) {
+		public static bool TryGetComponentInChildren<T>(out T component, bool includeInactive = true) {
 			for (var i = 0; i < SceneManager.sceneCount; i++)
-				if (TryGetComponentInChildren(SceneManager.GetSceneAt(i), out component))
+				if (TryGetComponentInChildren(SceneManager.GetSceneAt(i), out component, includeInactive))
 					return true;
 			component = default;
 			return false;
 		}
 
-		public static bool TryGetComponentInChildren<T>(this Scene scene, out T component) {
+		public static bool TryGetComponentInChildren<T>(this Scene scene, out T component, bool includeInactive = true) {
 			if (!scene.isLoaded) {
 				component = default;
 				return false;
 			}
 
 			foreach (var go in scene.GetRootGameObjects())
-				if (go.TryGetComponentInChildren(out component))
+				if (go.TryGetComponentInChildren(out component, includeInactive))
 					return true;
 
 			component = default;
 			return false;
 		}
 
-		public static bool TryGetComponentInChildren<T>(this GameObject gameObject, out T component) {
+		public static bool TryGetComponentInChildren<T>(this GameObject gameObject, out T component, bool includeInactive = true) {
+			if (!gameObject || (!includeInactive && !gameObject.activeInHierarchy)) {
+				component = default;
+				return false;
+			}
+
 			if (gameObject.TryGetComponent(out component))
 				return true;
 
-			foreach (UnityEngine.Transform child in gameObject.transform)
-				if (TryGetComponentInChildren(child.gameObject, out component))
+			foreach (UnityTransform child in gameObject.transform)
+				if (TryGetComponentInChildren(child.gameObject, out component, includeInactive))
 					return true;
 
 			component = default;
 			return false;
 		}
 
-		public static T GetComponentInChildren<T>()
-			=> TryGetComponentInChildren(out T component)
+		public static T GetComponentInChildren<T>(bool includeInactive = true)
+			=> TryGetComponentInChildren(out T component, includeInactive)
 				? component
 				: default;
 
-		public static T GetComponentInChildren<T>(this Scene scene)
-			=> TryGetComponentInChildren(scene, out T component)
+		public static T GetComponentInChildren<T>(this Scene scene, bool includeInactive = true)
+			=> TryGetComponentInChildren(scene, out T component, includeInactive)
 				? component
 				: default;
 
-		public static T GetComponentInChildren<T>(this GameObject gameObject)
-			=> TryGetComponentInChildren(gameObject, out T component)
+		public static T[] GetComponentsInChildren<T>(this GameObject gameObject, bool includeInactive = true)
+			=> gameObject.GetComponentsInChildren<T>(includeInactive);
+
+		public static T GetComponentInChildren<T>(this GameObject gameObject, bool includeInactive = true)
+			=> TryGetComponentInChildren(gameObject, out T component, includeInactive)
 				? component
 				: default;
 
-		public static T[] GetComponentsInChildren<T>() {
+		public static T[] GetComponentsInChildren<T>(bool includeInactive = true) {
 			var components = new List<T>();
 			for (var i = 0; i < SceneManager.sceneCount; i++)
-				components.AddRange(GetComponentsInChildren<T>(SceneManager.GetSceneAt(i)));
+				components.AddRange(GetComponentsInChildren<T>(SceneManager.GetSceneAt(i), includeInactive));
 			return components.ToArray();
 		}
 
-		public static T[] GetComponentsInChildren<T>(Scene scene) {
+		public static T[] GetComponentsInChildren<T>(this Scene scene, bool includeInactive = true) {
 			if (!scene.isLoaded) return Array.Empty<T>();
 			var components = new List<T>();
 			foreach (var go in scene.GetRootGameObjects())
-				components.AddRange(go.GetComponentsInChildren<T>());
+				components.AddRange(go.GetComponentsInChildren<T>(includeInactive));
 			return components.ToArray();
 		}
 

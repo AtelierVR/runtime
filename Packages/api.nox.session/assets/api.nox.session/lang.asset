@@ -9,141 +9,80 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f4edc8b87bb43eca2db6cd251e58d7c, type: 3}
+  m_Script: {fileID: 11500000, guid: 776389e82c640c44086d3baf10dd1c7b, type: 3}
   m_Name: lang
   m_EditorClassIdentifier: 
-  Languages:
-  - Language: en
-    Entries:
+  languages:
+  - IETF: en-US
+    entries:
     - key: session.manager.title
-      value: "Sessions Manager"
+      value: Sessions Manager
     - key: session.manager.refresh
-      value: "Refresh"
+      value: Refresh
     - key: session.manager.active_sessions
-      value: "Active Sessions"
+      value: Active Sessions
     - key: session.manager.current_session
-      value: "Current Session"
+      value: Current Session
     - key: session.manager.all_sessions
-      value: "All Sessions"
+      value: All Sessions
     - key: session.manager.no_sessions
-      value: "No active sessions"
+      value: No active sessions
     - key: session.manager.sessions_count
-      value: "Sessions: {0}"
+      value: 'Sessions: {0}'
     - key: session.manager.session_id
-      value: "Session #{0}"
+      value: Session #{0}
     - key: session.manager.current_indicator
-      value: "[CURRENT]"
+      value: '[CURRENT]'
     - key: session.manager.adapter_label
-      value: "Adapter: {0}"
+      value: 'Adapter: {0}'
     - key: session.manager.players_count
-      value: "Players: {0}"
+      value: 'Players: {0}'
     - key: session.manager.entities_count
-      value: "Entities: {0}"
+      value: 'Entities: {0}'
     - key: session.manager.set_current
-      value: "Set Current"
+      value: Set Current
     - key: session.manager.dispose
-      value: "Dispose"
+      value: Dispose
     - key: session.manager.dispose_confirm_title
-      value: "Confirm Dispose"
+      value: Confirm Dispose
     - key: session.manager.dispose_confirm_message
-      value: "Are you sure you want to dispose Session #{0}?"
+      value: Are you sure you want to dispose Session #{0}?
     - key: session.manager.dispose_confirm_yes
-      value: "Yes"
+      value: Yes
     - key: session.manager.dispose_confirm_no
-      value: "No"    - key: session.manager.error_refresh
-      value: "Error refreshing sessions: {0}"
+      value: No
+    - key: session.manager.error_refresh
+      value: 'Error refreshing sessions: {0}'
     - key: session.manager.error_dispose
-      value: "Error disposing session: {0}"
+      value: 'Error disposing session: {0}'
     - key: session.manager.none
-      value: "None"
+      value: None
     - key: session.manager.unknown
-      value: "Unknown"
+      value: Unknown
     - key: session.manager.no_current_session
-      value: "No current session"
+      value: No current session
     - key: session.manager.players_info
-      value: "Local Players: {0} | Master: {1}"
+      value: 'Local Players: {0} | Master: {1}'
     - key: session.manager.dispose_all
-      value: "Dispose All"
+      value: Dispose All
     - key: session.manager.dispose_all_confirm_title
-      value: "Confirm Dispose All"
+      value: Confirm Dispose All
     - key: session.manager.dispose_all_confirm_message
-      value: "Are you sure you want to dispose all sessions? This action cannot be undone."
+      value: Are you sure you want to dispose all sessions? This action cannot be
+        undone.
     - key: session.manager.cancel
-      value: "Cancel"
+      value: Cancel
     - key: session.manager.ok
-      value: "OK"
+      value: OK
     - key: session.manager.error
-      value: "Error"
+      value: Error
     - key: session.manager.dispose_error
-      value: "Failed to dispose session: {0}"
+      value: 'Failed to dispose session: {0}'
     - key: session.manager.dispose_all_error
-      value: "Failed to dispose all sessions: {0}"
+      value: 'Failed to dispose all sessions: {0}'
     - key: session.manager.no_sessions_info
-      value: "No sessions are currently active. Create a new session to get started."
-  - Language: fr
-    Entries:
-    - key: session.manager.title
-      value: "Gestionnaire de Sessions"
-    - key: session.manager.refresh
-      value: "Actualiser"
-    - key: session.manager.active_sessions
-      value: "Sessions Actives"
-    - key: session.manager.current_session
-      value: "Session Courante"
-    - key: session.manager.all_sessions
-      value: "Toutes les Sessions"
-    - key: session.manager.no_sessions
-      value: "Aucune session active"
-    - key: session.manager.sessions_count
-      value: "Sessions : {0}"
-    - key: session.manager.session_id
-      value: "Session #{0}"
-    - key: session.manager.current_indicator
-      value: "[COURANTE]"
-    - key: session.manager.adapter_label
-      value: "Adaptateur : {0}"
-    - key: session.manager.players_count
-      value: "Joueurs : {0}"
-    - key: session.manager.entities_count
-      value: "Entités : {0}"
-    - key: session.manager.set_current
-      value: "Définir Comme Courante"
-    - key: session.manager.dispose
-      value: "Supprimer"
-    - key: session.manager.dispose_confirm_title
-      value: "Confirmer la Suppression"
-    - key: session.manager.dispose_confirm_message
-      value: "Êtes-vous sûr de vouloir supprimer la Session #{0} ?"
-    - key: session.manager.dispose_confirm_yes
-      value: "Oui"
-    - key: session.manager.dispose_confirm_no
-      value: "Non"    - key: session.manager.error_refresh
-      value: "Erreur lors de l'actualisation des sessions : {0}"
-    - key: session.manager.error_dispose
-      value: "Erreur lors de la suppression de la session : {0}"
-    - key: session.manager.none
-      value: "Aucune"
-    - key: session.manager.unknown
-      value: "Inconnu"
-    - key: session.manager.no_current_session
-      value: "Aucune session courante"
-    - key: session.manager.players_info
-      value: "Joueurs locaux : {0} | Maître : {1}"
-    - key: session.manager.dispose_all
-      value: "Supprimer Tout"
-    - key: session.manager.dispose_all_confirm_title
-      value: "Confirmer la Suppression de Toutes"
-    - key: session.manager.dispose_all_confirm_message
-      value: "Êtes-vous sûr de vouloir supprimer toutes les sessions ? Cette action ne peut pas être annulée."
-    - key: session.manager.cancel
-      value: "Annuler"
-    - key: session.manager.ok
-      value: "OK"
-    - key: session.manager.error
-      value: "Erreur"
-    - key: session.manager.dispose_error
-      value: "Échec de la suppression de la session : {0}"
-    - key: session.manager.dispose_all_error
-      value: "Échec de la suppression de toutes les sessions : {0}"
-    - key: session.manager.no_sessions_info
-      value: "Aucune session n'est actuellement active. Créez une nouvelle session pour commencer."
+      value: No sessions are currently active. Create a new session to get started.
+    - key: session.manager.true
+      value: True
+    - key: session.manager.false
+      value: False

@@ -79,7 +79,7 @@ namespace api.nox.relay.editor {
 
 		private void UpdateConnection(VisualElement child, Connection connection) {
 			if (_root.childCount == 0) return;
-			
+
 			var label = child.Q<Label>("id");
 			label.text = connection.Id.ToString();
 
@@ -88,6 +88,9 @@ namespace api.nox.relay.editor {
 
 			var latency = child.Q<Label>("latency");
 			latency.text = connection.Latency.ToString("0");
+
+			var protocol = child.Q<Label>("protocol");
+			protocol.text = connection.Connector?.GetProtocolName() ?? "...";
 		}
 
 		public VisualElement Make(Dictionary<string, object> data) {

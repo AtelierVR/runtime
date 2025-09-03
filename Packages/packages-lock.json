@@ -162,6 +162,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "api.nox.videoplayer": {
+      "version": "file:api.nox.videoplayer",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "api.nox.world": {
       "version": "file:api.nox.world",
       "depth": 0,

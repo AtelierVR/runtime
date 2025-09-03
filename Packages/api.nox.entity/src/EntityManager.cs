@@ -37,7 +37,6 @@ namespace api.nox.entity {
 			}
 
 			_entities.Add(entity);
-			Logger.LogDebug($"Registered entity with ID {entity.GetId()}");
 		}
 
 		public void UnregisterEntity(IEntity entity) {
@@ -52,7 +51,6 @@ namespace api.nox.entity {
 			}
 
 			_entities.Remove(entity);
-			Logger.LogDebug($"Unregistered entity with ID {entity.GetId()}");
 		}
 
 		public IEntity GetEntity(int id)

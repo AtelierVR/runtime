@@ -2,10 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
-using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
-using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using Nox.Controllers;
 using Nox.Sessions;
@@ -17,9 +16,10 @@ namespace api.nox.session {
 		private readonly List<ISession> _sessions = new();
 		internal         MainModCoreAPI CoreAPI;
 		internal static  Main           Instance;
-		private          ushort         _nextId    = ushort.MinValue + 1;
-		private          ushort         _currentId = ushort.MinValue;
+		private          ushort         _nextId   = ushort.MinValue + 1;
+		internal         ushort         CurrentId = ushort.MinValue;
 		private          GameObject     _updateHandler;
+		private          LanguagePack   _lang;
 
 		internal IControllerAPI ControllerAPI
 			=> CoreAPI.ModAPI.GetMod("controller")
@@ -28,6 +28,8 @@ namespace api.nox.session {
 
 		public void OnInitializeMain(MainModCoreAPI api) {
 			CoreAPI  = api;
+			_lang    = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
+			LanguageManager.AddPack(_lang);
 			Instance = this;
 		}
 
@@ -35,7 +37,8 @@ namespace api.nox.session {
 			foreach (var session in _sessions.ToArray())
 				await session.Dispose();
 			_sessions.Clear();
-
+			LanguageManager.RemovePack(_lang);
+			_lang    = null;
 			CoreAPI  = null;
 			Instance = null;
 		}
@@ -65,17 +68,17 @@ namespace api.nox.session {
 
 		[NoxPublic(NoxAccess.Method)]
 		public ISession GetCurrent()
-			=> GetSession(_currentId);
+			=> GetSession(CurrentId);
 
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask SetCurrent(ushort id) {
-			if (id == _currentId) return;
+			if (id == CurrentId) return;
 			var nSession = _sessions.FirstOrDefault(s => s.GetId() == id);
-			var oSession = _sessions.FirstOrDefault(s => s.GetId() == _currentId);
+			var oSession = _sessions.FirstOrDefault(s => s.GetId() == CurrentId);
 
 			if (oSession != null)
 				await oSession.OnDeselect(nSession);
-			_currentId = id;
+			CurrentId = id;
 			if (nSession != null)
 				await nSession.OnSelect(oSession);
 
@@ -100,7 +103,7 @@ namespace api.nox.session {
 		private ushort GetNextId() {
 			var i = _nextId;
 			do {
-				if (i >= ushort.MaxValue) i = ushort.MinValue + 1;
+				if (i >= ushort.MaxValue) i = ushort.MinValue;
 				else i++;
 			} while (_sessions.Any(s => s.GetId() == i));
 
@@ -137,10 +140,8 @@ namespace api.nox.session {
 			return null;
 
 			void Callback(object[] data) {
-				if (data is { Length: > 0 } && data[0] is IAdapter a)
-					adapter = a;
-				if (data is { Length: > 1 } && data[0] is ISession s)
-					session = s;
+				adapter = data is { Length: > 0 } && data[0] is IAdapter a ? a : null;
+				session = data is { Length: > 1 } && data[1] is ISession s ? s : null;
 			}
 		}
 	}

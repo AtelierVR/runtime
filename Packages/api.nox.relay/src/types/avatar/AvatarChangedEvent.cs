@@ -19,7 +19,6 @@ namespace api.nox.relay.types.Avatar {
 			=> Result == AvatarChangedResult.Success;
 
 		public override bool FromBuffer(Buffer buffer) {
-			Logger.LogDebug($"Received {buffer}");
 			buffer.Goto(0);
 			InternalId = buffer.ReadByte();
 			Result     = buffer.ReadEnum<AvatarChangedResult>();

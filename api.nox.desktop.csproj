@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Packages\api.nox.desktop\src\DesktopPlayer.cs" />
     <Compile Include="Packages\api.nox.desktop\src\DesktopPlayerControllerLink.cs" />
+    <Compile Include="Packages\api.nox.desktop\src\DesktopCrosshair.cs" />
     <Compile Include="Packages\api.nox.desktop\src\DesktopController.cs" />
     <Compile Include="Packages\api.nox.desktop\src\Client.cs" />
     <Compile Include="Packages\api.nox.desktop\src\Keybindings.cs" />

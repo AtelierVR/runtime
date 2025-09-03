@@ -35,6 +35,7 @@ namespace api.nox.relay {
 
 			_avatarLoadingCts?.Cancel();
 			_avatarLoadingCts = new CancellationTokenSource();
+			await UniTask.SwitchToMainThread();
 
 			if (Avatar == null) {
 				var loading = await Main.AvatarAPI.LoadLoading(token: _avatarLoadingCts.Token);

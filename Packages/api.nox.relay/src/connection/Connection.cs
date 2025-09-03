@@ -32,114 +32,69 @@ namespace api.nox.relay.connection {
 		public async UniTask<bool> Connect(string address, ushort port)
 			=> await Connector.Connect(address, port);
 
-		private void OnReceived(Buffer buffer) {
-			if (buffer.length < 5) return;
+		private void OnReceived(Buffer buffer)
+			=> OnReceivedAsync(buffer).Forget();
+
+		private async UniTask OnReceivedAsync(Buffer buffer) {
+			await UniTask.SwitchToMainThread();
+			if (buffer.length < 5) {
+				Logger.LogWarning($"Received invalid buffer length: {buffer.length}\n{buffer}");
+				return;
+			}
+
 			buffer.Goto(0);
 			var length = buffer.ReadUShort();
 			var state  = buffer.ReadUShort();
 			var type   = buffer.ReadEnum<ResponseType>();
-			if (length < 5 || length > buffer.length) return;
-			
-			switch (type)
-			{
+			if (length < 5 || length > buffer.length) {
+				Logger.LogWarning($"Received invalid buffer length: {length} > {buffer.length}\n{buffer}");
+				return;
+			}
+
+
+			switch (type) {
 				case ResponseType.Enter:
 				case ResponseType.Quit:
 				case ResponseType.Join:
 				case ResponseType.Leave:
-				case ResponseType.Teleport:
 				case ResponseType.Transform:
 				case ResponseType.Custom:
 				case ResponseType.AvatarChanged:
 				case ResponseType.Traveling:
-					var iid = buffer.ReadByte();
+				case ResponseType.Teleport:
+					var iid      = buffer.ReadByte();
 					var instance = Instances.FirstOrDefault(x => x.InternalId == iid);
-					instance?.OnReceived(length, state, type, buffer.Clone(5, length));
+					if (instance != null)
+						await instance.OnReceived(length, state, type, buffer.Clone(5, length));
 					break;
 				case ResponseType.Disconnect:
 					var disconnect = new types.Disconnect.RelayEventDisconnect();
-					if (disconnect.FromBuffer(buffer.Clone(5, length)))
-					{
+					if (disconnect.FromBuffer(buffer.Clone(5, length))) {
 						Logger.Log($"Disconnect {disconnect.Reason}");
 						_lastHandshake = null;
-						_lastLatency = null;
+						_lastLatency   = null;
 						Connector.Close().Forget();
-					}
-					else
-					{
+					} else {
 						Logger.LogError($"Failed to parse disconnect");
 					}
 
 					break;
+				case ResponseType.Handshake:
+				case ResponseType.Segmentation:
+				case ResponseType.Reliable:
+				case ResponseType.Latency:
+				case ResponseType.Authentification:
+				case ResponseType.PasswordRequirement:
+				case ResponseType.ServerConfig:
+				case ResponseType.Status:
+				case ResponseType.None:
+					break;
+				default:
+					Logger.LogWarning($"Unknown receive type: {type}");
+					break;
 			}
 		}
 
-		private void HandleMultiPacketStart(Buffer buffer, ushort state, ushort length)
-		{
-			var sessionId = buffer.ReadUShort();
-			var totalPackets = buffer.ReadUShort();
-			var totalSize = (uint)buffer.ReadInt();
-			var originalType = buffer.ReadEnum<ResponseType>();
-			var originalUid = buffer.ReadUShort();
-
-			ClientMultiPacketManager.StartSession(sessionId, totalPackets, totalSize, originalType, state);
-			Logger.LogDebug($"Started receiving multipacket session {sessionId} with {totalPackets} packets, size {totalSize}");
-		}
-
-		private void HandleMultiPacketData(Buffer buffer, ushort state, ushort length)
-		{
-			var sessionId = buffer.ReadUShort();
-			var packetIndex = buffer.ReadUShort();
-			var dataLength = buffer.ReadUShort();
-			var remainingLength = length - 9; // 5 (header) + 2 (sessionId) + 2 (packetIndex)
-			var actualLength = Math.Min(dataLength, remainingLength);
-			
-			if (actualLength <= 0)
-			{
-				Logger.LogWarning($"Invalid data length for multipacket session {sessionId}, packet {packetIndex}");
-				return;
-			}
-
-			var data = new byte[actualLength];
-			for (int i = 0; i < actualLength; i++)
-			{
-				data[i] = buffer.ReadByte();
-			}
-
-			ClientMultiPacketManager.AddPacket(sessionId, packetIndex, data);
-			Logger.LogDebug($"Received multipacket data {packetIndex} for session {sessionId}");
-		}
-
-		private void HandleMultiPacketEnd(Buffer buffer, ushort state, ushort length)
-		{
-			var sessionId = buffer.ReadUShort();
-			var session = ClientMultiPacketManager.CompleteSession(sessionId);
-
-			if (session == null)
-			{
-				Logger.LogWarning($"Failed to complete multipacket session {sessionId}");
-				return;
-			}
-
-			var mergedData = session.GetMergedData();
-			if (mergedData == null)
-			{
-				Logger.LogError($"Failed to merge data for session {sessionId}");
-				return;
-			}
-
-			Logger.LogDebug($"Successfully merged {mergedData.Length} bytes for session {sessionId}");
-
-			// Create a new buffer with the merged data and process it as the original type
-			var mergedBuffer = new Buffer((ushort)(mergedData.Length + 5));
-			mergedBuffer.Write((ushort)(mergedData.Length + 5));
-			mergedBuffer.Write(session.OriginalState);
-			mergedBuffer.Write(session.OriginalType);
-			mergedBuffer.Write(mergedData);
-			mergedBuffer.Goto(0);
-
-			// Process the merged packet recursively
-			OnReceived(mergedBuffer);
-		}
 
 		internal readonly List<RelayInstance> Instances = new();
 
@@ -171,7 +126,7 @@ namespace api.nox.relay.connection {
 
 		public void Update() {
 			Connector.Update();
-			if (Status == ClientStatus.Disconnected) return;
+			if (Status == ClientStatus.Disconnected || !Connector.IsConnected()) return;
 
 			if (_lastLatencyRequest.AddSeconds(types.Latency.RelayRequestLatency.IntervalLatencyRequest) < DateTime.Now) {
 				_lastLatencyRequest = DateTime.Now;
@@ -231,7 +186,7 @@ namespace api.nox.relay.connection {
 			var (ok, _) = await Emit(request.ToBuffer(), oType, state);
 			if (!ok) {
 				Connector.OnReceivedEvent -= rec;
-				Logger.Log($"Requested: failed {oType} {state}");
+				Logger.LogWarning($"Requested: failed {oType} {state}");
 				return null;
 			}
 
@@ -243,7 +198,7 @@ namespace api.nox.relay.connection {
 				return res;
 			}
 
-			Logger.Log($"Requested: {oType} {state} timeout");
+			Logger.LogWarning($"Requested: {oType} {state} timeout");
 			return null;
 		}
 
@@ -319,16 +274,15 @@ namespace api.nox.relay.connection {
 			return instance;
 		}
 
-		public async UniTask<types.Disconnect.RelayEventDisconnect> RequestDisconnect(string reason = null)
-			=> await Request<types.Disconnect.RelayEventDisconnect>(
+		public async UniTask<bool> RequestDisconnect(string reason = null)
+			=> (await Emit(
 				new types.Disconnect.RelayRequestDisconnect {
 					ConnectionId = Id,
 					Reason       = reason
-				},
+				}.ToBuffer(),
 				RequestType.Disconnect,
-				ResponseType.Disconnect,
 				NextState()
-			);
+			)).Item1;
 
 		public async UniTask<types.Authentication.RelayResponseAuthentication> RequestAuthentication(types.Authentication.RelayRequestAuthentication request)
 			=> await Request<types.Authentication.RelayResponseAuthentication>(

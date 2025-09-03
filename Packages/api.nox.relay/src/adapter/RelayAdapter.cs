@@ -112,19 +112,19 @@ namespace api.nox.relay {
 
 		private async UniTask OnAvatarChangedAsync(AvatarChangedEvent ev) {
 			if (ev.Result != AvatarChangedResult.Changing) return;
-			Logger.LogDebug($"OnAvatarChanged: {ev}");
 			var player = _entities.GetEntity<RelayPlayer>(ev.PlayerId);
 			if (player == null) return;
 			await player.SetAvatar(ev.AvatarIdentifier);
 		}
 
 		public void OnUpdate() {
+			if (!_session.IsCurrent()) return;
+			if (_isTraveling || Tps == 0 || _lastUpdate.AddSeconds(1f / Tps) > DateTime.UtcNow) return;
+			_lastUpdate = DateTime.UtcNow;
 			var local = _entities.GetEntities<RelayLocalPlayer>().FirstOrDefault();
 			var other = _entities.GetEntities<RelayRemotePlayer>();
 			UpdatePlayerDistance(ref local, ref other);
 			UpdatePhysicalPlayers(ref local, ref other);
-			if (_isTraveling || Tps == 0 || _lastUpdate.AddSeconds(1f / Tps) > DateTime.UtcNow) return;
-			_lastUpdate = DateTime.UtcNow;
 			local?.SendTransform();
 		}
 
@@ -181,7 +181,7 @@ namespace api.nox.relay {
 							.SetPlatforms(new[] { PlatformExtensions.CurrentPlatform.GetPlatformName() })
 							.SetVersions(new[] { ev.WorldIdentifier.GetVersion() })
 							.SetLimit(1)
-					)).GetAssets()
+					))?.GetAssets()
 					.FirstOrDefault();
 
 				if (asset == null) {
@@ -298,6 +298,9 @@ namespace api.nox.relay {
 			Logger.LogDebug($"OnDeselect: {this}");
 			var main = _dimension.GetScene().GetMainScene();
 			main?.SetVisibleInstance(_dimension.GetMainIndex(), false, false);
+			var entities = _entities.GetEntities().ToArray();
+			foreach (var entity in entities)
+				entity.DestroyPhysical();
 			await UniTask.Yield();
 		}
 

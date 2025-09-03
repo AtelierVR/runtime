@@ -9,17 +9,17 @@ namespace api.nox.relay.types.Traveling {
 	public class TravelingEvent : RelayInstanceResponse {
 		public TravelingResults Results;
 
-		public bool IsError
-			=> Results.HasFlag(TravelingResults.Unknown);
-
 		public bool IsReady
-			=> Results.HasFlag(TravelingResults.Ready) && !IsError;
+			=> Results.HasFlag(TravelingResults.Ready);
 
 		public bool UseUrl
-			=> Results.HasFlag(TravelingResults.UseUrl) && !IsError;
+			=> Results.HasFlag(TravelingResults.UseUrl);
 
 		public bool UseMaster
-			=> Results.HasFlag(TravelingResults.UseMaster) && !IsError;
+			=> Results.HasFlag(TravelingResults.UseMaster);
+		
+		public bool IsSuccess
+			=> IsReady || UseUrl || UseMaster;
 
 		public string Reason;
 
@@ -69,7 +69,7 @@ namespace api.nox.relay.types.Traveling {
 
 		public override string ToString()
 			=> $"{GetType().Name}[Results={Results}"
-				+ (IsError ? $", Message=\"{Reason}\"" : "")
+				+ (!IsSuccess ? $", Message=\"{Reason}\"" : "")
 				+ (UseUrl ? $", Url=\"{DownloadUrl}\", Hash=\"{Hash}\", Size={Size}" : "")
 				+ (UseMaster ? $", World={WorldIdentifier.ToString()}" : "")
 				+ "]";

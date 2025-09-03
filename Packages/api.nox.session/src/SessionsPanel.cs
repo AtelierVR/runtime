@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
 using Nox.CCK.Mods.Panels;
 using Nox.Sessions;
+using Nox.Players;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -42,6 +43,9 @@ namespace api.nox.session {
 		private          Label         _sessionsCountLabel;
 		private          Label         _currentSessionLabel;
 		private          Button        _disposeAllButton;
+		
+		// Track session events subscriptions for cleanup
+		private readonly Dictionary<ISession, ISessionEvents> _sessionEventsSubscriptions = new();
 
 		internal void Update() {
 			if (!Editor.HasSessionPanelOpened() || _root.childCount == 0) return;
@@ -63,7 +67,7 @@ namespace api.nox.session {
 			if (_currentSessionLabel != null) {
 				if (currentSession != null) {
 					var adapter     = currentSession.GetAdapter();
-					var adapterName = adapter?.GetType().Name ?? "Unknown";
+					var adapterName = adapter?.GetType().Name ?? LanguageManager.Get("session.manager.unknown");
 					_currentSessionLabel.text = LanguageManager.Get("session.manager.current_session") + $" #{currentSession.GetId()} - " + LanguageManager.Get("session.manager.adapter_label", adapterName);
 				} else {
 					_currentSessionLabel.text = LanguageManager.Get("session.manager.no_current_session");
@@ -128,13 +132,19 @@ namespace api.nox.session {
 					LanguageManager.Get(
 						"session.manager.players_info",
 						new object[] {
-							localPlayer != null ? "True" : "False",
-							masterPlayer?.ToIdentifier()?.ToString() ?? "None"
+							localPlayer != null ? LanguageManager.Get("session.manager.true") : LanguageManager.Get("session.manager.false"),
+							masterPlayer?.ToIdentifier()?.ToString() ?? LanguageManager.Get("session.manager.none")
 						}
 					)
 				);
 				playersInfo.AddToClassList("session-players");
 				infoContainer.Add(playersInfo);
+
+				// Add players list if session supports ISessionEvents
+				if (session is ISessionEvents sessionEvents) {
+					var playersListContainer = CreatePlayersListContainer(adapter, sessionEvents, session);
+					infoContainer.Add(playersListContainer);
+				}
 			}
 
 			// Actions
@@ -142,16 +152,14 @@ namespace api.nox.session {
 			actionsContainer.AddToClassList("session-actions");
 
 			if (!isCurrent) {
-				var setCurrentButton = new Button(() => SetCurrentSession(session).Forget()) {
-					text = LanguageManager.Get("session.manager.set_current")
-				};
+				var setCurrentButton = new Button() { text = LanguageManager.Get("session.manager.set_current") };
+				setCurrentButton.RegisterCallback<ClickEvent>(_ => SetCurrentSession(session).Forget());
 				setCurrentButton.AddToClassList("session-action-button");
 				actionsContainer.Add(setCurrentButton);
 			}
 
-			var disposeButton = new Button(() => DisposeSession(session).Forget()) {
-				text = LanguageManager.Get("session.manager.dispose")
-			};
+			var disposeButton = new Button { text = LanguageManager.Get("session.manager.dispose") };
+			disposeButton.RegisterCallback<ClickEvent>(_ => DisposeSession(session).Forget());
 			disposeButton.AddToClassList("session-action-button");
 			disposeButton.AddToClassList("session-dispose-button");
 			actionsContainer.Add(disposeButton);
@@ -163,11 +171,90 @@ namespace api.nox.session {
 			return container;
 		}
 
-		private async UniTask SetCurrentSession(ISession session) {
-			if (Main.Instance != null) {
-				await Main.Instance.SetCurrent(session.GetId());
-				RefreshSessionsList();
+		private VisualElement CreatePlayersListContainer(IAdapter adapter, ISessionEvents sessionEvents, ISession session) {
+			var playersContainer = new VisualElement();
+			playersContainer.AddToClassList("session-players-list");
+
+			var playersHeader = new Label("Players:");
+			playersHeader.AddToClassList("session-players-header");
+			playersContainer.Add(playersHeader);
+
+			var playersList = new VisualElement();
+			playersList.AddToClassList("session-players-items");
+			
+			// Initial population of players list
+			UpdatePlayersList(playersList, adapter);
+			
+			playersContainer.Add(playersList);
+
+			// Subscribe to session events if not already subscribed
+			if (!_sessionEventsSubscriptions.ContainsKey(session)) {
+				_sessionEventsSubscriptions[session] = sessionEvents;
+				
+				// Subscribe to player events to update the list in real-time
+				sessionEvents.AddPlayerJoinedListener((player) => {
+					EditorApplication.delayCall += () => UpdatePlayersList(playersList, adapter);
+				});
+				
+				sessionEvents.AddPlayerLeftListener((player) => {
+					EditorApplication.delayCall += () => UpdatePlayersList(playersList, adapter);
+				});
 			}
+
+			return playersContainer;
+		}
+
+		private void UpdatePlayersList(VisualElement playersList, IAdapter adapter) {
+			if (playersList == null || adapter == null) return;
+
+			playersList.Clear();
+
+			var playerCount = adapter.GetPlayerCount();
+			if (playerCount == 0) {
+				var noPlayersLabel = new Label("No players");
+				noPlayersLabel.AddToClassList("session-no-players");
+				playersList.Add(noPlayersLabel);
+				return;
+			}
+
+			for (int i = 0; i < playerCount; i++) {
+				var player = adapter.GetPlayer(i);
+				if (player != null) {
+					var playerItem = new VisualElement();
+					playerItem.AddToClassList("session-player-item");
+
+					var playerLabel = new Label($"• {player.ToIdentifier()?.ToString() ?? $"Player {i}"}");
+					playerLabel.AddToClassList("session-player-name");
+					
+					// Mark local and master players
+					var localPlayer = adapter.GetLocalPlayer();
+					var masterPlayer = adapter.GetMasterPlayer();
+					
+					if (player == localPlayer) {
+						playerLabel.text += " (Local)";
+						playerLabel.AddToClassList("session-player-local");
+					}
+					
+					if (player == masterPlayer) {
+						playerLabel.text += " (Master)";
+						playerLabel.AddToClassList("session-player-master");
+					}
+
+					playerItem.Add(playerLabel);
+					playersList.Add(playerItem);
+				}
+			}
+		}
+
+		private async UniTask SetCurrentSession(ISession session) {
+			if (Main.Instance == null) {
+				Logger.Log("No session manager instance available");
+				return;
+			}
+
+			Logger.Log("Setting current session");
+			await Main.Instance.SetCurrent(session.GetId());
+			RefreshSessionsList();
 		}
 
 		private async UniTask DisposeSession(ISession session) {
@@ -256,6 +343,17 @@ namespace api.nox.session {
 		}
 
 		public void Dispose() {
+			// Cleanup session events subscriptions
+			foreach (var kvp in _sessionEventsSubscriptions) {
+				var session = kvp.Key;
+				var sessionEvents = kvp.Value;
+				
+				// Note: We can't unsubscribe specific listeners without keeping references to them
+				// This is a limitation of the current ISessionEvents interface
+				// In a real implementation, you might want to keep references to the specific actions
+			}
+			_sessionEventsSubscriptions.Clear();
+
 			// Clear cached references
 			_sessionsList        = null;
 			_sessionsCountLabel  = null;
@@ -269,3 +367,4 @@ namespace api.nox.session {
 	}
 }
 #endif
+

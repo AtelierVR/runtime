@@ -262,6 +262,7 @@ namespace api.nox.instance.client {
 
 			var isEmpty = true;
 			var isFirst = true;
+			var prefab  = PlayerComponent.PlayerPrefab;
 			var action = new Action<(IUser, IPlayer)[]>(
 				users => {
 					Logger.LogDebug($"Found {users.Length} instances for world {instance.GetTitle()} ({instance.ToIdentifier()})");
@@ -270,8 +271,7 @@ namespace api.nox.instance.client {
 							Destroy(child.gameObject);
 					isFirst = false;
 					foreach (var user in users) {
-						var (go, comp) = PlayerComponent.Generate(this, playerList.transform);
-						comp.UpdateContent(user);
+						PlayerComponent.Generate(this, playerList.transform, prefab, user).Forget();
 					}
 
 					if (users.Length > 0) {

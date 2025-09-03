@@ -1,5 +1,5 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
-    <Style src="project://database/Assets/Nox/ModLoader/Resources/nox.cck.style.uss?fileID=7433441132597879392&amp;guid=b86e17dc57cb40d2a131e93eab25a53d&amp;type=3#nox.cck.style" />
+    <Style src="project://database/Packages/api.nox.mod_loader/Resources/nox.cck.style.uss?fileID=7433441132597879392&amp;guid=ee18ab989d89a1a479332bd224e51c94&amp;type=3#nox.cck.style" />
     <engine:GroupBox name="header" class="nox-header" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;">
         <editor:Toolbar class="nox-toolbar">
             <editor:ToolbarMenu text="Menus" name="pages" class="nox-transparent" />
@@ -10,17 +10,17 @@
         </editor:Toolbar>
     </engine:GroupBox>
     <engine:GroupBox class="nox-content" style="flex-grow: 1; flex-shrink: 1; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;">
-        <engine:VisualElement name="content" style="flex-grow: 1; align-self: auto; align-items: stretch; display: none;" />
-        <engine:VisualElement name="error" class="nox-error" style="flex-grow: 1;">
+        <engine:VisualElement name="content" style="flex-grow: 1; align-self: auto; align-items: stretch; display: flex;" />
+        <engine:VisualElement name="error" class="nox-error" style="flex-grow: 1; display: none;">
             <engine:VisualElement class="section" style="flex-grow: 1;">
                 <engine:VisualElement name="icon" class="icon" style="background-image: resource(&apos;icons/error&apos;);" />
                 <engine:VisualElement>
                     <engine:Label text="Ouch" class="title" />
                     <engine:Label text="An error has occurred while the interface is being displayed." class="subtitle" />
                 </engine:VisualElement>
-                <engine:VisualElement class="stack">
-                    <engine:TextElement text="Label" name="stack" selectable="true" />
-                </engine:VisualElement>
+                <engine:ScrollView class="stack">
+                    <engine:TextElement name="stack" selectable="true" class="content" style="overflow: hidden;" />
+                </engine:ScrollView>
                 <engine:Button text="Copy crash stack&#10;" class="large" />
                 <engine:Button text="Go to default page" class="large" />
             </engine:VisualElement>

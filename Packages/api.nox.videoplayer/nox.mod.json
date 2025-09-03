@@ -1,0 +1,40 @@
+{
+  "type": "mod",
+  "id": "api.nox.videoplayer",
+  "provides": [
+    "fr.hactazia.videoplayer",
+    "videoplayer"
+  ],
+  "name": "Video Player",
+  "version": "1.0.0",
+  "description": "A video player for Nox",
+  "license": "GPL-3.0",
+  "icon": null,
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.videoplayer",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.videoplayer/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [],
+  "entrypoints": {
+    "main": [
+      "api.nox.videoplayer.Main"
+    ],
+    "client": [
+      "api.nox.videoplayer.Client"
+    ]
+  },
+  "references": [],
+  "sides": [],
+  "permissions": [],
+  "kernel": true
+}

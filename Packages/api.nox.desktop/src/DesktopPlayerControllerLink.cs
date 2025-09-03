@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.desktop {
@@ -245,6 +247,12 @@ namespace api.nox.desktop {
 
 			// Detect key press (not hold)
 			if (menuCurrentlyPressed && !menuPressed) {
+				// Don't toggle menu if an InputField is currently selected
+				if (IsInputFieldSelected()) {
+					menuPressed = menuCurrentlyPressed;
+					return;
+				}
+
 				// Toggle menu visibility
 				var isMenuVisible = player.menu != null && player.menu.GetActive();
 
@@ -267,6 +275,31 @@ namespace api.nox.desktop {
 			}
 
 			menuPressed = menuCurrentlyPressed;
+		}
+
+		/// <summary>
+		/// Check if an InputField (or similar text input component) is currently selected
+		/// </summary>
+		private bool IsInputFieldSelected() {
+			// Check if EventSystem exists
+			if (EventSystem.current == null) return false;
+
+			// Get the currently selected GameObject
+			var selectedObject = EventSystem.current.currentSelectedGameObject;
+			if (selectedObject == null) return false;
+
+			// Check if it's an InputField
+			var inputField = selectedObject.GetComponent<InputField>();
+			if (inputField != null && inputField.isFocused) return true;
+
+			// Check for TextMeshPro InputField (if using TMP) using reflection to avoid dependency
+			var tmpInputField = selectedObject.GetComponent("TMPro.TMP_InputField");
+			if (tmpInputField != null) {
+				var isFocusedProperty = tmpInputField.GetType().GetProperty("isFocused");
+				if (isFocusedProperty != null && (bool)isFocusedProperty.GetValue(tmpInputField)) return true;
+			}
+
+			return false;
 		}
 
 		private void OnApplicationFocus(bool hasFocus) {

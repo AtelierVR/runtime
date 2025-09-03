@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
@@ -11,8 +12,12 @@ using Transform = UnityEngine.Transform;
 
 namespace api.nox.instance.client {
 	public class PlayerComponent : MonoBehaviour {
-		public static (GameObject go, PlayerComponent comp) Generate(InstanceComponent reference, Transform parent) {
-			var instance  = Instantiate(Client.GetAsset<GameObject>("player.prefab", "player"), parent);
+		public static GameObject PlayerPrefab
+			=> Client.GetAsset<GameObject>("player.prefab", "player");
+
+		public static async UniTask<(GameObject go, PlayerComponent comp)> Generate(InstanceComponent reference, Transform parent, GameObject playerPrefab = null, (IUser, IPlayer) user = default) {
+			playerPrefab ??= PlayerPrefab;
+			var instance  = (await InstantiateAsync(playerPrefab, parent)).First();
 			var component = instance.AddComponent<PlayerComponent>();
 			component.reference = reference;
 			component.text      = Reference.GetComponent<TextLanguage>("text", instance);
@@ -21,18 +26,20 @@ namespace api.nox.instance.client {
 			component.button.onClick.AddListener(component.OnClick);
 			component.thumbnail          = Reference.GetComponent<Image>("thumbnail", instance);
 			component.thumbnailContainer = Reference.GetComponent<RectTransform>("thumbnail_container", instance);
+			if (user != default)
+				component.UpdateContent(user);
 			return (instance, component);
 		}
 
-		public  InstanceComponent              reference;
-		public  TextLanguage                   text;
-		public  Button                         button;
-		public  Image                          banner;
-		public  Image                          thumbnail;
-		public  RectTransform                  thumbnailContainer;
-		private CancellationTokenSource        _bannerTokenSource;
-		private CancellationTokenSource        _thumbnailTokenSource;
-		private (IUser, IPlayer) _user;
+		public  InstanceComponent       reference;
+		public  TextLanguage            text;
+		public  Button                  button;
+		public  Image                   banner;
+		public  Image                   thumbnail;
+		public  RectTransform           thumbnailContainer;
+		private CancellationTokenSource _bannerTokenSource;
+		private CancellationTokenSource _thumbnailTokenSource;
+		private (IUser, IPlayer)        _user;
 
 		public void UpdateContent((IUser, IPlayer) user) {
 			_user = user;
