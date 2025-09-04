@@ -1,8 +1,10 @@
 using api.nox.relay.types.Instance;
 using Nox.CCK.Utils;
 
-namespace api.nox.relay.types.Transform {
-	public class TransformEvent : RelayInstanceResponse {
+namespace api.nox.relay.types.Transform
+{
+	public class TransformEvent : RelayInstanceResponse
+	{
 		public TransformType Type;
 
 		public Nox.CCK.Utils.Transform Transform;
@@ -17,14 +19,16 @@ namespace api.nox.relay.types.Transform {
 		// Type == Entity
 		public ushort EntityId;
 
-		public override bool FromBuffer(Buffer buffer) {
+		public override bool FromBuffer(Buffer buffer)
+		{
 			buffer.Goto(0);
 			InternalId = buffer.ReadByte();
-			Type       = buffer.ReadEnum<TransformType>();
+			Type = buffer.ReadEnum<TransformType>();
 
-			switch (Type) {
+			switch (Type)
+			{
 				case TransformType.Player:
-					PlayerId  = buffer.ReadUShort();
+					PlayerId = buffer.ReadUShort();
 					PlayerRig = buffer.ReadUShort();
 					break;
 				case TransformType.ByPath:
@@ -39,19 +43,14 @@ namespace api.nox.relay.types.Transform {
 
 			Transform = new Nox.CCK.Utils.Transform();
 			var flags = buffer.ReadEnum<TransformFlags>();
-
 			if (flags.HasFlag(TransformFlags.Position))
 				Transform.SetPosition(buffer.ReadVector3());
-
 			if (flags.HasFlag(TransformFlags.Rotation))
 				Transform.SetRotation(buffer.ReadQuaternion());
-
 			if (flags.HasFlag(TransformFlags.Scale))
 				Transform.SetScale(buffer.ReadVector3());
-
 			if (flags.HasFlag(TransformFlags.Velocity))
 				Transform.SetVelocity(buffer.ReadVector3());
-
 			if (flags.HasFlag(TransformFlags.AngularVelocity))
 				Transform.SetAngularVelocity(buffer.ReadVector3());
 

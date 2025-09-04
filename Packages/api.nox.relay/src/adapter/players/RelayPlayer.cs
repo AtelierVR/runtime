@@ -17,8 +17,8 @@ using Transform = UnityEngine.Transform;
 
 namespace api.nox.relay {
 	public abstract class RelayPlayer : IPlayer, IPlayerAvatar, IDisposable {
-		protected InstancePlayer Reference;
-		protected RelayAdapter   Adapter;
+		public InstancePlayer Reference;
+		public RelayAdapter   Adapter;
 
 		private readonly  Dictionary<string, object>              _properties = new();
 		internal readonly Dictionary<ushort, NoxTransform>        Transforms  = new();

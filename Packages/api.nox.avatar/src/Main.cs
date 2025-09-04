@@ -6,6 +6,7 @@ using api.nox.avatar.search;
 using Cysharp.Threading.Tasks;
 using Nox.Avatar;
 using Nox.Avatars;
+using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
@@ -26,6 +27,7 @@ namespace api.nox.avatar {
 		internal      Network        Network;
 		internal      Cache          Cache;
 		private       Search         _search;
+		private       LanguagePack   _lang;
 
 		internal INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
@@ -50,12 +52,15 @@ namespace api.nox.avatar {
 		public void OnInitializeMain(MainModCoreAPI api) {
 			Instance = this;
 			CoreAPI  = api;
-			Network  = new Network();
-			Cache    = new Cache();
-			_search  = new Search();
+			_lang    = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
+			LanguageManager.AddPack(_lang);
+			Network = new Network();
+			Cache   = new Cache();
+			_search = new Search();
 		}
 
 		public void OnDisposeMain() {
+			LanguageManager.RemovePack(_lang);
 			Network  = null;
 			CoreAPI  = null;
 			Instance = null;

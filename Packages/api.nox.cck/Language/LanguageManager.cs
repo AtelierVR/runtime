@@ -62,15 +62,15 @@ namespace Nox.CCK.Language {
 				UpdateTexts(root);
 		}
 
+		public static string Get(string key)
+			=> Get(CurrentLanguage, key) ?? Get(FallbackLanguage, key) ?? $"[{key}]";
+
 		#if UNITY_EDITOR
 		[UnityEditor.MenuItem("Nox/Reload LanguageTexts")]
 		public static void ReloadLanguageTexts() {
 			for (var i = 0; i < SceneManager.sceneCount; i++)
 				UpdateTexts(SceneManager.GetSceneAt(i));
 		}
-
-		public static string Get(string key)
-			=> Get(CurrentLanguage, key) ?? Get(FallbackLanguage, key) ?? $"[{key}]";
 
 		public static string Get(string language, string key) {
 			if (Application.isPlaying)
@@ -94,8 +94,8 @@ namespace Nox.CCK.Language {
 			return value;
 		}
 		#else
-        public static string Get(string key) => GetInPacks(CurrentLanguage, key);
-        public static string Get(string language, string key) => GetInPacks(language, key);
+        public static string Get(string language, string key) 
+			=> GetInPacks(language, key);
 		#endif
 
 		public static string Get(string key, params object[] args) {
@@ -124,12 +124,9 @@ namespace Nox.CCK.Language {
 			if (LanguagePacks.Contains(pack)) {
 				Logger.Log($"{pack.name} updated");
 				LanguagePacks.Remove(pack);
-				LanguagePacks.Add(pack);
-				return;
-			} else {
-				Logger.Log($"{pack.name} added");
-				LanguagePacks.Add(pack);
-			}
+			} else Logger.Log($"{pack.name} added");
+
+			LanguagePacks.Add(pack);
 
 			Logger.LogDebug($"About {pack.name}:");
 			foreach (var langs in pack.languages) {
@@ -157,9 +154,13 @@ namespace Nox.CCK.Language {
 
 		public static string GetInPacks(string language, string key, List<LanguagePack> packs = null) {
 			packs ??= LanguagePacks;
-			for (var i = packs.Count - 1; i >= 0; i--) {
-				if (!packs[i]) continue;
-				if (packs[i].TryGetLocalizedString(language, key, out string value))
+			foreach (var t in packs) {
+				if (!t) {
+					Logger.LogWarning($"Language {language} is currently unavailable");
+					continue;
+				}
+
+				if (t.TryGetLocalizedString(language, key, out var value))
 					return value;
 			}
 
@@ -168,9 +169,13 @@ namespace Nox.CCK.Language {
 
 		public static bool Has(string language, string key, List<LanguagePack> packs = null) {
 			packs ??= LanguagePacks;
-			for (var i = packs.Count - 1; i >= 0; i--) {
-				if (!packs[i]) continue;
-				if (packs[i].HasLocalizationString(language, key))
+			foreach (var t in packs) {
+				if (!t) {
+					Logger.LogWarning($"Language {language} is currently unavailable");
+					continue;
+				}
+
+				if (t.HasLocalizationString(language, key))
 					return true;
 			}
 

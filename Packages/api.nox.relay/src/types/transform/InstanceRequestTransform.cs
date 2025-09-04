@@ -40,19 +40,14 @@ namespace api.nox.relay.types.Transform {
 			}
 
 			buffer.Write(Transform.Flags);
-
 			if (Transform.Flags.HasFlag(TransformFlags.Position))
 				buffer.Write(Transform.GetPosition());
-
-			if (Transform.Flags.HasFlag(TransformFlags.Rotation))
+			if (Transform.Flags.HasFlag(TransformFlags.Rotation)) 
 				buffer.Write(Transform.GetRotation());
-
 			if (Transform.Flags.HasFlag(TransformFlags.Scale))
 				buffer.Write(Transform.GetScale());
-
 			if (Transform.Flags.HasFlag(TransformFlags.Velocity))
 				buffer.Write(Transform.GetVelocity());
-
 			if (Transform.Flags.HasFlag(TransformFlags.AngularVelocity))
 				buffer.Write(Transform.GetAngularVelocity());
 

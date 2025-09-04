@@ -5,6 +5,7 @@ using Nox.Avatars;
 using Nox.Avatars.Parameters;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
+using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 using NoxTransform = Nox.CCK.Utils.Transform;
 
@@ -15,9 +16,18 @@ namespace api.nox.relay {
 		public override IRuntimeAvatar GetAvatar()
 			=> Avatar;
 
-		public override void OnMove(ushort part, NoxTransform move) {
-			if (part == PlayerRig.Base.ToIndex())
-				transform.Move(move);
+		public override void OnMove(ushort part, NoxTransform move) { }
+
+		private void Update() {
+			foreach (var (key, move) in Reference.Transforms) {
+				if (key != PlayerRig.Base.ToIndex()) continue;
+				var tps   = Reference.Adapter.Tps;
+				var lerpT = 1f - Mathf.Exp(-tps * Time.deltaTime);
+				transform.GetPositionAndRotation(out var position, out var rotation);
+				position = Vector3.Lerp(position, move.GetPosition(), lerpT);
+				rotation = Quaternion.Slerp(rotation, move.GetRotation(), lerpT);
+				transform.SetPositionAndRotation(position, rotation);
+			}
 		}
 
 		public override void OnParameter(int key, byte[] value) {
@@ -143,8 +153,8 @@ namespace api.nox.relay {
 
 			Logger.LogDebug($"Attaching avatar to {runtimeAvatar.GetDescriptor()}", runtimeAvatar.GetDescriptor().GetRoot());
 			root.transform.SetParent(transform, false);
-			root.transform.position      = Reference.GetPosition();
-			root.transform.localRotation = Reference.GetRotation();
+			root.transform.localPosition = Vector3.zero;
+			root.transform.localRotation = Quaternion.identity;
 
 			var parameterModule = Avatar?.GetDescriptor()
 				?.GetModules<IParameterModule>()
