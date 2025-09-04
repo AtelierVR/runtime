@@ -9,163 +9,206 @@ using UnityEditor;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
-namespace dev.nox.game_builder
-{
-    public class BuildAssets
-    {
-        public static string[] BuildAsAssetBundle(Mod mod, Platform target, string outputfolder, string buildname)
-        {
-            if (!target.IsSupported())
-            {
-                Logger.LogError("Unsupported platform: " + target.GetPlatformName());
-                return null;
-            }
+namespace dev.nox.game_builder {
+	public class BuildAssets {
+		private static string GetAssetPath(string filePath) {
+			// Normaliser le chemin
+			filePath = Path.GetFullPath(filePath).Replace('\\', '/');
 
-            var assetfolder = mod.GetData<string>("assets");
+			// Vérifier si le fichier est dans le dossier Assets
+			var assetsPath = Path.GetFullPath(Application.dataPath).Replace('\\', '/');
+			if (filePath.StartsWith(assetsPath)) {
+				return "Assets" + filePath.Substring(assetsPath.Length);
+			}
 
-            if (!Directory.Exists(assetfolder))
-            {
-                Logger.LogError("Asset folder not found: " + assetfolder);
-                return null;
-            }
-            var files = Directory.GetFiles(assetfolder, buildname + ".*", SearchOption.TopDirectoryOnly);
-            foreach (var file in files)
-                File.Delete(file);
+			// Vérifier si le fichier est dans un package
+			var packagesPath = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "Packages")).Replace('\\', '/');
+			if (filePath.StartsWith(packagesPath)) {
+				return "Packages" + filePath.Substring(packagesPath.Length);
+			}
 
-            var buildTarget = target.GetBuildTarget();
-            var buildTargetGroup = BuildPipeline.GetBuildTargetGroup(buildTarget);
+			// Si le chemin n'est ni dans Assets ni dans Packages, on ne peut pas l'utiliser
+			Logger.LogWarning($"Asset path not supported: {filePath}");
+			return null;
+		}
 
-            var scenes = Directory.GetFiles(assetfolder, "*.unity", SearchOption.AllDirectories);
-            var scene_assets = scenes.Select(s => "Assets/" + Path.GetRelativePath(Application.dataPath, s).Replace("\\", "/")).ToArray();
+		public static string[] BuildAsAssetBundle(Mod mod, Platform target, string outputfolder, string buildname) {
+			if (!target.IsSupported()) {
+				Logger.LogError("Unsupported platform: " + target.GetPlatformName());
+				return null;
+			}
 
-            var assets = Directory.GetFiles(assetfolder, "*.*", SearchOption.AllDirectories)
-                .Where(f => !f.EndsWith(".meta") && !f.EndsWith(".unity"))
-                .Select(f => "Assets/" + Path.GetRelativePath(Application.dataPath, f).Replace("\\", "/")).ToArray();
+			var assetfolder = mod.GetData<string>("assets");
 
-            var manifest = BuildPipeline.BuildAssetBundles(new()
-            {
-                outputPath = outputfolder,
-                targetPlatform = target.GetBuildTarget(),
-                options = BuildAssetBundleOptions.None,
-                bundleDefinitions = new AssetBundleBuild[]
-                {
-                    new ()
-                    {
-                        assetBundleName = buildname + ".scenes",
-                        assetNames = scene_assets,
-                    },
-                    new ()
-                    {
-                        assetBundleName = buildname + ".assets",
-                        assetNames = assets,
-                    },
-                }
-            });
+			if (!Directory.Exists(assetfolder)) {
+				Logger.LogError("Asset folder not found: " + assetfolder);
+				return null;
+			}
 
-            return manifest?.GetAllAssetBundles()
-                .Select(b => Path.Combine(outputfolder, b))
-                .ToArray();
-        }
+			var files = Directory.GetFiles(assetfolder, buildname + ".*", SearchOption.TopDirectoryOnly);
+			foreach (var file in files)
+				File.Delete(file);
 
-        public static AssetBundleBuildReult[] BuildAsAssetBundles(Mod[] mod, Platform target, string outputfolder)
-        {
-            if (!target.IsSupported())
-            {
-                Logger.LogError("Unsupported platform: " + target.GetPlatformName());
-                return new AssetBundleBuildReult[0];
-            }
+			var buildTarget      = target.GetBuildTarget();
+			var buildTargetGroup = BuildPipeline.GetBuildTargetGroup(buildTarget);
 
-            List<AssetBundleBuild> bundles = new();
-            List<AssetBundleBuildReult> results = new();
+			var scenes       = Directory.GetFiles(assetfolder, "*.unity", SearchOption.AllDirectories);
+			var scene_assets = scenes.Select(s => "Assets/" + Path.GetRelativePath(Application.dataPath, s).Replace("\\", "/")).ToArray();
 
-            for (int i = 0; i < mod.Length; i++)
-            {
-                var buildname = mod[i].GetMetadata().GetId();
-                var assetfolder = mod[i].GetData<string>("assets");
+			var assets = Directory.GetFiles(assetfolder, "*.*", SearchOption.AllDirectories)
+				.Where(f => !f.EndsWith(".meta") && !f.EndsWith(".unity"))
+				.Select(f => "Assets/" + Path.GetRelativePath(Application.dataPath, f).Replace("\\", "/"))
+				.ToArray();
 
-                if (!Directory.Exists(assetfolder)) continue;
+			var manifest = BuildPipeline.BuildAssetBundles(
+				new() {
+					outputPath     = outputfolder,
+					targetPlatform = target.GetBuildTarget(),
+					options        = BuildAssetBundleOptions.None,
+					bundleDefinitions = new AssetBundleBuild[] {
+						new() {
+							assetBundleName = buildname + ".scenes",
+							assetNames      = scene_assets,
+						},
+						new() {
+							assetBundleName = buildname + ".assets",
+							assetNames      = assets,
+						},
+					}
+				}
+			);
 
-                Logger.Log("Building asset bundles for: " + buildname);
+			return manifest?.GetAllAssetBundles()
+				.Select(b => Path.Combine(outputfolder, b))
+				.ToArray();
+		}
 
-                var scenes = Directory.GetFiles(assetfolder, "*.unity", SearchOption.AllDirectories)
-                    .Select(f => "Assets/" + Path.GetRelativePath(Application.dataPath, f).Replace("\\", "/")).ToArray();
+		public static AssetBundleBuildResult[] BuildAsAssetBundles(Mod[] mod, Platform target, string outputfolder) {
+			if (!target.IsSupported()) {
+				Logger.LogError("Unsupported platform: " + target.GetPlatformName());
+				return Array.Empty<AssetBundleBuildResult>();
+			}
 
-                var scriptables = Directory.GetFiles(assetfolder, "*.asset", SearchOption.AllDirectories)
-                    .Select(f => "Assets/" + Path.GetRelativePath(Application.dataPath, f).Replace("\\", "/")).ToArray();
+			List<AssetBundleBuild>       bundles = new();
+			List<AssetBundleBuildResult> results = new();
 
-                var assets = Directory.GetFiles(assetfolder, "*.*", SearchOption.AllDirectories)
-                    .Where(f => !f.EndsWith(".meta") && !f.EndsWith(".unity") && !f.EndsWith(".asset"))
-                    .Select(f => "Assets/" + Path.GetRelativePath(Application.dataPath, f).Replace("\\", "/")).ToArray();
+			for (int i = 0; i < mod.Length; i++) {
+				var buildname   = mod[i].GetMetadata().GetId();
+				var assetfolder = mod[i].GetData<string>("assets");
+
+				if (!Directory.Exists(assetfolder)) continue;
+
+				Logger.Log("Building asset bundles for: " + buildname);
+
+				var scenes = Directory.GetFiles(assetfolder, "*.unity", SearchOption.AllDirectories)
+					.Select(f => GetAssetPath(f))
+					.Where(p => !string.IsNullOrEmpty(p))
+					.ToArray();
+
+				var scriptables = Directory.GetFiles(assetfolder, "*.asset", SearchOption.AllDirectories)
+					.Select(f => GetAssetPath(f))
+					.Where(p => !string.IsNullOrEmpty(p))
+					.ToArray();
+
+				var assets = Directory.GetFiles(assetfolder, "*.*", SearchOption.AllDirectories)
+					.Where(f => !f.EndsWith(".meta") && !f.EndsWith(".unity") && !f.EndsWith(".asset") && !f.EndsWith(".cs"))
+					.Select(f => GetAssetPath(f))
+					.Where(p => !string.IsNullOrEmpty(p))
+					.ToArray();
 
 
-                foreach (var asset in assets)
-                    Logger.Log($"Asset for {mod[i].GetMetadata().GetId()}: {asset}");
+				foreach (var asset in assets)
+					Logger.Log($"Asset for {mod[i].GetMetadata().GetId()}: {asset}");
 
-                var OutSceneName = Guid.NewGuid().ToString().Replace("-", "") + ".scenes";
-                bundles.Add(new AssetBundleBuild
-                {
-                    assetBundleName = OutSceneName,
-                    assetNames = scenes,
-                });
+				List<string> resultOutputs = new();
 
-                var OutAssetName = Guid.NewGuid().ToString().Replace("-", "") + ".assets";
-                bundles.Add(new AssetBundleBuild
-                {
-                    assetBundleName = OutAssetName,
-                    assetNames = assets,
-                });
+				// Only create bundles if there are assets to include
+				if (scenes.Length > 0) {
+					var OutSceneName = Guid.NewGuid().ToString().Replace("-", "") + ".scenes";
+					bundles.Add(
+						new AssetBundleBuild {
+							assetBundleName = OutSceneName,
+							assetNames      = scenes,
+						}
+					);
+					resultOutputs.Add(Path.Combine(outputfolder, OutSceneName));
+				}
 
-                var OutScriptableName = Guid.NewGuid().ToString().Replace("-", "") + ".scriptables";
-                bundles.Add(new AssetBundleBuild
-                {
-                    assetBundleName = OutScriptableName,
-                    assetNames = scriptables,
-                });
+				if (assets.Length > 0) {
+					var OutAssetName = Guid.NewGuid().ToString().Replace("-", "") + ".assets";
+					bundles.Add(
+						new AssetBundleBuild {
+							assetBundleName = OutAssetName,
+							assetNames      = assets,
+						}
+					);
+					resultOutputs.Add(Path.Combine(outputfolder, OutAssetName));
+				}
 
-                results.Add(new AssetBundleBuildReult
-                {
-                    mod = mod[i],
-                    outputs = new string[]
-                    {
-                        Path.Combine(outputfolder, OutSceneName),
-                        Path.Combine(outputfolder, OutAssetName),
-                        Path.Combine(outputfolder, OutScriptableName),
-                    }
-                });
-            }
+				if (scriptables.Length > 0) {
+					var OutScriptableName = Guid.NewGuid().ToString().Replace("-", "") + ".scriptables";
+					bundles.Add(
+						new AssetBundleBuild {
+							assetBundleName = OutScriptableName,
+							assetNames      = scriptables,
+						}
+					);
+					resultOutputs.Add(Path.Combine(outputfolder, OutScriptableName));
+				}
 
-            var manifest = BuildPipeline.BuildAssetBundles(new()
-            {
-                outputPath = outputfolder,
-                targetPlatform = target.GetBuildTarget(),
-                options = BuildAssetBundleOptions.None | BuildAssetBundleOptions.IgnoreTypeTreeChanges | BuildAssetBundleOptions.RecurseDependencies,
-                bundleDefinitions = bundles.ToArray()
-            });
+				if (resultOutputs.Count > 0) {
+					results.Add(
+						new AssetBundleBuildResult {
+							mod     = mod[i],
+							outputs = resultOutputs.ToArray()
+						}
+					);
+				}
+			}
 
-            if (manifest == null)
-            {
-                Logger.LogError("Failed to build asset bundles");
-                return null;
-            }
+			// Don't try to build if there are no bundles
+			if (bundles.Count == 0) {
+				Logger.LogWarning("No asset bundles to build - no assets found in any mod folders");
+				return results.ToArray();
+			}
 
-            var expected = results.SelectMany(r => r.outputs.Select(o => Path.GetFileName(o)));
-            if (manifest.GetAllAssetBundles().Length != expected.Count())
-            {
-                Logger.LogWarning("Asset bundles count mismatch");
-                Logger.LogWarning($"Expected: ({expected.Count()})[{string.Join(", ", expected)}]");
-                Logger.LogWarning($"Got: ({manifest.GetAllAssetBundles().Length})[{string.Join(", ", manifest.GetAllAssetBundles())}]");
-                var missing = expected.Except(manifest.GetAllAssetBundles());
-                Logger.LogWarning($"Missing: ({missing.Count()})[{string.Join(", ", missing)}]");
-            }
+			Logger.Log($"Building {bundles.Count} asset bundles...");
+			foreach (var bundle in bundles) {
+				Logger.Log($"Bundle: {bundle.assetBundleName} with {bundle.assetNames.Length} assets");
+			}
 
-            return results.ToArray();
-        }
+			var manifest = BuildPipeline.BuildAssetBundles(
+				new() {
+					outputPath        = outputfolder,
+					targetPlatform    = target.GetBuildTarget(),
+					options           = BuildAssetBundleOptions.None | BuildAssetBundleOptions.IgnoreTypeTreeChanges | BuildAssetBundleOptions.RecurseDependencies,
+					bundleDefinitions = bundles.ToArray()
+				}
+			);
 
-        public class AssetBundleBuildReult
-        {
-            public Mod mod;
-            public string[] outputs;
-        }
-    }
+			if (manifest == null) {
+				Logger.LogError("Failed to build asset bundles");
+				return null;
+			}
+
+			Logger.Log($"Successfully built {manifest.GetAllAssetBundles().Length} asset bundles");
+
+			var expected = results.SelectMany(r => r.outputs.Select(o => Path.GetFileName(o)));
+			if (manifest.GetAllAssetBundles().Length != expected.Count()) {
+				Logger.LogWarning("Asset bundles count mismatch");
+				Logger.LogWarning($"Expected: ({expected.Count()})[{string.Join(", ", expected)}]");
+				Logger.LogWarning($"Got: ({manifest.GetAllAssetBundles().Length})[{string.Join(", ", manifest.GetAllAssetBundles())}]");
+				var missing = expected.Except(manifest.GetAllAssetBundles());
+				Logger.LogWarning($"Missing: ({missing.Count()})[{string.Join(", ", missing)}]");
+			}
+
+			return results.ToArray();
+		}
+
+		public class AssetBundleBuildResult {
+			public Mod      mod;
+			public string[] outputs;
+		}
+	}
 }
 #endif

@@ -33,7 +33,7 @@ namespace api.nox.world {
 			}
 
 			if (!scene.IsValid()) {
-				Logger.LogError($"Failed to load scene from AssetBundle: {path}");
+				Logger.LogError($"Failed to load scene from Internal Assets: {path}");
 				return null;
 			}
 

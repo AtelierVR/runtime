@@ -89,7 +89,7 @@ namespace Nox.CCK.Avatars.Parameters {
 		}
 
 
-		private static bool ToBool(this object parameter)
+		public static bool ToBool(this object parameter)
 			=> parameter switch {
 				bool b    => b,
 				byte b    => b  != 0,
@@ -123,7 +123,7 @@ namespace Nox.CCK.Avatars.Parameters {
 				_         => 0
 			};
 
-		private static int ToInt(this object parameter)
+		public static int ToInt(this object parameter)
 			=> parameter switch {
 				bool b    => b ? 1 : 0,
 				byte b    => b,
@@ -140,7 +140,7 @@ namespace Nox.CCK.Avatars.Parameters {
 				_         => 0
 			};
 
-		private static float ToFloat(this object parameter)
+		public static float ToFloat(this object parameter)
 			=> parameter switch {
 				bool b    => b ? 1f : 0f,
 				byte b    => b,
@@ -308,5 +308,41 @@ namespace Nox.CCK.Avatars.Parameters {
 				),
 				_ => Quaternion.identity
 			};
+
+		public static byte[] ToBytes(this object parameter)
+			=> parameter switch {
+				byte[] b  => b,
+				bool b    => new[] { (byte)(b ? 1 : 0) },
+				byte b    => new[] { b },
+				short s   => BitConverter.GetBytes(s),
+				ushort us => BitConverter.GetBytes(us),
+				int i     => BitConverter.GetBytes(i),
+				uint ui   => BitConverter.GetBytes(ui),
+				long l    => BitConverter.GetBytes(l),
+				ulong ul  => BitConverter.GetBytes(ul),
+				float f   => BitConverter.GetBytes(f),
+				double d  => BitConverter.GetBytes(d),
+				string s  => System.Text.Encoding.UTF8.GetBytes(s),
+				Vector3 v => FromVector3(v),
+				Quaternion q => FromQuaternion(q),
+				_ => Array.Empty<byte>()
+			};
+		
+		private static byte[] FromVector3(Vector3 v) {
+			var bytes = new byte[12];
+			Buffer.BlockCopy(BitConverter.GetBytes(v.x), 0, bytes, 0, 4);
+			Buffer.BlockCopy(BitConverter.GetBytes(v.y), 0, bytes, 4, 4);
+			Buffer.BlockCopy(BitConverter.GetBytes(v.z), 0, bytes, 8, 4);
+			return bytes;
+		}
+		
+		private static byte[] FromQuaternion(Quaternion q) {
+			var bytes = new byte[16];
+			Buffer.BlockCopy(BitConverter.GetBytes(q.x), 0, bytes, 0, 4);
+			Buffer.BlockCopy(BitConverter.GetBytes(q.y), 0, bytes, 4, 4);
+			Buffer.BlockCopy(BitConverter.GetBytes(q.z), 0, bytes, 8, 4);
+			Buffer.BlockCopy(BitConverter.GetBytes(q.w), 0, bytes, 12, 4);
+			return bytes;
+		}
 	}
 }

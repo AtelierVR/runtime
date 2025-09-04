@@ -23,6 +23,7 @@ namespace api.nox.relay.Instances {
 		public readonly UnityEvent<types.Leave.LeaveEvent>          OnLeave         = new();
 		public readonly UnityEvent<types.Avatar.AvatarChangedEvent> OnAvatarChanged = new();
 		public readonly UnityEvent<types.Transform.TransformEvent>  OnTransform     = new();
+		public readonly UnityEvent<types.Avatar.AvatarParamsEvent>  OnAvatarParams  = new();
 
 		internal async UniTask OnReceived(ushort length, ushort state, ResponseType type, Buffer buffer) {
 			await UniTask.SwitchToMainThread();
@@ -57,6 +58,11 @@ namespace api.nox.relay.Instances {
 					var avatar = new types.Avatar.AvatarChangedEvent { ConnectionId = Connection.Id, InternalId = InternalId };
 					if (avatar.FromBuffer(buffer)) OnAvatarChanged.Invoke(avatar);
 					else Logger.LogWarning($"Failed to parse avatar changed event for instance {InternalId}");
+					break;
+				case ResponseType.AvatarParams:
+					var avatarParams = new types.Avatar.AvatarParamsEvent { ConnectionId = Connection.Id, InternalId = InternalId };
+					if (avatarParams.FromBuffer(buffer)) OnAvatarParams.Invoke(avatarParams);
+					else Logger.LogWarning($"Failed to parse avatar params event for instance {InternalId}");
 					break;
 				case ResponseType.Transform:
 					var transform = new types.Transform.TransformEvent { ConnectionId = Connection.Id, InternalId = InternalId };
@@ -146,6 +152,12 @@ namespace api.nox.relay.Instances {
 					Connection.NextState()
 				)
 				?? types.Avatar.AvatarChangedEvent.CreateUnknown(Connection.Id, InternalId, "Unknown avatar change request");
+		}
+
+		public async UniTask<bool> SendAvatarParams(types.Avatar.InstanceRequestAvatarParams request) {
+			request.InternalId   = InternalId;
+			request.ConnectionId = Connection.Id;
+			return (await Connection.Emit(request.ToBuffer(), RequestType.AvatarParams)).Item1;
 		}
 	}
 }

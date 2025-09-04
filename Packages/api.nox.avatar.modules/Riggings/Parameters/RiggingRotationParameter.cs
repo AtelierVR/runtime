@@ -1,4 +1,5 @@
 using Nox.Avatars.Parameters;
+using Nox.CCK.Avatars.Parameters;
 using Nox.CCK.Utils;
 using UnityEngine;
 
@@ -34,11 +35,17 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 
 		public object Get()
 			=> _module?.GetPartRotation(_bone) ?? Quaternion.identity;
-		
+
 
 		public void Set(object value) {
 			if (!_module || value is not Quaternion rotation) return;
 			_module.SetPartRotation(_bone, rotation);
 		}
+
+		public byte[] Serialize()
+			=> Get().ToBytes();
+
+		public void Deserialize(byte[] data)
+			=> Set(data);
 	}
 }

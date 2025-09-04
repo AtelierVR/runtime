@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using api.nox.relay.types.Player;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
+using Nox.Avatars.Parameters;
 using Nox.Avatars.Players;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
@@ -19,8 +20,9 @@ namespace api.nox.relay {
 		protected InstancePlayer Reference;
 		protected RelayAdapter   Adapter;
 
-		private readonly  Dictionary<string, object>       _properties = new();
-		internal readonly Dictionary<ushort, NoxTransform> Transforms  = new();
+		private readonly  Dictionary<string, object>              _properties = new();
+		internal readonly Dictionary<ushort, NoxTransform>        Transforms  = new();
+		internal readonly Dictionary<int, (byte[], DeliveryType)> Parameters  = new();
 
 		public void SetReference(InstancePlayer reference, RelayAdapter adapter) {
 			Reference = reference;
@@ -73,7 +75,7 @@ namespace api.nox.relay {
 			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
 				?? new NoxTransform();
 			if (tr.IsSamePosition(position, Adapter.Threshold)) return;
-			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.DeliveryType = DeliveryType.LocalModified;
 			tr.SetPosition(position);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
@@ -83,7 +85,7 @@ namespace api.nox.relay {
 			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
 				?? new NoxTransform();
 			if (tr.IsSameRotation(rotation, Adapter.Threshold)) return;
-			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.DeliveryType = DeliveryType.LocalModified;
 			tr.SetRotation(rotation);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
@@ -99,7 +101,7 @@ namespace api.nox.relay {
 			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
 				?? new NoxTransform();
 			if (tr.IsSameVelocity(velocity, Adapter.Threshold)) return;
-			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.DeliveryType = DeliveryType.LocalModified;
 			tr.SetVelocity(velocity);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
@@ -115,7 +117,7 @@ namespace api.nox.relay {
 			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
 				?? new NoxTransform();
 			if (tr.IsSameAngularVelocity(angular, Adapter.Threshold)) return;
-			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.DeliveryType = DeliveryType.LocalModified;
 			tr.SetAngularVelocity(angular);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
@@ -125,7 +127,7 @@ namespace api.nox.relay {
 			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
 				?? new NoxTransform();
 			if (tr.IsSamePosition(position, Adapter.Threshold) && tr.IsSameRotation(rotation, Adapter.Threshold)) return;
-			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.DeliveryType = DeliveryType.LocalModified;
 			tr.SetPosition(position);
 			tr.SetRotation(rotation);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
@@ -133,9 +135,9 @@ namespace api.nox.relay {
 
 		[NoxPublic(NoxAccess.Method)]
 		public void MovePart(ushort part, NoxTransform transform)
-			=> MovePart(part, transform, TransformDeliveryType.LocalModified);
+			=> MovePart(part, transform, DeliveryType.LocalModified);
 
-		public void MovePart(ushort part, NoxTransform transform, TransformDeliveryType delivery) {
+		public void MovePart(ushort part, NoxTransform transform, DeliveryType delivery) {
 			if (Transforms.TryGetValue(part, out var existing)
 			    && existing.IsSamePosition(transform.GetPosition(), Adapter.Threshold)
 			    && existing.IsSameRotation(transform.GetRotation(), Adapter.Threshold)
@@ -143,16 +145,34 @@ namespace api.nox.relay {
 			transform.DeliveryType = delivery;
 			Transforms[part]       = transform;
 
-			if (delivery != TransformDeliveryType.RemoteModified || !TryGetPhysical<RelayPhysicalPlayer>(out var physical))
+			if (delivery != DeliveryType.RemoteModified || !TryGetPhysical<RelayPhysicalPlayer>(out var physical))
 				return;
 
 			physical.OnMove(part, transform);
-			transform.DeliveryType = TransformDeliveryType.None;
+			transform.DeliveryType = DeliveryType.None;
 		}
 
 		[NoxPublic(NoxAccess.Method)]
 		public void Move(NoxTransform transform)
 			=> MovePart(PlayerRig.Base.ToIndex(), transform);
+
+		public void SetParameter(int key, byte[] value, DeliveryType remoteModified) {
+			if (Parameters.TryGetValue(key, out var existing)
+			    && existing.Item1.Length == value.Length
+			    && existing.Item1.AsSpan().SequenceEqual(value)
+			   ) return;
+			Parameters[key] = (value, remoteModified);
+
+			if (remoteModified != DeliveryType.RemoteModified || !TryGetPhysical<RelayPhysicalPlayer>(out var physical))
+				return;
+
+			physical.OnParameter(key, value);
+			Parameters[key] = (value, DeliveryType.None);
+		}
+
+		[NoxPublic(NoxAccess.Method)]
+		public void SetParameter(int key, byte[] value)
+			=> SetParameter(key, value, DeliveryType.LocalModified);
 
 		[NoxPublic(NoxAccess.Method)]
 		public void Teleport(Transform transform) {

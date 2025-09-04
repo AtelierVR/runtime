@@ -131,6 +131,13 @@ namespace Nox.CCK.Language {
 				LanguagePacks.Add(pack);
 			}
 
+			Logger.LogDebug($"About {pack.name}:");
+			foreach (var langs in pack.languages) {
+				Logger.LogDebug($" - {langs.IETF}:");
+				foreach (var key in langs.entries)
+					Logger.LogDebug($"    - {key.key} = {key.value}");
+			}
+
 			OnPackListUpdated?.Invoke();
 		}
 

@@ -50,13 +50,6 @@
     <Compile Include="Packages\api.nox.table\src\base\Entry.cs" />
     <Compile Include="Packages\api.nox.table\src\Main.cs" />
     <None Include="Packages\api.nox.table\package.json" />
-    <None Include="Packages\api.nox.table\assets\api.nox.world\loader.uxml" />
-    <None Include="Packages\api.nox.table\assets\api.nox.world\world.uxml" />
-    <None Include="Packages\api.nox.table\assets\api.nox.world\loader-styles.uss" />
-    <None Include="Packages\api.nox.table\assets\api.nox.world\builder.uxml" />
-    <None Include="Packages\api.nox.table\assets\api.nox.world\publisher.uxml" />
-    <None Include="Packages\api.nox.table\assets\api.nox.world\notification.uxml" />
-    <None Include="Packages\api.nox.table\assets\api.nox.world\manager.uxml" />
     <None Include="Packages\api.nox.table\api.nox.table.asmdef" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.1f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>

@@ -1,4 +1,5 @@
 using Nox.Avatars.Parameters;
+using Nox.CCK.Avatars.Parameters;
 using UnityEngine;
 
 namespace Nox.CCK.Avatars.Rigging.Parameters {
@@ -43,14 +44,10 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 			}
 		}
 
-		public T GetValue<T>() {
-			var val = Get();
-			if (val is T result) return result;
-			return default(T);
-		}
+		public byte[] Serialize()
+			=> Get().ToBytes();
 
-		public void SetValue<T>(T value) {
-			Set((object)value);
-		}
+		public void Deserialize(byte[] data)
+			=> Set(data);
 	}
 }

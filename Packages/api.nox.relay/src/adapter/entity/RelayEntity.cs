@@ -71,9 +71,9 @@ namespace api.nox.relay {
 		}
 
 		public void Move(Transform transform)
-			=> Move(transform, TransformDeliveryType.LocalModified);
+			=> Move(transform, DeliveryType.LocalModified);
 
-		public void Move(Transform transform, TransformDeliveryType delivery) {
+		public void Move(Transform transform, DeliveryType delivery) {
 			throw new System.NotImplementedException();
 		}
 	}

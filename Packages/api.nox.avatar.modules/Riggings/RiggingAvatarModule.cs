@@ -177,6 +177,7 @@ namespace Nox.CCK.Avatars.Rigging {
 				target.rotation = rotation;
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		public bool IsActive(HumanBodyBones bone) {
 			var rigBuilder = GetRigBuilder();
 			if (!rigBuilder)

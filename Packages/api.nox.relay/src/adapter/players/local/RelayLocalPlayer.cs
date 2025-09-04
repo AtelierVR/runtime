@@ -16,15 +16,27 @@ namespace api.nox.relay {
 
 		public void SendTransform() {
 			var trs = Transforms
-				.Where(e => e.Value.DeliveryType == TransformDeliveryType.LocalModified)
+				.Where(e => e.Value.DeliveryType == DeliveryType.LocalModified)
 				.ToArray();
 			if (trs.Length == 0) return;
 			foreach (var tr in trs) {
 				var packet = types.Transform.InstanceRequestTransform.CreatePlayer(Reference.Id, tr.Key, tr.Value);
 				Adapter.Instance.SendTransform(packet).Forget();
-				tr.Value.DeliveryType = TransformDeliveryType.None;
+				tr.Value.DeliveryType = DeliveryType.None;
 				Transforms[tr.Key]    = tr.Value;
 			}
+		}
+
+		public void SendParameters() {
+			var paramsToSend = Parameters
+				.Where(p => p.Value.Item2 == DeliveryType.LocalModified)
+				.ToArray();
+			if (paramsToSend.Length == 0) return;
+			var dictionary = paramsToSend.ToDictionary(p => p.Key, p => p.Value.Item1);
+			var packet     = types.Avatar.InstanceRequestAvatarParams.CreateRequest(Reference.Id, dictionary);
+			Adapter.Instance.SendAvatarParams(packet).Forget();
+			foreach (var p in paramsToSend)
+				Parameters[p.Key] = (p.Value.Item1, DeliveryType.None);
 		}
 
 		public override bool TryGetPhysical<T>(out T physical) {

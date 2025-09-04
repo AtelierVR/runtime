@@ -8,7 +8,7 @@ namespace Nox.CCK.Utils {
 		private Vector3    velocity;
 		private Vector3    angularVelocity;
 
-		public TransformDeliveryType DeliveryType = TransformDeliveryType.None;
+		public DeliveryType DeliveryType = DeliveryType.None;
 		public TransformFlags        Flags { get; private set; } = TransformFlags.None;
 
 		// POSITION
@@ -191,7 +191,7 @@ namespace Nox.CCK.Utils {
 	}
 
 
-	public enum TransformDeliveryType {
+	public enum DeliveryType {
 		None,
 		LocalModified,
 		RemoteModified

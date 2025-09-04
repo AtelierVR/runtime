@@ -1,4 +1,5 @@
 namespace api.nox.relay.types {
+
 	public enum ResponseType : byte {
 		None = 0xFF,
 
@@ -19,8 +20,9 @@ namespace api.nox.relay.types {
 		Teleport            = 0x0C,
 		AvatarChanged       = 0x0D,
 		ServerConfig        = 0x0E,
-		Join                = 0x0F,
-		Leave               = 0x10,
-		Status              = 0x11,
+		AvatarParams        = 0x0F,
+		Join                = 0x10,
+		Leave               = 0x11,
+		Status              = 0x12,
 	}
 }

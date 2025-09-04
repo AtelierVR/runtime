@@ -149,7 +149,7 @@ MonoBehaviour:
   minZoom: 2
   maxZoom: 60
   player: {fileID: 5595254506500728190}
-  eventSystem: {fileID: 0}
+  eventSystem: {fileID: 6513091810161855493}
 --- !u!114 &592085171815288062
 MonoBehaviour:
   m_ObjectHideFlags: 0

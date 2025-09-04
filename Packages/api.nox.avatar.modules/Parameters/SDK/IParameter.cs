@@ -50,5 +50,9 @@ namespace Nox.Avatars.Parameters {
 		/// </summary>
 		/// <param name="value"></param>
 		public void Set(object value);
+
+		public byte[] Serialize();
+
+		public void Deserialize(byte[] data);
 	}
 }

@@ -86,7 +86,7 @@ namespace api.nox.offline {
 		[NoxPublic(NoxAccess.Method)]
 		public void SetPosition(Vector3 position) {
 			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
-			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.DeliveryType = DeliveryType.LocalModified;
 			tr.SetPosition(position);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
@@ -94,7 +94,7 @@ namespace api.nox.offline {
 		[NoxPublic(NoxAccess.Method)]
 		public void SetRotation(Quaternion rotation) {
 			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
-			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.DeliveryType = DeliveryType.LocalModified;
 			tr.SetRotation(rotation);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
@@ -108,7 +108,7 @@ namespace api.nox.offline {
 		[NoxPublic(NoxAccess.Method)]
 		public void SetVelocity(Vector3 velocity) {
 			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
-			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.DeliveryType = DeliveryType.LocalModified;
 			tr.SetVelocity(velocity);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
@@ -122,7 +122,7 @@ namespace api.nox.offline {
 		[NoxPublic(NoxAccess.Method)]
 		public void SetAngularVelocity(Vector3 angular) {
 			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
-			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.DeliveryType = DeliveryType.LocalModified;
 			tr.SetAngularVelocity(angular);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
@@ -145,7 +145,7 @@ namespace api.nox.offline {
 		[NoxPublic(NoxAccess.Method)]
 		public void Teleport(Vector3 position, Quaternion rotation) {
 			if (!Transforms.TryGetValue(PlayerRig.Base.ToIndex(), out var tr)) return;
-			tr.DeliveryType = TransformDeliveryType.LocalModified;
+			tr.DeliveryType = DeliveryType.LocalModified;
 			tr.SetPosition(position);
 			tr.SetRotation(rotation);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
@@ -160,7 +160,7 @@ namespace api.nox.offline {
 
 		public void MovePart(ushort part, Transform transform) {
 			if (!Transforms.TryGetValue(part, out var tr)) return;
-			transform.DeliveryType = TransformDeliveryType.LocalModified;
+			transform.DeliveryType = DeliveryType.LocalModified;
 			Transforms[part]       = transform;
 		}
 

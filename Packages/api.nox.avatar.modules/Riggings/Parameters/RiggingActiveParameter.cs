@@ -1,4 +1,5 @@
 using Nox.Avatars.Parameters;
+using Nox.CCK.Avatars.Parameters;
 using Nox.CCK.Utils;
 using UnityEngine;
 
@@ -39,5 +40,11 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 			if (!_module || value is not bool active) return;
 			_module.SetActive(_bone, active);
 		}
+
+		public byte[] Serialize()
+			=> Get().ToBytes();
+
+		public void Deserialize(byte[] data)
+			=> Set(data);
 	}
 }

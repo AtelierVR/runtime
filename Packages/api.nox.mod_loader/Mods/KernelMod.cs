@@ -10,7 +10,11 @@ namespace Nox.ModLoader.Mods
         internal KernelMod()
         {
             CoreAPI = new CoreAPI(this);
+            #if UNITY_EDITOR
+            AssetAPI = new EditorKernelAssetAPI(this);
+            #else
             AssetAPI = new KernelAssetAPI(this);
+            #endif
         }
         
         public override bool IsLoaded() 

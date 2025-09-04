@@ -1,6 +1,10 @@
+using System;
+using System.Linq;
 using Nox.Avatars;
+using Nox.Avatars.Parameters;
 using Nox.Avatars.Players;
 using Nox.CCK.Development;
+using Nox.CCK.Utils;
 using Nox.Players;
 using UnityEngine;
 using Gizmos = Nox.CCK.Development.Gizmos;
@@ -28,5 +32,25 @@ namespace api.nox.relay {
 		public abstract IRuntimeAvatar GetAvatar();
 
 		public abstract void OnMove(ushort part, NoxTransform move);
+
+		public abstract void OnParameter(int key, byte[] value);
+
+		private void Update() {
+			var avatar = GetAvatar();
+			var parameterModule = avatar?.GetDescriptor()
+				?.GetModules<IParameterModule>()
+				.FirstOrDefault();
+
+			if (parameterModule == null) return;
+			foreach (var param in parameterModule.GetParameters()) {
+				if (!param.IsSyncable()) continue;
+				var serialized = param.Serialize();
+				if (Reference.Parameters.TryGetValue(param.GetHash(), out var data)) {
+					if (data.Item2 == DeliveryType.RemoteModified) continue;
+					if (data.Item1.SequenceEqual(serialized)) continue;
+				}
+				Reference.Parameters[param.GetHash()] = (serialized, DeliveryType.LocalModified);
+			}
+		}
 	}
 }

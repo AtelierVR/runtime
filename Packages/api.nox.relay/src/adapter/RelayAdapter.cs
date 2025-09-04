@@ -64,13 +64,13 @@ namespace api.nox.relay {
 				case TransformType.Player: {
 					var player = _entities.GetEntity<RelayPlayer>(ev.PlayerId);
 					if (player == null) return;
-					player.MovePart(ev.PlayerRig, ev.Transform, TransformDeliveryType.RemoteModified);
+					player.MovePart(ev.PlayerRig, ev.Transform, DeliveryType.RemoteModified);
 					break;
 				}
 				case TransformType.Entity: {
 					var entity = _entities.GetEntity<RelayEntity>(ev.EntityId);
 					if (entity == null) return;
-					entity.Move(ev.Transform, TransformDeliveryType.RemoteModified);
+					entity.Move(ev.Transform, DeliveryType.RemoteModified);
 					break;
 				}
 				case TransformType.ByPath: {
@@ -99,6 +99,13 @@ namespace api.nox.relay {
 					break;
 			}
 		}
+		
+		public void OnAvatarParams(AvatarParamsEvent ev) {
+			var player = _entities.GetEntity<RelayPlayer>(ev.PlayerId);
+			if (player == null) return;
+			foreach (var param in ev.Parameters)
+				player.SetParameter(param.Key, param.Value, DeliveryType.RemoteModified);
+		}
 
 		public void OnLeave(LeaveEvent ev) {
 			Logger.LogDebug($"OnLeave: {ev}");
@@ -126,6 +133,7 @@ namespace api.nox.relay {
 			UpdatePlayerDistance(ref local, ref other);
 			UpdatePhysicalPlayers(ref local, ref other);
 			local?.SendTransform();
+			local?.SendParameters();
 		}
 
 		private void UpdatePhysicalPlayers(ref RelayLocalPlayer local, ref RelayRemotePlayer[] others) {

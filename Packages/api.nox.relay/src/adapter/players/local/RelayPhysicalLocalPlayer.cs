@@ -12,5 +12,9 @@ namespace api.nox.relay {
 		public override void OnMove(ushort part, NoxTransform move) {
 			Logger.LogWarning($"Received OnMove for local player on part {part}, which is not supported.", this);
 		}
+
+		public override void OnParameter(int key, byte[] value) {
+			Logger.LogWarning($"Received OnParameter for local player on key {key}, which is not supported.", this);
+		}
 	}
 }

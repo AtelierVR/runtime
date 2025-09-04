@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -8,7 +7,6 @@ using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using Logger = Nox.CCK.Utils.Logger;
 using NoxTransform = Nox.CCK.Utils.Transform;
-using Transform = UnityEngine.Transform;
 
 namespace api.nox.relay {
 	public class RelayPhysicalRemotePlayer : RelayPhysicalPlayer {
@@ -20,6 +18,21 @@ namespace api.nox.relay {
 		public override void OnMove(ushort part, NoxTransform move) {
 			if (part == PlayerRig.Base.ToIndex())
 				transform.Move(move);
+		}
+
+		public override void OnParameter(int key, byte[] value) {
+			if (Avatar == null)
+				return;
+
+			var parameterModule = Avatar?.GetDescriptor()
+				?.GetModules<IParameterModule>()
+				.FirstOrDefault();
+
+			if (parameterModule == null) return;
+			var parameter = parameterModule.GetParameter(key);
+			if (parameter == null || parameter.IsReadOnly() || !parameter.IsSyncable()) return;
+
+			parameter.Deserialize(value);
 		}
 
 		private CancellationTokenSource _avatarLoadingCts;
@@ -144,6 +157,7 @@ namespace api.nox.relay {
 
 			var parameters = parameterModule.GetParameters();
 			foreach (var param in parameters) {
+				if (param.IsReadOnly()) continue;
 				var n = param.GetName();
 				switch (n) {
 					case "tracking/head/active":
@@ -156,6 +170,12 @@ namespace api.nox.relay {
 						param.Set(false);
 						break;
 				}
+			}
+
+			foreach (var net in Reference.Parameters) {
+				var param = parameters.FirstOrDefault(pa => pa.GetHash() == net.Key);
+				if (param == null || param.IsReadOnly() || !param.IsSyncable()) continue;
+				param.Deserialize(net.Value.Item1);
 			}
 
 			root.SetActive(true);

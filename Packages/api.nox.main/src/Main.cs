@@ -4,15 +4,17 @@ using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
+using UnityEngine.SceneManagement;
 using Logger = Nox.CCK.Utils.Logger;
 #if UNITY_EDITOR
+using System.Linq;
 using UnityEditor;
 #endif
 
 namespace api.nox.main {
 	public class Main : MainModInitializer {
 		private LanguagePack _lang;
-		private IModCoreAPI   _coreAPI;
+		private IModCoreAPI  _coreAPI;
 
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
 
@@ -25,6 +27,12 @@ namespace api.nox.main {
 			_events = new[] {
 				api.EventAPI.Subscribe("exit", OnExitEvent)
 			};
+
+			var count = SceneManager.sceneCountInBuildSettings;
+			for (var i = 0; i < count; i++) {
+				var path = SceneUtility.GetScenePathByBuildIndex(i);
+				Logger.LogDebug($"Scene {i}: {path}");
+			}
 		}
 
 

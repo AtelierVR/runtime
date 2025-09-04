@@ -1,5 +1,6 @@
 namespace api.nox.relay.types {
-	public enum RequestType : byte {		None = 0xFF,
+public enum RequestType : byte {
+		None = 0xFF,
 
 		// System Messages
 		Disconnect   = 0x00,
@@ -18,6 +19,7 @@ namespace api.nox.relay.types {
 		Teleport            = 0x0C,
 		AvatarChanged       = 0x0D,
 		ServerConfig        = 0x0E,
+		AvatarParams        = 0x0F,
 		Status              = 0x11,
 	}
 }

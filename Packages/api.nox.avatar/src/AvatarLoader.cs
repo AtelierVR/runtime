@@ -13,6 +13,22 @@ namespace api.nox.avatar {
 		public static readonly UnityEvent<IRuntimeAvatar> OnAdded   = new();
 		public static readonly UnityEvent<IRuntimeAvatar> OnRemoved = new();
 
+		// Système de file d'attente pour limiter le nombre de chargements simultanés
+		private static readonly SemaphoreSlim LoadingSemaphore     = new SemaphoreSlim(3, 3);
+		private static          int           _currentLoadingCount = 0;
+
+		/// <summary>
+		/// Nombre actuel d'avatars en cours de chargement
+		/// </summary>
+		public static int CurrentLoadingCount
+			=> _currentLoadingCount;
+
+		/// <summary>
+		/// Nombre maximum d'avatars pouvant être chargés simultanément
+		/// </summary>
+		public static int MaxConcurrentLoads
+			=> 3;
+
 		internal static void InvokeAdded(IRuntimeAvatar runtimeAvatar) {
 			Avatar.Add(runtimeAvatar);
 			OnAdded.Invoke(runtimeAvatar);
@@ -40,31 +56,49 @@ namespace api.nox.avatar {
 
 		[NoxPublic(NoxAccess.Method)]
 		public static async UniTask<AssetBundleRuntimeRuntimeAvatar> LoadFromPath(string path, Action<float> progress = null, CancellationToken token = default) {
-			Logger.Log($"Loading avatar from path: {path}");
+			// Attendre qu'un slot de chargement soit disponible
+			await LoadingSemaphore.WaitAsync(token);
 
-			var avatar = await AssetBundleRuntimeRuntimeAvatar.Load(path, progress, token);
-			if (avatar == null) {
-				Logger.LogError($"Failed to load avatar from path: {path}");
-				return null;
+			try {
+				Interlocked.Increment(ref _currentLoadingCount);
+				Logger.Log($"Loading avatar from path: {path} (Queue: {_currentLoadingCount}/{MaxConcurrentLoads})");
+
+				var avatar = await AssetBundleRuntimeRuntimeAvatar.Load(path, progress, token);
+				if (avatar == null) {
+					Logger.LogError($"Failed to load avatar from path: {path}");
+					return null;
+				}
+
+				InvokeAdded(avatar);
+				return avatar;
+			} finally {
+				Interlocked.Decrement(ref _currentLoadingCount);
+				LoadingSemaphore.Release();
 			}
-
-			InvokeAdded(avatar);
-			return avatar;
 		}
 
 		[NoxPublic(NoxAccess.Method)]
 		public static async UniTask<AssetRuntimeRuntimeAvatar> LoadFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default) {
-			Logger.Log($"Loading avatar from assets: {ns}:{path}");	
-			
-			var avatar = await AssetRuntimeRuntimeAvatar.Load(ns, path, progress, token);
+			// Attendre qu'un slot de chargement soit disponible
+			await LoadingSemaphore.WaitAsync(token);
 
-			if (avatar == null) {
-				Logger.LogError($"Failed to load avatar from assets: {ns}:{path}");
-				return null;
+			try {
+				Interlocked.Increment(ref _currentLoadingCount);
+				Logger.Log($"Loading avatar from assets: {ns}:{path} (Queue: {_currentLoadingCount}/{MaxConcurrentLoads})");
+
+				var avatar = await AssetRuntimeRuntimeAvatar.Load(ns, path, progress, token);
+
+				if (avatar == null) {
+					Logger.LogError($"Failed to load avatar from assets: {ns}:{path}");
+					return null;
+				}
+
+				InvokeAdded(avatar);
+				return avatar;
+			} finally {
+				Interlocked.Decrement(ref _currentLoadingCount);
+				LoadingSemaphore.Release();
 			}
-
-			InvokeAdded(avatar);
-			return avatar;
 		}
 	}
 }

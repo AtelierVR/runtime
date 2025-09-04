@@ -7,7 +7,8 @@
         "GUID:7f7d1af65c2641843945d409d28f2e20",
         "Nox.Avatars.Parameters",
         "Nox.Avatars.Rigging",
-        "UniTask"
+        "UniTask",
+        "GUID:9c3ea01e9c7f43f3bac8bf5fbf857a82"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

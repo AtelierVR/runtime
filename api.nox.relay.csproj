@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Packages\api.nox.relay\src\editor\RelayEditor.cs" />
+    <Compile Include="Packages\api.nox.relay\src\types\avatar\InstanceRequestAvatarParams.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\join\JoinEvent.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\authentication\AuthenticationResult.cs" />
     <Compile Include="Packages\api.nox.relay\src\adapter\players\local\RelayPhysicalLocalPlayer.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="Packages\api.nox.relay\src\types\instance\RelayInstanceRequest.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\quit\InstanceRequestQuit.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\handshakes\RelayRequestHandshake.cs" />
+    <Compile Include="Packages\api.nox.relay\src\types\avatar\AvatarParamsEvent.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\ResponseType.cs" />
     <Compile Include="Packages\api.nox.relay\src\adapter\players\remote\RelayPhysicalRemotePlayer.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\RequestType.cs" />

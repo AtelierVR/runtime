@@ -2,6 +2,7 @@ using Nox.Avatars.Parameters;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using System.Linq;
+using Nox.CCK.Avatars.Parameters;
 
 namespace Nox.CCK.Avatars.Rigging.Parameters {
 	public class RigBuilderLayerActiveParameter : IParameter {
@@ -46,5 +47,11 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 				break;
 			}
 		}
+
+		public byte[] Serialize()
+			=> Get().ToBytes();
+
+		public void Deserialize(byte[] data)
+			=> Set(data);
 	}
 }

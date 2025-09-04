@@ -2,6 +2,7 @@ using Nox.Avatars.Parameters;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using System.Linq;
+using Nox.CCK.Avatars.Parameters;
 
 namespace Nox.CCK.Avatars.Rigging.Parameters {
 	public class RigBuilderLayerWeightParameter : IParameter {
@@ -46,15 +47,11 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 				break;
 			}
 		}
+		
+		public byte[] Serialize()
+			=> Get().ToBytes();
 
-		public T GetValue<T>() {
-			var val = Get();
-			if (val is T result) return result;
-			return default(T);
-		}
-
-		public void SetValue<T>(T value) {
-			Set((object)value);
-		}
+		public void Deserialize(byte[] data)
+			=> Set(data);
 	}
 }

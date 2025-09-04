@@ -51,7 +51,6 @@ namespace api.nox.relay.connection {
 				return;
 			}
 
-
 			switch (type) {
 				case ResponseType.Enter:
 				case ResponseType.Quit:
@@ -60,6 +59,7 @@ namespace api.nox.relay.connection {
 				case ResponseType.Transform:
 				case ResponseType.Custom:
 				case ResponseType.AvatarChanged:
+				case ResponseType.AvatarParams:
 				case ResponseType.Traveling:
 				case ResponseType.Teleport:
 					var iid      = buffer.ReadByte();
