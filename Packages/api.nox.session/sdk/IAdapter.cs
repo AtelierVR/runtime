@@ -2,12 +2,25 @@ using Cysharp.Threading.Tasks;
 using Nox.Entities;
 using Nox.Players;
 using Nox.Worlds;
+using UnityEngine;
 
 namespace Nox.Sessions {
 	/// <summary>
 	/// The Adapter is the comportment with external api and the session.
 	/// </summary>
 	public interface IAdapter {
+		/// <summary>
+		/// Get the name of the session.
+		/// </summary>
+		/// <returns></returns>
+		public string GetName();
+
+		/// <summary>
+		/// Get the thumbnail of the session.
+		/// </summary>
+		/// <returns></returns>
+		public UniTask<Texture2D> GetThumbnail();
+
 		/// <summary>
 		/// Set the session for the adapter.
 		/// </summary>

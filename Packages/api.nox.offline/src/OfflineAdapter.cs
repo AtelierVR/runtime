@@ -8,6 +8,8 @@ using Nox.Offline;
 using Nox.Players;
 using Nox.Sessions;
 using Nox.Worlds;
+using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.offline {
 	public class OfflineAdapter : IOfflineAdapter {
@@ -17,6 +19,8 @@ namespace api.nox.offline {
 		private          int              _nextPlayerId;
 		private          ISession         _session;
 		private          OfflineState     _state = new(true);
+		public           string           Title;
+		public           Texture2D        Thumbnail;
 
 		internal OfflineAdapter() {
 			_dimension      = null;
@@ -97,6 +101,14 @@ namespace api.nox.offline {
 				_dimension.SetMainIndex(await main.MakeInstance());
 			_dimension.GetScene().SetCurrent();
 			main.SetVisibleInstance(_dimension.GetMainIndex(), true, true);
+		}
+
+		public string GetName()
+			=> Title;
+
+		public async UniTask<Texture2D> GetThumbnail() {
+			await UniTask.Yield();
+			return Thumbnail;
 		}
 
 		[NoxPublic(NoxAccess.Method)]

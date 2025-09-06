@@ -45,3 +45,5 @@ MonoBehaviour:
       value: "Players"
     - key: instance.no_players
       value: "No players found."
+    - key: instance.session.label
+      value: "#{0} - {1}"

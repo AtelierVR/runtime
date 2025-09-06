@@ -13,7 +13,8 @@
         "Nox.CCK.Worlds",
         "Nox.Avatars",
         "Nox.Controllers",
-        "Nox.Avatars.Parameters"
+        "Nox.Avatars.Parameters",
+        "Nox.Network"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -252,7 +252,7 @@ namespace api.nox.desktop {
 				return;
 			}
 
-			SetAvatar(avatar);
+			await SetAvatar(avatar);
 
 			LoadAvatarFromUser(Client.UserAPI.GetCurrent());
 		}

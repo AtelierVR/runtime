@@ -11,6 +11,8 @@ using Nox.Offline;
 using Nox.Players;
 using Nox.Sessions;
 using Nox.Worlds;
+using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.offline {
 	public class Main : IOfflineAPI, MainModInitializer {
@@ -73,7 +75,18 @@ namespace api.nox.offline {
 				|| c0 is not bool c1
 				|| c1;
 
-			var adapter = new OfflineAdapter();
+			var title = options.TryGetValue("title", out var t0) && t0 is string t1
+				? t1
+				: "Offline Session";
+
+			var thumbnail = options.TryGetValue("thumbnail", out var i0) && i0 is Texture2D i1
+				? i1
+				: null;
+
+			var adapter = new OfflineAdapter {
+				Title     = title,
+				Thumbnail = thumbnail
+			};
 			var session = SessionAPI.New(adapter);
 			adapter.SetState(false, "Preparing offline session...", 0f);
 			context.Callback(adapter, session);

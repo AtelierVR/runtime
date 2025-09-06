@@ -211,14 +211,19 @@ namespace Nox.CCK.Avatars.Rigging {
 			var constraintGo = new GameObject("HeadConstraint");
 			constraintGo.transform.SetParent(rigContainer);
 
-			if (useHeadTwoBoneIK && neckTransform != null && chestTransform != null) {
+			// Toujours créer les deux contraintes - TwoBoneIK et LookAt
+			TwoBoneIKConstraint ikConstraint = null;
+			MultiAimConstraint aimConstraint = null;
+
+			// Créer TwoBoneIK si on a neck et chest
+			if (neckTransform != null && chestTransform != null) {
 				// Create hint target for neck direction
 				var hintTargetGo = new GameObject("NeckHint");
 				hintTargetGo.transform.SetParent(rigContainer);
 				hintTargetGo.transform.position = neckTransform.position + neckTransform.up * 0.2f;
 
 				// Add TwoBoneIK constraint for Chest/Neck/Head chain
-				var ikConstraint = constraintGo.AddComponent<TwoBoneIKConstraint>();
+				ikConstraint = constraintGo.AddComponent<TwoBoneIKConstraint>();
 				ikConstraint.data.root = chestTransform;
 				ikConstraint.data.mid = neckTransform;
 				ikConstraint.data.tip = headTransform;
@@ -227,18 +232,18 @@ namespace Nox.CCK.Avatars.Rigging {
 				ikConstraint.data.targetPositionWeight = 1f;
 				ikConstraint.data.targetRotationWeight = 1f;
 				ikConstraint.data.hintWeight = 0.3f; // Lower weight for more natural movement
-				ikConstraint.weight = 1f;
-			} else {
-				// Fallback to MultiAim constraint for head look
-				var aimConstraint = constraintGo.AddComponent<MultiAimConstraint>();
-				aimConstraint.data.constrainedObject = headTransform;
-				aimConstraint.data.sourceObjects.Add(new WeightedTransform(headTarget, 1f));
-				aimConstraint.data.aimAxis = MultiAimConstraintData.Axis.Z;
-				aimConstraint.data.upAxis = MultiAimConstraintData.Axis.Y;
-				aimConstraint.data.worldUpType = MultiAimConstraintData.WorldUpType.ObjectUp;
-				aimConstraint.data.worldUpObject = headTransform.parent;
-				aimConstraint.weight = 1f;
+				ikConstraint.weight = useHeadTwoBoneIK ? 1f : 0f;
 			}
+
+			// Toujours créer MultiAim constraint pour head look
+			aimConstraint = constraintGo.AddComponent<MultiAimConstraint>();
+			aimConstraint.data.constrainedObject = headTransform;
+			aimConstraint.data.sourceObjects.Add(new WeightedTransform(headTarget, 1f));
+			aimConstraint.data.aimAxis = MultiAimConstraintData.Axis.Z;
+			aimConstraint.data.upAxis = MultiAimConstraintData.Axis.Y;
+			aimConstraint.data.worldUpType = MultiAimConstraintData.WorldUpType.Vector;
+			aimConstraint.data.maintainOffset = false;
+			aimConstraint.weight = useHeadTwoBoneIK ? 0f : 1f;
 
 			// Generate constraints for additional body parts
 			if (neckTarget && neckTransform) {
@@ -467,6 +472,29 @@ namespace Nox.CCK.Avatars.Rigging {
 			targetGo.transform.position = position;
 			targetGo.transform.rotation = rotation ?? Quaternion.identity;
 			return targetGo.transform;
+		}
+
+		/// <summary>
+		/// Bascule entre les contraintes TwoBoneIK et LookAt pour la tête
+		/// </summary>
+		/// <param name="rigContainer">Container du rig</param>
+		/// <param name="useHeadTwoBoneIK">True pour TwoBoneIK, false pour LookAt</param>
+		public static void SwitchHeadConstraintMode(Transform rigContainer, bool useHeadTwoBoneIK) {
+			var headConstraint = rigContainer.Find("HeadConstraint");
+			if (!headConstraint) return;
+
+			var ikConstraint = headConstraint.GetComponent<TwoBoneIKConstraint>();
+			var aimConstraint = headConstraint.GetComponent<MultiAimConstraint>();
+
+			if (ikConstraint) {
+				ikConstraint.weight = useHeadTwoBoneIK ? 1f : 0f;
+			}
+
+			if (aimConstraint) {
+				aimConstraint.weight = useHeadTwoBoneIK ? 0f : 1f;
+			}
+
+			Logger.Log($"Switched head constraint to {(useHeadTwoBoneIK ? "TwoBoneIK" : "LookAt")} mode");
 		}
 	}
 }

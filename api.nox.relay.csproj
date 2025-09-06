@@ -975,6 +975,10 @@
       <Project>{cb480378-d253-f3ad-3348-902862002b9e}</Project>
       <Name>Nox.Avatars.Parameters</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.Network.csproj">
+      <Project>{d72e3f1d-b6a9-ae1f-6165-22b88075502b}</Project>
+      <Name>Nox.Network</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

@@ -108,10 +108,10 @@ namespace api.nox.ui.menus {
 							executionType      = NavigationExecution.Event
 						},
 						new() {
-							key = "sessions",
+							key = "session",
 							// text               = "sessions",
 							iconPath           = "icons/group.png",
-							execution          = "sessions",
+							execution          = "session",
 							flags              = NavigationFlags.Button,
 							executionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto

@@ -37,7 +37,8 @@ namespace api.nox.relay {
 		internal float      Threshold     = 0.001f;
 		private  float      _renderEntity = 100f;
 		internal GameObject EntitiesRoot;
-
+		internal string     Title;
+		internal Texture2D  Thumbnail;
 
 		internal RelayAdapter() {
 			_dimension   = null;
@@ -45,8 +46,7 @@ namespace api.nox.relay {
 			EntitiesRoot = new GameObject($"[{GetType().Name}Entities]");
 			UnityEngine.Object.DontDestroyOnLoad(EntitiesRoot);
 		}
-
-
+		
 		public void OnEnter(EnterResponse ev) {
 			Tps           = ev.Tps;
 			Threshold     = ev.Threshold;
@@ -99,7 +99,7 @@ namespace api.nox.relay {
 					break;
 			}
 		}
-		
+
 		public void OnAvatarParams(AvatarParamsEvent ev) {
 			var player = _entities.GetEntity<RelayPlayer>(ev.PlayerId);
 			if (player == null) return;
@@ -259,6 +259,14 @@ namespace api.nox.relay {
 			_state = new RelayState(isReady, message, progress);
 			_session.OnStateChanged(_state, old);
 			Logger.LogDebug($"SetState: {this} -> {_state}");
+		}
+
+		public string GetName()
+			=> Title;
+
+		public async UniTask<Texture2D> GetThumbnail() {
+			await UniTask.Yield();
+			return Thumbnail;
 		}
 
 		[NoxPublic(NoxAccess.Method)]

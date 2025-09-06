@@ -6,8 +6,9 @@ using api.nox.relay.types.Authentication;
 using api.nox.relay.types.Traveling;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Events;
-using Nox.CCK.Utils;
 using Nox.Sessions;
+using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay {
 	public class Adapting {
@@ -83,12 +84,28 @@ namespace api.nox.relay {
 					? i1
 					: 0u;
 
-			var adapter = new RelayAdapter();
+			var title = options.TryGetValue("title", out var t0)
+				&& t0 is string t1
+					? t1
+					: null;
+
+
+			var adapter = new RelayAdapter { Title = title };
 			var session = Main.SessionAPI.New(adapter);
 			adapter.SetState(false, "Preparing relay session...", 0f);
 			context.Callback(adapter, session);
 			PrepareAsync(session, adapter, connections, address, server, instance, setCurrent).Forget();
+			if (options.TryGetValue("thumbnail", out var th0))
+				PrepareThumbnailAsync(adapter, th0).Forget();
 		}
+
+		private static async UniTask PrepareThumbnailAsync(RelayAdapter adapter, object obj)
+			=> adapter.Thumbnail = obj switch {
+				string url when Uri.TryCreate(url, UriKind.Absolute, out _) => await Main.NetworkAPI.FetchTexture(url),
+				UniTask<Texture2D> tex                                      => await tex,
+				Texture2D t                                                 => t,
+				_                                                           => null
+			};
 
 		private static async UniTask<(string, IPEndPoint)> ParseIPEndPoint(string address) {
 			var uri     = new Uri(address);

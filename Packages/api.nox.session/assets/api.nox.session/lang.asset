@@ -15,6 +15,8 @@ MonoBehaviour:
   languages:
   - IETF: en-US
     entries:
+    - key: session.dropdown.label
+      value: "{0}"
     - key: session.manager.title
       value: Sessions Manager
     - key: session.manager.refresh

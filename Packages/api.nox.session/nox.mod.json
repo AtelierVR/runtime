@@ -52,6 +52,9 @@
     ],
     "editor": [
       "api.nox.session.Editor"
+    ],
+    "client": [
+      "api.nox.session.Client"
     ]
   },
   "references": [],

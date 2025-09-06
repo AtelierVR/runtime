@@ -10,7 +10,10 @@
     "Nox.Entities",
     "Nox.CCK.Worlds",
     "Nox.Controllers",
-    "Nox.Users"
+    "Nox.Users",
+    "Nox.UI",
+    "Nox.Instances",
+    "Unity.TextMeshPro"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

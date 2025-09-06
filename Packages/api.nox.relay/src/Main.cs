@@ -11,6 +11,7 @@ using Nox.Avatars;
 using Nox.CCK.Mods.Events;
 using Nox.Controllers;
 using Nox.Entities;
+using Nox.Network;
 using Nox.Sessions;
 using Nox.Users;
 using Nox.Worlds;
@@ -28,6 +29,11 @@ namespace api.nox.relay {
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("entity")
 				.GetEntry<IEntityAPI>();
+
+		internal static INetworkAPI NetworkAPI
+			=> Instance.CoreAPI.ModAPI
+				.GetMod("network")
+				.GetEntry<INetworkAPI>();
 
 		internal static IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI

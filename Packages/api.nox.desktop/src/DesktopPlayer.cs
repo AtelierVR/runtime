@@ -119,26 +119,22 @@ namespace api.nox.desktop {
 		}
 
 		public virtual void Jump() {
-			if (isGrounded) {
-				DisableGrounding(0.1f);
-				body.useGravity = true;
-				body.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
-			}
+			if (!isGrounded) return;
+			DisableGrounding(0.1f);
+			body.useGravity = true;
+			body.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
 		}
 
 		public virtual void ToggleFlying() {
-			if (mayFly) {
-				isFlying = !isFlying;
-				// When flying, disable grounding and gravity
-				// When not flying, enable grounding and let Ground() manage gravity
-				if (isFlying) {
-					body.useGravity = false;
-					flyDirection    = Vector3.zero;
-				} else {
-					// Gravity will be managed by Ground() method
-					flyDirection = Vector3.zero;
-				}
-			}
+			if (!mayFly) return;
+			isFlying = !isFlying;
+			// When flying, disable grounding and gravity
+			// When not flying, enable grounding and let Ground() manage gravity
+			if (isFlying) 
+				body.useGravity = false;
+			
+			// Gravity will be managed by Ground() method
+			flyDirection    = Vector3.zero;
 		}
 
 		/// <summary>Sets fly direction including vertical movement</summary>
@@ -147,8 +143,8 @@ namespace api.nox.desktop {
 			flyDirection = direction;
 		}
 
-		public virtual void SetCrouching(bool crouching) {
-			this.crouching = crouching;
+		public virtual void SetCrouching(bool crouch) {
+			crouching = crouch;
 		}
 
 		protected virtual void FixedUpdate() {

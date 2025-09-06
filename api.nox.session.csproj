@@ -47,7 +47,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Packages\api.nox.session\src\Session.cs" />
+    <Compile Include="Packages\api.nox.session\src\client\SessionComponent.cs" />
+    <Compile Include="Packages\api.nox.session\src\Client.cs" />
     <Compile Include="Packages\api.nox.session\src\Main.cs" />
+    <Compile Include="Packages\api.nox.session\src\client\SessionPage.cs" />
     <Compile Include="Packages\api.nox.session\src\SessionsPanel.cs" />
     <Compile Include="Packages\api.nox.session\src\Editor.cs" />
     <None Include="Packages\api.nox.session\nox.mod.json" />
@@ -862,6 +865,9 @@
     <Reference Include="UniTask">
       <HintPath>U:\Projets\nox\runtime\Library\ScriptAssemblies\UniTask.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>U:\Projets\nox\runtime\Library\ScriptAssemblies\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>U:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
     </Reference>
@@ -901,6 +907,14 @@
     <ProjectReference Include="Nox.Users.csproj">
       <Project>{c237149e-58f6-bdd3-6473-3bc76e6fd9f4}</Project>
       <Name>Nox.Users</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.UI.csproj">
+      <Project>{0f333b38-227b-3a61-c9e4-410cadf64208}</Project>
+      <Name>Nox.UI</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Instances.csproj">
+      <Project>{f4a96811-5ab6-e173-59f9-c7a0c465d2d3}</Project>
+      <Name>Nox.Instances</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

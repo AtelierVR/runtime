@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Nox.Entities;
 using Nox.Players;
 using Nox.Worlds;
+using UnityEngine;
 
 namespace Nox.Sessions {
 	public interface ISession {

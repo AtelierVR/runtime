@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
@@ -29,6 +30,11 @@ namespace Nox.CCK.Avatars.Rigging {
 		public bool generateTwoBoneIK = true;
 		public bool generateHipIK     = true;
 		public bool useHeadTwoBoneIK  = true;
+		public bool useHeadLookAt     = false;
+
+		private void OnValidate() {
+			this.SwitchHeadConstraintMode(useHeadLookAt);
+		}
 
 		[Header("Target Objects")]
 		public Transform leftHandTarget;
