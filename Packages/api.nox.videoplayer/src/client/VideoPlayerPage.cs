@@ -29,16 +29,16 @@ namespace api.nox.videoplayer.client {
 
 		internal static IPage OnGotoAction(IMenu menu, object[] context)
 			=> new VideoPlayerPage {
-				_mId     = menu.GetId(),
-				_context = context,
-				Selected = T(context, 0, out int id) ? id : 0
+				_mId      = menu.GetId(),
+				_context  = context,
+				_selected = T(context, 0, out int id) ? id : 0
 			};
 
-		private  int                  _mId;
-		private  object[]             _context;
-		private  GameObject           _content;
-		private  VideoPlayerComponent _component;
-		internal int                  Selected;
+		private int                  _mId;
+		private object[]             _context;
+		private GameObject           _content;
+		private VideoPlayerComponent _component;
+		private int                  _selected;
 
 		public object[] GetContext()
 			=> _context;
@@ -53,6 +53,7 @@ namespace api.nox.videoplayer.client {
 			=> Client.UiAPI.Get<IMenu>(_mId);
 
 		public void OnOpen(IPage lastPage) {
+			Logger.LogDebug($"Opened page in menu {_mId} with selected player {_selected}");
 			VideoPlayerManager.OnRegistered.AddListener(OnRegistered);
 			VideoPlayerManager.OnUnRegistered.AddListener(OnUnRegistered);
 			foreach (var player in VideoPlayerManager.VideoPlayers)
@@ -67,18 +68,18 @@ namespace api.nox.videoplayer.client {
 		}
 
 		public IVideoPlayer GetSelectedPlayer() {
-			var player = VideoPlayerManager.VideoPlayers.FirstOrDefault(p => p.GetId() == Selected);
+			var player = VideoPlayerManager.VideoPlayers.FirstOrDefault(p => p.GetId() == _selected);
 			if (player != null || VideoPlayerManager.VideoPlayers.Count <= 0) return player;
-			player   = VideoPlayerManager.VideoPlayers.FirstOrDefault();
-			Selected = player?.GetId() ?? 0;
+			player    = VideoPlayerManager.VideoPlayers.FirstOrDefault();
+			_selected = player?.GetId() ?? 0;
 			return player;
 		}
 
 		private void OnUnRegistered(IVideoPlayer player) {
 			Remove(player);
-			if (player == null || player.GetId() != Selected) return;
+			if (player == null || player.GetId() != _selected) return;
 			var next = VideoPlayerManager.VideoPlayers.FirstOrDefault();
-			Selected = next?.GetId() ?? 0;
+			_selected = next?.GetId() ?? 0;
 			OnUpdate();
 		}
 
@@ -105,15 +106,16 @@ namespace api.nox.videoplayer.client {
 		private void Add(IVideoPlayer emitter) {
 			var ui = new UiPlayer(emitter, this);
 			Players.Add(ui);
+			Logger.LogDebug($"Added player {emitter.GetId()}");
 		}
 
 		public void OnProgress(IVideoPlayer player, double progress) {
-			if (player == null || player.GetId() != Selected) return;
+			if (player == null || player.GetId() != _selected) return;
 			_component?.UpdateProgress(player, progress);
 		}
 
 		public void OnPlayStatusChanged(IVideoPlayer player, bool isPlaying) {
-			if (player == null || player.GetId() != Selected) return;
+			if (player == null || player.GetId() != _selected) return;
 			_component?.UpdatePlayStatus(player, isPlaying);
 		}
 

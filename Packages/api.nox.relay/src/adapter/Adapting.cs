@@ -84,13 +84,17 @@ namespace api.nox.relay {
 					? i1
 					: 0u;
 
-			var title = options.TryGetValue("title", out var t0)
+			var name = options.TryGetValue("name", out var t0)
 				&& t0 is string t1
 					? t1
 					: null;
 
-
-			var adapter = new RelayAdapter { Title = title };
+			var shortname = options.TryGetValue("short_name", out var n0)
+				&& n0 is string n1
+					? n1
+					: null;
+			
+			var adapter = new RelayAdapter { Name = name, ShortName = shortname };
 			var session = Main.SessionAPI.New(adapter);
 			adapter.SetState(false, "Preparing relay session...", 0f);
 			context.Callback(adapter, session);

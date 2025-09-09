@@ -5,8 +5,10 @@ using Cysharp.Threading.Tasks;
 using Nox.Worlds;
 using Nox.Offline;
 using Nox.Sessions;
+using UnityEngine.Scripting;
 
 namespace api.nox.main {
+	[Preserve]
 	public class Client : ClientModInitializer {
 		private static ClientModCoreAPI _coreAPI;
 

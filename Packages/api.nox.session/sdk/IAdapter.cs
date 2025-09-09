@@ -16,6 +16,12 @@ namespace Nox.Sessions {
 		public string GetName();
 
 		/// <summary>
+		/// Get the short name of the session.
+		/// </summary>
+		/// <returns></returns>
+		public string GetShortName();
+
+		/// <summary>
 		/// Get the thumbnail of the session.
 		/// </summary>
 		/// <returns></returns>

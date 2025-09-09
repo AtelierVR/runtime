@@ -4,7 +4,8 @@
     "references": [
         "UniTask",
         "Nox.CCK",
-        "Nox.ModLoader"
+        "Nox.ModLoader",
+        "Nox.Avatars"
     ],
     "includePlatforms": [
         "Editor"

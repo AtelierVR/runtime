@@ -446,7 +446,7 @@
 .nox-transparent .unity-toolbar-menu__arrow {
     display: flex;
     height: 24px;
-    background-image: resource('Nox.CCK.Icon');
+    background-image: resource('icon');
     -unity-background-scale-mode: scale-and-crop;
     width: 24px;
 }

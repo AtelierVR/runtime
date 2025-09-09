@@ -9,6 +9,7 @@ using Nox.CCK.Utils;
 using Nox.Controllers;
 using Nox.Sessions;
 using UnityEngine;
+using UnityEngine.Events;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.session {
@@ -21,14 +22,18 @@ namespace api.nox.session {
 		private          GameObject     _updateHandler;
 		private          LanguagePack   _lang;
 
+		public static readonly UnityEvent<ISession>           OnSessionAdded   = new();
+		public static readonly UnityEvent<ISession>           OnSessionRemoved = new();
+		public static readonly UnityEvent<ISession, ISession> OnCurrentChanged = new();
+
 		internal IControllerAPI ControllerAPI
 			=> CoreAPI.ModAPI.GetMod("controller")
 				?.GetMains()
 				.FirstOrDefault() as IControllerAPI;
 
 		public void OnInitializeMain(MainModCoreAPI api) {
-			CoreAPI  = api;
-			_lang    = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
+			CoreAPI = api;
+			_lang   = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
 			LanguageManager.AddPack(_lang);
 			Instance = this;
 		}
@@ -86,18 +91,21 @@ namespace api.nox.session {
 			ControllerAPI.GetCurrent()?.SetPlayer(local);
 
 			CoreAPI.EventAPI.Emit("session_current_changed", nSession, oSession);
+			OnCurrentChanged?.Invoke(nSession, oSession);
 		}
 
 		internal void Add(Session session) {
 			if (session == null) return;
 			_sessions.Add(session);
 			CoreAPI.EventAPI.Emit("session_added", session);
+			OnSessionAdded?.Invoke(session);
 		}
 
 		internal void Remove(Session session) {
 			if (session == null) return;
 			_sessions.Remove(session);
 			CoreAPI.EventAPI.Emit("session_removed", session);
+			OnSessionRemoved?.Invoke(session);
 		}
 
 		private ushort GetNextId() {

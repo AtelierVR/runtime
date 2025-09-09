@@ -84,7 +84,7 @@ namespace api.nox.offline {
 				: null;
 
 			var adapter = new OfflineAdapter {
-				Title     = title,
+				Name     = title,
 				Thumbnail = thumbnail
 			};
 			var session = SessionAPI.New(adapter);

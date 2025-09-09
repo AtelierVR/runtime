@@ -155,7 +155,6 @@ namespace Nox.ModLoader {
 
 
 		private static async UniTaskVoid AsyncInitialize() {
-			
 			// Force background mode to true (for updating mods in background like sockets with Update method)
 			Application.runInBackground = true;
 
@@ -183,7 +182,7 @@ namespace Nox.ModLoader {
 
 			if (_initializing) return;
 			_initializing = true;
-
+			
 			DisplayProgressBar("Loading Mods", "Discovering Mods...", -1.0f);
 
 			var resultinfos = await ModManager.LoadMods();

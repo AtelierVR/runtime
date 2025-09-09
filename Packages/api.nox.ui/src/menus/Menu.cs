@@ -14,13 +14,17 @@ using Object = UnityEngine.Object;
 
 namespace api.nox.ui.menus {
 	public class Menu : MonoBehaviour, INoxObject, IMenu {
-		[Header("Menu Settings")] public string   defaultKey       = HomePage.GetStaticKey();
-		public                           object[] defaultArguments = Array.Empty<object>();
+		[Header("Menu Settings")]
+		public string defaultKey = HomePage.GetStaticKey();
 
-		[Header("References")] public BottomOrbiter bottomOrbiter;
-		public                        TopOrbiter    topOrbiter;
-		public                        RectTransform container;
-		public                        GameObject    parent;
+		public object[] defaultArguments = Array.Empty<object>();
+
+		[Header("References")]
+		public BottomOrbiter bottomOrbiter;
+
+		public TopOrbiter    topOrbiter;
+		public RectTransform container;
+		public GameObject    parent;
 
 		internal HistoryList History;
 		internal Client      Client;
@@ -263,6 +267,15 @@ namespace api.nox.ui.menus {
 				if (!content) {
 					Debug.LogError($"Page {newPage.GetKey()} does not have content.");
 					return;
+				}
+
+				var rect = content.GetComponent<RectTransform>();
+				if (rect) {
+					rect.anchorMin = Vector2.zero;
+					rect.anchorMax = Vector2.one;
+					rect.offsetMin = Vector2.zero;
+					rect.offsetMax = Vector2.zero;
+					rect.pivot     = new Vector2(0.5f, 0.5f);
 				}
 
 				foreach (UnityEngine.Transform child in container)

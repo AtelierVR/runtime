@@ -2,7 +2,7 @@ using Cysharp.Threading.Tasks;
 
 namespace Nox.ModLoader.Cores.Assets
 {
-    public interface AssetAPI : CCK.Mods.Assets.IAssetAPI
+    public interface IAssetAPI : CCK.Mods.Assets.IAssetAPI
     {
         public UniTask<bool> RegisterAssets();
         public UniTask<bool> UnRegisterAssets();

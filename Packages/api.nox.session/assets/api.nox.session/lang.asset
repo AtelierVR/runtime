@@ -88,3 +88,17 @@ MonoBehaviour:
       value: True
     - key: session.manager.false
       value: False
+    - key: session.page.no_session.title
+      value: No Active Session
+    - key: session.page.no_session.label
+      value: There is no active session.
+    - key: session.page.session.name
+      value: "{0}"
+    - key: session.page.session.short_name
+      value: "#{0}"
+    - key: session.page.session.label
+      value: "About {0}"
+    - key: session.navigation.handler
+      value: "{0}"
+    - key: session.main.title
+      value: Session Overview

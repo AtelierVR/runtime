@@ -14,11 +14,15 @@ namespace api.nox.videoplayer {
 		public static void Listen() {
 			SceneManager.sceneUnloaded += OnSceneUnloaded;
 			SceneManager.sceneLoaded   += OnSceneLoaded;
+			for (var i = 0; i < SceneManager.sceneCount; i++)
+				OnSceneLoaded(SceneManager.GetSceneAt(i), LoadSceneMode.Single);
 		}
 
 		public static void UnListen() {
 			SceneManager.sceneUnloaded -= OnSceneUnloaded;
 			SceneManager.sceneLoaded   -= OnSceneLoaded;
+			for (var i = 0; i < SceneManager.sceneCount; i++)
+				OnSceneUnloaded(SceneManager.GetSceneAt(i));
 		}
 
 		private static void OnSceneUnloaded(Scene scene) {
@@ -28,7 +32,8 @@ namespace api.nox.videoplayer {
 		}
 
 		private static void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-			var components = scene.GetComponentsInChildren<IVideoPlayer>();
+			var components = scene.GetComponentsInChildren<IVideoPlayer>(true);
+			Logger.LogDebug($"Found {components.Length} video players in scene {scene.name}");
 			foreach (var player in components)
 				Register(player);
 		}

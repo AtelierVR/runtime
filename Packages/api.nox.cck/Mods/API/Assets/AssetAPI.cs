@@ -31,6 +31,24 @@ namespace Nox.CCK.Mods.Assets
         public bool HasOverrideAsset<T>(string ns, string name) where T : Object; // check override local assets first
         public T GetOverrideAsset<T>(string ns, string name) where T : Object; // check override local assets first
 
+        public UniTask<bool> HasAssetAsync<T>(string ns, string name)
+            where T : Object; // check override local assets first, then override assets, then local assets
+
+        public UniTask<T> GetAssetAsync<T>(string ns, string name)
+            where T : Object; // check override local assets first, then override assets, then local assets
+
+        public UniTask<bool> HasAssetAsync<T>(string name)
+            where T : Object; // check override local assets first, then override assets, then local assets
+
+        public UniTask<T> GetAssetAsync<T>(string name)
+            where T : Object; // check override local assets first, then override assets, then local assets
+
+        public UniTask<bool> HasLocalAssetAsync<T>(string name) where T : Object; // check strictly local assets
+        public UniTask<T> GetLocalAssetAsync<T>(string name) where T : Object; // check strictly local assets
+
+        public UniTask<bool> HasOverrideAssetAsync<T>(string ns, string name) where T : Object; // check override local assets first
+        public UniTask<T> GetOverrideAssetAsync<T>(string ns, string name) where T : Object; // check override local assets first
+
 
         public bool HasWorld(string ns, string name);
         public bool IsLoadedWorld(string ns, string name);

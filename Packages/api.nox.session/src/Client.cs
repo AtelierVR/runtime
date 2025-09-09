@@ -1,10 +1,13 @@
 using System;
 using System.Linq;
 using api.nox.session.client;
+using api.nox.session.client.handlers;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
 using Nox.Instances;
+using Nox.Sessions;
 using Nox.UI;
 
 namespace api.nox.session {
@@ -20,11 +23,16 @@ namespace api.nox.session {
 				.GetMod("instance")
 				.GetMains()
 				.FirstOrDefault() as IInstanceAPI;
-		
+
 		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object
 			=> string.IsNullOrEmpty(ns)
 				? Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(path)
 				: Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(ns, path);
+
+		public static UniTask<T> GetAssetAsync<T>(string path, string ns = null) where T : UnityEngine.Object
+			=> string.IsNullOrEmpty(ns)
+				? Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(path)
+				: Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(ns, path);
 
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
 
@@ -35,7 +43,8 @@ namespace api.nox.session {
 			Instance = this;
 			CoreAPI  = api;
 			_events = new[] {
-				CoreAPI.EventAPI.Subscribe("menu_goto", OnGoto)
+				CoreAPI.EventAPI.Subscribe("menu_goto", OnGoto),
+				CoreAPI.EventAPI.Subscribe("session_handlers_request", OnHandlerRequest),
 			};
 		}
 
@@ -50,7 +59,17 @@ namespace api.nox.session {
 			if (page == null) return;
 			Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.GetId(), page);
 		}
-		
+
+
+		private static void OnHandlerRequest(EventData context) {
+			if (!context.TryGet(0, out ISession mid)) return;
+			context.Callback(
+				MainHandler.GetId(),
+				MainHandler.GetDisplay(),
+				MainHandler.GetIcon()
+			);
+		}
+
 		public void OnDisposeClient() {
 			foreach (var e in _events)
 				CoreAPI.EventAPI.Unsubscribe(e);

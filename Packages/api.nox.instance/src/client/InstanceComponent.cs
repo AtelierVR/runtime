@@ -120,7 +120,8 @@ namespace api.nox.instance.client {
 			data.Add("set_current", true);
 			data.Add("server", Page.Instance.GetServerAddress());
 			data.Add("instance", Page.Instance.GetId());
-			data.Add("title", LanguageManager.Get("instance.session.label", new object[] { Page.Instance.GetName(), Page.Instance.GetTitle() }));
+			data.Add("name", Page.Instance.GetTitle());
+			data.Add("short_name", Page.Instance.GetName());
 			data.Add("thumbnail", Main.Instance.NetworkAPI.FetchTexture(Page.Instance.GetThumbnailUrl()));
 			Main.Instance.SessionAPI.MakeSession(
 				"external:"

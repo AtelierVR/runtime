@@ -1,4 +1,4 @@
-using System.Linq;
+using System;
 using api.nox.search.client;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
@@ -17,13 +17,15 @@ namespace api.nox.search {
 				? Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(path)
 				: Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(ns, path);
 
-		private EventSubscription _event;
+		private EventSubscription[] _events;
 
 		public void OnInitializeClient(ClientModCoreAPI api) {
-			_event = Main.Instance.CoreAPI.EventAPI.Subscribe("menu_goto", OnGoto);
+			_events = new[] {
+				Main.Instance.CoreAPI.EventAPI.Subscribe("menu_goto", OnGoto)
+			};
 		}
 
-		private void OnGoto(EventData context) {
+		private static void OnGoto(EventData context) {
 			if (!context.TryGet(0, out int mid)) return;
 			if (!context.TryGet(1, out string key)) return;
 			var menu = UiAPI?.Get<IMenu>(mid);
@@ -34,10 +36,10 @@ namespace api.nox.search {
 			if (page == null) return;
 			Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.GetId(), page);
 		}
-
 		public void OnDisposeClient() {
-			Main.Instance.CoreAPI.EventAPI.Unsubscribe(_event);
-			_event = null;
+			foreach (var subscription in _events)
+				Main.Instance.CoreAPI.EventAPI.Unsubscribe(subscription);
+			_events = Array.Empty<EventSubscription>();
 		}
 	}
 }

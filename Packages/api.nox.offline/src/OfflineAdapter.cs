@@ -19,7 +19,8 @@ namespace api.nox.offline {
 		private          int              _nextPlayerId;
 		private          ISession         _session;
 		private          OfflineState     _state = new(true);
-		public           string           Title;
+		public           string           Name;
+		public           string           ShortName;
 		public           Texture2D        Thumbnail;
 
 		internal OfflineAdapter() {
@@ -104,7 +105,10 @@ namespace api.nox.offline {
 		}
 
 		public string GetName()
-			=> Title;
+			=> Name;
+
+		public string GetShortName()
+			=> ShortName ?? _session.GetId().ToString();
 
 		public async UniTask<Texture2D> GetThumbnail() {
 			await UniTask.Yield();

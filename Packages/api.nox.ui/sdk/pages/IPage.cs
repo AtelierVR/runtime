@@ -22,7 +22,8 @@ namespace Nox.UI {
 		/// Make or return <see cref="GameObject"/> for the content of the page.
 		/// </summary>
 		/// <returns></returns>
-		public GameObject GetContent(RectTransform parent);
+		public GameObject GetContent(RectTransform parent)
+			=> null;
 
 		/// <summary>
 		/// Asynchronously make or return <see cref="GameObject"/> for the content of the page.

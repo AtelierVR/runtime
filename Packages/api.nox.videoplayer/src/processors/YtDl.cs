@@ -212,7 +212,7 @@ namespace api.nox.videoplayer {
 								output.AppendLine(line);
 						}
 					}, cancellationToken: cancellationToken
-				);
+				).Forget();
 
 				UniTask.RunOnThreadPool(
 					async () => {
@@ -231,7 +231,7 @@ namespace api.nox.videoplayer {
 								error.AppendLine(line);
 						}
 					}, cancellationToken: cancellationToken
-				);
+				).Forget();
 
 				// Wait for process to exit and for output/error reading to complete
 				while (!process.HasExited) {

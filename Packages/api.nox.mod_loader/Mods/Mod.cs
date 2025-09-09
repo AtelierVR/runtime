@@ -31,14 +31,14 @@ namespace Nox.ModLoader.Mods {
 		public Dictionary<string, object> GetDatas()
 			=> Metadata.InternalData;
 
-		internal CoreAPI  CoreAPI;
-		public   AssetAPI AssetAPI;
+		internal CoreAPI   CoreAPI;
+		public   IAssetAPI AssetAPI;
 
 		// implementation of main class components
-		internal List<MainModInitializer> MainInitializers = new();
-		private  InitializerState         _mainState       = InitializerState.None;
+		private List<MainModInitializer> _mainInitializers = new();
+		private InitializerState         _mainState        = InitializerState.None;
 
-		private bool mainEnabled;
+		private bool _mainEnabled;
 
 		public T GetEntry<T>() {
 			T entry = default;
@@ -57,72 +57,72 @@ namespace Nox.ModLoader.Mods {
 		}
 
 		public bool IsMainEnabled()
-			=> mainEnabled;
+			=> _mainEnabled;
 
 		public MainModInitializer[] GetMains()
-			=> MainInitializers.ToArray();
+			=> _mainInitializers.ToArray();
 
 		public T GetMain<T>()
-			=> MainInitializers.OfType<T>().FirstOrDefault();
+			=> _mainInitializers.OfType<T>().FirstOrDefault();
 
 		public void EnableMain() {
 			if (IsMainEnabled()) return;
 			Logger.LogDebug($"Enabling main in {Metadata.GetId()}@{Metadata.GetVersion()}");
-			MainInitializers = CreateInstances<MainModInitializer>("main").ToList();
-			mainEnabled      = true;
+			_mainInitializers = CreateInstances<MainModInitializer>("main").ToList();
+			_mainEnabled      = true;
 			CoreAPI.EventAPI.Emit(new ModEventContext("mod_enabled", this, "main"));
 		}
 
 		public void DisableMain() {
 			if (!IsMainEnabled()) return;
 			Logger.LogDebug($"Disabling main in {Metadata.GetId()}@{Metadata.GetVersion()}");
-			mainEnabled = false;
+			_mainEnabled = false;
 			CoreAPI.EventAPI.Emit(new ModEventContext("mod_disabled", this, "main"));
 		}
 
 		public void ClearMain() {
 			if (!IsMainEnabled()) return;
 			Logger.LogDebug($"Clearing main in {Metadata.GetId()}@{Metadata.GetVersion()}");
-			foreach (var main in MainInitializers.ToArray())
-				MainInitializers.Remove(main);
+			foreach (var main in _mainInitializers.ToArray())
+				_mainInitializers.Remove(main);
 		}
 
 		// implementation of editor class components
-		internal List<EditorModInitializer> EditorInitializers = new();
-		private  InitializerState           _editorState       = InitializerState.None;
+		private List<EditorModInitializer> _editorInitializers = new();
+		private InitializerState           _editorState        = InitializerState.None;
 
 
-		private bool editorEnabled;
+		private bool _editorEnabled;
 
 		public bool IsEditorEnabled()
-			=> editorEnabled;
+			=> _editorEnabled;
 
 		public EditorModInitializer[] GetEditors()
-			=> EditorInitializers.ToArray();
+			=> _editorInitializers.ToArray();
 
 		public T GetEditor<T>()
-			=> EditorInitializers.OfType<T>().FirstOrDefault();
+			=> _editorInitializers.OfType<T>().FirstOrDefault();
 
 		public void EnableEditor() {
 			if (IsEditorEnabled()) return;
 			Logger.LogDebug($"Enabling editor in {Metadata.GetId()}@{Metadata.GetVersion()}");
-			EditorInitializers = CreateInstances<EditorModInitializer>("editor").ToList();
-			editorEnabled      = true;
+			_editorInitializers = CreateInstances<EditorModInitializer>("editor").ToList();
+			_editorEnabled      = true;
 			CoreAPI.EventAPI.Emit(new ModEventContext("mod_enabled", this, "editor"));
 		}
 
 		public void DisableEditor() {
 			if (!IsEditorEnabled()) return;
 			Logger.LogDebug($"Disabling editor in {Metadata.GetId()}@{Metadata.GetVersion()}");
-			editorEnabled = false;
+			_editorEnabled = false;
 			CoreAPI.EventAPI.Emit(new ModEventContext("mod_disabled", this, "editor"));
 		}
 
 		public void ClearEditor() {
 			if (!IsEditorEnabled()) return;
 			Logger.LogDebug($"Clearing editor in {Metadata.GetId()}@{Metadata.GetVersion()}");
-			foreach (var editor in EditorInitializers.ToArray())
-				EditorInitializers.Remove(editor);
+			foreach (var editor in _editorInitializers.ToArray())
+				_editorInitializers.Remove(editor);
 		}
 
 		// implementation of server class components
@@ -429,7 +429,20 @@ namespace Nox.ModLoader.Mods {
 			=> Profilers.Profiles.ToArray();
 
 		public virtual T[] CreateInstances<T>(string entry) where T : IModInitializer {
-			var types     = GetEntryClasses(entry);
+			var entries = GetMetadata().GetEntryPoints();
+			
+			Logger.LogDebug($"Entries of [{entry.ToUpper()}] in {Metadata.GetId()}@{Metadata.GetVersion()}:");
+			if (!entries.Has(entry)) {
+				var elements = entries.Get(entry);
+				foreach (var element in elements)
+					Logger.LogDebug($" - {element}");
+			}
+
+
+			var types = GetEntryClasses(entry);
+			if (types.Length == 0)
+				return Array.Empty<T>();
+
 			var instances = new Dictionary<string, T>();
 
 			foreach (var type in types) {
@@ -452,10 +465,8 @@ namespace Nox.ModLoader.Mods {
 				CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "main", ExecutionEventStatus.Pre));
 				_mainState = InitializerState.Initialized;
 				Profilers.Set("initialize", "main", PerformanceManager.At.Start, DateTime.UtcNow);
-
-				for (var i = 0; i < MainInitializers.Count; i++) {
-					var instance = MainInitializers[i];
-					Logger.LogDebug($"Initializing main in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
+				for (var i = 0; i < _mainInitializers.Count; i++) {
+					var instance = _mainInitializers[i];
 					Profilers.Set("initialize", "main", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
 					CoreAPI.EventAPI.Emit(
 						new ModEventContext(
@@ -464,6 +475,7 @@ namespace Nox.ModLoader.Mods {
 						)
 					);
 					try {
+						Logger.LogDebug($"Calling OnInitialize for main in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
 						instance.OnInitialize(CoreAPI);
 						await instance.OnInitializeAsync(CoreAPI);
 						instance.OnInitializeMain(CoreAPI);
@@ -495,8 +507,8 @@ namespace Nox.ModLoader.Mods {
 				_editorState = InitializerState.Initialized;
 				Profilers.Set("initialize", "editor", PerformanceManager.At.Start, DateTime.UtcNow);
 				CoreAPI.EventAPI.Emit(new ModEventContext("mod_initialize", this, "editor", ExecutionEventStatus.Pre));
-				for (var i = 0; i < EditorInitializers.Count; i++) {
-					var instance = EditorInitializers[i];
+				for (var i = 0; i < _editorInitializers.Count; i++) {
+					var instance = _editorInitializers[i];
 					Logger.LogDebug(
 						$"Initializing editor in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}"
 					);
@@ -716,8 +728,8 @@ namespace Nox.ModLoader.Mods {
 				CoreAPI.EventAPI.Emit(
 					new ModEventContext("mod_post_initialize", this, "main", ExecutionEventStatus.Pre)
 				);
-				for (var i = 0; i < MainInitializers.Count; i++) {
-					var instance = MainInitializers[i];
+				for (var i = 0; i < _mainInitializers.Count; i++) {
+					var instance = _mainInitializers[i];
 					Logger.LogDebug(
 						$"Post initializing main in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}"
 					);
@@ -764,8 +776,8 @@ namespace Nox.ModLoader.Mods {
 						ExecutionEventStatus.Pre
 					)
 				);
-				for (var i = 0; i < EditorInitializers.Count; i++) {
-					var instance = EditorInitializers[i];
+				for (var i = 0; i < _editorInitializers.Count; i++) {
+					var instance = _editorInitializers[i];
 					Logger.LogDebug(
 						$"Post initializing editor in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}"
 					);
@@ -993,8 +1005,8 @@ namespace Nox.ModLoader.Mods {
 				_mainState = InitializerState.PreDisposed;
 				Profilers.Set("pre_dispose", "main", PerformanceManager.At.Start, DateTime.UtcNow);
 				CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "main", ExecutionEventStatus.Pre));
-				for (var i = 0; i < MainInitializers.Count; i++) {
-					var instance = MainInitializers[i];
+				for (var i = 0; i < _mainInitializers.Count; i++) {
+					var instance = _mainInitializers[i];
 					Logger.LogDebug($"Pre disposing main in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
 					Profilers.Set("pre_dispose", "main", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
 					CoreAPI.EventAPI.Emit(
@@ -1034,8 +1046,8 @@ namespace Nox.ModLoader.Mods {
 				_editorState = InitializerState.PreDisposed;
 				Profilers.Set("pre_dispose", "editor", PerformanceManager.At.Start, DateTime.UtcNow);
 				CoreAPI.EventAPI.Emit(new ModEventContext("mod_pre_dispose", this, "editor", ExecutionEventStatus.Pre));
-				for (var i = 0; i < EditorInitializers.Count; i++) {
-					var instance = EditorInitializers[i];
+				for (var i = 0; i < _editorInitializers.Count; i++) {
+					var instance = _editorInitializers[i];
 					Logger.LogDebug(
 						$"Pre disposing editor in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}"
 					);
@@ -1435,8 +1447,8 @@ namespace Nox.ModLoader.Mods {
 				_editorState = InitializerState.Disposed;
 				Profilers.Set("dispose", "editor", PerformanceManager.At.Start, DateTime.UtcNow);
 				CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "editor", ExecutionEventStatus.Pre));
-				for (var i = 0; i < EditorInitializers.Count; i++) {
-					var instance = EditorInitializers[i];
+				for (var i = 0; i < _editorInitializers.Count; i++) {
+					var instance = _editorInitializers[i];
 					Logger.LogDebug($"Disposing editor in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
 					Profilers.Set("dispose", "editor", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
 					CoreAPI.EventAPI.Emit(
@@ -1476,8 +1488,8 @@ namespace Nox.ModLoader.Mods {
 				_mainState = InitializerState.Disposed;
 				Profilers.Set("dispose", "main", PerformanceManager.At.Start, DateTime.UtcNow);
 				CoreAPI.EventAPI.Emit(new ModEventContext("mod_dispose", this, "main", ExecutionEventStatus.Pre));
-				for (var i = 0; i < MainInitializers.Count; i++) {
-					var instance = MainInitializers[i];
+				for (var i = 0; i < _mainInitializers.Count; i++) {
+					var instance = _mainInitializers[i];
 					Logger.LogDebug($"Disposing main in {Metadata.GetId()}@{Metadata.GetVersion()} on {instance}");
 					Profilers.Set("dispose", "main", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
 					CoreAPI.EventAPI.Emit(
@@ -1596,8 +1608,8 @@ namespace Nox.ModLoader.Mods {
 
 			if (IsEditorEnabled() && _editorState == InitializerState.PostInitialized) {
 				Profilers.Set("update", "editor", PerformanceManager.At.Start, DateTime.UtcNow);
-				for (var i = 0; i < EditorInitializers.Count; i++) {
-					var instance = EditorInitializers[i];
+				for (var i = 0; i < _editorInitializers.Count; i++) {
+					var instance = _editorInitializers[i];
 					Profilers.Set("update", "editor", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
 					try {
 						instance.OnUpdate();
@@ -1614,8 +1626,8 @@ namespace Nox.ModLoader.Mods {
 
 			if (IsMainEnabled() && _mainState == InitializerState.PostInitialized) {
 				Profilers.Set("update", "main", PerformanceManager.At.Start, DateTime.UtcNow);
-				for (var i = 0; i < MainInitializers.Count; i++) {
-					var instance = MainInitializers[i];
+				for (var i = 0; i < _mainInitializers.Count; i++) {
+					var instance = _mainInitializers[i];
 					Profilers.Set("update", "main", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
 					try {
 						instance.OnUpdate();
@@ -1638,8 +1650,8 @@ namespace Nox.ModLoader.Mods {
 
 			if (IsMainEnabled() && _mainState == InitializerState.PostInitialized) {
 				Profilers.Set("late_update", "main", PerformanceManager.At.Start, DateTime.UtcNow);
-				for (var i = 0; i < MainInitializers.Count; i++) {
-					var instance = MainInitializers[i];
+				for (var i = 0; i < _mainInitializers.Count; i++) {
+					var instance = _mainInitializers[i];
 					Profilers.Set("late_update", "main", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
 					try {
 						instance.OnLateUpdate();
@@ -1656,8 +1668,8 @@ namespace Nox.ModLoader.Mods {
 
 			if (IsEditorEnabled() && _editorState == InitializerState.PostInitialized) {
 				Profilers.Set("late_update", "editor", PerformanceManager.At.Start, DateTime.UtcNow);
-				for (var i = 0; i < EditorInitializers.Count; i++) {
-					var instance = EditorInitializers[i];
+				for (var i = 0; i < _editorInitializers.Count; i++) {
+					var instance = _editorInitializers[i];
 					Profilers.Set("late_update", "editor", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
 					try {
 						instance.OnLateUpdate();
@@ -1755,8 +1767,8 @@ namespace Nox.ModLoader.Mods {
 
 			if (IsMainEnabled() && _mainState == InitializerState.PostInitialized) {
 				Profilers.Set("fixed_update", "main", PerformanceManager.At.Start, DateTime.UtcNow);
-				for (var i = 0; i < MainInitializers.Count; i++) {
-					var instance = MainInitializers[i];
+				for (var i = 0; i < _mainInitializers.Count; i++) {
+					var instance = _mainInitializers[i];
 					Profilers.Set("fixed_update", "main", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
 					try {
 						instance.OnFixedUpdate();
@@ -1773,8 +1785,8 @@ namespace Nox.ModLoader.Mods {
 
 			if (IsEditorEnabled() && _editorState == InitializerState.PostInitialized) {
 				Profilers.Set("fixed_update", "editor", PerformanceManager.At.Start, DateTime.UtcNow);
-				for (var i = 0; i < EditorInitializers.Count; i++) {
-					var instance = EditorInitializers[i];
+				for (var i = 0; i < _editorInitializers.Count; i++) {
+					var instance = _editorInitializers[i];
 					Profilers.Set("fixed_update", "editor", $"{i}", PerformanceManager.At.Start, DateTime.UtcNow);
 					try {
 						instance.OnFixedUpdate();

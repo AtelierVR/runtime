@@ -132,11 +132,23 @@ namespace api.nox.videoplayer {
 
 		private static string GetDownloadUrl() {
 			return PlatformExtensions.RuntimePlatform switch {
-				Platform.Windows => "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip",
-				Platform.Linux   => "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz",
-				Platform.MacOS   => null, // Will be determined dynamically via API
-				_                => throw new PlatformNotSupportedException("Platform not supported")
+				Platform.Windows  => "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip",
+				Platform.Linux    => "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz",
+				Platform.MacOS    => null, // Will be determined dynamically via API
+				_                 => throw new PlatformNotSupportedException("Platform not supported")
 			};
+		}
+		
+		public class FfMpegDownloadInfo {
+			public DownloadInfo download { get; set; }
+			
+			public class DownloadInfo {
+				public FileInfo zip { get; set; }
+
+				public class FileInfo {
+					public string url { get; set; }
+				}
+			}
 		}
 
 		private static async UniTask<string> GetMacOSDownloadUrl(CancellationToken cancellationToken) {
@@ -148,14 +160,13 @@ namespace api.nox.videoplayer {
 				response.EnsureSuccessStatusCode();
 
 				var jsonContent = await response.Content.ReadAsStringAsync();
-				var apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(jsonContent);
+				var apiResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<FfMpegDownloadInfo>(jsonContent);
 
 				// Extract ZIP download URL from the API response
-				string downloadUrl = apiResponse?.download?.zip?.url;
+				var downloadUrl = apiResponse.download.zip.url;
 				
-				if (string.IsNullOrEmpty(downloadUrl)) {
+				if (string.IsNullOrEmpty(downloadUrl)) 
 					throw new InvalidOperationException("Unable to get FFmpeg download URL from evermeet.cx API");
-				}
 
 				return downloadUrl;
 			} catch (Exception ex) {

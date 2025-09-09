@@ -9,7 +9,7 @@ using Cysharp.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace Nox.ModLoader.Cores.Assets {
-	public class KernelAssetAPI : AssetAPI {
+	public class KernelAssetAPI : IAssetAPI {
 		public KernelAssetAPI(ModLoader.Mods.KernelMod kernelMod)
 			=> _kernelMod = kernelMod;
 
@@ -58,7 +58,6 @@ namespace Nox.ModLoader.Cores.Assets {
 			return mod != null && mod.AssetAPI.HasLocalAsset<T>(name);
 		}
 
-
 		public T GetAsset<T>(string name) where T : Object
 			=> GetAsset<T>(_kernelMod.Metadata.GetId(), name);
 
@@ -72,15 +71,142 @@ namespace Nox.ModLoader.Cores.Assets {
 				         .Where(m => m.AssetAPI.HasOverrideAsset<T>(ns, name)))
 				return m.AssetAPI.GetOverrideAsset<T>(ns, name);
 
-
 			// get from the initial mod
 			var mod = ModManager.GetMod(ns);
 			return mod?.AssetAPI.GetLocalAsset<T>(name);
 		}
 
+		public bool HasLocalAsset<T>(string name) where T : Object
+			=> HasOverrideAsset<T>(_kernelMod.Metadata.GetId(), name);
+
+		public T GetLocalAsset<T>(string name) where T : Object
+			=> GetOverrideAsset<T>(_kernelMod.Metadata.GetId(), name);
+
+		public bool HasOverrideAsset<T>(string ns, string name) where T : Object {
+			List<string> namespaces = new() { ns };
+			var          mod        = ModManager.GetMod(ns);
+
+			if (mod != null) {
+				var meta = mod.GetMetadata();
+				namespaces.Add(meta.GetId());
+				namespaces.AddRange(meta.GetProvides());
+			}
+
+			foreach (var n in namespaces) {
+				if (!string.IsNullOrEmpty(HasAssetFromBundle(n, name)))
+					return true;
+			}
+
+			return false;
+		}
+
+		public T GetOverrideAsset<T>(string ns, string name) where T : Object {
+			List<string> namespaces = new() { ns };
+			var          mod        = ModManager.GetMod(ns);
+
+			if (mod != null) {
+				var meta = mod.GetMetadata();
+				namespaces.Add(meta.GetId());
+				namespaces.AddRange(meta.GetProvides());
+			}
+
+			foreach (var n in namespaces) {
+				var asset = GetAssetFromBundle<T>(n, name);
+				if (asset != null)
+					return asset;
+			}
+
+			return null;
+		}
+
+		// Async versions for assets
+		public async UniTask<bool> HasAssetAsync<T>(string name) where T : Object
+			=> await HasAssetAsync<T>(_kernelMod.Metadata.GetId(), name);
+
+		public async UniTask<bool> HasAssetAsync<T>(string ns, string name) where T : Object {
+			if (await HasOverrideAssetAsync<T>(ns, name))
+				return true;
+
+			// get on other mods
+			foreach (var m in ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))) {
+				if (await m.AssetAPI.HasOverrideAssetAsync<T>(ns, name))
+					return true;
+			}
+
+			// get from the initial mod
+			var mod = ModManager.GetMod(ns);
+			return mod != null && await mod.AssetAPI.HasLocalAssetAsync<T>(name);
+		}
+
+		public async UniTask<T> GetAssetAsync<T>(string name) where T : Object
+			=> await GetAssetAsync<T>(_kernelMod.Metadata.GetId(), name);
+
+		public async UniTask<T> GetAssetAsync<T>(string ns, string name) where T : Object {
+			// get on override mod
+			if (await HasOverrideAssetAsync<T>(ns, name))
+				return await GetOverrideAssetAsync<T>(ns, name);
+
+			// get on other mods
+			foreach (var m in ModManager.Mods.Where(m => m != _kernelMod && m.IsLoaded() && !m.GetMetadata().Match(ns))) {
+				if (await m.AssetAPI.HasOverrideAssetAsync<T>(ns, name))
+					return await m.AssetAPI.GetOverrideAssetAsync<T>(ns, name);
+			}
+
+			// get from the initial mod
+			var mod = ModManager.GetMod(ns);
+			return mod != null ? await mod.AssetAPI.GetLocalAssetAsync<T>(name) : null;
+		}
+
+		public async UniTask<bool> HasLocalAssetAsync<T>(string name) where T : Object
+			=> await HasOverrideAssetAsync<T>(_kernelMod.Metadata.GetId(), name);
+
+		public async UniTask<T> GetLocalAssetAsync<T>(string name) where T : Object
+			=> await GetOverrideAssetAsync<T>(_kernelMod.Metadata.GetId(), name);
+
+		public async UniTask<bool> HasOverrideAssetAsync<T>(string ns, string name) where T : Object {
+			await UniTask.Yield(); // Make it properly async
+
+			List<string> namespaces = new() { ns };
+			var          mod        = ModManager.GetMod(ns);
+
+			if (mod != null) {
+				var meta = mod.GetMetadata();
+				namespaces.Add(meta.GetId());
+				namespaces.AddRange(meta.GetProvides());
+			}
+
+			foreach (var n in namespaces) {
+				if (!string.IsNullOrEmpty(HasAssetFromBundle(n, name)))
+					return true;
+			}
+
+			return false;
+		}
+
+		public async UniTask<T> GetOverrideAssetAsync<T>(string ns, string name) where T : Object {
+			await UniTask.Yield(); // Make it properly async
+
+			List<string> namespaces = new() { ns };
+			var          mod        = ModManager.GetMod(ns);
+
+			if (mod != null) {
+				var meta = mod.GetMetadata();
+				namespaces.Add(meta.GetId());
+				namespaces.AddRange(meta.GetProvides());
+			}
+
+			foreach (var n in namespaces) {
+				var asset = GetAssetFromBundle<T>(n, name);
+				if (asset != null)
+					return asset;
+			}
+
+			return null;
+		}
+
+		// World methods
 		public async UniTask<Scene> LoadWorld(string name, LoadSceneMode mode = LoadSceneMode.Single)
 			=> await LoadWorld(_kernelMod.Metadata.GetId(), name, mode);
-
 
 		public async UniTask<Scene> LoadWorld(string ns, string name, LoadSceneMode mode = LoadSceneMode.Single) {
 			if (IsLoadedWorld(ns, name)) {
@@ -111,7 +237,6 @@ namespace Nox.ModLoader.Cores.Assets {
 			return default;
 		}
 
-
 		public bool HasWorld(string name)
 			=> HasWorld(_kernelMod.Metadata.GetId(), name);
 
@@ -128,7 +253,6 @@ namespace Nox.ModLoader.Cores.Assets {
 			var mod = ModManager.GetMod(ns);
 			return mod != null && mod.AssetAPI.HasLocalAsset<Object>(name);
 		}
-
 
 		public Scene GetWorld(string name)
 			=> GetWorld(_kernelMod.Metadata.GetId(), name);
@@ -147,7 +271,6 @@ namespace Nox.ModLoader.Cores.Assets {
 			var mod = ModManager.GetMod(ns);
 			return mod != null ? mod.AssetAPI.GetLocalWorld(name) : default;
 		}
-
 
 		public async UniTask UnloadWorld(string name)
 			=> await UnloadWorld(_kernelMod.Metadata.GetId(), name);
@@ -186,46 +309,6 @@ namespace Nox.ModLoader.Cores.Assets {
 			return mod != null && mod.AssetAPI.IsLoadedLocalWorld(name);
 		}
 
-
-		public bool HasOverrideAsset<T>(string ns, string name) where T : Object {
-			List<string> namespaces = new() { ns };
-			var          mod        = ModManager.GetMod(ns);
-
-			if (mod != null) {
-				var meta = mod.GetMetadata();
-				namespaces.Add(meta.GetId());
-				namespaces.AddRange(meta.GetProvides());
-			}
-
-			foreach (var n in namespaces)
-				return !string.IsNullOrEmpty(HasAssetFromBundle(n, name));
-
-			return false;
-		}
-
-
-		public T GetOverrideAsset<T>(string ns, string name) where T : Object {
-			List<string> namespaces = new() { ns };
-			var          mod        = ModManager.GetMod(ns);
-
-			if (mod != null) {
-				var meta = mod.GetMetadata();
-				namespaces.Add(meta.GetId());
-				namespaces.AddRange(meta.GetProvides());
-			}
-
-			foreach (var n in namespaces)
-				return GetAssetFromBundle<T>(n, name);
-
-			return default;
-		}
-
-		public bool HasLocalAsset<T>(string name) where T : Object
-			=> HasOverrideAsset<T>(_kernelMod.Metadata.GetId(), name);
-
-		public T GetLocalAsset<T>(string name) where T : Object
-			=> GetOverrideAsset<T>(_kernelMod.Metadata.GetId(), name);
-
 		public async UniTask<Scene> LoadLocalWorld(string name, LoadSceneMode mode = LoadSceneMode.Single)
 			=> await LoadOverrideWorld(_kernelMod.Metadata.GetId(), name, mode);
 
@@ -239,15 +322,17 @@ namespace Nox.ModLoader.Cores.Assets {
 				namespaces.AddRange(meta.GetProvides());
 			}
 
-			foreach (var n in namespaces)
-				return await LoadWorldFromBundle(n, name, mode);
+			foreach (var n in namespaces) {
+				var scene = await LoadWorldFromBundle(n, name, mode);
+				if (scene.IsValid())
+					return scene;
+			}
 
 			return default;
 		}
 
 		public async UniTask UnloadLocalWorld(string name)
 			=> await UnloadOverrideWorld(_kernelMod.Metadata.GetId(), name);
-
 
 		public async UniTask UnloadOverrideWorld(string ns, string name) {
 			List<string> namespaces = new() { ns };
@@ -261,10 +346,7 @@ namespace Nox.ModLoader.Cores.Assets {
 
 			foreach (var n in namespaces)
 				await UnloadWorldFromBundle(n, name);
-
-			return;
 		}
-
 
 		public bool HasOverrideWorld(string ns, string name) {
 			List<string> namespaces = new() { ns };
@@ -276,12 +358,13 @@ namespace Nox.ModLoader.Cores.Assets {
 				namespaces.AddRange(meta.GetProvides());
 			}
 
-			foreach (var n in namespaces)
-				return !string.IsNullOrEmpty(HasWorldFromBundle(n, name));
+			foreach (var n in namespaces) {
+				if (!string.IsNullOrEmpty(HasWorldFromBundle(n, name)))
+					return true;
+			}
 
 			return false;
 		}
-
 
 		public bool IsLoadedOverrideWorld(string ns, string name) {
 			List<string> namespaces = new() { ns };
@@ -293,12 +376,13 @@ namespace Nox.ModLoader.Cores.Assets {
 				namespaces.AddRange(meta.GetProvides());
 			}
 
-			foreach (var n in namespaces)
-				return IsLoadedWorldFromBundle(n, name);
+			foreach (var n in namespaces) {
+				if (IsLoadedWorldFromBundle(n, name))
+					return true;
+			}
 
 			return false;
 		}
-
 
 		public Scene GetOverrideWorld(string ns, string name) {
 			List<string> namespaces = new() { ns };
@@ -310,12 +394,14 @@ namespace Nox.ModLoader.Cores.Assets {
 				namespaces.AddRange(meta.GetProvides());
 			}
 
-			foreach (var n in namespaces)
-				return GetWorldFromBundle(n, name);
+			foreach (var n in namespaces) {
+				var scene = GetWorldFromBundle(n, name);
+				if (scene.IsValid())
+					return scene;
+			}
 
 			return default;
 		}
-
 
 		public bool HasLocalWorld(string name)
 			=> HasOverrideWorld(_kernelMod.Metadata.GetId(), name);
@@ -326,56 +412,55 @@ namespace Nox.ModLoader.Cores.Assets {
 		public Scene GetLocalWorld(string name)
 			=> GetOverrideWorld(_kernelMod.Metadata.GetId(), name);
 
+		// Bundle helper methods
 		public string GetAssetPathFromBundle(string ns, string name) {
 			var basepath = _kernelMod.Metadata.GetCustom<JObject>("kernel")?.GetValue("assets_path")?.ToObject<string>();
-			if (string.IsNullOrEmpty(basepath)) {
-				Logger.LogWarning("Asset base path not found for " + _kernelMod.Metadata.GetId());
+			if (string.IsNullOrEmpty(basepath))
 				return null;
-			}
 
-			return Path.Combine(basepath, ns, name).Replace('\\', '/').ToLower();
+			return FormatPath(Path.Combine(basepath, ns, name));
 		}
 
+		public string FormatPath(string path)
+			=> path.Replace('\\', '/').ToLower();
+
 		public T GetAssetFromBundle<T>(string ns, string name) where T : Object {
-			if (_assetBundles == null) {
-				Logger.LogWarning("Asset bundles not loaded for " + _kernelMod.Metadata.GetId() + " - " + ns + "/" + name);
-				return default;
-			}
+			if (_assetBundles == null)
+				return null;
 
 			var v = HasAssetFromBundle(ns, name);
 			if (v == null)
-				return default;
+				return null;
+
 			foreach (var n in _assetBundles)
 				if (n.Contains(v))
 					return n.LoadAsset<T>(v);
-			return default;
+
+			return null;
 		}
 
 		public KeyValuePair<string, string>[] GetAssetNamesFromBundle(string ns) {
-			if (_assetBundles == null) {
-				Logger.LogWarning("Asset bundles not loaded for " + _kernelMod.Metadata.GetId() + " - " + ns);
+			if (_assetBundles == null)
 				return null;
-			}
 
-			var                                v      = GetAssetPathFromBundle(ns, "");
+			var v = GetAssetPathFromBundle(ns, "");
 			List<KeyValuePair<string, string>> assets = new();
 			foreach (var n in _assetBundles)
 			foreach (var a in n.GetAllAssetNames())
-				if (a.Replace('\\', '/').ToLower().StartsWith(v))
+				if (FormatPath(a).StartsWith(v))
 					assets.Add(new KeyValuePair<string, string>(ns, a[(a.IndexOf('/') + 1)..]));
+
 			return assets.ToArray();
 		}
 
 		public string HasAssetFromBundle(string ns, string name) {
-			if (_assetBundles == null) {
-				Logger.LogWarning("Asset bundles not loaded for " + _kernelMod.Metadata.GetId() + " - " + ns + "/" + name);
+			if (_assetBundles == null)
 				return null;
-			}
 
 			var v = GetAssetPathFromBundle(ns, name);
 			foreach (var n in _assetBundles)
 			foreach (var a in n.GetAllAssetNames())
-				if (a.Replace('\\', '/').ToLower() == v)
+				if (FormatPath(a) == v)
 					return a;
 
 			return null;
@@ -386,37 +471,24 @@ namespace Nox.ModLoader.Cores.Assets {
 				return true;
 
 			var kernel = _kernelMod.Metadata.GetCustom<JObject>("kernel");
-			if (kernel == null) {
-				Logger.LogWarning("Kernel data not found for " + _kernelMod.Metadata.GetId());
+			if (kernel == null)
 				return false;
-			}
 
 			var assets = kernel.GetValue("assets")?.ToObject<JObject[]>();
-			if (assets == null) {
-				Logger.LogWarning("Assets not found for " + _kernelMod.Metadata.GetId());
+			if (assets == null)
 				return false;
-			}
 
 			_assetBundles = new List<AssetBundle>();
 
 			foreach (var asset in assets) {
 				var path = asset.GetValue("file")?.ToObject<string>();
-				if (string.IsNullOrEmpty(path)) {
-					Logger.LogWarning($"Asset bundle path not found for {_kernelMod.Metadata.GetId()}");
-					continue;
-				}
+				if (string.IsNullOrEmpty(path)) continue;
 
 				path = Path.Combine(Application.dataPath, "Nox", path);
-				if (!File.Exists(path)) {
-					Logger.LogWarning($"Asset bundle {path} not found for {_kernelMod.Metadata.GetId()}");
-					continue;
-				}
+				if (!File.Exists(path)) continue;
 
 				var bundle = await AssetBundle.LoadFromFileAsync(path);
-				if (!bundle) {
-					Logger.LogWarning($"Failed to load asset bundle {path} for {_kernelMod.Metadata.GetId()}");
-					continue;
-				}
+				if (!bundle) continue;
 
 				_assetBundles.Add(bundle);
 			}
@@ -438,28 +510,17 @@ namespace Nox.ModLoader.Cores.Assets {
 
 		public async UniTask<Scene> LoadWorldFromBundle(string ns, string name, LoadSceneMode mode = LoadSceneMode.Single) {
 			var path = GetAssetPathFromBundle(ns, name);
-			Logger.Log("Loading world: " + ns + "/" + name + " - " + path);
-			if (string.IsNullOrEmpty(path)) {
-				Logger.LogWarning("Asset path not found for " + _kernelMod.Metadata.GetId() + " - " + ns + "/" + name);
-				return default;
-			}
+			if (string.IsNullOrEmpty(path)) return default;
 
 			foreach (var n in _assetBundles)
 			foreach (var a in n.GetAllScenePaths()) {
-				if (a.Replace('\\', '/').ToLower() != path) continue;
+				if (FormatPath(a) != path) continue;
 				var scene = SceneManager.GetSceneByPath(a);
-				if (!scene.isLoaded || !scene.IsValid()) {
-					await SceneManager.LoadSceneAsync(a, mode);
-					scene = SceneManager.GetSceneByPath(a);
-				}
-
-				if (!scene.IsValid()) Logger.LogWarning("Scene is not valid after loading: " + ns + "/" + name + " - " + path);
-				else Logger.Log("Scene loaded: "                                             + ns + "/" + name + " - " + path);
-
+				if (scene.isLoaded && scene.IsValid()) return scene;
+				await SceneManager.LoadSceneAsync(a, mode);
+				scene = SceneManager.GetSceneByPath(a);
 				return scene;
 			}
-
-			Logger.LogWarning("World not found: " + ns + "/" + name);
 
 			return default;
 		}
@@ -467,34 +528,26 @@ namespace Nox.ModLoader.Cores.Assets {
 		public async UniTask UnloadWorldFromBundle(string ns, string name) {
 			var path = GetAssetPathFromBundle(ns, name);
 
-			if (string.IsNullOrEmpty(path)) {
-				Logger.LogWarning("Asset path not found for " + _kernelMod.Metadata.GetId() + " - " + ns + "/" + name);
+			if (string.IsNullOrEmpty(path))
 				return;
-			}
 
 			foreach (var n in _assetBundles)
 			foreach (var a in n.GetAllScenePaths())
-				if (a.Replace('\\', '/').ToLower() == path) {
+				if (FormatPath(a) == path) {
 					var scene = SceneManager.GetSceneByPath(a);
 					if (scene.isLoaded) await SceneManager.UnloadSceneAsync(scene);
 					return;
 				}
-
-			Logger.LogWarning("World not found: " + ns + "/" + name);
 		}
 
 		public string HasWorldFromBundle(string ns, string name) {
 			var path = GetAssetPathFromBundle(ns, name);
-			Logger.Log("Checking HAS world: " + ns + "/" + name + " - " + path);
-			if (string.IsNullOrEmpty(path)) {
-				Logger.LogWarning("Asset path not found for " + _kernelMod.Metadata.GetId() + " - " + ns + "/" + name);
+			if (string.IsNullOrEmpty(path))
 				return null;
-			}
 
 			foreach (var n in _assetBundles)
 			foreach (var a in n.GetAllScenePaths()) {
-				Logger.Log($"{a.Replace('\\', '/').ToLower()} == {path}");
-				if (a.Replace('\\', '/').ToLower() == path)
+				if (FormatPath(a) == path)
 					return a;
 			}
 
@@ -503,38 +556,28 @@ namespace Nox.ModLoader.Cores.Assets {
 
 		public bool IsLoadedWorldFromBundle(string ns, string name) {
 			var path = GetAssetPathFromBundle(ns, name);
-			Logger.Log("Checking LOADED world: " + ns + "/" + name + " - " + path);
-			if (string.IsNullOrEmpty(path)) {
-				Logger.LogWarning("Asset path not found for " + _kernelMod.Metadata.GetId() + " - " + ns + "/" + name);
+			if (string.IsNullOrEmpty(path))
 				return false;
-			}
 
 			foreach (var n in _assetBundles)
 			foreach (var a in n.GetAllScenePaths())
-				if (a.Replace('\\', '/').ToLower() == path) {
+				if (FormatPath(a) == path) {
 					var scene = SceneManager.GetSceneByPath(a);
-					Logger.Log("Scene loaded: " + ns + "/" + name + " - " + path + " - " + scene.isLoaded);
 					return scene.isLoaded;
 				}
 
-			Logger.LogWarning("aa World not found: " + ns + "/" + name);
 			return false;
 		}
 
 		public Scene GetWorldFromBundle(string ns, string name) {
 			var path = GetAssetPathFromBundle(ns, name);
-			Logger.Log("Getting world: " + ns + "/" + name + " - " + path);
-			if (string.IsNullOrEmpty(path)) {
-				Logger.LogWarning("Asset path not found for " + _kernelMod.Metadata.GetId() + " - " + ns + "/" + name);
+			if (string.IsNullOrEmpty(path))
 				return default;
-			}
 
 			foreach (var n in _assetBundles)
 			foreach (var a in n.GetAllScenePaths())
-				if (a.Replace('\\', '/').ToLower() == path)
+				if (FormatPath(a) == path)
 					return SceneManager.GetSceneByPath(a);
-
-			Logger.LogWarning("World not found: " + ns + "/" + name);
 
 			return default;
 		}

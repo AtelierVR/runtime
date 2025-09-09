@@ -414,7 +414,7 @@ namespace api.nox.world.client {
 			// generate profile
 			var container = Instantiate(containerAsset, splitContent);
 			var profile = Instantiate(
-				Client.GetAsset<GameObject>("prefabs/profile.prefab"),
+				Client.GetAsset<GameObject>("prefabs/profile.prefab", "ui"),
 				Reference.GetComponent<RectTransform>("content", container)
 			);
 			component.identifier       = Reference.GetComponent<TextLanguage>("identifier", profile);
