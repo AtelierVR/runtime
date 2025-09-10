@@ -1,5 +1,3 @@
 namespace Nox.VideoPlayer {
-	public class IAudioVideo {
-		
-	}
+	public interface IAudioVideo : IAudio, IVideo { }
 }

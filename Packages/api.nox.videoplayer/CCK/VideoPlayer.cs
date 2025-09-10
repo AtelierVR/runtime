@@ -8,137 +8,43 @@ using Logger = Nox.CCK.Utils.Logger;
 using UnityVideoPlayer = UnityEngine.Video.VideoPlayer;
 
 namespace Nox.CCK.VideoPlayer {
-	public class VideoPlayer : MonoBehaviour, IVideoPlayer, IVideoPlayerEvents {
-		#region Events
+	public class VideoPlayer : MonoBehaviour, IVideoPlayer, IVideoPlayerResolver, IVideoPlayerDetails {
+		#region Fields
 
-		public UnityEvent            onReady             = new(); // Événement pour la préparation terminée
-		public UnityEvent            onStart             = new(); // Événement pour le début de la lecture
-		public UnityEvent            onEnd               = new(); // Événement pour la fin de la lecture
-		public UnityEvent<Exception> onError             = new(); // Événement pour les erreurs
-		public UnityEvent            onConnectionLost    = new(); // Événement pour perte de connexion
-		public UnityEvent            onReconnecting      = new(); // Événement pour tentative de reconnexion
-		public UnityEvent            onReconnected       = new(); // Événement pour reconnexion réussie
-		public UnityEvent            onPlay              = new(); // Événement pour la lecture
-		public UnityEvent            onPause             = new(); // Événement pour la pause
-		public UnityEvent            onResume            = new(); // Événement pour la reprise
-		public UnityEvent<double>    onProgress          = new(); // Événement pour la progression (0.0 à 1.0)
-		public UnityEvent<double>    onSeek              = new(); // Événement pour le seek (temps en secondes)
-		public UnityEvent<float>     onVolumeChanged     = new(); // Événement pour le changement de volume (0.0 à 1.0)
-		public UnityEvent<bool>      onPlayStatusChanged = new(); // Événement pour le changement de statut de lecture
+		public string           playQuery;
+		public UnityVideoPlayer videoPlayer;
+		public AudioSource      audioSource;
 
-		public void AddReadyListener(UnityAction listener)
-			=> onReady.AddListener(listener);
+		private       string   _currentUrl;
+		private       bool     _isReconnecting;
+		private       int      _reconnectAttempts;
+		private const int      MaxReconnectAttempts = 3;
+		private const float    ReconnectDelay       = 2;
+		private       double   _lastProgress        = -1;
+		private       bool     _lastPlayingStatus;
+		private       IResolve _currentPlaying;
 
-		public void RemoveReadyListener(UnityAction listener)
-			=> onReady.RemoveListener(listener);
+		#endregion Fields
 
-		public void AddStartListener(UnityAction listener)
-			=> onStart.AddListener(listener);
-
-		public void RemoveStartListener(UnityAction listener)
-			=> onStart.RemoveListener(listener);
-
-		public void AddEndListener(UnityAction listener)
-			=> onEnd.AddListener(listener);
-
-		public void RemoveEndListener(UnityAction listener)
-			=> onEnd.RemoveListener(listener);
-
-		public void AddErrorListener(UnityAction<Exception> listener)
-			=> onError.AddListener(listener);
-
-		public void RemoveErrorListener(UnityAction<Exception> listener)
-			=> onError.RemoveListener(listener);
-
-		public void AddConnectionLostListener(UnityAction listener)
-			=> onConnectionLost.AddListener(listener);
-
-		public void RemoveConnectionLostListener(UnityAction listener)
-			=> onConnectionLost.RemoveListener(listener);
-
-		public void AddReconnectingListener(UnityAction listener)
-			=> onReconnecting.AddListener(listener);
-
-		public void RemoveReconnectingListener(UnityAction listener)
-			=> onReconnecting.RemoveListener(listener);
-
-		public void AddReconnectedListener(UnityAction listener)
-			=> onReconnected.AddListener(listener);
-
-		public void RemoveReconnectedListener(UnityAction listener)
-			=> onReconnected.RemoveListener(listener);
-
-		// Nouvelles méthodes pour les nouveaux événements
-		public void AddPlayListener(UnityAction listener)
-			=> onPlay.AddListener(listener);
-
-		public void RemovePlayListener(UnityAction listener)
-			=> onPlay.RemoveListener(listener);
-
-		public void AddPauseListener(UnityAction listener)
-			=> onPause.AddListener(listener);
-
-		public void RemovePauseListener(UnityAction listener)
-			=> onPause.RemoveListener(listener);
-
-		public void AddResumeListener(UnityAction listener)
-			=> onResume.AddListener(listener);
-
-		public void RemoveResumeListener(UnityAction listener)
-			=> onResume.RemoveListener(listener);
-
-		public void AddProgressListener(UnityAction<double> listener)
-			=> onProgress.AddListener(listener);
-
-		public void RemoveProgressListener(UnityAction<double> listener)
-			=> onProgress.RemoveListener(listener);
-
-		public void AddSeekListener(UnityAction<double> listener)
-			=> onSeek.AddListener(listener);
-
-		public void RemoveSeekListener(UnityAction<double> listener)
-			=> onSeek.RemoveListener(listener);
-
-		public void AddVolumeChangedListener(UnityAction<float> listener)
-			=> onVolumeChanged.AddListener(listener);
-
-		public void RemoveVolumeChangedListener(UnityAction<float> listener)
-			=> onVolumeChanged.RemoveListener(listener);
-
-		public void AddPlayStatusChangedListener(UnityAction<bool> listener)
-			=> onPlayStatusChanged.AddListener(listener);
-
-		public void RemovePlayStatusChangedListener(UnityAction<bool> listener)
-			=> onPlayStatusChanged.RemoveListener(listener);
-
-		#endregion Events
-
-		private       UnityVideoPlayer _videoPlayer;
-		private       AudioSource      _audioSource;
-		private       string           _currentUrl;
-		private       bool             _isReconnecting;
-		private       int              _reconnectAttempts;
-		private const int              MaxReconnectAttempts = 3;
-		private const float            ReconnectDelay       = 2;
-		private       double           _lastProgress        = -1; // Pour éviter de déclencher l'événement en continu
-		private       bool             _lastPlayingStatus;        // Pour détecter les changements de statut
+		#region Properties
 
 		public UnityVideoPlayer UnityVideoPlayer {
-			// ReSharper disable once Unity.PerformanceCriticalCodeInvocation
-			get => _videoPlayer ??= GetComponent<UnityVideoPlayer>();
-			set => _videoPlayer = value;
+			// ReSharper disable Unity.PerformanceCriticalCodeInvocation
+			get => videoPlayer ??= GetComponent<UnityVideoPlayer>() ?? GetComponentInChildren<UnityVideoPlayer>();
+			set => videoPlayer = value;
 		}
 
 		public AudioSource AudioSource {
-			// ReSharper disable once Unity.PerformanceCriticalCodeInvocation
-			get => _audioSource ??= GetComponent<AudioSource>();
-			set => _audioSource = value;
+			// ReSharper disable Unity.PerformanceCriticalCodeInvocation
+			get => audioSource ??= GetComponent<AudioSource>() ?? GetComponentInChildren<AudioSource>();
+			set => audioSource = value;
 		}
 
-		private void Awake() {
-			UnityVideoPlayer = GetComponent<UnityVideoPlayer>();
-			AudioSource      = GetComponent<AudioSource>();
+		#endregion Properties
 
+		#region Unity Lifecycle
+
+		private void Awake() {
 			UnityVideoPlayer.prepareCompleted    += OnPrepareCompleted;
 			UnityVideoPlayer.started             += OnStarted;
 			UnityVideoPlayer.loopPointReached    += OnLoopPointReached;
@@ -147,6 +53,29 @@ namespace Nox.CCK.VideoPlayer {
 			UnityVideoPlayer.frameDropped        += OnFrameDropped;
 			UnityVideoPlayer.frameReady          += OnFrameReady;
 			UnityVideoPlayer.seekCompleted       += OnSeekCompleted;
+		}
+
+		private void Start() {
+			if (!string.IsNullOrEmpty(playQuery))
+				Play(playQuery);
+		}
+
+		private void Update() {
+			// Vérification du statut de lecture
+			var isPlaying = UnityVideoPlayer.isPlaying;
+			if (isPlaying != _lastPlayingStatus) {
+				_lastPlayingStatus = isPlaying;
+				onPlayStatusChanged.Invoke(this, isPlaying);
+			}
+
+			// Surveiller le progrès de la vidéo seulement si elle est en cours de lecture
+			if (isPlaying && UnityVideoPlayer.length > 0) {
+				var currentProgress = GetProgress();
+				// Déclencher l'événement seulement si le progrès a changé de manière significative (plus de 1%)
+				if (!(Math.Abs(currentProgress - _lastProgress) > float.Epsilon)) return;
+				_lastProgress = currentProgress;
+				onProgress.Invoke(this, currentProgress);
+			}
 		}
 
 		private void OnDestroy() {
@@ -160,26 +89,192 @@ namespace Nox.CCK.VideoPlayer {
 			UnityVideoPlayer.seekCompleted       -= OnSeekCompleted;
 		}
 
-		private void Update() {
-			// Vérification du statut de lecture
-			var isPlaying = UnityVideoPlayer.isPlaying;
-			if (isPlaying != _lastPlayingStatus) {
-				_lastPlayingStatus = isPlaying;
-				onPlayStatusChanged.Invoke(isPlaying);
-			}
+		#endregion Unity Lifecycle
 
-			// Surveiller le progrès de la vidéo seulement si elle est en cours de lecture
-			if (isPlaying && UnityVideoPlayer.length > 0) {
-				var currentProgress = GetProgress();
-				// Déclencher l'événement seulement si le progrès a changé de manière significative (plus de 1%)
-				if (Math.Abs(currentProgress - _lastProgress) > float.Epsilon) {
-					_lastProgress = currentProgress;
-					onProgress.Invoke(currentProgress);
-				}
-			}
+		#region Events
+
+		public UnityEvent<IVideoPlayer>            onReady             = new(); // Événement pour la préparation terminée
+		public UnityEvent<IVideoPlayer>            onStart             = new(); // Événement pour le début de la lecture
+		public UnityEvent<IVideoPlayer>            onEnd               = new(); // Événement pour la fin de la lecture
+		public UnityEvent<IVideoPlayer, Exception> onError             = new(); // Événement pour les erreurs
+		public UnityEvent<IVideoPlayer>            onConnectionLost    = new(); // Événement pour perte de connexion
+		public UnityEvent<IVideoPlayer>            onReconnecting      = new(); // Événement pour tentative de reconnexion
+		public UnityEvent<IVideoPlayer>            onReconnected       = new(); // Événement pour reconnexion réussie
+		public UnityEvent<IVideoPlayer>            onPlay              = new(); // Événement pour la lecture
+		public UnityEvent<IVideoPlayer>            onPause             = new(); // Événement pour la pause
+		public UnityEvent<IVideoPlayer>            onResume            = new(); // Événement pour la reprise
+		public UnityEvent<IVideoPlayer, double>    onProgress          = new(); // Événement pour la progression (0.0 à 1.0)
+		public UnityEvent<IVideoPlayer, double>    onSeek              = new(); // Événement pour le seek (temps en secondes)
+		public UnityEvent<IVideoPlayer, float>     onVolumeChanged     = new(); // Événement pour le changement de volume (0.0 à 1.0)
+		public UnityEvent<IVideoPlayer, bool>      onPlayStatusChanged = new(); // Événement pour le changement de statut de lecture
+
+		public void AddReadyListener(UnityAction<IVideoPlayer> listener)
+			=> onReady.AddListener(listener);
+
+		public void RemoveReadyListener(UnityAction<IVideoPlayer> listener)
+			=> onReady.RemoveListener(listener);
+
+		public void AddStartListener(UnityAction<IVideoPlayer> listener)
+			=> onStart.AddListener(listener);
+
+		public void RemoveStartListener(UnityAction<IVideoPlayer> listener)
+			=> onStart.RemoveListener(listener);
+
+		public void AddEndListener(UnityAction<IVideoPlayer> listener)
+			=> onEnd.AddListener(listener);
+
+		public void RemoveEndListener(UnityAction<IVideoPlayer> listener)
+			=> onEnd.RemoveListener(listener);
+
+		public void AddErrorListener(UnityAction<IVideoPlayer, Exception> listener)
+			=> onError.AddListener(listener);
+
+		public void RemoveErrorListener(UnityAction<IVideoPlayer, Exception> listener)
+			=> onError.RemoveListener(listener);
+
+		public void AddConnectionLostListener(UnityAction<IVideoPlayer> listener)
+			=> onConnectionLost.AddListener(listener);
+
+		public void RemoveConnectionLostListener(UnityAction<IVideoPlayer> listener)
+			=> onConnectionLost.RemoveListener(listener);
+
+		public void AddReconnectingListener(UnityAction<IVideoPlayer> listener)
+			=> onReconnecting.AddListener(listener);
+
+		public void RemoveReconnectingListener(UnityAction<IVideoPlayer> listener)
+			=> onReconnecting.RemoveListener(listener);
+
+		public void AddReconnectedListener(UnityAction<IVideoPlayer> listener)
+			=> onReconnected.AddListener(listener);
+
+		public void RemoveReconnectedListener(UnityAction<IVideoPlayer> listener)
+			=> onReconnected.RemoveListener(listener);
+
+		// Nouvelles méthodes pour les nouveaux événements
+		public void AddPlayListener(UnityAction<IVideoPlayer> listener)
+			=> onPlay.AddListener(listener);
+
+		public void RemovePlayListener(UnityAction<IVideoPlayer> listener)
+			=> onPlay.RemoveListener(listener);
+
+		public void AddPauseListener(UnityAction<IVideoPlayer> listener)
+			=> onPause.AddListener(listener);
+
+		public void RemovePauseListener(UnityAction<IVideoPlayer> listener)
+			=> onPause.RemoveListener(listener);
+
+		public void AddResumeListener(UnityAction<IVideoPlayer> listener)
+			=> onResume.AddListener(listener);
+
+		public void RemoveResumeListener(UnityAction<IVideoPlayer> listener)
+			=> onResume.RemoveListener(listener);
+
+		public void AddProgressListener(UnityAction<IVideoPlayer, double> listener)
+			=> onProgress.AddListener(listener);
+
+		public void RemoveProgressListener(UnityAction<IVideoPlayer, double> listener)
+			=> onProgress.RemoveListener(listener);
+
+		public void AddSeekListener(UnityAction<IVideoPlayer, double> listener)
+			=> onSeek.AddListener(listener);
+
+		public void RemoveSeekListener(UnityAction<IVideoPlayer, double> listener)
+			=> onSeek.RemoveListener(listener);
+
+		public void AddVolumeChangedListener(UnityAction<IVideoPlayer, float> listener)
+			=> onVolumeChanged.AddListener(listener);
+
+		public void RemoveVolumeChangedListener(UnityAction<IVideoPlayer, float> listener)
+			=> onVolumeChanged.RemoveListener(listener);
+
+		public void AddPlayStatusChangedListener(UnityAction<IVideoPlayer, bool> listener)
+			=> onPlayStatusChanged.AddListener(listener);
+
+		public void RemovePlayStatusChangedListener(UnityAction<IVideoPlayer, bool> listener)
+			=> onPlayStatusChanged.RemoveListener(listener);
+
+		#endregion Events
+
+		#region Resolving
+
+		public UnityEvent<IVideoPlayer, IFetchOptions>            onResolving = new();
+		public UnityEvent<IVideoPlayer, IFetchOptions, IResult[]> onResolved  = new();
+
+		private IFetchOptions _currentFetchOptions;
+
+		private void Resolve(IFetchOptions fetchOptions) {
+			if (_currentFetchOptions != null)
+				_currentFetchOptions.GetCancellation().Cancel();
+			_currentFetchOptions = fetchOptions;
+			Logger.LogDebug($"Resolving {_currentFetchOptions?.ToString() ?? "null"}");
+			onResolving.Invoke(this, fetchOptions);
 		}
 
-		public void Play(string url, bool loop = false) {
+		public void OnResolve(IFetchOptions initial, IResult[] results) {
+			if (_currentFetchOptions != initial) return; // Ignore if not the current fetch options
+
+			foreach (var result in results) {
+				if (result == null || !result.IsError()) continue;
+				Logger.LogWarning($"Error during fetch for {_currentFetchOptions?.ToString() ?? "null"}: {result.GetError()}");
+			}
+
+			var resolves = results.SelectMany(e => e.GetData()).ToArray();
+
+			if (resolves.Length == 0) {
+				Logger.LogWarning($"No data found for {_currentFetchOptions?.ToString() ?? "null"}");
+				onError.Invoke(this, new Exception("No data found"));
+				return;
+			}
+
+			var first = resolves.FirstOrDefault();
+
+			if (first == null) {
+				Logger.LogWarning($"No results found for {_currentFetchOptions?.ToString() ?? "null"}");
+				onError.Invoke(this, new Exception("No results found"));
+				return;
+			}
+
+			var tuple = first.FindQuality();
+
+			if (tuple.Item1 == null) {
+				Logger.LogWarning($"No compatible stream found for {_currentFetchOptions?.ToString() ?? "null"}");
+				onError.Invoke(this, new Exception("No compatible stream found"));
+				return;
+			}
+
+			onResolved.Invoke(this, initial, results);
+			_currentPlaying = first;
+
+			Play(tuple, IsLooping());
+		}
+
+		public void AddResolvingListener(UnityAction<IVideoPlayer, IFetchOptions> listener)
+			=> onResolving.AddListener(listener);
+
+		public void RemoveResolvingListener(UnityAction<IVideoPlayer, IFetchOptions> listener)
+			=> onResolving.RemoveListener(listener);
+
+		public void AddResolvedListener(UnityAction<IVideoPlayer, IFetchOptions, IResult[]> listener)
+			=> onResolved.AddListener(listener);
+
+		public void RemoveResolvedListener(UnityAction<IVideoPlayer, IFetchOptions, IResult[]> listener)
+			=> onResolved.RemoveListener(listener);
+
+		#endregion Resolving
+
+		#region Playback
+
+		public void Play(string query)
+			=> Play(query, IsLooping());
+
+
+		public void Play(string query, bool loop) {
+			Logger.LogDebug($"Play called with query: {query}, loop: {loop}");
+			Resolve(new VideoFetchOptions { Query = query });
+			SetLooping(loop);
+		}
+
+		private void PlayUrl(string url, bool loop) {
 			_currentUrl        = url; // Stocker l'URL pour les reconnexions
 			_reconnectAttempts = 0;   // Réinitialiser le compteur de tentatives
 			_isReconnecting    = false;
@@ -188,7 +283,126 @@ namespace Nox.CCK.VideoPlayer {
 			UnityVideoPlayer.isLooping = loop;
 			UnityVideoPlayer.Prepare();
 
-			onPlay.Invoke();
+			Logger.LogDebug($"Playing URL {_currentUrl}");
+			onPlay.Invoke(this);
+		}
+
+		private void Play((IFormat, IFormat) tuple, bool loop) {
+			if (tuple.Item1 is IAudioVideo av) {
+				Play(av);
+				return;
+			}
+
+			if (tuple is { Item1: IVideo v, Item2: IAudio a }) {
+				Play(v, a);
+				return;
+			}
+
+			switch (tuple.Item1) {
+				case IVideo v2:
+					Play(v2);
+					break;
+				case IAudio a2:
+					Play(a2);
+					break;
+				default:
+					Logger.LogError("Tuple contains unsupported format types");
+					break;
+			}
+		}
+
+		private void Play(IAudioVideo audioVideo) {
+			if (audioVideo == null) {
+				Logger.LogError("AudioVideo format is null");
+				onError.Invoke(this, new ArgumentNullException(nameof(audioVideo)));
+				return;
+			}
+
+			var url = audioVideo.GetUrl();
+			if (string.IsNullOrEmpty(url)) {
+				Logger.LogError("AudioVideo URL is null or empty");
+				onError.Invoke(this, new Exception("AudioVideo URL is null or empty"));
+				return;
+			}
+
+			Logger.LogDebug($"Playing AudioVideo format: {url} (Resolution: {audioVideo.GetResolution()}, Audio Channels: {audioVideo.GetAudioChannels()})");
+			
+			// Configure le player pour audio et vidéo
+			UnityVideoPlayer.audioOutputMode = UnityEngine.Video.VideoAudioOutputMode.AudioSource;
+			UnityVideoPlayer.SetTargetAudioSource(0, AudioSource);
+			
+			PlayUrl(url, IsLooping());
+		}
+
+		private void Play(IVideo video, IAudio audio) {
+			if (video == null || audio == null) {
+				Logger.LogError($"Video or Audio format is null - Video: {video != null}, Audio: {audio != null}");
+				onError.Invoke(this, new ArgumentNullException(video == null ? nameof(video) : nameof(audio)));
+				return;
+			}
+
+			var videoUrl = video.GetUrl();
+			var audioUrl = audio.GetUrl();
+
+			if (string.IsNullOrEmpty(videoUrl) || string.IsNullOrEmpty(audioUrl)) {
+				Logger.LogError($"Video or Audio URL is null or empty - Video URL: {!string.IsNullOrEmpty(videoUrl)}, Audio URL: {!string.IsNullOrEmpty(audioUrl)}");
+				onError.Invoke(this, new Exception("Video or Audio URL is null or empty"));
+				return;
+			}
+
+			Logger.LogDebug($"Playing separate Video and Audio streams - Video: {videoUrl}, Audio: {audioUrl}");
+			Logger.LogDebug($"Video Resolution: {video.GetResolution()}, Audio Channels: {audio.GetAudioChannels()}");
+
+			// Pour des streams séparés, Unity VideoPlayer ne supporte pas nativement deux URLs
+			// On doit utiliser la vidéo comme source principale et gérer l'audio séparément
+			Logger.LogWarning("Separate video/audio streams detected. Using video stream only - audio stream will be ignored.");
+			
+			Play(video);
+		}
+
+		private void Play(IVideo video) {
+			if (video == null) {
+				Logger.LogError("Video format is null");
+				onError.Invoke(this, new ArgumentNullException(nameof(video)));
+				return;
+			}
+
+			var url = video.GetUrl();
+			if (string.IsNullOrEmpty(url)) {
+				Logger.LogError("Video URL is null or empty");
+				onError.Invoke(this, new Exception("Video URL is null or empty"));
+				return;
+			}
+
+			Logger.LogDebug($"Playing Video format: {url} (Resolution: {video.GetResolution()}, Framerate: {video.GetFramerate()})");
+			
+			// Configure le player pour vidéo seulement
+			UnityVideoPlayer.audioOutputMode = UnityEngine.Video.VideoAudioOutputMode.None;
+			
+			PlayUrl(url, IsLooping());
+		}
+
+		private void Play(IAudio audio) {
+			if (audio == null) {
+				Logger.LogError("Audio format is null");
+				onError.Invoke(this, new ArgumentNullException(nameof(audio)));
+				return;
+			}
+
+			var url = audio.GetUrl();
+			if (string.IsNullOrEmpty(url)) {
+				Logger.LogError("Audio URL is null or empty");
+				onError.Invoke(this, new Exception("Audio URL is null or empty"));
+				return;
+			}
+
+			Logger.LogDebug($"Playing Audio format: {url} (Channels: {audio.GetAudioChannels()}, Bitrate: {audio.GetAudioBitrate()})");
+			
+			// Configure le player pour audio seulement
+			UnityVideoPlayer.audioOutputMode = UnityEngine.Video.VideoAudioOutputMode.AudioSource;
+			UnityVideoPlayer.SetTargetAudioSource(0, AudioSource);
+			
+			PlayUrl(url, IsLooping());
 		}
 
 		public void Stop() {
@@ -199,25 +413,25 @@ namespace Nox.CCK.VideoPlayer {
 		public void Pause() {
 			if (!UnityVideoPlayer.isPlaying) return;
 			UnityVideoPlayer.Pause();
-			onPause.Invoke();
+			onPause.Invoke(this);
 		}
 
 		public void Resume() {
 			if (UnityVideoPlayer.isPlaying) return;
 			UnityVideoPlayer.Play();
-			onResume.Invoke();
+			onResume.Invoke(this);
 		}
 
 		public void SetVolume(float volume) {
 			var clampedVolume = Mathf.Clamp01(volume);
 			AudioSource.volume = clampedVolume;
-			onVolumeChanged.Invoke(clampedVolume);
+			onVolumeChanged.Invoke(this, clampedVolume);
 		}
 
 		public void SetSeek(double time) {
 			var clampedTime = Math.Clamp(time, 0, UnityVideoPlayer.length);
 			UnityVideoPlayer.time = clampedTime;
-			onSeek.Invoke(clampedTime);
+			onSeek.Invoke(this, clampedTime);
 		}
 
 		public double GetTime()
@@ -244,6 +458,10 @@ namespace Nox.CCK.VideoPlayer {
 		public bool IsPlaying()
 			=> UnityVideoPlayer.isPlaying;
 
+		#endregion Playback
+
+		#region Callbacks
+
 		private void OnPrepareCompleted(UnityVideoPlayer source) {
 			Logger.Log($"Video prepared: {source.url}");
 
@@ -252,20 +470,20 @@ namespace Nox.CCK.VideoPlayer {
 				_isReconnecting    = false;
 				_reconnectAttempts = 0;
 				Logger.Log("Reconnexion réussie !");
-				onReconnected.Invoke();
+				onReconnected.Invoke(this);
 			}
 
-			onReady.Invoke();
+			onReady.Invoke(this);
 		}
 
 		private void OnStarted(UnityVideoPlayer source) {
 			Logger.Log($"Video started: {source.url}");
-			onStart.Invoke();
+			onStart.Invoke(this);
 		}
 
 		private void OnLoopPointReached(UnityVideoPlayer source) {
 			Logger.Log($"Video ended: {source.url}");
-			onEnd.Invoke();
+			onEnd.Invoke(this);
 		}
 
 		private void OnErrorReceived(UnityVideoPlayer source, string message) {
@@ -277,7 +495,7 @@ namespace Nox.CCK.VideoPlayer {
 				HandleConnectionError();
 			} else {
 				// Erreur non liée à la connexion, propager l'erreur
-				onError.Invoke(exception);
+				onError.Invoke(this, exception);
 			}
 		}
 
@@ -296,6 +514,10 @@ namespace Nox.CCK.VideoPlayer {
 		private void OnFrameReady(UnityVideoPlayer source, long frameIdx) {
 			// Frame ready - peut être utilisé pour des traitements spécifiques
 		}
+
+		#endregion Callbacks
+
+		#region Connection Handling
 
 		/// <summary>
 		/// Détermine si l'erreur est liée à un problème de connexion
@@ -317,7 +539,7 @@ namespace Nox.CCK.VideoPlayer {
 		private void HandleConnectionError() {
 			if (!_isReconnecting) {
 				Logger.Log("Perte de connexion détectée");
-				onConnectionLost.Invoke();
+				onConnectionLost.Invoke(this);
 			}
 
 			if (_reconnectAttempts < MaxReconnectAttempts) {
@@ -325,13 +547,13 @@ namespace Nox.CCK.VideoPlayer {
 				_isReconnecting = true;
 
 				Logger.Log($"Tentative de reconnexion {_reconnectAttempts}/{MaxReconnectAttempts}");
-				onReconnecting.Invoke();
+				onReconnecting.Invoke(this);
 
 				AttemptReconnectionAsync().Forget();
 			} else {
 				Logger.LogError("Échec de la reconnexion après plusieurs tentatives");
 				_isReconnecting = false;
-				onError.Invoke(new Exception($"Impossible de se reconnecter après {MaxReconnectAttempts} tentatives"));
+				onError.Invoke(this, new Exception($"Impossible de se reconnecter après {MaxReconnectAttempts} tentatives"));
 			}
 		}
 
@@ -355,8 +577,21 @@ namespace Nox.CCK.VideoPlayer {
 			if (string.IsNullOrEmpty(_currentUrl)) return;
 			_reconnectAttempts = 0;
 			_isReconnecting    = true;
-			onReconnecting.Invoke();
+			onReconnecting.Invoke(this);
 			AttemptReconnectionAsync().Forget();
 		}
+
+		#endregion Connection Handling
+
+		#region Metadata
+
+		public string GetTitle()
+			=> _currentPlaying?.GetTile();
+
+		public string GetSubtitle()
+			=> _currentPlaying?.GetSubtitle();
+
+		#endregion Metadata
 	}
 }
+

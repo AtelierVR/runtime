@@ -13,5 +13,7 @@ namespace Nox.VideoPlayer {
 		public IFormat[] GetFormat();
 
 		public ISubtitle[] GetSubtitles();
+
+		public (IFormat, IFormat) FindQuality(float quality = -1);
 	}
 }

@@ -133,7 +133,7 @@ namespace api.nox.desktop {
 		private void LoadAvatarFromUser(ICurrentUser user)
 			=> SetAvatar(Client.AvatarAPI.Make(user?.GetAvatarId())).Forget();
 
-		public async UniTask<IRuntimeAvatar> SetAvatar(IAvatarIdentifier identifier) {
+		public async UniTask<IRuntimeAvatar> SetAvatar(IAvatarIdentifier identifier, Action<string, float> onProgress = null) {
 			Logger.LogDebug($"Loading avatar for identifier {identifier?.ToString() ?? "null"}");
 
 			var playerAvatar = _attachedPlayer as ILocalPlayerAvatar;
@@ -181,7 +181,7 @@ namespace api.nox.desktop {
 				var download = Client.AvatarAPI.DownloadToCache(
 					asset.GetUrl(),
 					hash: asset.GetHash(),
-					progress: p => Logger.LogDebug($"Downloading avatar {identifier.ToString()}: {p:P1}"),
+					progress: p => onProgress?.Invoke($"Downloading avatar {identifier.ToString()}", p),
 					token: _avatarLoadingCts.Token
 				);
 				download.Start();
@@ -192,7 +192,7 @@ namespace api.nox.desktop {
 
 			var avatar = await Client.AvatarAPI.LoadFromCache(
 				asset.GetHash(),
-				progress: p => Logger.LogDebug($"Loading avatar {identifier.ToString()}: {p:P1}"),
+				progress:  p => onProgress?.Invoke($"Loading avatar{identifier.ToString()}", p),
 				token: _avatarLoadingCts.Token
 			);
 			if (_avatarLoadingCts.IsCancellationRequested)

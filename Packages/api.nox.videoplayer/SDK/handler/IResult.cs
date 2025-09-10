@@ -6,6 +6,6 @@ namespace Nox.VideoPlayer {
 
 		public bool HasNext();
 
-		public IResultData[] GetData();
+		public IResolve[] GetData();
 	}
 }

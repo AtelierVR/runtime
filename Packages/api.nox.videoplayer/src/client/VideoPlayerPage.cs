@@ -135,23 +135,21 @@ namespace api.nox.videoplayer.client {
 		public UiPlayer(IVideoPlayer player, VideoPlayerPage page) {
 			Player = player;
 			Page   = page;
-			var ev = player.GetEvents();
-			ev.AddProgressListener(OnProgress);
-			ev.AddPlayStatusChangedListener(OnPlayStatusChanged);
+			Player.AddProgressListener(OnProgress);
+			Player.AddPlayStatusChangedListener(OnPlayStatusChanged);
 			Logger.Log($"[VideoPlayerPage] Player {player.GetId()} added to UI");
 		}
 
 		public void Dispose() {
-			var ev = Player.GetEvents();
-			ev.RemoveProgressListener(OnProgress);
-			ev.RemovePlayStatusChangedListener(OnPlayStatusChanged);
+			Player.RemoveProgressListener(OnProgress);
+			Player.RemovePlayStatusChangedListener(OnPlayStatusChanged);
 			Logger.Log($"[VideoPlayerPage] Player {Player.GetId()} removed from UI");
 		}
 
-		public void OnProgress(double progress)
+		public void OnProgress(IVideoPlayer _, double progress)
 			=> Page.OnProgress(Player, progress);
 
-		public void OnPlayStatusChanged(bool isPlaying)
+		public void OnPlayStatusChanged(IVideoPlayer _, bool isPlaying)
 			=> Page.OnPlayStatusChanged(Player, isPlaying);
 	}
 }

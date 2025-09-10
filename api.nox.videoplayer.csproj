@@ -56,15 +56,15 @@
     <Compile Include="Packages\api.nox.videoplayer\src\VideoPlayer.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\handlers\Youtube.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\client\VideoPlayerPage.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\src\base\Resolve.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\client\VideoPlayerComponent.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\processors\YtDl.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\Main.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\Client.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\src\base\ResultData.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\processors\FFmpeg.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\base\Thumbnail.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\base\AudioVideoFormat.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\src\M3U8StreamServer.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\src\videoplayers\VideoPlayerResolver.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\videoplayers\VideoPlayerExtensions.cs" />
     <None Include="Packages\api.nox.videoplayer\link.xml" />
     <None Include="Packages\api.nox.videoplayer\nox.mod.json" />

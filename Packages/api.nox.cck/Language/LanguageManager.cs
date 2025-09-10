@@ -121,30 +121,13 @@ namespace Nox.CCK.Language {
 		}
 
 		public static void AddPack(LanguagePack pack) {
-			if (LanguagePacks.Contains(pack)) {
-				Logger.Log($"{pack.name} updated");
-				LanguagePacks.Remove(pack);
-			} else Logger.Log($"{pack.name} added");
-
 			LanguagePacks.Add(pack);
-
-			Logger.LogDebug($"About {pack.name}:");
-			foreach (var langs in pack.languages) {
-				Logger.LogDebug($" - {langs.IETF}:");
-				foreach (var key in langs.entries)
-					Logger.LogDebug($"    - {key.key} = {key.value}");
-			}
-
 			OnPackListUpdated?.Invoke();
 		}
 
 		public static void RemovePack(LanguagePack pack) {
-			if (!LanguagePacks.Contains(pack))
-				return;
-
-			Logger.Log($"{pack.name} removed");
+			if (!LanguagePacks.Contains(pack)) return;
 			LanguagePacks.Remove(pack);
-
 			OnPackListUpdated?.Invoke();
 		}
 
@@ -154,32 +137,15 @@ namespace Nox.CCK.Language {
 
 		public static string GetInPacks(string language, string key, List<LanguagePack> packs = null) {
 			packs ??= LanguagePacks;
-			foreach (var t in packs) {
-				if (!t) {
-					Logger.LogWarning($"Language {language} is currently unavailable");
-					continue;
-				}
-
+			foreach (var t in packs.Where(t => t)) 
 				if (t.TryGetLocalizedString(language, key, out var value))
 					return value;
-			}
-
 			return null;
 		}
 
 		public static bool Has(string language, string key, List<LanguagePack> packs = null) {
 			packs ??= LanguagePacks;
-			foreach (var t in packs) {
-				if (!t) {
-					Logger.LogWarning($"Language {language} is currently unavailable");
-					continue;
-				}
-
-				if (t.HasLocalizationString(language, key))
-					return true;
-			}
-
-			return false;
+			return packs.Where(t => t).Any(t => t.HasLocalizationString(language, key));
 		}
 
 		public static bool Has(string key, List<LanguagePack> packs = null)

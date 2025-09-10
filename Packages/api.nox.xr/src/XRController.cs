@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -305,7 +306,7 @@ namespace api.nox.xr {
 						break;
 				}
 			}
-			
+
 			root.SetActive(true);
 
 			return true;
@@ -353,7 +354,7 @@ namespace api.nox.xr {
 		private void LoadAvatarFromUser(ICurrentUser user)
 			=> SetAvatar(Client.AvatarAPI.Make(user?.GetAvatarId())).Forget();
 
-		public async UniTask<IRuntimeAvatar> SetAvatar(IAvatarIdentifier identifier) {
+		public async UniTask<IRuntimeAvatar> SetAvatar(IAvatarIdentifier identifier, Action<string, float> progress = null) {
 			Logger.LogDebug($"Loading avatar for identifier {identifier?.ToString() ?? "null"}");
 
 			var playerAvatar = _attachedPlayer as ILocalPlayerAvatar;
@@ -400,7 +401,7 @@ namespace api.nox.xr {
 				var download = Client.AvatarAPI.DownloadToCache(
 					asset.GetUrl(),
 					hash: asset.GetHash(),
-					progress: p => Logger.LogDebug($"Downloading avatar {identifier.ToString()}: {p:P1}"),
+					progress: p => progress?.Invoke($"Downloading avatar {identifier.ToString()}", p),
 					token: _avatarLoadingCts.Token
 				);
 				download.Start();
@@ -411,7 +412,7 @@ namespace api.nox.xr {
 
 			var avatar = await Client.AvatarAPI.LoadFromCache(
 				asset.GetHash(),
-				progress: p => Logger.LogDebug($"Loading avatar {identifier.ToString()}: {p:P1}"),
+				progress: p => progress?.Invoke($"Loading avatar {identifier.ToString()}", p),
 				token: _avatarLoadingCts.Token
 			);
 			if (_avatarLoadingCts.IsCancellationRequested)

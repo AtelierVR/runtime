@@ -1,3 +1,5 @@
+using System;
+
 namespace Nox.VideoPlayer {
 	public interface IFormat {
 		public string GetUrl();

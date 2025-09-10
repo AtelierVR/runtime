@@ -18,15 +18,39 @@ namespace api.nox.videoplayer.handlers {
 		public string[] GetTitleArguments()
 			=> new string[] { };
 
+		public static bool IsUrl(string query)
+			=> query.StartsWith("https://www.youtube.com/watch")
+				|| query.StartsWith("https://youtu.be/");
+
+		public static string FormatUrl(string original) {
+			var id = "";
+
+			if (original.StartsWith("https://www.youtube.com/watch")) {
+				var uri   = new System.Uri(original);
+				var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+				id = query.Get("v") ?? "";
+			} else if (original.StartsWith("https://youtu.be/")) {
+				var uri = new System.Uri(original);
+				id = uri.AbsolutePath.TrimStart('/');
+			}
+
+			return $"https://www.youtube.com/watch?v={id}";
+		}
+
 		public async UniTask<IResult[]> Fetch(IFetchOptions options) {
 			try {
-				var response = await YtDl.Extract($"ytsearch{options.GetLimit()}:{options.GetQuery()}", cancellationToken: options.GetCancellation().Token);
+				var response = IsUrl(options.GetQuery())
+					? await YtDl.Extract(FormatUrl(options.GetQuery()), cancellationToken: options.GetCancellation().Token)
+					: await YtDl.Extract($"ytsearch{options.GetLimit()}:{options.GetQuery()}", cancellationToken: options.GetCancellation().Token);
+
 				if (response is not { Type: JTokenType.Object })
 					throw new InvalidDataException("Response from yt-dlp is not an object");
+
 				var type      = response["_type"]?.ToString();
 				var extractor = response["extractor"]?.ToString() ?? "unknown";
-				if (extractor != "youtube:search")
+				if (extractor != "youtube:search" && extractor != "youtube")
 					throw new InvalidDataException($"Unexpected extractor: {extractor}");
+
 				return new IResult[] {
 					Result.FromData(
 						type switch {
@@ -42,11 +66,11 @@ namespace api.nox.videoplayer.handlers {
 			}
 		}
 
-		private static ResultData ParseVideo(JToken video) {
+		private static Resolve ParseVideo(JToken video) {
 			if (video is not { Type: JTokenType.Object })
 				throw new InvalidDataException("Video is not an object");
 
-			return new ResultData {
+			return new Resolve {
 				Id         = video["id"]?.ToString()    ?? "",
 				Title      = video["title"]?.ToString() ?? video["fulltitle"]?.ToString() ?? video["id"]?.ToString(),
 				Thumbnails = ParseThumbnails(video["thumbnails"]),
@@ -120,7 +144,8 @@ namespace api.nox.videoplayer.handlers {
 				}
 
 				if (fmt is AudioVideoFormat or AudioFormat) {
-					fmt.AudioBitrate = format["abr"]?.ToObject<uint>() ?? 0u;
+					if(format["abr"]?.Type != JTokenType.Null) 
+						fmt.AudioBitrate = format["abr"]?.ToObject<uint>() ?? 0u;
 					fmt.AudioCodec   = acodec;
 				}
 
@@ -131,12 +156,12 @@ namespace api.nox.videoplayer.handlers {
 			return list.ToArray();
 		}
 
-		private static ResultData[] ParsePlaylist(JToken playlist) {
+		private static Resolve[] ParsePlaylist(JToken playlist) {
 			if (playlist is not { Type: JTokenType.Object })
 				throw new InvalidDataException("Playlist is not an object");
 			var entries = playlist["entries"];
 			return entries is not { Type: JTokenType.Array }
-				? System.Array.Empty<ResultData>()
+				? System.Array.Empty<Resolve>()
 				: entries.Select(ParseVideo)
 					.ToArray();
 		}

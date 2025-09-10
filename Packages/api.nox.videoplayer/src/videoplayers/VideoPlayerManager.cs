@@ -38,18 +38,22 @@ namespace api.nox.videoplayer {
 				Register(player);
 		}
 
-		public static void Register(IVideoPlayer player) {
+		private static void Register(IVideoPlayer player) {
 			if (player == null) return;
 			if (VideoPlayers.Contains(player)) return;
 			VideoPlayers.Add(player);
+			Logger.LogDebug($"Registered video player {player}");
 			Main.Instance.CoreAPI.EventAPI.Emit("video_player_registered", player);
+			OnRegistered.Invoke(player);
 		}
 
-		public static void UnRegister(IVideoPlayer player) {
+		private static void UnRegister(IVideoPlayer player) {
 			if (player == null) return;
 			if (!VideoPlayers.Contains(player)) return;
 			VideoPlayers.Remove(player);
+			Logger.LogDebug($"Unregistered video player {player}");
 			Main.Instance.CoreAPI.EventAPI.Emit("video_player_unregistered", player);
+			OnUnRegistered.Invoke(player);
 		}
 	}
 }

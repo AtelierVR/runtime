@@ -60,5 +60,16 @@ namespace api.nox.videoplayer {
 
 		public string GetDynamicRange()
 			=> DynamicRange;
+
+		public int CompareTo(IFormat other) {
+			if (other == null) return 1;
+			
+			// Comparer d'abord par qualité
+			var qualityComparison = Quality.CompareTo(other.GetQuality());
+			if (qualityComparison != 0) return qualityComparison;
+			
+			// Puis par bitrate si les qualités sont égales
+			return Bitrate.CompareTo(other.GetBitrate());
+		}
 	}
 }

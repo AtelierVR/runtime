@@ -151,38 +151,6 @@ PrefabInstance:
       propertyPath: m_AnchorMin.x
       value: 0.295
       objectReference: {fileID: 0}
-    - target: {fileID: 4415745982179208543, guid: dc067c577ec1b854684d789b6e727cc0, type: 3}
-      propertyPath: m_ControlledAudioTrackCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4415745982179208543, guid: dc067c577ec1b854684d789b6e727cc0, type: 3}
-      propertyPath: m_DirectAudioMutes.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4415745982179208543, guid: dc067c577ec1b854684d789b6e727cc0, type: 3}
-      propertyPath: m_DirectAudioVolumes.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4415745982179208543, guid: dc067c577ec1b854684d789b6e727cc0, type: 3}
-      propertyPath: m_EnabledAudioTracks.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4415745982179208543, guid: dc067c577ec1b854684d789b6e727cc0, type: 3}
-      propertyPath: m_TargetAudioSources.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4415745982179208543, guid: dc067c577ec1b854684d789b6e727cc0, type: 3}
-      propertyPath: 'm_DirectAudioVolumes.Array.data[0]'
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4415745982179208543, guid: dc067c577ec1b854684d789b6e727cc0, type: 3}
-      propertyPath: 'm_EnabledAudioTracks.Array.data[0]'
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4415745982179208543, guid: dc067c577ec1b854684d789b6e727cc0, type: 3}
-      propertyPath: 'm_TargetAudioSources.Array.data[0]'
-      value: 
-      objectReference: {fileID: 125100146}
     - target: {fileID: 4941219564456579801, guid: dc067c577ec1b854684d789b6e727cc0, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -303,7 +271,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cbd40304d094210aaa8162f768613bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Nox.CCK.VideoPlayer::Nox.CCK.VideoPlayer.VideoPlayer
-  playQuery: https://www.youtube.com/watch?v=ThHvx5a9IYA&list=RDATUpo33OvdA&index=3
+  playQuery: https://www.youtube.com/watch?v=mX8f6LwWH6Q&list=RDmX8f6LwWH6Q&start_radio=1
   videoPlayer: {fileID: 125100152}
   audioSource: {fileID: 125100146}
   onReady:

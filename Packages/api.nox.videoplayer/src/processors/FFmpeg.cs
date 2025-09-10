@@ -61,7 +61,6 @@ namespace api.nox.videoplayer {
 
 				// Download and extract based on platform
 				await DownloadForPlatform(folder, cancellationToken);
-
 			} catch (OperationCanceledException) {
 				// Clean up partial download
 				if (File.Exists(targetPath))
@@ -79,7 +78,7 @@ namespace api.nox.videoplayer {
 
 		private static async UniTask DownloadForPlatform(string folder, CancellationToken cancellationToken) {
 			string downloadUrl;
-			
+
 			// Get download URL (dynamically for macOS, static for others)
 			if (PlatformExtensions.RuntimePlatform == Platform.MacOS) {
 				downloadUrl = await GetMacOSDownloadUrl(cancellationToken);
@@ -90,12 +89,12 @@ namespace api.nox.videoplayer {
 				}
 			}
 
-			var isZip = downloadUrl.EndsWith(".zip");
+			var isZip    = downloadUrl.EndsWith(".zip");
 			var tempFile = Path.Combine(folder, isZip ? "ffmpeg.zip" : "ffmpeg.tar.xz");
 
 			try {
 				using var httpClient = new HttpClient();
-				httpClient.Timeout = TimeSpan.FromMinutes(30); // FFmpeg is larger than yt-dlp
+				httpClient.Timeout = TimeSpan.FromMinutes(30); // FFmpeg is larger than FFmpeg
 
 				// Download the archive
 				using var response = await httpClient.GetAsync(downloadUrl, cancellationToken);
@@ -103,7 +102,7 @@ namespace api.nox.videoplayer {
 
 				// Download to temp file with proper stream disposal
 				{
-					await using var fileStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write);
+					await using var fileStream    = new FileStream(tempFile, FileMode.Create, FileAccess.Write);
 					await using var contentStream = await response.Content.ReadAsStreamAsync();
 					await contentStream.CopyToAsync(fileStream, cancellationToken);
 				} // Ensure streams are disposed before extraction
@@ -117,7 +116,6 @@ namespace api.nox.videoplayer {
 				} else {
 					await ExtractFromTarXz(tempFile, folder, cancellationToken);
 				}
-
 			} finally {
 				// Clean up temp file
 				if (File.Exists(tempFile)) {
@@ -132,16 +130,16 @@ namespace api.nox.videoplayer {
 
 		private static string GetDownloadUrl() {
 			return PlatformExtensions.RuntimePlatform switch {
-				Platform.Windows  => "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip",
-				Platform.Linux    => "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz",
-				Platform.MacOS    => null, // Will be determined dynamically via API
-				_                 => throw new PlatformNotSupportedException("Platform not supported")
+				Platform.Windows => "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip",
+				Platform.Linux   => "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz",
+				Platform.MacOS   => null, // Will be determined dynamically via API
+				_                => throw new PlatformNotSupportedException("Platform not supported")
 			};
 		}
-		
+
 		public class FfMpegDownloadInfo {
 			public DownloadInfo download { get; set; }
-			
+
 			public class DownloadInfo {
 				public FileInfo zip { get; set; }
 
@@ -164,8 +162,8 @@ namespace api.nox.videoplayer {
 
 				// Extract ZIP download URL from the API response
 				var downloadUrl = apiResponse.download.zip.url;
-				
-				if (string.IsNullOrEmpty(downloadUrl)) 
+
+				if (string.IsNullOrEmpty(downloadUrl))
 					throw new InvalidOperationException("Unable to get FFmpeg download URL from evermeet.cx API");
 
 				return downloadUrl;
@@ -177,27 +175,28 @@ namespace api.nox.videoplayer {
 		private static void ExtractFromZip(string zipFile, string folder, CancellationToken cancellationToken) {
 			// For Windows and macOS, we'll use System.IO.Compression
 			using var archive = ZipFile.OpenRead(zipFile);
-			
+
 			var executableName = PlatformExtensions.RuntimePlatform == Platform.Windows ? "ffmpeg.exe" : "ffmpeg";
-			
+
 			foreach (var entry in archive.Entries) {
 				if (entry.Name.Equals(executableName, StringComparison.OrdinalIgnoreCase)) {
-					var targetPath = Path.Combine(folder, executableName);
+					var       targetPath  = Path.Combine(folder, executableName);
 					using var entryStream = entry.Open();
-					using var fileStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write);
+					using var fileStream  = new FileStream(targetPath, FileMode.Create, FileAccess.Write);
 					entryStream.CopyTo(fileStream);
-					
+
 					// Make executable on Unix platforms (macOS)
 					if (PlatformExtensions.RuntimePlatform == Platform.MacOS) {
 						var chmodInfo = new ProcessStartInfo {
-							FileName = "chmod",
-							Arguments = $"+x \"{targetPath}\"",
+							FileName        = "chmod",
+							Arguments       = $"+x \"{targetPath}\"",
 							UseShellExecute = false,
-							CreateNoWindow = true
+							CreateNoWindow  = true
 						};
 						using var chmodProcess = Process.Start(chmodInfo);
 						chmodProcess?.WaitForExit();
 					}
+
 					break;
 				}
 			}
@@ -206,14 +205,14 @@ namespace api.nox.videoplayer {
 		private static async UniTask ExtractFromTarXz(string tarFile, string folder, CancellationToken cancellationToken) {
 			// For Unix platforms, we'll call tar command
 			var targetPath = Path.Combine(folder, "ffmpeg");
-			
+
 			var startInfo = new ProcessStartInfo {
-				FileName = "tar",
-				Arguments = $"-xf \"{tarFile}\" --strip-components=2 -C \"{folder}\" --wildcards \"*/bin/ffmpeg\"",
-				UseShellExecute = false,
+				FileName               = "tar",
+				Arguments              = $"-xf \"{tarFile}\" --strip-components=2 -C \"{folder}\" --wildcards \"*/bin/ffmpeg\"",
+				UseShellExecute        = false,
 				RedirectStandardOutput = true,
-				RedirectStandardError = true,
-				CreateNoWindow = true
+				RedirectStandardError  = true,
+				CreateNoWindow         = true
 			};
 
 			using var process = Process.Start(startInfo);
@@ -233,10 +232,10 @@ namespace api.nox.videoplayer {
 			// Make executable on Unix platforms
 			if (File.Exists(targetPath)) {
 				var chmodInfo = new ProcessStartInfo {
-					FileName = "chmod",
-					Arguments = $"+x \"{targetPath}\"",
+					FileName        = "chmod",
+					Arguments       = $"+x \"{targetPath}\"",
 					UseShellExecute = false,
-					CreateNoWindow = true
+					CreateNoWindow  = true
 				};
 				using var chmodProcess = Process.Start(chmodInfo);
 				chmodProcess?.WaitForExit();
@@ -272,12 +271,12 @@ namespace api.nox.videoplayer {
 
 			try {
 				var startInfo = new ProcessStartInfo {
-					FileName = path,
-					Arguments = "-version",
-					UseShellExecute = false,
+					FileName               = path,
+					Arguments              = "-version",
+					UseShellExecute        = false,
 					RedirectStandardOutput = true,
-					RedirectStandardError = true,
-					CreateNoWindow = true
+					RedirectStandardError  = true,
+					CreateNoWindow         = true
 				};
 
 				using var process = Process.Start(startInfo);
@@ -304,11 +303,12 @@ namespace api.nox.videoplayer {
 							var versionString = parts[2];
 							// Try to extract version number (e.g., "6.1" from "6.1-full_build")
 							var dashIndex = versionString.IndexOf('-');
-							if (dashIndex > 0) 
+							if (dashIndex > 0)
 								versionString = versionString[..dashIndex];
-							if (Version.TryParse(versionString, out var version)) 
+							if (Version.TryParse(versionString, out var version))
 								return version;
 						}
+
 						break;
 					}
 				}
@@ -320,7 +320,7 @@ namespace api.nox.videoplayer {
 		}
 
 		public static async UniTask<string> RunCommand(string arguments, CancellationToken cancellationToken = default) {
-			if (!await WaitReady(cancellationToken: cancellationToken)) 
+			if (!await WaitReady(cancellationToken: cancellationToken))
 				throw new InvalidOperationException("FFmpeg not available");
 
 			var path = GetPath();
@@ -328,55 +328,102 @@ namespace api.nox.videoplayer {
 				throw new FileNotFoundException("ffmpeg executable not found", path);
 
 			var output = new StringBuilder();
-			var error = new StringBuilder();
+			var error  = new StringBuilder();
+			Process process = null;
 
 			try {
 				var startInfo = new ProcessStartInfo {
-					FileName = path,
-					Arguments = arguments,
-					UseShellExecute = false,
+					FileName               = path,
+					Arguments              = arguments,
+					UseShellExecute        = false,
 					RedirectStandardOutput = true,
-					RedirectStandardError = true,
-					CreateNoWindow = true
+					RedirectStandardError  = true,
+					CreateNoWindow         = true
 				};
 
 				Logger.LogDebug($"{startInfo.FileName} {startInfo.Arguments}");
-				var process = Process.Start(startInfo);
+				process = Process.Start(startInfo);
 				if (process == null)
-					throw new InvalidOperationException("Failed to start ffmpeg process");
+					throw new InvalidOperationException("Failed to start FFmpeg process");
 
-				// Read output streams
+				// Read output and error streams asynchronously
+				UniTask.RunOnThreadPool(
+						async () => {
+							while (!process.HasExited) {
+								cancellationToken.ThrowIfCancellationRequested();
+								var line = await process.StandardOutput.ReadLineAsync();
+								if (line != null)
+									output.AppendLine(line);
+								else await UniTask.Delay(10, cancellationToken: cancellationToken);
+							}
+
+							// Read remaining output after process exits
+							while (!process.StandardOutput.EndOfStream) {
+								var line = await process.StandardOutput.ReadLineAsync();
+								if (line != null)
+									output.AppendLine(line);
+							}
+						}, cancellationToken: cancellationToken
+					)
+					.Forget();
+
+				UniTask.RunOnThreadPool(
+						async () => {
+							while (!process.HasExited) {
+								cancellationToken.ThrowIfCancellationRequested();
+								var line = await process.StandardError.ReadLineAsync();
+								if (line != null)
+									error.AppendLine(line);
+								else await UniTask.Delay(10, cancellationToken: cancellationToken);
+							}
+
+							// Read remaining error after process exits
+							while (!process.StandardError.EndOfStream) {
+								var line = await process.StandardError.ReadLineAsync();
+								if (line != null)
+									error.AppendLine(line);
+							}
+						}, cancellationToken: cancellationToken
+					)
+					.Forget();
+
+				// Wait for process to exit and for output/error reading to complete
 				while (!process.HasExited) {
-					cancellationToken.ThrowIfCancellationRequested();
-					
-					if (!process.StandardOutput.EndOfStream) {
-						var line = await process.StandardOutput.ReadLineAsync();
-						if (line != null)
-							output.AppendLine(line);
+					if (cancellationToken.IsCancellationRequested) {
+						try {
+							process.Kill();
+						} catch {
+							// ignored
+						}
 					}
-					
-					if (!process.StandardError.EndOfStream) {
-						var line = await process.StandardError.ReadLineAsync();
-						if (line != null)
-							error.AppendLine(line);
-					}
-					
-					await UniTask.Delay(10, cancellationToken: cancellationToken);
+
+					await UniTask.Delay(50, cancellationToken: cancellationToken);
 				}
 
-				// Read remaining output
-				output.Append(await process.StandardOutput.ReadToEndAsync());
-				error.Append(await process.StandardError.ReadToEndAsync());
+				// Check exit code first - FFmpeg returns 0 on success
+				var exitCode = process.ExitCode;
+				if (exitCode != 0) {
+					var errorStr = error.ToString();
+					throw new InvalidOperationException($"FFmpeg process failed with exit code {exitCode}. Error: {errorStr}");
+				}
 
-				if (process.ExitCode != 0) 
-					throw new InvalidOperationException($"FFmpeg failed with exit code {process.ExitCode}: {error}");
+				// For successful execution, stderr might contain progress info which is normal
+				Logger.LogDebug($"FFmpeg completed successfully with exit code {exitCode}");
 				
-				return output.ToString();
-			} catch (OperationCanceledException) {
-				throw;
 			} catch (Exception ex) {
+				// Kill process if still running
+				try {
+					process?.Kill();
+				} catch {
+					// ignored
+				}
 				throw new InvalidOperationException($"FFmpeg execution failed: {ex.Message}", ex);
 			}
+
+			// Return any output, or empty string if no output (which is normal for some FFmpeg operations)
+			var outputStr = output.ToString();
+
+			return outputStr;
 		}
 	}
 }

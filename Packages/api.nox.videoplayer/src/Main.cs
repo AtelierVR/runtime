@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 
 namespace api.nox.videoplayer {
 	public class Main : MainModInitializer, IVideoPlayerAPI {
-		internal readonly List<IHandler>     Handlers = new();
+		internal static readonly List<IHandler>     Handlers = new();
 		public static     Main               Instance;
 		public            MainModCoreAPI     CoreAPI;
 		private           VideoPlayerManager _manager;
@@ -77,6 +77,7 @@ namespace api.nox.videoplayer {
 			_lang    = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
 			LanguageManager.AddPack(_lang);
 			VideoPlayerManager.Listen();
+			VideoPlayerResolver.Listen();
 			PrepareAsync().Forget();
 			_handlers = new IHandler[] { new Youtube() };
 			foreach (var handler in _handlers)
@@ -84,6 +85,7 @@ namespace api.nox.videoplayer {
 		}
 
 		public void OnDisposeMain() {
+			VideoPlayerResolver.UnListen();
 			VideoPlayerManager.UnListen();
 			if (!YtDl.IsDownloading)
 				YtDl.CancelDownload();
