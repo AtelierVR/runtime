@@ -1,5 +1,5 @@
 namespace Nox.VideoPlayer {
-	public interface IResultData {
+	public interface IResolve {
 		public string GetId();
 
 		public string GetTile();

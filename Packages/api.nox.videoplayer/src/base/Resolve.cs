@@ -2,7 +2,7 @@ using System.Linq;
 using Nox.VideoPlayer;
 
 namespace api.nox.videoplayer {
-	public class ResultData : IResultData {
+	public class Resolve : IResolve {
 		public string      Id;
 		public string      Title;
 		public string      Subtitle;
