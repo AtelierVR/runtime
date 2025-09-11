@@ -45,6 +45,15 @@ public:
     PlayerError getPlayerError() const;
     const char* getPlayerErrorMessage() const;
     void destroy(); // Add missing destroy method
+    
+    // Cache information methods
+    size_t getVideoCacheSize() const;
+    size_t getAudioCacheSize() const;
+    double getLastVideoCacheTime() const;
+    double getLastAudioCacheTime() const;
+    
+    // FFmpeg debug information
+    const char* getFFMPEGDetails() const;
 
 private:
     void cleanup();
@@ -93,9 +102,16 @@ private:
     
     std::map<double, VideoFrame> cachedVideoFrames;
     std::map<double, AudioFrame> cachedAudioFrames;
-    std::mutex cacheMutex;
+    mutable std::mutex cacheMutex;
+    
+    // Unity-safe frame buffers (separate from cache)
+    VideoFrame unityVideoFrame;
+    AudioFrame unityAudioFrame;
+    std::mutex unityFrameMutex;
     
     int videoWidth;
     int videoHeight;
     double frameRate;
+    
+    mutable std::string ffmpegDebugDetails;  // For FFmpeg debug information
 };

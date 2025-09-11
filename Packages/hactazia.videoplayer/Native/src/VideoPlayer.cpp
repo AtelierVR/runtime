@@ -1,6 +1,7 @@
 #include "../include/VideoPlayer.h"
 #include <chrono>
 #include <thread>
+#include <string>
 
 extern "C"
 {
@@ -10,9 +11,19 @@ extern "C"
 #include <libavutil/imgutils.h>
 #include <libavutil/opt.h>
 #include <libavutil/channel_layout.h>
+#include <libavutil/error.h>
 #include <libswscale/swscale.h>
 #include <libswresample/swresample.h>
 }
+
+// Define AV_ERROR_MAX_STRING_SIZE if not available
+#ifndef AV_ERROR_MAX_STRING_SIZE
+#define AV_ERROR_MAX_STRING_SIZE 64
+#endif
+
+// Cache size limits to prevent memory issues
+static const size_t MAX_VIDEO_CACHE_SIZE = 100; // Maximum number of cached video frames
+static const size_t MAX_AUDIO_CACHE_SIZE = 200; // Maximum number of cached audio frames
 
 VideoPlayer::VideoPlayer() : formatContext(nullptr),
                              videoCodecContext(nullptr),
@@ -41,6 +52,19 @@ VideoPlayer::VideoPlayer() : formatContext(nullptr),
                              videoHeight(0),
                              frameRate(0.0)
 {
+    // Initialize Unity-safe frame buffers
+    unityVideoFrame.data = nullptr;
+    unityVideoFrame.width = 0;
+    unityVideoFrame.height = 0;
+    unityVideoFrame.timestamp = 0.0;
+    unityVideoFrame.valid = false;
+    
+    unityAudioFrame.data = nullptr;
+    unityAudioFrame.size = 0;
+    unityAudioFrame.sampleRate = 0;
+    unityAudioFrame.channels = 0;
+    unityAudioFrame.timestamp = 0.0;
+    unityAudioFrame.valid = false;
 }
 
 VideoPlayer::~VideoPlayer()
@@ -223,26 +247,67 @@ bool VideoPlayer::loadVideo(const char *url)
         return false;
     }
 
+    // Stop any currently running playback before loading new video
+    if (isPlaying)
+    {
+        shouldStop = true;
+        isPlaying = false;
+        isPaused = false;
+        
+        // Notify threads to stop
+        {
+            std::lock_guard<std::mutex> lock(decodingMutex);
+            decodingCondition.notify_all();
+        }
+        
+        // Wait for threads to finish
+        if (decodingThread.joinable())
+        {
+            decodingThread.join();
+        }
+    }
+
     cleanup();
     playerError = PlayerError::NONE;
     errorMessage = "";
 
-    // Ouvrir le fichier/stream
-    if (avformat_open_input(&formatContext, url, nullptr, nullptr) < 0)
+    // Set timeout options for network URLs
+    AVDictionary *options = nullptr;
+    if (strstr(url, "http://") == url || strstr(url, "https://") == url)
+    {
+        // Set connection timeout to 30 seconds
+        av_dict_set(&options, "timeout", "30000000", 0); // 30 seconds in microseconds
+        // Set user agent for better compatibility
+        av_dict_set(&options, "user_agent", "Hactazia VideoPlayer/1.0", 0);
+        // Enable reconnection on network errors
+        av_dict_set(&options, "reconnect", "1", 0);
+        av_dict_set(&options, "reconnect_streamed", "1", 0);
+    }
+
+    // Ouvrir le fichier/stream avec timeout
+    int ret = avformat_open_input(&formatContext, url, nullptr, &options);
+    av_dict_free(&options); // Clean up options regardless of result
+    
+    if (ret < 0)
     {
         playerState = PlayerState::ERROR;
         playerError = PlayerError::FILE_NOT_FOUND;
-        errorMessage = "Failed to open video file: " + std::string(url);
+        char error_buf[AV_ERROR_MAX_STRING_SIZE];
+        av_strerror(ret, error_buf, sizeof(error_buf));
+        errorMessage = "Failed to open video file: " + std::string(url) + " - " + std::string(error_buf);
         return false;
     }
 
     // Récupérer les informations du stream
-    if (avformat_find_stream_info(formatContext, nullptr) < 0)
+    ret = avformat_find_stream_info(formatContext, nullptr);
+    if (ret < 0)
     {
         cleanup();
         playerState = PlayerState::ERROR;
         playerError = PlayerError::INVALID_FORMAT;
-        errorMessage = "Failed to retrieve stream information from: " + std::string(url);
+        char error_buf[AV_ERROR_MAX_STRING_SIZE];
+        av_strerror(ret, error_buf, sizeof(error_buf));
+        errorMessage = "Failed to retrieve stream information from: " + std::string(url) + " - " + std::string(error_buf);
         return false;
     }
 
@@ -465,9 +530,9 @@ void VideoPlayer::seek(double time)
 
 VideoFrame *VideoPlayer::getVideoFrameAtTime(double time)
 {
-    std::lock_guard<std::mutex> lock(cacheMutex);
+    std::lock_guard<std::mutex> cacheLock(cacheMutex);
 
-    VideoFrame* lastFrame = nullptr;
+    VideoFrame* sourceFrame = nullptr;
     double lastTimestamp = -1.0;
     
     // Find the frame with the highest timestamp that is still <= time
@@ -476,18 +541,51 @@ VideoFrame *VideoPlayer::getVideoFrameAtTime(double time)
         if (timestamp <= time && timestamp > lastTimestamp)
         {
             lastTimestamp = timestamp;
-            lastFrame = &frame;
+            sourceFrame = &frame;
         }
     }
 
-    return lastFrame;
+    // Validate the source frame
+    if (sourceFrame == nullptr || 
+        sourceFrame->data == nullptr || 
+        sourceFrame->width <= 0 || sourceFrame->height <= 0 ||
+        sourceFrame->width > 8192 || sourceFrame->height > 8192)
+    {
+        return nullptr;
+    }
+
+    // Copy frame data to Unity-safe buffer
+    {
+        std::lock_guard<std::mutex> unityLock(unityFrameMutex);
+        
+        // Calculate required buffer size
+        size_t bufferSize = sourceFrame->width * sourceFrame->height * 4; // RGBA
+        
+        // Allocate or reallocate Unity buffer if needed
+        if (unityVideoFrame.data == nullptr || 
+            unityVideoFrame.width != sourceFrame->width || 
+            unityVideoFrame.height != sourceFrame->height)
+        {
+            delete[] unityVideoFrame.data;
+            unityVideoFrame.data = new uint8_t[bufferSize];
+            unityVideoFrame.width = sourceFrame->width;
+            unityVideoFrame.height = sourceFrame->height;
+        }
+        
+        // Copy frame data safely
+        memcpy(unityVideoFrame.data, sourceFrame->data, bufferSize);
+        unityVideoFrame.timestamp = sourceFrame->timestamp;
+        unityVideoFrame.valid = true;
+        
+        return &unityVideoFrame;
+    }
 }
 
 AudioFrame *VideoPlayer::getAudioFrameAtTime(double time)
 {
-    std::lock_guard<std::mutex> lock(cacheMutex);
+    std::lock_guard<std::mutex> cacheLock(cacheMutex);
 
-    AudioFrame* lastFrame = nullptr;
+    AudioFrame* sourceFrame = nullptr;
     double lastTimestamp = -1.0;
     
     // Find the frame with the highest timestamp that is still <= time
@@ -496,11 +594,40 @@ AudioFrame *VideoPlayer::getAudioFrameAtTime(double time)
         if (timestamp <= time && timestamp > lastTimestamp)
         {
             lastTimestamp = timestamp;
-            lastFrame = &frame;
+            sourceFrame = &frame;
         }
     }
 
-    return lastFrame;
+    // Validate the source frame
+    if (sourceFrame == nullptr || 
+        sourceFrame->data == nullptr || 
+        sourceFrame->size <= 0)
+    {
+        return nullptr;
+    }
+
+    // Copy frame data to Unity-safe buffer
+    {
+        std::lock_guard<std::mutex> unityLock(unityFrameMutex);
+        
+        // Allocate or reallocate Unity buffer if needed
+        if (unityAudioFrame.data == nullptr || 
+            unityAudioFrame.size != sourceFrame->size)
+        {
+            delete[] unityAudioFrame.data;
+            unityAudioFrame.data = new uint8_t[sourceFrame->size];
+            unityAudioFrame.size = sourceFrame->size;
+        }
+        
+        // Copy frame data safely
+        memcpy(unityAudioFrame.data, sourceFrame->data, sourceFrame->size);
+        unityAudioFrame.sampleRate = sourceFrame->sampleRate;
+        unityAudioFrame.channels = sourceFrame->channels;
+        unityAudioFrame.timestamp = sourceFrame->timestamp;
+        unityAudioFrame.valid = true;
+        
+        return &unityAudioFrame;
+    }
 }
 
 double VideoPlayer::getDuration() const
@@ -561,6 +688,269 @@ const char *VideoPlayer::getPlayerErrorMessage() const
         return errorMessage.c_str();
     }
     return "";
+}
+
+size_t VideoPlayer::getVideoCacheSize() const
+{
+    std::lock_guard<std::mutex> lock(cacheMutex);
+    return cachedVideoFrames.size();
+}
+
+size_t VideoPlayer::getAudioCacheSize() const
+{
+    std::lock_guard<std::mutex> lock(cacheMutex);
+    return cachedAudioFrames.size();
+}
+
+double VideoPlayer::getLastVideoCacheTime() const
+{
+    std::lock_guard<std::mutex> lock(cacheMutex);
+    if (cachedVideoFrames.empty())
+    {
+        return -1.0; // Indicate no frames cached
+    }
+    // Since std::map is ordered by key, the last element has the highest timestamp
+    return cachedVideoFrames.rbegin()->first;
+}
+
+double VideoPlayer::getLastAudioCacheTime() const
+{
+    std::lock_guard<std::mutex> lock(cacheMutex);
+    if (cachedAudioFrames.empty())
+    {
+        return -1.0; // Indicate no frames cached
+    }
+    // Since std::map is ordered by key, the last element has the highest timestamp
+    return cachedAudioFrames.rbegin()->first;
+}
+
+const char* VideoPlayer::getFFMPEGDetails() const
+{
+    // Build debug information string with FFmpeg and player details
+    ffmpegDebugDetails = "=== FFmpeg Debug Information ===\n";
+    
+    // FFmpeg library versions
+    ffmpegDebugDetails += "FFmpeg Library Versions:\n";
+    ffmpegDebugDetails += "  libavcodec: " + std::string(AV_STRINGIFY(LIBAVCODEC_VERSION)) + "\n";
+    ffmpegDebugDetails += "  libavformat: " + std::string(AV_STRINGIFY(LIBAVFORMAT_VERSION)) + "\n";
+    ffmpegDebugDetails += "  libavutil: " + std::string(AV_STRINGIFY(LIBAVUTIL_VERSION)) + "\n";
+    ffmpegDebugDetails += "  libswscale: " + std::string(AV_STRINGIFY(LIBSWSCALE_VERSION)) + "\n";
+    ffmpegDebugDetails += "  libswresample: " + std::string(AV_STRINGIFY(LIBSWRESAMPLE_VERSION)) + "\n\n";
+    
+    // Player state information
+    ffmpegDebugDetails += "Player State:\n";
+    ffmpegDebugDetails += "  State: ";
+    switch (playerState.load()) {
+        case PlayerState::UNINITIALIZED: ffmpegDebugDetails += "UNINITIALIZED"; break;
+        case PlayerState::LOADED: ffmpegDebugDetails += "LOADED"; break;
+        case PlayerState::PLAYING: ffmpegDebugDetails += "PLAYING"; break;
+        case PlayerState::PAUSED: ffmpegDebugDetails += "PAUSED"; break;
+        case PlayerState::STOPPED: ffmpegDebugDetails += "STOPPED"; break;
+        case PlayerState::ERROR: ffmpegDebugDetails += "ERROR"; break;
+        default: ffmpegDebugDetails += "UNKNOWN"; break;
+    }
+    ffmpegDebugDetails += "\n";
+    
+    ffmpegDebugDetails += "  Error: ";
+    switch (playerError.load()) {
+        case PlayerError::NONE: ffmpegDebugDetails += "NONE"; break;
+        case PlayerError::FILE_NOT_FOUND: ffmpegDebugDetails += "FILE_NOT_FOUND"; break;
+        case PlayerError::INVALID_FORMAT: ffmpegDebugDetails += "INVALID_FORMAT"; break;
+        case PlayerError::CODEC_ERROR: ffmpegDebugDetails += "CODEC_ERROR"; break;
+        case PlayerError::MEMORY_ERROR: ffmpegDebugDetails += "MEMORY_ERROR"; break;
+        case PlayerError::UNKNOWN_ERROR: ffmpegDebugDetails += "UNKNOWN_ERROR"; break;
+        default: ffmpegDebugDetails += "UNDEFINED"; break;
+    }
+    ffmpegDebugDetails += "\n";
+    
+    if (!errorMessage.empty()) {
+        ffmpegDebugDetails += "  Error Message: " + errorMessage + "\n";
+    }
+    
+    ffmpegDebugDetails += "  Is Playing: " + std::string(isPlaying ? "true" : "false") + "\n";
+    ffmpegDebugDetails += "  Is Paused: " + std::string(isPaused ? "true" : "false") + "\n";
+    ffmpegDebugDetails += "  Current Time: " + std::to_string(currentTime.load()) + "s\n";
+    ffmpegDebugDetails += "  Duration: " + std::to_string(duration.load()) + "s\n\n";
+    
+    // Format context information
+    if (formatContext) {
+        ffmpegDebugDetails += "Format Context:\n";
+        if (formatContext->url) {
+            ffmpegDebugDetails += "  URL: " + std::string(formatContext->url) + "\n";
+        }
+        if (formatContext->iformat) {
+            if (formatContext->iformat->name) {
+                ffmpegDebugDetails += "  Format Name: " + std::string(formatContext->iformat->name) + "\n";
+            }
+            if (formatContext->iformat->long_name) {
+                ffmpegDebugDetails += "  Format Long Name: " + std::string(formatContext->iformat->long_name) + "\n";
+            }
+            if (formatContext->iformat->extensions) {
+                ffmpegDebugDetails += "  Extensions: " + std::string(formatContext->iformat->extensions) + "\n";
+            }
+            if (formatContext->iformat->mime_type) {
+                ffmpegDebugDetails += "  MIME Type: " + std::string(formatContext->iformat->mime_type) + "\n";
+            }
+            ffmpegDebugDetails += "  Format Flags: 0x" + std::to_string(formatContext->iformat->flags) + "\n";
+        }
+        
+        ffmpegDebugDetails += "  Streams: " + std::to_string(formatContext->nb_streams) + "\n";
+        ffmpegDebugDetails += "  Duration: " + std::to_string(formatContext->duration / AV_TIME_BASE) + "s (" + std::to_string(formatContext->duration) + " time units)\n";
+        ffmpegDebugDetails += "  Start Time: " + std::to_string(formatContext->start_time / AV_TIME_BASE) + "s\n";
+        ffmpegDebugDetails += "  Bitrate: " + std::to_string(formatContext->bit_rate) + " bps\n";
+        ffmpegDebugDetails += "  Packet Size: " + std::to_string(formatContext->packet_size) + "\n";
+        ffmpegDebugDetails += "  Max Delay: " + std::to_string(formatContext->max_delay) + "\n";
+        ffmpegDebugDetails += "  Flags: 0x" + std::to_string(formatContext->flags) + "\n";
+        
+        if (formatContext->nb_programs > 0) {
+            ffmpegDebugDetails += "  Programs: " + std::to_string(formatContext->nb_programs) + "\n";
+        }
+        
+        if (formatContext->nb_chapters > 0) {
+            ffmpegDebugDetails += "  Chapters: " + std::to_string(formatContext->nb_chapters) + "\n";
+        }
+        
+        // Stream information
+        ffmpegDebugDetails += "  Stream Details:\n";
+        for (unsigned int i = 0; i < formatContext->nb_streams; i++) {
+            AVStream* stream = formatContext->streams[i];
+            if (stream) {
+                ffmpegDebugDetails += "    Stream " + std::to_string(i) + ":\n";
+                ffmpegDebugDetails += "      Index: " + std::to_string(stream->index) + "\n";
+                ffmpegDebugDetails += "      ID: " + std::to_string(stream->id) + "\n";
+                
+                if (stream->codecpar) {
+                    ffmpegDebugDetails += "      Media Type: ";
+                    switch (stream->codecpar->codec_type) {
+                        case AVMEDIA_TYPE_VIDEO: ffmpegDebugDetails += "VIDEO"; break;
+                        case AVMEDIA_TYPE_AUDIO: ffmpegDebugDetails += "AUDIO"; break;
+                        case AVMEDIA_TYPE_SUBTITLE: ffmpegDebugDetails += "SUBTITLE"; break;
+                        case AVMEDIA_TYPE_DATA: ffmpegDebugDetails += "DATA"; break;
+                        case AVMEDIA_TYPE_ATTACHMENT: ffmpegDebugDetails += "ATTACHMENT"; break;
+                        default: ffmpegDebugDetails += "UNKNOWN(" + std::to_string(stream->codecpar->codec_type) + ")"; break;
+                    }
+                    ffmpegDebugDetails += "\n";
+                    
+                    const AVCodecDescriptor* desc = avcodec_descriptor_get(stream->codecpar->codec_id);
+                    if (desc && desc->name) {
+                        ffmpegDebugDetails += "      Codec: " + std::string(desc->name) + "\n";
+                    }
+                    
+                    if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+                        ffmpegDebugDetails += "      Resolution: " + std::to_string(stream->codecpar->width) + "x" + std::to_string(stream->codecpar->height) + "\n";
+                        if (stream->avg_frame_rate.num > 0 && stream->avg_frame_rate.den > 0) {
+                            double fps = (double)stream->avg_frame_rate.num / stream->avg_frame_rate.den;
+                            ffmpegDebugDetails += "      Frame Rate: " + std::to_string(fps) + " fps\n";
+                        }
+                        const char* pix_fmt_name = av_get_pix_fmt_name((AVPixelFormat)stream->codecpar->format);
+                        if (pix_fmt_name) {
+                            ffmpegDebugDetails += "      Pixel Format: " + std::string(pix_fmt_name) + "\n";
+                        }
+                    } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+                        ffmpegDebugDetails += "      Sample Rate: " + std::to_string(stream->codecpar->sample_rate) + " Hz\n";
+                        ffmpegDebugDetails += "      Channels: " + std::to_string(stream->codecpar->ch_layout.nb_channels) + "\n";
+                        const char* sample_fmt_name = av_get_sample_fmt_name((AVSampleFormat)stream->codecpar->format);
+                        if (sample_fmt_name) {
+                            ffmpegDebugDetails += "      Sample Format: " + std::string(sample_fmt_name) + "\n";
+                        }
+                    }
+                    
+                    if (stream->codecpar->bit_rate > 0) {
+                        ffmpegDebugDetails += "      Bitrate: " + std::to_string(stream->codecpar->bit_rate) + " bps\n";
+                    }
+                }
+                
+                if (stream->time_base.num > 0 && stream->time_base.den > 0) {
+                    ffmpegDebugDetails += "      Time Base: " + std::to_string(stream->time_base.num) + "/" + std::to_string(stream->time_base.den) + "\n";
+                }
+                
+                if (stream->start_time != AV_NOPTS_VALUE) {
+                    double start_time = (double)stream->start_time * stream->time_base.num / stream->time_base.den;
+                    ffmpegDebugDetails += "      Start Time: " + std::to_string(start_time) + "s\n";
+                }
+                
+                if (stream->duration != AV_NOPTS_VALUE) {
+                    double duration = (double)stream->duration * stream->time_base.num / stream->time_base.den;
+                    ffmpegDebugDetails += "      Duration: " + std::to_string(duration) + "s\n";
+                }
+                
+                if (stream->nb_frames > 0) {
+                    ffmpegDebugDetails += "      Frame Count: " + std::to_string(stream->nb_frames) + "\n";
+                }
+                
+                // Stream metadata
+                if (stream->metadata) {
+                    AVDictionaryEntry* entry = nullptr;
+                    bool hasMetadata = false;
+                    while ((entry = av_dict_get(stream->metadata, "", entry, AV_DICT_IGNORE_SUFFIX))) {
+                        if (!hasMetadata) {
+                            ffmpegDebugDetails += "      Metadata:\n";
+                            hasMetadata = true;
+                        }
+                        ffmpegDebugDetails += "        " + std::string(entry->key) + ": " + std::string(entry->value) + "\n";
+                    }
+                }
+            }
+        }
+        
+        // Global metadata
+        if (formatContext->metadata) {
+            AVDictionaryEntry* entry = nullptr;
+            bool hasMetadata = false;
+            while ((entry = av_dict_get(formatContext->metadata, "", entry, AV_DICT_IGNORE_SUFFIX))) {
+                if (!hasMetadata) {
+                    ffmpegDebugDetails += "  Global Metadata:\n";
+                    hasMetadata = true;
+                }
+                ffmpegDebugDetails += "    " + std::string(entry->key) + ": " + std::string(entry->value) + "\n";
+            }
+        }
+        
+        ffmpegDebugDetails += "\n";
+    } else {
+        ffmpegDebugDetails += "Format Context: NULL\n\n";
+    }
+    
+    // Video codec information
+    if (videoCodecContext) {
+        ffmpegDebugDetails += "Video Codec:\n";
+        if (videoCodecContext->codec && videoCodecContext->codec->name) {
+            ffmpegDebugDetails += "  Codec: " + std::string(videoCodecContext->codec->name) + "\n";
+        }
+        ffmpegDebugDetails += "  Resolution: " + std::to_string(videoCodecContext->width) + "x" + std::to_string(videoCodecContext->height) + "\n";
+        ffmpegDebugDetails += "  Pixel Format: " + std::string(av_get_pix_fmt_name(videoCodecContext->pix_fmt)) + "\n";
+        ffmpegDebugDetails += "  Bitrate: " + std::to_string(videoCodecContext->bit_rate) + "\n";
+        ffmpegDebugDetails += "  Frame Rate: " + std::to_string(frameRate) + " fps\n\n";
+    }
+    
+    // Audio codec information
+    if (audioCodecContext) {
+        ffmpegDebugDetails += "Audio Codec:\n";
+        if (audioCodecContext->codec && audioCodecContext->codec->name) {
+            ffmpegDebugDetails += "  Codec: " + std::string(audioCodecContext->codec->name) + "\n";
+        }
+        ffmpegDebugDetails += "  Sample Rate: " + std::to_string(audioCodecContext->sample_rate) + " Hz\n";
+        ffmpegDebugDetails += "  Channels: " + std::to_string(audioCodecContext->ch_layout.nb_channels) + "\n";
+        ffmpegDebugDetails += "  Sample Format: " + std::string(av_get_sample_fmt_name(audioCodecContext->sample_fmt)) + "\n";
+        ffmpegDebugDetails += "  Bitrate: " + std::to_string(audioCodecContext->bit_rate) + "\n\n";
+    }
+    
+    // Cache information
+    {
+        std::lock_guard<std::mutex> lock(cacheMutex);
+        ffmpegDebugDetails += "Cache Information:\n";
+        ffmpegDebugDetails += "  Video Cache Size: " + std::to_string(cachedVideoFrames.size()) + "/" + std::to_string(MAX_VIDEO_CACHE_SIZE) + "\n";
+        ffmpegDebugDetails += "  Audio Cache Size: " + std::to_string(cachedAudioFrames.size()) + "/" + std::to_string(MAX_AUDIO_CACHE_SIZE) + "\n";
+        
+        if (!cachedVideoFrames.empty()) {
+            ffmpegDebugDetails += "  Video Cache Range: " + std::to_string(cachedVideoFrames.begin()->first) + "s - " + std::to_string(cachedVideoFrames.rbegin()->first) + "s\n";
+        }
+        if (!cachedAudioFrames.empty()) {
+            ffmpegDebugDetails += "  Audio Cache Range: " + std::to_string(cachedAudioFrames.begin()->first) + "s - " + std::to_string(cachedAudioFrames.rbegin()->first) + "s\n";
+        }
+    }
+    
+    return ffmpegDebugDetails.c_str();
 }
 
 void VideoPlayer::cleanup()
@@ -679,6 +1069,26 @@ void VideoPlayer::cleanup()
         cachedAudioFrames.clear();
     }
 
+    // Clean up Unity-safe frame buffers
+    {
+        std::lock_guard<std::mutex> unityLock(unityFrameMutex);
+        
+        if (unityVideoFrame.data != nullptr) {
+            delete[] unityVideoFrame.data;
+            unityVideoFrame.data = nullptr;
+        }
+        unityVideoFrame.width = 0;
+        unityVideoFrame.height = 0;
+        unityVideoFrame.valid = false;
+        
+        if (unityAudioFrame.data != nullptr) {
+            delete[] unityAudioFrame.data;
+            unityAudioFrame.data = nullptr;
+        }
+        unityAudioFrame.size = 0;
+        unityAudioFrame.valid = false;
+    }
+
     // Réinitialiser les variables
     videoStreamIndex = -1;
     audioStreamIndex = -1;
@@ -717,49 +1127,98 @@ void VideoPlayer::decodingLoop()
         return;
     }
 
-    while (!shouldStop && isPlaying)
+    try 
     {
-        // Additional safety check - ensure essential components are still valid
-        if (!formatContext || !videoCodecContext || !frame)
+        while (!shouldStop && isPlaying)
         {
-            playerState = PlayerState::ERROR;
-            isPlaying = false;
-            break;
-        }
-
-        // Vérifier si on est en pause
-        {
-            std::unique_lock<std::mutex> lock(decodingMutex);
-            decodingCondition.wait(lock, [this]
-                                   { return !isPaused || shouldStop; });
-
-            if (shouldStop)
+            // Additional safety check - ensure essential components are still valid
+            if (!formatContext || !videoCodecContext || !frame)
+            {
+                playerState = PlayerState::ERROR;
+                isPlaying = false;
                 break;
-        }
+            }
 
-        // Lire un paquet
-        if (av_read_frame(formatContext, packet) >= 0)
-        {
-            if (packet->stream_index == videoStreamIndex)
+            // Vérifier si on est en pause
             {
-                decodeVideoPacket(packet);
+                std::unique_lock<std::mutex> lock(decodingMutex);
+                decodingCondition.wait(lock, [this]
+                                       { return !isPaused || shouldStop; });
+
+                if (shouldStop)
+                    break;
             }
-            else if (packet->stream_index == audioStreamIndex && audioCodecContext)
+
+            // Lire un paquet with timeout protection
+            int ret = av_read_frame(formatContext, packet);
+            if (ret >= 0)
             {
-                decodeAudioPacket(packet);
+                try 
+                {
+                    if (packet->stream_index == videoStreamIndex)
+                    {
+                        decodeVideoPacket(packet);
+                    }
+                    else if (packet->stream_index == audioStreamIndex && audioCodecContext)
+                    {
+                        decodeAudioPacket(packet);
+                    }
+                    av_packet_unref(packet);
+                }
+                catch (...)
+                {
+                    // Handle any exceptions during packet processing
+                    av_packet_unref(packet);
+                    // Continue to next packet instead of crashing
+                }
             }
-            av_packet_unref(packet);
-        }
-        else
-        {
-            // Fin du fichier ou erreur
-            playerState = PlayerState::STOPPED;
-            isPlaying = false;
-            break;
+            else
+            {
+                // Check if it's EOF or an error
+                if (ret == AVERROR_EOF)
+                {
+                    // End of file reached
+                    playerState = PlayerState::STOPPED;
+                    isPlaying = false;
+                    break;
+                }
+                else
+                {
+                    // Network error or other issue - try to continue for a bit
+                    static int errorCount = 0;
+                    errorCount++;
+                    
+                    if (errorCount > 10) // Too many consecutive errors
+                    {
+                        playerState = PlayerState::ERROR;
+                        playerError = PlayerError::UNKNOWN_ERROR;
+                        char error_buf[AV_ERROR_MAX_STRING_SIZE];
+                        av_strerror(ret, error_buf, sizeof(error_buf));
+                        errorMessage = "Decoding error: " + std::string(error_buf);
+                        isPlaying = false;
+                        break;
+                    }
+                    
+                    // Small delay before retrying
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                }
+            }
         }
     }
+    catch (...)
+    {
+        // Catch any unhandled exceptions to prevent crash
+        playerState = PlayerState::ERROR;
+        playerError = PlayerError::UNKNOWN_ERROR;
+        errorMessage = "Unexpected error in decoding loop";
+        isPlaying = false;
+    }
 
-    av_packet_free(&packet);
+    // Clean up packet
+    if (packet)
+    {
+        av_packet_free(&packet);
+    }
 }
 
 void VideoPlayer::decodeVideoPacket(AVPacket *packet)
@@ -786,6 +1245,25 @@ void VideoPlayer::decodeVideoPacket(AVPacket *packet)
             if (frame->pts != AV_NOPTS_VALUE)
             {
                 timestamp = frame->pts * av_q2d(formatContext->streams[videoStreamIndex]->time_base);
+                
+                // For streaming content, ensure timestamp is reasonable
+                // If timestamp is extremely large (like for live streams), use elapsed time instead
+                if (timestamp > 1e9) // More than ~31 years, likely invalid for regular content
+                {
+                    static auto startTime = std::chrono::steady_clock::now();
+                    auto elapsed = std::chrono::steady_clock::now() - startTime;
+                    timestamp = std::chrono::duration<double>(elapsed).count();
+                }
+            }
+            else
+            {
+                // If no PTS available, estimate based on frame rate and frame count
+                static int frameCount = 0;
+                frameCount++;
+                if (frameRate > 0.0)
+                {
+                    timestamp = frameCount / frameRate;
+                }
             }
 
             currentTime = timestamp;
@@ -901,6 +1379,19 @@ void VideoPlayer::decodeVideoPacket(AVPacket *packet)
                         delete[] existingIt->second.data;
                         existingIt->second.data = nullptr;
                         existingIt->second.valid = false;
+                    }
+
+                    // Cache size management - remove oldest frames if cache is too large
+                    while (cachedVideoFrames.size() >= MAX_VIDEO_CACHE_SIZE)
+                    {
+                        auto oldestIt = cachedVideoFrames.begin();
+                        if (oldestIt->second.data && oldestIt->second.valid)
+                        {
+                            delete[] oldestIt->second.data;
+                            oldestIt->second.data = nullptr;
+                            oldestIt->second.valid = false;
+                        }
+                        cachedVideoFrames.erase(oldestIt);
                     }
 
                     cachedVideoFrames[timestamp] = videoFrameData;
@@ -1033,6 +1524,19 @@ void VideoPlayer::decodeAudioPacket(AVPacket *packet)
                         delete[] existingIt->second.data;
                         existingIt->second.data = nullptr;
                         existingIt->second.valid = false;
+                    }
+
+                    // Cache size management - remove oldest frames if cache is too large
+                    while (cachedAudioFrames.size() >= MAX_AUDIO_CACHE_SIZE)
+                    {
+                        auto oldestIt = cachedAudioFrames.begin();
+                        if (oldestIt->second.data && oldestIt->second.valid)
+                        {
+                            delete[] oldestIt->second.data;
+                            oldestIt->second.data = nullptr;
+                            oldestIt->second.valid = false;
+                        }
+                        cachedAudioFrames.erase(oldestIt);
                     }
 
                     cachedAudioFrames[timestamp] = audioFrameData;

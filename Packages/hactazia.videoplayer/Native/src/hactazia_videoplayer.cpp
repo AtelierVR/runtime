@@ -193,4 +193,39 @@ extern "C"
         return player->getPlayerErrorMessage();
     }
 
+    VIDEOPLAYER_API int GetVideoCacheSize(VideoPlayer *player)
+    {
+        if (!player)
+            return 0;
+        return static_cast<int>(player->getVideoCacheSize());
+    }
+
+    VIDEOPLAYER_API int GetAudioCacheSize(VideoPlayer *player)
+    {
+        if (!player)
+            return 0;
+        return static_cast<int>(player->getAudioCacheSize());
+    }
+
+    VIDEOPLAYER_API double GetLastVideoCacheTime(VideoPlayer *player)
+    {
+        if (!player)
+            return -1.0;
+        return player->getLastVideoCacheTime();
+    }
+
+    VIDEOPLAYER_API double GetLastAudioCacheTime(VideoPlayer *player)
+    {
+        if (!player)
+            return -1.0;
+        return player->getLastAudioCacheTime();
+    }
+
+    VIDEOPLAYER_API const char *GetFFMPEGDetails(VideoPlayer *player)
+    {
+        if (!player)
+            return "Player not found";
+        return player->getFFMPEGDetails();
+    }
+
 } // extern "C"

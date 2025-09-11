@@ -116,6 +116,30 @@ namespace Hactazia.VideoPlayer {
 		[return: MarshalAs(UnmanagedType.LPStr)]
 		private static extern string Impl_GetPlayerErrorMessage(IntPtr player);
 
+		// ========================================
+		// Cache information functions
+		// ========================================
+
+		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "GetVideoCacheSize")]
+		private static extern int Impl_GetVideoCacheSize(IntPtr player);
+
+		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "GetAudioCacheSize")]
+		private static extern int Impl_GetAudioCacheSize(IntPtr player);
+
+		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "GetLastVideoCacheTime")]
+		private static extern double Impl_GetLastVideoCacheTime(IntPtr player);
+
+		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "GetLastAudioCacheTime")]
+		private static extern double Impl_GetLastAudioCacheTime(IntPtr player);
+
+		// ========================================
+		// FFmpeg debug information
+		// ========================================
+
+		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, EntryPoint = "GetFFMPEGDetails")]
+		[return: MarshalAs(UnmanagedType.LPStr)]
+		private static extern string Impl_GetFFMPEGDetails(IntPtr player);
+
 
 		public static IntPtr CreateVideoPlayer()
 			=> Impl_CreateVideoPlayer();
@@ -219,6 +243,39 @@ namespace Hactazia.VideoPlayer {
 		public static string GetPlayerErrorMessage(IntPtr player) {
 			if (!IsValid(player)) return "";
 			return Impl_GetPlayerErrorMessage(player);
+		}
+
+		// ========================================
+		// Cache information methods
+		// ========================================
+
+		public static int GetVideoCacheSize(IntPtr player) {
+			if (!IsValid(player)) return 0;
+			return Impl_GetVideoCacheSize(player);
+		}
+
+		public static int GetAudioCacheSize(IntPtr player) {
+			if (!IsValid(player)) return 0;
+			return Impl_GetAudioCacheSize(player);
+		}
+
+		public static double GetLastVideoCacheTime(IntPtr player) {
+			if (!IsValid(player)) return -1.0;
+			return Impl_GetLastVideoCacheTime(player);
+		}
+
+		public static double GetLastAudioCacheTime(IntPtr player) {
+			if (!IsValid(player)) return -1.0;
+			return Impl_GetLastAudioCacheTime(player);
+		}
+
+		// ========================================
+		// FFmpeg debug information
+		// ========================================
+
+		public static string GetFFMPEGDetails(IntPtr player) {
+			if (!IsValid(player)) return "Player not found";
+			return Impl_GetFFMPEGDetails(player);
 		}
 	}
 }

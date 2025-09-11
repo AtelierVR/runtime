@@ -95,6 +95,15 @@ VIDEOPLAYER_API int GetPlayerState(VideoPlayer* player);
 VIDEOPLAYER_API int GetPlayerError(VideoPlayer* player);
 VIDEOPLAYER_API const char* GetPlayerErrorMessage(VideoPlayer* player);
 
+// Cache information functions
+VIDEOPLAYER_API int GetVideoCacheSize(VideoPlayer* player);
+VIDEOPLAYER_API int GetAudioCacheSize(VideoPlayer* player);
+VIDEOPLAYER_API double GetLastVideoCacheTime(VideoPlayer* player);
+VIDEOPLAYER_API double GetLastAudioCacheTime(VideoPlayer* player);
+
+// FFmpeg debug information
+VIDEOPLAYER_API const char* GetFFMPEGDetails(VideoPlayer* player);
+
 #ifdef __cplusplus
 }
 #endif

@@ -239,7 +239,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!222 &1667200843734059246
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -859,8 +859,8 @@ RectTransform:
   - {fileID: 5837100617964420050}
   m_Father: {fileID: 1811474285336322225}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.295, y: 0}
-  m_AnchorMax: {x: 0.295, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 60, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1024,10 +1024,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7612c7c0b759d4488408b5d4d88d111, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Hactazia.VideoPlayer::Hactazia.VideoPlayer.VideoPlayer
-  videoUrl: https://rr2---sn-25glenlr.googlevideo.com/videoplayback?expire=1757627672&ei=t_DCaNi3O_XRp-oPrbzwuAs&ip=2a01%3Ae0a%3A86%3A2960%3A4561%3Accd2%3A589f%3A6fef&id=o-AHrKWqNoS9RjRyCvY_sPKBHwjNH4qP-35HJ3IKbxR_2I&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&met=1757606071%2C&mh=0v&mm=31%2C26&mn=sn-25glenlr%2Csn-4g5ednsd&ms=au%2Conr&mv=m&mvi=2&pl=42&rms=au%2Cau&initcwndbps=2816250&bui=AY1jyLPsiTCgQ72DFiVMgoXt8A3OIad3FbikUuVWXYLozU_OFres7rAFbbaRucsMAUCpZ3B1KEQnXiqp&spc=l3OVKbGnPhD6v14Wlg9O&vprv=1&svpuc=1&mime=video%2Fmp4&ns=BptmMe2foTj6_NOnJS6W2IAQ&rqh=1&gir=yes&clen=9708078&ratebypass=yes&dur=146.796&lmt=1751204312557972&mt=1757605816&fvip=5&fexp=51552689%2C51565115%2C51565682%2C51580968&c=TVHTML5_SIMPLY&sefc=1&txp=5538534&n=xrJxgDFR5pGtGA&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Cgir%2Cclen%2Cratebypass%2Cdur%2Clmt&lsparams=met%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRQIhAJsQ-yLREJPbCpF47IML_Ls204YcZLNJFIWzIX9j7bIHAiBKWdLBk9dsj0pQ9jtYA5JRfvFU0RZn-FWEEkyoPhT_CA%3D%3D&sig=AJfQdSswRgIhAOuXeXQQSPMvfTnyICn8LUMHuBCzk0jRN3yfNtvEb9N0AiEAwiH7BqNDaeP6nisETWpQyIykIJPAI6fiDBGYBpXZ0ow%3D
+  videoUrl: https://eun13.playlist.ttvnw.net/v1/playlist/Cv4EXguKrrhyPt9HCvT0CLrVC4LdwHD7a7ikNtdaKSE6HVwQGXFKKM3NjXKsw07ho0NCfO6w_ROxnVd93nwN-iuaxoIdUdHcIoS1Cl1-d2C13OtAiF2gXMf4wTLW2yV_-_9VkxPeOrah_waDsdRknrO-D1SogysmJ_sg6UR3SaA8v3xXi5tSvqp_kNLDbpWa2fNMYa_2AQenrior549c_apc8NcQ57r2IxQFtHTUlVyyLvaA02faP987SvKcJkniWfh7R-A86M05soMSMC3LB7Cj2eMvWjIz9VQ0lQogjR2y3EzPUL-fZPmSl3pt8yy4qk6pe4SVUnQPBUNqnPqKgX0_PHYaMt24f6fPbb5blmdnNWypTQRta7yIxDFSIzva9f31sTzaaFXDupkU3ctpUc4xE5g3juOfnjUyO5yS-v_kFuOBhc_mSEXqEGqKPmB7s31HQvkSYvfG_0HrgZc-wfzIYfQMDwCNtKvoAeompKSLeCrUSixQLjmv7MSBpoVtXMPV-L2FFeCxuFCnfCpf38XjE9jNUGTrQtf2lnLvPWSox-Qg8ajncJcmWRNikRxAK2Vle_LnPzGE0QbOn3-Wt-wmhPCXK34oQMRDZmo53SeQ7QnV4lncxuZzodi71HkcKLaBe8CudC4fDiPY3y4hDSfh610FUmFOc3pJ1_8dyf9uomVaBvGSpuDqUQggOj5VjmHxZIzhQARYoFXjyEXwJblybjdkJQZR9lHS2r3hu8jym6jm93VxuGjJ95wmBdrsjIVsgH_-ZrowycHUcX7cFKsCeQPQBDT6nmRCDDgA8nCVURoO_gwEbLTPf8EFEwEc2gfBey0SrXTlRT1YaticZc4aDE82_TSn9khxJdUexiABKglldS13ZXN0LTIwmw0.m3u8
   playOnStart: 1
   loop: 1
   renderTexture: {fileID: 8400000, guid: e11b26e0e0cd5764c91348a917531849, type: 2}
+  audioSource: {fileID: 0}
+  enableAudio: 1
 --- !u!114 &4426997369126388286
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1835,7 +1837,7 @@ RectTransform:
   m_Father: {fileID: 8207659306052577733}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0.295, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}

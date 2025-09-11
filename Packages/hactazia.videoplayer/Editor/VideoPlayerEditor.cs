@@ -5,6 +5,8 @@ using Logger = Nox.CCK.Utils.Logger;
 namespace Hactazia.VideoPlayer.Editor {
 	[CustomEditor(typeof(VideoPlayer))]
 	public class VideoPlayerEditor : UnityEditor.Editor {
+		private Vector2 debugScrollPosition = Vector2.zero;
+		
 		public override void OnInspectorGUI() {
 			DrawDefaultInspector();
 
@@ -81,6 +83,17 @@ namespace Hactazia.VideoPlayer.Editor {
 					// Frame Rate utilisant la propriété du VideoPlayer
 					EditorGUILayout.LabelField("Frame Rate", $"{videoPlayer.FrameRate:F2} fps");
 
+					// Cache Information
+					EditorGUILayout.Space();
+					EditorGUILayout.LabelField("Cache Information", EditorStyles.boldLabel);
+					EditorGUILayout.LabelField("Video Cache Size", videoPlayer.VideoCacheSize.ToString());
+					EditorGUILayout.LabelField("Audio Cache Size", videoPlayer.AudioCacheSize.ToString());
+					
+					double lastVideoTime = videoPlayer.LastVideoCacheTime;
+					double lastAudioTime = videoPlayer.LastAudioCacheTime;
+					EditorGUILayout.LabelField("Last Video Cache Time", lastVideoTime >= 0 ? FormatTime(lastVideoTime) : "No frames cached");
+					EditorGUILayout.LabelField("Last Audio Cache Time", lastAudioTime >= 0 ? FormatTime(lastAudioTime) : "No frames cached");
+
 					// Texture de sortie
 					if (videoPlayer.OutputTexture != null) {
 						EditorGUILayout.LabelField("Output Texture", $"{videoPlayer.OutputTexture.width}x{videoPlayer.OutputTexture.height} ({videoPlayer.OutputTexture.format})");
@@ -92,6 +105,34 @@ namespace Hactazia.VideoPlayer.Editor {
 				}
 
 				EditorGUILayout.EndVertical();
+			}
+
+			// FFmpeg Debug Section (collapsible)
+			if (Application.isPlaying) {
+				EditorGUILayout.Space();
+				videoPlayer.showFFmpegDebug = EditorGUILayout.Foldout(videoPlayer.showFFmpegDebug, "FFmpeg Debug Information", true, EditorStyles.foldoutHeader);
+				
+				if (videoPlayer.showFFmpegDebug) {
+					EditorGUILayout.BeginVertical("box");
+					
+					EditorGUILayout.BeginHorizontal();
+					if (GUILayout.Button("Refresh Debug Info", GUILayout.Width(120))) {
+						// Force refresh by accessing the property
+						_ = videoPlayer.FFMPEGDetails;
+					}
+					if (GUILayout.Button("Copy to Clipboard", GUILayout.Width(120))) {
+						EditorGUIUtility.systemCopyBuffer = videoPlayer.FFMPEGDetails;
+						Debug.Log("FFmpeg debug information copied to clipboard");
+					}
+					EditorGUILayout.EndHorizontal();
+					
+					// Display FFmpeg debug information in a scrollable text area
+					debugScrollPosition = EditorGUILayout.BeginScrollView(debugScrollPosition, GUILayout.Height(200));
+					EditorGUILayout.TextArea(videoPlayer.FFMPEGDetails, EditorStyles.textArea, GUILayout.ExpandHeight(true));
+					EditorGUILayout.EndScrollView();
+					
+					EditorGUILayout.EndVertical();
+				}
 			}
 
 			// Repaint automatique quand la vidéo joue
