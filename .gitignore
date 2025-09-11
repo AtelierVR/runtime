@@ -82,6 +82,7 @@ crashlytics-build.properties
 !/[Pp]ackages/*.nox.*/
 /[Pp]ackages/*.nox.*/link.xml
 /[Pp]ackages/*.nox.*/link.xml.meta
+!/[Pp]ackages/hactazia.*/
 !/[Pp]ackages/manifest.json
 /[Aa]ssets/[Tt]emp/
 /[Aa]ssets/[Aa]uto[Hh]and/

@@ -1,0 +1,19 @@
+{
+    "name": "Hactazia.VideoPlayer.Editor",
+    "rootNamespace": "Hactazia.VideoPlayer.Editor",
+    "references": [
+        "Hactazia.VideoPlayer"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
+

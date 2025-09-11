@@ -11,8 +11,8 @@
         "**/*.user": false,
         "**/*.userprefs": true,
         "**/*.unityproj": true,
-        "**/*.dll": true,
-        "**/*.exe": true,
+        "**/*.dll": false,
+        "**/*.exe": false,
         "**/*.pdf": true,
         "**/*.mid": true,
         "**/*.midi": true,
@@ -39,10 +39,10 @@
         "**/*.asset": false,
         "**/*.cubemap": true,
         "**/*.flare": true,
-        "**/*.mat": true,
+        "**/*.mat": false,
         "**/*.meta": true,
-        "**/*.prefab": true,
-        "**/*.unity": true,
+        "**/*.prefab": false,
+        "**/*.unity": false,
         "build/": true,
         "Build/": true,
         "Library/": true,
@@ -66,5 +66,6 @@
     "explorer.fileNesting.patterns": {
         "*.sln": "*.csproj",
     },
-    "dotnet.defaultSolution": "nox-runtime.sln"
+    "dotnet.defaultSolution": "nox-runtime.sln",
+    "cmake.sourceDirectory": "U:/Projets/nox/runtime/Packages/hactazia.videoplayer/Native"
 }

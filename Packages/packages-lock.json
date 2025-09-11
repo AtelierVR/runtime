@@ -731,6 +731,14 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "hactazia.videoplayer": {
+      "version": "file:hactazia.videoplayer",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.render-pipelines.core": "14.0.0"
+      }
+    },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
       "depth": 0,
