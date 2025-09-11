@@ -180,7 +180,7 @@ namespace Hactazia.VideoPlayer {
 
 		private void UpdateVideoFrame() {
 			var frameData = GetVideoFrameAtTime(CurrentTime);
-			if (!frameData.HasValue || !videoTexture || !renderTexture) return;
+			if (!frameData.HasValue || !renderTexture) return;
 
 			var frame = frameData.Value;
 			if (frame.data == IntPtr.Zero) return;
