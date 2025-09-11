@@ -2,7 +2,8 @@
     "name": "Hactazia.VideoPlayer.Editor",
     "rootNamespace": "Hactazia.VideoPlayer.Editor",
     "references": [
-        "Hactazia.VideoPlayer"
+        "Hactazia.VideoPlayer",
+        "Nox.CCK"
     ],
     "includePlatforms": [
         "Editor"
