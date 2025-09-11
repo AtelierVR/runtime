@@ -164,12 +164,30 @@ namespace Hactazia.VideoPlayer.Editor {
 				return "00:00";
 			}
 
-			var timeSpan = System.TimeSpan.FromSeconds(timeInSeconds);
-			if (timeSpan.TotalHours >= 1) {
-				return timeSpan.ToString(@"hh\:mm\:ss");
+			// Check for values that would cause TimeSpan overflow
+			// TimeSpan.MaxValue.TotalSeconds is approximately 922,337,203,685.477
+			if (timeInSeconds < 0) {
+				return "00:00";
+			}
+			
+			if (timeInSeconds > System.TimeSpan.MaxValue.TotalSeconds) {
+				return "∞"; // Infinity symbol for very long durations
 			}
 
-			return timeSpan.ToString(@"mm\:ss");
+			try {
+				var timeSpan = System.TimeSpan.FromSeconds(timeInSeconds);
+				if (timeSpan.TotalHours >= 1) {
+					return timeSpan.ToString(@"hh\:mm\:ss");
+				}
+
+				return timeSpan.ToString(@"mm\:ss");
+			}
+			catch (System.OverflowException) {
+				return "∞";
+			}
+			catch (System.ArgumentOutOfRangeException) {
+				return "∞";
+			}
 		}
 	}
 }
