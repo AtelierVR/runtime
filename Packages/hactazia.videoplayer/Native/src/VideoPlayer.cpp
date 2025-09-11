@@ -467,26 +467,40 @@ VideoFrame *VideoPlayer::getVideoFrameAtTime(double time)
 {
     std::lock_guard<std::mutex> lock(cacheMutex);
 
-    auto it = cachedVideoFrames.find(time);
-    if (it != cachedVideoFrames.end())
+    VideoFrame* lastFrame = nullptr;
+    double lastTimestamp = -1.0;
+    
+    // Find the frame with the highest timestamp that is still <= time
+    for (auto& [timestamp, frame] : cachedVideoFrames)
     {
-        return &it->second;
+        if (timestamp <= time && timestamp > lastTimestamp)
+        {
+            lastTimestamp = timestamp;
+            lastFrame = &frame;
+        }
     }
 
-    return nullptr;
+    return lastFrame;
 }
 
 AudioFrame *VideoPlayer::getAudioFrameAtTime(double time)
 {
     std::lock_guard<std::mutex> lock(cacheMutex);
 
-    auto it = cachedAudioFrames.find(time);
-    if (it != cachedAudioFrames.end())
+    AudioFrame* lastFrame = nullptr;
+    double lastTimestamp = -1.0;
+    
+    // Find the frame with the highest timestamp that is still <= time
+    for (auto& [timestamp, frame] : cachedAudioFrames)
     {
-        return &it->second;
+        if (timestamp <= time && timestamp > lastTimestamp)
+        {
+            lastTimestamp = timestamp;
+            lastFrame = &frame;
+        }
     }
 
-    return nullptr;
+    return lastFrame;
 }
 
 double VideoPlayer::getDuration() const

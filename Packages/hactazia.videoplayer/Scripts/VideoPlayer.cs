@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace Hactazia.VideoPlayer {
 	/// <summary>
@@ -35,6 +36,10 @@ namespace Hactazia.VideoPlayer {
 		private byte[]    _pixelBuffer;
 		private GCHandle  _pixelHandle;
 
+		// Cached dimensions to avoid repeated native calls
+		private int _cachedWidth  = 0;
+		private int _cachedHeight = 0;
+		
 		public double Duration
 			=> VideoPlayerNative.GetDuration(_nativePlayer);
 
@@ -88,18 +93,18 @@ namespace Hactazia.VideoPlayer {
 		private void Update() {
 			if (!VideoPlayerNative.IsValid(_nativePlayer))
 				return;
-		
+
 			VideoPlayerNative.UpdatePlayer(_nativePlayer);
-		
+
 			if (State != PlayerState.Playing) return;
-		
+
 			// Déclencher l'événement de temps seulement si significativement différent
 			if (Math.Abs(CurrentTime - _lastTime) > 0.01) // 10ms de tolérance
 			{
 				OnTimeChanged.Invoke(CurrentTime);
 				_lastTime = CurrentTime;
 			}
-		
+
 			// Vérifier la fin de la vidéo
 			if (CurrentTime >= Duration) {
 				if (loop) {
@@ -109,8 +114,7 @@ namespace Hactazia.VideoPlayer {
 					OnVideoEnded.Invoke();
 				}
 			}
-		
-			// Récupérer et afficher la frame courante
+
 			UpdateVideoFrame();
 		}
 
@@ -132,13 +136,21 @@ namespace Hactazia.VideoPlayer {
 			if (!VideoPlayerNative.LoadVideo(_nativePlayer, url))
 				return false;
 
+			// Reset timing variables for the new video
+			_lastTime          = 0.0;
+			// Cache video properties
+			_cachedWidth  = VideoWidth;
+			_cachedHeight = VideoHeight;
+			
 			OnVideoLoaded.Invoke();
-			Debug.Log($"Video loaded: {VideoWidth}x{VideoHeight}, Duration: {Duration:F2}s, FPS: {FrameRate:F2}");
 			return true;
 		}
 
-		public void Play()
-			=> VideoPlayerNative.Play(_nativePlayer);
+		public void Play() {
+			VideoPlayerNative.Play(_nativePlayer);
+			var currentTime = CurrentTime;
+			_lastTime      = currentTime;
+		}
 
 		public void Pause()
 			=> VideoPlayerNative.Pause(_nativePlayer);
@@ -152,6 +164,7 @@ namespace Hactazia.VideoPlayer {
 		public void Seek(double time) {
 			time = Math.Max(0.0, Math.Min(time, Duration));
 			VideoPlayerNative.Seek(_nativePlayer, time);
+			_lastTime      = time;
 		}
 
 		public VideoFrame? GetVideoFrameAtTime(double time) {
@@ -167,11 +180,17 @@ namespace Hactazia.VideoPlayer {
 		}
 
 		private void UpdateVideoFrame() {
-			var frameData = GetVideoFrameAtTime(CurrentTime);
+			var currentTime = CurrentTime;
+
+			var frameData = GetVideoFrameAtTime(currentTime);
 			if (!frameData.HasValue || !renderTexture) return;
 
 			var frame = frameData.Value;
-			if (frame.data == IntPtr.Zero) return;
+			if (frame.data == IntPtr.Zero || !frame.valid || frame.width <= 0 || frame.height <= 0)
+				return;
+
+			// Update cached dimensions if needed
+			UpdateCachedDimensions();
 
 			// Assurer que la RenderTexture est de la bonne taille
 			ResizeRenderTexture();
@@ -179,7 +198,7 @@ namespace Hactazia.VideoPlayer {
 			ResizeBuffer();
 
 			// Copier les données de la frame native vers notre buffer
-			Marshal.Copy(frame.data, _pixelBuffer, 0, VideoWidth * VideoHeight * 4);
+			Marshal.Copy(frame.data, _pixelBuffer, 0, _cachedWidth * _cachedHeight * 4);
 
 			// Mettre à jour la texture
 			_videoTexture.LoadRawTextureData(_pixelBuffer);
@@ -188,36 +207,45 @@ namespace Hactazia.VideoPlayer {
 			Graphics.CopyTexture(_videoTexture, renderTexture);
 		}
 
+		private void UpdateCachedDimensions() {
+			var width  = VideoWidth;
+			var height = VideoHeight;
+			if (_cachedWidth != width || _cachedHeight != height) {
+				_cachedWidth  = width;
+				_cachedHeight = height;
+				Logger.Log($"Video dimensions changed: {_cachedWidth}x{_cachedHeight}");
+			}
+		}
+
 		private void ResizeBuffer() {
-			var width        = VideoWidth;
-			var height       = VideoHeight;
-			var requiredSize = width * height * 4;
+			var requiredSize = _cachedWidth * _cachedHeight * 4;
 			if (_pixelBuffer != null && _pixelBuffer.Length == requiredSize) return;
 			if (_pixelHandle.IsAllocated)
 				_pixelHandle.Free();
 			_pixelBuffer = new byte[requiredSize];
 			_pixelHandle = GCHandle.Alloc(_pixelBuffer, GCHandleType.Pinned);
+			Logger.Log($"Resized pixel buffer to {_cachedWidth}x{_cachedHeight} ({requiredSize} bytes)");
 		}
 
 		private void ResizeRenderTexture() {
 			if (!renderTexture) return;
-			var width  = VideoWidth;
-			var height = VideoHeight;
-			if (renderTexture.width == width && renderTexture.height == height) return;
+			if (renderTexture.width == _cachedWidth && renderTexture.height == _cachedHeight) return;
 
 			renderTexture.Release();
-			renderTexture.width  = width;
-			renderTexture.height = height;
+			renderTexture.width  = _cachedWidth;
+			renderTexture.height = _cachedHeight;
 			renderTexture.Create();
+			Logger.Log($"Resized RenderTexture to {_cachedWidth}x{_cachedHeight}");
 		}
 
 		private void CreateVideoTexture() {
 			if (_videoTexture)
 				DestroyImmediate(_videoTexture);
-			_videoTexture = new Texture2D(VideoWidth, VideoHeight, TextureFormat.RGBA32, false) {
+			_videoTexture = new Texture2D(_cachedWidth, _cachedHeight, TextureFormat.RGBA32, false) {
 				wrapMode   = TextureWrapMode.Clamp,
 				filterMode = FilterMode.Bilinear
 			};
+			Logger.Log($"Created video texture {_cachedWidth}x{_cachedHeight}");
 		}
 
 		private void ResizeTexture() {
@@ -226,14 +254,12 @@ namespace Hactazia.VideoPlayer {
 				return;
 			}
 
-			var width  = VideoWidth;
-			var height = VideoHeight;
-			if (_videoTexture.width == width && _videoTexture.height == height) return;
+			if (_videoTexture.width == _cachedWidth && _videoTexture.height == _cachedHeight) return;
 
 			CreateVideoTexture();
+			Logger.Log($"Resized video texture to {_cachedWidth}x{_cachedHeight}");
 		}
 
-		// Méthodes publiques pour l'interface Unity
 		[ContextMenu("Play Video")]
 		public void PlayVideo()
 			=> Play();
