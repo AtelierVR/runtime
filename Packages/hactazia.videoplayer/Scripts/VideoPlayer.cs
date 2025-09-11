@@ -86,42 +86,29 @@ namespace Hactazia.VideoPlayer {
 		private void Update() {
 			if (playerId < 0) return;
 
-			try {
-				VideoPlayerNative.UpdatePlayer(playerId);
+			VideoPlayerNative.UpdatePlayer(playerId);
 
-				var currentState = State;
-				if (currentState != PlayerState.Playing) return;
+			if (State != PlayerState.Playing) return;
 
-				var currentTime = CurrentTime;
-				var duration = Duration;
-
-				// Déclencher l'événement de temps seulement si significativement différent
-				if (Math.Abs(currentTime - lastTime) > 0.01) // 10ms de tolérance
-				{
-					OnTimeChanged?.Invoke(currentTime);
-					lastTime = currentTime;
-				}
-
-				// Vérifier la fin de la vidéo
-				if (currentTime >= duration && duration > 0) {
-					if (loop) {
-						Seek(0.0);
-					} else {
-						Stop();
-						OnVideoEnded?.Invoke();
-					}
-				}
-
-				// Récupérer et afficher la frame courante
-				UpdateVideoFrame();
+			// Déclencher l'événement de temps seulement si significativement différent
+			if (Math.Abs(CurrentTime - lastTime) > 0.01) // 10ms de tolérance
+			{
+				OnTimeChanged?.Invoke(CurrentTime);
+				lastTime = CurrentTime;
 			}
-			catch (System.Exception ex) {
-				Debug.LogError($"VideoPlayer Update error: {ex.Message}");
-				// En cas d'erreur, arrêter le player pour éviter d'autres problèmes
-				if (playerId >= 0) {
-					playerId = -1;
+
+			// Vérifier la fin de la vidéo
+			if (CurrentTime >= Duration) {
+				if (loop) {
+					Seek(0.0);
+				} else {
+					Stop();
+					OnVideoEnded?.Invoke();
 				}
 			}
+
+			// Récupérer et afficher la frame courante
+			UpdateVideoFrame();
 		}
 
 		private void OnDestroy() {
@@ -150,43 +137,18 @@ namespace Hactazia.VideoPlayer {
 			return true;
 		}
 
-		public void Play() {
-			if (playerId < 0 || !IsLoaded) return;
-			try {
-				VideoPlayerNative.Play(playerId);
-			} catch (System.Exception ex) {
-				Debug.LogError($"VideoPlayer Play error: {ex.Message}");
-			}
-		}
+		public void Play()
+			=> VideoPlayerNative.Play(playerId);
 
-		public void Pause() {
-			if (playerId < 0 || !IsPlaying) return;
-			try {
-				VideoPlayerNative.Pause(playerId);
-			} catch (System.Exception ex) {
-				Debug.LogError($"VideoPlayer Pause error: {ex.Message}");
-			}
-		}
+		public void Pause()
+			=> VideoPlayerNative.Pause(playerId);
 
-		public void Resume() {
-			if (playerId < 0 || !IsPaused) return;
-			try {
-				VideoPlayerNative.Resume(playerId);
-			} catch (System.Exception ex) {
-				Debug.LogError($"VideoPlayer Resume error: {ex.Message}");
-			}
-		}
 
-		public void Stop() {
-			if (playerId < 0 || State == PlayerState.Stopped || State == PlayerState.Uninitialized) return;
-			
-			try {
-				VideoPlayerNative.Stop(playerId);
-			}
-			catch (System.Exception ex) {
-				Debug.LogError($"VideoPlayer Stop error: {ex.Message}");
-			}
-		}
+		public void Resume()
+			=> VideoPlayerNative.Resume(playerId);
+
+		public void Stop()
+			=> VideoPlayerNative.Stop(playerId);
 
 		public void Seek(double time) {
 			if (playerId < 0 || State == PlayerState.Uninitialized || State == PlayerState.Error) return;
