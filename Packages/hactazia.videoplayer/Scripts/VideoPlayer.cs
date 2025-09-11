@@ -137,8 +137,6 @@ namespace Hactazia.VideoPlayer {
 			if (!VideoPlayerNative.IsValid(_nativePlayer))
 				return;
 
-			VideoPlayerNative.UpdatePlayer(_nativePlayer);
-
 			if (State != PlayerState.Playing) return;
 
 			// Déclencher l'événement de temps seulement si significativement différent
@@ -264,13 +262,7 @@ namespace Hactazia.VideoPlayer {
 			}
 
 			// Update cached dimensions if needed
-			UpdateCachedDimensions();
-
-			// Check if dimensions changed unexpectedly
-			if (frame.width != _cachedWidth || frame.height != _cachedHeight) {
-				Logger.LogWarning($"Frame size mismatch: expected {_cachedWidth}x{_cachedHeight}, got {frame.width}x{frame.height}");
-				return;
-			}
+			UpdateCachedDimensions(frame.width, frame.height);
 
 			// Assurer que la RenderTexture est de la bonne taille
 			ResizeRenderTexture();
@@ -298,14 +290,13 @@ namespace Hactazia.VideoPlayer {
 			}
 		}
 
-		private void UpdateCachedDimensions() {
-			var width  = VideoWidth;
-			var height = VideoHeight;
-			if (_cachedWidth != width || _cachedHeight != height) {
-				_cachedWidth  = width;
-				_cachedHeight = height;
-				Logger.Log($"Video dimensions changed: {_cachedWidth}x{_cachedHeight}");
-			}
+		private void UpdateCachedDimensions(int width = -1, int height = -1) {
+			width  = width  > 0 ? width : VideoWidth;
+			height = height > 0 ? height : VideoHeight;
+			if (_cachedWidth == width && _cachedHeight == height) return;
+			_cachedWidth  = width;
+			_cachedHeight = height;
+			Logger.Log($"Video dimensions changed: {_cachedWidth}x{_cachedHeight}");
 		}
 
 		private void ResizeBuffer() {

@@ -224,12 +224,6 @@ namespace Hactazia.VideoPlayer {
 			return Impl_GetFrameRate(player);
 		}
 		
-		public static void UpdatePlayer(IntPtr player)
-		{
-			if (!IsValid(player)) return;
-			Impl_UpdatePlayer(player);
-		}
-
 		public static PlayerState GetPlayerState(IntPtr player) {
 			if (!IsValid(player)) return PlayerState.Uninitialized;
 			return (PlayerState)Impl_GetPlayerState(player);

@@ -34,49 +34,26 @@ namespace Nox.VideoPlayer {
 
 		public RenderTexture GetRender();
 
-		public void AddReadyListener(UnityAction<IVideoPlayer> listener);
+		public UnityEvent<IVideoPlayer> OnReadyEvent();
 
-		public void RemoveReadyListener(UnityAction<IVideoPlayer> listener);
+		public UnityEvent<IVideoPlayer> OnStartEvent();
 
-		public void AddStartListener(UnityAction<IVideoPlayer> listener);
+		public UnityEvent<IVideoPlayer> OnPlayEvent();
 
-		public void RemoveStartListener(UnityAction<IVideoPlayer> listener);
+		public UnityEvent<IVideoPlayer> OnPauseEvent();
 
-		public void AddEndListener(UnityAction<IVideoPlayer> listener);
+		public UnityEvent<IVideoPlayer> OnResumeEvent();
 
-		public void RemoveEndListener(UnityAction<IVideoPlayer> listener);
+		public UnityEvent<IVideoPlayer> OnEndEvent();
 
-		public void AddErrorListener(UnityAction<IVideoPlayer, Exception> listener);
+		public UnityEvent<IVideoPlayer, double> OnProgressEvent();
 
-		public void RemoveErrorListener(UnityAction<IVideoPlayer, Exception> listener);
+		public UnityEvent<IVideoPlayer, double> OnSeekEvent();
 
-		// Nouveaux événements
-		public void AddPlayListener(UnityAction<IVideoPlayer> listener);
+		public UnityEvent<IVideoPlayer, float> OnVolumeChangedEvent();
 
-		public void RemovePlayListener(UnityAction<IVideoPlayer> listener);
+		public UnityEvent<IVideoPlayer, bool> OnPlayStatusChangedEvent();
 
-		public void AddPauseListener(UnityAction<IVideoPlayer> listener);
-
-		public void RemovePauseListener(UnityAction<IVideoPlayer> listener);
-
-		public void AddResumeListener(UnityAction<IVideoPlayer> listener);
-
-		public void RemoveResumeListener(UnityAction<IVideoPlayer> listener);
-
-		public void AddProgressListener(UnityAction<IVideoPlayer, double> listener);
-
-		public void RemoveProgressListener(UnityAction<IVideoPlayer, double> listener);
-
-		public void AddSeekListener(UnityAction<IVideoPlayer, double> listener);
-
-		public void RemoveSeekListener(UnityAction<IVideoPlayer, double> listener);
-
-		public void AddVolumeChangedListener(UnityAction<IVideoPlayer, float> listener);
-
-		public void RemoveVolumeChangedListener(UnityAction<IVideoPlayer, float> listener);
-
-		public void AddPlayStatusChangedListener(UnityAction<IVideoPlayer, bool> listener);
-
-		public void RemovePlayStatusChangedListener(UnityAction<IVideoPlayer, bool> listener);
+		public UnityEvent<IVideoPlayer, Exception> OnErrorEvent();
 	}
 }

@@ -108,97 +108,60 @@ namespace Nox.CCK.VideoPlayer {
 		public UnityEvent<IVideoPlayer, float>     onVolumeChanged     = new(); // Événement pour le changement de volume (0.0 à 1.0)
 		public UnityEvent<IVideoPlayer, bool>      onPlayStatusChanged = new(); // Événement pour le changement de statut de lecture
 
-		public void AddReadyListener(UnityAction<IVideoPlayer> listener)
-			=> onReady.AddListener(listener);
+		public UnityEvent<IVideoPlayer, IFetchOptions>            onResolving = new(); // Événement pour le début de la résolution
+		public UnityEvent<IVideoPlayer, IFetchOptions, IResult[]> onResolved  = new(); // Événement pour la résolution terminée
 
-		public void RemoveReadyListener(UnityAction<IVideoPlayer> listener)
-			=> onReady.RemoveListener(listener);
+		public UnityEvent<IVideoPlayer> OnReadyEvent()
+			=> onReady;
 
-		public void AddStartListener(UnityAction<IVideoPlayer> listener)
-			=> onStart.AddListener(listener);
+		public UnityEvent<IVideoPlayer> OnConnectionLost()
+			=> onConnectionLost;
 
-		public void RemoveStartListener(UnityAction<IVideoPlayer> listener)
-			=> onStart.RemoveListener(listener);
+		public UnityEvent<IVideoPlayer> OnReconnecting()
+			=> onReconnecting;
 
-		public void AddEndListener(UnityAction<IVideoPlayer> listener)
-			=> onEnd.AddListener(listener);
+		public UnityEvent<IVideoPlayer> OnReconnected()
+			=> onReconnected;
 
-		public void RemoveEndListener(UnityAction<IVideoPlayer> listener)
-			=> onEnd.RemoveListener(listener);
+		public UnityEvent<IVideoPlayer> OnPlayEvent()
+			=> onPlay;
 
-		public void AddErrorListener(UnityAction<IVideoPlayer, Exception> listener)
-			=> onError.AddListener(listener);
+		public UnityEvent<IVideoPlayer> OnPauseEvent()
+			=> onPause;
 
-		public void RemoveErrorListener(UnityAction<IVideoPlayer, Exception> listener)
-			=> onError.RemoveListener(listener);
+		public UnityEvent<IVideoPlayer> OnResumeEvent()
+			=> onResume;
 
-		public void AddConnectionLostListener(UnityAction<IVideoPlayer> listener)
-			=> onConnectionLost.AddListener(listener);
+		public UnityEvent<IVideoPlayer, double> OnProgressEvent()
+			=> onProgress;
 
-		public void RemoveConnectionLostListener(UnityAction<IVideoPlayer> listener)
-			=> onConnectionLost.RemoveListener(listener);
+		public UnityEvent<IVideoPlayer, double> OnSeekEvent()
+			=> onSeek;
 
-		public void AddReconnectingListener(UnityAction<IVideoPlayer> listener)
-			=> onReconnecting.AddListener(listener);
+		public UnityEvent<IVideoPlayer, float> OnVolumeChangedEvent()
+			=> onVolumeChanged;
 
-		public void RemoveReconnectingListener(UnityAction<IVideoPlayer> listener)
-			=> onReconnecting.RemoveListener(listener);
+		public UnityEvent<IVideoPlayer, bool> OnPlayStatusChangedEvent()
+			=> onPlayStatusChanged;
 
-		public void AddReconnectedListener(UnityAction<IVideoPlayer> listener)
-			=> onReconnected.AddListener(listener);
+		public UnityEvent<IVideoPlayer, Exception> OnErrorEvent()
+			=> onError;
 
-		public void RemoveReconnectedListener(UnityAction<IVideoPlayer> listener)
-			=> onReconnected.RemoveListener(listener);
+		public UnityEvent<IVideoPlayer> OnStartEvent()
+			=> onStart;
 
-		// Nouvelles méthodes pour les nouveaux événements
-		public void AddPlayListener(UnityAction<IVideoPlayer> listener)
-			=> onPlay.AddListener(listener);
-
-		public void RemovePlayListener(UnityAction<IVideoPlayer> listener)
-			=> onPlay.RemoveListener(listener);
-
-		public void AddPauseListener(UnityAction<IVideoPlayer> listener)
-			=> onPause.AddListener(listener);
-
-		public void RemovePauseListener(UnityAction<IVideoPlayer> listener)
-			=> onPause.RemoveListener(listener);
-
-		public void AddResumeListener(UnityAction<IVideoPlayer> listener)
-			=> onResume.AddListener(listener);
-
-		public void RemoveResumeListener(UnityAction<IVideoPlayer> listener)
-			=> onResume.RemoveListener(listener);
-
-		public void AddProgressListener(UnityAction<IVideoPlayer, double> listener)
-			=> onProgress.AddListener(listener);
-
-		public void RemoveProgressListener(UnityAction<IVideoPlayer, double> listener)
-			=> onProgress.RemoveListener(listener);
-
-		public void AddSeekListener(UnityAction<IVideoPlayer, double> listener)
-			=> onSeek.AddListener(listener);
-
-		public void RemoveSeekListener(UnityAction<IVideoPlayer, double> listener)
-			=> onSeek.RemoveListener(listener);
-
-		public void AddVolumeChangedListener(UnityAction<IVideoPlayer, float> listener)
-			=> onVolumeChanged.AddListener(listener);
-
-		public void RemoveVolumeChangedListener(UnityAction<IVideoPlayer, float> listener)
-			=> onVolumeChanged.RemoveListener(listener);
-
-		public void AddPlayStatusChangedListener(UnityAction<IVideoPlayer, bool> listener)
-			=> onPlayStatusChanged.AddListener(listener);
-
-		public void RemovePlayStatusChangedListener(UnityAction<IVideoPlayer, bool> listener)
-			=> onPlayStatusChanged.RemoveListener(listener);
+		public UnityEvent<IVideoPlayer> OnEndEvent()
+			=> onEnd;
+		
+		public UnityEvent<IVideoPlayer, IFetchOptions> OnResolvingEvent()
+			=> onResolving;
+		
+		public UnityEvent<IVideoPlayer, IFetchOptions, IResult[]> OnResolvedEvent()
+			=> onResolved;
 
 		#endregion Events
 
 		#region Resolving
-
-		public UnityEvent<IVideoPlayer, IFetchOptions>            onResolving = new();
-		public UnityEvent<IVideoPlayer, IFetchOptions, IResult[]> onResolved  = new();
 
 		private IFetchOptions _currentFetchOptions;
 
@@ -247,18 +210,6 @@ namespace Nox.CCK.VideoPlayer {
 
 			Play(tuple, IsLooping());
 		}
-
-		public void AddResolvingListener(UnityAction<IVideoPlayer, IFetchOptions> listener)
-			=> onResolving.AddListener(listener);
-
-		public void RemoveResolvingListener(UnityAction<IVideoPlayer, IFetchOptions> listener)
-			=> onResolving.RemoveListener(listener);
-
-		public void AddResolvedListener(UnityAction<IVideoPlayer, IFetchOptions, IResult[]> listener)
-			=> onResolved.AddListener(listener);
-
-		public void RemoveResolvedListener(UnityAction<IVideoPlayer, IFetchOptions, IResult[]> listener)
-			=> onResolved.RemoveListener(listener);
 
 		#endregion Resolving
 
@@ -326,11 +277,11 @@ namespace Nox.CCK.VideoPlayer {
 			}
 
 			Logger.LogDebug($"Playing AudioVideo format: {url} (Resolution: {audioVideo.GetResolution()}, Audio Channels: {audioVideo.GetAudioChannels()})");
-			
+
 			// Configure le player pour audio et vidéo
 			UnityVideoPlayer.audioOutputMode = UnityEngine.Video.VideoAudioOutputMode.AudioSource;
 			UnityVideoPlayer.SetTargetAudioSource(0, AudioSource);
-			
+
 			PlayUrl(url, IsLooping());
 		}
 
@@ -356,7 +307,7 @@ namespace Nox.CCK.VideoPlayer {
 			// Pour des streams séparés, Unity VideoPlayer ne supporte pas nativement deux URLs
 			// On doit utiliser la vidéo comme source principale et gérer l'audio séparément
 			Logger.LogWarning("Separate video/audio streams detected. Using video stream only - audio stream will be ignored.");
-			
+
 			Play(video);
 		}
 
@@ -375,10 +326,10 @@ namespace Nox.CCK.VideoPlayer {
 			}
 
 			Logger.LogDebug($"Playing Video format: {url} (Resolution: {video.GetResolution()}, Framerate: {video.GetFramerate()})");
-			
+
 			// Configure le player pour vidéo seulement
 			UnityVideoPlayer.audioOutputMode = UnityEngine.Video.VideoAudioOutputMode.None;
-			
+
 			PlayUrl(url, IsLooping());
 		}
 
@@ -397,11 +348,11 @@ namespace Nox.CCK.VideoPlayer {
 			}
 
 			Logger.LogDebug($"Playing Audio format: {url} (Channels: {audio.GetAudioChannels()}, Bitrate: {audio.GetAudioBitrate()})");
-			
+
 			// Configure le player pour audio seulement
 			UnityVideoPlayer.audioOutputMode = UnityEngine.Video.VideoAudioOutputMode.AudioSource;
 			UnityVideoPlayer.SetTargetAudioSource(0, AudioSource);
-			
+
 			PlayUrl(url, IsLooping());
 		}
 
@@ -451,6 +402,7 @@ namespace Nox.CCK.VideoPlayer {
 
 		public RenderTexture GetRender()
 			=> UnityVideoPlayer.targetTexture;
+
 
 		public float GetVolume()
 			=> AudioSource.volume;
@@ -594,4 +546,3 @@ namespace Nox.CCK.VideoPlayer {
 		#endregion Metadata
 	}
 }
-

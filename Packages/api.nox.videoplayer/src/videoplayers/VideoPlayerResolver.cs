@@ -24,14 +24,14 @@ namespace api.nox.videoplayer {
 			var player = arg0.GetResolver();
 			if (player == null) return;
 			Logger.LogDebug($"Unregistered video player {arg0} from resolving");
-			player.RemoveResolvingListener(OnResolving);
+			player.OnResolvingEvent().RemoveListener(OnResolving);
 		}
 
 		private static void OnRegistered(IVideoPlayer arg0) {
 			var player = arg0.GetResolver();
 			if (player == null) return;
 			Logger.LogDebug($"Registered video player {arg0} for resolving");
-			player.AddResolvingListener(OnResolving);
+			player.OnResolvingEvent().AddListener(OnResolving);
 		}
 
 		private static void OnResolving(IVideoPlayer arg0, IFetchOptions arg1)
