@@ -1,5 +1,6 @@
 #include "../include/VideoPlayer.h"
 #include <chrono>
+#include <thread>
 
 extern "C"
 {
@@ -774,6 +775,19 @@ void VideoPlayer::decodeVideoPacket(AVPacket *packet)
             }
 
             currentTime = timestamp;
+
+            // Control playback speed - wait for the appropriate time
+            if (frameRate > 0.0) {
+                static auto lastFrameTime = std::chrono::steady_clock::now();
+                auto expectedFrameDuration = std::chrono::duration<double>(1.0 / frameRate);
+                auto currentFrameTime = std::chrono::steady_clock::now();
+                auto actualDuration = currentFrameTime - lastFrameTime;
+                
+                if (actualDuration < expectedFrameDuration) {
+                    std::this_thread::sleep_for(expectedFrameDuration - actualDuration);
+                }
+                lastFrameTime = std::chrono::steady_clock::now();
+            }
 
             // Convertir la frame au format RGBA
             if (!swsContext)
