@@ -27,41 +27,41 @@ namespace Hactazia.VideoPlayer {
 		public event Action         OnVideoEnded;
 		public event Action<double> OnTimeChanged;
 
-		private int       playerId = -1;
+		private IntPtr    nativePlayer = IntPtr.Zero;
 		private Texture2D videoTexture;
 		private double    lastTime = 0.0; // Cache pour éviter les allocations GC
 		private byte[]    pixelBuffer;
 		private GCHandle  pixelHandle;
 
 		public double Duration
-			=> VideoPlayerNative.GetDuration(playerId);
+			=> VideoPlayerNative.GetDuration(nativePlayer);
 
 		public double CurrentTime
-			=> VideoPlayerNative.GetCurrentTime(playerId);
+			=> VideoPlayerNative.GetCurrentTime(nativePlayer);
 
 		public int VideoWidth
-			=> VideoPlayerNative.GetVideoWidth(playerId);
+			=> VideoPlayerNative.GetVideoWidth(nativePlayer);
 
 		public int VideoHeight
-			=> VideoPlayerNative.GetVideoHeight(playerId);
+			=> VideoPlayerNative.GetVideoHeight(nativePlayer);
 
 		public double FrameRate
-			=> VideoPlayerNative.GetFrameRate(playerId);
+			=> VideoPlayerNative.GetFrameRate(nativePlayer);
 
 		public RenderTexture OutputTexture
 			=> renderTexture;
 
 		public int PlayerId
-			=> playerId;
+			=> nativePlayer.ToInt32();
 
 		public PlayerState State
-			=> playerId >= 0 ? (PlayerState)VideoPlayerNative.GetPlayerState(playerId) : PlayerState.Uninitialized;
+			=> (PlayerState)VideoPlayerNative.GetPlayerState(nativePlayer);
 
 		public PlayerError Error
-			=> playerId >= 0 ? (PlayerError)VideoPlayerNative.GetPlayerError(playerId) : PlayerError.None;
+			=> (PlayerError)VideoPlayerNative.GetPlayerError(nativePlayer);
 
 		public string ErrorMessage
-			=> playerId >= 0 ? VideoPlayerNative.GetPlayerErrorMessage(playerId) : "Player not initialized";
+			=> VideoPlayerNative.GetPlayerErrorMessage(nativePlayer);
 
 		public bool IsLoaded
 			=> State != PlayerState.Uninitialized && State != PlayerState.Error;
@@ -84,9 +84,10 @@ namespace Hactazia.VideoPlayer {
 		}
 
 		private void Update() {
-			if (playerId < 0) return;
+			if (nativePlayer == IntPtr.Zero)
+				return;
 
-			VideoPlayerNative.UpdatePlayer(playerId);
+			VideoPlayerNative.UpdatePlayer(nativePlayer);
 
 			if (State != PlayerState.Playing) return;
 
@@ -112,10 +113,8 @@ namespace Hactazia.VideoPlayer {
 		}
 
 		private void OnDestroy() {
-			if (playerId >= 0) {
-				VideoPlayerNative.DestroyVideoPlayer(playerId);
-				playerId = -1;
-			}
+			VideoPlayerNative.DestroyVideoPlayer(nativePlayer);
+			nativePlayer = IntPtr.Zero;
 
 			if (pixelHandle.IsAllocated)
 				pixelHandle.Free();
@@ -125,11 +124,10 @@ namespace Hactazia.VideoPlayer {
 		}
 
 		public bool LoadVideo(string url) {
-			if (playerId >= 0)
-				VideoPlayerNative.DestroyVideoPlayer(playerId);
-
-			playerId = VideoPlayerNative.CreateVideoPlayer();
-			if (!VideoPlayerNative.LoadVideo(playerId, url))
+			VideoPlayerNative.DestroyVideoPlayer(nativePlayer);
+			
+			nativePlayer = VideoPlayerNative.CreateVideoPlayer();
+			if (!VideoPlayerNative.LoadVideo(nativePlayer, url))
 				return false;
 
 			OnVideoLoaded?.Invoke();
@@ -138,27 +136,27 @@ namespace Hactazia.VideoPlayer {
 		}
 
 		public void Play()
-			=> VideoPlayerNative.Play(playerId);
+			=> VideoPlayerNative.Play(nativePlayer);
 
 		public void Pause()
-			=> VideoPlayerNative.Pause(playerId);
+			=> VideoPlayerNative.Pause(nativePlayer);
 
 
 		public void Resume()
-			=> VideoPlayerNative.Resume(playerId);
+			=> VideoPlayerNative.Resume(nativePlayer);
 
 		public void Stop()
-			=> VideoPlayerNative.Stop(playerId);
+			=> VideoPlayerNative.Stop(nativePlayer);
 
 		public void Seek(double time) {
-			if (playerId < 0 || State == PlayerState.Uninitialized || State == PlayerState.Error) return;
+			if (nativePlayer == IntPtr.Zero || State == PlayerState.Uninitialized || State == PlayerState.Error) return;
 			time = Math.Max(0.0, Math.Min(time, Duration));
-			VideoPlayerNative.Seek(playerId, time);
+			VideoPlayerNative.Seek(nativePlayer, time);
 		}
 
 		public VideoFrame? GetVideoFrameAtTime(double time) {
-			if (playerId < 0 || State == PlayerState.Uninitialized || State == PlayerState.Error) return null;
-			var framePtr = VideoPlayerNative.GetVideoFrameAtTime(playerId, time);
+			if (nativePlayer == IntPtr.Zero || State == PlayerState.Uninitialized || State == PlayerState.Error) return null;
+			var framePtr = VideoPlayerNative.GetVideoFrameAtTime(nativePlayer, time);
 			if (framePtr == IntPtr.Zero) return null;
 
 			var frame = Marshal.PtrToStructure<VideoFrame>(framePtr);
@@ -168,8 +166,8 @@ namespace Hactazia.VideoPlayer {
 		}
 
 		public AudioFrame? GetAudioFrameAtTime(double time) {
-			if (playerId < 0 || State == PlayerState.Uninitialized || State == PlayerState.Error) return null;
-			var framePtr = VideoPlayerNative.GetAudioFrameAtTime(playerId, time);
+			if (nativePlayer == IntPtr.Zero || State == PlayerState.Uninitialized || State == PlayerState.Error) return null;
+			var framePtr = VideoPlayerNative.GetAudioFrameAtTime(nativePlayer, time);
 			if (framePtr == IntPtr.Zero) return null;
 
 			var frame = Marshal.PtrToStructure<AudioFrame>(framePtr);

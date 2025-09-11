@@ -64,44 +64,5 @@ struct AudioFrame {
 typedef void (*VideoFrameCallback)(const VideoFrame* frame);
 typedef void (*AudioFrameCallback)(const AudioFrame* frame);
 
-// Interface C pour Unity
-extern "C" {
-    // Gestion du player
-    VIDEOPLAYER_API int CreateVideoPlayer();
-    VIDEOPLAYER_API void DestroyVideoPlayer(int playerId);
-    
-    // Contrôle de lecture
-    VIDEOPLAYER_API bool LoadVideo(int playerId, const char* url);
-    VIDEOPLAYER_API void Play(int playerId);
-    VIDEOPLAYER_API void Pause(int playerId);
-    VIDEOPLAYER_API void Resume(int playerId);
-    VIDEOPLAYER_API void Stop(int playerId);
-    VIDEOPLAYER_API void Seek(int playerId, double time);
-    
-    // Récupération de frames par timestamp
-    VIDEOPLAYER_API VideoFrame* GetVideoFrameAtTime(int playerId, double time);
-    VIDEOPLAYER_API AudioFrame* GetAudioFrameAtTime(int playerId, double time);
-    
-    // Libération mémoire
-    VIDEOPLAYER_API void FreeVideoFrame(VideoFrame* frame);
-    VIDEOPLAYER_API void FreeAudioFrame(AudioFrame* frame);
-    
-    // Informations vidéo
-    VIDEOPLAYER_API double GetDuration(int playerId);
-    VIDEOPLAYER_API double GetCurrentTime(int playerId);
-    VIDEOPLAYER_API int GetVideoWidth(int playerId);
-    VIDEOPLAYER_API int GetVideoHeight(int playerId);
-    VIDEOPLAYER_API double GetFrameRate(int playerId);
-    
-    // État du player
-    VIDEOPLAYER_API int GetPlayerState(int playerId);
-    VIDEOPLAYER_API int GetPlayerError(int playerId);
-    VIDEOPLAYER_API const char* GetPlayerErrorMessage(int playerId);
-    
-    // Callbacks (optionnel)
-    VIDEOPLAYER_API void SetVideoFrameCallback(int playerId, VideoFrameCallback callback);
-    VIDEOPLAYER_API void SetAudioFrameCallback(int playerId, AudioFrameCallback callback);
-    
-    // Mise à jour (à appeler depuis Unity Update)
-    VIDEOPLAYER_API void UpdatePlayer(int playerId);
-}
+// Forward declaration for VideoPlayerImpl class
+class VideoPlayerImpl;

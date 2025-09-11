@@ -27,42 +27,42 @@ namespace Hactazia.VideoPlayer {
 		// ========================================
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int CreateVideoPlayer();
+		public static extern IntPtr CreateVideoPlayer();
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void DestroyVideoPlayer(int playerId);
+		public static extern void DestroyVideoPlayer(IntPtr player);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern bool LoadVideo(int playerId, [MarshalAs(UnmanagedType.LPStr)] string url);
+		public static extern bool LoadVideo(IntPtr player, [MarshalAs(UnmanagedType.LPStr)] string url);
 
 		// ========================================
 		// Fonctions de contrôle de lecture
 		// ========================================
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void Play(int playerId);
+		public static extern void Play(IntPtr player);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void Pause(int playerId);
+		public static extern void Pause(IntPtr player);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void Resume(int playerId);
+		public static extern void Resume(IntPtr player);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void Stop(int playerId);
+		public static extern void Stop(IntPtr player);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void Seek(int playerId, double time);
+		public static extern void Seek(IntPtr player, double time);
 
 		// ========================================
 		// Fonctions d'accès aux données
 		// ========================================
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr GetVideoFrameAtTime(int playerId, double time);
+		public static extern IntPtr GetVideoFrameAtTime(IntPtr player, double time);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern IntPtr GetAudioFrameAtTime(int playerId, double time);
+		public static extern IntPtr GetAudioFrameAtTime(IntPtr player, double time);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
 		public static extern void FreeVideoFrame(IntPtr frame);
@@ -75,45 +75,45 @@ namespace Hactazia.VideoPlayer {
 		// ========================================
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern double GetDuration(int playerId);
+		public static extern double GetDuration(IntPtr player);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern double GetCurrentTime(int playerId);
+		public static extern double GetCurrentTime(IntPtr player);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int GetVideoWidth(int playerId);
+		public static extern int GetVideoWidth(IntPtr player);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int GetVideoHeight(int playerId);
+		public static extern int GetVideoHeight(IntPtr player);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern double GetFrameRate(int playerId);
+		public static extern double GetFrameRate(IntPtr player);
 
 		// ========================================
 		// Fonctions de callbacks et mise à jour
 		// ========================================
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void SetVideoFrameCallback(int playerId, VideoFrameCallback callback);
+		public static extern void SetVideoFrameCallback(IntPtr player, VideoFrameCallback callback);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void SetAudioFrameCallback(int playerId, AudioFrameCallback callback);
+		public static extern void SetAudioFrameCallback(IntPtr player, AudioFrameCallback callback);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern void UpdatePlayer(int playerId);
+		public static extern void UpdatePlayer(IntPtr player);
 
 		// ========================================
 		// Fonctions d'état et gestion d'erreurs
 		// ========================================
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int GetPlayerState(int playerId);
+		public static extern int GetPlayerState(IntPtr player);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
-		public static extern int GetPlayerError(int playerId);
+		public static extern int GetPlayerError(IntPtr player);
 
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl)]
 		[return: MarshalAs(UnmanagedType.LPStr)]
-		public static extern string GetPlayerErrorMessage(int playerId);
+		public static extern string GetPlayerErrorMessage(IntPtr player);
 	}
 }
