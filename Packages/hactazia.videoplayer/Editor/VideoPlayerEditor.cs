@@ -1,10 +1,13 @@
 using UnityEngine;
 using UnityEditor;
 
-namespace Hactazia.VideoPlayer.Editor {
+namespace Hactazia.VideoPlayer.Editor
+{
 	[CustomEditor(typeof(VideoPlayer))]
-	public class VideoPlayerEditor : UnityEditor.Editor {
-		public override void OnInspectorGUI() {
+	public class VideoPlayerEditor : UnityEditor.Editor
+	{
+		public override void OnInspectorGUI()
+		{
 			DrawDefaultInspector();
 
 			var videoPlayer = (VideoPlayer)target;
@@ -13,7 +16,8 @@ namespace Hactazia.VideoPlayer.Editor {
 			EditorGUILayout.Space();
 			EditorGUILayout.LabelField("Debug Information", EditorStyles.boldLabel);
 
-			using (new EditorGUI.DisabledGroupScope(true)) {
+			using (new EditorGUI.DisabledGroupScope(true))
+			{
 				EditorGUILayout.BeginVertical("box");
 
 				// État de la vidéo avec les nouvelles propriétés
@@ -22,14 +26,16 @@ namespace Hactazia.VideoPlayer.Editor {
 				EditorGUILayout.LabelField("Player ID", videoPlayer.PlayerId >= 0 ? videoPlayer.PlayerId.ToString() : "Not Initialized");
 
 				// Affichage des erreurs si présentes
-				if (videoPlayer.HasError) {
+				if (videoPlayer.HasError)
+				{
 					EditorGUILayout.Space();
 					EditorGUILayout.LabelField("Error", EditorStyles.boldLabel);
 					EditorGUILayout.LabelField("Error Type", videoPlayer.Error.ToString());
 					EditorGUILayout.LabelField("Error Message", videoPlayer.ErrorMessage, EditorStyles.wordWrappedLabel);
 				}
 
-				if (videoPlayer.IsLoaded) {
+				if (videoPlayer.IsLoaded)
+				{
 					// Dimensions utilisant les propriétés du VideoPlayer
 					EditorGUILayout.LabelField("Dimensions", $"{videoPlayer.VideoWidth} x {videoPlayer.VideoHeight}");
 
@@ -46,12 +52,17 @@ namespace Hactazia.VideoPlayer.Editor {
 					EditorGUILayout.LabelField("Frame Rate", $"{videoPlayer.FrameRate:F2} fps");
 
 					// Texture de sortie
-					if (videoPlayer.OutputTexture != null) {
+					if (videoPlayer.OutputTexture != null)
+					{
 						EditorGUILayout.LabelField("Output Texture", $"{videoPlayer.OutputTexture.width}x{videoPlayer.OutputTexture.height} ({videoPlayer.OutputTexture.format})");
-					} else {
+					}
+					else
+					{
 						EditorGUILayout.LabelField("Output Texture", "None");
 					}
-				} else {
+				}
+				else
+				{
 					EditorGUILayout.LabelField("Video not loaded", EditorStyles.centeredGreyMiniLabel);
 				}
 
@@ -59,12 +70,14 @@ namespace Hactazia.VideoPlayer.Editor {
 			}
 
 			// Repaint automatique quand la vidéo joue
-			if (Application.isPlaying && videoPlayer.IsPlaying) {
+			if (Application.isPlaying && videoPlayer.IsPlaying)
+			{
 				Repaint();
 			}
 
 			// Section Controls (seulement en mode Play)
-			if (Application.isPlaying) {
+			if (Application.isPlaying)
+			{
 				EditorGUILayout.Space();
 				EditorGUILayout.LabelField("Video Controls", EditorStyles.boldLabel);
 
@@ -72,23 +85,44 @@ namespace Hactazia.VideoPlayer.Editor {
 
 				// Bouton Play/Resume
 				GUI.enabled = videoPlayer.IsLoaded && (!videoPlayer.IsPlaying || videoPlayer.IsPaused);
-				if (GUILayout.Button(videoPlayer.IsPaused ? "Resume" : "Play")) {
-					if (videoPlayer.IsPaused) {
+				if (GUILayout.Button(videoPlayer.IsPaused ? "Resume" : "Play"))
+				{
+					if (videoPlayer.IsPaused)
+					{
 						videoPlayer.Resume();
-					} else {
-						videoPlayer.Play();
+					}
+					else
+					{
+						// Add safety checks before calling Play()
+						try
+						{
+							if (videoPlayer != null && videoPlayer.IsLoaded && !videoPlayer.HasError)
+							{
+								videoPlayer.Play();
+							}
+							else
+							{
+								Debug.LogWarning("VideoPlayer: Cannot play - player not properly initialized or has errors");
+							}
+						}
+						catch (System.Exception e)
+						{
+							Debug.LogError($"VideoPlayer: Error calling Play() - {e.Message}");
+						}
 					}
 				}
 
 				// Bouton Pause
 				GUI.enabled = videoPlayer.IsLoaded && videoPlayer.IsPlaying && !videoPlayer.IsPaused;
-				if (GUILayout.Button("Pause")) {
+				if (GUILayout.Button("Pause"))
+				{
 					videoPlayer.Pause();
 				}
 
 				// Bouton Stop
 				GUI.enabled = videoPlayer.IsLoaded && (videoPlayer.IsPlaying || videoPlayer.IsPaused);
-				if (GUILayout.Button("Stop")) {
+				if (GUILayout.Button("Stop"))
+				{
 					videoPlayer.Stop();
 				}
 
@@ -96,31 +130,36 @@ namespace Hactazia.VideoPlayer.Editor {
 				EditorGUILayout.EndHorizontal();
 
 				// Section Seek (nouvelle fonctionnalité)
-				if (videoPlayer.IsLoaded) {
+				if (videoPlayer.IsLoaded)
+				{
 					EditorGUILayout.Space();
 					EditorGUILayout.LabelField("Seek Controls", EditorStyles.boldLabel);
-					
+
 					EditorGUILayout.BeginHorizontal();
 					EditorGUILayout.LabelField("Seek to time:", GUILayout.Width(80));
-					
+
 					float seekTime = EditorGUILayout.Slider((float)videoPlayer.CurrentTime, 0f, (float)videoPlayer.Duration);
-					
-					if (GUI.changed && !videoPlayer.IsPlaying) {
+
+					if (GUI.changed && !videoPlayer.IsPlaying)
+					{
 						videoPlayer.Seek(seekTime);
 					}
-					
+
 					EditorGUILayout.EndHorizontal();
 				}
 			}
 		}
 
-		private string FormatTime(double timeInSeconds) {
-			if (double.IsNaN(timeInSeconds) || double.IsInfinity(timeInSeconds)) {
+		private string FormatTime(double timeInSeconds)
+		{
+			if (double.IsNaN(timeInSeconds) || double.IsInfinity(timeInSeconds))
+			{
 				return "00:00";
 			}
 
 			var timeSpan = System.TimeSpan.FromSeconds(timeInSeconds);
-			if (timeSpan.TotalHours >= 1) {
+			if (timeSpan.TotalHours >= 1)
+			{
 				return timeSpan.ToString(@"hh\:mm\:ss");
 			}
 

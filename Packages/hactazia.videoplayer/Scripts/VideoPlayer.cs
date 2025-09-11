@@ -1,6 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace Hactazia.VideoPlayer {
 	/// <summary>
@@ -23,45 +25,45 @@ namespace Hactazia.VideoPlayer {
 
 
 		// Events
-		public event Action         OnVideoLoaded;
-		public event Action         OnVideoEnded;
-		public event Action<double> OnTimeChanged;
+		public readonly UnityEvent         OnVideoLoaded = new();
+		public readonly UnityEvent         OnVideoEnded  = new();
+		public readonly UnityEvent<double> OnTimeChanged = new();
 
-		private IntPtr    nativePlayer = IntPtr.Zero;
-		private Texture2D videoTexture;
-		private double    lastTime = 0.0; // Cache pour éviter les allocations GC
-		private byte[]    pixelBuffer;
-		private GCHandle  pixelHandle;
+		private IntPtr    _nativePlayer = VideoPlayerNative.InvalidPlayer;
+		private Texture2D _videoTexture;
+		private double    _lastTime = 0.0;
+		private byte[]    _pixelBuffer;
+		private GCHandle  _pixelHandle;
 
 		public double Duration
-			=> VideoPlayerNative.GetDuration(nativePlayer);
+			=> VideoPlayerNative.GetDuration(_nativePlayer);
 
 		public double CurrentTime
-			=> VideoPlayerNative.GetCurrentTime(nativePlayer);
+			=> VideoPlayerNative.GetCurrentTime(_nativePlayer);
 
 		public int VideoWidth
-			=> VideoPlayerNative.GetVideoWidth(nativePlayer);
+			=> VideoPlayerNative.GetVideoWidth(_nativePlayer);
 
 		public int VideoHeight
-			=> VideoPlayerNative.GetVideoHeight(nativePlayer);
+			=> VideoPlayerNative.GetVideoHeight(_nativePlayer);
 
 		public double FrameRate
-			=> VideoPlayerNative.GetFrameRate(nativePlayer);
+			=> VideoPlayerNative.GetFrameRate(_nativePlayer);
 
 		public RenderTexture OutputTexture
 			=> renderTexture;
 
 		public int PlayerId
-			=> nativePlayer.ToInt32();
+			=> _nativePlayer.ToInt32();
 
 		public PlayerState State
-			=> (PlayerState)VideoPlayerNative.GetPlayerState(nativePlayer);
+			=> VideoPlayerNative.GetPlayerState(_nativePlayer);
 
 		public PlayerError Error
-			=> (PlayerError)VideoPlayerNative.GetPlayerError(nativePlayer);
+			=> VideoPlayerNative.GetPlayerError(_nativePlayer);
 
 		public string ErrorMessage
-			=> VideoPlayerNative.GetPlayerErrorMessage(nativePlayer);
+			=> VideoPlayerNative.GetPlayerErrorMessage(_nativePlayer);
 
 		public bool IsLoaded
 			=> State != PlayerState.Uninitialized && State != PlayerState.Error;
@@ -84,96 +86,84 @@ namespace Hactazia.VideoPlayer {
 		}
 
 		private void Update() {
-			if (nativePlayer == IntPtr.Zero)
+			if (!VideoPlayerNative.IsValid(_nativePlayer))
 				return;
-
-			VideoPlayerNative.UpdatePlayer(nativePlayer);
-
+		
+			VideoPlayerNative.UpdatePlayer(_nativePlayer);
+		
 			if (State != PlayerState.Playing) return;
-
+		
 			// Déclencher l'événement de temps seulement si significativement différent
-			if (Math.Abs(CurrentTime - lastTime) > 0.01) // 10ms de tolérance
+			if (Math.Abs(CurrentTime - _lastTime) > 0.01) // 10ms de tolérance
 			{
-				OnTimeChanged?.Invoke(CurrentTime);
-				lastTime = CurrentTime;
+				OnTimeChanged.Invoke(CurrentTime);
+				_lastTime = CurrentTime;
 			}
-
+		
 			// Vérifier la fin de la vidéo
 			if (CurrentTime >= Duration) {
 				if (loop) {
 					Seek(0.0);
 				} else {
 					Stop();
-					OnVideoEnded?.Invoke();
+					OnVideoEnded.Invoke();
 				}
 			}
-
+		
 			// Récupérer et afficher la frame courante
 			UpdateVideoFrame();
 		}
 
 		private void OnDestroy() {
-			VideoPlayerNative.DestroyVideoPlayer(nativePlayer);
-			nativePlayer = IntPtr.Zero;
+			VideoPlayerNative.DestroyVideoPlayer(_nativePlayer);
+			_nativePlayer = VideoPlayerNative.InvalidPlayer;
 
-			if (pixelHandle.IsAllocated)
-				pixelHandle.Free();
+			if (_pixelHandle.IsAllocated)
+				_pixelHandle.Free();
 
-			if (videoTexture)
-				DestroyImmediate(videoTexture);
+			if (_videoTexture)
+				DestroyImmediate(_videoTexture);
 		}
 
 		public bool LoadVideo(string url) {
-			VideoPlayerNative.DestroyVideoPlayer(nativePlayer);
-			
-			nativePlayer = VideoPlayerNative.CreateVideoPlayer();
-			if (!VideoPlayerNative.LoadVideo(nativePlayer, url))
+			VideoPlayerNative.DestroyVideoPlayer(_nativePlayer);
+			_nativePlayer = VideoPlayerNative.CreateVideoPlayer();
+
+			if (!VideoPlayerNative.LoadVideo(_nativePlayer, url))
 				return false;
 
-			OnVideoLoaded?.Invoke();
+			OnVideoLoaded.Invoke();
 			Debug.Log($"Video loaded: {VideoWidth}x{VideoHeight}, Duration: {Duration:F2}s, FPS: {FrameRate:F2}");
 			return true;
 		}
 
 		public void Play()
-			=> VideoPlayerNative.Play(nativePlayer);
+			=> VideoPlayerNative.Play(_nativePlayer);
 
 		public void Pause()
-			=> VideoPlayerNative.Pause(nativePlayer);
-
+			=> VideoPlayerNative.Pause(_nativePlayer);
 
 		public void Resume()
-			=> VideoPlayerNative.Resume(nativePlayer);
+			=> VideoPlayerNative.Resume(_nativePlayer);
 
 		public void Stop()
-			=> VideoPlayerNative.Stop(nativePlayer);
+			=> VideoPlayerNative.Stop(_nativePlayer);
 
 		public void Seek(double time) {
-			if (nativePlayer == IntPtr.Zero || State == PlayerState.Uninitialized || State == PlayerState.Error) return;
 			time = Math.Max(0.0, Math.Min(time, Duration));
-			VideoPlayerNative.Seek(nativePlayer, time);
+			VideoPlayerNative.Seek(_nativePlayer, time);
 		}
 
 		public VideoFrame? GetVideoFrameAtTime(double time) {
-			if (nativePlayer == IntPtr.Zero || State == PlayerState.Uninitialized || State == PlayerState.Error) return null;
-			var framePtr = VideoPlayerNative.GetVideoFrameAtTime(nativePlayer, time);
-			if (framePtr == IntPtr.Zero) return null;
-
-			var frame = Marshal.PtrToStructure<VideoFrame>(framePtr);
-			VideoPlayerNative.FreeVideoFrame(framePtr);
-
-			return frame.valid ? frame : null;
+			var frame = VideoPlayerNative.GetVideoFrameAtTime(_nativePlayer, time);
+			if (!frame.HasValue) return null;
+			return frame.Value.valid ? frame : null;
 		}
 
 		public AudioFrame? GetAudioFrameAtTime(double time) {
-			if (nativePlayer == IntPtr.Zero || State == PlayerState.Uninitialized || State == PlayerState.Error) return null;
-			var framePtr = VideoPlayerNative.GetAudioFrameAtTime(nativePlayer, time);
-			if (framePtr == IntPtr.Zero) return null;
-
-			var frame = Marshal.PtrToStructure<AudioFrame>(framePtr);
-			VideoPlayerNative.FreeAudioFrame(framePtr);
-
-			return frame.valid ? frame : null;
+			var frame = VideoPlayerNative.GetAudioFrameAtTime(_nativePlayer, time);
+			if (!frame.HasValue) return null;
+			return frame.Value.valid ? frame : null;
 		}
 
 		private void UpdateVideoFrame() {
@@ -189,24 +179,24 @@ namespace Hactazia.VideoPlayer {
 			ResizeBuffer();
 
 			// Copier les données de la frame native vers notre buffer
-			Marshal.Copy(frame.data, pixelBuffer, 0, VideoWidth * VideoHeight * 4);
+			Marshal.Copy(frame.data, _pixelBuffer, 0, VideoWidth * VideoHeight * 4);
 
 			// Mettre à jour la texture
-			videoTexture.LoadRawTextureData(pixelBuffer);
-			videoTexture.Apply();
+			_videoTexture.LoadRawTextureData(_pixelBuffer);
+			_videoTexture.Apply();
 
-			Graphics.CopyTexture(videoTexture, renderTexture);
+			Graphics.CopyTexture(_videoTexture, renderTexture);
 		}
 
 		private void ResizeBuffer() {
 			var width        = VideoWidth;
 			var height       = VideoHeight;
 			var requiredSize = width * height * 4;
-			if (pixelBuffer != null && pixelBuffer.Length == requiredSize) return;
-			if (pixelHandle.IsAllocated)
-				pixelHandle.Free();
-			pixelBuffer = new byte[requiredSize];
-			pixelHandle = GCHandle.Alloc(pixelBuffer, GCHandleType.Pinned);
+			if (_pixelBuffer != null && _pixelBuffer.Length == requiredSize) return;
+			if (_pixelHandle.IsAllocated)
+				_pixelHandle.Free();
+			_pixelBuffer = new byte[requiredSize];
+			_pixelHandle = GCHandle.Alloc(_pixelBuffer, GCHandleType.Pinned);
 		}
 
 		private void ResizeRenderTexture() {
@@ -222,23 +212,23 @@ namespace Hactazia.VideoPlayer {
 		}
 
 		private void CreateVideoTexture() {
-			if (videoTexture)
-				DestroyImmediate(videoTexture);
-			videoTexture = new Texture2D(VideoWidth, VideoHeight, TextureFormat.RGBA32, false) {
+			if (_videoTexture)
+				DestroyImmediate(_videoTexture);
+			_videoTexture = new Texture2D(VideoWidth, VideoHeight, TextureFormat.RGBA32, false) {
 				wrapMode   = TextureWrapMode.Clamp,
 				filterMode = FilterMode.Bilinear
 			};
 		}
 
 		private void ResizeTexture() {
-			if (!videoTexture) {
+			if (!_videoTexture) {
 				CreateVideoTexture();
 				return;
 			}
 
 			var width  = VideoWidth;
 			var height = VideoHeight;
-			if (videoTexture.width == width && videoTexture.height == height) return;
+			if (_videoTexture.width == width && _videoTexture.height == height) return;
 
 			CreateVideoTexture();
 		}

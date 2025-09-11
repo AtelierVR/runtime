@@ -99,12 +99,10 @@ endif()
 
 # Source files - VideoPlayer implementation
 set(SOURCES
-    src/VideoPlayer.cpp
     src/hactazia_videoplayer.cpp
 )
 
 set(HEADERS
-    include/VideoPlayer.h
     include/hactazia_videoplayer.h
 )
 

@@ -3,106 +3,97 @@
 #endif
 
 #include "../include/hactazia_videoplayer.h"
+#include "VideoPlayer.cpp"
 #include <unordered_map>
+#include <map>
+#include <thread>
 #include <mutex>
+#include <condition_variable>
+#include <queue>
+#include <atomic>
+#include <chrono>
+#include <algorithm>
 #include <memory>
-
-// Forward declaration
-class VideoPlayerImpl;
-
-// Déclaration des fonctions internes pour accéder à VideoPlayerImpl
-VideoPlayerImpl *CreateVideoPlayerImpl();
-void DestroyVideoPlayerImpl(VideoPlayerImpl *impl);
-bool LoadVideoImpl(VideoPlayerImpl *impl, const char *url);
-void PlayImpl(VideoPlayerImpl *impl);
-void PauseImpl(VideoPlayerImpl *impl);
-void ResumeImpl(VideoPlayerImpl *impl);
-void StopImpl(VideoPlayerImpl *impl);
-void SeekImpl(VideoPlayerImpl *impl, double time);
-VideoFrame *GetVideoFrameAtTimeImpl(VideoPlayerImpl *impl, double time);
-AudioFrame *GetAudioFrameAtTimeImpl(VideoPlayerImpl *impl, double time);
-double GetDurationImpl(VideoPlayerImpl *impl);
-double GetCurrentTimeImpl(VideoPlayerImpl *impl);
-int GetVideoWidthImpl(VideoPlayerImpl *impl);
-int GetVideoHeightImpl(VideoPlayerImpl *impl);
-double GetFrameRateImpl(VideoPlayerImpl *impl);
-void SetVideoFrameCallbackImpl(VideoPlayerImpl *impl, VideoFrameCallback callback);
-void SetAudioFrameCallbackImpl(VideoPlayerImpl *impl, AudioFrameCallback callback);
-void UpdatePlayerImpl(VideoPlayerImpl *impl);
-int GetPlayerStateImpl(VideoPlayerImpl *impl);
-int GetPlayerErrorImpl(VideoPlayerImpl *impl);
-const char *GetPlayerErrorMessageImpl(VideoPlayerImpl *impl);
 
 // Implémentation de l'interface C
 extern "C"
 {
 
-    VIDEOPLAYER_API VideoPlayerImpl *CreateVideoPlayer()
+    VIDEOPLAYER_API VideoPlayer *CreateVideoPlayer()
     {
-        return CreateVideoPlayerImpl();
+        return new VideoPlayer();
     }
 
-    VIDEOPLAYER_API void DestroyVideoPlayer(VideoPlayerImpl *player)
+    VIDEOPLAYER_API void DestroyVideoPlayer(VideoPlayer *player)
     {
         if (!player)
             return;
-        DestroyVideoPlayerImpl(player);
+        
+        try 
+        {
+            delete player; // appelle automatiquement ~VideoPlayer(), qui fait destroy()
+        }
+        catch (...)
+        {
+            // Prevent any exceptions from propagating to C#
+            // This could happen if there are issues during destruction
+        }
     }
 
-    VIDEOPLAYER_API bool LoadVideo(VideoPlayerImpl *player, const char *url)
+    VIDEOPLAYER_API bool LoadVideo(VideoPlayer *player, const char *url)
     {
         if (!player)
             return false;
-        return LoadVideoImpl(player, url);
+        return player->loadVideo(url);
     }
 
-    VIDEOPLAYER_API void Play(VideoPlayerImpl *player)
+    VIDEOPLAYER_API void Play(VideoPlayer *player)
     {
         if (!player)
             return;
-        PlayImpl(player);
+        player->play();
     }
 
-    VIDEOPLAYER_API void Pause(VideoPlayerImpl *player)
+    VIDEOPLAYER_API void Pause(VideoPlayer *player)
     {
         if (!player)
             return;
-        PauseImpl(player);
+        player->pause();
     }
 
-    VIDEOPLAYER_API void Resume(VideoPlayerImpl *player)
+    VIDEOPLAYER_API void Resume(VideoPlayer *player)
     {
         if (!player)
             return;
-        ResumeImpl(player);
+        player->resume();
     }
 
-    VIDEOPLAYER_API void Stop(VideoPlayerImpl *player)
+    VIDEOPLAYER_API void Stop(VideoPlayer *player)
     {
         if (!player)
             return;
-        StopImpl(player);
+        player->stop();
     }
 
-    VIDEOPLAYER_API void Seek(VideoPlayerImpl *player, double time)
+    VIDEOPLAYER_API void Seek(VideoPlayer *player, double time)
     {
         if (!player)
             return;
-        SeekImpl(player, time);
+        player->seek(time);
     }
 
-    VIDEOPLAYER_API VideoFrame *GetVideoFrameAtTime(VideoPlayerImpl *player, double time)
+    VIDEOPLAYER_API VideoFrame *GetVideoFrameAtTime(VideoPlayer *player, double time)
     {
         if (!player)
             return nullptr;
-        return GetVideoFrameAtTimeImpl(player, time);
+        return player->getVideoFrameAtTime(time);
     }
 
-    VIDEOPLAYER_API AudioFrame *GetAudioFrameAtTime(VideoPlayerImpl *player, double time)
+    VIDEOPLAYER_API AudioFrame *GetAudioFrameAtTime(VideoPlayer *player, double time)
     {
         if (!player)
             return nullptr;
-        return GetAudioFrameAtTimeImpl(player, time);
+        return player->getAudioFrameAtTime(time);
     }
 
     VIDEOPLAYER_API void FreeVideoFrame(VideoFrame *frame)
@@ -125,81 +116,81 @@ extern "C"
         delete frame;
     }
 
-    VIDEOPLAYER_API double GetDuration(VideoPlayerImpl *player)
+    VIDEOPLAYER_API double GetDuration(VideoPlayer *player)
     {
         if (!player)
             return 0.0;
-        return GetDurationImpl(player);
+        return player->getDuration();
     }
 
-    VIDEOPLAYER_API double GetCurrentTime(VideoPlayerImpl *player)
+    VIDEOPLAYER_API double GetCurrentTime(VideoPlayer *player)
     {
         if (!player)
             return 0.0;
-        return GetCurrentTimeImpl(player);
+        return player->getCurrentTime();
     }
 
-    VIDEOPLAYER_API int GetVideoWidth(VideoPlayerImpl *player)
-    {
-        if (player)
-            return GetVideoWidthImpl(player);
-        return 0;
-    }
-
-    VIDEOPLAYER_API int GetVideoHeight(VideoPlayerImpl *player)
+    VIDEOPLAYER_API int GetVideoWidth(VideoPlayer *player)
     {
         if (!player)
             return 0;
-        return GetVideoHeightImpl(player);
+        return player->getVideoWidth();
     }
 
-    VIDEOPLAYER_API double GetFrameRate(VideoPlayerImpl *player)
+    VIDEOPLAYER_API int GetVideoHeight(VideoPlayer *player)
+    {
+        if (!player)
+            return 0;
+        return player->getVideoHeight();
+    }
+
+    VIDEOPLAYER_API double GetFrameRate(VideoPlayer *player)
     {
         if (!player)
             return 0.0;
-        return GetFrameRateImpl(player);
+        return player->getFrameRate();
     }
 
-    VIDEOPLAYER_API void SetVideoFrameCallback(VideoPlayerImpl *player, VideoFrameCallback callback)
+    VIDEOPLAYER_API void SetVideoFrameCallback(VideoPlayer *player, VideoFrameCallback callback)
     {
         if (!player)
             return;
-        SetVideoFrameCallbackImpl(player, callback);
+        player->setVideoFrameCallback(callback);
     }
 
-    VIDEOPLAYER_API void SetAudioFrameCallback(VideoPlayerImpl *player, AudioFrameCallback callback)
+    VIDEOPLAYER_API void SetAudioFrameCallback(VideoPlayer *player, AudioFrameCallback callback)
     {
         if (!player)
             return;
-        SetAudioFrameCallbackImpl(player, callback);
+        player->setAudioFrameCallback(callback);
     }
 
-    VIDEOPLAYER_API void UpdatePlayer(VideoPlayerImpl *player)
+    VIDEOPLAYER_API void UpdatePlayer(VideoPlayer *player)
     {
         if (!player)
             return;
-        UpdatePlayerImpl(player);
+        player->update();
     }
 
-    VIDEOPLAYER_API int GetPlayerState(VideoPlayerImpl *player)
+    VIDEOPLAYER_API int GetPlayerState(VideoPlayer *player)
     {
         if (!player)
             return static_cast<int>(PlayerState::UNINITIALIZED);
-        return GetPlayerStateImpl(player);
+        return static_cast<int>(player->getPlayerState());
     }
 
-    VIDEOPLAYER_API int GetPlayerError(VideoPlayerImpl *player)
+    VIDEOPLAYER_API int GetPlayerError(VideoPlayer *player)
     {
         if (!player)
             return static_cast<int>(PlayerError::NONE);
-        return GetPlayerErrorImpl(player);
+        return static_cast<int>(player->getPlayerError());
     }
 
-    VIDEOPLAYER_API const char *GetPlayerErrorMessage(VideoPlayerImpl *player)
+    VIDEOPLAYER_API const char *GetPlayerErrorMessage(VideoPlayer *player)
     {
         if (!player)
             return "Player not found";
-        return GetPlayerErrorMessageImpl(player);
+        return player->getPlayerErrorMessage();
     }
 
 } // extern "C"
