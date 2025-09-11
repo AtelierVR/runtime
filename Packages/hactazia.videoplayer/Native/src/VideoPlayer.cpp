@@ -394,8 +394,10 @@ private:
         while (avcodec_receive_frame(videoCodecContext, frame) >= 0) {
             // Convertir en RGBA
             uint8_t* data = new uint8_t[videoCodecContext->width * videoCodecContext->height * 4];
-            uint8_t* destData[1] = { data };
-            int destLinesize[1] = { videoCodecContext->width * 4 };
+            
+            // Flip the image vertically by adjusting the destination pointer and linesize
+            uint8_t* destData[1] = { data + (videoCodecContext->height - 1) * videoCodecContext->width * 4 };
+            int destLinesize[1] = { -videoCodecContext->width * 4 };
             
             sws_scale(swsContext, frame->data, frame->linesize, 0, videoCodecContext->height,
                      destData, destLinesize);
