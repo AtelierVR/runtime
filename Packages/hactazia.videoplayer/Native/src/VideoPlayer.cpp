@@ -1,4 +1,7 @@
+#ifndef VIDEOPLAYER_EXPORTS
 #define VIDEOPLAYER_EXPORTS
+#endif
+
 #include "../include/VideoPlayer.h"
 #include <unordered_map>
 #include <map>
@@ -555,8 +558,7 @@ private:
     }
 };
 
-// Fonctions d'implémentation pour l'interface C
-extern "C" {
+// Fonctions d'implémentation (internes, pas d'export)
 
 VideoPlayerImpl* CreateVideoPlayerImpl() {
     return new VideoPlayerImpl();
@@ -641,5 +643,3 @@ int GetPlayerErrorImpl(VideoPlayerImpl* impl) {
 const char* GetPlayerErrorMessageImpl(VideoPlayerImpl* impl) {
     return impl->getPlayerErrorMessage();
 }
-
-} // extern "C"
