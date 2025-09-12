@@ -1,0 +1,6 @@
+{
+  "name": "nox.hactazia.videoplayer",
+  "displayName": "Nox - Hactazia's Video Player Integration",
+  "description": "Implementation of Hactazia's Video Player for Nox.",
+  "version": "1.0.0"
+}
