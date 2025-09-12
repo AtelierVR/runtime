@@ -141,7 +141,7 @@ namespace api.nox.relay {
 				return false;
 			}
 
-			var root = Avatar.GetDescriptor().GetRoot();
+			var root = Avatar.GetDescriptor().GetAnchor();
 			if (!root) {
 				Logger.LogError("Avatar descriptor root is null, cannot set avatar.");
 				Avatar = old;
@@ -151,7 +151,7 @@ namespace api.nox.relay {
 			if (old != null)
 				await old.Dispose();
 
-			Logger.LogDebug($"Attaching avatar to {runtimeAvatar.GetDescriptor()}", runtimeAvatar.GetDescriptor().GetRoot());
+			Logger.LogDebug($"Attaching avatar to {runtimeAvatar.GetDescriptor()}", runtimeAvatar.GetDescriptor().GetAnchor());
 			root.transform.SetParent(transform, false);
 			root.transform.localPosition = Vector3.zero;
 			root.transform.localRotation = Quaternion.identity;

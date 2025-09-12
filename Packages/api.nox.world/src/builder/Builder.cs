@@ -8,6 +8,7 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Build;
 using Nox.CCK.Utils;
 using Nox.CCK.Worlds;
+using Nox.Worlds.Scenes;
 using UnityEditor;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.SceneManagement;
@@ -132,7 +133,7 @@ namespace api.nox.world.builder {
 			=> BuildMenuAsync().Forget();
 
 		public async static UniTask BuildMenuAsync() {
-			if (!WorldDescriptorExtension.TryGetDescriptor(SceneManager.GetActiveScene(), out MainWorldDescriptor descriptor)) {
+			if (!SceneManager.GetActiveScene().TryGetComponentInChildren<WorldDescriptor>(out var descriptor)) {
 				EditorUtility.DisplayDialog("Build Failed", "No valid main scene descriptor found in the current scene.", "OK");
 				return;
 			}
@@ -210,7 +211,19 @@ namespace api.nox.world.builder {
 				data.ProgressCallback?.Invoke(0.15f, "Creating scene backups...");
 				await UniTask.Yield();
 
-				var sceneAssets = data.Descriptor.EstimateScenes(); // Création des sauvegardes de scènes
+				// Création des sauvegardes de scènes
+				var sceneModule = data.Descriptor.GetModules<IScenesModule>().FirstOrDefault();
+				if (sceneModule == null)
+					return new BuildResult {
+						Type    = BuildResultType.InvalidScene,
+						Message = "No IScenesModule found in the main scene descriptor. Please ensure the descriptor is set up correctly."
+					};
+
+				var sceneAssets = sceneModule.GetScenes()
+					.Select((scene, index) => (AssetDatabase.LoadAssetAtPath<SceneAsset>(scene), index))
+					.Where(t => t.Item1)
+					.ToDictionary(t => (byte)t.index, t => t.Item1);
+
 				Logger.Log("Creating scene backups before compilation...");
 				if (!CreateSceneBackups(sceneAssets)) {
 					return new BuildResult {

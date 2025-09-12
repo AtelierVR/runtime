@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using api.nox.world.network;
-using api.nox.world.cache;
 using api.nox.world.search;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
-using Nox.CCK.Worlds;
 using Nox.Network;
 using Nox.Offline;
 using Nox.Search;
@@ -32,7 +29,7 @@ namespace api.nox.world {
 		#region Variables
 
 		internal static Main              Instance;
-		internal        IModCoreAPI        CoreAPI;
+		internal        IModCoreAPI       CoreAPI;
 		internal        SceneGroupManager GroupManager;
 		internal        Network           Network;
 		internal        Cache             Cache;
@@ -69,9 +66,7 @@ namespace api.nox.world {
 				.GetMod("session")
 				?.GetEntry<ISessionAPI>();
 
-		public readonly UnityEvent<BaseWorldDescriptor, Scene> OnWorldLoaded     = new();
-		public readonly UnityEvent<MainWorldDescriptor, Scene> OnMainWorldLoaded = new();
-		public readonly UnityEvent<SubWorldDescriptor, Scene>  OnSubWorldLoaded  = new();
+		public readonly UnityEvent<IWorldDescriptor, Scene> OnWorldLoaded = new();
 
 		#endregion
 
@@ -106,16 +101,12 @@ namespace api.nox.world {
 
 
 		private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-			if (!WorldDescriptorExtension.TryGetDescriptor<BaseWorldDescriptor>(scene, out var descriptor)) {
+			if (!scene.TryGetComponentInChildren<IWorldDescriptor>(out var descriptor)) {
 				Logger.LogWarning("WorldSystem.OnSceneLoaded: Scene does not have a valid descriptor.");
 				return;
 			}
 
 			OnWorldLoaded.Invoke(descriptor, scene);
-			if (descriptor is MainWorldDescriptor mainDescriptor)
-				OnMainWorldLoaded.Invoke(mainDescriptor, scene);
-			else if (descriptor is SubWorldDescriptor subDescriptor)
-				OnSubWorldLoaded.Invoke(subDescriptor, scene);
 		}
 
 		private void OnSceneUnloaded(Scene scene) { }

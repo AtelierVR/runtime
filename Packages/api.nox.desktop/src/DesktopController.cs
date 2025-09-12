@@ -370,7 +370,7 @@ namespace api.nox.desktop {
 				return false;
 			}
 
-			var root = _attachedRuntimeAvatar.GetDescriptor().GetRoot();
+			var root = _attachedRuntimeAvatar.GetDescriptor().GetAnchor();
 			if (!root) {
 				Logger.LogError("Avatar descriptor root is null, cannot set avatar.");
 				_attachedRuntimeAvatar = old;
@@ -380,7 +380,7 @@ namespace api.nox.desktop {
 			if (old != null)
 				await old.Dispose();
 
-			Logger.LogDebug($"Attaching avatar to {runtimeAvatar.GetDescriptor()}", runtimeAvatar.GetDescriptor().GetRoot());
+			Logger.LogDebug($"Attaching avatar to {runtimeAvatar.GetDescriptor()}", runtimeAvatar.GetDescriptor().GetAnchor());
 			root.transform.SetParent(transform, false);
 			root.transform.localPosition = Vector3.zero;
 			root.transform.localRotation = Quaternion.identity;

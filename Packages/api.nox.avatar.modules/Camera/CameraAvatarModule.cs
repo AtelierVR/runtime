@@ -53,7 +53,7 @@ namespace Nox.CCK.Avatars.Camera {
 
 			var module = modules.Length switch {
 				1 => modules.FirstOrDefault(),
-				0 => descriptor.GetRoot().AddComponent<CameraAvatarModule>(),
+				0 => descriptor.GetAnchor().AddComponent<CameraAvatarModule>(),
 				_ => null
 			};
 

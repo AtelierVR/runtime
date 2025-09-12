@@ -28,7 +28,7 @@ namespace Mods.api.nox.xr.editor {
 			
 			EditorGUILayout.Space();
 			
-			EditorGUILayout.ObjectField(controller.GetAvatar()?.GetDescriptor().GetRoot(), typeof(GameObject), true);
+			EditorGUILayout.ObjectField(controller.GetAvatar()?.GetDescriptor().GetAnchor(), typeof(GameObject), true);
 		}
 		
 		public override bool RequiresConstantRepaint() {

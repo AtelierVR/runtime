@@ -1,7 +1,11 @@
 using System;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Utils;
 using Nox.CCK.Worlds;
+using Nox.Worlds;
+using Nox.Worlds.Scenes;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Logger = Nox.CCK.Utils.Logger;
@@ -9,7 +13,7 @@ using Logger = Nox.CCK.Utils.Logger;
 namespace api.nox.world {
 	public class AssetBundleRuntimeWorldGroup : RuntimeWorldGroup {
 		public AssetBundle AssetBundle;
-		
+
 		public static string ParseGroup(string path) {
 			if (!string.IsNullOrEmpty(path))
 				return $"bundle:{path}";
@@ -88,30 +92,25 @@ namespace api.nox.world {
 
 			progress?.Invoke(0.6f);
 
-			var prefab = new GameObject($"[Reference] {nameof(AssetBundleRuntimeWorldGroup)}");
-			SceneManager.MoveGameObjectToScene(prefab, scene);
-			foreach (var root in scene.GetRootGameObjects())
-				root.transform.SetParent(prefab.transform);
-			prefab.SetActive(false);
+			var res = await WorldSetup.Prepare<AssetBundleRuntimeWorldGroup>(
+				scene,
+				progress: p => progress?.Invoke(0.6f + p * 0.4f),
+				token: token
+			);
 
-			if (!WorldDescriptorExtension.TryGetDescriptor<MainWorldDescriptor>(scene, out var main)) {
-				Logger.LogError($"Failed to load main descriptor: {path}");
+			if (!res.Success) {
+				Logger.LogError($"Failed to prepare world from AssetBundle: {path} ({res.Error})");
 				await SceneManager.UnloadSceneAsync(scene);
 				await bundle.UnloadAsync(true);
 				return null;
 			}
 
+			res.Runtime.Id          = ParseGroup(path);
+			res.Runtime.AssetBundle = bundle;
+
 			progress?.Invoke(1f);
 
-			var abw = new AssetBundleRuntimeWorldGroup {
-				Id          = ParseGroup(path),
-				AssetBundle = bundle,
-				Active      = 0,
-				SubInstances   = new SubRuntimeWorldInstance[main.GetScenes().Length]
-			};
-
-			abw.MainInstance = new MainRuntimeWorldInstance(abw, scene, prefab);
-			return abw;
+			return res.Runtime;
 		}
 
 		public override string ToString()

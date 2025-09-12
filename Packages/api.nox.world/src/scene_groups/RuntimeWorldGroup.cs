@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
@@ -8,15 +9,14 @@ using Nox.Worlds;
 
 namespace api.nox.world {
 	public abstract class RuntimeWorldGroup : IRuntimeWorld, INoxObject {
-		internal string                    Id;
-		internal int                       Active = 0;
-		internal MainRuntimeWorldInstance  MainInstance;
-		internal SubRuntimeWorldInstance[] SubInstances;
-		internal SceneGroupManager         GroupManager;
-		internal IWorldIdentifier          WorldIdentifier;
+		internal string                 Id;
+		internal int                    Active = 0;
+		internal RuntimeWorldInstance[] Instances;
+		internal SceneGroupManager      GroupManager;
+		internal IWorldIdentifier       WorldIdentifier;
 
 		internal Scene[] GetUnityScenes()
-			=> GetScenes()
+			=> GetInstances()
 				.Select(e => e.GetScene())
 				.Where(s => s.IsValid())
 				.ToArray();
@@ -28,37 +28,17 @@ namespace api.nox.world {
 			=> WorldIdentifier = identifier;
 
 		[NoxPublic(NoxAccess.Method)]
-		public IBaseRuntimeWorldInstance<IBaseWorldDescriptor>[] GetScenes() {
-			var scenes = new List<IBaseRuntimeWorldInstance<IBaseWorldDescriptor>> { MainInstance };
-			scenes.AddRange(SubInstances);
-			return scenes.ToArray();
-		}
+		public IRuntimeWorldInstance[] GetInstances()
+			=> Instances.Cast<IRuntimeWorldInstance>().ToArray();
 
 		[NoxPublic(NoxAccess.Method)]
-		public IBaseRuntimeWorldInstance<T> GetScene<T>(int index) where T : IBaseWorldDescriptor
-			=> index switch {
-				0 when typeof(MainWorldDescriptor) == typeof(T) => MainInstance as IBaseRuntimeWorldInstance<T>,
-				_ when typeof(SubWorldDescriptor)  == typeof(T) => GetSubScene(index - 1) as IBaseRuntimeWorldInstance<T>,
-				_                                               => null
-			};
+		public IRuntimeWorldInstance GetInstance(int index)
+			=> index >= 0 && index < Instances.Length
+				? Instances[index]
+				: null;
 
-		[NoxPublic(NoxAccess.Method)]
-		public IBaseRuntimeWorldInstance<IBaseWorldDescriptor> GetScene(int index)
-			=> index == 0 ? GetMainScene() : GetSubScene(index);
-
-		[NoxPublic(NoxAccess.Method)]
-		public IMainRuntimeWorldInstance GetMainScene()
-			=> MainInstance;
-
-		[NoxPublic(NoxAccess.Method)]
-		public ISubRuntimeWorldInstance GetSubScene(int index) {
-			if (index < 0 || index >= SubInstances.Length) return null;
-			return SubInstances[index];
-		}
-
-		[NoxPublic(NoxAccess.Method)]
-		public int GetSceneCount()
-			=> SubInstances.Length;
+		public int GetInstanceCount()
+			=> Instances.Length;
 
 		[NoxPublic(NoxAccess.Method)]
 		public void SetCurrent()
@@ -70,26 +50,17 @@ namespace api.nox.world {
 
 		[NoxPublic(NoxAccess.Method)]
 		public virtual async UniTask Dispose() {
-			for (var i = 0; i < SubInstances.Length; i++) {
-				if (SubInstances[i] == null) continue;
-				await UniTask.Yield();
-				SubInstances[i].Dispose();
-				SubInstances[i] = null;
-			}
-
 			await UniTask.Yield();
-
-			if (MainInstance != null) {
-				MainInstance.Dispose();
-				MainInstance = null;
-			}
+			foreach (var t in Instances)
+				t?.Dispose();
+			Instances = Array.Empty<RuntimeWorldInstance>();
 		}
 
-		internal void OnSelect(RuntimeWorldGroup oldRuntimeWorldGroup) {
+		internal void OnSelect(RuntimeWorldGroup old) {
 			Logger.LogDebug($"OnSelect: {Id}");
-			var activeScene = GetScene(Active) ?? GetMainScene();
-			foreach (var scene in GetScenes()) {
-				if (scene == activeScene) {
+			var active = GetInstance(Active) ?? GetInstances()[0];
+			foreach (var scene in GetInstances()) {
+				if (scene == active) {
 					Logger.LogDebug($"Showing the active scene {scene} in world {Id}");
 					SceneManager.SetActiveScene(scene.GetScene());
 				}
@@ -102,9 +73,9 @@ namespace api.nox.world {
 			}
 		}
 
-		internal void OnDeselect(RuntimeWorldGroup newRuntimeWorldGroup) {
+		internal void OnDeselect(RuntimeWorldGroup @rew) {
 			Logger.LogDebug($"OnDeselect: {Id}");
-			foreach (var scene in GetScenes())
+			foreach (var scene in GetInstances())
 			foreach (var id in scene.GetInstanceIds())
 				scene.SetVisibleInstance(id, false, false);
 		}

@@ -180,6 +180,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "api.nox.world.modules": {
+      "version": "file:api.nox.world.modules",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "api.nox.xr": {
       "version": "file:api.nox.xr",
       "depth": 0,

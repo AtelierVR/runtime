@@ -56,5 +56,10 @@ namespace Nox.Players {
 		/// <param name="part"></param>
 		/// <param name="transform"></param>
 		public void MovePart(ushort part, NoxTransform transform);
+
+		/// <summary>
+		/// Teleport the player to a spawn point.
+		/// </summary>
+		public void Respawn();
 	}
 }

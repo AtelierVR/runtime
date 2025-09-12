@@ -6,6 +6,7 @@ using Nox.Entities;
 using Nox.Players;
 using Nox.Sessions;
 using Nox.Worlds;
+using Nox.Worlds.Spawns;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -97,22 +98,42 @@ namespace api.nox.session {
 
 			// Si c'est un joueur local, vérifier s'il faut le téléporter au spawn
 			if (player.IsLocal())
-				TryTeleportPlayerToSpawn(player);
+				player.Respawn();
 
 			Main.Instance.CoreAPI.EventAPI.Emit("session_player_joined", this, player);
 			OnPlayerJoinedEvent.Invoke(player);
+
+			foreach (var descriptor in GetDescriptors().Where(e => e != null))
+			foreach (var module in descriptor.GetModules<ISessionModule>())
+				module.OnPlayerJoined(player);
 		}
 
 		public void OnPlayerLeft(IPlayer player) {
 			Logger.LogDebug($"OnPlayerLeft: {player}");
 			Main.Instance.CoreAPI.EventAPI.Emit("session_player_left", this, player);
 			OnPlayerLeftEvent.Invoke(player);
+
+			foreach (var descriptor in GetDescriptors().Where(e => e != null))
+			foreach (var module in descriptor.GetModules<ISessionModule>())
+				module.OnPlayerLeft(player);
 		}
 
 		public void OnAuthorityTransferred(IPlayer player) {
 			Logger.LogDebug($"OnAuthorityTransferred: {player}");
 			Main.Instance.CoreAPI.EventAPI.Emit("session_authority_transferred", this, player);
 			OnAuthorityTransferredEvent.Invoke(player);
+
+			foreach (var descriptor in GetDescriptors().Where(e => e != null))
+			foreach (var module in descriptor.GetModules<ISessionModule>())
+				module.OnAuthorityTransferred(player);
+		}
+
+		public IWorldDescriptor[] GetDescriptors() {
+			var dimension = Adapter.GetDimension();
+			var main = dimension.GetScene()
+				.GetInstances()[0]
+				.GetInstanceDescriptor(dimension.GetMainIndex());
+			return new[] { main };
 		}
 
 		public void OnStateChanged(IAdapterState state, IAdapterState previousState) {
@@ -134,34 +155,42 @@ namespace api.nox.session {
 		public override string ToString()
 			=> $"{GetType().Name}[Id={Id}, Adapter={Adapter}]";
 
-		public async UniTask OnDeselect(ISession nSession)
-			=> await Adapter.OnDeselect(nSession);
+		public async UniTask OnDeselect(ISession nSession) {
+			foreach (var descriptor in GetDescriptors().Where(e => e != null))
+			foreach (var module in descriptor.GetModules<ISessionModule>())
+				module.OnSessionDeselected();
 
-		public async UniTask OnSelect(ISession oSession)
-			=> await Adapter.OnSelect(oSession);
+			await Adapter.OnDeselect(nSession);
+		}
 
-		private void TryTeleportPlayerToSpawn(IPlayer player) {
-			// Rechercher un descripteur de scène dans la scène active
-			var activeScene = SceneManager.GetActiveScene();
-			if (!WorldDescriptorExtension.TryGetDescriptor<BaseWorldDescriptor>(activeScene, out var descriptor)) {
-				Logger.LogDebug("No scene descriptor found in active scene for spawn teleportation");
-				return;
-			}
+		public void OnDescriptorAdded(IWorldDescriptor descriptor) {
+			Main.Instance.CoreAPI.EventAPI.Emit("session_descriptor_added", this, descriptor);
 
-			// Vérifier si le descripteur utilise un système de spawn
-			if (!descriptor.UseSpawn()) {
-				Logger.LogDebug("Scene descriptor does not use spawn system");
-				return;
-			}
+			var modules = descriptor.GetModules<ISessionModule>();
+			Logger.LogDebug($"OnDescriptorAdded: {descriptor} with {modules.Length} modules");
 
-			// Choisir un spawn et téléporter le joueur
-			var spawnObject = descriptor.ChoiceSpawn();
-			if (spawnObject) {
-				player.Teleport(spawnObject.transform);
-				Logger.LogDebug($"Teleported local player {player.GetDisplay()} to spawn at {spawnObject.transform.position}");
-			} else {
-				Logger.LogWarning("ChoiceSpawn returned null object");
-			}
+			foreach (var module in modules)
+				module.OnSession(this);
+
+			for (var i = 0; i < GetPlayerCount(); i++)
+				foreach (var module in modules)
+					module.OnPlayerJoined(GetPlayer(i));
+
+			var master = Adapter.GetMasterPlayer();
+			foreach (var module in modules)
+				module.OnAuthorityTransferred(master);
+
+			if (IsCurrent())
+				foreach (var module in modules)
+					module.OnSessionSelected();
+		}
+
+		public async UniTask OnSelect(ISession oSession) {
+			await Adapter.OnSelect(oSession);
+
+			foreach (var descriptor in GetDescriptors().Where(e => e != null))
+			foreach (var module in descriptor.GetModules<ISessionModule>())
+				module.OnSessionSelected();
 		}
 	}
 }

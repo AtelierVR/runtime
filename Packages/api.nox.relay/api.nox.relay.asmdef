@@ -14,7 +14,8 @@
         "Nox.Avatars",
         "Nox.Controllers",
         "Nox.Avatars.Parameters",
-        "Nox.Network"
+        "Nox.Network",
+        "Nox.Worlds.Spawns"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

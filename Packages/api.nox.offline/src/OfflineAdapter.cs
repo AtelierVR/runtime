@@ -17,7 +17,7 @@ namespace api.nox.offline {
 		private readonly IEntityManager   _entities;
 		private          int              _masterPlayerId;
 		private          int              _nextPlayerId;
-		private          ISession         _session;
+		internal         ISession         _session;
 		private          OfflineState     _state = new(true);
 		public           string           Name;
 		public           string           ShortName;
@@ -87,19 +87,25 @@ namespace api.nox.offline {
 
 		public async UniTask OnDeselect(ISession newSession) {
 			Logger.LogDebug($"OnDeselect: {this}");
-			var main = _dimension.GetScene().GetMainScene();
+			var main = _dimension.GetScene().GetInstances()[0];
 			main?.SetVisibleInstance(_dimension.GetMainIndex(), false, false);
 			await UniTask.Yield();
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		public async UniTask OnSelect(ISession oldSession) {
 			Logger.LogDebug($"OnSelect: {this}");
 			if (_dimension == null)
 				throw new InvalidOperationException($"No current dimension found for session {this}. Please ensure a dimension is set before selecting the session.");
 			if (GetLocalPlayer() == null) NewPlayer();
-			var main = _dimension.GetScene().GetMainScene();
-			if (_dimension.GetMainIndex() == 0)
-				_dimension.SetMainIndex(await main.MakeInstance());
+			var main = _dimension.GetScene().GetInstances()[0];
+			if (_dimension.GetMainIndex() == 0) {
+				var id = await main.MakeInstance();
+				_dimension.SetMainIndex(id);
+				var desc = main.GetInstanceDescriptor(id);
+				_session.OnDescriptorAdded(desc);
+			}
+
 			_dimension.GetScene().SetCurrent();
 			main.SetVisibleInstance(_dimension.GetMainIndex(), true, true);
 		}
@@ -127,7 +133,7 @@ namespace api.nox.offline {
 			foreach (var entity in _entities.GetEntities().ToArray())
 				_entities.UnregisterEntity(entity);
 			if (_dimension.GetMainIndex() > 0)
-				_dimension.GetScene().GetMainScene().RemoveInstance(_dimension.GetMainIndex());
+				_dimension.GetScene().GetInstances()[0].RemoveInstance(_dimension.GetMainIndex());
 		}
 
 		[NoxPublic(NoxAccess.Method)]

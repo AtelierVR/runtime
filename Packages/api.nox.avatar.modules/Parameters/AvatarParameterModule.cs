@@ -16,7 +16,7 @@ namespace Nox.CCK.Avatars.Parameters {
 
 			var module = modules.Length switch {
 				1 => modules.FirstOrDefault(),
-				0 => descriptor.GetRoot().AddComponent<AvatarParameterModule>(),
+				0 => descriptor.GetAnchor().AddComponent<AvatarParameterModule>(),
 				_ => null
 			};
 

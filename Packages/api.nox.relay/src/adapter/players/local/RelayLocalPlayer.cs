@@ -2,7 +2,6 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.Avatars.Controllers;
-using Nox.Avatars.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;

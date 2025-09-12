@@ -15,7 +15,8 @@
         "Nox.Instances",
         "Nox.Tables",
         "Nox.Offline",
-        "Nox.Sessions"
+        "Nox.Sessions",
+        "Nox.Worlds.Scenes"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

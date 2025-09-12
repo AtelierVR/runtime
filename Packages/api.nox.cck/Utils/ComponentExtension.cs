@@ -145,5 +145,6 @@ namespace Nox.CCK.Utils {
 			if (!move.IsSameAngularVelocity(rb.angularVelocity, threshold))
 				rb.angularVelocity = move.GetAngularVelocity();
 		}
+
 	}
 }

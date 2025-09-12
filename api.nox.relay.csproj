@@ -971,6 +971,10 @@
       <Project>{d72e3f1d-b6a9-ae1f-6165-22b88075502b}</Project>
       <Name>Nox.Network</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.Worlds.Spawns.csproj">
+      <Project>{c8e2f5bf-63c8-fdc5-f6fb-d0fbfa47c28d}</Project>
+      <Name>Nox.Worlds.Spawns</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

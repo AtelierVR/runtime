@@ -71,8 +71,8 @@ namespace api.nox.world {
 			["PlatformMismatch"]         = "PlatformMismatch"
 		};
 
-		internal static MainWorldDescriptor[] Descriptors
-			=> WorldDescriptorExtension.GetDescriptors<MainWorldDescriptor>();
+		internal static WorldDescriptor[] Descriptors
+			=> ComponentExtension.GetComponentsInChildren<WorldDescriptor>();
 
 		// Helper methods for notification management
 		private static void SetNotificationIfNotExists(string uid, NotificationType type, string messageKey, params object[] args) {
@@ -140,7 +140,7 @@ namespace api.nox.world {
 			UpdateUI(descriptor);
 		}
 
-		private void CheckMultipleDescriptors(MainWorldDescriptor[] descriptors) {
+		private void CheckMultipleDescriptors(WorldDescriptor[] descriptors) {
 			if (descriptors.Length > 1)
 				SetNotificationWithActions(
 					_notificationIds["MultipleWorldDescriptors"], NotificationType.Warning,
@@ -189,78 +189,78 @@ namespace api.nox.world {
 			}
 		}
 
-		private void CheckSpawns(MainWorldDescriptor descriptor) {
-			var esSpawn = descriptor.EstimateSpawns();
-
-			if (esSpawn.Count == 1 && esSpawn[0] == descriptor.gameObject)
-				SetNotificationIfNotExists(_notificationIds["NoSpawns"], NotificationType.Info, "world.builder.no_spawns");
-			else RemoveNotificationIfExists(_notificationIds["NoSpawns"]);
-
-			var spawns = descriptor.GetSpawns();
-			for (var i = 0; i < spawns.Length; i++) {
-				var spawn                  = spawns[i];
-				var nullNotificationId     = $"SpawnIsNull-{i}";
-				var estimateNotificationId = $"SpawnEstimate-{i}";
-
-				if (!spawn) {
-					SetNotificationWithActions(
-						nullNotificationId, NotificationType.Warning,
-						"world.builder.spawn_null", new List<VisualElement> {
-							CreateNormalizeButton(() => descriptor.spawns = descriptor.EstimateSpawns().Values.ToArray())
-						}, i
-					);
-					RemoveNotificationIfExists(estimateNotificationId);
-				} else {
-					RemoveNotificationIfExists(nullNotificationId);
-
-					var estimate = esSpawn.FirstOrDefault(e => e.Value == spawn);
-					if (estimate.Key != i)
-						SetNotificationWithActions(
-							estimateNotificationId, NotificationType.Warning,
-							"world.builder.spawn_estimate", new List<VisualElement> {
-								CreateNormalizeButton(() => descriptor.spawns = descriptor.EstimateSpawns().Values.ToArray())
-							}, spawn.name, i, estimate.Key, i
-						);
-					else RemoveNotificationIfExists(estimateNotificationId);
-				}
-			}
+		private void CheckSpawns(WorldDescriptor descriptor) {
+			// var esSpawn = descriptor.EstimateSpawns();
+			//
+			// if (esSpawn.Count == 1 && esSpawn[0] == descriptor.gameObject)
+			// 	SetNotificationIfNotExists(_notificationIds["NoSpawns"], NotificationType.Info, "world.builder.no_spawns");
+			// else RemoveNotificationIfExists(_notificationIds["NoSpawns"]);
+			//
+			// var spawns = descriptor.GetSpawns();
+			// for (var i = 0; i < spawns.Length; i++) {
+			// 	var spawn                  = spawns[i];
+			// 	var nullNotificationId     = $"SpawnIsNull-{i}";
+			// 	var estimateNotificationId = $"SpawnEstimate-{i}";
+			//
+			// 	if (!spawn) {
+			// 		SetNotificationWithActions(
+			// 			nullNotificationId, NotificationType.Warning,
+			// 			"world.builder.spawn_null", new List<VisualElement> {
+			// 				CreateNormalizeButton(() => descriptor.spawns = descriptor.EstimateSpawns().Values.ToArray())
+			// 			}, i
+			// 		);
+			// 		RemoveNotificationIfExists(estimateNotificationId);
+			// 	} else {
+			// 		RemoveNotificationIfExists(nullNotificationId);
+			//
+			// 		var estimate = esSpawn.FirstOrDefault(e => e.Value == spawn);
+			// 		if (estimate.Key != i)
+			// 			SetNotificationWithActions(
+			// 				estimateNotificationId, NotificationType.Warning,
+			// 				"world.builder.spawn_estimate", new List<VisualElement> {
+			// 					CreateNormalizeButton(() => descriptor.spawns = descriptor.EstimateSpawns().Values.ToArray())
+			// 				}, spawn.name, i, estimate.Key, i
+			// 			);
+			// 		else RemoveNotificationIfExists(estimateNotificationId);
+			// 	}
+			// }
 		}
 
-		private void CheckScenes(MainWorldDescriptor descriptor) {
-			var esScene = descriptor.EstimateScenes();
-
-			if (esScene.Count == 1)
-				SetNotificationIfNotExists(_notificationIds["NoScenes"], NotificationType.Success, "world.builder.no_scenes");
-			else RemoveNotificationIfExists(_notificationIds["NoScenes"]);
-
-			var scenes = descriptor.GetScenes().Skip(1).ToList();
-			for (var i = 0; i < scenes.Count; i++) {
-				var scene                  = scenes[i];
-				var nullNotificationId     = $"SceneIsNull-{i}";
-				var estimateNotificationId = $"SceneEstimate-{i}";
-
-				if (string.IsNullOrEmpty(scene)) {
-					SetNotificationWithActions(
-						nullNotificationId, NotificationType.Warning,
-						"world.builder.scene_null", new List<VisualElement> {
-							CreateNormalizeButton(() => descriptor.sceneAssets = descriptor.EstimateScenes().Values.ToList())
-						}, i
-					);
-					RemoveNotificationIfExists(estimateNotificationId);
-				} else {
-					RemoveNotificationIfExists(nullNotificationId);
-
-					var estimate = esScene.FirstOrDefault(e => AssetDatabase.GetAssetPath(e.Value) == scene);
-					if (estimate.Key != i)
-						SetNotificationWithActions(
-							estimateNotificationId, NotificationType.Warning,
-							"world.builder.scene_estimate", new List<VisualElement> {
-								CreateNormalizeButton(() => descriptor.sceneAssets = descriptor.EstimateScenes().Values.ToList())
-							}, scene, i, estimate.Key, i
-						);
-					else RemoveNotificationIfExists(estimateNotificationId);
-				}
-			}
+		private void CheckScenes(WorldDescriptor descriptor) {
+			// var esScene = descriptor.EstimateScenes();
+			//
+			// if (esScene.Count == 1)
+			// 	SetNotificationIfNotExists(_notificationIds["NoScenes"], NotificationType.Success, "world.builder.no_scenes");
+			// else RemoveNotificationIfExists(_notificationIds["NoScenes"]);
+			//
+			// var scenes = descriptor.GetScenes().Skip(1).ToList();
+			// for (var i = 0; i < scenes.Count; i++) {
+			// 	var scene                  = scenes[i];
+			// 	var nullNotificationId     = $"SceneIsNull-{i}";
+			// 	var estimateNotificationId = $"SceneEstimate-{i}";
+			//
+			// 	if (string.IsNullOrEmpty(scene)) {
+			// 		SetNotificationWithActions(
+			// 			nullNotificationId, NotificationType.Warning,
+			// 			"world.builder.scene_null", new List<VisualElement> {
+			// 				CreateNormalizeButton(() => descriptor.sceneAssets = descriptor.EstimateScenes().Values.ToList())
+			// 			}, i
+			// 		);
+			// 		RemoveNotificationIfExists(estimateNotificationId);
+			// 	} else {
+			// 		RemoveNotificationIfExists(nullNotificationId);
+			//
+			// 		var estimate = esScene.FirstOrDefault(e => AssetDatabase.GetAssetPath(e.Value) == scene);
+			// 		if (estimate.Key != i)
+			// 			SetNotificationWithActions(
+			// 				estimateNotificationId, NotificationType.Warning,
+			// 				"world.builder.scene_estimate", new List<VisualElement> {
+			// 					CreateNormalizeButton(() => descriptor.sceneAssets = descriptor.EstimateScenes().Values.ToList())
+			// 				}, scene, i, estimate.Key, i
+			// 			);
+			// 		else RemoveNotificationIfExists(estimateNotificationId);
+			// 	}
+			// }
 		}
 
 		private void CheckPlayMode() {
@@ -274,7 +274,7 @@ namespace api.nox.world {
 			else RemoveNotificationIfExists(_notificationIds["PlayMode"]);
 		}
 
-		private void CheckBuildPlatform(MainWorldDescriptor descriptor) {
+		private void CheckBuildPlatform(WorldDescriptor descriptor) {
 			var buildPlatform = descriptor?.target ?? Platform.None;
 
 			if (buildPlatform == Platform.None)
@@ -292,7 +292,7 @@ namespace api.nox.world {
 			else RemoveNotificationIfExists(_notificationIds["UseActivePlatform"]);
 		}
 
-		private void CheckUnsupportedPlatform(MainWorldDescriptor descriptor) {
+		private void CheckUnsupportedPlatform(WorldDescriptor descriptor) {
 			// Determine the platform to check
 			var platformToCheck = descriptor?.target ?? Platform.None;
 
@@ -333,7 +333,7 @@ namespace api.nox.world {
 			}
 		}
 
-		private void CheckPlatformMismatch(MainWorldDescriptor descriptor) {
+		private void CheckPlatformMismatch(WorldDescriptor descriptor) {
 			// Skip check if descriptor is null or target is None
 			if (!descriptor || descriptor.target == Platform.None) {
 				RemoveNotificationIfExists(_notificationIds["PlatformMismatch"]);
@@ -367,7 +367,7 @@ namespace api.nox.world {
 			} else RemoveNotificationIfExists(_notificationIds["PlatformMismatch"]);
 		}
 
-		private void UpdateUI(MainWorldDescriptor descriptor) {
+		private void UpdateUI(WorldDescriptor descriptor) {
 			if (_root.childCount == 0) return;
 
 			// Cache UI elements if not already cached

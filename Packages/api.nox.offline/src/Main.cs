@@ -84,7 +84,7 @@ namespace api.nox.offline {
 				: null;
 
 			var adapter = new OfflineAdapter {
-				Name     = title,
+				Name      = title,
 				Thumbnail = thumbnail
 			};
 			var session = SessionAPI.New(adapter);
@@ -118,8 +118,7 @@ namespace api.nox.offline {
 					hash: asset.GetHash(),
 					progress: arg0 => adapter.SetState(false, $"Downloading world '{worldId.ToString()}'...", 0.15f + arg0 * 0.45f)
 				);
-				download.Start();
-				await download.Wait();
+				await download.Start();
 			}
 
 			adapter.SetState(false, $"Loading world '{worldId}'...", 0.6f);

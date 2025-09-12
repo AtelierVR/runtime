@@ -158,6 +158,8 @@ ParticleSystemRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -179,6 +181,7 @@ ParticleSystemRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
@@ -5089,17 +5092,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Version: 3
   m_UsePipelineSettings: 1
   m_AdditionalLightsShadowResolutionTier: 2
-  m_LightLayerMask: 1
-  m_RenderingLayers: 1
   m_CustomShadowLayers: 0
-  m_ShadowLayerMask: 1
-  m_ShadowRenderingLayers: 1
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1055241733
 GameObject:
   m_ObjectHideFlags: 0
@@ -5110,6 +5119,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1055241735}
   - component: {fileID: 1055241736}
+  - component: {fileID: 1055241737}
   m_Layer: 0
   m_Name: World Descriptor
   m_TagString: Untagged
@@ -5141,20 +5151,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 1055241733}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 27b143a69400493093a10d9445ba058d, type: 3}
+  m_Script: {fileID: 11500000, guid: 762fe8c159f54837842db237501905ab, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  spawns:
-  - {fileID: 1055241733}
-  spawnType: 2
-  spawnIndex: 0
-  isCompiled: 0
-  scenes: []
-  sceneAssets: []
+  m_EditorClassIdentifier: Nox.CCK.Worlds::Nox.CCK.Worlds.WorldDescriptor
   target: 0
   publishId: 0
   publishServer: 
   publishVersion: 0
+  isCompiled: 0
+--- !u!114 &1055241737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1055241733}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63b5850aacf6453a81962d2b6020127c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Nox.CCK.Worlds.Scenes::Nox.CCK.Worlds.Scenes.ScenesWorldModule
+  scenes: []
+  sceneAssets: []
 --- !u!1 &1978528953
 GameObject:
   m_ObjectHideFlags: 0
@@ -5194,6 +5212,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5215,6 +5235,7 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0

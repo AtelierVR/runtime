@@ -22,44 +22,20 @@ namespace Nox.Worlds {
 		/// Returns all loaded scenes in the world.
 		/// </summary>
 		/// <returns></returns>
-		public IBaseRuntimeWorldInstance<IBaseWorldDescriptor>[] GetScenes();
-
-		/// <summary>
-		/// Returns the scene at the given index.
-		/// The index 0 is reserved for the main scene.
-		/// All other scenes are loaded as sub-scenes or null if not loaded.
-		/// </summary>
-		/// <param name="index"></param>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public IBaseRuntimeWorldInstance<T> GetScene<T>(int index) where T : IBaseWorldDescriptor;
-
+		public IRuntimeWorldInstance[] GetInstances();
+		
 		/// <summary>
 		/// Returns the scene at the given index.
 		/// </summary>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		public IBaseRuntimeWorldInstance<IBaseWorldDescriptor> GetScene(int index);
-
-		/// <summary>
-		/// Returns the main scene.
-		/// </summary>
-		/// <returns></returns>
-		public IMainRuntimeWorldInstance GetMainScene();
-
-		/// <summary>
-		/// Returns the sub-scene at the given index.
-		/// Can return null if the sub-scene is not loaded.
-		/// </summary>
-		/// <param name="index"></param>
-		/// <returns></returns>
-		public ISubRuntimeWorldInstance GetSubScene(int index);
+		public IRuntimeWorldInstance GetInstance(int index);
 
 		/// <summary>
 		/// Returns the number of scenes in the world.
 		/// </summary>
 		/// <returns></returns>
-		public int GetSceneCount();
+		public int GetInstanceCount();
 
 		/// <summary>
 		/// Makes the world current.

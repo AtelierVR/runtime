@@ -81,7 +81,7 @@ namespace api.nox.relay {
 						return;
 					}
 
-					var scene = _dimension.GetScene().GetScene(index)?.GetScene();
+					var scene = _dimension.GetScene().GetInstance(index)?.GetScene();
 					if (!scene.HasValue) {
 						Logger.LogWarning($"No scene found for entity path: {ev.Path}");
 						return;
@@ -291,7 +291,7 @@ namespace api.nox.relay {
 			foreach (var entity in _entities.GetEntities().ToArray())
 				_entities.UnregisterEntity(entity);
 			if (_dimension.GetMainIndex() > 0)
-				_dimension.GetScene().GetMainScene().RemoveInstance(_dimension.GetMainIndex());
+				_dimension.GetScene().GetInstances()[0].RemoveInstance(_dimension.GetMainIndex());
 			_dimension = null;
 			UnityEngine.Object.Destroy(EntitiesRoot);
 			EntitiesRoot = null;
@@ -317,7 +317,7 @@ namespace api.nox.relay {
 
 		public async UniTask OnDeselect(ISession newSession) {
 			Logger.LogDebug($"OnDeselect: {this}");
-			var main = _dimension.GetScene().GetMainScene();
+			var main = _dimension.GetScene().GetInstances()[0];
 			main?.SetVisibleInstance(_dimension.GetMainIndex(), false, false);
 			var entities = _entities.GetEntities().ToArray();
 			foreach (var entity in entities)
@@ -329,10 +329,15 @@ namespace api.nox.relay {
 			Logger.LogDebug($"OnSelect: {this}");
 			if (_dimension == null)
 				throw new InvalidOperationException($"No current dimension found for session {this}. Please ensure a dimension is set before selecting the session.");
-			// if (GetLocalPlayer() == null) NewPlayer();
-			var main = _dimension.GetScene().GetMainScene();
-			if (_dimension.GetMainIndex() == 0)
-				_dimension.SetMainIndex(await main.MakeInstance());
+			
+			var main = _dimension.GetScene().GetInstances()[0];
+			if (_dimension.GetMainIndex() == 0) {
+				var id = await main.MakeInstance();
+				_dimension.SetMainIndex(id);
+				var desc = main.GetInstanceDescriptor(id);
+				_session.OnDescriptorAdded(desc);
+			}
+
 			_dimension.GetScene().SetCurrent();
 			main.SetVisibleInstance(_dimension.GetMainIndex(), true, true);
 		}

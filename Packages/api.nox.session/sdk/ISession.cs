@@ -115,5 +115,11 @@ namespace Nox.Sessions {
 		/// <param name="nSession"></param>
 		/// <returns></returns>
 		UniTask OnDeselect(ISession nSession);
+
+		/// <summary>
+		/// Event called when a new world descriptor is added to the session.
+		/// </summary>
+		/// <param name="descriptor"></param>
+		void OnDescriptorAdded(IWorldDescriptor descriptor);
 	}
 }

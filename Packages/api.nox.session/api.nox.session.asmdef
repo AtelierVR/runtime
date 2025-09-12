@@ -13,7 +13,8 @@
     "Nox.Users",
     "Nox.UI",
     "Nox.Instances",
-    "Unity.TextMeshPro"
+    "Unity.TextMeshPro",
+    "Nox.Worlds.Spawns"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

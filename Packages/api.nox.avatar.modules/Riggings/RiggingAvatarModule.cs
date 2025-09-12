@@ -18,7 +18,7 @@ namespace Nox.CCK.Avatars.Rigging {
 		private readonly List<IParameter>  _parameters = new();
 
 		public GameObject Anchor
-			=> _descriptor.GetRoot();
+			=> _descriptor.GetAnchor();
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		public RigBuilder GetRigBuilder()
@@ -370,7 +370,7 @@ namespace Nox.CCK.Avatars.Rigging {
 
 			var module = modules.Length switch {
 				1 => modules.FirstOrDefault(),
-				0 => descriptor.GetRoot().AddComponent<RiggingAvatarModule>(),
+				0 => descriptor.GetAnchor().AddComponent<RiggingAvatarModule>(),
 				_ => null
 			};
 

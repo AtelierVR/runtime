@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Nox.Avatars;
 using UnityEngine;
 using Nox.CCK.Players;
@@ -7,6 +8,7 @@ using Nox.CCK.Utils;
 using Nox.Entities;
 using Nox.Players;
 using Nox.Users;
+using Nox.Worlds.Spawns;
 using Logger = Nox.CCK.Utils.Logger;
 using Transform = Nox.CCK.Utils.Transform;
 
@@ -162,6 +164,16 @@ namespace api.nox.offline {
 			if (!Transforms.TryGetValue(part, out var tr)) return;
 			transform.DeliveryType = DeliveryType.LocalModified;
 			Transforms[part]       = transform;
+		}
+
+		public void Respawn() {
+			var dimension   = _context.GetDimension();
+			var main        = dimension.GetScene().GetInstances()[0];
+			var descriptor  = main.GetInstanceDescriptor(dimension.GetMainIndex());
+			var spawnModule = descriptor?.GetModules<ISpawnModule>().FirstOrDefault();
+			if (spawnModule == null) return;
+			var spawn = spawnModule.ChoiceSpawn();
+			Teleport(spawn.GetPosition(), spawn.GetRotation());
 		}
 
 		public void Move(Transform transform)

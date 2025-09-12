@@ -11,7 +11,7 @@ using Nox.Players;
 
 namespace Nox.CCK.Avatars {
 	public class AvatarDescriptor : MonoBehaviour, IAvatarDescriptor, ICompilable {
-		public GameObject GetRoot()
+		public GameObject GetAnchor()
 			=> gameObject;
 
 		#region Publisher
@@ -82,7 +82,7 @@ namespace Nox.CCK.Avatars {
 		// ReSharper disable Unity.PerformanceAnalysis
 		public static IAvatarModule[] FindModules(IAvatarDescriptor descriptor) {
 			var modules = new HashSet<IAvatarModule>(descriptor.GetModules());
-			var root    = descriptor.GetRoot();
+			var root    = descriptor.GetAnchor();
 			modules.UnionWith(root.GetComponents<IAvatarModule>());
 			modules.UnionWith(root.GetComponentsInChildren<IAvatarModule>(true));
 			return modules.ToArray();

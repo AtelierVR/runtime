@@ -7,7 +7,7 @@ using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace Nox.CCK.Avatars.EyeLooks {
-	public class EyeLookAvatarModule : MonoBehaviour, IAvatarModule, ICompilable {
+	public class EyeLookAvatarModule : MonoBehaviour, IAvatarModule {
 		private IAvatarDescriptor _descriptor;
 
 		[SerializeReference]

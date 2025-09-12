@@ -21,7 +21,7 @@ namespace api.nox.avatar {
 				return false;
 
 			var descriptor = avatar.GetDescriptor();
-			var gameObject = descriptor.GetRoot();
+			var gameObject = descriptor.GetAnchor();
 
 			if (!gameObject) {
 				Logger.LogError("Avatar descriptor root GameObject is null.");

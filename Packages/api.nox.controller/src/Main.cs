@@ -28,6 +28,16 @@ namespace api.nox.controller {
 			=> _current;
 
 		public async UniTask<bool> SetCurrent(IController controller) {
+			if (controller == null) {
+				if (_current == null)
+					return true;
+
+				_current.Dispose();
+				_current = null;
+				_coreAPI.EventAPI.Emit("controller_changed", null);
+				return true;
+			}
+
 			if (_current == controller)
 				return true;
 

@@ -6,7 +6,7 @@ namespace Nox.Avatars {
 		/// Get the root GameObject of the avatar.
 		/// </summary>
 		/// <returns></returns>
-		public GameObject GetRoot();
+		public GameObject GetAnchor();
 
 		/// <summary>
 		/// Gets the avatar modules of a specific type.

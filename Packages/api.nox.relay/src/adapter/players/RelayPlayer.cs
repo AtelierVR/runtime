@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using api.nox.relay.types.Player;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
@@ -10,6 +11,7 @@ using Nox.CCK.Utils;
 using Nox.Entities;
 using Nox.Players;
 using Nox.Users;
+using Nox.Worlds.Spawns;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 using NoxTransform = Nox.CCK.Utils.Transform;
@@ -196,9 +198,20 @@ namespace api.nox.relay {
 		public abstract UniTask<bool> SetAvatar(IAvatarIdentifier identifier);
 
 		public abstract IAvatarIdentifier GetAvatar();
+		
+		public void Respawn() {
+			var dimension   = Adapter.GetDimension();
+			var main        = dimension.GetScene().GetInstances()[0];
+			var descriptor  = main.GetInstanceDescriptor(dimension.GetMainIndex());
+			var spawnModule = descriptor?.GetModules<ISpawnModule>().FirstOrDefault();
+			if (spawnModule == null) return;
+			var spawn = spawnModule.ChoiceSpawn();
+			Teleport(spawn.GetPosition(), spawn.GetRotation());
+		}
 
 		public override string ToString()
 			=> $"{GetType().Name}[Id={GetId()}, Display={GetDisplay()}, Identifier={ToIdentifier()}, IsMaster={IsMaster()}]";
+
 
 		public void Dispose() {
 			DestroyPhysical();

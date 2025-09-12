@@ -56,10 +56,10 @@ namespace Nox.CCK.Avatars.Playable {
 			animator.runtimeAnimatorController ??= GetAssetController();
 
 			if (!animator.playableGraph.IsValid()) {
-				Descriptor.GetRoot().SetActive(true);
+				Descriptor.GetAnchor().SetActive(true);
 				var startTime = Time.realtimeSinceStartup;
 				await UniTask.WaitUntil(() => animator.playableGraph.IsValid() || Time.realtimeSinceStartup - startTime > 15f);
-				Descriptor.GetRoot().SetActive(false);
+				Descriptor.GetAnchor().SetActive(false);
 				if (Time.realtimeSinceStartup - startTime > 15) {
 					Logger.LogError("Timed out waiting for Animator's playable graph to become valid, cannot play avatar module.");
 					return false;

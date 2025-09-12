@@ -1,0 +1,20 @@
+{
+  "name": "api.nox.world.modules",
+  "rootNamespace": "",
+  "references": [
+    "Nox.Worlds",
+    "Nox.CCK",
+    "UniTask",
+    "Nox.CCK.Worlds.FellInVoid",
+    "Nox.CCK.Worlds.Spawns"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

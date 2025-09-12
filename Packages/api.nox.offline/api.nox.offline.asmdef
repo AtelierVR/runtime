@@ -11,7 +11,8 @@
     "Nox.CCK.Worlds",
     "Nox.Worlds",
     "Nox.Users",
-    "Nox.Avatars"
+    "Nox.Avatars",
+    "Nox.Worlds.Spawns"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
