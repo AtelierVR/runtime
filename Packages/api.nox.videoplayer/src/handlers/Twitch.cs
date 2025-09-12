@@ -29,7 +29,7 @@ namespace api.nox.videoplayer.handlers {
 			var id = "";
 
 			if (original.StartsWith("https://www.twitch.tv/")) {
-				var uri = new System.Uri(original);
+				var uri = new Uri(original);
 				id = uri.AbsolutePath.TrimStart('/');
 			}
 
@@ -40,11 +40,9 @@ namespace api.nox.videoplayer.handlers {
 			try {
 				if (EstimatePriority(options) < 0)
 					return new IResult[] { Result.FromError("Query is not a valid Twitch URL") };
-				
-				var response = IsUrl(options.GetQuery())
-					? await YtDl.Extract(FormatUrl(options.GetQuery()), cancellationToken: options.GetCancellation().Token)
-					: await YtDl.Extract($"ytsearch{options.GetLimit()}:{options.GetQuery()}", cancellationToken: options.GetCancellation().Token);
 
+				var response = await YtDl.Extract(FormatUrl(options.GetQuery()), cancellationToken: options.GetCancellation().Token);
+				
 				if (response is not { Type: JTokenType.Object })
 					throw new InvalidDataException("Response from yt-dlp is not an object");
 
