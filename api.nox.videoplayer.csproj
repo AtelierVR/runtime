@@ -50,6 +50,7 @@
     <Compile Include="Packages\api.nox.videoplayer\src\videoplayers\VideoPlayerManager.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\base\Result.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\base\AudioFormat.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\src\handlers\Twitch.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\client\widget\VideoPlayerWidget.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\base\Format.cs" />
     <Compile Include="Packages\api.nox.videoplayer\src\base\Subtitle.cs" />
