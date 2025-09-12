@@ -47,7 +47,7 @@ namespace api.nox.videoplayer.handlers {
 					throw new InvalidDataException("Response from yt-dlp is not an object");
 
 				var type      = ToObject(response["_type"], "");
-				var extractor = ToObject(response["_extractor"], "unknown");
+				var extractor = ToObject(response["extractor"], "unknown");
 				if (extractor != "twitch:stream" && extractor != "twitch")
 					throw new InvalidDataException($"Unexpected extractor: {extractor}");
 

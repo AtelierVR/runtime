@@ -18,14 +18,21 @@ namespace api.nox.videoplayer.handlers {
 		public string[] GetTitleArguments()
 			=> new string[] { };
 
-		public int EstimatePriority(IFetchOptions options)
-			=> IsUrl(options.GetQuery()) ? 100 : string.IsNullOrEmpty(GetTitleKey()) ? -1 : 10;
+		public int EstimatePriority(IFetchOptions options) {
+			if (IsUrl(options.GetQuery()))
+				return 100;
+			if (string.IsNullOrEmpty(options.GetQuery()))
+				return -1;
+			if (options.GetQuery().StartsWith("http"))
+				return -1;
+			return 10;
+		}
 
-		public static bool IsUrl(string query)
+		private static bool IsUrl(string query)
 			=> query.StartsWith("https://www.youtube.com/watch")
 				|| query.StartsWith("https://youtu.be/");
 
-		public static string FormatUrl(string original) {
+		private static string FormatUrl(string original) {
 			var id = "";
 
 			if (original.StartsWith("https://www.youtube.com/watch")) {
