@@ -82,6 +82,13 @@ extern "C"
         player->seek(time);
     }
 
+    VIDEOPLAYER_API VideoFrame *GetVideoFrame(VideoPlayer *player)
+    {
+        if (!player)
+            return nullptr;
+        return player->getVideoFrame();
+    }
+
     VIDEOPLAYER_API VideoFrame *GetVideoFrameAtTime(VideoPlayer *player, double time)
     {
         if (!player)

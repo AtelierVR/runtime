@@ -31,6 +31,7 @@ public:
     void resume();
     void stop();
     void seek(double time);
+    VideoFrame* getVideoFrame();
     VideoFrame* getVideoFrameAtTime(double time);
     AudioFrame* getAudioFrameAtTime(double time);
     double getDuration() const;

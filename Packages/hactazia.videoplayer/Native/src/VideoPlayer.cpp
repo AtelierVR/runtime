@@ -581,6 +581,11 @@ VideoFrame *VideoPlayer::getVideoFrameAtTime(double time)
     }
 }
 
+VideoFrame *VideoPlayer::getVideoFrame()
+{
+    return getVideoFrameAtTime(getCurrentTime());
+}
+
 AudioFrame *VideoPlayer::getAudioFrameAtTime(double time)
 {
     std::lock_guard<std::mutex> cacheLock(cacheMutex);

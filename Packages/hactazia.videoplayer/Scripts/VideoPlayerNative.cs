@@ -58,6 +58,9 @@ namespace Hactazia.VideoPlayer {
 		// Fonctions d'accès aux données
 		// ========================================
 
+		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "GetVideoFrame")]
+		private static extern IntPtr Impl_GetVideoFrame(IntPtr player);
+
 		[DllImport(DLLName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "GetVideoFrameAtTime")]
 		private static extern IntPtr Impl_GetVideoFrameAtTime(IntPtr player, double time);
 
@@ -183,6 +186,13 @@ namespace Hactazia.VideoPlayer {
 		public static void Seek(IntPtr player, double time) {
 			if (!IsValid(player) || time < 0) return;
 			Impl_Seek(player, time);
+		}
+
+		public static VideoFrame? GetVideoFrame(IntPtr player) {
+			if (!IsValid(player)) return null;
+			var ptr = Impl_GetVideoFrame(player);
+			if (ptr == IntPtr.Zero) return null;
+			return Marshal.PtrToStructure<VideoFrame>(ptr);
 		}
 
 		public static VideoFrame? GetVideoFrameAtTime(IntPtr player, double time) {

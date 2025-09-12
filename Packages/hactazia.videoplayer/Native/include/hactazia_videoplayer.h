@@ -79,6 +79,7 @@ VIDEOPLAYER_API void Pause(VideoPlayer* player);
 VIDEOPLAYER_API void Resume(VideoPlayer* player);
 VIDEOPLAYER_API void Stop(VideoPlayer* player);
 VIDEOPLAYER_API void Seek(VideoPlayer* player, double time);
+VIDEOPLAYER_API VideoFrame* GetVideoFrame(VideoPlayer* player);
 VIDEOPLAYER_API VideoFrame* GetVideoFrameAtTime(VideoPlayer* player, double time);
 VIDEOPLAYER_API AudioFrame* GetAudioFrameAtTime(VideoPlayer* player, double time);
 VIDEOPLAYER_API void FreeVideoFrame(VideoFrame* frame);
