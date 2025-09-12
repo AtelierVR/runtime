@@ -9,6 +9,8 @@ namespace Nox.VideoPlayer {
 
 		public string[] GetTitleArguments();
 
+		public int EstimatePriority(IFetchOptions options);
+
 		public UniTask<IResult[]> Fetch(IFetchOptions options);
 	}
 }

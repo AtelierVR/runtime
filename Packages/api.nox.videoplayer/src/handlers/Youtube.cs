@@ -18,6 +18,9 @@ namespace api.nox.videoplayer.handlers {
 		public string[] GetTitleArguments()
 			=> new string[] { };
 
+		public int EstimatePriority(IFetchOptions options)
+			=> IsUrl(options.GetQuery()) ? 100 : string.IsNullOrEmpty(GetTitleKey()) ? -1 : 10;
+
 		public static bool IsUrl(string query)
 			=> query.StartsWith("https://www.youtube.com/watch")
 				|| query.StartsWith("https://youtu.be/");
@@ -39,6 +42,9 @@ namespace api.nox.videoplayer.handlers {
 
 		public async UniTask<IResult[]> Fetch(IFetchOptions options) {
 			try {
+				if (EstimatePriority(options) < 0)
+					return new IResult[] { Result.FromError("Cannot handle this query") };
+
 				var response = IsUrl(options.GetQuery())
 					? await YtDl.Extract(FormatUrl(options.GetQuery()), cancellationToken: options.GetCancellation().Token)
 					: await YtDl.Extract($"ytsearch{options.GetLimit()}:{options.GetQuery()}", cancellationToken: options.GetCancellation().Token);
@@ -144,9 +150,9 @@ namespace api.nox.videoplayer.handlers {
 				}
 
 				if (fmt is AudioVideoFormat or AudioFormat) {
-					if(format["abr"]?.Type != JTokenType.Null) 
+					if (format["abr"]?.Type != JTokenType.Null)
 						fmt.AudioBitrate = format["abr"]?.ToObject<uint>() ?? 0u;
-					fmt.AudioCodec   = acodec;
+					fmt.AudioCodec = acodec;
 				}
 
 				if (!string.IsNullOrWhiteSpace(fmt.Url))

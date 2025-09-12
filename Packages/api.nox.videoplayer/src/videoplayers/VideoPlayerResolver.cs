@@ -46,8 +46,14 @@ namespace api.nox.videoplayer {
 
 			Logger.LogDebug($"Resolving video for player {arg0} with options {arg1}");
 
-			var handlers = Main.Handlers;
-			var results  = new List<IResult>();
+			var handlers = Main.Handlers
+				.Select(e => (e.EstimatePriority(arg1), e))
+				.Where(e => e.Item1 >= 0)
+				.OrderByDescending(e => e.Item1)
+				.Select(e => e.e)
+				.ToArray();
+
+			var results = new List<IResult>();
 
 			await UniTask.SwitchToMainThread();
 			await UniTask.WhenAll(Enumerable.Select(handlers, Resolver));
