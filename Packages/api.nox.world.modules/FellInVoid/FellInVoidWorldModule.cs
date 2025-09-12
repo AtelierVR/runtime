@@ -40,17 +40,11 @@ namespace Nox.CCK.Worlds.FellInVoid {
 		public void OnSession(ISession session)
 			=> _session = session;
 
-		public void OnPlayerJoined(IPlayer player) {
-			Logger.Log("OnPlayerJoined: " + player);
-		}
-
-		public void OnPlayerLeft(IPlayer player) {
-			Logger.Log("OnPlayerLeft: " + player);
-		}
-
 		public void Update() {
 			var local = _session?.GetAdapter().GetLocalPlayer();
-			local.Respawn();
+			var pos   = local?.GetPosition() ?? new Vector3(0, fallThreshold + 1, 0);
+			if (pos.y < fallThreshold)
+				local?.Respawn();
 		}
 	}
 }
