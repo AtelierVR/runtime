@@ -8,7 +8,7 @@ using Logger = Nox.CCK.Utils.Logger;
 using UnityVideoPlayer = UnityEngine.Video.VideoPlayer;
 
 namespace Nox.CCK.VideoPlayer {
-	public class VideoPlayer : MonoBehaviour, IVideoPlayer, IVideoPlayerResolver, IVideoPlayerDetails {
+	public class VideoPlayer : MonoBehaviour, IVideoPlayer, IVideoPlayerResolver, IVideoPlayerDetails, IVideoPlayerResolution {
 		#region Fields
 
 		public string           playQuery;
@@ -93,20 +93,21 @@ namespace Nox.CCK.VideoPlayer {
 
 		#region Events
 
-		public UnityEvent<IVideoPlayer>            onReady             = new(); // Événement pour la préparation terminée
-		public UnityEvent<IVideoPlayer>            onStart             = new(); // Événement pour le début de la lecture
-		public UnityEvent<IVideoPlayer>            onEnd               = new(); // Événement pour la fin de la lecture
-		public UnityEvent<IVideoPlayer, Exception> onError             = new(); // Événement pour les erreurs
-		public UnityEvent<IVideoPlayer>            onConnectionLost    = new(); // Événement pour perte de connexion
-		public UnityEvent<IVideoPlayer>            onReconnecting      = new(); // Événement pour tentative de reconnexion
-		public UnityEvent<IVideoPlayer>            onReconnected       = new(); // Événement pour reconnexion réussie
-		public UnityEvent<IVideoPlayer>            onPlay              = new(); // Événement pour la lecture
-		public UnityEvent<IVideoPlayer>            onPause             = new(); // Événement pour la pause
-		public UnityEvent<IVideoPlayer>            onResume            = new(); // Événement pour la reprise
-		public UnityEvent<IVideoPlayer, double>    onProgress          = new(); // Événement pour la progression (0.0 à 1.0)
-		public UnityEvent<IVideoPlayer, double>    onSeek              = new(); // Événement pour le seek (temps en secondes)
-		public UnityEvent<IVideoPlayer, float>     onVolumeChanged     = new(); // Événement pour le changement de volume (0.0 à 1.0)
-		public UnityEvent<IVideoPlayer, bool>      onPlayStatusChanged = new(); // Événement pour le changement de statut de lecture
+		public UnityEvent<IVideoPlayer>             onReady             = new(); // Événement pour la préparation terminée
+		public UnityEvent<IVideoPlayer>             onStart             = new(); // Événement pour le début de la lecture
+		public UnityEvent<IVideoPlayer>             onEnd               = new(); // Événement pour la fin de la lecture
+		public UnityEvent<IVideoPlayer, Exception>  onError             = new(); // Événement pour les erreurs
+		public UnityEvent<IVideoPlayer>             onConnectionLost    = new(); // Événement pour perte de connexion
+		public UnityEvent<IVideoPlayer>             onReconnecting      = new(); // Événement pour tentative de reconnexion
+		public UnityEvent<IVideoPlayer>             onReconnected       = new(); // Événement pour reconnexion réussie
+		public UnityEvent<IVideoPlayer>             onPlay              = new(); // Événement pour la lecture
+		public UnityEvent<IVideoPlayer>             onPause             = new(); // Événement pour la pause
+		public UnityEvent<IVideoPlayer>             onResume            = new(); // Événement pour la reprise
+		public UnityEvent<IVideoPlayer, double>     onProgress          = new(); // Événement pour la progression (0.0 à 1.0)
+		public UnityEvent<IVideoPlayer, double>     onSeek              = new(); // Événement pour le seek (temps en secondes)
+		public UnityEvent<IVideoPlayer, float>      onVolumeChanged     = new(); // Événement pour le changement de volume (0.0 à 1.0)
+		public UnityEvent<IVideoPlayer, bool>       onPlayStatusChanged = new(); // Événement pour le changement de statut de lecture
+		public UnityEvent<IVideoPlayer, Vector2Int> onResolutionChanged = new(); // Événement pour le changement de résolution
 
 		public UnityEvent<IVideoPlayer, IFetchOptions>            onResolving = new(); // Événement pour le début de la résolution
 		public UnityEvent<IVideoPlayer, IFetchOptions, IResult[]> onResolved  = new(); // Événement pour la résolution terminée
@@ -152,12 +153,16 @@ namespace Nox.CCK.VideoPlayer {
 
 		public UnityEvent<IVideoPlayer> OnEndEvent()
 			=> onEnd;
-		
+
 		public UnityEvent<IVideoPlayer, IFetchOptions> OnResolvingEvent()
 			=> onResolving;
-		
+
 		public UnityEvent<IVideoPlayer, IFetchOptions, IResult[]> OnResolvedEvent()
 			=> onResolved;
+
+
+		public UnityEvent<IVideoPlayer, Vector2Int> OnResolutionChangedEvent()
+			=> onResolutionChanged;
 
 		#endregion Events
 
@@ -542,6 +547,11 @@ namespace Nox.CCK.VideoPlayer {
 
 		public string GetSubtitle()
 			=> _currentPlaying?.GetSubtitle();
+
+		public Vector2Int GetResolution()
+			=> UnityVideoPlayer.texture
+				? new Vector2Int(UnityVideoPlayer.texture.width, UnityVideoPlayer.texture.height)
+				: Vector2Int.zero;
 
 		#endregion Metadata
 	}
