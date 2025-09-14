@@ -6,14 +6,15 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
 using Nox.CCK.Mods.Panels;
 using Nox.Sessions;
-using Nox.Players;
 using UnityEditor;
-using UnityEngine;
+using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.session {
 	public class SessionsPanel : IEditorPanelBuilder, IDisposable {
+		#region Interface Implementation
+
 		public string GetId()
 			=> "sessions";
 
@@ -27,28 +28,84 @@ namespace api.nox.session {
 			=> false;
 
 		public VisualElement[] GetHeaders() {
-			var refreshButton = new Button { text = LanguageManager.Get("session.manager.refresh") };
+			var refreshButton = new Button {
+				text = LanguageManager.Get("session.manager.refresh")
+			};
 			refreshButton.AddToClassList("nox-transparent");
-			refreshButton.RegisterCallback<ClickEvent>(OnRefresh);
+			refreshButton.clicked += RefreshSessionsList;
+
 			return new VisualElement[] { refreshButton };
 		}
 
-		private void OnRefresh(ClickEvent evt) {
-			RefreshSessionsList();
-			evt.StopPropagation();
+		#endregion
+
+		#region Private Fields
+
+		private readonly VisualElement       _root      = new();
+		private          VisualElement       _container = new();
+		private          MultiColumnListView _sessionsListView;
+		private          IntegerField        _sessionCountField;
+		private          TextField           _currentSessionField;
+		private          Button              _disposeAllButton;
+		private          HelpBox             _statusHelpBox;
+
+		// Data tracking
+		private readonly Dictionary<ISession, ISessionEvents> _sessionEventsSubscriptions = new();
+		private readonly List<SessionDisplayData>             _sessionItems               = new();
+
+		#endregion
+
+		#region ListView Data Classes
+
+		private class SessionDisplayData {
+			public ISession Session     { get; }
+			public string   DisplayName { get; set; }
+			public bool     IsCurrent   { get; set; }
+			public string   AdapterType { get; set; }
+			public int      PlayerCount { get; set; }
+			public string   Status      { get; set; }
+			public string   PlayersInfo { get; set; }
+
+			public SessionDisplayData(ISession session, bool isCurrent) {
+				Session   = session;
+				IsCurrent = isCurrent;
+				UpdateData();
+			}
+
+			public void UpdateData() {
+				var adapter = Session?.GetAdapter();
+				DisplayName = $"Session #{Session?.GetId()}";
+				AdapterType = adapter?.GetType().Name   ?? "Unknown";
+				PlayerCount = adapter?.GetPlayerCount() ?? 0;
+				Status      = IsCurrent ? "Current" : "Active";
+
+				// Build players info string
+				if (adapter != null && PlayerCount > 0) {
+					var players = new List<string>();
+					for (int i = 0; i < PlayerCount; i++) {
+						var player = adapter.GetPlayer(i);
+						if (player != null) {
+							var name = player.ToIdentifier()?.ToString() ?? $"Player {i}";
+							var type = "";
+							if (player      == adapter.GetLocalPlayer()) type  = " (Local)";
+							else if (player == adapter.GetMasterPlayer()) type = " (Master)";
+							players.Add(name + type);
+						}
+					}
+
+					PlayersInfo = string.Join(", ", players);
+				} else {
+					PlayersInfo = "No players";
+				}
+			}
 		}
 
-		private readonly VisualElement _root = new();
-		private          VisualElement _sessionsList;
-		private          Label         _sessionsCountLabel;
-		private          Label         _currentSessionLabel;
-		private          Button        _disposeAllButton;
-		
-		// Track session events subscriptions for cleanup
-		private readonly Dictionary<ISession, ISessionEvents> _sessionEventsSubscriptions = new();
+		#endregion
+
+		#region Update and Refresh
 
 		internal void Update() {
-			if (!Editor.HasSessionPanelOpened() || _root.childCount == 0) return;
+			if (!Editor.HasSessionPanelOpened() || _container.childCount == 0) return;
 			RefreshSessionsList();
 		}
 
@@ -59,192 +116,269 @@ namespace api.nox.session {
 			var currentSession = Main.Instance.GetCurrent();
 			var sessionCount   = Main.Instance.GetSessionCount();
 
-			// Update sessions count
-			if (_sessionsCountLabel != null)
-				_sessionsCountLabel.text = LanguageManager.Get("session.manager.sessions_count", sessionCount);
+			UpdateSessionInfo(sessionCount, currentSession);
+			UpdateListView(sessions, currentSession);
+			UpdateGlobalActions(sessionCount);
+		}
 
-			// Update current session info
-			if (_currentSessionLabel != null) {
-				if (currentSession != null) {
-					var adapter     = currentSession.GetAdapter();
-					var adapterName = adapter?.GetType().Name ?? LanguageManager.Get("session.manager.unknown");
-					_currentSessionLabel.text = LanguageManager.Get("session.manager.current_session") + $" #{currentSession.GetId()} - " + LanguageManager.Get("session.manager.adapter_label", adapterName);
+		private void UpdateSessionInfo(int sessionCount, ISession currentSession) {
+			if (_sessionCountField != null) {
+				_sessionCountField.value = sessionCount;
+			}
+
+			if (_currentSessionField != null) {
+				_currentSessionField.value = currentSession != null ? $"Session #{currentSession.GetId()}" : "None";
+			}
+
+			if (_statusHelpBox != null) {
+				if (sessionCount == 0) {
+					_statusHelpBox.text        = "No active sessions. Sessions will appear here when created.";
+					_statusHelpBox.messageType = HelpBoxMessageType.Info;
 				} else {
-					_currentSessionLabel.text = LanguageManager.Get("session.manager.no_current_session");
+					_statusHelpBox.text        = $"{sessionCount} active session(s). Current: {(currentSession != null ? $"#{currentSession.GetId()}" : "None")}";
+					_statusHelpBox.messageType = HelpBoxMessageType.None;
 				}
 			}
-
-			// Update dispose all button
-			if (_disposeAllButton != null)
-				_disposeAllButton.SetEnabled(sessionCount > 0); // Update sessions list
-			UpdateSessionsList(sessions, currentSession);
 		}
 
-		private void UpdateSessionsList(ISession[] sessions, ISession currentSession) {
-			if (_sessionsList == null) return;
+		private void UpdateListView(ISession[] sessions, ISession currentSession) {
+			if (_sessionsListView == null) return;
 
-			_sessionsList.Clear();
+			_sessionItems.Clear();
 
-			if (sessions.Length == 0) {
-				var noSessionsLabel = new Label(LanguageManager.Get("session.manager.no_sessions"));
-				noSessionsLabel.AddToClassList("session-no-sessions");
-				_sessionsList.Add(noSessionsLabel);
-				return;
+			// Sort sessions: current first, then by ID
+			var sortedSessions = sessions.OrderByDescending(s => s == currentSession)
+				.ThenBy(s => s.GetId())
+				.ToArray();
+
+			foreach (var session in sortedSessions) {
+				var item = new SessionDisplayData(session, session == currentSession);
+				_sessionItems.Add(item);
+
+				// Subscribe to events for real-time updates
+				SubscribeToSessionEvents(session);
 			}
 
-			foreach (var session in sessions) {
-				var sessionItem = CreateSessionItem(session, session == currentSession);
-				_sessionsList.Add(sessionItem);
+			_sessionsListView.itemsSource = _sessionItems;
+			_sessionsListView.RefreshItems();
+		}
+
+		private void UpdateGlobalActions(int sessionCount) {
+			if (_disposeAllButton != null) {
+				_disposeAllButton.SetEnabled(sessionCount > 0);
 			}
 		}
 
-		private VisualElement CreateSessionItem(ISession session, bool isCurrent) {
-			var container = new VisualElement();
-			container.AddToClassList("session-item");
-			if (isCurrent) container.AddToClassList("session-current");
+		#endregion
 
-			// Session header
-			var header = new VisualElement();
-			header.AddToClassList("session-header");
-
-			var titleLabel = new Label($"Session #{session.GetId()}");
-			titleLabel.AddToClassList("session-title");
-			if (isCurrent) {
-				titleLabel.text += " " + LanguageManager.Get("session.manager.current_indicator");
+		#region UI Creation
+		public VisualElement Make(Dictionary<string, object> data) {
+			_root.Clear();
+			
+			// Load UXML template
+			var visualTree = Editor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("sessions-panel.uxml");
+			if (visualTree != null) {
+				var template = visualTree.CloneTree();
+				_root.Add(template);
+				
+				// Get references to UI elements
+				GetUIReferences();
+				
+				// Setup programmatic elements
+				SetupProgrammaticElements();
+			} else {
+				// Fallback to programmatic creation if UXML not found
+				CreateLayoutProgrammatically();
 			}
+			
+			RefreshSessionsList();
+			return _root;
+		}
 
-			header.Add(titleLabel);
+		private void GetUIReferences() {
+			// Get references to elements defined in UXML
+			_sessionCountField = _root.Q<IntegerField>("session-count-field");
+			_currentSessionField = _root.Q<TextField>("current-session-field");
+			_disposeAllButton = _root.Q<Button>("dispose-all-button");
+			_statusHelpBox = _root.Q<HelpBox>("status-helpbox");
+			
+			// Setup button event
+			if (_disposeAllButton != null) {
+				_disposeAllButton.clicked += DisposeAllSessions;
+			}
+		}
 
-			// Session info
-			var infoContainer = new VisualElement();
-			infoContainer.AddToClassList("session-info");
+		private void SetupProgrammaticElements() {
+			// Create and add the MultiColumnListView programmatically
+			var sessionsContainer = _root.Q<VisualElement>("sessions-list-container");
+			if (sessionsContainer != null) {
+				CreateSessionsListView(sessionsContainer);
+			}
+		}
 
-			var adapter = session.GetAdapter();
-			if (adapter != null) {
-				var adapterLabel = new Label(LanguageManager.Get("session.manager.adapter_label", adapter.GetType().Name));
-				adapterLabel.AddToClassList("session-adapter");
-				infoContainer.Add(adapterLabel);
+		private void CreateLayoutProgrammatically() {
+			// Fallback method - same as before
+			CreateSessionInfoSection();
+			CreateGlobalActionsSection();
+			CreateStatusSection();
+			CreateSessionsListView();
+		}
 
-				// Player count
-				var localPlayer  = adapter.GetLocalPlayer();
-				var masterPlayer = adapter.GetMasterPlayer();
-				var playersInfo = new Label(
-					LanguageManager.Get(
-						"session.manager.players_info",
-						new object[] {
-							localPlayer != null ? LanguageManager.Get("session.manager.true") : LanguageManager.Get("session.manager.false"),
-							masterPlayer?.ToIdentifier()?.ToString() ?? LanguageManager.Get("session.manager.none")
+		private void CreateSessionInfoSection() {
+			var foldout = new Foldout { text = "Session Information", value = true };
+
+			_sessionCountField = new IntegerField("Active Sessions") {
+				isReadOnly = true
+			};
+			foldout.Add(_sessionCountField);
+
+			_currentSessionField = new TextField("Current Session") {
+				isReadOnly = true
+			};
+			foldout.Add(_currentSessionField);
+
+			_container.Add(foldout);
+		}
+
+		private void CreateGlobalActionsSection() {
+			var foldout = new Foldout { text = "Actions", value = false };
+
+			_disposeAllButton = new Button(DisposeAllSessions) {
+				text = "Dispose All Sessions"
+			};
+			foldout.Add(_disposeAllButton);
+
+			_container.Add(foldout);
+		}
+
+		private void CreateStatusSection() {
+			_statusHelpBox = new HelpBox("Loading...", HelpBoxMessageType.Info);
+			_container.Add(_statusHelpBox);
+		}
+
+		private void CreateSessionsListView(VisualElement container = null) {
+			// Create columns first with smaller widths
+			var columns = new Columns();
+			columns.Add(new Column { title = "Session", width = 80, minWidth = 60 });
+			columns.Add(new Column { title = "Adapter", width = 80, minWidth = 60 });
+			columns.Add(new Column { title = "Players", width = 50, minWidth = 40 });
+			columns.Add(new Column { title = "Status", width = 60, minWidth = 50 });
+			columns.Add(new Column { title = "Players Info", width = 150, minWidth = 100 });
+			columns.Add(new Column { title = "Actions", width = 100, minWidth = 80 });
+
+			// Create ListView with columns
+			_sessionsListView = new MultiColumnListView(columns);
+			_sessionsListView.showBorder = true;
+			_sessionsListView.showAlternatingRowBackgrounds = AlternatingRowBackground.All;
+			_sessionsListView.fixedItemHeight = 20;
+
+			// Set up column renderers
+			if (_sessionsListView.columns != null) {
+				var sessionColumn = _sessionsListView.columns["Session"];
+				if (sessionColumn != null) {
+					sessionColumn.makeCell = () => new Label();
+					sessionColumn.bindCell = (element, index) => {
+						if (element is Label label && index < _sessionItems.Count) {
+							label.text = _sessionItems[index].DisplayName;
 						}
-					)
-				);
-				playersInfo.AddToClassList("session-players");
-				infoContainer.Add(playersInfo);
+					};
+				}
 
-				// Add players list if session supports ISessionEvents
-				if (session is ISessionEvents sessionEvents) {
-					var playersListContainer = CreatePlayersListContainer(adapter, sessionEvents, session);
-					infoContainer.Add(playersListContainer);
+				var adapterColumn = _sessionsListView.columns["Adapter"];
+				if (adapterColumn != null) {
+					adapterColumn.makeCell = () => new Label();
+					adapterColumn.bindCell = (element, index) => {
+						if (element is Label label && index < _sessionItems.Count) {
+							label.text = _sessionItems[index].AdapterType;
+						}
+					};
+				}
+
+				var playersColumn = _sessionsListView.columns["Players"];
+				if (playersColumn != null) {
+					playersColumn.makeCell = () => new Label();
+					playersColumn.bindCell = (element, index) => {
+						if (element is Label label && index < _sessionItems.Count) {
+							label.text = _sessionItems[index].PlayerCount.ToString();
+						}
+					};
+				}
+
+				var statusColumn = _sessionsListView.columns["Status"];
+				if (statusColumn != null) {
+					statusColumn.makeCell = () => new Label();
+					statusColumn.bindCell = (element, index) => {
+						if (element is Label label && index < _sessionItems.Count) {
+							label.text = _sessionItems[index].Status;
+						}
+					};
+				}
+
+				var playersInfoColumn = _sessionsListView.columns["Players Info"];
+				if (playersInfoColumn != null) {
+					playersInfoColumn.makeCell = () => new Label();
+					playersInfoColumn.bindCell = (element, index) => {
+						if (element is Label label && index < _sessionItems.Count) {
+							label.text = _sessionItems[index].PlayersInfo;
+						}
+					};
+				}
+
+				var actionsColumn = _sessionsListView.columns["Actions"];
+				if (actionsColumn != null) {
+					actionsColumn.makeCell = () => CreateActionButtons();
+					actionsColumn.bindCell = (element, index) => {
+						if (element is VisualElement container && index < _sessionItems.Count) {
+							BindActionButtons(container, _sessionItems[index]);
+						}
+					};
 				}
 			}
 
-			// Actions
-			var actionsContainer = new VisualElement();
-			actionsContainer.AddToClassList("session-actions");
-
-			if (!isCurrent) {
-				var setCurrentButton = new Button() { text = LanguageManager.Get("session.manager.set_current") };
-				setCurrentButton.RegisterCallback<ClickEvent>(_ => SetCurrentSession(session).Forget());
-				setCurrentButton.AddToClassList("session-action-button");
-				actionsContainer.Add(setCurrentButton);
+			// Add to container or create foldout
+			if (container != null) {
+				container.Add(_sessionsListView);
+			} else {
+				var foldout = new Foldout { text = "Sessions", value = true };
+				foldout.Add(_sessionsListView);
+				_root.Add(foldout);
 			}
+		}
 
-			var disposeButton = new Button { text = LanguageManager.Get("session.manager.dispose") };
-			disposeButton.RegisterCallback<ClickEvent>(_ => DisposeSession(session).Forget());
-			disposeButton.AddToClassList("session-action-button");
-			disposeButton.AddToClassList("session-dispose-button");
-			actionsContainer.Add(disposeButton);
+		private VisualElement CreateActionButtons() {
+			var container = new VisualElement();
+			container.style.flexDirection = FlexDirection.Row;
 
-			container.Add(header);
-			container.Add(infoContainer);
-			container.Add(actionsContainer);
+			var setCurrentButton = new Button { text = "Set Current" };
+			setCurrentButton.name = "setCurrentButton";
+			container.Add(setCurrentButton);
+
+			var disposeButton = new Button { text = "Dispose" };
+			disposeButton.name = "disposeButton";
+			container.Add(disposeButton);
 
 			return container;
 		}
 
-		private VisualElement CreatePlayersListContainer(IAdapter adapter, ISessionEvents sessionEvents, ISession session) {
-			var playersContainer = new VisualElement();
-			playersContainer.AddToClassList("session-players-list");
+		private void BindActionButtons(VisualElement container, SessionDisplayData item) {
+			var setCurrentButton = container.Q<Button>("setCurrentButton");
+			var disposeButton    = container.Q<Button>("disposeButton");
 
-			var playersHeader = new Label("Players:");
-			playersHeader.AddToClassList("session-players-header");
-			playersContainer.Add(playersHeader);
+			if (setCurrentButton != null && disposeButton != null) {
+				setCurrentButton.SetEnabled(!item.IsCurrent);
 
-			var playersList = new VisualElement();
-			playersList.AddToClassList("session-players-items");
-			
-			// Initial population of players list
-			UpdatePlayersList(playersList, adapter);
-			
-			playersContainer.Add(playersList);
+				// Clear existing callbacks and add new ones
+				setCurrentButton.clicked -= null;
+				disposeButton.clicked    -= null;
 
-			// Subscribe to session events if not already subscribed
-			if (!_sessionEventsSubscriptions.ContainsKey(session)) {
-				_sessionEventsSubscriptions[session] = sessionEvents;
-				
-				// Subscribe to player events to update the list in real-time
-				sessionEvents.AddPlayerJoinedListener((player) => {
-					EditorApplication.delayCall += () => UpdatePlayersList(playersList, adapter);
-				});
-				
-				sessionEvents.AddPlayerLeftListener((player) => {
-					EditorApplication.delayCall += () => UpdatePlayersList(playersList, adapter);
-				});
-			}
-
-			return playersContainer;
-		}
-
-		private void UpdatePlayersList(VisualElement playersList, IAdapter adapter) {
-			if (playersList == null || adapter == null) return;
-
-			playersList.Clear();
-
-			var playerCount = adapter.GetPlayerCount();
-			if (playerCount == 0) {
-				var noPlayersLabel = new Label("No players");
-				noPlayersLabel.AddToClassList("session-no-players");
-				playersList.Add(noPlayersLabel);
-				return;
-			}
-
-			for (int i = 0; i < playerCount; i++) {
-				var player = adapter.GetPlayer(i);
-				if (player != null) {
-					var playerItem = new VisualElement();
-					playerItem.AddToClassList("session-player-item");
-
-					var playerLabel = new Label($"• {player.ToIdentifier()?.ToString() ?? $"Player {i}"}");
-					playerLabel.AddToClassList("session-player-name");
-					
-					// Mark local and master players
-					var localPlayer = adapter.GetLocalPlayer();
-					var masterPlayer = adapter.GetMasterPlayer();
-					
-					if (player == localPlayer) {
-						playerLabel.text += " (Local)";
-						playerLabel.AddToClassList("session-player-local");
-					}
-					
-					if (player == masterPlayer) {
-						playerLabel.text += " (Master)";
-						playerLabel.AddToClassList("session-player-master");
-					}
-
-					playerItem.Add(playerLabel);
-					playersList.Add(playerItem);
-				}
+				setCurrentButton.clicked += () => SetCurrentSession(item.Session).Forget();
+				disposeButton.clicked    += () => DisposeSession(item.Session).Forget();
 			}
 		}
+
+		#endregion
+
+		#region Session Operations
 
 		private async UniTask SetCurrentSession(ISession session) {
 			if (Main.Instance == null) {
@@ -252,118 +386,104 @@ namespace api.nox.session {
 				return;
 			}
 
-			Logger.Log("Setting current session");
-			await Main.Instance.SetCurrent(session.GetId());
-			RefreshSessionsList();
+			try {
+				Logger.Log($"Setting session {session.GetId()} as current");
+				await Main.Instance.SetCurrent(session.GetId());
+				RefreshSessionsList();
+			} catch (Exception ex) {
+				Logger.LogError($"Failed to set current session: {ex.Message}");
+				EditorUtility.DisplayDialog("Error", $"Failed to set current session: {ex.Message}", "OK");
+			}
 		}
 
 		private async UniTask DisposeSession(ISession session) {
-			if (EditorUtility.DisplayDialog(
-				    LanguageManager.Get("session.manager.dispose_confirm_title"),
-				    LanguageManager.Get("session.manager.dispose_confirm_message", session.GetId()),
-				    LanguageManager.Get("session.manager.dispose"),
-				    LanguageManager.Get("session.manager.cancel")
+			if (!EditorUtility.DisplayDialog(
+				    "Confirm Disposal",
+				    $"Are you sure you want to dispose session #{session.GetId()}?\nThis action cannot be undone.",
+				    "Dispose",
+				    "Cancel"
 			    )) {
-				try {
+				return;
+			}
+
+			try {
+				await session.Dispose();
+
+				// Clean up subscriptions
+				_sessionEventsSubscriptions.Remove(session);
+
+				RefreshSessionsList();
+			} catch (Exception ex) {
+				Logger.LogError($"Failed to dispose session {session.GetId()}: {ex.Message}");
+				EditorUtility.DisplayDialog("Error", $"Failed to dispose session: {ex.Message}", "OK");
+			}
+		}
+
+		private void DisposeAllSessions()
+			=> DisposeAllSessionsAsync().Forget();
+
+
+		private async UniTask DisposeAllSessionsAsync() {
+			var sessions = Main.Instance?.GetSessions();
+			if (sessions == null || sessions.Length == 0) return;
+
+			if (!EditorUtility.DisplayDialog(
+				    "Confirm Disposal of All Sessions",
+				    $"Are you sure you want to dispose all {sessions.Length} sessions?\nThis action cannot be undone.",
+				    "Dispose All",
+				    "Cancel"
+			    )) {
+				return;
+			}
+
+			try {
+				foreach (var session in sessions) {
 					await session.Dispose();
-					RefreshSessionsList();
-				} catch (Exception ex) {
-					Logger.LogError($"Failed to dispose session {session.GetId()}: {ex.Message}");
-					EditorUtility.DisplayDialog(
-						LanguageManager.Get("session.manager.error"),
-						LanguageManager.Get("session.manager.dispose_error", ex.Message),
-						LanguageManager.Get("session.manager.ok")
-					);
 				}
+
+				// Clean up all subscriptions
+				_sessionEventsSubscriptions.Clear();
+
+				RefreshSessionsList();
+			} catch (Exception ex) {
+				Logger.LogError($"Failed to dispose all sessions: {ex.Message}");
+				EditorUtility.DisplayDialog("Error", $"Failed to dispose all sessions: {ex.Message}", "OK");
 			}
 		}
 
-		private async void DisposeAllSessions() {
-			if (EditorUtility.DisplayDialog(
-				    LanguageManager.Get("session.manager.dispose_all_confirm_title"),
-				    LanguageManager.Get("session.manager.dispose_all_confirm_message"),
-				    LanguageManager.Get("session.manager.dispose_all"),
-				    LanguageManager.Get("session.manager.cancel")
-			    )) {
-				try {
-					var sessions = Main.Instance?.GetSessions();
-					if (sessions != null) {
-						foreach (var session in sessions) {
-							await session.Dispose();
-						}
-					}
+		#endregion
 
-					RefreshSessionsList();
-				} catch (Exception ex) {
-					Logger.LogError($"Failed to dispose all sessions: {ex.Message}");
-					EditorUtility.DisplayDialog(
-						LanguageManager.Get("session.manager.error"),
-						LanguageManager.Get("session.manager.dispose_all_error", ex.Message),
-						LanguageManager.Get("session.manager.ok")
-					);
-				}
-			}
+		#region Event Subscriptions
+
+		private void SubscribeToSessionEvents(ISession session) {
+			if (_sessionEventsSubscriptions.ContainsKey(session)) return;
+			if (!(session is ISessionEvents sessionEvents)) return;
+
+			_sessionEventsSubscriptions[session] = sessionEvents;
+
+			sessionEvents.AddPlayerJoinedListener((_) => { EditorApplication.delayCall += RefreshSessionsList; });
+
+			sessionEvents.AddPlayerLeftListener((_) => { EditorApplication.delayCall += RefreshSessionsList; });
 		}
 
-		public VisualElement Make(Dictionary<string, object> data) {
-			_root.ClearBindings();
-			_root.Clear();
+		#endregion
 
-			// Reset cached UI elements
-			_sessionsList        = null;
-			_sessionsCountLabel  = null;
-			_currentSessionLabel = null;
-			_disposeAllButton    = null;
-
-			var child = Editor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("sessions.uxml")?.CloneTree();
-			if (child == null) throw new Exception("Failed to load sessions panel UI from 'sessions.uxml'");
-
-			child.style.flexGrow = 1;
-			_root.Add(child);
-
-			// Cache UI elements
-			_sessionsList        = _root.Q<VisualElement>("sessions-list");
-			_sessionsCountLabel  = _root.Q<Label>("sessions-count");
-			_currentSessionLabel = _root.Q<Label>("current-session");
-			_disposeAllButton    = _root.Q<Button>("dispose-all-button");
-
-			// Initialize components
-			if (_disposeAllButton != null) {
-				_disposeAllButton.clicked += DisposeAllSessions;
-			}
-
-			// Initial refresh
-			RefreshSessionsList();
-
-			return _root;
-		}
+		#region Cleanup
 
 		public void OnClosed() {
 			// Cleanup when panel is closed
 		}
 
 		public void Dispose() {
-			// Cleanup session events subscriptions
-			foreach (var kvp in _sessionEventsSubscriptions) {
-				var session = kvp.Key;
-				var sessionEvents = kvp.Value;
-				
-				// Note: We can't unsubscribe specific listeners without keeping references to them
-				// This is a limitation of the current ISessionEvents interface
-				// In a real implementation, you might want to keep references to the specific actions
-			}
+			// Clean up event subscriptions
 			_sessionEventsSubscriptions.Clear();
 
-			// Clear cached references
-			_sessionsList        = null;
-			_sessionsCountLabel  = null;
-			_currentSessionLabel = null;
-			_disposeAllButton    = null;
-
-			// Clear UI
-			_root.Clear();
-			_root.ClearBindings();
+			if (_disposeAllButton != null) {
+				_disposeAllButton.clicked -= DisposeAllSessions;
+			}
 		}
+
+		#endregion
 	}
 }
 #endif

@@ -65,8 +65,6 @@ namespace api.nox.relay.types.Enter {
 				default:
 					return false;
 			}
-
-			return false;
 		}
 
 		public override string ToString()

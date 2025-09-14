@@ -4,7 +4,6 @@ using System.Linq;
 using api.nox.relay.types.Player;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
-using Nox.Avatars.Parameters;
 using Nox.Avatars.Players;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
@@ -125,15 +124,21 @@ namespace api.nox.relay {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public void Teleport(Vector3 position, Quaternion rotation) {
+		public void Teleport(Vector3 position, Quaternion rotation)
+			=> Teleport(position, rotation, Vector3.zero, Vector3.zero);
+
+		public void Teleport(Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angular) {
 			var tr = Transforms.GetValueOrDefault(PlayerRig.Base.ToIndex())
 				?? new NoxTransform();
 			if (tr.IsSamePosition(position, Adapter.Threshold) && tr.IsSameRotation(rotation, Adapter.Threshold)) return;
 			tr.DeliveryType = DeliveryType.LocalModified;
 			tr.SetPosition(position);
 			tr.SetRotation(rotation);
+			tr.SetVelocity(velocity);
+			tr.SetAngularVelocity(angular);
 			Transforms[PlayerRig.Base.ToIndex()] = tr;
 		}
+
 
 		[NoxPublic(NoxAccess.Method)]
 		public void MovePart(ushort part, NoxTransform transform)
@@ -177,9 +182,14 @@ namespace api.nox.relay {
 			=> SetParameter(key, value, DeliveryType.LocalModified);
 
 		[NoxPublic(NoxAccess.Method)]
-		public void Teleport(Transform transform) {
+		public void Teleport(Transform transform, Rigidbody rb = null) {
 			if (!transform) return;
-			Teleport(transform.position, transform.rotation);
+			Teleport(
+				transform.position,
+				transform.rotation,
+				rb?.linearVelocity  ?? Vector3.zero,
+				rb?.angularVelocity ?? Vector3.zero
+			);
 		}
 
 		[NoxPublic(NoxAccess.Method)]
@@ -198,15 +208,16 @@ namespace api.nox.relay {
 		public abstract UniTask<bool> SetAvatar(IAvatarIdentifier identifier);
 
 		public abstract IAvatarIdentifier GetAvatar();
-		
+
 		public void Respawn() {
 			var dimension   = Adapter.GetDimension();
 			var main        = dimension.GetScene().GetInstances()[0];
-			var descriptor  = main.GetInstanceDescriptor(dimension.GetMainIndex());
+			var descriptor  = main.GetDescriptor(dimension.GetMainIndex());
 			var spawnModule = descriptor?.GetModules<ISpawnModule>().FirstOrDefault();
 			if (spawnModule == null) return;
 			var spawn = spawnModule.ChoiceSpawn();
 			Teleport(spawn.GetPosition(), spawn.GetRotation());
+			Logger.LogDebug($"Player {GetId()} respawned at {spawn.GetPosition()}");
 		}
 
 		public override string ToString()

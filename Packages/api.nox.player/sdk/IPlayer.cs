@@ -48,7 +48,8 @@ namespace Nox.Players {
 		/// Teleport the player to a transform's position and rotation.
 		/// </summary>
 		/// <param name="transform">Target transform</param>
-		public void Teleport(Transform transform);
+		/// <param name="rigidbody"></param>
+		public void Teleport(Transform transform, Rigidbody rigidbody = null);
 
 		/// <summary>
 		/// Move a specific part of the player to a new transform.

@@ -1,20 +1,23 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Build;
+using Nox.CCK.Development;
 using Nox.Worlds;
 using Nox.Worlds.Spawns;
 using UnityEngine;
+using Gizmos = Nox.CCK.Development.Gizmos;
 using Logger = Nox.CCK.Utils.Logger;
 using Random = UnityEngine.Random;
 
 namespace Nox.CCK.Worlds.Spawns {
-	public class SpawnsWorldModule : MonoBehaviour, ISpawnModule {
+	public class SpawnsWorldModule : MonoBehaviour, ISpawnModule, IGizmos, ICompilable {
 		private IRuntimeWorld _runtime;
 
 		public uint GetSpawnIndex()
 			=> spawnIndex;
-
 
 		public SpawnType GetSpawnType()
 			=> spawnType;
@@ -67,6 +70,22 @@ namespace Nox.CCK.Worlds.Spawns {
 
 			return spawnsDict;
 		}
+
+
+		public SpawnBehavior[] SpawnBehaviors {
+			get
+				=> spawns
+						?.Select(e => e as SpawnBehavior)
+						.Where(e => e)
+						.ToArray()
+					?? Array.Empty<SpawnBehavior>();
+			set
+				=> spawns = value
+						?.Select(e => e as ISpawn)
+						.ToArray()
+					?? Array.Empty<ISpawn>();
+		}
+
 		#endif
 
 		public ISpawn ChoiceSpawn()
@@ -134,6 +153,19 @@ namespace Nox.CCK.Worlds.Spawns {
 			await UniTask.Yield();
 			_runtime = runtime;
 			return true;
+		}
+
+		public void OnDrawGizmos() {
+			if (!this || !enabled) return;
+			Gizmos.color = Color.cyan;
+			foreach (var spawn in spawns ?? Array.Empty<ISpawn>()) {
+				if (spawn == null) continue;
+				var pos     = spawn.GetPosition();
+				var rot     = spawn.GetRotation();
+				var forward = rot * Vector3.forward;
+				Gizmos.DrawWireSphere(pos, 0.25f);
+				Gizmos.DrawLine(pos, pos + forward * 0.5f);
+			}
 		}
 	}
 }

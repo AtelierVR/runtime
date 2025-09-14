@@ -6,7 +6,12 @@
     "Nox.CCK",
     "UniTask",
     "Nox.CCK.Worlds.FellInVoid",
-    "Nox.CCK.Worlds.Spawns"
+    "Nox.CCK.Worlds.Spawns",
+    "Nox.Worlds.Spawns",
+    "Nox.CCK.Worlds",
+    "Nox.Sessions",
+    "Nox.Players",
+    "Nox.Entities"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

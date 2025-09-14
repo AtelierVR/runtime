@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Nox.Avatars;
 using Nox.CCK.Players;
 using Nox.Players;
 using UnityEngine;
+using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace Nox.Controllers {
 	/// <summary>
@@ -58,6 +58,21 @@ namespace Nox.Controllers {
 		/// </summary>
 		/// <returns></returns>
 		public Dictionary<ushort, Transform> GetParts();
+
+		/// <summary>
+		/// Set a transformation for a part of the controller.
+		/// </summary>
+		/// <param name="index"></param>
+		/// <param name="transform"></param>
+		public void SetPart(ushort index, NoxTransform transform);
+
+		/// <summary>
+		/// Get a part of the controller by index.
+		/// </summary>
+		/// <param name="index"></param>
+		/// <param name="tr"></param>
+		/// <returns></returns>
+		public bool TryGetPart(ushort index, out Transform tr);
 
 		/// <summary>
 		/// Get the abilities of the controller.

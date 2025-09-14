@@ -102,8 +102,7 @@ namespace api.nox.offline {
 			if (_dimension.GetMainIndex() == 0) {
 				var id = await main.MakeInstance();
 				_dimension.SetMainIndex(id);
-				var desc = main.GetInstanceDescriptor(id);
-				_session.OnDescriptorAdded(desc);
+				_session.OnSceneLoaded(main.GetDescriptor(id), id, main.GetAnchor(id));
 			}
 
 			_dimension.GetScene().SetCurrent();

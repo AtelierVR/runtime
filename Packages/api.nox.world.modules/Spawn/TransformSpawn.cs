@@ -1,12 +1,13 @@
-using Nox.Worlds.Spawns;
+using System.ComponentModel;
 using UnityEngine;
 
 namespace Nox.CCK.Worlds.Spawns {
-	public class TransformSpawn : MonoBehaviour, ISpawn {
-		public Vector3 GetPosition()
+	[DisplayName("Values Spawn")]
+	public class TransformSpawn : SpawnBehavior {
+		public override Vector3 GetPosition()
 			=> transform.position;
 
-		public Quaternion GetRotation()
+		public override Quaternion GetRotation()
 			=> transform.rotation;
 	}
 }

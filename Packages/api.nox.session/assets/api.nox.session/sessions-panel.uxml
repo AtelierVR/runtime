@@ -1,0 +1,27 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <ui:VisualElement name="sessions-panel-root" style="flex-grow: 1;">
+        
+        <!-- Session Information Section -->
+        <ui:Foldout text="Session Information" value="true" name="session-info-foldout">
+            <uie:IntegerField label="Active Sessions" name="session-count-field" readonly="true" />
+            <uie:TextField label="Current Session" name="current-session-field" readonly="true" />
+        </ui:Foldout>
+        
+        <!-- Global Actions Section -->
+        <ui:Foldout text="Actions" value="false" name="actions-foldout">
+            <ui:Button text="Dispose All Sessions" name="dispose-all-button" />
+        </ui:Foldout>
+        
+        <!-- Status Section -->
+        <ui:HelpBox text="Loading..." message-type="Info" name="status-helpbox" />
+        
+        <!-- Sessions List Section -->
+        <ui:Foldout text="Sessions" value="true" name="sessions-foldout">
+            <ui:VisualElement name="sessions-list-container" style="flex-grow: 1; min-height: 200px;">
+                <!-- MultiColumnListView will be added programmatically -->
+            </ui:VisualElement>
+        </ui:Foldout>
+        
+    </ui:VisualElement>
+</ui:UXML>
+

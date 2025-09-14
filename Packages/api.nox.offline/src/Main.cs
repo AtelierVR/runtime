@@ -6,10 +6,12 @@ using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
+using Nox.Controllers;
 using Nox.Entities;
 using Nox.Offline;
 using Nox.Players;
 using Nox.Sessions;
+using Nox.Users;
 using Nox.Worlds;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
@@ -17,14 +19,30 @@ using Logger = Nox.CCK.Utils.Logger;
 namespace api.nox.offline {
 	public class Main : IOfflineAPI, MainModInitializer {
 		internal static IEntityAPI EntityAPI
-			=> _instance._coreAPI.ModAPI.GetMod("entity").GetMains().FirstOrDefault() as IEntityAPI;
-
+			=> _instance._coreAPI.ModAPI
+				.GetMod("entity")
+				.GetEntry<IEntityAPI>();
+				
 		internal static IWorldAPI WorldAPI
-			=> _instance._coreAPI.ModAPI.GetMod("world").GetMains().FirstOrDefault() as IWorldAPI;
+			=> _instance._coreAPI.ModAPI
+				.GetMod("world")
+				.GetEntry<IWorldAPI>();
 
 		internal static ISessionAPI SessionAPI
-			=> _instance._coreAPI.ModAPI.GetMod("session").GetMains().FirstOrDefault() as ISessionAPI;
+			=> _instance._coreAPI.ModAPI
+				.GetMod("session")
+				.GetEntry<ISessionAPI>();
+				
+		internal static IUserAPI UserAPI
+			=> _instance._coreAPI.ModAPI
+				.GetMod("user")
+				.GetEntry<IUserAPI>();
 
+		internal static IControllerAPI ControllerAPI
+			=> _instance._coreAPI.ModAPI
+				.GetMod("controller")
+				.GetEntry<IControllerAPI>();
+				
 		private        MainModCoreAPI      _coreAPI;
 		private static Main                _instance;
 		private        EventSubscription[] _events = Array.Empty<EventSubscription>();

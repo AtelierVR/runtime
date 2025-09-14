@@ -47,7 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Packages\api.nox.world.jint\src\Main.cs" />
-    <Compile Include="Packages\api.nox.world.jint\src\WorldManager.cs" />
+    <Compile Include="Packages\api.nox.world.jint\src\JintBackingModule.cs" />
     <None Include="Packages\api.nox.world.jint\nox.mod.json" />
     <None Include="Packages\api.nox.world.jint\api.nox.world.jint.asmdef" />
     <None Include="Packages\api.nox.world.jint\package.json" />
@@ -861,6 +861,22 @@
     <ProjectReference Include="Nox.CCK.csproj">
       <Project>{39bf21be-d0c7-e647-0301-babd67a9c8f6}</Project>
       <Name>Nox.CCK</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Sessions.csproj">
+      <Project>{0874ac54-00dd-a011-6c68-4b824efa4828}</Project>
+      <Name>Nox.Sessions</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Worlds.csproj">
+      <Project>{d0540d5b-32fb-c952-eac5-877988a72d00}</Project>
+      <Name>Nox.Worlds</Name>
+    </ProjectReference>
+    <ProjectReference Include="api.nox.jint.csproj">
+      <Project>{050c8115-621b-df1d-ab50-aeb3cf87f6b3}</Project>
+      <Name>api.nox.jint</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Jint.csproj">
+      <Project>{bd8d55ba-be6b-897f-8274-96e2b5d05912}</Project>
+      <Name>Nox.CCK.Jint</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

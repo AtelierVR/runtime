@@ -179,13 +179,17 @@ namespace api.nox.xr {
 
 			if (controller is IControllerAvatar ca) {
 				await SetAvatar(ca.GetAvatar());
-				ca.SetAvatar((IRuntimeAvatar)null);
+				ca.SetAvatar(null).Forget();
 			}
 
 			var p = controller.GetPlayer();
 			controller.SetPlayer(null);
 			SetPlayer(p);
 		}
+
+		public bool TryGetPart(ushort index, out Transform tr)
+			=> GetParts().TryGetValue(index, out tr);
+
 
 		[NoxPublic(NoxAccess.Method)]
 		public Dictionary<string, object> GetAbilities()
@@ -404,8 +408,7 @@ namespace api.nox.xr {
 					progress: p => progress?.Invoke($"Downloading avatar {identifier.ToString()}", p),
 					token: _avatarLoadingCts.Token
 				);
-				download.Start();
-				await download.Wait();
+				await download.Start();
 				if (_avatarLoadingCts.IsCancellationRequested)
 					return null;
 			}
@@ -595,6 +598,7 @@ namespace api.nox.xr {
 		// 	player.headCamera.transform.position = pos;
 		// }
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		private void SynchronizePlayerFromController() {
 			if (_attachedPlayer == null) return;
 			foreach (var part in GetParts())
@@ -602,6 +606,30 @@ namespace api.nox.xr {
 					part.Key,
 					new NoxTransform(part.Value, part.Value.GetComponent<Rigidbody>())
 				);
+		}
+
+		// ReSharper disable Unity.PerformanceAnalysis
+		public void SetPart(ushort index, NoxTransform tr) {
+			var part = GetParts()
+				.FirstOrDefault(p => p.Key == index);
+
+			if (index == PlayerRig.Base.ToIndex()) {
+				if (!tr.IsSamePosition(player.transform.position))
+					player.SetPosition(tr.GetPosition());
+			} else {
+				if (!tr.IsSamePosition(part.Value.position))
+					part.Value.position = tr.GetPosition();
+			}
+
+			if (!tr.IsSameRotation(part.Value.rotation))
+				part.Value.rotation = tr.GetRotation();
+
+			var rb = part.Value.GetComponent<Rigidbody>();
+
+			if (rb && !tr.IsSameVelocity(rb.linearVelocity))
+				rb.linearVelocity = tr.GetVelocity();
+			if (rb && !tr.IsSameAngularVelocity(rb.angularVelocity))
+				rb.angularVelocity = tr.GetAngularVelocity();
 		}
 
 		private void SynchronizeControllerFromPlayer() {

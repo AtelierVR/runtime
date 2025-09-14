@@ -96,8 +96,7 @@ namespace api.nox.relay {
 					progress: p => Logger.LogDebug($"Downloading avatar {identifier.ToString()}: {p:P1}"),
 					token: _avatarLoadingCts.Token
 				);
-				download.Start();
-				await download.Wait();
+				await download.Start();
 				if (_avatarLoadingCts.IsCancellationRequested)
 					return null;
 			}

@@ -1,15 +1,12 @@
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
-using Nox.CCK.Worlds;
 using Nox.Entities;
 using Nox.Players;
 using Nox.Sessions;
 using Nox.Worlds;
-using Nox.Worlds.Spawns;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.SceneManagement;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.session {
@@ -132,7 +129,7 @@ namespace api.nox.session {
 			var dimension = Adapter.GetDimension();
 			var main = dimension.GetScene()
 				.GetInstances()[0]
-				.GetInstanceDescriptor(dimension.GetMainIndex());
+				.GetDescriptor(dimension.GetMainIndex());
 			return new[] { main };
 		}
 
@@ -163,14 +160,14 @@ namespace api.nox.session {
 			await Adapter.OnDeselect(nSession);
 		}
 
-		public void OnDescriptorAdded(IWorldDescriptor descriptor) {
-			Main.Instance.CoreAPI.EventAPI.Emit("session_descriptor_added", this, descriptor);
+		public void OnSceneLoaded(IWorldDescriptor descriptor, int index, GameObject anchor) {
+			Main.Instance.CoreAPI.EventAPI.Emit("session_scene_added", this, index, descriptor, anchor);
 
 			var modules = descriptor.GetModules<ISessionModule>();
 			Logger.LogDebug($"OnDescriptorAdded: {descriptor} with {modules.Length} modules");
 
 			foreach (var module in modules)
-				module.OnSession(this);
+				module.OnLoaded(this);
 
 			for (var i = 0; i < GetPlayerCount(); i++)
 				foreach (var module in modules)
@@ -183,7 +180,29 @@ namespace api.nox.session {
 			if (IsCurrent())
 				foreach (var module in modules)
 					module.OnSessionSelected();
+
+			var dimension = Adapter.GetDimension();
+			for (var i = 0; i < dimension.GetSize(); i++) {
+				var d = dimension.GetDescriptor(i);
+				if (d == null) continue;
+				foreach (var module in d.GetModules<ISessionModule>())
+					module.OnSceneLoaded(descriptor, index, anchor);
+			}
 		}
+
+		public void OnSceneUnloaded(int index) {
+			Main.Instance.CoreAPI.EventAPI.Emit("session_scene_removed", this, index);
+			var dimension = Adapter.GetDimension();
+			for (var i = 0; i < dimension.GetSize(); i++) {
+				var d = dimension.GetDescriptor(i);
+				if (d == null) continue;
+				foreach (var module in d.GetModules<ISessionModule>())
+					module.OnSceneUnloaded(index);
+			}
+		}
+
+		public IDimension GetDimension()
+			=> Adapter.GetDimension();
 
 		public async UniTask OnSelect(ISession oSession) {
 			await Adapter.OnSelect(oSession);

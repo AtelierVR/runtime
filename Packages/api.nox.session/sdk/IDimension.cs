@@ -1,7 +1,7 @@
 using Nox.Worlds;
 
 namespace Nox.Sessions {
-	public interface IDimension {
+	public interface IDimension: ISimplifiedDimension {
 		/// <summary>
 		/// Index of the instance scene for the session.
 		/// If is 0, the dimension not have own instance scene.

@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Nox.Entities;
 using Nox.Players;
@@ -120,6 +119,20 @@ namespace Nox.Sessions {
 		/// Event called when a new world descriptor is added to the session.
 		/// </summary>
 		/// <param name="descriptor"></param>
-		void OnDescriptorAdded(IWorldDescriptor descriptor);
+		/// <param name="index"></param>
+		/// <param name="anchor"></param>
+		public void OnSceneLoaded(IWorldDescriptor descriptor, int index, GameObject anchor);
+
+		/// <summary>
+		/// Event called when a world descriptor is removed from the session.
+		/// </summary>
+		/// <param name="index"></param>
+		public void OnSceneUnloaded(int index);
+
+		/// <summary>
+		/// Get the dimension of the session.
+		/// </summary>
+		/// <returns></returns>
+		public IDimension GetDimension();
 	}
 }

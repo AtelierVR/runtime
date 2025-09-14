@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
-using Nox.CCK.Worlds;
 using Nox.Worlds;
 using UnityEngine.SceneManagement;
 using UnityEngine;
@@ -61,8 +60,11 @@ namespace api.nox.world {
 		private InstanceScene GetInstance(int id)
 			=> Instances.FirstOrDefault(x => x.GetId() == id);
 
-		public IWorldDescriptor GetInstanceDescriptor(int id)
+		public IWorldDescriptor GetDescriptor(int id)
 			=> GetInstance(id)?.Descriptor;
+
+		public GameObject GetAnchor(int id)
+			=> GetInstance(id)?.Container;
 
 		public void SetVisibleInstance(int id, bool active, bool save) {
 			var instance = GetInstance(id);

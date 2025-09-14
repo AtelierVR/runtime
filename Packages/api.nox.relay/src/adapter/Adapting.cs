@@ -93,7 +93,7 @@ namespace api.nox.relay {
 				&& n0 is string n1
 					? n1
 					: null;
-			
+
 			var adapter = new RelayAdapter { Name = name, ShortName = shortname };
 			var session = Main.SessionAPI.New(adapter);
 			adapter.SetState(false, "Preparing relay session...", 0f);
@@ -132,9 +132,11 @@ namespace api.nox.relay {
 		private static async UniTask PrepareAsync(ISession session, RelayAdapter adapter, string[] connections, string address, string server, uint instance, bool setCurrent) {
 			adapter.SetState(false, "Fetching token...", 0.05f);
 			var token = await Main.UserAPI.GetToken(server);
+			
 			if (token == null) {
 				adapter.SetState(false, "Failed to fetch token", -1f);
 				Logger.LogError($"Failed to fetch token for server {server}");
+				await session.Dispose();
 				return;
 			}
 
@@ -163,6 +165,8 @@ namespace api.nox.relay {
 
 			if (connection == null) {
 				adapter.SetState(false, "Failed to connect to any relay", -1f);
+				Logger.LogError("Failed to connect to any relay");
+				await session.Dispose();
 				return;
 			}
 
@@ -173,7 +177,7 @@ namespace api.nox.relay {
 			if (hand == null) {
 				adapter.SetState(false, "Failed to handshake with relay", -1f);
 				Logger.LogError("Failed to handshake with relay");
-				await connection.Dispose();
+				await session.Dispose();
 				return;
 			}
 
@@ -183,7 +187,7 @@ namespace api.nox.relay {
 			if (auth.IsError) {
 				adapter.SetState(false, $"Authentication failed: {auth.Reason}", -1f);
 				Logger.LogError($"Authentication failed: {auth.Result} - {auth.Reason}");
-				await connection.Dispose();
+				await session.Dispose();
 				return;
 			}
 
@@ -192,7 +196,7 @@ namespace api.nox.relay {
 			if (adapter.Instance == null) {
 				adapter.SetState(false, $"Failed to get instance {instance}", -1f);
 				Logger.LogError($"Failed to get instance {instance} from relay");
-				await connection.Dispose();
+				await session.Dispose();
 				return;
 			}
 
@@ -208,7 +212,7 @@ namespace api.nox.relay {
 			if (enter.IsError) {
 				adapter.SetState(false, "Failed to connect to instance", -1f);
 				Logger.LogError($"Failed to connect to instance {instance}: {enter.Result} - {enter.Reason}");
-				await connection.Dispose();
+				await session.Dispose();
 				return;
 			}
 
@@ -221,7 +225,7 @@ namespace api.nox.relay {
 			if (!travalRequest.IsSuccess) {
 				adapter.SetState(false, $"Failed to travel to instance {instance}: {travalRequest.Reason}", -1f);
 				Logger.LogError($"Failed to travel to instance {instance}: {travalRequest.Results} - {travalRequest.Reason}");
-				await connection.Dispose();
+				await session.Dispose();
 				return;
 			}
 
@@ -234,7 +238,7 @@ namespace api.nox.relay {
 			if (!traveling) {
 				adapter.SetState(false, "Failed to travel to instance", -1f);
 				Logger.LogError($"Failed to travel to instance {instance}");
-				await connection.Dispose();
+				await session.Dispose();
 				return;
 			}
 
@@ -244,7 +248,7 @@ namespace api.nox.relay {
 			if (!travelReady.IsReady) {
 				adapter.SetState(false, $"Failed to travel to instance {instance}: {travelReady.Reason}", -1f);
 				Logger.LogError($"Failed to travel to instance {instance}: {travelReady.Results} - {travelReady.Reason}");
-				await connection.Dispose();
+				await session.Dispose();
 				return;
 			}
 
@@ -257,7 +261,7 @@ namespace api.nox.relay {
 			if (!await player.SetAvatar(player.GetAvatar())) {
 				adapter.SetState(false, "Failed to set local player avatar", -1f);
 				Logger.LogError($"Failed to set local player avatar for instance {instance}");
-				await connection.Dispose();
+				await session.Dispose();
 				return;
 			}
 

@@ -3,7 +3,11 @@
   "rootNamespace": "api.nox.world.jint",
   "references": [
     "Nox.CCK",
-    "UniTask"
+    "UniTask",
+    "Nox.Sessions",
+    "Nox.Worlds",
+    "api.nox.jint",
+    "Nox.CCK.Jint"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

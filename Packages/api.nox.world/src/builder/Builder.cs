@@ -214,15 +214,16 @@ namespace api.nox.world.builder {
 				// Création des sauvegardes de scènes
 				var sceneModule = data.Descriptor.GetModules<IScenesModule>().FirstOrDefault();
 				if (sceneModule == null)
-					return new BuildResult {
-						Type    = BuildResultType.InvalidScene,
-						Message = "No IScenesModule found in the main scene descriptor. Please ensure the descriptor is set up correctly."
-					};
+					Logger.Log("No ScenesWorldModule found in the descriptor. Proceeding with only the main scene.");
 
-				var sceneAssets = sceneModule.GetScenes()
-					.Select((scene, index) => (AssetDatabase.LoadAssetAtPath<SceneAsset>(scene), index))
-					.Where(t => t.Item1)
-					.ToDictionary(t => (byte)t.index, t => t.Item1);
+				var sceneAssets = sceneModule
+						?.GetScenes()
+						.Select((scene, index) => (AssetDatabase.LoadAssetAtPath<SceneAsset>(scene), index))
+						.Where(t => t.Item1)
+						.ToDictionary(t => (byte)t.index, t => t.Item1)
+					?? new Dictionary<byte, SceneAsset>() {
+						{ 0, AssetDatabase.LoadAssetAtPath<SceneAsset>(data.Descriptor.gameObject.scene.path) }
+					};
 
 				Logger.Log("Creating scene backups before compilation...");
 				if (!CreateSceneBackups(sceneAssets)) {
@@ -353,6 +354,7 @@ namespace api.nox.world.builder {
 					OpenSceneMode.Single
 				)
 			};
+
 
 			foreach (var scene in sceneAssets.Skip(1)) {
 				await UniTask.Yield();

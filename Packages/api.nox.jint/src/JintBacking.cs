@@ -86,12 +86,17 @@ namespace api.nox.jint {
 					.ExportObject("gameObject", new ObjectWrapper(Engine, gameObject))
 			);
 			try {
+				NoxLogger.LogDebug($"script: {script}");
+				NoxLogger.LogDebug($"script.asset: {script.asset}");
+				NoxLogger.LogDebug($"script.asset.text: {script.asset.text}");
+				
 				var module = Engine.PrepareModule(script.asset.text);
 				Engine.AddModule("__main__", x => x.AddModule(module));
 				ExecutionContext = Engine.ImportModule("__main__");
 				Invoke("onPrepare");
 			} catch (Exception e) {
 				NoxLogger.LogError($"Error executing onPrepare function: {e.Message}", this);
+				NoxLogger.LogException(e, this);
 				Engine           = null;
 				ExecutionContext = null;
 			}

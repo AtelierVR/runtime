@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Nox.Worlds {
@@ -20,7 +21,14 @@ namespace Nox.Worlds {
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		public IWorldDescriptor GetInstanceDescriptor(int id);
+		public IWorldDescriptor GetDescriptor(int id);
+
+		/// <summary>
+		/// Returns the anchor GameObject of the scene instance for the given ID.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		public GameObject GetAnchor(int id);
 
 		/// <summary>
 		/// Hide or show the scene in the world.

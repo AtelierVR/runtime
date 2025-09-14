@@ -1,9 +1,10 @@
 using Nox.Players;
 using Nox.Worlds;
+using UnityEngine;
 
 namespace Nox.Sessions {
 	public interface ISessionModule : IWorldModule {
-		public void OnSession(ISession session) { }
+		public void OnLoaded(ISession session) { }
 
 		public void OnSessionSelected() { }
 
@@ -14,5 +15,9 @@ namespace Nox.Sessions {
 		public void OnPlayerLeft(IPlayer player) { }
 
 		public void OnAuthorityTransferred(IPlayer @new) { }
+
+		public void OnSceneLoaded(IWorldDescriptor descriptor, int index, GameObject anchor) { }
+		
+		public void OnSceneUnloaded(int index) { }
 	}
 }

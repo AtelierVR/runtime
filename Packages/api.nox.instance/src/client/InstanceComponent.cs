@@ -7,7 +7,6 @@ using Newtonsoft.Json.Linq;
 using Nox.CCK.Language;
 using Nox.CCK.Utils;
 using Nox.Instances;
-using Nox.Instances;
 using Nox.Users;
 using Nox.Worlds;
 using UnityEngine;

@@ -220,8 +220,7 @@ namespace api.nox.relay {
 					hash: hash,
 					progress: f => progress?.Invoke(0.2f + f * 0.45f, "Downloading world...")
 				);
-				download.Start();
-				await download.Wait();
+				await download.Start();
 			}
 
 			progress?.Invoke(0.65f, "Loading world");
@@ -329,13 +328,12 @@ namespace api.nox.relay {
 			Logger.LogDebug($"OnSelect: {this}");
 			if (_dimension == null)
 				throw new InvalidOperationException($"No current dimension found for session {this}. Please ensure a dimension is set before selecting the session.");
-			
+
 			var main = _dimension.GetScene().GetInstances()[0];
 			if (_dimension.GetMainIndex() == 0) {
 				var id = await main.MakeInstance();
 				_dimension.SetMainIndex(id);
-				var desc = main.GetInstanceDescriptor(id);
-				_session.OnDescriptorAdded(desc);
+				_session.OnSceneLoaded(main.GetDescriptor(id), id, main.GetAnchor(id));
 			}
 
 			_dimension.GetScene().SetCurrent();

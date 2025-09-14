@@ -46,7 +46,9 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.1f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Packages\api.nox.world.modules\Editor\SpawnWorldModuleEditor.cs" />
     <Compile Include="Packages\api.nox.world.modules\src\Main.cs" />
+    <Compile Include="Packages\api.nox.world.modules\Editor\FellInVoidWorldModuleEditor.cs" />
     <None Include="Packages\api.nox.world.modules\link.xml" />
     <None Include="Packages\api.nox.world.modules\nox.mod.json" />
     <None Include="Packages\api.nox.world.modules\api.nox.world.modules.asmdef" />
@@ -872,6 +874,26 @@
     <ProjectReference Include="Nox.CCK.Worlds.Spawns.csproj">
       <Project>{44f6a82b-4a92-1b35-899c-a476e7982441}</Project>
       <Name>Nox.CCK.Worlds.Spawns</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Worlds.Spawns.csproj">
+      <Project>{c8e2f5bf-63c8-fdc5-f6fb-d0fbfa47c28d}</Project>
+      <Name>Nox.Worlds.Spawns</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Worlds.csproj">
+      <Project>{e3f3b769-9bd6-c46f-3578-54823274209d}</Project>
+      <Name>Nox.CCK.Worlds</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Sessions.csproj">
+      <Project>{0874ac54-00dd-a011-6c68-4b824efa4828}</Project>
+      <Name>Nox.Sessions</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Players.csproj">
+      <Project>{0e499f4c-db68-9841-61eb-59e5a4ed821c}</Project>
+      <Name>Nox.Players</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Entities.csproj">
+      <Project>{57446f06-06b0-94aa-6dd3-4195fbeb0f71}</Project>
+      <Name>Nox.Entities</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

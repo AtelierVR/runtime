@@ -55,6 +55,7 @@
     <Compile Include="Packages\api.nox.session\src\SessionsPanel.cs" />
     <Compile Include="Packages\api.nox.session\src\Editor.cs" />
     <None Include="Packages\api.nox.session\link.xml" />
+    <None Include="Packages\api.nox.session\assets\api.nox.session\sessions-panel.uxml" />
     <None Include="Packages\api.nox.session\nox.mod.json" />
     <None Include="Packages\api.nox.session\package.json" />
     <None Include="Packages\api.nox.session\api.nox.session.asmdef" />

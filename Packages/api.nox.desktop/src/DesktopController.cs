@@ -184,15 +184,14 @@ namespace api.nox.desktop {
 					progress: p => onProgress?.Invoke($"Downloading avatar {identifier.ToString()}", p),
 					token: _avatarLoadingCts.Token
 				);
-				download.Start();
-				await download.Wait();
+				await download.Start();
 				if (_avatarLoadingCts.IsCancellationRequested)
 					return null;
 			}
 
 			var avatar = await Client.AvatarAPI.LoadFromCache(
 				asset.GetHash(),
-				progress:  p => onProgress?.Invoke($"Loading avatar{identifier.ToString()}", p),
+				progress: p => onProgress?.Invoke($"Loading avatar{identifier.ToString()}", p),
 				token: _avatarLoadingCts.Token
 			);
 			if (_avatarLoadingCts.IsCancellationRequested)
@@ -271,9 +270,12 @@ namespace api.nox.desktop {
 
 			if (controller is IControllerAvatar ca) {
 				await SetAvatar(ca.GetAvatar());
-				ca.SetAvatar((IRuntimeAvatar)null);
+				ca.SetAvatar(null).Forget();
 			}
 		}
+
+		public bool TryGetPart(ushort index, out Transform tr)
+			=> GetParts().TryGetValue(index, out tr);
 
 		[NoxPublic(NoxAccess.Method)]
 		public Dictionary<string, object> GetAbilities()
@@ -339,6 +341,30 @@ namespace api.nox.desktop {
 				{ PlayerRig.Base.ToIndex(), transform },
 				{ PlayerRig.Head.ToIndex(), player.headCamera.transform }
 			};
+
+		// ReSharper disable Unity.PerformanceAnalysis
+		public void SetPart(ushort index, NoxTransform tr) {
+			var part = GetParts()
+				.FirstOrDefault(p => p.Key == index);
+
+			if (index == PlayerRig.Base.ToIndex()) {
+				if (!tr.IsSamePosition(player.transform.position))
+					player.SetPosition(tr.GetPosition());
+			} else {
+				if (!tr.IsSamePosition(part.Value.position))
+					part.Value.position = tr.GetPosition();
+			}
+
+			if (!tr.IsSameRotation(part.Value.rotation))
+				part.Value.rotation = tr.GetRotation();
+
+			var rb = part.Value.GetComponent<Rigidbody>();
+
+			if (rb && !tr.IsSameVelocity(rb.linearVelocity))
+				rb.linearVelocity = tr.GetVelocity();
+			if (rb && !tr.IsSameAngularVelocity(rb.angularVelocity))
+				rb.angularVelocity = tr.GetAngularVelocity();
+		}
 
 		private IPlayer                 _attachedPlayer;
 		private IRuntimeAvatar          _attachedRuntimeAvatar;

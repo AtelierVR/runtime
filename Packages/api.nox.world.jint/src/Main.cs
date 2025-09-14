@@ -1,14 +1,15 @@
+using System;
 using System.Linq;
 using Nox.CCK.Mods.Cores;
+using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
-using Nox.CCK.Utils;
-using UnityEngine.Events;
+using Nox.Worlds;
 
 namespace api.nox.world.jint {
 	public class Main : MainModInitializer {
-		internal static MainModCoreAPI CoreAPI;
-		internal static Main           Instance;
-		internal        WorldManager   WorldManager;
+		internal static MainModCoreAPI      CoreAPI;
+		internal static Main                Instance;
+		private         EventSubscription[] _events = Array.Empty<EventSubscription>();
 
 		internal static MainModInitializer WorldAPI
 			=> CoreAPI.ModAPI.GetMod("world").GetMains().FirstOrDefault();
@@ -17,15 +18,25 @@ namespace api.nox.world.jint {
 			=> CoreAPI.ModAPI.GetMod("jint").GetMains().FirstOrDefault();
 
 		public void OnInitializeMain(MainModCoreAPI api) {
-			CoreAPI      = api;
-			Instance     = this;
-			WorldManager = new WorldManager();
-			Logger.LogDebug($"WorldManager: {WorldManager}");
+			CoreAPI       = api;
+			Instance      = this;
+			_events = new[] {
+				api.EventAPI.Subscribe("world_check_request", OnCheckRequest),
+			};
+		}
+
+		private static void OnCheckRequest(EventData context) {
+			if (!context.TryGet<IWorldDescriptor>(0, out var descriptor))
+				return;
+			var valid = true;
+			valid &= JintBackingModule.Check(descriptor);
+			context.Callback(valid);
 		}
 
 		public void OnDisposeMain() {
-			WorldManager.Dispose();
-			WorldManager = null;
+			foreach (var e in _events)
+				CoreAPI.EventAPI.Unsubscribe(e);
+			_events  = Array.Empty<EventSubscription>();
 			CoreAPI  = null;
 			Instance = null;
 		}

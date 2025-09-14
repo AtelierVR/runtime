@@ -919,7 +919,7 @@ namespace api.nox.world {
 				// Handle build result
 				if (result.Type != BuildResultType.Success) {
 					HideProgress();
-					string errorMessage = result.Type switch {
+					var errorMessage = result.Type switch {
 						BuildResultType.Failed            => $"Build failed: {result.Message}",
 						BuildResultType.AlreadyBuilding   => "A build is already in progress.",
 						BuildResultType.EditorCompiling   => "Unity is currently compiling scripts.",
@@ -1022,7 +1022,7 @@ namespace api.nox.world {
 			} catch (Exception ex) {
 				HideProgress();
 				ShowErrorDialog($"An error occurred during publish: {ex.Message}", useDirectMessage: true);
-				Logger.LogError($"An error occurred during publish: {ex.Message}");
+				Logger.LogException(ex);
 				SetDisplay(DisplayFlags.World | DisplayFlags.WorldAsset);
 			} finally {
 				// Cleanup temporary build path

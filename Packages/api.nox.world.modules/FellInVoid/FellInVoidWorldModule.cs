@@ -35,16 +35,17 @@ namespace Nox.CCK.Worlds.FellInVoid {
 
 		public float fallThreshold = -100f;
 
-		private ISession _session;
+		public ISession Session;
 
-		public void OnSession(ISession session)
-			=> _session = session;
+		public void OnLoaded(ISession session)
+			=> Session = session;
 
 		public void Update() {
-			var local = _session?.GetAdapter().GetLocalPlayer();
-			var pos   = local?.GetPosition() ?? new Vector3(0, fallThreshold + 1, 0);
+			if (Session == null) return;
+			var local = Session.GetAdapter().GetLocalPlayer();
+			var pos   = local.GetPosition();
 			if (pos.y < fallThreshold)
-				local?.Respawn();
+				local.Respawn();
 		}
 	}
 }
