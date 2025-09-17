@@ -101,7 +101,9 @@ namespace api.nox.jint {
 				typeof(bool),
 				typeof(Object),
 				typeof(GameObject),
-				typeof(Transform)
+				typeof(Transform),
+				typeof(TMPro.TextMeshProUGUI),
+				typeof(Collider),
 			};
 
 			var typeColumn = new Column {

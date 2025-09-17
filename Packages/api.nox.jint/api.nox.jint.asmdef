@@ -1,20 +1,20 @@
 {
-  "name": "api.nox.jint",
-  "rootNamespace": "api.nox.jint",
-  "references": [
-    "Nox.CCK",
-    "UniTask",
-    "Jint",
-    "Nox.CCK.Jint",
-    "Nox.Jint"
-  ],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": [],
-  "versionDefines": [],
-  "noEngineReferences": false
+    "name": "api.nox.jint",
+    "rootNamespace": "api.nox.jint",
+    "references": [
+        "Nox.CCK",
+        "UniTask",
+        "Nox.Jint",
+        "Unity.TextMeshPro",
+        "Nox.CCK.Jint"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

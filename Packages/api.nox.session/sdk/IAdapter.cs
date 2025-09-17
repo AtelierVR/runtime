@@ -123,5 +123,9 @@ namespace Nox.Sessions {
 		/// </example>
 		/// </summary>
 		public void OnUpdate() { }
+
+		public IPlayer[] GetPlayers();
+
+		public IEntity[] GetEntities();
 	}
 }

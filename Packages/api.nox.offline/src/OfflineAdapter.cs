@@ -38,6 +38,12 @@ namespace api.nox.offline {
 		public IAdapterState GetState()
 			=> _state;
 
+		public IPlayer[] GetPlayers()
+			=> _entities.GetEntities<IPlayer>().ToArray();
+
+		public IEntity[] GetEntities()
+			=> _entities.GetEntities().ToArray();
+
 		internal void SetState(bool isReady, string message = "", float progress = 1f) {
 			var old = _state;
 			_state = new OfflineState(isReady, message, progress);

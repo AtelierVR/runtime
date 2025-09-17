@@ -857,6 +857,9 @@
     <Reference Include="UniTask">
       <HintPath>U:\Projets\nox\runtime\Library\ScriptAssemblies\UniTask.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>U:\Projets\nox\runtime\Library\ScriptAssemblies\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>U:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
     </Reference>
@@ -869,13 +872,13 @@
       <Project>{39bf21be-d0c7-e647-0301-babd67a9c8f6}</Project>
       <Name>Nox.CCK</Name>
     </ProjectReference>
-    <ProjectReference Include="Nox.CCK.Jint.csproj">
-      <Project>{bd8d55ba-be6b-897f-8274-96e2b5d05912}</Project>
-      <Name>Nox.CCK.Jint</Name>
-    </ProjectReference>
     <ProjectReference Include="Nox.Jint.csproj">
       <Project>{7c2c463a-26a3-7905-84ce-de910451931d}</Project>
       <Name>Nox.Jint</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Jint.csproj">
+      <Project>{bd8d55ba-be6b-897f-8274-96e2b5d05912}</Project>
+      <Name>Nox.CCK.Jint</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

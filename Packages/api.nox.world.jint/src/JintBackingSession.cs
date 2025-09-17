@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Jint.Native;
+using Jint.Runtime;
 using Jint.Runtime.Modules;
 using Nox.Jint;
 using Nox.Players;
@@ -16,7 +18,7 @@ using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
 
 namespace api.nox.session.jint {
-	public class JintBackingSession : MonoBehaviour, IJintBacking, ISessionModule {
+	public class JintBackingSession : MonoBehaviour, IJintBacking {
 		public JintBackingModule module;
 		public IJintScript       Script;
 		public ObjectInstance    Context;
@@ -68,6 +70,15 @@ namespace api.nox.session.jint {
 						.ExportObject("gameObject", gameObject)
 						.ExportObject("transform", gameObject.transform)
 						.ExportFunction("id", () => GetInstanceID())
+				);
+
+				_engine.AddModule(
+					"players", builder => builder
+						.ExportFunction("getLocal", () => module.Session.GetAdapter().GetLocalPlayer())
+						.ExportFunction("getMaster", () => module.Session.GetAdapter().GetMasterPlayer())
+						.ExportFunction("getAll", () => module.Session.GetAdapter().GetPlayers())
+						.ExportFunction("getCount", () => module.Session.GetAdapter().GetPlayerCount())
+						.ExportFunction("getAt", args => new ObjectWrapper(_engine, module.Session.GetAdapter().GetPlayer((int)args.At(0).AsNumber())))
 				);
 
 				var m = JintEngine.PrepareModule(Script.GetContent());

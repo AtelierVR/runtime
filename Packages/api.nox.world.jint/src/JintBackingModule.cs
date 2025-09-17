@@ -3,6 +3,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using Nox.Jint;
+using Nox.Players;
 using Nox.Sessions;
 using Nox.Worlds;
 using UnityEngine;
@@ -60,6 +61,31 @@ namespace api.nox.session.jint {
 				Destroy(backing);
 			backings.Clear();
 			Session = null;
+		}
+
+		public void OnSessionSelected() {
+			foreach (var backing in backings)
+				backing.OnSessionSelected();
+		}
+
+		public void OnSessionDeselected() {
+			foreach (var backing in backings)
+				backing.OnSessionDeselected();
+		}
+
+		public void OnPlayerJoined(IPlayer player) {
+			foreach (var backing in backings)
+				backing.OnPlayerJoined(player);
+		}
+
+		public void OnPlayerLeft(IPlayer player) {
+			foreach (var backing in backings)
+				backing.OnPlayerLeft(player);
+		}
+
+		public void OnAuthorityTransferred(IPlayer @new) {
+			foreach (var backing in backings)
+				backing.OnAuthorityTransferred(@new);
 		}
 	}
 }

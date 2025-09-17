@@ -280,6 +280,12 @@ namespace api.nox.relay {
 			_session          = session;
 		}
 
+		public IPlayer[] GetPlayers()
+			=> _entities.GetEntities<IPlayer>().ToArray();
+
+		public IEntity[] GetEntities()
+			=> _entities.GetEntities().ToArray();
+
 		public IDimension GetDimension()
 			=> _dimension;
 
