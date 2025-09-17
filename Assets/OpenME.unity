@@ -204,7 +204,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: nox.hactazia.videoplayer::NHVideoPlayer
   render: {fileID: 0}
-  videoUrl: https://www.twitch.tv/lofigirl
+  videoUrl: https://youtu.be/mX8f6LwWH6Q?si=wl4twO03wiY_XEOh
   playOnStart: 1
   onReady:
     m_PersistentCalls:

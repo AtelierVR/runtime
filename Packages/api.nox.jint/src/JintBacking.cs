@@ -6,6 +6,7 @@ using Jint.Native.Object;
 using Jint.Runtime.Interop;
 using Nox.CCK.Build;
 using Nox.CCK.Jint;
+using Nox.Jint;
 using UnityEngine;
 using Engine = Jint.Engine;
 using Transform = UnityEngine.Transform;
@@ -65,14 +66,11 @@ namespace api.nox.jint {
 			Engine.SetValue("Transform", TypeReference.CreateTypeReference(Engine, typeof(Transform)));
 
 			// import json of Script.exports
-			if (!string.IsNullOrEmpty(script.exports)) {
-				try {
-					var exports = Engine.Evaluate(script.exports).AsObject();
-					Engine.SetValue("exports", exports);
-				} catch (Exception e) {
-					NoxLogger.LogError($"Error parsing exports: {e.Message}", this);
-				}
-			} else Engine.SetValue("exports", new ObjectWrapper(Engine, new Dictionary<string, object>()));
+			try {
+				Engine.SetValue("exports", new ObjectWrapper(Engine, script.GetExports()));
+			} catch (Exception e) {
+				NoxLogger.LogError($"Error parsing exports: {e.Message}", this);
+			}
 
 			Engine.AddModule(
 				"console", builder => builder

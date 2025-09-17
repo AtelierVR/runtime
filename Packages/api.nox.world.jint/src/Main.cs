@@ -1,8 +1,10 @@
 using System;
+using System.IO;
 using System.Linq;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Utils;
 using Nox.Worlds;
 
 namespace api.nox.session.jint {
@@ -11,6 +13,13 @@ namespace api.nox.session.jint {
 		internal static Main                Instance;
 		private         EventSubscription[] _events = Array.Empty<EventSubscription>();
 
+		public static string GetModulePath() {
+			var folder = Path.Combine(Constants.ConfigPath, "jint_modules");
+			if (!Directory.Exists(folder))
+				Directory.CreateDirectory(folder);
+			return folder;
+		}
+		
 		internal static MainModInitializer WorldAPI
 			=> CoreAPI.ModAPI.GetMod("world").GetMains().FirstOrDefault();
 
@@ -18,8 +27,8 @@ namespace api.nox.session.jint {
 			=> CoreAPI.ModAPI.GetMod("jint").GetMains().FirstOrDefault();
 
 		public void OnInitializeMain(MainModCoreAPI api) {
-			CoreAPI       = api;
-			Instance      = this;
+			CoreAPI  = api;
+			Instance = this;
 			_events = new[] {
 				api.EventAPI.Subscribe("world_check_request", OnCheckRequest),
 			};

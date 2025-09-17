@@ -1,4 +1,4 @@
-import { transform } from "behaviour";
+import { transform } from 'behaviour';
 
 let d = Date.now();
 export let speed = 0.1;

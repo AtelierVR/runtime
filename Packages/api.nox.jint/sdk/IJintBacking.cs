@@ -1,4 +1,4 @@
-namespace Nox.CCK.Jint {
+namespace Nox.Jint {
 	public interface IJintBacking {
 		public void Invoke(string method, params object[] args);
 

@@ -57,10 +57,8 @@ namespace api.nox.network {
 
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask<Texture2D> FetchTexture(string url, UnityWebRequest req = null, Action<float, ulong> progress = null, CancellationToken token = default) {
-			if (string.IsNullOrEmpty(url)) {
-				Logger.LogWarning("FetchTexture: URL is null or empty.");
+			if (string.IsNullOrEmpty(url)) 
 				return null;
-			}
 
 			Logger.Log($"Fetching [TEXTURE] {url}...");
 			var                    request = _activeRequests.FirstOrDefault(r => r.Item1 == url);

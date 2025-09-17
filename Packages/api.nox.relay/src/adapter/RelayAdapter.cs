@@ -289,7 +289,7 @@ namespace api.nox.relay {
 			if (Connection != null) await Connection.RequestDisconnect();
 			foreach (var entity in _entities.GetEntities().ToArray())
 				_entities.UnregisterEntity(entity);
-			if (_dimension.GetMainIndex() > 0)
+			if (_dimension != null && _dimension.GetMainIndex() > 0)
 				_dimension.GetScene().GetInstances()[0].RemoveInstance(_dimension.GetMainIndex());
 			_dimension = null;
 			UnityEngine.Object.Destroy(EntitiesRoot);

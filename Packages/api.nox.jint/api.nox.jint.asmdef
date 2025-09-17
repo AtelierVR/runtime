@@ -5,7 +5,8 @@
     "Nox.CCK",
     "UniTask",
     "Jint",
-    "Nox.CCK.Jint"
+    "Nox.CCK.Jint",
+    "Nox.Jint"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

@@ -59,12 +59,10 @@ namespace api.nox.search.client {
 					icon.texture = texture;
 					icon.gameObject.SetActive(true);
 				} else {
-					Logger.LogError("ResultComponent: Failed to fetch texture.");
 					icon.gameObject.SetActive(false);
 					icon.texture = null;
 				}
 			} catch {
-				Logger.LogError("ResultComponent: Exception while fetching texture.");
 				icon.gameObject.SetActive(false);
 				icon.texture = null;
 			}

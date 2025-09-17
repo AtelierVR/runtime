@@ -7,7 +7,7 @@
     "Nox.Sessions",
     "Nox.Worlds",
     "api.nox.jint",
-    "Nox.CCK.Jint"
+    "Nox.Jint"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
