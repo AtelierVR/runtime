@@ -7,7 +7,8 @@
     "Nox.Sessions",
     "Nox.Worlds",
     "api.nox.jint",
-    "Nox.Jint"
+    "Nox.Jint",
+    "Nox.Players"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

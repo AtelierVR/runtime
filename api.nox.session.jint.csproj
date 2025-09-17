@@ -879,6 +879,10 @@
       <Project>{7c2c463a-26a3-7905-84ce-de910451931d}</Project>
       <Name>Nox.Jint</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.Players.csproj">
+      <Project>{0e499f4c-db68-9841-61eb-59e5a4ed821c}</Project>
+      <Name>Nox.Players</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

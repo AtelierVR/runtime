@@ -7,6 +7,7 @@ using Nox.CCK.Build;
 using Nox.CCK.Utils;
 using Nox.Worlds.Scenes;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using Logger = Nox.CCK.Utils.Logger;
 
@@ -140,6 +141,13 @@ namespace api.nox.world {
 					Success = false,
 					Error   = "No scenes module found in world descriptor."
 				};
+
+			foreach (var camera in prefab.GetComponentsInChildren<Camera>(true))
+				if (camera.CompareTag("MainCamera"))
+					camera.tag = "Untagged";
+			
+			foreach (var eventSystem in prefab.GetComponentsInChildren<EventSystem>(true))
+				eventSystem.enabled = false;
 
 			runtime.Instances    = new RuntimeWorldInstance[scenes.GetScenes().Length + 1];
 			runtime.Instances[0] = new RuntimeWorldInstance(runtime, scene, prefab);

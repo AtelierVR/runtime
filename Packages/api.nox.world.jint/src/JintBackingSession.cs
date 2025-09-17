@@ -5,16 +5,18 @@ using Jint.Runtime.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Jint.Runtime.Modules;
 using Nox.Jint;
+using Nox.Players;
 using Nox.Sessions;
-using UnityEngine.Events;
+using Nox.Worlds;
 using JintEngine = Jint.Engine;
 using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
 
 namespace api.nox.session.jint {
-	public class JintBackingSession : MonoBehaviour, IJintBacking {
+	public class JintBackingSession : MonoBehaviour, IJintBacking, ISessionModule {
 		public JintBackingModule module;
 		public IJintScript       Script;
 		public ObjectInstance    Context;
@@ -144,12 +146,22 @@ namespace api.nox.session.jint {
 			_engine = null;
 		}
 
-		public void RemovePlayerLeftListener(UnityAction action) {
-			throw new NotImplementedException();
-		}
+		public UniTask<bool> Setup(IRuntimeWorld runtime)
+			=> UniTask.FromResult(true);
 
-		public void RemovePlayerJoinedListener(UnityAction action) {
-			throw new NotImplementedException();
-		}
+		public void OnSessionSelected()
+			=> Invoke("onSessionSelected");
+
+		public void OnSessionDeselected()
+			=> Invoke("onSessionDeselected");
+
+		public void OnPlayerJoined(IPlayer player)
+			=> Invoke("onPlayerJoined", player);
+
+		public void OnPlayerLeft(IPlayer player)
+			=> Invoke("onPlayerLeft", player);
+
+		public void OnAuthorityTransferred(IPlayer @new)
+			=> Invoke("onAuthorityTransferred", @new);
 	}
 }
