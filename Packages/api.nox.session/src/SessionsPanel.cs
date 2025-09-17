@@ -172,36 +172,37 @@ namespace api.nox.session {
 		#endregion
 
 		#region UI Creation
+
 		public VisualElement Make(Dictionary<string, object> data) {
 			_root.Clear();
-			
+
 			// Load UXML template
 			var visualTree = Editor.CoreAPI.AssetAPI.GetAsset<VisualTreeAsset>("sessions-panel.uxml");
 			if (visualTree != null) {
 				var template = visualTree.CloneTree();
 				_root.Add(template);
-				
+
 				// Get references to UI elements
 				GetUIReferences();
-				
+
 				// Setup programmatic elements
 				SetupProgrammaticElements();
 			} else {
 				// Fallback to programmatic creation if UXML not found
 				CreateLayoutProgrammatically();
 			}
-			
+
 			RefreshSessionsList();
 			return _root;
 		}
 
 		private void GetUIReferences() {
 			// Get references to elements defined in UXML
-			_sessionCountField = _root.Q<IntegerField>("session-count-field");
+			_sessionCountField   = _root.Q<IntegerField>("session-count-field");
 			_currentSessionField = _root.Q<TextField>("current-session-field");
-			_disposeAllButton = _root.Q<Button>("dispose-all-button");
-			_statusHelpBox = _root.Q<HelpBox>("status-helpbox");
-			
+			_disposeAllButton    = _root.Q<Button>("dispose-all-button");
+			_statusHelpBox       = _root.Q<HelpBox>("status-helpbox");
+
 			// Setup button event
 			if (_disposeAllButton != null) {
 				_disposeAllButton.clicked += DisposeAllSessions;
@@ -259,18 +260,18 @@ namespace api.nox.session {
 		private void CreateSessionsListView(VisualElement container = null) {
 			// Create columns first with smaller widths
 			var columns = new Columns();
-			columns.Add(new Column { title = "Session", width = 80, minWidth = 60 });
-			columns.Add(new Column { title = "Adapter", width = 80, minWidth = 60 });
-			columns.Add(new Column { title = "Players", width = 50, minWidth = 40 });
-			columns.Add(new Column { title = "Status", width = 60, minWidth = 50 });
+			columns.Add(new Column { title = "Session", width      = 80, minWidth  = 60 });
+			columns.Add(new Column { title = "Adapter", width      = 80, minWidth  = 60 });
+			columns.Add(new Column { title = "Players", width      = 50, minWidth  = 40 });
+			columns.Add(new Column { title = "Status", width       = 60, minWidth  = 50 });
 			columns.Add(new Column { title = "Players Info", width = 150, minWidth = 100 });
-			columns.Add(new Column { title = "Actions", width = 100, minWidth = 80 });
+			columns.Add(new Column { title = "Actions", width      = 100, minWidth = 80 });
 
 			// Create ListView with columns
-			_sessionsListView = new MultiColumnListView(columns);
-			_sessionsListView.showBorder = true;
+			_sessionsListView                               = new MultiColumnListView(columns);
+			_sessionsListView.showBorder                    = true;
 			_sessionsListView.showAlternatingRowBackgrounds = AlternatingRowBackground.All;
-			_sessionsListView.fixedItemHeight = 20;
+			_sessionsListView.fixedItemHeight               = 20;
 
 			// Set up column renderers
 			if (_sessionsListView.columns != null) {
@@ -461,9 +462,9 @@ namespace api.nox.session {
 
 			_sessionEventsSubscriptions[session] = sessionEvents;
 
-			sessionEvents.AddPlayerJoinedListener((_) => { EditorApplication.delayCall += RefreshSessionsList; });
+			sessionEvents.OnPlayerJoinedEvent().AddListener(_ => EditorApplication.delayCall += RefreshSessionsList);
 
-			sessionEvents.AddPlayerLeftListener((_) => { EditorApplication.delayCall += RefreshSessionsList; });
+			sessionEvents.OnPlayerLeftEvent().RemoveListener(_ => EditorApplication.delayCall += RefreshSessionsList);
 		}
 
 		#endregion
@@ -487,4 +488,3 @@ namespace api.nox.session {
 	}
 }
 #endif
-

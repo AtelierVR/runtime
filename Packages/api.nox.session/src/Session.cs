@@ -23,34 +23,10 @@ namespace api.nox.session {
 		public readonly IAdapter Adapter;
 		public readonly Main     Manager;
 
-		public readonly UnityEvent<IPlayer>                      OnPlayerJoinedEvent         = new();
-		public readonly UnityEvent<IPlayer>                      OnPlayerLeftEvent           = new();
-		public readonly UnityEvent<IPlayer>                      OnAuthorityTransferredEvent = new();
-		public readonly UnityEvent<IAdapterState, IAdapterState> OnStateChangedEvent         = new();
-
-		public void AddPlayerJoinedListener(UnityAction<IPlayer> action)
-			=> OnPlayerJoinedEvent.AddListener(action);
-
-		public void AddPlayerLeftListener(UnityAction<IPlayer> action)
-			=> OnPlayerLeftEvent.AddListener(action);
-
-		public void AddAuthorityTransferredListener(UnityAction<IPlayer> action)
-			=> OnAuthorityTransferredEvent.AddListener(action);
-
-		public void AddStateChangedListener(UnityAction<IAdapterState, IAdapterState> action)
-			=> OnStateChangedEvent.AddListener(action);
-
-		public void RemovePlayerJoinedListener(UnityAction<IPlayer> action)
-			=> OnPlayerJoinedEvent.RemoveListener(action);
-
-		public void RemovePlayerLeftListener(UnityAction<IPlayer> action)
-			=> OnPlayerLeftEvent.RemoveListener(action);
-
-		public void RemoveAuthorityTransferredListener(UnityAction<IPlayer> action)
-			=> OnAuthorityTransferredEvent.RemoveListener(action);
-
-		public void RemoveStateChangedListener(UnityAction<IAdapterState, IAdapterState> action)
-			=> OnStateChangedEvent.RemoveListener(action);
+		public readonly UnityEvent<IPlayer>                      OnPlayerJoinedListener         = new();
+		public readonly UnityEvent<IPlayer>                      OnPlayerLeftListener           = new();
+		public readonly UnityEvent<IPlayer>                      OnAuthorityTransferredListener = new();
+		public readonly UnityEvent<IAdapterState, IAdapterState> OnStateChangedListener         = new();
 
 		[NoxPublic(NoxAccess.Method)]
 		public ushort GetId()
@@ -98,7 +74,7 @@ namespace api.nox.session {
 				player.Respawn();
 
 			Main.Instance.CoreAPI.EventAPI.Emit("session_player_joined", this, player);
-			OnPlayerJoinedEvent.Invoke(player);
+			OnPlayerJoinedListener.Invoke(player);
 
 			foreach (var descriptor in GetDescriptors().Where(e => e != null))
 			foreach (var module in descriptor.GetModules<ISessionModule>())
@@ -108,7 +84,7 @@ namespace api.nox.session {
 		public void OnPlayerLeft(IPlayer player) {
 			Logger.LogDebug($"OnPlayerLeft: {player}");
 			Main.Instance.CoreAPI.EventAPI.Emit("session_player_left", this, player);
-			OnPlayerLeftEvent.Invoke(player);
+			OnPlayerLeftListener.Invoke(player);
 
 			foreach (var descriptor in GetDescriptors().Where(e => e != null))
 			foreach (var module in descriptor.GetModules<ISessionModule>())
@@ -118,7 +94,7 @@ namespace api.nox.session {
 		public void OnAuthorityTransferred(IPlayer player) {
 			Logger.LogDebug($"OnAuthorityTransferred: {player}");
 			Main.Instance.CoreAPI.EventAPI.Emit("session_authority_transferred", this, player);
-			OnAuthorityTransferredEvent.Invoke(player);
+			OnAuthorityTransferredListener.Invoke(player);
 
 			foreach (var descriptor in GetDescriptors().Where(e => e != null))
 			foreach (var module in descriptor.GetModules<ISessionModule>())
@@ -139,7 +115,7 @@ namespace api.nox.session {
 				Main.Instance.CoreAPI.EventAPI.Emit("session_ready", this);
 			else if (!state.IsReady() && Mathf.Approximately(state.GetProgress(), -1))
 				Main.Instance.CoreAPI.EventAPI.Emit("session_error", this);
-			OnStateChangedEvent.Invoke(state, previousState);
+			OnStateChangedListener.Invoke(state, previousState);
 		}
 
 		public void OnUpdate()
@@ -211,5 +187,14 @@ namespace api.nox.session {
 			foreach (var module in descriptor.GetModules<ISessionModule>())
 				module.OnSessionSelected();
 		}
+
+		public UnityEvent<IPlayer> OnPlayerJoinedEvent()
+			=> OnPlayerJoinedListener;
+
+		public UnityEvent<IPlayer> OnPlayerLeftEvent()
+			=> OnPlayerLeftListener;
+
+		public UnityEvent<IPlayer> OnAuthorityTransferredEvent()
+			=> OnAuthorityTransferredListener;
 	}
 }

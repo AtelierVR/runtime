@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Jint.Runtime.Modules;
 using Nox.Jint;
+using Nox.Sessions;
+using UnityEngine.Events;
 using JintEngine = Jint.Engine;
 using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
@@ -69,7 +71,7 @@ namespace api.nox.session.jint {
 				var m = JintEngine.PrepareModule(Script.GetContent());
 				_engine.AddModule("__main__", x => x.AddModule(m));
 				Context = _engine.ImportModule("__main__");
-				
+
 				try {
 					var exports = Script.GetExports();
 					foreach (var prop in exports)
@@ -140,6 +142,14 @@ namespace api.nox.session.jint {
 			if (_engine == null) return;
 			Main.CoreAPI.EventAPI.Emit("jint_engine_destroyed", this, _engine);
 			_engine = null;
+		}
+
+		public void RemovePlayerLeftListener(UnityAction action) {
+			throw new NotImplementedException();
+		}
+
+		public void RemovePlayerJoinedListener(UnityAction action) {
+			throw new NotImplementedException();
 		}
 	}
 }
