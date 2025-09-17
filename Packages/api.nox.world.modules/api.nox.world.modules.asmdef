@@ -11,7 +11,8 @@
     "Nox.CCK.Worlds",
     "Nox.Sessions",
     "Nox.Players",
-    "Nox.Entities"
+    "Nox.Entities",
+    "Nox.CCK.Worlds.Scenes"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

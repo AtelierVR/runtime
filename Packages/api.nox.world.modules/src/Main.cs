@@ -4,6 +4,7 @@ using Nox.CCK.Worlds.FellInVoid;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Worlds.Scenes;
 using Nox.CCK.Worlds.Spawns;
 
 namespace api.nox.world.modules {
@@ -24,6 +25,7 @@ namespace api.nox.world.modules {
 			var valid = true;
 			valid &= FellInVoidWorldModule.Check(descriptor);
 			valid &= SpawnsWorldModule.Check(descriptor);
+			valid &= ScenesWorldModule.Check(descriptor);
 			context.Callback(valid);
 		}
 
