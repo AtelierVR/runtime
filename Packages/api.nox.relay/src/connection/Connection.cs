@@ -86,7 +86,7 @@ namespace api.nox.relay.connection {
 				case ResponseType.Authentification:
 				case ResponseType.PasswordRequirement:
 				case ResponseType.ServerConfig:
-				case ResponseType.Status:
+				case ResponseType.Sessions:
 				case ResponseType.None:
 					break;
 				default:
@@ -232,8 +232,8 @@ namespace api.nox.relay.connection {
 					ConnectionId = Id,
 					Page         = page
 				},
-				RequestType.Status,
-				ResponseType.Status,
+				RequestType.Sessions,
+				ResponseType.Sessions,
 				NextState()
 			);
 			foreach (var instance in sessions.Instances)

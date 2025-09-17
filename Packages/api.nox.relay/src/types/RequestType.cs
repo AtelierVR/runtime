@@ -20,6 +20,6 @@ public enum RequestType : byte {
 		AvatarChanged       = 0x0D,
 		ServerConfig        = 0x0E,
 		AvatarParams        = 0x0F,
-		Status              = 0x11,
+		Sessions              = 0x11,
 	}
 }

@@ -23,6 +23,6 @@ namespace api.nox.relay.types {
 		AvatarParams        = 0x0F,
 		Join                = 0x10,
 		Leave               = 0x11,
-		Status              = 0x12,
+		Sessions              = 0x12,
 	}
 }
