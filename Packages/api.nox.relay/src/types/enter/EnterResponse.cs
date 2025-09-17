@@ -46,8 +46,8 @@ namespace api.nox.relay.types.Enter {
 					Reason = buffer.Remaining >= 2 ? buffer.ReadString() : "Unknown error"; 
 					return true;
 				case EnterResult.Blacklisted:
-					Reason   = buffer.ReadString();
 					ExpireAt = buffer.ReadDateTime();
+					Reason   = buffer.ReadString();
 					return true;
 				case EnterResult.Success:
 					Player = new InstancePlayer {

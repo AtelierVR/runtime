@@ -126,6 +126,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "api.nox.session.jint": {
+      "version": "file:api.nox.world.jint",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "api.nox.settings": {
       "version": "file:api.nox.settings",
       "depth": 0,
@@ -170,12 +176,6 @@
     },
     "api.nox.world": {
       "version": "file:api.nox.world",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.world.jint": {
-      "version": "file:api.nox.world.jint",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

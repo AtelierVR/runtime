@@ -45,6 +45,7 @@ namespace api.nox.jint {
 			if (Engine == null) Prepare();
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		public void Prepare() {
 			script ??= GetComponent<JintScript>();
 			Logger ??= new Logger();
@@ -89,7 +90,7 @@ namespace api.nox.jint {
 				NoxLogger.LogDebug($"script: {script}");
 				NoxLogger.LogDebug($"script.asset: {script.asset}");
 				NoxLogger.LogDebug($"script.asset.text: {script.asset.text}");
-				
+
 				var module = Engine.PrepareModule(script.asset.text);
 				Engine.AddModule("__main__", x => x.AddModule(module));
 				ExecutionContext = Engine.ImportModule("__main__");

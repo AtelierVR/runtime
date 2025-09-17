@@ -5,7 +5,7 @@ using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
 using Nox.Worlds;
 
-namespace api.nox.world.jint {
+namespace api.nox.session.jint {
 	public class Main : MainModInitializer {
 		internal static MainModCoreAPI      CoreAPI;
 		internal static Main                Instance;

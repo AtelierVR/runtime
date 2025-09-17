@@ -31,6 +31,9 @@ namespace Nox.CCK.Jint {
 				? Backing.Call<T>(functionName, args)
 				: default;
 
+		public void Awake()
+			=> InvokeFunction("onAwake");
+
 		public void Start()
 			=> InvokeFunction("onStart");
 

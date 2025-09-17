@@ -1,6 +1,6 @@
 {
-  "name": "api.nox.world.jint",
-  "rootNamespace": "api.nox.world.jint",
+  "name": "api.nox.session.jint",
+  "rootNamespace": "api.nox.session.jint",
   "references": [
     "Nox.CCK",
     "UniTask",

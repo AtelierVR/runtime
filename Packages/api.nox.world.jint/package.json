@@ -1,5 +1,5 @@
 {
-  "name": "api.nox.world.jint",
-  "displayName": "Nox - Jint for Worlds",
+  "name": "api.nox.session.jint",
+  "displayName": "Nox - Jint for Sessions",
   "version": "1.0.0"
 }

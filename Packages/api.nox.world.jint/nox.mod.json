@@ -1,11 +1,11 @@
 {
   "type": "mod",
-  "id": "api.nox.world.jint",
+  "id": "api.nox.session.jint",
   "provides": [
-    "fr.hactazia.world.jint",
-    "world.jint"
+    "fr.hactazia.session.jint",
+    "session.jint"
   ],
-  "name": "Jint system",
+  "name": "Jint for Sessions",
   "version": "1.0.0",
   "description": "Provides the Jint API for the jint.",
   "license": "GPL-3.0",
@@ -31,14 +31,14 @@
       "version": ">=1.0.0"
     },
     {
-      "id": "world",
+      "id": "session",
       "type": "depends",
       "version": ">=1.0.0"
     }
   ],
   "entrypoints": {
     "main": [
-      "api.nox.world.jint.Main"
+      "api.nox.session.jint.Main"
     ]
   },
   "references": [],
