@@ -84,7 +84,7 @@ namespace api.nox.settings.client {
 			var handler  = Main.Handlers.FirstOrDefault(h => h.Split().Item1 == category);
 			if (handler == null)
 				category = Main.Handlers.FirstOrDefault()?.Split().Item1;
-			return handler == null ? null : new CategoryDetails(category);
+			return string.IsNullOrEmpty(category) ? null : new CategoryDetails(category);
 		}
 
 		public CategoryDetails GetCategory(string category) {
