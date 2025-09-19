@@ -1,9 +1,12 @@
+using Cysharp.Threading.Tasks;
+using UnityEngine;
+
 namespace Nox.Settings {
-	public interface ISettingHandler {
-		public void OnSelected();
+	public interface IHandler {
+		public string[] GetPath();
 
-		public void OnDeselected();
+		public GameObject GetContent(RectTransform transform);
 
-		public ISettingPage[] GetPages();
+		public UniTask<GameObject> GetContentAsync(RectTransform transform);
 	}
 }

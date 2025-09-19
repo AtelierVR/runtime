@@ -1,106 +1,89 @@
-Shader "Nox/Mirror"
+Shader "Nox/MirrorShader"
 {
     Properties
     {
-        _ReflectionTexLeft ("Reflection Left", 2D) = "white" {}
-        _ReflectionTexRight ("Reflection Right", 2D) = "white" {}
-        _ReflectionTexMono ("Reflection Mono", 2D) = "white" {}
-        _ReflectionIntensity ("Reflection Intensity", Range(0, 1)) = 1
-        _Tint ("Tint", Color) = (1,1,1,1)
+        _LeftEyeTexture ("Left Eye Texture", 2D) = "white" {}
+        _RightEyeTexture ("Right Eye Texture", 2D) = "white" {}
     }
-
+    
     SubShader
     {
-        Tags { "RenderType"="Opaque" "RenderPipeline"="UniversalPipeline" }
-        LOD 100
-
+        Tags { "RenderType"="Opaque" "Queue"="Geometry" }
+        LOD 200
+        
         Pass
         {
-            Name "ForwardLit"
-            Tags { "LightMode"="UniversalForward" }
-
-            HLSLPROGRAM
+            CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            #pragma multi_compile_fog
-
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-
-            struct Attributes
+            #pragma multi_compile_instancing
+            
+            #include "UnityCG.cginc"
+            
+            struct appdata
             {
-                float4 positionOS : POSITION;
+                float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
-                float3 normalOS : NORMAL;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
-
-            struct Varyings
+            
+            struct v2f
             {
-                float4 positionHCS : SV_POSITION;
                 float2 uv : TEXCOORD0;
+                float4 vertex : SV_POSITION;
                 float4 screenPos : TEXCOORD1;
-                float fogCoord : TEXCOORD2;
+                UNITY_VERTEX_OUTPUT_STEREO
             };
-
-            TEXTURE2D(_ReflectionTexLeft);
-            SAMPLER(sampler_ReflectionTexLeft);
-
-            TEXTURE2D(_ReflectionTexRight);
-            SAMPLER(sampler_ReflectionTexRight);
-
-            TEXTURE2D(_ReflectionTexMono);
-            SAMPLER(sampler_ReflectionTexMono);
-
-            CBUFFER_START(UnityPerMaterial)
-                float4 _ReflectionTexLeft_ST;
-                float4 _ReflectionTexRight_ST;
-                float4 _ReflectionTexMono_ST;
-                float _ReflectionIntensity;
-                float4 _Tint;
-            CBUFFER_END
-
-            Varyings vert(Attributes input)
+            
+            sampler2D _LeftEyeTexture;
+            sampler2D _RightEyeTexture;
+            float4 _LeftEyeTexture_ST;
+            float4 _RightEyeTexture_ST;
+            
+            v2f vert (appdata v)
             {
-                Varyings output;
+                v2f o;
+                UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
-                output.positionHCS = vertexInput.positionCS;
-                output.screenPos = ComputeScreenPos(output.positionHCS);
-                output.uv = TRANSFORM_TEX(input.uv, _ReflectionTexLeft);
-                output.fogCoord = ComputeFogFactor(output.positionHCS.z);
+                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.uv = TRANSFORM_TEX(v.uv, _LeftEyeTexture);
+                o.screenPos = ComputeScreenPos(o.vertex);
                 
-                return output;
+                return o;
             }
-
-            half4 frag(Varyings input) : SV_Target
+            
+            fixed4 frag (v2f i) : SV_Target
             {
-                float2 screenUV = input.screenPos.xy / input.screenPos.w;
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
                 
-                // Utiliser la texture de réflexion appropriée selon le contexte
-                half4 reflection;
+                // Flip UV horizontally for mirror effect
+                float2 mirrorUV = float2(1.0 - i.uv.x, i.uv.y);
                 
-                // En mode stéréo, utiliser Left/Right, sinon Mono
-                #if defined(UNITY_SINGLE_PASS_STEREO)
+                fixed4 col;
+                
+                // Check which eye we're rendering for
+                #if defined(UNITY_SINGLE_PASS_STEREO) || defined(UNITY_STEREO_INSTANCING_ENABLED)
                     if (unity_StereoEyeIndex == 0)
-                        reflection = SAMPLE_TEXTURE2D(_ReflectionTexLeft, sampler_ReflectionTexLeft, screenUV);
+                    {
+                        // Left eye
+                        col = tex2D(_LeftEyeTexture, mirrorUV);
+                    }
                     else
-                        reflection = SAMPLE_TEXTURE2D(_ReflectionTexRight, sampler_ReflectionTexRight, screenUV);
+                    {
+                        // Right eye
+                        col = tex2D(_RightEyeTexture, mirrorUV);
+                    }
                 #else
-                    reflection = SAMPLE_TEXTURE2D(_ReflectionTexMono, sampler_ReflectionTexMono, screenUV);
+                    // Non-VR fallback - use left eye texture
+                    col = tex2D(_LeftEyeTexture, mirrorUV);
                 #endif
                 
-                // Appliquer l'intensité et la teinte
-                reflection.rgb *= _ReflectionIntensity;
-                reflection.rgb *= _Tint.rgb;
-                
-                // Appliquer le brouillard
-                reflection.rgb = MixFog(reflection.rgb, input.fogCoord);
-                
-                return reflection;
+                return col;
             }
-            ENDHLSL
+            ENDCG
         }
     }
     
-    Fallback "Universal Render Pipeline/Unlit"
+    FallBack "Diffuse"
 }

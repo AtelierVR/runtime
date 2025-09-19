@@ -119,7 +119,8 @@ namespace api.nox.desktop {
 
 			desktop._onUserUpdate = Client.CoreAPI.EventAPI.Subscribe("user_update", desktop.OnUserUpdate);
 
-			EventSystem.current     = desktop.eventSystem;
+			EventSystem.current = desktop.eventSystem;
+
 			desktop.gameObject.name = $"[{desktop.GetType().Name}_{desktop.GetInstanceID()}]";
 			DontDestroyOnLoad(desktop);
 			return true;

@@ -10,15 +10,18 @@ namespace Nox.CCK.Language {
 			=> LanguageManager.Get(key, arguments);
 
 		private void Start() {
-			LanguageManager.OnLanguageChanged += UpdateText;
+			LanguageManager.OnLanguageChanged.AddListener(OnUpdateText);
 			UpdateText();
 		}
 
 		private void OnDestroy()
-			=> LanguageManager.OnLanguageChanged -= UpdateText;
+			=> LanguageManager.OnLanguageChanged.RemoveListener(OnUpdateText);
 
 
 		private void OnValidate()
+			=> UpdateText();
+
+		private void OnUpdateText(string lang)
 			=> UpdateText();
 
 		public void UpdateText() {

@@ -1,38 +1,29 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Language;
 using Nox.CCK.Utils;
-using Nox.Settingss;
+using Nox.Settings;
 using Nox.UI;
 using UnityEngine;
 
 namespace api.nox.settings.client {
-	public class SettingPage : IPage {
+	public class SettingsPage : IPage {
 		internal static string GetStaticKey()
 			=> "settings";
 
 		public string GetKey()
 			=> GetStaticKey();
 
-		internal int              MId;
-		private  object[]         _context;
-		private  GameObject       _content;
-		private  SettingComponent _component;
-		private  ushort           _currentId = ushort.MinValue;
-
-
-		public ISettings GetSettings() {
-			var settings = Main.Instance.GetSettings(_currentId);
-			settings ??= Main.Instance.GetCurrent();
-			return settings ?? Main.Instance.GetSettingss().FirstOrDefault();
-		}
-
-		public void SetSettings(ISettings settings) {
-			_currentId = settings?.GetId() ?? ushort.MinValue;
-			Refresh(false);
-		}
+		internal int               MId;
+		private  object[]          _context;
+		private  GameObject        _content;
+		private  SettingsComponent _component;
+		private  string[]          _current;
 
 		public void OnRefresh()
-			=> Refresh(false);
+			=> Refresh();
 
 		private static bool T<T>(object[] o, int index, out T value) {
 			if (o.Length > index && o[index] is T t) {
@@ -44,25 +35,23 @@ namespace api.nox.settings.client {
 			return false;
 		}
 
-		internal static IPage OnGotoAction(IMenu menu, object[] context) {
-			var id = T(context, 0, out ushort cid) ? cid : ushort.MinValue;
-			return new SettingPage {
-				MId        = menu.GetId(),
-				_context   = context,
-				_currentId = id
+		internal static IPage OnGotoAction(IMenu menu, object[] context)
+			=> new SettingsPage {
+				MId      = menu.GetId(),
+				_context = context,
+				_current = T(context, 0, out string[] path) ? path : Array.Empty<string>()
 			};
-		}
 
-		private void Refresh(bool load) {
+
+		private void Refresh() {
 			if (!_component) return;
 			_component.UpdateTitles();
-			_component.UpdateDropdown();
 			_component.UpdateNavigation().Forget();
-			_component.UpdateThumbnail().Forget();
+			_component.UpdateContent().Forget();
 		}
 
 		public void OnDisplay(IPage lastPage)
-			=> Refresh(false);
+			=> Refresh();
 
 		public object[] GetContext()
 			=> _context;
@@ -72,30 +61,71 @@ namespace api.nox.settings.client {
 
 		public GameObject GetContent(RectTransform parent) {
 			if (_content) return _content;
-			(_content, _component) = SettingComponent.Generate(this, parent);
+			(_content, _component) = SettingsComponent.Generate(this, parent);
 			UpdateLayout.UpdateImmediate(_content);
 			return _content;
 		}
 
 		public void OnOpen(IPage lastPage) {
-			Main.OnCurrentChanged.AddListener(OnSettingsChanged);
-			Main.OnSettingsAdded.AddListener(OnSettingsAdded);
-			Main.OnSettingsRemoved.AddListener(OnSettingsRemoved);
+			Main.OnHandlerAdded.AddListener(OnSettingsChanged);
+			Main.OnHandlerRemoved.AddListener(OnSettingsChanged);
 		}
+
+		private void OnSettingsChanged(IHandler arg0)
+			=> Refresh();
 
 		public void OnRemove() {
-			Main.OnCurrentChanged.RemoveListener(OnSettingsChanged);
-			Main.OnSettingsAdded.RemoveListener(OnSettingsAdded);
-			Main.OnSettingsRemoved.RemoveListener(OnSettingsRemoved);
+			Main.OnHandlerAdded.RemoveListener(OnSettingsChanged);
+			Main.OnHandlerRemoved.RemoveListener(OnSettingsChanged);
 		}
 
-		private void OnSettingsAdded(ISettings settings)
-			=> Refresh(false);
+		public CategoryDetails GetCategory() {
+			var category = _current.Length > 0 ? _current[0] : null;
+			var handler  = Main.Handlers.FirstOrDefault(h => h.Split().Item1 == category);
+			if (handler == null)
+				category = Main.Handlers.FirstOrDefault()?.Split().Item1;
+			return handler == null ? null : new CategoryDetails(category);
+		}
 
-		private void OnSettingsRemoved(ISettings settings)
-			=> Refresh(false);
+		public CategoryDetails GetCategory(string category) {
+			var handler = Main.Handlers.FirstOrDefault(h => h.Split().Item1 == category);
+			return handler == null ? null : new CategoryDetails(category);
+		}
 
-		private void OnSettingsChanged(ISettings newSettings, ISettings oldSettings)
-			=> Refresh(false);
+		public GroupDetails[] GetGroups(string category)
+			=> Main.Handlers
+				.Where(h => h.Split().Item1 == category)
+				.GroupBy(h => h.Split().Item2)
+				.Select(
+					g => new GroupDetails {
+						Handlers = g.ToArray(),
+						Category = category
+					}
+				)
+				.ToArray();
+	}
+
+	public class GroupDetails {
+		public IHandler[] Handlers = Array.Empty<IHandler>();
+		public string     Category;
+	}
+
+	public class CategoryDetails {
+		private readonly string _id;
+
+		public CategoryDetails(string id)
+			=> _id = id;
+
+		public string GetId()
+			=> _id;
+
+		public string GetTitle()
+			=> $"settings.page.{_id}.title";
+
+		public async UniTask<Texture2D> GetIcon()
+			=> await Client.GetAssetAsync<Texture2D>($"icons/{_id}.png");
+
+		public string GetLabel()
+			=> $"settings.page.{_id}.label";
 	}
 }

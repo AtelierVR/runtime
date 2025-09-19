@@ -31,11 +31,7 @@
     ],
     "client": [
       "api.nox.settings.Client"
-    ],
-    "editor": [
-      "api.nox.settings.Editor"
-    ],
-    "instance": []
+    ]
   },
   "references": [],
   "sides": [],

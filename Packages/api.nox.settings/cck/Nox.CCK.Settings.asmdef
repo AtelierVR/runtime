@@ -1,9 +1,10 @@
 {
-    "name": "Nox.Settings",
+    "name": "Nox.CCK.Settings",
     "rootNamespace": "",
     "references": [
         "Nox.CCK",
-        "UniTask"
+        "UniTask",
+        "Nox.Settings"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

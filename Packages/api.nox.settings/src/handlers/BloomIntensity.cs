@@ -2,12 +2,12 @@ using api.nox.settings.prefabs;
 using Nox.CCK.Utils;
 
 namespace api.nox.settings.handlers {
-	public sealed class Brightness : RangeHandler {
+	public sealed class BloomIntensity : RangeHandler {
 		public override string[] GetPath()
-			=> new[] { " accessibility", "visual", "brightness" };
+			=> new[] { "accessibility", "visual", "bloom_intensity" };
 
-		public Brightness() {
-			SetRange(0f, 2f);
+		public BloomIntensity() {
+			SetRange(0f, 1f);
 			SetStep(0.1f);
 			SetValue(Value);
 		}
@@ -17,14 +17,14 @@ namespace api.nox.settings.handlers {
 				=> Config.Load()
 					.Get(
 						new[] {
-							"settings", "accessibility", "brightness"
-						}, 0.5f
+							"settings", "accessibility", "bloom_intensity"
+						}, 0f
 					);
 			set {
 				var config = Config.Load();
 				config.Set(
 					new[] {
-						"settings", "accessibility", "brightness"
+						"settings", "accessibility", "bloom_intensity"
 					}, value
 				);
 				config.Save();

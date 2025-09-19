@@ -1,17 +1,13 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using api.nox.world.client;
-using api.nox.world.widget;
+using api.nox.settings.client;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
-using Nox.Instances;
 using Nox.UI;
-using Nox.UI.Widgets;
-using UnityEngine;
 
-namespace api.nox.world {
+namespace api.nox.settings {
 	public class Client : ClientModInitializer {
 		internal static IUiAPI UiAPI
 			=> Main.Instance.CoreAPI.ModAPI
@@ -19,12 +15,11 @@ namespace api.nox.world {
 				.GetClients()
 				.FirstOrDefault() as IUiAPI;
 
-		internal static IInstanceAPI InstanceAPI
-			=> Main.Instance.CoreAPI.ModAPI
-				.GetMod("instance")
-				.GetMains()
-				.FirstOrDefault() as IInstanceAPI;
-		
+		public static UniTask<T> GetAssetAsync<T>(string path, string ns = null) where T : UnityEngine.Object
+			=> string.IsNullOrEmpty(ns)
+				? Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(path)
+				: Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(ns, path);
+
 		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object
 			=> string.IsNullOrEmpty(ns)
 				? Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(path)
@@ -40,7 +35,6 @@ namespace api.nox.world {
 			CoreAPI  = api;
 			_events = new[] {
 				CoreAPI.EventAPI.Subscribe("menu_goto", OnGoto),
-				CoreAPI.EventAPI.Subscribe("widget_request", OnWidgetRequest)
 			};
 		}
 
@@ -50,24 +44,12 @@ namespace api.nox.world {
 			var menu = UiAPI?.Get<IMenu>(mid);
 			if (menu == null) return;
 			IPage page = null;
-			if (WorldPage.GetStaticKey() == key)
-				page = WorldPage.OnGotoAction(menu, context.Data[2..]);
+			if (SettingsPage.GetStaticKey() == key)
+				page = SettingsPage.OnGotoAction(menu, context.Data[2..]);
 			if (page == null) return;
 			Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.GetId(), page);
 		}
-		
-		private void OnWidgetRequest(EventData context) {
-			if (!context.TryGet(0, out int mid)) return;
-			if (!context.TryGet(1, out RectTransform tr)) return;
-			var menu = UiAPI?.Get<IMenu>(mid);
-			if (menu == null) return;
-			List<(GameObject, IWidget)> widgets = new();
-			if (HomeWidget.TryMake(menu, tr, out var widget))
-				widgets.Add(widget);
-			foreach (var value in widgets)
-				context.Callback(value.Item2, value.Item1);
-		}
-		
+
 		public void OnDisposeClient() {
 			foreach (var e in _events)
 				CoreAPI.EventAPI.Unsubscribe(e);

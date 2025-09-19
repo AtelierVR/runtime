@@ -8,7 +8,6 @@ using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.VideoPlayer;
 using UnityEngine.Events;
-using UnityEngine.SceneManagement;
 
 namespace api.nox.videoplayer {
 	public class Main : MainModInitializer, IVideoPlayerAPI {

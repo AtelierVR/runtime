@@ -4,6 +4,8 @@ using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
 using Nox.Controllers;
+using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.controller {
 	public class Main : IControllerAPI, MainModInitializer {
@@ -54,6 +56,14 @@ namespace api.nox.controller {
 			}
 
 			_current = controller;
+
+			var cam = _current.GetCamera();
+			Camera.SetupCurrent(cam);
+			cam.tag = "MainCamera";
+			foreach (var c in ComponentExtension.GetComponentsInChildren<Camera>())
+				if (c != cam && c.CompareTag("MainCamera"))
+					c.tag = "Untagged";
+			
 			_coreAPI.EventAPI.Emit("controller_changed", _current);
 			return true;
 

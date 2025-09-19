@@ -2,19 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Nox.CCK.Utils;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace Nox.CCK.Language {
 	public class LanguageManager {
-		public delegate void LanguageChanged();
-
-		public static event LanguageChanged OnLanguageChanged;
-
-		public delegate void PackListUpdated();
-
-		public static event PackListUpdated OnPackListUpdated;
+		public static readonly UnityEvent<string> OnLanguageChanged = new();
+		public static readonly UnityEvent         OnPackListUpdated = new();
 
 		public const string FallbackLanguage = "en-US";
 
@@ -29,7 +26,7 @@ namespace Nox.CCK.Language {
 				if (value == _currentLanguage) return;
 				_currentLanguage = value;
 				UpdateTexts();
-				OnLanguageChanged?.Invoke();
+				OnLanguageChanged.Invoke(_currentLanguage);
 			}
 		}
 
@@ -45,21 +42,10 @@ namespace Nox.CCK.Language {
 			return languages.ToArray();
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		public static void UpdateTexts() {
-			for (var i = 0; i < SceneManager.sceneCount; i++)
-				UpdateTexts(SceneManager.GetSceneAt(i));
-		}
-
-		private static void UpdateTexts(GameObject gameObject) {
-			foreach (var pack in gameObject.GetComponents<TextLanguage>())
-				pack.UpdateText();
-			foreach (Transform child in gameObject.transform)
-				UpdateTexts(child.gameObject);
-		}
-
-		private static void UpdateTexts(Scene gameObject) {
-			foreach (var root in gameObject.GetRootGameObjects())
-				UpdateTexts(root);
+			var texts = ComponentExtension.GetComponentsInChildren<TextLanguage>();
+			foreach (var text in texts) text.UpdateText();
 		}
 
 		public static string Get(string key)
@@ -67,10 +53,8 @@ namespace Nox.CCK.Language {
 
 		#if UNITY_EDITOR
 		[UnityEditor.MenuItem("Nox/Reload LanguageTexts")]
-		public static void ReloadLanguageTexts() {
-			for (var i = 0; i < SceneManager.sceneCount; i++)
-				UpdateTexts(SceneManager.GetSceneAt(i));
-		}
+		public static void ReloadLanguageTexts()
+			=> UpdateTexts();
 
 		public static string Get(string language, string key) {
 			if (Application.isPlaying)
@@ -122,13 +106,13 @@ namespace Nox.CCK.Language {
 
 		public static void AddPack(LanguagePack pack) {
 			LanguagePacks.Add(pack);
-			OnPackListUpdated?.Invoke();
+			OnPackListUpdated.Invoke();
 		}
 
 		public static void RemovePack(LanguagePack pack) {
 			if (!LanguagePacks.Contains(pack)) return;
 			LanguagePacks.Remove(pack);
-			OnPackListUpdated?.Invoke();
+			OnPackListUpdated.Invoke();
 		}
 
 
@@ -137,7 +121,7 @@ namespace Nox.CCK.Language {
 
 		public static string GetInPacks(string language, string key, List<LanguagePack> packs = null) {
 			packs ??= LanguagePacks;
-			foreach (var t in packs.Where(t => t)) 
+			foreach (var t in packs.Where(t => t))
 				if (t.TryGetLocalizedString(language, key, out var value))
 					return value;
 			return null;

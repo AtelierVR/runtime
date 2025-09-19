@@ -126,7 +126,8 @@ namespace api.nox.xr {
 			xr._onUserUpdate = Client.CoreAPI.EventAPI.Subscribe("user_update", xr.OnUserUpdate);
 
 			EventSystem.current = xr.eventSystem;
-			xr.gameObject.name  = $"[{xr.GetType().Name}_{xr.GetInstanceID()}]";
+			Camera.SetupCurrent(xr.player.headCamera);
+			xr.gameObject.name = $"[{xr.GetType().Name}_{xr.GetInstanceID()}]";
 			DontDestroyOnLoad(xr);
 			return true;
 		}
