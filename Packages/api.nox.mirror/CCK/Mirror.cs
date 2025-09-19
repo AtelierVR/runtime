@@ -1,426 +1,322 @@
 using UnityEngine;
-using UnityEngine.Rendering;
-using Unity.Mathematics;
-using UnityEngine.Rendering.Universal;
-using RenderPipeline = UnityEngine.Rendering.RenderPipelineManager;
-using static UnityEngine.Camera;
-using System;
-using Nox.CCK.Utils;
 
 namespace Nox.CCK.Mirror {
-	public class Mirror : MonoBehaviour {
-		[Header("Main Settings")]
-		public Renderer Renderer;
-		public Material MirrorsMaterial;
-		
-		[Header("Camera Settings")]
-		[Tooltip("Caméra à utiliser pour le rendu. Si null, utilisera Camera.main")]
-		public Camera SourceCamera;
-
-		[SerializeField]
-		private LayerMask ReflectingLayers;
-
-		public float ClipPlaneOffset = 0.001f;
-		public float nearClipLimit   = 0.01f;
-		public float FarClipPlane    = 25f;
-		public int   XSize           = 2048;
-		public int   YSize           = 2048;
-		public int   depth           = 24;
-		public int   Antialiasing    = 2;
-
-		[Header("Options")]
-		public bool allowXRRendering = true;
-		public bool RenderPostProcessing = false;
-		public bool OcclusionCulling     = false;
-		public bool renderShadows        = false;
-
-		[Header("Debug / Runtime")]
-		public bool IsActive;
-		public bool IsAbleToRender;
-		public static bool InsideRendering;
-
-		[Header("Cameras")]
-		public Camera LeftCamera;
-		public Camera RightCamera;
-		public RenderTexture PortalTextureLeft;
-		public RenderTexture PortalTextureRight;
-
-		public Action OnCamerasRenderering;
-		public Action OnCamerasFinished;
-
-		private Vector3   thisPosition;
-		private Vector3   normal;
-		private Vector3   projectionDirection = -Vector3.forward;
-		private Matrix4x4 scaledMatrix;
-		private int       instanceID;
-
-		private void OnEnable() {
-			IsActive = false;
-			IsAbleToRender = false;
-
-			// Validation préliminaire
-			if (!ValidateComponents()) {
-				Debug.LogError("Mirror: Validation des composants échouée", this);
-				return;
-			}
-
-			// Configurer les layers avant l'initialisation
-			EnsureLayers();
-			
-			// Générer automatiquement le matériau s'il n'existe pas
-			EnsureMirrorMaterial();
-
-			// Obtenir la caméra source avec fallback robuste
-			Camera targetCamera = GetTargetCameraWithFallback();
-			if (targetCamera == null) {
-				Debug.LogError("Mirror: Aucune caméra disponible pour l'initialisation", this);
-				return;
-			}
-
-			// Initialiser le miroir
-			if (!Initialize(targetCamera)) {
-				Debug.LogError("Mirror: Échec de l'initialisation", this);
-				return;
-			}
-
-			instanceID = gameObject.GetInstanceID();
-
-			// S'abonner aux événements seulement si l'initialisation a réussi
-			RenderPipeline.beginCameraRendering += UpdateCamera;
-			
-			Debug.Log($"Mirror activé avec succès - Caméra source: {targetCamera.name}", this);
-		}
-
-		private bool ValidateComponents() {
-			if (Renderer == null) {
-				Debug.LogError("Mirror: Aucun Renderer assigné. Veuillez assigner un Renderer dans l'inspecteur.", this);
-				return false;
-			}
-
-			if (Renderer.transform == null) {
-				Debug.LogError("Mirror: Le Renderer n'a pas de Transform valide.", this);
-				return false;
-			}
-
-			return true;
-		}
-
-		private void EnsureMirrorMaterial() {
-			if (MirrorsMaterial) {
-				if (Renderer && Renderer.material != MirrorsMaterial)
-					Renderer.material = MirrorsMaterial;
-				return;
-			}
-
-			var shader = CreateMirrorShader();
-			if (shader != null) {
-				MirrorsMaterial = new Material(shader) {
-					name = $"MirrorMaterial_{GetInstanceID()}"
-				};
-
-				if (Renderer)
-					Renderer.material = MirrorsMaterial;
-			}
-		}
-
-		private Shader CreateMirrorShader() {
-			// Priorité 1: Essayer le shader URP Unlit standard
-			var urpUnlitShader = Shader.Find("Universal Render Pipeline/Unlit");
-			if (urpUnlitShader != null) return urpUnlitShader;
-
-			// Priorité 2: Essayer le shader Unlit standard
-			var unlitShader = Shader.Find("Unlit/Texture");
-			if (unlitShader != null) return unlitShader;
-
-			// Priorité 3: Essayer le shader sprites URP
-			var spriteShader = Shader.Find("Universal Render Pipeline/2D/Sprite-Lit-Default");
-			if (spriteShader != null) return spriteShader;
-
-			// Priorité 4: Shader standard comme fallback
-			var standardShader = Shader.Find("Standard");
-			if (standardShader != null) return standardShader;
-
-			// Dernier recours: Built-in diffuse
-			return Shader.Find("Legacy Shaders/Diffuse");
-		}
-
-		private Camera GetTargetCameraWithFallback() {
-			// Priorité 1: Caméra assignée explicitement
-			if (SourceCamera != null) return SourceCamera;
-
-			// Priorité 3: Camera.main par défaut
-			if (Camera.main != null) return Camera.main;
-
-			// Priorité 4: Chercher n'importe quelle caméra active dans la scène
-			Camera[] cameras = FindObjectsOfType<Camera>();
-			foreach (Camera cam in cameras) {
-				if (cam.enabled && cam.gameObject.activeInHierarchy) {
-					return cam;
-				}
-			}
-
-			return null;
-		}
-
-		private void OnDisable() {
-			CleanUp();
-		}
-
-		private void OnDestroy() {
-			RenderPipeline.beginCameraRendering -= UpdateCamera;
-		}
-
-		private void CleanUp() {
-			if (PortalTextureLeft) DestroyImmediate(PortalTextureLeft);
-			if (PortalTextureRight) DestroyImmediate(PortalTextureRight);
-			if (LeftCamera) Destroy(LeftCamera.gameObject);
-			if (RightCamera) Destroy(RightCamera.gameObject);
-		}
-
-		private void EnsureLayers() {
-			if (ReflectingLayers != 0) return;
-
-			int defaultLayer = LayerMask.NameToLayer("Default");
-			//
-			// if (remoteLayer < 0 || localLayer < 0 || defaultLayer < 0) {
-			// 	Debug.LogError("One or more required layers are missing.");
-			// } else {
-			// 	ReflectingLayers = (1 << remoteLayer) | (1 << localLayer) | (1 << defaultLayer);
-			// }
-		}
-
-		private bool Initialize(Camera sourceCamera) {
-			if (sourceCamera == null) {
-				Debug.LogError("Mirror: Aucune caméra source disponible pour l'initialisation", this);
-				return false;
-			}
-
-			if (Renderer == null) {
-				Debug.LogError("Mirror: Aucun renderer assigné au miroir", this);
-				return false;
-			}
-
-			scaledMatrix = Matrix4x4.Scale(new Vector3(-1, 1, 1));
-
-			CreatePortalCamera(sourceCamera, StereoscopicEye.Left, ref LeftCamera, ref PortalTextureLeft);
-			CreatePortalCamera(sourceCamera, StereoscopicEye.Right, ref RightCamera, ref PortalTextureRight);
-
-			// Vérifier que les caméras ont été créées correctement
-			if (LeftCamera == null || RightCamera == null) {
-				Debug.LogError("Mirror: Échec de la création des caméras portal", this);
-				IsActive = false;
-				IsAbleToRender = false;
-				return false;
-			}
-
-			// Vérifier que les RenderTextures ont été créées
-			if (PortalTextureLeft == null || PortalTextureRight == null) {
-				Debug.LogError("Mirror: Échec de la création des RenderTextures", this);
-				IsActive = false;
-				IsAbleToRender = false;
-				return false;
-			}
-
-			// Assigner les textures au matériau maintenant que tout est créé
-			AssignTexturesToMaterial();
-
-			// Le renderer n'a pas besoin d'être visible au moment de l'initialisation
-			IsAbleToRender = true;
-			IsActive = true;
-			InsideRendering = false;
-			
-			Debug.Log($"Mirror initialisé avec succès - Caméras: {LeftCamera.name}, {RightCamera.name}", this);
-			return true;
-		}
-
-		private void UpdateCamera(ScriptableRenderContext context, Camera camera) {
-			if (!IsAbleToRender || !IsActive) return;
-			if (!IsCameraAble(camera)) return;
-
-			OnCamerasRenderering?.Invoke();
-
-			thisPosition = Renderer.transform.position;
-			normal       = Renderer.transform.TransformDirection(projectionDirection);
-
-			UpdateCameraState(context, camera);
-
-			OnCamerasFinished?.Invoke();
-		}
-
-		private bool IsCameraAble(Camera camera) {
-			// Vérifier si c'est la caméra source assignée ou Camera.main
-			Camera targetCamera = GetTargetCameraWithFallback();
-			return targetCamera != null && camera.GetInstanceID() == targetCamera.GetInstanceID();
-		}
-
-		private void UpdateCameraState(ScriptableRenderContext context, Camera camera) {
-			if (InsideRendering) return;
-			InsideRendering = true;
-
-			camera.transform.GetPositionAndRotation(out Vector3 position, out Quaternion rotation);
-
-			if (camera.stereoEnabled) {
-				RenderCamera(camera, MonoOrStereoscopicEye.Left, context, position, rotation);
-				RenderCamera(camera, MonoOrStereoscopicEye.Right, context, position, rotation);
-			} else {
-				RenderCamera(camera, MonoOrStereoscopicEye.Mono, context, position, rotation);
-			}
-
-			InsideRendering = false;
-		}
-
-		private void RenderCamera(Camera sourceCamera, MonoOrStereoscopicEye eye, ScriptableRenderContext context, Vector3 srcPosition, Quaternion srcRotation) {
-			Camera portalCamera = (eye == MonoOrStereoscopicEye.Right) ? RightCamera : LeftCamera;
-			if (!portalCamera) return;
-
-			Vector3 eyeOffset;
-			Matrix4x4 projMatrix;
-
-			if (eye == MonoOrStereoscopicEye.Mono) {
-				eyeOffset = srcPosition;
-				projMatrix = sourceCamera.projectionMatrix;
-			} else {
-				StereoscopicEye Eye = (StereoscopicEye)eye;
-				eyeOffset = sourceCamera.GetStereoViewMatrix(Eye).inverse.MultiplyPoint(Vector3.zero);
-				projMatrix = sourceCamera.GetStereoProjectionMatrix(Eye);
-			}
-
-			transform.GetPositionAndRotation(out Vector3 TransformPosition, out Quaternion Rotation);
-
-			Vector3 localEyeOffset = InverseTransformPointCustom(TransformPosition, Rotation, eyeOffset);
-			Vector3 reflectedForward = Vector3.Reflect(InverseTransformDirectionCustom(Rotation, srcRotation * Vector3.forward), Vector3.forward);
-			Vector3 reflectedUp = Vector3.Reflect(InverseTransformDirectionCustom(Rotation, srcRotation * Vector3.up), Vector3.forward);
-			Vector3 reflectedPos = Vector3.Reflect(localEyeOffset, Vector3.forward);
-
-			Quaternion reflectedRotation = Quaternion.LookRotation(reflectedForward, reflectedUp);
-			portalCamera.transform.SetLocalPositionAndRotation(reflectedPos, reflectedRotation);
-
-			Vector4 clipPlane = CameraHelper.SpacePlane(portalCamera.worldToCameraMatrix, thisPosition, normal, ClipPlaneOffset);
-			clipPlane.x *= -1;
-
-			CalculateObliqueMatrix(ref projMatrix, clipPlane);
-			portalCamera.projectionMatrix = scaledMatrix * projMatrix * scaledMatrix;
-
-			#pragma warning disable CS0618
-			UniversalRenderPipeline.RenderSingleCamera(context, portalCamera);
-			#pragma warning restore CS0618
-		}
-
-		private Vector3 InverseTransformDirectionCustom(Quaternion rotation, Vector3 direction) {
-			// Inverse transform the direction by the rotation only (ignore position)
-			return Quaternion.Inverse(rotation) * direction;
-		}
-
-		private Vector3 InverseTransformPointCustom(Vector3 position, Quaternion rotation, Vector3 point) {
-			// Subtract the position, then remove rotation
-			return Quaternion.Inverse(rotation) * (point - position);
-		}
-
-		/// <summary>
-		/// Calculates an oblique projection matrix
-		/// </summary>
-		public static void CalculateObliqueMatrix(ref Matrix4x4 projection, float4 clipPlane) {
-			// Compute the clip-space corner point opposite the clipping plane
-			float4 q = projection.inverse * new float4(math.sign(clipPlane.x), math.sign(clipPlane.y), 1.0f, 1.0f);
-			// Calculate the scaled plane vector
-			float dot = math.dot(clipPlane, q);
-			if (dot == 0.0f) {
-				return; // avoid divide-by-zero just in case
-			}
-
-			float4 c = clipPlane * (2.0f / dot);
-			// Replace the third row of the projection matrix
-			projection[2]  = c.x - projection[3];
-			projection[6]  = c.y - projection[7];
-			projection[10] = c.z - projection[11];
-			projection[14] = c.w - projection[15];
-		}
-
-		private void CreatePortalCamera(Camera sourceCamera, StereoscopicEye eye, ref Camera portalCamera, ref RenderTexture portalTexture) {
-			portalTexture = new RenderTexture(XSize, YSize, 0, RenderTextureFormat.Default) {
-				name         = $"__MirrorReflection{eye}{GetInstanceID()}",
-				isPowerOfTwo = true,
-				antiAliasing = 1,
-				depth        = depth
-			};
-			
-			// Créer la RenderTexture avec les bonnes propriétés
-			portalTexture.Create();
-
-			CreateNewCamera(sourceCamera, out portalCamera);
-			if (portalCamera == null) {
-				Debug.LogError($"Mirror: Échec de la création de la caméra {eye}", this);
-				return;
-			}
-			
-			portalCamera.targetTexture = portalTexture;
-
-			Debug.Log($"Mirror: RenderTexture créée - {portalTexture.name} ({portalTexture.width}x{portalTexture.height})", this);
-		}
-
-		private void AssignTexturesToMaterial() {
-			if (!Renderer || !MirrorsMaterial) {
-				Debug.LogWarning("Mirror: Impossible d'assigner les textures - Renderer ou MirrorsMaterial manquant", this);
-				return;
-			}
-
-			// Assigner les textures selon le type de shader
-			if (MirrorsMaterial.shader.name == "Nox/Mirror") {
-				// Shader personnalisé avec support stéréo
-				if (PortalTextureLeft != null) {
-					MirrorsMaterial.SetTexture("_ReflectionTexLeft", PortalTextureLeft);
-					Debug.Log("Mirror: Texture Left assignée au shader Nox/Mirror", this);
-				}
-				if (PortalTextureRight != null) {
-					MirrorsMaterial.SetTexture("_ReflectionTexRight", PortalTextureRight);
-					Debug.Log("Mirror: Texture Right assignée au shader Nox/Mirror", this);
-				}
-				if (PortalTextureLeft != null) {
-					MirrorsMaterial.SetTexture("_ReflectionTexMono", PortalTextureLeft);
-					Debug.Log("Mirror: Texture Mono assignée au shader Nox/Mirror", this);
-				}
-			} else {
-				// Shader standard - utiliser la texture Left comme texture principale
-				if (PortalTextureLeft != null) {
-					MirrorsMaterial.SetTexture("_MainTex", PortalTextureLeft);
-					Debug.Log($"Mirror: Texture Left assignée à _MainTex du shader {MirrorsMaterial.shader.name}", this);
-				}
-				
-				// Essayer d'autres propriétés communes
-				if (PortalTextureLeft != null && MirrorsMaterial.HasProperty("_BaseMap")) {
-					MirrorsMaterial.SetTexture("_BaseMap", PortalTextureLeft);
-					Debug.Log("Mirror: Texture assignée à _BaseMap (URP)", this);
-				}
-			}
-
-			// S'assurer que le matériau est assigné au renderer
-			if (Renderer.material != MirrorsMaterial) {
-				Renderer.material = MirrorsMaterial;
-				Debug.Log("Mirror: Matériau assigné au renderer", this);
-			}
-		}
-
-		private void CreateNewCamera(Camera sourceCamera, out Camera newCamera) {
-			GameObject camObj = new GameObject($"MirrorCam_{GetInstanceID()}_{sourceCamera.GetInstanceID()}", typeof(Camera));
-
-			camObj.transform.SetParent(transform);
-			newCamera = camObj.GetComponent<Camera>();
-			newCamera.enabled = false;
-			newCamera.CopyFrom(sourceCamera);
-			newCamera.depth = 2;
-			newCamera.farClipPlane = FarClipPlane;
-			newCamera.cullingMask = ReflectingLayers;
-			newCamera.useOcclusionCulling = OcclusionCulling;
-
-			if (newCamera.TryGetComponent(out UniversalAdditionalCameraData cameraData)) {
-				cameraData.allowXRRendering = allowXRRendering;
-				cameraData.renderPostProcessing = RenderPostProcessing;
-				cameraData.renderShadows = renderShadows;
-			}
-		}
-
-		private void VisibilityFlag(bool isVisible) {
-			IsAbleToRender = isVisible;
-		}
-	}
+
+//http://wiki.unity3d.com/index.php?title=MirrorReflection4
+public class Mirror : MonoBehaviour
+{
+    public bool m_DisablePixelLights = true;
+    public int m_TextureSize = 1024;
+    public float m_ClipPlaneOffset = 0.00f;
+    public LayerMask m_ReflectLayers = -1;
+
+    //Mirror lock
+    private static bool isRenderingMirror;
+
+    //Updated once
+    private Camera mirrorCam;
+    private Skybox mirrorSkybox;
+
+    //Updated every render
+    private Matrix4x4 parentTMat;
+    private Quaternion parentRotation;
+
+    private Dictionary<Camera, RenderData> m_Reflections = new Dictionary<Camera, RenderData>();
+    private RenderData[] reflectionDatas;
+    private int[] textureShaderId = new int[2];
+
+    private void Start()
+    {
+        Renderer component = base.GetComponent<Renderer>();
+        Material sharedMaterial = component.sharedMaterial;
+        sharedMaterial.shader = Shader.Find("MetrixVR/MirrorShader");
+        textureShaderId[0] = Shader.PropertyToID("_LeftEyeTexture");
+        textureShaderId[1] = Shader.PropertyToID("_RightEyeTexture");
+    }
+
+    private void OnWillRenderObject()
+    {
+        Renderer rend = GetComponent<Renderer>();
+        if (!enabled || !rend || !rend.enabled)
+        {
+            return;
+        }
+        Camera cam = Camera.current;
+        if (!cam || cam == mirrorCam)
+        {
+            return;
+        }
+        if (isRenderingMirror)
+        {
+            return;
+        }
+        isRenderingMirror = true;
+        if (!this.mirrorCam) InitCamera(cam);
+        UpdateCameraConfig(cam);
+        UpdateParentTransform(cam);
+        RenderData rdatas = GetRenderDatas(cam);
+
+        if (cam.stereoEnabled)
+        {
+            if(cam.stereoTargetEye == StereoTargetEyeMask.Left || cam.stereoTargetEye == StereoTargetEyeMask.Both)
+            {
+                Vector3 worldEyePos = GetWorldEyePos(cam, UnityEngine.XR.XRNode.LeftEye);
+                Quaternion worldEyeRot = GetWorldEyeRot(cam, UnityEngine.XR.XRNode.LeftEye);
+                Matrix4x4 eyeProjectionMatrix = GetEyeProjectionMatrix(cam, UnityEngine.XR.XRNode.LeftEye);
+                UpdateAndRenderCamera(cam, rdatas.textures[0], worldEyePos, worldEyeRot, eyeProjectionMatrix);
+            }
+
+            if (cam.stereoTargetEye == StereoTargetEyeMask.Right || cam.stereoTargetEye == StereoTargetEyeMask.Both)
+            {
+                Vector3 worldEyePos = GetWorldEyePos(cam, UnityEngine.XR.XRNode.RightEye);
+                Quaternion worldEyeRot = GetWorldEyeRot(cam, UnityEngine.XR.XRNode.RightEye);
+                Matrix4x4 eyeProjectionMatrix = GetEyeProjectionMatrix(cam, UnityEngine.XR.XRNode.RightEye);
+                UpdateAndRenderCamera(cam, rdatas.textures[1], worldEyePos, worldEyeRot, eyeProjectionMatrix);
+            }
+        }
+        else
+        {
+            UpdateAndRenderCamera(cam, rdatas.textures[0], cam.transform.position, cam.transform.rotation, cam.projectionMatrix);
+        }
+
+        rend.SetPropertyBlock(rdatas.propertyBlock);
+
+        isRenderingMirror = false;
+    }
+
+    private void InitCamera(Camera src)
+    {
+        GameObject gameObject = new GameObject("CameraMirror (" + base.gameObject.name + ")", new Type[]
+        {
+                typeof(Camera),
+                typeof(Skybox),
+                typeof(FlareLayer)
+        });
+        gameObject.hideFlags = HideFlags.HideAndDontSave;
+        mirrorSkybox = gameObject.GetComponent<Skybox>();
+        mirrorCam = gameObject.GetComponent<Camera>();
+        mirrorCam.enabled = false;
+    }
+
+    private void UpdateCameraConfig(Camera src)
+    {
+        mirrorCam.clearFlags = src.clearFlags;
+        mirrorCam.backgroundColor = src.backgroundColor;
+        if (src.clearFlags == CameraClearFlags.Skybox)
+        {
+            Skybox sky = src.GetComponent(typeof(Skybox)) as Skybox;
+            if (!sky || !sky.material)
+            {
+                mirrorSkybox.enabled = false;
+            }
+            else
+            {
+                mirrorSkybox.enabled = true;
+                mirrorSkybox.material = sky.material;
+            }
+        }
+        mirrorCam.farClipPlane = src.farClipPlane;
+        mirrorCam.nearClipPlane = src.nearClipPlane;
+        mirrorCam.orthographic = src.orthographic;
+        mirrorCam.fieldOfView = src.fieldOfView;
+        mirrorCam.aspect = src.aspect;
+        mirrorCam.orthographicSize = src.orthographicSize;
+        mirrorCam.useOcclusionCulling = true;
+    }
+
+    private void UpdateParentTransform(Camera cam)
+    {
+        if (cam.transform.parent != null)
+        {
+            parentTMat = cam.transform.parent.localToWorldMatrix;
+            parentRotation = cam.transform.parent.rotation;
+        }
+        else
+        {
+            Quaternion localRotation = UnityEngine.XR.InputTracking.GetLocalRotation(UnityEngine.XR.XRNode.Head);
+            Matrix4x4 matrix4x = Matrix4x4.TRS(UnityEngine.XR.InputTracking.GetLocalPosition(UnityEngine.XR.XRNode.Head), localRotation, Vector3.one);
+            parentTMat = cam.transform.localToWorldMatrix * matrix4x.inverse;
+            parentRotation = cam.transform.rotation * Quaternion.Inverse(localRotation);
+        }
+    }
+
+    private RenderData GetRenderDatas(Camera cam)
+    {
+        RenderData renderData = null;
+        if (!this.m_Reflections.TryGetValue(cam, out renderData))
+        {
+            renderData = new RenderData();
+            renderData.propertyBlock = new MaterialPropertyBlock();
+            m_Reflections[cam] = renderData;
+        }
+        for (int i = 0; i < 2; i++)
+        {
+            if (i > 0 && !cam.stereoEnabled)
+            {
+                break;
+            }
+            int antialiasing = QualitySettings.antiAliasing > 0 ? QualitySettings.antiAliasing : 1;
+            if (!renderData.textures[i] || renderData.textures[i].width != cam.pixelWidth || renderData.textures[i].height != cam.pixelHeight || renderData.textures[i].antiAliasing != antialiasing)
+            {
+                if (renderData.textures[i])
+                {
+                    DestroyImmediate(renderData.textures[i]);
+                }
+                renderData.textures[i] = new RenderTexture(cam.pixelWidth, cam.pixelHeight, 24);
+                renderData.textures[i].antiAliasing = antialiasing;
+                renderData.textures[i].hideFlags = HideFlags.DontSave;
+                renderData.propertyBlock.SetTexture(textureShaderId[i], renderData.textures[i]);
+            }
+        }
+        return renderData;
+    }
+
+    private void UpdateAndRenderCamera(Camera cam, RenderTexture renderTarget, Vector3 cpos, Quaternion crot, Matrix4x4 pMatrix)
+    {
+        mirrorCam.ResetWorldToCameraMatrix();
+        Vector3 pos = transform.position;
+        Vector3 normal = transform.up;
+
+        float d = -Vector3.Dot(normal, pos) - m_ClipPlaneOffset;
+        Vector4 reflectionPlane = new Vector4(normal.x, normal.y, normal.z, d);
+
+        Matrix4x4 reflection = Matrix4x4.zero;
+        CalculateReflectionMatrix(ref reflection, reflectionPlane);
+
+        //Vector3 oldpos = cam.transform.position;
+        //Quaternion oldrot = cam.transform.rotation;
+
+
+
+        mirrorCam.transform.position = cpos;
+        mirrorCam.transform.rotation = crot;
+        mirrorCam.projectionMatrix = pMatrix;
+
+
+        //Vector3 newpos = reflection.MultiplyPoint(cpos);
+
+        mirrorCam.worldToCameraMatrix *= reflection;
+
+
+
+        // Setup oblique projection matrix so that near plane is our reflection
+        // plane. This way we clip everything below/above it for free.
+        Vector4 clipPlane = CameraSpacePlane(mirrorCam, pos, normal, 1.0f);
+        //Matrix4x4 projection = cam.projectionMatrix;
+        mirrorCam.projectionMatrix = mirrorCam.CalculateObliqueMatrix(clipPlane);
+        mirrorCam.transform.position = GetPosition(mirrorCam.cameraToWorldMatrix);
+        mirrorCam.transform.rotation = GetRotation(mirrorCam.cameraToWorldMatrix);
+
+        mirrorCam.cullingMask = ~(1 << 4) & ~(1 << LayerMask.NameToLayer("MainCameraOnly")) & m_ReflectLayers.value; // never render water layer
+        mirrorCam.targetTexture = renderTarget;
+        GL.invertCulling = true;
+        //mirrorCam.transform.position = newpos;
+        //Vector3 euler = cam.transform.eulerAngles;
+        //mirrorCam.transform.eulerAngles = new Vector3(0, euler.y, euler.z);
+        mirrorCam.Render();
+        //mirrorCam.transform.position = oldpos;
+        //mirrorCam.transform.rotation = oldrot;
+        GL.invertCulling = false;
+    }
+
+
+
+
+
+    // Calculates reflection matrix around the given plane
+    private static void CalculateReflectionMatrix(ref Matrix4x4 reflectionMat, Vector4 plane)
+    {
+        reflectionMat.m00 = (1F - 2F * plane[0] * plane[0]);
+        reflectionMat.m01 = (-2F * plane[0] * plane[1]);
+        reflectionMat.m02 = (-2F * plane[0] * plane[2]);
+        reflectionMat.m03 = (-2F * plane[3] * plane[0]);
+
+        reflectionMat.m10 = (-2F * plane[1] * plane[0]);
+        reflectionMat.m11 = (1F - 2F * plane[1] * plane[1]);
+        reflectionMat.m12 = (-2F * plane[1] * plane[2]);
+        reflectionMat.m13 = (-2F * plane[3] * plane[1]);
+
+        reflectionMat.m20 = (-2F * plane[2] * plane[0]);
+        reflectionMat.m21 = (-2F * plane[2] * plane[1]);
+        reflectionMat.m22 = (1F - 2F * plane[2] * plane[2]);
+        reflectionMat.m23 = (-2F * plane[3] * plane[2]);
+
+        reflectionMat.m30 = 0F;
+        reflectionMat.m31 = 0F;
+        reflectionMat.m32 = 0F;
+        reflectionMat.m33 = 1F;
+    }
+
+    // Given position/normal of the plane, calculates plane in camera space.
+    private Vector4 CameraSpacePlane(Camera cam, Vector3 pos, Vector3 normal, float sideSign)
+    {
+        Vector3 offsetPos = pos + normal * m_ClipPlaneOffset;
+        Matrix4x4 m = cam.worldToCameraMatrix;
+        Vector3 cpos = m.MultiplyPoint(offsetPos);
+        Vector3 cnormal = m.MultiplyVector(normal).normalized * sideSign;
+        return new Vector4(cnormal.x, cnormal.y, cnormal.z, -Vector3.Dot(cpos, cnormal));
+    }
+
+
+
+
+
+
+
+    private Vector3 GetWorldEyePos(Camera cam, UnityEngine.XR.XRNode eye)
+    {
+        Vector3 localPosition = UnityEngine.XR.InputTracking.GetLocalPosition(eye);
+        return parentTMat.MultiplyPoint3x4(localPosition);
+    }
+    
+    private Quaternion GetWorldEyeRot(Camera cam, UnityEngine.XR.XRNode eye)
+    {
+        Quaternion localRotation = UnityEngine.XR.InputTracking.GetLocalRotation(eye);
+        return this.parentRotation * localRotation;
+    }
+    
+    private Matrix4x4 GetEyeProjectionMatrix(Camera cam, UnityEngine.XR.XRNode eye)
+    {
+        return cam.GetStereoProjectionMatrix((eye != UnityEngine.XR.XRNode.RightEye) ? Camera.StereoscopicEye.Left : Camera.StereoscopicEye.Right);
+    }
+
+
+    private static Quaternion GetRotation(Matrix4x4 matrix)
+    {
+        Quaternion result = default(Quaternion);
+        result.w = Mathf.Sqrt(Mathf.Max(0f, 1f + matrix.m00 + matrix.m11 + matrix.m22)) / 2f;
+        result.x = Mathf.Sqrt(Mathf.Max(0f, 1f + matrix.m00 - matrix.m11 - matrix.m22)) / 2f;
+        result.y = Mathf.Sqrt(Mathf.Max(0f, 1f - matrix.m00 + matrix.m11 - matrix.m22)) / 2f;
+        result.z = Mathf.Sqrt(Mathf.Max(0f, 1f - matrix.m00 - matrix.m11 + matrix.m22)) / 2f;
+        result.x = _copysign(result.x, matrix.m21 - matrix.m12);
+        result.y = _copysign(result.y, matrix.m02 - matrix.m20);
+        result.z = _copysign(result.z, matrix.m10 - matrix.m01);
+        return result;
+    }
+    
+    private static Vector3 GetPosition(Matrix4x4 matrix)
+    {
+        float m = matrix.m03;
+        float m2 = matrix.m13;
+        float m3 = matrix.m23;
+        return new Vector3(m, m2, m3);
+    }
+
+
+    private static float _copysign(float sizeval, float signval)
+    {
+        return (Mathf.Sign(signval) != 1f) ? (-Mathf.Abs(sizeval)) : Mathf.Abs(sizeval);
+    }
+
+
+
+
+
+    private class RenderData
+    {
+        public RenderTexture[] textures = new RenderTexture[2];
+        public MaterialPropertyBlock matPBs;
+        internal MaterialPropertyBlock propertyBlock;
+    }
+}
 }
