@@ -132,7 +132,8 @@ namespace api.nox.settings.client {
 		}
 
 		internal async UniTask UpdateContent() {
-			var box = await Client.GetAssetAsync<GameObject>("prefabs/box.prefab", "ui");
+			var box  = await Client.GetAssetAsync<GameObject>("prefabs/box.prefab", "ui");
+			var list = await Client.GetAssetAsync<GameObject>("prefabs/list.prefab", "ui");
 
 			foreach (Transform tf in content)
 				Destroy(tf.gameObject);
@@ -148,7 +149,10 @@ namespace api.nox.settings.client {
 			foreach (var group in groups) {
 				var groupBox = (await InstantiateAsync(box, content)).FirstOrDefault();
 				if (!groupBox) continue;
-				var cont = Reference.GetComponent<RectTransform>("content", groupBox);
+				var cont    = Reference.GetComponent<RectTransform>("content", groupBox);
+				var listBox = (await InstantiateAsync(box, cont)).FirstOrDefault();
+				if (!listBox) continue;
+				cont = Reference.GetComponent<RectTransform>("content", listBox);
 				foreach (var handler in group.Handlers) {
 					var handlerBox = await handler.GetContentAsync(cont) ?? handler.GetContent(cont);
 					if (!handlerBox) {
