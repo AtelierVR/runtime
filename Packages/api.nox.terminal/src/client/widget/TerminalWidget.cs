@@ -1,4 +1,5 @@
 ﻿using api.nox.terminal.client;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using Nox.UI;
 using Nox.UI.Widgets;
@@ -13,13 +14,14 @@ namespace api.nox.terminal.widget {
 		public string GetKey()
 			=> GetDefaultKey();
 
-		private int _mid;
+		private int        _mid;
+		private GameObject _content;
 
 		private void OnClick()
 			=> Client.UiAPI?.SendGoto(_mid, TerminalPage.GetStaticKey());
 
 		public Vector2Int GetSize()
-			=> new(3, 2);
+			=> Vector2Int.one;
 
 		public int GetPriority()
 			=> 100;
@@ -29,11 +31,24 @@ namespace api.nox.terminal.widget {
 			var instance  = Instantiate(prefab, parent);
 			var component = instance.AddComponent<TerminalWidget>();
 			component._mid = menu.GetId();
+
 			var button = Reference.GetComponent<Button>("button", instance);
 			button.onClick.AddListener(component.OnClick);
 			instance.name = $"[{component.GetKey()}_{instance.GetInstanceID()}]";
 			values        = (instance, component);
+
+			prefab             = Client.GetAsset<GameObject>("prefabs/widget.prefab", "ui");
+			component._content = Instantiate(prefab, Reference.GetComponent<RectTransform>("content", instance));
+
+			component.UpdateIcon().Forget();
+
 			return true;
+		}
+
+		private async UniTask UpdateIcon() {
+			var icon      = await Client.GetAssetAsync<Sprite>("icons/terminal.png", "ui");
+			var labelIcon = Reference.GetComponent<Image>("icon", _content);
+			labelIcon.sprite = icon;
 		}
 	}
 }
