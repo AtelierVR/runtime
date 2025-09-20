@@ -127,7 +127,7 @@
       "dependencies": {}
     },
     "api.nox.session.jint": {
-      "version": "file:api.nox.world.jint",
+      "version": "file:api.nox.session.jint",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
