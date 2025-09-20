@@ -45,10 +45,10 @@ namespace api.nox.settings.client {
 
 		private void Refresh() {
 			if (!_component) return;
-			_component.UpdateTitles();
 			_component.UpdateNavigation().Forget();
 			_component.UpdateContent().Forget();
 			_component.UpdateIcon().Forget();
+			_component.UpdateTitles();
 		}
 
 		public void OnDisplay(IPage lastPage)
@@ -110,7 +110,10 @@ namespace api.nox.settings.client {
 			var category = GetCategory(id);
 			if (category == null) return;
 			_current = new[] { id };
-			Refresh();
+			if (!_component) return;
+			_component.UpdateContent().Forget();
+			_component.UpdateIcon().Forget();
+			_component.UpdateTitles();
 		}
 	}
 

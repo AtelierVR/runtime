@@ -148,8 +148,8 @@ namespace api.nox.settings.client {
 		}
 
 		internal async UniTask UpdateContent() {
-			var box  = await Client.GetAssetAsync<GameObject>("prefabs/box.prefab", "ui");
-			var list = await Client.GetAssetAsync<GameObject>("prefabs/list.prefab", "ui");
+			var box  = Client.GetAsset<GameObject>("prefabs/box.prefab", "ui");
+			var list = Client.GetAsset<GameObject>("prefabs/list.prefab", "ui");
 
 			foreach (Transform tf in content)
 				Destroy(tf.gameObject);
