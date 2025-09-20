@@ -369,6 +369,10 @@ PrefabInstance:
       propertyPath: m_sharedMaterial
       value: 
       objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    - target: {fileID: 4680792040036055024, guid: aa7f0222d6ddce44fac8366a3a40c379, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 8192
+      objectReference: {fileID: 0}
     - target: {fileID: 4892485553236297164, guid: aa7f0222d6ddce44fac8366a3a40c379, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

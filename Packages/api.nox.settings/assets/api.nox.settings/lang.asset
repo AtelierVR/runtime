@@ -55,3 +55,45 @@ MonoBehaviour:
       value: "Quality"
     - key: settings.entry.graphic.anti_aliasing.label
       value: "Anti-Aliasing"
+  - IETF: fr-FR
+    entries:
+    - key: settings.page.accessibility.title
+      value: "Accessibilité"
+    - key: settings.page.accessibility.label
+      value: "Accessibilité"
+    - key: settings.no_settings.title
+      value: "Aucun paramètre"
+    - key: settings.range.type.empty
+      value: ""
+    - key: settings.range.value.integer
+      value: "{0}"
+    - key: settings.range.value.float
+      value: "{1}"
+    - key: settings.range.value.percent
+      value: "{2} %"
+    - key: settings.range.value.float_precent
+      value: "{3} %"
+    - key: settings.range.value.binary
+      value: "{4}"
+    - key: settings.range.value.hexadecimal
+      value: "{5}"
+    - key: settings.entry.accessibility.interface.language.label
+      value: "Langue"
+    - key: settings.entry.accessibility.visual.brightness.label
+      value: "Luminosité"
+    - key: settings.entry.accessibility.visual.bloom_intensity.label
+      value: "Intensité du bloom"
+    - key: settings.group.accessibility.visual.label
+      value: "Visuel"
+    - key: settings.group.accessibility.interface.label
+      value: "Interface"
+    - key: settings.page.graphic.title
+      value: "Graphismes"
+    - key: settings.page.graphic.label
+      value: "Graphismes"
+    - key: settings.group.graphic.general.label
+      value: "Général"
+    - key: settings.entry.graphic.quality.label
+      value: "Qualité"
+    - key: settings.entry.graphic.anti_aliasing.label
+      value: "Anti-Aliasing"
