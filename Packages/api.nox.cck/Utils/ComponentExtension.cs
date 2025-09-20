@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityTransform = UnityEngine.Transform;
 using NoxTransform = Nox.CCK.Utils.Transform;
+using Object = UnityEngine.Object;
 
 namespace Nox.CCK.Utils {
 	public static class ComponentExtension {
@@ -146,5 +147,22 @@ namespace Nox.CCK.Utils {
 				rb.angularVelocity = move.GetAngularVelocity();
 		}
 
+		public static void Destroy(this Object @object) {
+			#if UNITY_EDITOR
+			if (Application.isPlaying) Object.Destroy(@object);
+			else UnityEditor.EditorApplication.delayCall += () => Object.DestroyImmediate(@object);
+			#else
+			Destroy(instance);
+			#endif
+		}
+
+		public static void DestroyImmediate(this Object @object) {
+			#if UNITY_EDITOR
+			if (Application.isPlaying) Object.DestroyImmediate(@object);
+			else UnityEditor.EditorApplication.delayCall += () => Object.DestroyImmediate(@object);
+			#else
+			DestroyImmediate(instance);
+			#endif
+		}
 	}
 }
