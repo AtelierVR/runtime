@@ -667,8 +667,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 199.42857, y: -30}
-  m_SizeDelta: {x: 398.85715, y: 60}
+  m_AnchoredPosition: {x: 114, y: -30}
+  m_SizeDelta: {x: 228, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6722048972235397111
 CanvasRenderer:
@@ -919,8 +919,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 471.5714, y: -30}
-  m_SizeDelta: {x: 398.85715, y: 60}
+  m_AnchoredPosition: {x: 386, y: -30}
+  m_SizeDelta: {x: 228, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &355892199165608526
 CanvasRenderer:
@@ -1221,7 +1221,6 @@ GameObject:
   - component: {fileID: 4035111521598053597}
   - component: {fileID: 4834074129158335587}
   - component: {fileID: 7419280850498367053}
-  - component: {fileID: 7698329316188030107}
   - component: {fileID: 4126184828498127169}
   - component: {fileID: 207910499773941441}
   m_Layer: 5
@@ -1247,7 +1246,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 166.325, y: -30}
+  m_AnchoredPosition: {x: 80.981766, y: -30}
   m_SizeDelta: {x: 93.49, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4834074129158335587
@@ -1278,7 +1277,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: fesfefesfesesfesfesfesfesfesfesfesfessefefsfesesffes
+  m_text: Option A
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1349,21 +1348,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &7698329316188030107
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4729375609114614918}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d47b3d382366b4f4ba329f904489a98b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Nox.CCK::Nox.CCK.Language.TextLanguage
-  key: session.dropdown.label
-  arguments:
-  - fesfefesfesesfesfesfesfesfesfesfesfessefefsfesesffes
 --- !u!114 &4126184828498127169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1526,8 +1510,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 128.07143, y: -30}
-  m_SizeDelta: {x: 256.14285, y: 60}
+  m_AnchoredPosition: {x: 128, y: -30}
+  m_SizeDelta: {x: 256, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1972430314414877238
 CanvasRenderer:
@@ -1803,7 +1787,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 352.75357, y: -30}
+  m_AnchoredPosition: {x: 181.98177, y: -30}
   m_SizeDelta: {x: 60, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &613436933068616649
