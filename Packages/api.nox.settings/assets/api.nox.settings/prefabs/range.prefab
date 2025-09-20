@@ -252,7 +252,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: -1
+  m_PreferredHeight: 60
   m_FlexibleWidth: 1000
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -267,7 +267,6 @@ GameObject:
   - component: {fileID: 3309268583181417468}
   - component: {fileID: 1521117047025811761}
   - component: {fileID: 7742859999074680876}
-  - component: {fileID: 4268028417239056676}
   - component: {fileID: 5629981783550276498}
   m_Layer: 5
   m_Name: Type Text
@@ -394,20 +393,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &4268028417239056676
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5813988216940887880}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7b0678e90722794f8a65be8b45ee25e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Key: type
-  Refrence: {fileID: 0}
 --- !u!114 &5629981783550276498
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -434,7 +419,6 @@ GameObject:
   - component: {fileID: 8076037833830893057}
   - component: {fileID: 2775678123437391115}
   - component: {fileID: 6989307881489836908}
-  - component: {fileID: 3532068343233870079}
   m_Layer: 5
   m_Name: Value Text
   m_TagString: Untagged
@@ -580,20 +564,6 @@ MonoBehaviour:
   - 100.00
   - 1111
   - FFFFFF
---- !u!114 &3532068343233870079
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5828163211857438627}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f7b0678e90722794f8a65be8b45ee25e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Key: value
-  Refrence: {fileID: 0}
 --- !u!1 &7153879297546392767
 GameObject:
   m_ObjectHideFlags: 0
@@ -606,6 +576,10 @@ GameObject:
   - component: {fileID: 1339182319214179896}
   - component: {fileID: 8044242555062386405}
   - component: {fileID: 4730905092466188697}
+  - component: {fileID: 2473401878495263046}
+  - component: {fileID: 7335445724438293133}
+  - component: {fileID: 1427722744112513116}
+  - component: {fileID: 8698208855953648199}
   m_Layer: 5
   m_Name: range
   m_TagString: Untagged
@@ -629,10 +603,10 @@ RectTransform:
   - {fileID: 3071220474489603177}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 657.889, y: -182}
-  m_SizeDelta: {x: 1315.778, y: 60}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1339182319214179896
 CanvasRenderer:
@@ -682,6 +656,68 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &2473401878495263046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7153879297546392767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 60
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
+--- !u!114 &7335445724438293133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7153879297546392767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7b0678e90722794f8a65be8b45ee25e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Nox.CCK::Nox.CCK.Utils.Reference
+  Key: label
+  Refrence: {fileID: 7940103129218944306}
+--- !u!114 &1427722744112513116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7153879297546392767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7b0678e90722794f8a65be8b45ee25e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Nox.CCK::Nox.CCK.Utils.Reference
+  Key: value
+  Refrence: {fileID: 5828163211857438627}
+--- !u!114 &8698208855953648199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7153879297546392767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7b0678e90722794f8a65be8b45ee25e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Nox.CCK::Nox.CCK.Utils.Reference
+  Key: type
+  Refrence: {fileID: 5813988216940887880}
 --- !u!1 &7341047564693109340
 GameObject:
   m_ObjectHideFlags: 0

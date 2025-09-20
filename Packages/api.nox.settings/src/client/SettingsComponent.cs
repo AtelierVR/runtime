@@ -72,6 +72,7 @@ namespace api.nox.settings.client {
 			var list   = Instantiate(listAsset, Reference.GetComponent<RectTransform>("content", scroll));
 			component.content = Reference.GetComponent<RectTransform>("content", list);
 
+
 			return (content, component);
 		}
 
@@ -84,6 +85,22 @@ namespace api.nox.settings.client {
 			}
 
 			title.UpdateText(settings.GetTitle());
+		}
+
+		public async UniTask UpdateIcon() {
+			var settings = Page.GetCategory();
+
+			var texture = settings != null
+				? await settings.GetIcon()
+				: await Client.GetAssetAsync<Texture2D>("icons/settings.png", "ui");
+
+			labelIcon.sprite = texture
+				? Sprite.Create(
+					texture,
+					new Rect(0, 0, texture.width, texture.height),
+					new Vector2(0.5f, 0.5f)
+				)
+				: null;
 		}
 
 		public async UniTask UpdateNavigation() {
@@ -149,8 +166,10 @@ namespace api.nox.settings.client {
 			foreach (var group in groups) {
 				var groupBox = (await InstantiateAsync(box, content)).FirstOrDefault();
 				if (!groupBox) continue;
-				var cont    = Reference.GetComponent<RectTransform>("content", groupBox);
-				var listBox = (await InstantiateAsync(box, cont)).FirstOrDefault();
+				var cont = Reference.GetComponent<RectTransform>("content", groupBox);
+				var text = Reference.GetComponent<TextLanguage>("text", groupBox);
+				text.UpdateText(group.GetLabel());
+				var listBox = (await InstantiateAsync(list, cont)).FirstOrDefault();
 				if (!listBox) continue;
 				cont = Reference.GetComponent<RectTransform>("content", listBox);
 				foreach (var handler in group.Handlers) {

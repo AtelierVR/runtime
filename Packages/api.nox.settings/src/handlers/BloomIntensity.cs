@@ -8,8 +8,10 @@ namespace api.nox.settings.handlers {
 
 		public BloomIntensity() {
 			SetRange(0f, 1f);
-			SetStep(0.1f);
+			SetStep(0.001f);
 			SetValue(Value);
+			SetLabelKey($"setting.entry.{string.Join(".", GetPath())}.label");
+			SetValueKey("settings.range.value.percent");
 		}
 
 		public float Value {

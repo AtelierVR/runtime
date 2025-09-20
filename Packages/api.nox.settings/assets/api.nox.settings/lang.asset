@@ -21,3 +21,27 @@ MonoBehaviour:
       value: "Accessibility"
     - key: settings.no_settings.title
       value: "No Settings"
+    - key: settings.range.type.empty
+      value: ""
+    - key: settings.range.value.integer
+      value: "{0}"
+    - key: settings.range.value.float
+      value: "{1}"
+    - key: settings.range.value.percent
+      value: "{2}%"
+    - key: settings.range.value.float_precent
+      value: "{3}%"
+    - key: settings.range.value.binary
+      value: "{4}"
+    - key: settings.range.value.hexadecimal
+      value: "{5}"
+    - key: setting.entry.accessibility.interface.language.label
+      value: "Language"
+    - key: setting.entry.accessibility.visual.brightness.label
+      value: "Brightness"
+    - key: setting.entry.accessibility.visual.bloom_intensity.label
+      value: "Bloom Intensity"
+    - key: settings.group.accessibility.visual.label
+      value: "Visual"
+    - key: settings.group.accessibility.interface.label
+      value: "Interface"

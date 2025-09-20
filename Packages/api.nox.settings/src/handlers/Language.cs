@@ -5,18 +5,19 @@ using Nox.CCK.Language;
 
 namespace api.nox.settings.handlers {
 	public class Language : DropdownHandler, IDisposable {
-		public override string[] GetPath()
+		public sealed override string[] GetPath()
 			=> new[] { "accessibility", "interface", "language" };
 
 		public Language() {
 			LanguageManager.OnPackListUpdated.AddListener(OnPacksUpdated);
 			LanguageManager.OnLanguageChanged.AddListener(OnLanguageChanged);
 			OnPacksUpdated();
+			SetLabel($"setting.entry.{string.Join(".", GetPath())}.label");
 		}
 
 		public override void OnValueChanged(string value)
 			=> LanguageManager.CurrentLanguage = value;
-		
+
 		private void OnPacksUpdated() {
 			var packs = LanguageManager.GetAvailableLanguages();
 			var res   = new List<(string, string)>();

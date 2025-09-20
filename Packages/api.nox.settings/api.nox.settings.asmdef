@@ -6,7 +6,8 @@
         "UniTask",
         "Nox.Settings",
         "Nox.Controllers",
-        "Nox.UI"
+        "Nox.UI",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

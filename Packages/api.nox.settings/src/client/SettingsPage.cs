@@ -48,6 +48,7 @@ namespace api.nox.settings.client {
 			_component.UpdateTitles();
 			_component.UpdateNavigation().Forget();
 			_component.UpdateContent().Forget();
+			_component.UpdateIcon().Forget();
 		}
 
 		public void OnDisplay(IPage lastPage)
@@ -99,7 +100,8 @@ namespace api.nox.settings.client {
 				.Select(
 					g => new GroupDetails {
 						Handlers = g.ToArray(),
-						Category = category
+						Category = category,
+						Group    = g.Key
 					}
 				)
 				.ToArray();
@@ -108,6 +110,10 @@ namespace api.nox.settings.client {
 	public class GroupDetails {
 		public IHandler[] Handlers = Array.Empty<IHandler>();
 		public string     Category;
+		public string     Group;
+
+		public string GetLabel()
+			=> $"settings.group.{Category}.{Group}.label";
 	}
 
 	public class CategoryDetails {

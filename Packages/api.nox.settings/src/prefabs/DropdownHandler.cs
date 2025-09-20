@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Language;
 using Nox.CCK.Utils;
 using Nox.Settings;
 using UnityEngine;
@@ -8,17 +9,28 @@ namespace api.nox.settings.prefabs {
 	public abstract class DropdownHandler : IHandler {
 		private (string, string)[] _options;
 		private int                _defaultIndex = 0;
+		private string             _keyLabel;
+
+		private TextLanguage _textLabel;
 
 		public abstract string[] GetPath();
 
-		private Dropdown _dropdown;
+		public void SetLabel(string key) {
+			_keyLabel = key;
+			if (_textLabel)
+				_textLabel.UpdateText(key);
+		}
+
+		private TMPro.TMP_Dropdown _dropdown;
 
 		public virtual GameObject GetContent(RectTransform transform) {
 			var asset = Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/dropdown.prefab");
 			var go    = Object.Instantiate(asset, transform, false);
-			_dropdown = Reference.GetComponent<Dropdown>("dropdown", go);
+			_dropdown  = Reference.GetComponent<TMPro.TMP_Dropdown>("dropdown", go);
+			_textLabel = Reference.GetComponent<TextLanguage>("label", go);
 			UpdateOptions();
 			UpdateValue();
+			SetLabel(_keyLabel);
 			return go;
 		}
 
@@ -32,9 +44,9 @@ namespace api.nox.settings.prefabs {
 		private void UpdateOptions() {
 			if (!_dropdown) return;
 			_dropdown.ClearOptions();
-			var list = new System.Collections.Generic.List<Dropdown.OptionData>();
+			var list = new System.Collections.Generic.List<TMPro.TMP_Dropdown.OptionData>();
 			foreach (var (label, value) in _options)
-				list.Add(new Dropdown.OptionData(label));
+				list.Add(new TMPro.TMP_Dropdown.OptionData(label));
 			_dropdown.AddOptions(list);
 			_dropdown.SetValueWithoutNotify(Mathf.Clamp(_defaultIndex, 0, _options.Length - 1));
 			_dropdown.onValueChanged.RemoveListener(OnInternalValueChanged);
