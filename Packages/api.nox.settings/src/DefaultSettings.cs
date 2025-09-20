@@ -8,7 +8,9 @@ namespace api.nox.settings {
 			=> new IHandler[] {
 				new Language(),
 				new Brightness(),
-				new BloomIntensity()
+				new BloomIntensity(),
+				new Quality(),
+				new AntiAliasing()
 			};
 
 		public static (string, string, string) Split(this IHandler handler) {
@@ -23,5 +25,8 @@ namespace api.nox.settings {
 
 		public static string ToID(this IHandler handler)
 			=> string.Join(":", handler.Split());
+
+		private static string FormatLanguage(string text)
+			=> text.ToLower().Trim().Replace(" ", "_");
 	}
 }

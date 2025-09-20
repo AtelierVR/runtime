@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Packages\api.nox.settings\src\Main.cs" />
     <Compile Include="Packages\api.nox.settings\src\handlers\Language.cs" />
+    <Compile Include="Packages\api.nox.settings\src\handlers\AntiAliasing.cs" />
     <Compile Include="Packages\api.nox.settings\src\client\SettingsPage.cs" />
     <Compile Include="Packages\api.nox.settings\src\prefabs\RangeHandler.cs" />
     <Compile Include="Packages\api.nox.settings\src\client\SettingsComponent.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="Packages\api.nox.settings\src\Client.cs" />
     <Compile Include="Packages\api.nox.settings\src\prefabs\DropdownHandler.cs" />
     <Compile Include="Packages\api.nox.settings\src\handlers\BloomIntensity.cs" />
+    <Compile Include="Packages\api.nox.settings\src\handlers\Quality.cs" />
     <Compile Include="Packages\api.nox.settings\src\DefaultSettings.cs" />
     <None Include="Packages\api.nox.settings\api.nox.settings.asmdef" />
     <None Include="Packages\api.nox.settings\package.json" />
