@@ -15,6 +15,7 @@ namespace api.nox.settings.handlers {
 			SetLabel($"settings.entry.{string.Join(".", GetPath())}.label");
 			SetOptions(QualitySettings.names.Select(x => (x, x)).ToArray());
 			Value = Config.Load().Get(GetConfigPath(), Value);
+			SetValue(QualitySettings.names[Value], false);
 		}
 
 		public override void OnValueChanged(string value) {

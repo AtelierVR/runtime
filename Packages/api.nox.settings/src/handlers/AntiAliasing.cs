@@ -21,6 +21,7 @@ namespace api.nox.settings.handlers {
 			SetLabel($"settings.entry.{string.Join(".", GetPath())}.label");
 			SetOptions(AntiAliasingOptions);
 			Value = Config.Load().Get(GetConfigPath(), Value);
+			SetValue(Value.ToString(), false);
 		}
 
 		public override void OnValueChanged(string value) {
