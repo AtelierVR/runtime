@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using api.nox.settings.prefabs;
 using Nox.CCK.Language;
+using Nox.CCK.Utils;
 
 namespace api.nox.settings.handlers {
-	public class Language : DropdownHandler, IDisposable {
+	public sealed class Language : DropdownHandler, IDisposable {
 		public sealed override string[] GetPath()
 			=> new[] { "accessibility", "interface", "language" };
 
@@ -13,20 +14,33 @@ namespace api.nox.settings.handlers {
 			LanguageManager.OnLanguageChanged.AddListener(OnLanguageChanged);
 			OnPacksUpdated();
 			SetLabel($"settings.entry.{string.Join(".", GetPath())}.label");
+			Value = Config.Load().Get("settings.language", Value);
+			SetValue(LanguageManager.CurrentLanguage, false);
 		}
 
-		public override void OnValueChanged(string value)
-			=> LanguageManager.CurrentLanguage = value;
+		public override void OnValueChanged(string value) {
+			Value = value;
+		}
+
+		private string Value {
+			get => LanguageManager.CurrentLanguage;
+			set {
+				LanguageManager.CurrentLanguage = value;
+				var config = Config.Load();
+				config.Set("settings.language", value);
+				config.Save();
+			}
+		}
 
 		private void OnPacksUpdated() {
-			var packs = LanguageManager.GetAvailableLanguages();
+			var langs = LanguageManager.GetAvailableLanguages();
 			var res   = new List<(string, string)>();
 
-			foreach (var pack in packs) {
-				var name = LanguageManager.Get(pack, "language");
-				if (string.IsNullOrWhiteSpace(name))
-					name = pack;
-				res.Add((pack, name));
+			foreach (var lang in langs) {
+				var name = LanguageManager.Get(lang, "language");
+				if (string.IsNullOrEmpty(name))
+					name = lang;
+				res.Add((lang, name));
 			}
 
 			SetOptions(res.ToArray());
