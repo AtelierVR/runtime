@@ -40,7 +40,7 @@ namespace api.nox.settings.handlers {
 				var name = LanguageManager.Get(lang, "language");
 				if (string.IsNullOrEmpty(name))
 					name = lang;
-				res.Add((lang, name));
+				res.Add((name, lang));
 			}
 
 			SetOptions(res.ToArray());
