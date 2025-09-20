@@ -206,10 +206,8 @@ namespace api.nox.ui.menus {
 
 			foreach (var data in GetDefaultData()) {
 				var part = GetPart(data.Key);
-				foreach (var entry in data.Value) {
-					part.AddElement(entry);
-					await UniTask.Yield();
-				}
+				part.AddElements(data.Value.ToArray());
+				await UniTask.Yield();
 			}
 
 			foreach (var o in GetInternalOrbiters())

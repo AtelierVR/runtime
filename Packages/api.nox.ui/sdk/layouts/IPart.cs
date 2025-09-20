@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Nox.UI {
@@ -40,5 +41,12 @@ namespace Nox.UI {
 		/// </summary>
 		/// <param name="element"></param>
 		public void AddElement(NavigationData element);
+
+		/// <summary>
+		/// Add multiple elements to the part.
+		/// If already exists, update it.
+		/// </summary>
+		/// <param name="elements"></param>
+		void AddElements(NavigationData[] elements);
 	}
 }

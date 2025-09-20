@@ -1,6 +1,6 @@
 using System.Linq;
 using api.nox.ui.menus;
-using Nox.CCK.Mods.Cores;
+using Nox.CCK.Utils;
 using Nox.UI;
 using UnityEngine;
 
@@ -10,7 +10,7 @@ namespace api.nox.ui.layouts {
 		public abstract GameObject    GetPrefab();
 		public          RectTransform container;
 		public          Menu          menu;
-		
+
 
 		public bool GetActive()
 			=> gameObject.activeSelf;
@@ -38,21 +38,20 @@ namespace api.nox.ui.layouts {
 			}
 		}
 
-		public virtual void AddElement(NavigationData data) {
+		public void AddElement(NavigationData element)
+			=> AddElement(element, null);
+
+		public virtual void AddElement(NavigationData data, GameObject prefab = null) {
 			var elementComponent = GetChildren().FirstOrDefault(e => e.GetData().key == data.key);
 
 			if (!elementComponent) {
-				var instance = Instantiate(GetPrefab(), container);
+				prefab = GetPrefab();
+				var instance = Instantiate(prefab, container);
 				elementComponent = instance.GetComponent<Element>();
 
 				if (!elementComponent) {
 					Debug.LogError($"Prefab {GetPrefab().name} does not have Element component. Cannot add element to part {name}.");
-					#if UNITY_EDITOR
-					if (Application.isPlaying) Destroy(instance);
-					else UnityEditor.EditorApplication.delayCall += () => DestroyImmediate(instance);
-					#else
-				Destroy(instance);
-					#endif
+					instance.Destroy();
 					return;
 				}
 
@@ -60,6 +59,12 @@ namespace api.nox.ui.layouts {
 			}
 
 			elementComponent.SetData(menu, data);
+		}
+
+		public virtual void AddElements(NavigationData[] elements) {
+			var prefab = GetPrefab();
+			foreach (var data in elements)
+				AddElement(data, prefab);
 		}
 	}
 }
