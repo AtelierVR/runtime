@@ -35,13 +35,23 @@ MonoBehaviour:
       value: "{4}"
     - key: settings.range.value.hexadecimal
       value: "{5}"
-    - key: setting.entry.accessibility.interface.language.label
+    - key: settings.entry.accessibility.interface.language.label
       value: "Language"
-    - key: setting.entry.accessibility.visual.brightness.label
+    - key: settings.entry.accessibility.visual.brightness.label
       value: "Brightness"
-    - key: setting.entry.accessibility.visual.bloom_intensity.label
+    - key: settings.entry.accessibility.visual.bloom_intensity.label
       value: "Bloom Intensity"
     - key: settings.group.accessibility.visual.label
       value: "Visual"
     - key: settings.group.accessibility.interface.label
       value: "Interface"
+    - key: settings.page.graphic.title
+      value: "Graphics"
+    - key: settings.page.graphic.label
+      value: "Graphics"
+    - key: settings.group.graphic.general.label
+      value: "General"
+    - key: settings.entry.graphic.quality.label
+      value: "Quality"
+    - key: settings.entry.graphic.anti_aliasing.label
+      value: "Anti-Aliasing"

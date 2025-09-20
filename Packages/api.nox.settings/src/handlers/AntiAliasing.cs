@@ -5,10 +5,10 @@ using UnityEngine;
 namespace api.nox.settings.handlers {
 	public sealed class AntiAliasing : DropdownHandler {
 		public override string[] GetPath()
-			=> new[] { "graphic", "antialiasing" };
+			=> new[] { "graphic", "anti_aliasing" };
 
 		public static string[] GetConfigPath()
-			=> new[] { "settings", "graphic", "antialiasing" };
+			=> new[] { "settings", "graphic", "msaa" };
 
 		private static readonly (string, string)[] AntiAliasingOptions = {
 			("Off", 0.ToString()),
@@ -18,7 +18,7 @@ namespace api.nox.settings.handlers {
 		};
 
 		public AntiAliasing() {
-			SetLabel($"setting.entry.{string.Join(".", GetPath())}.label");
+			SetLabel($"settings.entry.{string.Join(".", GetPath())}.label");
 			SetOptions(AntiAliasingOptions);
 			Value = Config.Load().Get(GetConfigPath(), Value);
 		}

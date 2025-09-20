@@ -105,6 +105,13 @@ namespace api.nox.settings.client {
 					}
 				)
 				.ToArray();
+
+		public void SetCurrent(string id) {
+			var category = GetCategory(id);
+			if (category == null) return;
+			_current = new[] { id };
+			Refresh();
+		}
 	}
 
 	public class GroupDetails {

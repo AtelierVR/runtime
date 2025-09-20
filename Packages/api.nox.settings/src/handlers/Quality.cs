@@ -12,7 +12,7 @@ namespace api.nox.settings.handlers {
 			=> new[] { "settings", "graphic", "quality" };
 
 		public Quality() {
-			SetLabel($"setting.entry.{string.Join(".", GetPath())}.label");
+			SetLabel($"settings.entry.{string.Join(".", GetPath())}.label");
 			SetOptions(QualitySettings.names.Select(x => (x, x)).ToArray());
 			Value = Config.Load().Get(GetConfigPath(), Value);
 		}

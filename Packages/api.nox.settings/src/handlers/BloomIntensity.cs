@@ -10,7 +10,7 @@ namespace api.nox.settings.handlers {
 			SetRange(0f, 1f);
 			SetStep(0.001f);
 			SetValue(Value);
-			SetLabelKey($"setting.entry.{string.Join(".", GetPath())}.label");
+			SetLabelKey($"settings.entry.{string.Join(".", GetPath())}.label");
 			SetValueKey("settings.range.value.percent");
 		}
 

@@ -12,7 +12,7 @@ namespace api.nox.settings.handlers {
 			LanguageManager.OnPackListUpdated.AddListener(OnPacksUpdated);
 			LanguageManager.OnLanguageChanged.AddListener(OnLanguageChanged);
 			OnPacksUpdated();
-			SetLabel($"setting.entry.{string.Join(".", GetPath())}.label");
+			SetLabel($"settings.entry.{string.Join(".", GetPath())}.label");
 		}
 
 		public override void OnValueChanged(string value)

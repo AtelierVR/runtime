@@ -17,7 +17,6 @@ namespace api.nox.settings.client {
 		public  TextLanguage            title;
 		private CancellationTokenSource _thumbnailTokenSource;
 		public  RectTransform           navigation;
-		public  string                  currentHandler;
 		public  GameObject              leftContainer;
 
 		public SettingsPage Page;
@@ -188,8 +187,7 @@ namespace api.nox.settings.client {
 		}
 
 
-		private void OnChangePage(string page) {
-			if (string.IsNullOrEmpty(page)) return;
-		}
+		private void OnChangePage(string page)
+			=> Page.SetCurrent(page);
 	}
 }
