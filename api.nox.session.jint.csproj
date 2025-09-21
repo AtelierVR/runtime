@@ -46,13 +46,13 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.1f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.world.jint\src\Main.cs" />
-    <Compile Include="Packages\api.nox.world.jint\src\JintBackingSession.cs" />
-    <Compile Include="Packages\api.nox.world.jint\src\JintBackingModule.cs" />
-    <None Include="Packages\api.nox.world.jint\nox.mod.json" />
-    <None Include="Packages\api.nox.world.jint\api.nox.session.jint.asmdef" />
-    <None Include="Packages\api.nox.world.jint\package.json" />
-    <None Include="Packages\api.nox.world.jint\link.xml" />
+    <Compile Include="Packages\api.nox.session.jint\src\Main.cs" />
+    <Compile Include="Packages\api.nox.session.jint\src\JintBackingSession.cs" />
+    <Compile Include="Packages\api.nox.session.jint\src\JintBackingModule.cs" />
+    <None Include="Packages\api.nox.session.jint\nox.mod.json" />
+    <None Include="Packages\api.nox.session.jint\api.nox.session.jint.asmdef" />
+    <None Include="Packages\api.nox.session.jint\package.json" />
+    <None Include="Packages\api.nox.session.jint\link.xml" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.1f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>

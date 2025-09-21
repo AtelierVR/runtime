@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Players;
 using Nox.Players;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace Nox.Controllers {
@@ -50,6 +51,12 @@ namespace Nox.Controllers {
 		/// </summary>
 		/// <returns></returns>
 		public Camera GetCamera();
+		
+		/// <summary>
+		/// Get the EventSystem associated with the controller.
+		/// </summary>
+		/// <returns></returns>
+		public EventSystem GetEventSystem();
 
 		/// <summary>
 		/// Get the parts of the controller.

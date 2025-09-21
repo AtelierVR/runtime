@@ -119,8 +119,6 @@ namespace api.nox.desktop {
 
 			desktop._onUserUpdate = Client.CoreAPI.EventAPI.Subscribe("user_update", desktop.OnUserUpdate);
 
-			EventSystem.current = desktop.eventSystem;
-
 			desktop.gameObject.name = $"[{desktop.GetType().Name}_{desktop.GetInstanceID()}]";
 			DontDestroyOnLoad(desktop);
 			return true;
@@ -260,6 +258,9 @@ namespace api.nox.desktop {
 		[NoxPublic(NoxAccess.Method)]
 		public Camera GetCamera()
 			=> player.headCamera;
+
+		public EventSystem GetEventSystem()
+			=> eventSystem;
 
 		[NoxPublic(NoxAccess.Method)]
 		public Collider GetCollider()
@@ -433,6 +434,10 @@ namespace api.nox.desktop {
 					case "tracking/left_foot/active":
 					case "tracking/right_foot/active":
 						param.Set(false);
+						break;
+					case "rig/ik/upper_spine/position_weight":
+					case "rig/ik/upper_spine/hint_weight":
+						param.Set(0f);
 						break;
 				}
 			}

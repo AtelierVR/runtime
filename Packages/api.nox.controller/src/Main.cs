@@ -5,6 +5,7 @@ using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
 using Nox.Controllers;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.controller {
@@ -63,7 +64,12 @@ namespace api.nox.controller {
 			foreach (var c in ComponentExtension.GetComponentsInChildren<Camera>())
 				if (c != cam && c.CompareTag("MainCamera"))
 					c.tag = "Untagged";
-			
+
+			var eventSystem = _current.GetEventSystem();
+			EventSystem.current = eventSystem;
+			foreach (var es in ComponentExtension.GetComponentsInChildren<EventSystem>())
+				if (es != eventSystem) es.gameObject.SetActive(false);
+
 			_coreAPI.EventAPI.Emit("controller_changed", _current);
 			return true;
 
