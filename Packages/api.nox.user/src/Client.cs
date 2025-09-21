@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using api.nox.user.client;
 using api.nox.user.widget;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
@@ -22,6 +23,11 @@ namespace api.nox.user {
 			=> string.IsNullOrEmpty(ns)
 				? Instance.CoreAPI.AssetAPI.GetAsset<T>(path)
 				: Instance.CoreAPI.AssetAPI.GetAsset<T>(ns, path);
+
+		public static UniTask<T> GetAssetAsync<T>(string path, string ns = null) where T : UnityEngine.Object
+			=> string.IsNullOrEmpty(ns)
+				? Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(path)
+				: Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(ns, path);
 
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
 

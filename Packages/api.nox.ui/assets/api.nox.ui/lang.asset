@@ -15,5 +15,7 @@ MonoBehaviour:
   languages:
   - IETF: en-US
     entries:
-    - key: key.value
+    - key: value
       value: '{0}'
+    - key: empty
+      value: ''

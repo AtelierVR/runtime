@@ -14,7 +14,6 @@ namespace api.nox.videoplayer {
 		internal static readonly List<IHandler>     Handlers = new();
 		public static            Main               Instance;
 		public                   MainModCoreAPI     CoreAPI;
-		private                  VideoPlayerManager _manager;
 		private                  LanguagePack       _lang;
 
 		internal static readonly UnityEvent<IHandler> OnHandlerAdded   = new();
