@@ -93,7 +93,12 @@ namespace api.nox.xr {
 			}
 
 			var instance = Instantiate(prefab);
-			var xr       = instance.GetComponent<XRController>();
+
+			instance.transform.position   = Vector3.zero;
+			instance.transform.rotation   = Quaternion.identity;
+			instance.transform.localScale = Vector3.one;
+
+			var xr = instance.GetComponent<XRController>();
 
 			if (!xr) {
 				Logger.LogError("Failed to get desktop proxy component");
@@ -125,8 +130,6 @@ namespace api.nox.xr {
 
 			xr._onUserUpdate = Client.CoreAPI.EventAPI.Subscribe("user_update", xr.OnUserUpdate);
 
-			EventSystem.current = xr.eventSystem;
-			Camera.SetupCurrent(xr.player.headCamera);
 			xr.gameObject.name = $"[{xr.GetType().Name}_{xr.GetInstanceID()}]";
 			DontDestroyOnLoad(xr);
 			return true;
@@ -170,6 +173,9 @@ namespace api.nox.xr {
 		public Camera GetCamera()
 			=> player.headCamera;
 
+		public EventSystem GetEventSystem()
+			=> eventSystem;
+
 		[NoxPublic(NoxAccess.Method)]
 		public Collider GetCollider()
 			=> player.bodyCollider;
@@ -199,7 +205,7 @@ namespace api.nox.xr {
 				{ "grounded", player.IsGrounded() },
 				{ "climbing", player.IsClimbing() },
 				{ "pushing_up", player.IsPushingUp() },
-				{ "immobilized", player.useMovement },
+				{ "immobilized", !player.useMovement },
 				{ "crouching", player.crouching },
 				{ "flying", !player.useGrounding },
 				{ "may_fly", mayFly },
@@ -212,7 +218,7 @@ namespace api.nox.xr {
 			if (!GetAbilities().ContainsKey(key)) return;
 			switch (key) {
 				case "immobilized":
-					player.useMovement = (bool)value;
+					player.useMovement = !(bool)value;
 					break;
 				case "crouching":
 					player.crouching = (bool)value;
@@ -232,7 +238,7 @@ namespace api.nox.xr {
 		[NoxPublic(NoxAccess.Method)]
 		public Dictionary<ushort, Transform> GetParts()
 			=> new() {
-				{ PlayerRig.Base.ToIndex(), transform },
+				{ PlayerRig.Base.ToIndex(), player.transform },
 				{ PlayerRig.Head.ToIndex(), player.headCamera.transform },
 				{ PlayerRig.LeftHand.ToIndex(), player.handLeft.transform },
 				{ PlayerRig.RightHand.ToIndex(), player.handRight.transform }
@@ -275,7 +281,7 @@ namespace api.nox.xr {
 				await old.Dispose();
 
 			Logger.LogDebug($"Attaching avatar to {runtimeAvatar.GetDescriptor()}", runtimeAvatar.GetDescriptor().GetAnchor());
-			root.transform.SetParent(transform, false);
+			root.transform.SetParent(player.transform, false);
 			root.transform.localPosition = Vector3.zero;
 			root.transform.localRotation = Quaternion.identity;
 
@@ -322,9 +328,17 @@ namespace api.nox.xr {
 			=> _attachedPlayer;
 
 		private void Start()
-			=> RestartInteractions().Forget();
+			=> StartupAutoHand().Forget();
 
-		private async UniTask RestartInteractions() {
+		private async UniTask StartupAutoHand() {
+			player.bodyCollider.material = new PhysicsMaterial {
+				dynamicFriction = 0f,
+				staticFriction  = 0f,
+				bounciness      = 0f,
+				frictionCombine = PhysicsMaterialCombine.Maximum,
+				bounceCombine   = PhysicsMaterialCombine.Average
+			};
+
 			foreach (var interaction in interactions) {
 				interaction.gameObject.SetActive(false);
 				foreach (var member in interaction.startingGroupMembers)
@@ -344,7 +358,6 @@ namespace api.nox.xr {
 
 		private void Update() {
 			SynchronizePlayerFromController();
-			// Avatar parameter synchronization temporarily disabled due to missing APIs
 			SynchronizeParametersAvatar();
 		}
 
@@ -582,23 +595,6 @@ namespace api.nox.xr {
 			}
 		}
 
-		// private void UpdateCamera() {
-		// 	var cameraModule = _attachedRuntimeAvatar?.GetDescriptor()
-		// 		?.GetModules<ICameraModule>()
-		// 		.FirstOrDefault();
-		//
-		// 	if (cameraModule == null)
-		// 		return;
-		//
-		// 	var offset = cameraModule.GetOffset();
-		// 	var anchor = cameraModule.GetAnchor();
-		// 	anchor.GetPositionAndRotation(out var pos, out var _);
-		//
-		// 	pos += anchor.TransformDirection(offset);
-		//
-		// 	player.headCamera.transform.position = pos;
-		// }
-
 		// ReSharper disable Unity.PerformanceAnalysis
 		private void SynchronizePlayerFromController() {
 			if (_attachedPlayer == null) return;
@@ -611,6 +607,7 @@ namespace api.nox.xr {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		public void SetPart(ushort index, NoxTransform tr) {
+			Logger.LogWarning($"{tr} {index} {tr.DeliveryType}");
 			var part = GetParts()
 				.FirstOrDefault(p => p.Key == index);
 
@@ -635,9 +632,9 @@ namespace api.nox.xr {
 
 		private void SynchronizeControllerFromPlayer() {
 			if (_attachedPlayer == null) return;
-			Logger.LogDebug("Synchronizing player from controller");
-			transform.position = _attachedPlayer.GetPosition();
-			transform.rotation = _attachedPlayer.GetRotation();
+			Logger.LogDebug($"Synchronizing controller from player at {_attachedPlayer.GetPosition()} with rotation {_attachedPlayer.GetRotation()}");
+			player.SetPosition(_attachedPlayer.GetPosition());
+			player.SetRotation(_attachedPlayer.GetRotation());
 		}
 	}
 }
