@@ -37,7 +37,7 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		public object Get() {
 			if (!_rigBuilder) return 0f;
 			var layer = _rigBuilder.layers.FirstOrDefault(l => l.rig && l.rig.name == _layerName);
-			return layer?.rig?.weight;
+			return layer?.rig?.weight ?? 0f;
 		}
 
 		public void Set(object value) {
@@ -47,7 +47,7 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 				break;
 			}
 		}
-		
+
 		public byte[] Serialize()
 			=> Get().ToBytes();
 

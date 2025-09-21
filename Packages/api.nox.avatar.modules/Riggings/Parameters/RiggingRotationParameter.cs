@@ -34,12 +34,12 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 			=> true;
 
 		public object Get()
-			=> _module?.GetPartRotation(_bone) ?? Quaternion.identity;
+			=> _module?.GetPart(_bone).rotation ?? Quaternion.identity;
 
 
 		public void Set(object value) {
 			if (!_module || value is not Quaternion rotation) return;
-			_module.SetPartRotation(_bone, rotation);
+			_module.GetPart(_bone).rotation = rotation;
 		}
 
 		public byte[] Serialize()

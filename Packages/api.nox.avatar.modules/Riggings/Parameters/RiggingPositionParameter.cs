@@ -34,12 +34,12 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 			=> true;
 
 		public object Get()
-			=> _module?.GetPartPosition(_bone) ?? Vector3.zero;
+			=> _module?.GetPart(_bone)?.position ?? Vector3.zero;
 
 
 		public void Set(object value) {
 			if (!_module || value is not Vector3 position) return;
-			_module.SetPartPosition(_bone, position);
+			_module.GetPart(_bone).position = position;
 		}
 
 		public byte[] Serialize()

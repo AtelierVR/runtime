@@ -10,6 +10,9 @@ using Object = UnityEngine.Object;
 namespace Nox.CCK.Utils {
 	public static class ComponentExtension {
 		// ReSharper disable Unity.PerformanceAnalysis
+		public static T GetOrAddComponent<T>(this Component component) where T : Component
+			=> GetOrAddComponent<T>(component.gameObject);
+
 		public static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component
 			=> gameObject.GetComponent<T>() ?? gameObject.AddComponent<T>();
 
