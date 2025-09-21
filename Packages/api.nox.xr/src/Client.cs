@@ -176,8 +176,9 @@ namespace api.nox.xr {
 
 			var devices = new List<InputDevice>();
 			InputDevices.GetDevices(devices);
+			Logger.LogDebug($"XR Devices found: {devices.Count}");
 			foreach (var device in devices)
-				OnDeviceConnected(device);
+				await OnDeviceConnectedAsync(device);
 		}
 
 		public void StopLoader() {
