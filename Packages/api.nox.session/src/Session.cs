@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
@@ -103,10 +104,39 @@ namespace api.nox.session {
 
 		public IWorldDescriptor[] GetDescriptors() {
 			var dimension = Adapter.GetDimension();
-			var main = dimension.GetScene()
-				.GetInstances()[0]
-				.GetDescriptor(dimension.GetMainIndex());
-			return new[] { main };
+			if (dimension == null) {
+				Logger.LogWarning($"{this}: GetDescriptors called before a dimension was assigned. Returning no descriptors.");
+				return Array.Empty<IWorldDescriptor>();
+			}
+
+			var scene = dimension.GetScene();
+			if (scene == null) {
+				Logger.LogWarning($"{this}: GetDescriptors called but dimension has no scene. Returning no descriptors.");
+				return Array.Empty<IWorldDescriptor>();
+			}
+
+			var instances = scene.GetInstances();
+			if (instances == null || instances.Length == 0) {
+				Logger.LogWarning($"{this}: GetDescriptors found no instances in the scene. Returning no descriptors.");
+				return Array.Empty<IWorldDescriptor>();
+			}
+
+			var mainInstance = instances[0];
+			if (mainInstance == null) {
+				Logger.LogWarning($"{this}: GetDescriptors found a null main instance. Returning no descriptors.");
+				return Array.Empty<IWorldDescriptor>();
+			}
+
+			var mainIndex = dimension.GetMainIndex();
+			if (mainIndex < 0) {
+				Logger.LogWarning($"{this}: GetDescriptors received an invalid main index {mainIndex}. Returning no descriptors.");
+				return Array.Empty<IWorldDescriptor>();
+			}
+
+			var descriptor = mainInstance.GetDescriptor(mainIndex);
+			return descriptor != null
+				? new[] { descriptor }
+				: Array.Empty<IWorldDescriptor>();
 		}
 
 		public void OnStateChanged(IAdapterState state, IAdapterState previousState) {

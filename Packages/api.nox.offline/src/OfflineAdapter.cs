@@ -93,8 +93,22 @@ namespace api.nox.offline {
 
 		public async UniTask OnDeselect(ISession newSession) {
 			Logger.LogDebug($"OnDeselect: {this}");
-			var main = _dimension.GetScene().GetInstances()[0];
-			main?.SetVisibleInstance(_dimension.GetMainIndex(), false, false);
+			if (_dimension == null) {
+				Logger.LogWarning($"OnDeselect: {this} has no dimension assigned. Skipping visibility updates.");
+				await UniTask.Yield();
+				return;
+			}
+
+			var scene = _dimension.GetScene();
+			var instances = scene?.GetInstances();
+			var main = instances != null && instances.Length > 0 ? instances[0] : null;
+			if (main == null) {
+				Logger.LogWarning($"OnDeselect: {this} could not locate the main instance. Skipping visibility updates.");
+				await UniTask.Yield();
+				return;
+			}
+
+			main.SetVisibleInstance(_dimension.GetMainIndex(), false, false);
 			await UniTask.Yield();
 		}
 
