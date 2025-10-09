@@ -352,7 +352,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bddfe6933c4a401c8cc06a28864284af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Nox.CCK.VideoPlayer.Hactazia::Nox.CCK.VideoPlayer.Hactazia.VideoPlayer
-  playQuery: https://www.twitch.tv/lofigirl
+  playQuery: https://youtu.be/ThHvx5a9IYA?si=4aHK7RNXoxjfsUws
   videoPlayer: {fileID: 150414376}
   videoOutput: {fileID: 1198164845}
   audioSource: {fileID: 99666749}
