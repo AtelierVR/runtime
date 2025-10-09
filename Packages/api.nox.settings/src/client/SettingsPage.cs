@@ -99,11 +99,15 @@ namespace api.nox.settings.client {
 				.GroupBy(h => h.Split().Item2)
 				.Select(
 					g => new GroupDetails {
-						Handlers = g.ToArray(),
+						Handlers = g
+							.ToArray()
+							.OrderBy(h => h)
+							.ToArray(),
 						Category = category,
 						Group    = g.Key
 					}
 				)
+				.OrderBy(g => g)
 				.ToArray();
 
 		public void SetCurrent(string id) {
@@ -117,13 +121,19 @@ namespace api.nox.settings.client {
 		}
 	}
 
-	public class GroupDetails {
+	public class GroupDetails : IComparable<GroupDetails> {
 		public IHandler[] Handlers = Array.Empty<IHandler>();
 		public string     Category;
 		public string     Group;
 
 		public string GetLabel()
 			=> $"settings.group.{Category}.{Group}.label";
+
+		private string Compare()
+			=> $"{Category}.{Group}";
+
+		public int CompareTo(GroupDetails other)
+			=> string.Compare(Compare(), other.Compare(), StringComparison.Ordinal);
 	}
 
 	public class CategoryDetails {

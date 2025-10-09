@@ -3,10 +3,11 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 using System.Collections.Generic;
-
-#if UNITY_EDITOR
+using Nox.ModLoader.EntryPoints;
 using Nox.CCK.Utils;
 using Nox.ModLoader.Mods;
+
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine.UIElements;
 #endif
@@ -68,10 +69,10 @@ namespace Nox.ModLoader {
 			mods.Reverse();
 
 			foreach (var mod in ModManager.Mods)
-				await mod.SendPreDispose();
+				await mod.PreDispose();
 
 			foreach (var mod in ModManager.Mods)
-				await mod.SendDispose();
+				await mod.Dispose();
 
 			for (var i = 0; i < mods.Count; i++) {
 				var mod = mods[i];
@@ -104,15 +105,15 @@ namespace Nox.ModLoader {
 					$"Enabling Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
 					(float)i / results.Mods.Length
 				);
-				mod.EnableMain();
-				mod.EnableEditor();
+				mod.GetEntry(EntryPoint.MainEntry).Enable();
+				mod.GetEntry(EntryPoint.EditorEntry).Enable();
 			}
 
 			foreach (var mod in results.Mods)
-				await mod.SendInitialize();
+				await mod.Initialize();
 
 			foreach (var mod in results.Mods)
-				await mod.SendPostInitialize();
+				await mod.PostInitialize();
 
 			_isReloading = false;
 
@@ -130,7 +131,7 @@ namespace Nox.ModLoader {
 		private static void OnUpdateEditor() {
 			if (Application.isPlaying || _isReloading) return;
 			foreach (var mod in ModManager.Mods)
-				mod.SendUpdate();
+				mod.Update();
 		}
 
 		private static void OnPlayModeStateChanged(PlayModeStateChange state, ResultLoadInfos resultInfos) {
@@ -182,17 +183,17 @@ namespace Nox.ModLoader {
 
 			if (_initializing) return;
 			_initializing = true;
-			
+
 			DisplayProgressBar("Loading Mods", "Discovering Mods...", -1.0f);
 
-			var resultinfos = await ModManager.LoadMods();
+			var loaded = await ModManager.LoadMods();
 
 			Logger.Log($"Executing Editor as [{(Application.isConsolePlatform ? "Server" : "Client")}]...");
-			Logger.LogDebug($"{resultinfos.Mods.Length} mods loaded:");
-			foreach (var mod in resultinfos.Mods)
+			Logger.LogDebug($"{loaded.Mods.Length} mods loaded:");
+			foreach (var mod in loaded.Mods)
 				Logger.LogDebug($"- {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}");
 
-			foreach (var result in resultinfos.Results)
+			foreach (var result in loaded.Results)
 				if (result.IsError)
 					Logger.LogError(result.Message);
 				else if (result.IsWarning)
@@ -201,39 +202,39 @@ namespace Nox.ModLoader {
 
 			DisplayProgressBar("Loading Mods", "Enabling Mods...", 0.0f);
 
-			for (var i = 0; i < resultinfos.Mods.Length; i++) {
-				var mod = resultinfos.Mods[i];
+			for (var i = 0; i < loaded.Mods.Length; i++) {
+				var mod = loaded.Mods[i];
 				DisplayProgressBar(
 					"Loading Mods",
 					$"Enabling Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
-					(float)(i + 1) / resultinfos.Mods.Length
+					(float)(i + 1) / loaded.Mods.Length
 				);
-				mod.EnableMain();
+				mod.GetEntry(EntryPoint.MainEntry)?.Enable();
 				#if UNITY_EDITOR
-				mod.EnableEditor();
+				mod.GetEntry(EntryPoint.EditorEntry)?.Enable();
 				#endif
 			}
 
 			DisplayProgressBar("Loading Mods", "Initializing Mods...", 0.0f);
 
-			for (var i = 0; i < resultinfos.Mods.Length; i++) {
-				var mod = resultinfos.Mods[i];
+			for (var i = 0; i < loaded.Mods.Length; i++) {
+				var mod = loaded.Mods[i];
 				DisplayProgressBar(
 					"Loading Mods",
 					$"Initializing Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
-					(float)(i + 1) / resultinfos.Mods.Length
+					(float)(i + 1) / loaded.Mods.Length
 				);
-				await mod.SendInitialize();
+				await mod.Initialize();
 			}
 
-			for (var i = 0; i < resultinfos.Mods.Length; i++) {
-				var mod = resultinfos.Mods[i];
+			for (var i = 0; i < loaded.Mods.Length; i++) {
+				var mod = loaded.Mods[i];
 				DisplayProgressBar(
 					"Loading Mods",
 					$"Post-Initializing Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
-					(float)(i + 1) / resultinfos.Mods.Length
+					(float)(i + 1) / loaded.Mods.Length
 				);
-				await mod.SendPostInitialize();
+				await mod.PostInitialize();
 			}
 
 			Logger.Log("Mods Loaded...");
@@ -241,11 +242,11 @@ namespace Nox.ModLoader {
 
 			#if UNITY_EDITOR
 			EditorApplication.update               += OnUpdateEditor;
-			EditorApplication.playModeStateChanged += state => OnPlayModeStateChanged(state, resultinfos);
+			EditorApplication.playModeStateChanged += state => OnPlayModeStateChanged(state, loaded);
 			if (EditorApplication.isPlaying)
-				OnPlayModeStateChanged(PlayModeStateChange.EnteredPlayMode, resultinfos);
+				OnPlayModeStateChanged(PlayModeStateChange.EnteredPlayMode, loaded);
 			#else
-            StartupPlayerLoop.Setup(resultinfos);
+            StartupPlayerLoop.Setup(loaded);
 			#endif
 		}
 
@@ -266,8 +267,8 @@ namespace Nox.ModLoader {
 					$"Disabling Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
 					(float)(i + 1) / resultInfos.Mods.Length
 				);
-				mod.DisableClient();
-				mod.DisableServer();
+				mod.GetEntry(EntryPoint.ClientEntry)?.Disable();
+				mod.GetEntry(EntryPoint.ServerEntry)?.Disable();
 			}
 
 			DisplayProgressBar("Exiting PlayMode", "Pre-Disposing Mods...", 0.0f);
@@ -279,7 +280,7 @@ namespace Nox.ModLoader {
 					$"Pre-Disposing Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
 					(float)(i + 1) / resultInfos.Mods.Length
 				);
-				await mod.SendPreDispose();
+				await mod.PreDispose();
 			}
 
 			DisplayProgressBar("Exiting PlayMode", "Disposing Mods...", 0.0f);
@@ -291,22 +292,7 @@ namespace Nox.ModLoader {
 					$"Disposing Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
 					(float)(i + 1) / resultInfos.Mods.Length
 				);
-				await mod.SendDispose();
-			}
-
-			// clearing 
-
-			DisplayProgressBar("Exiting PlayMode", "Clearing Mods...", 0.0f);
-
-			for (var i = 0; i < resultInfos.Mods.Length; i++) {
-				var mod = resultInfos.Mods[resultInfos.Mods.Length - 1 - i];
-				DisplayProgressBar(
-					"Exiting PlayMode",
-					$"Clearing Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
-					(float)(i + 1) / resultInfos.Mods.Length
-				);
-				mod.ClearClient();
-				mod.ClearServer();
+				await mod.Dispose();
 			}
 
 			Logger.Log("Mods Disabled...");
@@ -349,7 +335,28 @@ namespace Nox.ModLoader {
 			WantsTo = WantsToLoad.None;
 			Logger.Log("Wants to load set to None...");
 		}
+
+		[MenuItem("Nox/ModLoader/Debug/One Runtime (Default)")]
+		private static void SetOneRuntimeMode() {
+			OneRuntime = true;
+			Logger.Log("Component Mode set to One Component (StartupManager for all mods)...");
+		}
+
+		[MenuItem("Nox/ModLoader/Debug/Individual Components")]
+		private static void SetIndividualComponentsMode() {
+			OneRuntime = false;
+			Logger.Log("Component Mode set to Individual Components (ModComponent per mod)...");
+		}
 		#endif
+
+		private static bool OneRuntime {
+			get => Config.Load().Get("settings.debug.one_runtime", true);
+			set {
+				var config = Config.Load();
+				config.Set("settings.debug.one_runtime", value);
+				config.Save();
+			}
+		}
 
 		private static async UniTask OnEnteredPlayMode(ResultLoadInfos resultInfos) {
 			Logger.Log("Entered PlayMode... Enabling Mods...");
@@ -422,8 +429,8 @@ namespace Nox.ModLoader {
 					(float)(i + 1) / resultInfos.Mods.Length
 				);
 				if (Application.isConsolePlatform)
-					mod.EnableServer();
-				else mod.EnableClient();
+					mod.GetEntry(EntryPoint.ServerEntry)?.Enable();
+				else mod.GetEntry(EntryPoint.ClientEntry)?.Enable();
 			}
 
 			DisplayProgressBar("Entered PlayMode", "Initializing Mods...", 0.0f);
@@ -436,7 +443,7 @@ namespace Nox.ModLoader {
 					$"Initializing Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
 					(float)(i + 1) / resultInfos.Mods.Length
 				);
-				await mod.SendInitialize();
+				await mod.Initialize();
 			}
 
 			DisplayProgressBar("Entered PlayMode", "Post-Initializing Mods...", 0.0f);
@@ -449,7 +456,7 @@ namespace Nox.ModLoader {
 					$"Post-Initializing Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
 					(float)(i + 1) / resultInfos.Mods.Length
 				);
-				await mod.SendPostInitialize();
+				await mod.PostInitialize();
 			}
 
 			Logger.Log("Mods Enabled...");
@@ -457,21 +464,77 @@ namespace Nox.ModLoader {
 		}
 
 
+		public class ModComponent : MonoBehaviour {
+			private Mod _mod;
+
+			public static ModComponent Create(Mod mod) {
+				var go        = new GameObject();
+				var component = go.AddComponent<ModComponent>();
+				go.name = $"[ModComponent:{mod.Metadata.GetId()}]";
+				#if UNITY_EDITOR
+				EditorGUIUtility.SetIconForObject(component, Resources.Load<Texture2D>("Nox.CCK.Icon"));
+				#endif
+				component._mod = mod;
+				DontDestroyOnLoad(go);
+				return component;
+			}
+
+			private void Update() {
+				_mod?.Update();
+			}
+
+			private void LateUpdate() {
+				_mod?.LateUpdate();
+			}
+
+			private void FixedUpdate() {
+				_mod?.FixedUpdate();
+			}
+		}
+
 		public class StartupPlayerLoop : MonoBehaviour {
 			private static StartupPlayerLoop _instance;
 			private        ResultLoadInfos   _resultInfos;
+			private        bool              _useOneComponent;
 
 			public static void Setup(ResultLoadInfos resultInfos) {
-				if (_instance)
-					throw new Exception("StartupPlayerLoop already exists...");
-				var go = new GameObject();
-				_instance = go.AddComponent<StartupPlayerLoop>();
-				go.name   = $"[{_instance.GetType().Name}]";
-				#if UNITY_EDITOR
-				EditorGUIUtility.SetIconForObject(_instance, Resources.Load<Texture2D>("Nox.CCK.Icon"));
-				#endif
-				_instance._resultInfos = resultInfos;
-				DontDestroyOnLoad(go);
+				var useOneComponent = OneRuntime;
+
+				if (useOneComponent) {
+					// Mode original : un seul composant pour tous les mods
+					Logger.Log("Using One Component mode (StartupManager handles all mods)...");
+					if (_instance)
+						throw new Exception("StartupPlayerLoop already exists...");
+					var go = new GameObject();
+					_instance = go.AddComponent<StartupPlayerLoop>();
+					go.name   = $"[{_instance.GetType().Name}]";
+					#if UNITY_EDITOR
+					EditorGUIUtility.SetIconForObject(_instance, Resources.Load<Texture2D>("Nox.CCK.Icon"));
+					#endif
+					_instance._resultInfos     = resultInfos;
+					_instance._useOneComponent = true;
+					DontDestroyOnLoad(go);
+				} else {
+					// Nouveau mode : un composant par mod
+					Logger.Log($"Using Individual Components mode (ModComponent per mod, {resultInfos.Mods.Length} components will be created)...");
+					foreach (var mod in resultInfos.Mods) {
+						ModComponent.Create(mod);
+					}
+
+					// Créer quand même un StartupPlayerLoop pour gérer les événements globaux
+					// mais sans les updates des mods
+					if (_instance)
+						throw new Exception("StartupPlayerLoop already exists...");
+					var go = new GameObject();
+					_instance = go.AddComponent<StartupPlayerLoop>();
+					go.name   = $"[{_instance.GetType().Name}:Manager]";
+					#if UNITY_EDITOR
+					EditorGUIUtility.SetIconForObject(_instance, Resources.Load<Texture2D>("Nox.CCK.Icon"));
+					#endif
+					_instance._resultInfos     = resultInfos;
+					_instance._useOneComponent = false;
+					DontDestroyOnLoad(go);
+				}
 			}
 
 			private async void OnApplicationQuit() {
@@ -493,18 +556,21 @@ namespace Nox.ModLoader {
 			}
 
 			private void Update() {
+				if (!_useOneComponent) return;
 				foreach (var mod in ModManager.Mods)
-					mod.SendUpdate();
+					mod.Update();
 			}
 
 			private void LateUpdate() {
+				if (!_useOneComponent) return;
 				foreach (var mod in ModManager.Mods)
-					mod.SendLateUpdate();
+					mod.LateUpdate();
 			}
 
 			private void FixedUpdate() {
+				if (!_useOneComponent) return;
 				foreach (var mod in ModManager.Mods)
-					mod.SendFixedUpdate();
+					mod.FixedUpdate();
 			}
 		}
 	}

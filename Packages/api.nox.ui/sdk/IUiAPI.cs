@@ -1,3 +1,4 @@
+using Nox.UI.modals;
 using UnityEngine;
 
 namespace Nox.UI {
@@ -62,5 +63,12 @@ namespace Nox.UI {
 		/// <param name="menuId"></param>
 		/// <param name="page"></param>
 		public void SendDisplay(int menuId, IPage page);
+
+		/// <summary>
+		/// Creates a new modal builder instance.
+		/// </summary>
+		/// <param name="menu"></param>
+		/// <returns></returns>
+		public IModalBuilder MakeModal(IMenu menu);
 	}
 }

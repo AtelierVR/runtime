@@ -17,7 +17,7 @@ namespace api.nox.instance.search {
 			=> new[] { Reference.GetTitle() ?? Reference.GetId().ToString() };
 
 		public async UniTask<Texture2D> GetImage()
-			=> await Main.Instance.NetworkAPI.FetchTexture(Reference.GetThumbnailUrl());
+			=> await Main.NetworkAPI.FetchTexture(Reference.GetThumbnailUrl());
 
 		public void OnClick(int menuId)
 			=> Client.UiAPI?.SendGoto(menuId, InstancePage.GetStaticKey(), "instance", Reference);

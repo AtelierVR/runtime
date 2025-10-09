@@ -1,4 +1,3 @@
-using System.Linq;
 using api.nox.user.network;
 using api.nox.user.search;
 using Cysharp.Threading.Tasks;
@@ -10,42 +9,32 @@ using Nox.Network;
 using Nox.Search;
 using Nox.Servers;
 using Nox.Users;
-using Nox.Worlds;
 
 namespace api.nox.user {
-	public class Main : MainModInitializer, IUserAPI {
+	public class Main : IMainModInitializer, IUserAPI {
 		internal static Main           Instance;
 		internal        MainModCoreAPI CoreAPI;
 		internal        Network        Network;
 		private         LanguagePack   _language;
 		private         Search         _search;
 
-		public IServerAPI ServerAPI
+		public static IServerAPI ServerAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("server")
-				?.GetMains()
-				.FirstOrDefault() as IServerAPI;
+				?.GetInstance<IServerAPI>();
 
-		public INetworkAPI NetworkAPI
+		public static INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("network")
-				?.GetMains()
-				.FirstOrDefault() as INetworkAPI;
+				?.GetInstance<INetworkAPI>();
 
-		internal ISearchAPI SearchAPI
+		internal static ISearchAPI SearchAPI
 			=> Main.Instance.CoreAPI.ModAPI
 				.GetMod("search")
-				.GetMains()
-				.FirstOrDefault() as ISearchAPI;
-
-		public IWorldAPI WorldAPI
-			=> Instance.CoreAPI.ModAPI
-				.GetMod("world")
-				?.GetMains()
-				.FirstOrDefault() as IWorldAPI;
+				?.GetInstance<ISearchAPI>();
 
 		public async UniTask OnInitializeMainAsync(MainModCoreAPI api) {
-			CoreAPI   = api;
+			CoreAPI = api;
 			Instance  = this;
 			Network   = new Network();
 			_language = api.AssetAPI.GetAsset<LanguagePack>("lang.asset");

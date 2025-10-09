@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
-using api.nox.settings.prefabs;
 using Nox.CCK.Language;
+using Nox.CCK.Settings;
 using Nox.CCK.Utils;
+using UnityEngine;
 
 namespace api.nox.settings.handlers {
 	public sealed class Language : DropdownHandler, IDisposable {
 		public sealed override string[] GetPath()
 			=> new[] { "accessibility", "interface", "language" };
+
+		protected override GameObject GetPrefab()
+			=> Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/dropdown.prefab");
 
 		public Language() {
 			LanguageManager.OnPackListUpdated.AddListener(OnPacksUpdated);

@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace api.nox.ui {
-	public class Editor : EditorModInitializer {
+	public class Editor : IEditorModInitializer {
 		internal static EditorModCoreAPI CoreAPI;
 
 		public void OnInitializeEditor(EditorModCoreAPI api) {

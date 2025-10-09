@@ -80,6 +80,7 @@ namespace api.nox.avatar {
 			}
 
 
+			avatar.Id         = avatar.Root.GetInstanceID().ToString();
 			avatar.Root.name  = $"[{avatar.GetType().Name}_{avatar.GetId()}]";
 			avatar.Descriptor = avatar.Root.GetComponent<IAvatarDescriptor>();
 

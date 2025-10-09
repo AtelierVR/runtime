@@ -23,6 +23,7 @@ namespace api.nox.relay.Instances {
 		public readonly UnityEvent<types.Leave.LeaveEvent>          OnLeave         = new();
 		public readonly UnityEvent<types.Avatar.AvatarChangedEvent> OnAvatarChanged = new();
 		public readonly UnityEvent<types.Transform.TransformEvent>  OnTransform     = new();
+		public readonly UnityEvent<types.Voice.VoiceEvent>          OnVoice         = new();
 		public readonly UnityEvent<types.Avatar.AvatarParamsEvent>  OnAvatarParams  = new();
 
 		internal async UniTask OnReceived(ushort length, ushort state, ResponseType type, Buffer buffer) {
@@ -68,6 +69,11 @@ namespace api.nox.relay.Instances {
 					var transform = new types.Transform.TransformEvent { ConnectionId = Connection.Id, InternalId = InternalId };
 					if (transform.FromBuffer(buffer)) OnTransform.Invoke(transform);
 					else Logger.LogWarning($"Failed to parse transform event for instance {InternalId}");
+					break;
+				case ResponseType.Voice:
+					var voice = new types.Voice.VoiceEvent { ConnectionId = Connection.Id, InternalId = InternalId };
+					if (voice.FromBuffer(buffer)) OnVoice.Invoke(voice);
+					else Logger.LogWarning($"Failed to parse voice event for instance {InternalId}");
 					break;
 				default:
 					Logger.LogDebug($"Received unknown response type {type} for instance {InternalId}");
@@ -158,6 +164,12 @@ namespace api.nox.relay.Instances {
 			request.InternalId   = InternalId;
 			request.ConnectionId = Connection.Id;
 			return (await Connection.Emit(request.ToBuffer(), RequestType.AvatarParams)).Item1;
+		}
+
+		public async UniTask<bool> SendVoice(types.Voice.InstanceRequestVoice request) {
+			request.InternalId   = InternalId;
+			request.ConnectionId = Connection.Id;
+			return (await Connection.Emit(request.ToBuffer(), RequestType.Voice)).Item1;
 		}
 	}
 }

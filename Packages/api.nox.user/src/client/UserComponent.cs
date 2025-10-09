@@ -45,7 +45,7 @@ namespace api.nox.user.client {
 
 			_thumbnailTokenSource = new CancellationTokenSource();
 			if (user?.GetThumbnailUrl() != null) {
-				var texture = await Main.Instance.NetworkAPI
+				var texture = await Main.NetworkAPI
 					.FetchTexture(user.GetThumbnailUrl())
 					.AttachExternalCancellation(_thumbnailTokenSource.Token);
 				thumbnail.sprite = texture
@@ -64,7 +64,7 @@ namespace api.nox.user.client {
 
 			_bannerTokenSource = new CancellationTokenSource();
 			if (user?.GetBannerUrl() != null) {
-				var texture = await Main.Instance.NetworkAPI
+				var texture = await Main.NetworkAPI
 					.FetchTexture(user.GetBannerUrl())
 					.AttachExternalCancellation(_bannerTokenSource.Token);
 				if (texture) {

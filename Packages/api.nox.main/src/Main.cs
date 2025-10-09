@@ -12,7 +12,7 @@ using UnityEditor;
 #endif
 
 namespace api.nox.main {
-	public class Main : MainModInitializer {
+	public class Main : IMainModInitializer {
 		private LanguagePack _lang;
 		private IModCoreAPI  _coreAPI;
 

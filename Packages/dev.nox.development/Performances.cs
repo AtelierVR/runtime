@@ -16,21 +16,21 @@ using UnityEngine.UIElements;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace dev.nox.development {
-	public class Performances : EditorModInitializer {
+	public class Performances : IEditorModInitializer {
 		internal static EditorModCoreAPI    CoreAPI;
 		private         EditorPanel         _buildPanel;
 		private         EventSubscription[] _events = Array.Empty<EventSubscription>();
 		private         PerformancePanel    _panel;
 
-		internal static UnityEvent<Mod> ModLoadedEvent   = new();
-		internal static UnityEvent<Mod> ModUnloadedEvent = new();
+		internal static UnityEvent<IMod> ModLoadedEvent   = new();
+		internal static UnityEvent<IMod> ModUnloadedEvent = new();
 
 		public void OnInitializeEditor(EditorModCoreAPI api) {
 			CoreAPI = api;
 
 			_events = new[] {
-				api.EventAPI.Subscribe("mod_loaded", ctx => OnModLoaded(ctx.TryGet(0, out Mod m) ? m : null)),
-				api.EventAPI.Subscribe("mod_unloaded", ctx => OnModUnloaded(ctx.TryGet(0, out Mod m) ? m : null)),
+				api.EventAPI.Subscribe("mod_loaded", ctx => OnModLoaded(ctx.TryGet(0, out IMod m) ? m : null)),
+				api.EventAPI.Subscribe("mod_unloaded", ctx => OnModUnloaded(ctx.TryGet(0, out IMod m) ? m : null)),
 			};
 
 			foreach (var m in api.ModAPI.GetMods())
@@ -49,12 +49,12 @@ namespace dev.nox.development {
 			CoreAPI = null;
 		}
 
-		private void OnModLoaded(Mod mod) {
+		private void OnModLoaded(IMod mod) {
 			if (mod == null) return;
 			ModLoadedEvent.Invoke(mod);
 		}
 
-		private void OnModUnloaded(Mod mod) {
+		private void OnModUnloaded(IMod mod) {
 			if (mod == null) return;
 			ModUnloadedEvent.Invoke(mod);
 		}
@@ -157,7 +157,7 @@ namespace dev.nox.development {
 			}
 		}
 
-		private void OnModAdded(Mod mod) {
+		private void OnModAdded(IMod mod) {
 			if (mod == null) return;
 			
 			var modId = mod.GetMetadata().GetId();
@@ -186,7 +186,7 @@ namespace dev.nox.development {
 			userData.LastModified = DateTime.Now;
 		}
 
-		private void OnModRemoved(Mod mod) {
+		private void OnModRemoved(IMod mod) {
 			if (mod == null) return;
 			
 			var modId = mod.GetMetadata().GetId();
@@ -390,7 +390,7 @@ namespace dev.nox.development {
 	}
 
 	public class ModPerformanceMonitor {
-		private readonly Mod _mod;
+		private readonly IMod _mod;
 		private readonly VisualElement _container;
 		private readonly Foldout _foldout;
 		private readonly VisualElement _content;
@@ -409,7 +409,7 @@ namespace dev.nox.development {
 		
 		private const float UpdateInterval = 0.2f;
 
-		public ModPerformanceMonitor(Mod mod, VisualElement container) {
+		public ModPerformanceMonitor(IMod mod, VisualElement container) {
 			_mod = mod;
 			_container = container;
 			_foldout = container.Q<Foldout>("mod-foldout");
@@ -453,7 +453,7 @@ namespace dev.nox.development {
 			PerformanceMonitor.Fill(_graphTexture);
 		}
 
-		public void UpdateMod(Mod mod) {
+		public void UpdateMod(IMod mod) {
 			// Update mod reference if needed
 			UpdateModInfo();
 		}
@@ -470,7 +470,7 @@ namespace dev.nox.development {
 			
 			_lastUpdate = DateTime.UtcNow;
 			
-			var profilers = _mod.GetPerformances();
+			var profilers = _mod.GetProfiler();
 			Array.Sort(profilers, (p1, p2) => string.Compare(p1.GetName(), p2.GetName(), StringComparison.Ordinal));
 			
 			UpdateProfilers(profilers);
@@ -481,7 +481,7 @@ namespace dev.nox.development {
 			}
 		}
 
-		private void UpdateProfilers(Performance[] profilers) {
+		private void UpdateProfilers(Profile[] profilers) {
 			// Remove old profilers
 			var currentNames = profilers.Select(p => p.GetName()).ToHashSet();
 			var toRemove = _profilerMonitors.Keys.Where(k => !currentNames.Contains(k)).ToList();
@@ -532,7 +532,7 @@ namespace dev.nox.development {
 			}
 		}
 
-		private void UpdateSummary(Performance[] profilers) {
+		private void UpdateSummary(Profile[] profilers) {
 			if (profilers.Length == 0) return;
 			
 			var totalTime = profilers.Sum(p => p.Duration.TotalMilliseconds);

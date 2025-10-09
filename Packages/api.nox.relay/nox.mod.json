@@ -24,7 +24,48 @@
     }
   ],
   "contributors": [],
-  "relations": [],
+  "relations": [
+    {
+      "id": "avatar",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "entity",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "network",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "user",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "world",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "session",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "controller",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "microphone",
+      "type": "depends",
+      "version": ">=1.0.0"
+    }
+  ],
   "entrypoints": {
     "main": [
       "api.nox.relay.Main"

@@ -21,7 +21,7 @@ using ISearchRequest = Nox.Avatars.ISearchRequest;
 using ISearchResponse = Nox.Avatars.ISearchResponse;
 
 namespace api.nox.avatar {
-	public class Main : MainModInitializer, IAvatarAPI {
+	public class Main : IMainModInitializer, IAvatarAPI {
 		public static Main           Instance;
 		public        MainModCoreAPI CoreAPI;
 		internal      Network        Network;
@@ -32,22 +32,22 @@ namespace api.nox.avatar {
 		internal INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("network")
-				?.GetEntry<INetworkAPI>();
+				?.GetInstance<INetworkAPI>();
 
 		internal ISearchAPI SearchAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("search")
-				?.GetEntry<ISearchAPI>();
+				?.GetInstance<ISearchAPI>();
 
 		internal IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("user")
-				?.GetEntry<IUserAPI>();
+				?.GetInstance<IUserAPI>();
 
 		internal ITableAPI TableAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("table")
-				?.GetEntry<ITableAPI>();
+				?.GetInstance<ITableAPI>();
 
 		public void OnInitializeMain(MainModCoreAPI api) {
 			Instance = this;

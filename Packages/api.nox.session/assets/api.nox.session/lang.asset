@@ -102,3 +102,23 @@ MonoBehaviour:
       value: "{0}"
     - key: session.main.title
       value: Session Overview
+    - key: terminal.command.respawn.player_not_found
+      value: Local player not found.
+    - key: terminal.command.respawn.success
+      value: '{0} has been respawned at ({1}, {2}, {3}).'
+    - key: terminal.command.players.description
+      value: List all players in the current session with their positions
+    - key: terminal.command.players.short
+      value: List players
+    - key: terminal.command.players.session_not_found
+      value: No active session found.
+    - key: terminal.command.players.no_players
+      value: No players found in the current session.
+    - key: terminal.command.players.header
+      value: 'Players in session ({0} total):'
+    - key: terminal.command.players.entry
+      value: '{0}. {1} at ({2}, {3}, {4}) {5}'
+    - key: terminal.command.players.local
+      value: '[LOCAL]'
+    - key: terminal.command.players.master
+      value: '[MASTER]'

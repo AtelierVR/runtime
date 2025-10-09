@@ -3,7 +3,7 @@ using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 
 namespace api.nox.ui {
-	public class Main : MainModInitializer {
+	public class Main : IMainModInitializer {
 		private       LanguagePack   _lang;
 		public        MainModCoreAPI CoreAPI;
 		public static Main           Instance;

@@ -171,8 +171,10 @@ namespace api.nox.settings.client {
 				var listBox = (await InstantiateAsync(list, cont)).FirstOrDefault();
 				if (!listBox) continue;
 				cont = Reference.GetComponent<RectTransform>("content", listBox);
+				var menu = Page.GetMenu();
 				foreach (var handler in group.Handlers) {
-					var handlerBox = await handler.GetContentAsync(cont) ?? handler.GetContent(cont);
+					var handlerBox = await handler.GetContentAsync(cont, menu) 
+						?? handler.GetContent(cont, menu);
 					if (!handlerBox) {
 						Debug.LogWarning($"Handler {handler.ToID()} does not have content.");
 						continue;

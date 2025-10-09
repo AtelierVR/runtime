@@ -26,7 +26,10 @@ namespace api.nox.user.widget {
 		private TextLanguage      _label;
 
 		private void OnClick()
-			=> Client.UiAPI?.SendGoto(_mid, UserPage.GetStaticKey(), "identifier", GetUserIdentifier());
+			=> Client.UiAPI?.SendGoto(
+				_mid, UserPage.GetStaticKey(),
+				"user", Main.Instance.Network.CurrentUser
+			);
 
 		private static UserIdentifier GetUserIdentifier()
 			=> Main.Instance.Network.CurrentUser?.ToInternalIdentifier();
@@ -112,7 +115,7 @@ namespace api.nox.user.widget {
 				return;
 			}
 
-			var banner = await Main.Instance.NetworkAPI.FetchTexture(url);
+			var banner = await Main.NetworkAPI.FetchTexture(url);
 			if (!banner || banner.height == 0) {
 				_container.SetActive(false);
 				return;
@@ -135,7 +138,7 @@ namespace api.nox.user.widget {
 				return;
 			}
 
-			var thumbnail = await Main.Instance.NetworkAPI.FetchTexture(url);
+			var thumbnail = await Main.NetworkAPI.FetchTexture(url);
 			if (!thumbnail || thumbnail.height == 0) {
 				await UpdateIcon();
 				return;

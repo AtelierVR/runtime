@@ -10,7 +10,7 @@ using Nox.Tables;
 using Nox.Users;
 
 namespace api.nox.table {
-	public class Main : MainModInitializer, ITableAPI {
+	public class Main : IMainModInitializer, ITableAPI {
 		#region Variables
 
 		internal static Main       Instance;
@@ -19,12 +19,12 @@ namespace api.nox.table {
 		internal static INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("network")
-				?.GetEntry<INetworkAPI>();
+				?.GetInstance<INetworkAPI>();
 
 		internal static IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("user")
-				?.GetEntry<IUserAPI>();
+				?.GetInstance<IUserAPI>();
 
 		internal Network Network;
 

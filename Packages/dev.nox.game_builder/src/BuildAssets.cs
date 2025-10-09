@@ -32,7 +32,7 @@ namespace dev.nox.game_builder {
 			return null;
 		}
 
-		public static string[] BuildAsAssetBundle(Mod mod, Platform target, string outputfolder, string buildname) {
+		public static string[] BuildAsAssetBundle(IMod mod, Platform target, string outputfolder, string buildname) {
 			if (!target.IsSupported()) {
 				Logger.LogError("Unsupported platform: " + target.GetPlatformName());
 				return null;
@@ -83,7 +83,7 @@ namespace dev.nox.game_builder {
 				.ToArray();
 		}
 
-		public static AssetBundleBuildResult[] BuildAsAssetBundles(Mod[] mod, Platform target, string outputfolder) {
+		public static AssetBundleBuildResult[] BuildAsAssetBundles(IMod[] mod, Platform target, string outputfolder) {
 			if (!target.IsSupported()) {
 				Logger.LogError("Unsupported platform: " + target.GetPlatformName());
 				return Array.Empty<AssetBundleBuildResult>();
@@ -206,7 +206,7 @@ namespace dev.nox.game_builder {
 		}
 
 		public class AssetBundleBuildResult {
-			public Mod      mod;
+			public IMod      mod;
 			public string[] outputs;
 		}
 	}

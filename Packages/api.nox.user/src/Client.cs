@@ -12,12 +12,11 @@ using Nox.UI.Widgets;
 using UnityEngine;
 
 namespace api.nox.user {
-	public class Client : ClientModInitializer {
+	public class Client : IClientModInitializer {
 		internal static IUiAPI UiAPI
 			=> Main.Instance.CoreAPI.ModAPI
 				.GetMod("ui")
-				.GetClients()
-				.FirstOrDefault() as IUiAPI;
+				.GetInstance<IUiAPI>();
 
 		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object
 			=> string.IsNullOrEmpty(ns)

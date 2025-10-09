@@ -14,21 +14,21 @@ using UnityEngine.XR.Management;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.xr {
-	public class Client : ClientModInitializer {
+	public class Client : IClientModInitializer {
 		internal static Client           Instance;
 		internal static ClientModCoreAPI CoreAPI;
 
 		internal static IUiAPI UiAPI
 			=> CoreAPI.ModAPI.GetMod("ui")
-				?.GetEntry<IUiAPI>();
+				?.GetInstance<IUiAPI>();
 
 		internal static IAvatarAPI AvatarAPI
 			=> CoreAPI.ModAPI.GetMod("avatar")
-				?.GetEntry<IAvatarAPI>();
+				?.GetInstance<IAvatarAPI>();
 
 		internal static IUserAPI UserAPI
 			=> CoreAPI.ModAPI.GetMod("user")
-				?.GetEntry<IUserAPI>();
+				?.GetInstance<IUserAPI>();
 
 		#if UNITY_EDITOR
 		private static bool NoVRFlag {

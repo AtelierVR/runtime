@@ -17,31 +17,31 @@ using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.offline {
-	public class Main : IOfflineAPI, MainModInitializer {
+	public class Main : IOfflineAPI, IMainModInitializer {
 		internal static IEntityAPI EntityAPI
 			=> _instance._coreAPI.ModAPI
 				.GetMod("entity")
-				.GetEntry<IEntityAPI>();
+				.GetInstance<IEntityAPI>();
 				
 		internal static IWorldAPI WorldAPI
 			=> _instance._coreAPI.ModAPI
 				.GetMod("world")
-				.GetEntry<IWorldAPI>();
+				.GetInstance<IWorldAPI>();
 
 		internal static ISessionAPI SessionAPI
 			=> _instance._coreAPI.ModAPI
 				.GetMod("session")
-				.GetEntry<ISessionAPI>();
+				.GetInstance<ISessionAPI>();
 				
 		internal static IUserAPI UserAPI
 			=> _instance._coreAPI.ModAPI
 				.GetMod("user")
-				.GetEntry<IUserAPI>();
+				.GetInstance<IUserAPI>();
 
 		internal static IControllerAPI ControllerAPI
 			=> _instance._coreAPI.ModAPI
 				.GetMod("controller")
-				.GetEntry<IControllerAPI>();
+				.GetInstance<IControllerAPI>();
 				
 		private        MainModCoreAPI      _coreAPI;
 		private static Main                _instance;

@@ -312,7 +312,8 @@ namespace Nox.CCK.Utils {
 			return result.ToArray();
 		}
 
-		public static INoxObject Cast(object obj) {
+		public static INoxObject Cast(object obj)
+		{
 			if (obj is INoxObject noxObj)
 				return noxObj;
 			return null;

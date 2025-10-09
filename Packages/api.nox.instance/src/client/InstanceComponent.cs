@@ -91,7 +91,7 @@ namespace api.nox.instance.client {
 
 			_thumbnailTokenSource = new CancellationTokenSource();
 			if (!string.IsNullOrEmpty(instance?.GetThumbnailUrl())) {
-				var texture = await Main.Instance.NetworkAPI
+				var texture = await Main.NetworkAPI
 					.FetchTexture(instance.GetThumbnailUrl())
 					.AttachExternalCancellation(_thumbnailTokenSource.Token);
 				if (texture) {
@@ -121,8 +121,8 @@ namespace api.nox.instance.client {
 			data.Add("instance", Page.Instance.GetId());
 			data.Add("name", Page.Instance.GetTitle());
 			data.Add("short_name", Page.Instance.GetName());
-			data.Add("thumbnail", Main.Instance.NetworkAPI.FetchTexture(Page.Instance.GetThumbnailUrl()));
-			Main.Instance.SessionAPI.MakeSession(
+			data.Add("thumbnail", Main.NetworkAPI.FetchTexture(Page.Instance.GetThumbnailUrl()));
+			Main.SessionAPI.MakeSession(
 				"external:"
 				+ Page.Instance
 					.GetConnectionData()
@@ -306,11 +306,11 @@ namespace api.nox.instance.client {
 			if (token.IsCancellationRequested)
 				return Array.Empty<(IUser, IPlayer)>();
 
-			var request = Main.Instance.UserAPI
+			var request = Main.UserAPI
 				.MakeSearchRequest()
 				.SetIds(users.Select(p => p.GetIdentifier().GetId()).ToArray());
 
-			var response = await Main.Instance.UserAPI.Search(request, server)
+			var response = await Main.UserAPI.Search(request, server)
 				.AttachExternalCancellation(token);
 			if (token.IsCancellationRequested)
 				return Array.Empty<(IUser, IPlayer)>();

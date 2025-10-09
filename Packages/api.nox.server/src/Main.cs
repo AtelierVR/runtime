@@ -13,7 +13,7 @@ using Nox.Users;
 using UnityEngine.Events;
 
 namespace api.nox.server {
-	public class Main : MainModInitializer, IServerAPI {
+	public class Main : IMainModInitializer, IServerAPI {
 		internal        MainModCoreAPI CoreAPI;
 		internal static Main           Instance;
 
@@ -24,12 +24,12 @@ namespace api.nox.server {
 		internal static INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("network")
-				?.GetEntry<INetworkAPI>();
+				?.GetInstance<INetworkAPI>();
 
 		internal static IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("user")
-				?.GetEntry<IUserAPI>();
+				?.GetInstance<IUserAPI>();
 
 		internal readonly UnityEvent<INoxObject> OnServerUpdated      = new();
 		internal readonly UnityEvent<INoxObject> OnServerFetched      = new();

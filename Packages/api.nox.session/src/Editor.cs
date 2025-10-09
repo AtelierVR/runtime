@@ -4,7 +4,7 @@ using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Mods.Panels;
 
 namespace api.nox.session {
-	public class Editor : EditorModInitializer {
+	public class Editor : IEditorModInitializer {
 		private         SessionsPanel    _sessionsPanel;
 		private static  EditorPanel      _sessionsPanelInstance;
 		internal static EditorModCoreAPI CoreAPI;

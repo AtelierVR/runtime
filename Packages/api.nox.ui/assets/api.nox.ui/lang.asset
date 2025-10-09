@@ -19,3 +19,5 @@ MonoBehaviour:
       value: '{0}'
     - key: empty
       value: ''
+    - key: time
+      value: '{1}:{2}'

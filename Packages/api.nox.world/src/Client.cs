@@ -13,19 +13,17 @@ using Nox.UI.Widgets;
 using UnityEngine;
 
 namespace api.nox.world {
-	public class Client : ClientModInitializer {
+	public class Client : IClientModInitializer {
 		internal static IUiAPI UiAPI
 			=> Main.Instance.CoreAPI.ModAPI
 				.GetMod("ui")
-				.GetClients()
-				.FirstOrDefault() as IUiAPI;
+				.GetInstance<IUiAPI>();
 
 		internal static IInstanceAPI InstanceAPI
 			=> Main.Instance.CoreAPI.ModAPI
 				.GetMod("instance")
-				.GetMains()
-				.FirstOrDefault() as IInstanceAPI;
-		
+				.GetInstance<IInstanceAPI>();
+
 		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object
 			=> string.IsNullOrEmpty(ns)
 				? Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(path)
@@ -61,7 +59,7 @@ namespace api.nox.world {
 			if (page == null) return;
 			Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.GetId(), page);
 		}
-		
+
 		private void OnWidgetRequest(EventData context) {
 			if (!context.TryGet(0, out int mid)) return;
 			if (!context.TryGet(1, out RectTransform tr)) return;
@@ -73,7 +71,7 @@ namespace api.nox.world {
 			foreach (var value in widgets)
 				context.Callback(value.Item2, value.Item1);
 		}
-		
+
 		public void OnDisposeClient() {
 			foreach (var e in _events)
 				CoreAPI.EventAPI.Unsubscribe(e);

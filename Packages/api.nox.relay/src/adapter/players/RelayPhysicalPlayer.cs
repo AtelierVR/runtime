@@ -35,6 +35,8 @@ namespace api.nox.relay {
 
 		public abstract void OnParameter(int key, byte[] value);
 
+		public abstract void SetVoice(AudioClip clip);
+
 		private void Update() {
 			var avatar = GetAvatar();
 			var parameterModule = avatar?.GetDescriptor()
@@ -49,6 +51,7 @@ namespace api.nox.relay {
 					if (data.Item2 == DeliveryType.RemoteModified) continue;
 					if (data.Item1.SequenceEqual(serialized)) continue;
 				}
+
 				Reference.Parameters[param.GetHash()] = (serialized, DeliveryType.LocalModified);
 			}
 		}

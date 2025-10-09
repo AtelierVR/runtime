@@ -73,8 +73,7 @@ namespace api.nox.desktop {
 			=> Client
 				.CoreAPI.ModAPI
 				.GetMod("keybinding")
-				?.GetMains()
-				.FirstOrDefault() as IKeyBindingManager;
+				?.GetInstance<IKeyBindingManager>();
 
 		/// <summary>
 		/// Rebinds all key bindings defined in the Keys array.

@@ -15,7 +15,9 @@
         "Nox.Controllers",
         "Nox.Avatars.Parameters",
         "Nox.Network",
-        "Nox.Worlds.Spawns"
+        "Nox.Worlds.Spawns",
+        "Nox.Avatars.Voice",
+        "Nox.Microphone"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

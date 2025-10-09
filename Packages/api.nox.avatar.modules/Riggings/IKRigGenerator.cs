@@ -1,5 +1,6 @@
 using Nox.Avatars.Rigging;
 using Nox.CCK.Utils;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using Transform = UnityEngine.Transform;
@@ -12,6 +13,7 @@ namespace Nox.CCK.Avatars.Rigging {
 	/// This prevents ambiguous bone references that can cause avatar validation errors.
 	/// </summary>
 	public static class IKRigGenerator {
+		public const string HipsHead   = "IKRig_HipsHead";
 		public const string UpperSpine = "IKRig_UpperSpine";
 		public const string LeftArm    = "IKRig_LeftArm";
 		public const string RightArm   = "IKRig_RightArm";
@@ -22,6 +24,7 @@ namespace Nox.CCK.Avatars.Rigging {
 
 		public static string GetRigFromBone(HumanBodyBones bone)
 			=> bone switch {
+				HumanBodyBones.Hips                                                                      => HipsHead,
 				HumanBodyBones.Chest or HumanBodyBones.Neck or HumanBodyBones.Head                       => UpperSpine,
 				HumanBodyBones.LeftUpperArm or HumanBodyBones.LeftLowerArm or HumanBodyBones.LeftHand    => LeftArm,
 				HumanBodyBones.RightUpperArm or HumanBodyBones.RightLowerArm or HumanBodyBones.RightHand => RightArm,
@@ -34,6 +37,7 @@ namespace Nox.CCK.Avatars.Rigging {
 
 		public static HumanBodyBones GetBoneFromRig(string rig)
 			=> rig switch {
+				HipsHead   => HumanBodyBones.Hips,
 				UpperSpine => HumanBodyBones.Chest,
 				LeftArm    => HumanBodyBones.LeftHand,
 				RightArm   => HumanBodyBones.RightHand,
@@ -47,6 +51,7 @@ namespace Nox.CCK.Avatars.Rigging {
 		public static RigBuilder CreateIKRig(RiggingAvatarModule module) {
 			var rigBuilder = CreateRigBuilder(module);
 			rigBuilder.enabled = false;
+			
 			CreateUpperSpine(module, rigBuilder);
 			CreateLeftArm(module, rigBuilder);
 			CreateRightArm(module, rigBuilder);
@@ -55,6 +60,7 @@ namespace Nox.CCK.Avatars.Rigging {
 			CreateLeftToe(module, rigBuilder);
 			CreateRightToe(module, rigBuilder);
 			UpdateParts(module);
+
 			rigBuilder.enabled = true;
 			return rigBuilder;
 		}
@@ -84,6 +90,13 @@ namespace Nox.CCK.Avatars.Rigging {
 			constraint.data.tip    = module.GetBone(HumanBodyBones.Head);
 			constraint.data.target = module.GetOrAddPart(HumanBodyBones.Head, upperSpine.transform);
 			constraint.data.hint   = module.GetOrAddPart(HumanBodyBones.Neck, upperSpine.transform);
+
+			if (constraint.data.root)
+				constraint.data.root.gameObject.GetOrAddComponent<RigTransform>();
+			if (constraint.data.mid)
+				constraint.data.mid.gameObject.GetOrAddComponent<RigTransform>();
+			if (constraint.data.tip)
+				constraint.data.tip.gameObject.GetOrAddComponent<RigTransform>();
 
 			constraint.data.targetPositionWeight = 1.0f;
 			constraint.data.targetRotationWeight = 1.0f;
@@ -126,6 +139,13 @@ namespace Nox.CCK.Avatars.Rigging {
 			constraint.data.target = module.GetOrAddPart(handBone, arm.transform);
 			constraint.data.hint   = module.GetOrAddPart(lowerBone, arm.transform);
 
+			if (constraint.data.root)
+				constraint.data.root.gameObject.GetOrAddComponent<RigTransform>();
+			if (constraint.data.mid)
+				constraint.data.mid.gameObject.GetOrAddComponent<RigTransform>();
+			if (constraint.data.tip)
+				constraint.data.tip.gameObject.GetOrAddComponent<RigTransform>();
+
 			constraint.data.targetPositionWeight = 1.0f;
 			constraint.data.targetRotationWeight = 1.0f;
 			constraint.data.hintWeight           = 1.0f;
@@ -167,6 +187,13 @@ namespace Nox.CCK.Avatars.Rigging {
 			constraint.data.target = module.GetOrAddPart(footBone, leg.transform);
 			constraint.data.hint   = module.GetOrAddPart(lowerBone, leg.transform);
 
+			if (constraint.data.root)
+				constraint.data.root.gameObject.GetOrAddComponent<RigTransform>();
+			if (constraint.data.mid)
+				constraint.data.mid.gameObject.GetOrAddComponent<RigTransform>();
+			if (constraint.data.tip)
+				constraint.data.tip.gameObject.GetOrAddComponent<RigTransform>();
+
 			constraint.data.targetPositionWeight = 1.0f;
 			constraint.data.targetRotationWeight = 1.0f;
 			constraint.data.hintWeight           = 1.0f;
@@ -200,6 +227,9 @@ namespace Nox.CCK.Avatars.Rigging {
 
 			constraint.data.constrainedObject = module.GetBone(toeBone);
 			constraint.data.sourceObject      = module.GetOrAddPart(toeBone, toe.transform);
+
+			if (constraint.data.constrainedObject)
+				constraint.data.constrainedObject.gameObject.GetOrAddComponent<RigTransform>();
 
 			constraint.data.dampPosition = 0.1f;
 			constraint.data.dampRotation = 0.1f;

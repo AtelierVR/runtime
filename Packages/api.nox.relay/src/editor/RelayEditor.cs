@@ -4,7 +4,7 @@ using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Mods.Panels;
 
 namespace api.nox.relay.editor {
-	public class RelayEditor : EditorModInitializer {
+	public class RelayEditor : IEditorModInitializer {
 		internal static EditorModCoreAPI CoreAPI;
 
 		private static EditorPanel         _listPanel;

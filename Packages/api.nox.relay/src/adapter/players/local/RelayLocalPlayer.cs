@@ -103,5 +103,24 @@ namespace api.nox.relay {
 
 		public override bool HasPhysical()
 			=> _physicalComponent;
+
+		private string _lastVoiceId;
+
+		public void SendVoice() {
+			var voice = Main.MicrophoneAPI.GetCurrent();
+
+			if (voice?.GetName() != _lastVoiceId) {
+				var lastMic = Main.MicrophoneAPI.Get(_lastVoiceId);
+				lastMic?.Stop("relay");
+				_lastVoiceId = voice?.GetName();
+				Logger.Log($"Local player voice changed to: {_lastVoiceId ?? "null"}");
+			}
+
+			var clip = voice?.Start("relay");
+			if (!clip) return;
+
+			var packet = types.Voice.InstanceRequestVoice.CreateRequest(clip);
+			Adapter.Instance.SendVoice(packet).Forget();
+		}
 	}
 }

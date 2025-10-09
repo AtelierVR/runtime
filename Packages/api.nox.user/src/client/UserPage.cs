@@ -46,7 +46,7 @@ namespace api.nox.user.client {
 					return OnPageByIdentifier(menu, context, UserIdentifier.FromString(id2));
 				case "identifier" when T(context, 1, out IUserIdentifier ui0):
 					return OnPageByIdentifier(menu, context, UserIdentifier.FromBase(ui0));
-				case "user" when T(context, 1, out User usr3):
+				case "user" when T(context, 1, out IUser usr3):
 					return OnPageByUser(menu, context, usr3);
 			}
 
@@ -64,11 +64,11 @@ namespace api.nox.user.client {
 			return page;
 		}
 
-		private static UserPage OnPageByUser(IMenu menu, object[] context, User user) {
+		private static UserPage OnPageByUser(IMenu menu, object[] context, IUser user) {
 			return new UserPage {
 				_mId        = menu.GetId(),
 				_context    = context,
-				_identifier = user.ToInternalIdentifier(),
+				_identifier = user.ToIdentifier(),
 				_user       = user
 			};
 		}

@@ -11,7 +11,7 @@ using Nox.CCK.Utils;
 using UnityEngine.UIElements;
 
 namespace dev.nox.development {
-	public class EventLogger : EditorModInitializer {
+	public class EventLogger : IEditorModInitializer {
 		internal static EditorModCoreAPI  CoreAPI;
 		private         EditorPanel       _buildPanel;
 		private         EventSubscription _subLogs;
@@ -141,25 +141,25 @@ namespace dev.nox.development {
 
 		private static string CustomLabel(EventData context)
 			=> context.EventName switch {
-				"mod_initialize" when context.TryGet(0, out Mod mod)
+				"mod_initialize" when context.TryGet(0, out IMod mod)
 					&& context.TryGet(1, out string entry)
 					&& context.TryGet(2, out Enum type)
 					=> $"{context.EventName} [{entry.ToUpper()}]{mod.GetMetadata().GetId()}@{mod.GetMetadata().GetVersion()} => {type}",
-				"mod_post_initialize" when context.TryGet(0, out Mod mod)
+				"mod_post_initialize" when context.TryGet(0, out IMod mod)
 					&& context.TryGet(1, out string entry)
 					&& context.TryGet(2, out Enum type)
 					=> $"{context.EventName} [{entry.ToUpper()}]{mod.GetMetadata().GetId()}@{mod.GetMetadata().GetVersion()} => {type}",
-				"mod_dispose" when context.TryGet(0, out Mod mod)
+				"mod_dispose" when context.TryGet(0, out IMod mod)
 					&& context.TryGet(1, out string entry)
 					&& context.TryGet(2, out Enum type)
 					=> $"{context.EventName} [{entry.ToUpper()}]{mod.GetMetadata().GetId()}@{mod.GetMetadata().GetVersion()} => {type}",
-				"mod_pre_dispose" when context.TryGet(0, out Mod mod)
+				"mod_pre_dispose" when context.TryGet(0, out IMod mod)
 					&& context.TryGet(1, out string entry)
 					&& context.TryGet(2, out Enum type)
 					=> $"{context.EventName} [{entry.ToUpper()}]{mod.GetMetadata().GetId()}@{mod.GetMetadata().GetVersion()} => {type}",
-				"mod_disabled" when context.TryGet(0, out Mod mod) && context.TryGet(1, out string entry)
+				"mod_disabled" when context.TryGet(0, out IMod mod) && context.TryGet(1, out string entry)
 					=> $"{context.EventName} [{entry.ToUpper()}]{mod.GetMetadata().GetId()}@{mod.GetMetadata().GetVersion()}",
-				"mod_enabled" when context.TryGet(0, out Mod mod) && context.TryGet(1, out string entry)
+				"mod_enabled" when context.TryGet(0, out IMod mod) && context.TryGet(1, out string entry)
 					=> $"{context.EventName} [{entry.ToUpper()}]{mod.GetMetadata().GetId()}@{mod.GetMetadata().GetVersion()}",
 				_ => context.EventName
 			};

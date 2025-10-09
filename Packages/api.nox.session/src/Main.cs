@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using api.nox.session.commands;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
@@ -13,7 +14,7 @@ using UnityEngine.Events;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.session {
-	public class Main : MainModInitializer, ISessionAPI {
+	public class Main : IMainModInitializer, ISessionAPI {
 		private readonly List<ISession> _sessions = new();
 		internal         MainModCoreAPI CoreAPI;
 		internal static  Main           Instance;
@@ -21,6 +22,7 @@ namespace api.nox.session {
 		internal         ushort         CurrentId = ushort.MinValue;
 		private          GameObject     _updateHandler;
 		private          LanguagePack   _lang;
+		private          Commands       _commands;
 
 		public static readonly UnityEvent<ISession>           OnSessionAdded   = new();
 		public static readonly UnityEvent<ISession>           OnSessionRemoved = new();
@@ -28,17 +30,19 @@ namespace api.nox.session {
 
 		internal IControllerAPI ControllerAPI
 			=> CoreAPI.ModAPI.GetMod("controller")
-				?.GetMains()
-				.FirstOrDefault() as IControllerAPI;
+				?.GetInstance<IControllerAPI>();
 
 		public void OnInitializeMain(MainModCoreAPI api) {
-			CoreAPI = api;
+			CoreAPI  = api;
+			Instance = this;
 			_lang   = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
 			LanguageManager.AddPack(_lang);
-			Instance = this;
+			_commands = new Commands();
 		}
 
 		public async UniTask OnDisposeMainAsync() {
+			_commands.Dispose();
+			_commands = null;
 			foreach (var session in _sessions.ToArray())
 				await session.Dispose();
 			_sessions.Clear();
@@ -118,6 +122,7 @@ namespace api.nox.session {
 			return _nextId = i;
 		}
 
+		[NoxPublic(NoxAccess.Method)]
 		public bool CanMakeSession(string adapterId, Dictionary<string, object> options = null) {
 			var canMake = false;
 			options ??= new Dictionary<string, object>();
@@ -130,6 +135,7 @@ namespace api.nox.session {
 			}
 		}
 
+		[NoxPublic(NoxAccess.Method)]
 		public ISession MakeSession(string adapterId, Dictionary<string, object> options = null) {
 			if (!CanMakeSession(adapterId, options)) return null;
 			IAdapter adapter = null;

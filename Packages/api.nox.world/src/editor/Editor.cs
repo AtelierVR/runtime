@@ -3,9 +3,10 @@ using System.Linq;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Mods.Panels;
+using Nox.Network;
 
 namespace api.nox.world {
-	public class Editor : EditorModInitializer {
+	public class Editor : IEditorModInitializer {
 		private        WorldLoaderPanel  _loader;
 		private        WorldManagerPanel _manager;
 		private static EditorPanel       _loaderPanel;
@@ -16,12 +17,6 @@ namespace api.nox.world {
 		private         WorldPublisherPanel _publisher;
 		internal static WorldBuilderPanel   Builder;
 		internal static EditorModCoreAPI    CoreAPI;
-
-		internal static MainModInitializer NetworkAPI
-			=> CoreAPI.ModAPI
-				.GetMod("network")
-				.GetMains()
-				.FirstOrDefault();
 
 		public void OnInitializeEditor(EditorModCoreAPI api) {
 			CoreAPI    = api;

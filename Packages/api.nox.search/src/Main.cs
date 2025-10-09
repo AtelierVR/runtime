@@ -8,7 +8,7 @@ using Nox.Search;
 using UnityEngine.Events;
 
 namespace api.nox.search {
-	public class Main : MainModInitializer, ISearchAPI {
+	public class Main : IMainModInitializer, ISearchAPI {
 		internal readonly List<IHandler> Handlers = new();
 		internal static   Main           Instance;
 		internal          IModCoreAPI    CoreAPI;

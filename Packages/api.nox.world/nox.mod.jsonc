@@ -43,6 +43,16 @@
       "id": "table",
       "type": "recommends",
       "version": ">=1.0.0"
+    },
+    {
+      "id": "user",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "instance",
+      "type": "depends",
+      "version": ">=1.0.0"
     }
   ],
   "entrypoints": {

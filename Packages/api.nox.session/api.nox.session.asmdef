@@ -14,7 +14,8 @@
     "Nox.UI",
     "Nox.Instances",
     "Unity.TextMeshPro",
-    "Nox.Worlds.Spawns"
+    "Nox.Worlds.Spawns",
+    "Nox.Terminals"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

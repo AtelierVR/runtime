@@ -42,12 +42,12 @@ namespace api.nox.videoplayer.handlers {
 					return new IResult[] { Result.FromError("Query is not a valid Twitch URL") };
 
 				var response = await YtDl.Extract(FormatUrl(options.GetQuery()), cancellationToken: options.GetCancellation().Token);
-				
+
 				if (response is not { Type: JTokenType.Object })
 					throw new InvalidDataException("Response from yt-dlp is not an object");
 
-				var type      = ToObject(response["_type"], "");
-				var extractor = ToObject(response["extractor"], "unknown");
+				var type      = Global.ToObject(response["_type"], "unknown");
+				var extractor = Global.ToObject(response["extractor"], "unknown");
 				if (extractor != "twitch:stream" && extractor != "twitch")
 					throw new InvalidDataException($"Unexpected extractor: {extractor}");
 
@@ -87,7 +87,7 @@ namespace api.nox.videoplayer.handlers {
 
 			return (from thumb in thumbnails
 				where thumb is { Type: JTokenType.Object }
-				let url = ToObject(thumb["url"], "")
+				let url = Global.ToObject(thumb["url"], "")
 				where !string.IsNullOrWhiteSpace(url)
 				select new Thumbnail { Url = url, Language = null, Resolution = ExtractResolutionFromThumbnailUrl(url) }).ToArray();
 		}
@@ -115,16 +115,6 @@ namespace api.nox.videoplayer.handlers {
 			return new Vector2Int(-1, -1);
 		}
 
-		private static T ToObject<T>(JToken input, T @default) {
-			if (input is { Type: JTokenType.Null })
-				return @default;
-			try {
-				return input.ToObject<T>();
-			} catch {
-				return @default;
-			}
-		}
-
 		private static Format[] ParseFormats(JToken formats) {
 			if (formats is not { Type: JTokenType.Array })
 				return System.Array.Empty<Format>();
@@ -133,8 +123,8 @@ namespace api.nox.videoplayer.handlers {
 				if (format is not { Type: JTokenType.Object })
 					continue;
 
-				var acodec = ToObject(format["acodec"], "none");
-				var vcodec = ToObject(format["vcodec"], "none");
+				var acodec = Global.ToObject(format["acodec"], "none");
+				var vcodec = Global.ToObject(format["vcodec"], "none");
 
 				Format fmt;
 				if (acodec != "none" && vcodec != "none")
@@ -145,25 +135,25 @@ namespace api.nox.videoplayer.handlers {
 					fmt = new VideoFormat();
 				else continue;
 
-				fmt.Url       = ToObject(format["url"], "");
-				fmt.Container = ToObject(format["container"], "");
-				fmt.Language  = ToObject(format["language"], "");
-				fmt.Bitrate   = ToObject(format["tbr"], 0u);
-				fmt.Quality   = ToObject(format["quality"], 0f);
+				fmt.Url       = Global.ToObject(format["url"], "");
+				fmt.Container = Global.ToObject(format["container"], "");
+				fmt.Language  = Global.ToObject(format["language"], "");
+				fmt.Bitrate   = Global.ToObject(format["tbr"], 0u);
+				fmt.Quality   = Global.ToObject(format["quality"], 0f);
 
 				if (fmt is AudioVideoFormat or VideoFormat) {
 					fmt.Resolution = new Vector2Int(
-						ToObject(format["width"], 0),
-						ToObject(format["height"], 0)
+						Global.ToObject(format["width"], 0),
+						Global.ToObject(format["height"], 0)
 					);
-					fmt.Framerate    = ToObject(format["fps"], 0u);
-					fmt.VideoBitrate = ToObject(format["vbr"], 0u);
+					fmt.Framerate    = Global.ToObject(format["fps"], 0u);
+					fmt.VideoBitrate = Global.ToObject(format["vbr"], 0u);
 					fmt.VideoCodec   = vcodec;
-					fmt.DynamicRange = ToObject(format["dynamic_range"], "SDR");
+					fmt.DynamicRange = Global.ToObject(format["dynamic_range"], "SDR");
 				}
 
 				if (fmt is AudioVideoFormat or AudioFormat) {
-					fmt.AudioBitrate = ToObject(format["abr"], 0u);
+					fmt.AudioBitrate = Global.ToObject(format["abr"], 0u);
 					fmt.AudioCodec   = acodec;
 				}
 

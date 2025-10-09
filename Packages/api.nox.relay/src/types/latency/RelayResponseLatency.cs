@@ -25,6 +25,6 @@ namespace api.nox.relay.types.Latency {
 			=> FinalTime - InitialTime;
 
 		public override string ToString()
-			=> $"{GetType().Name}[ping={GetLatency()}ms, up={GetUpLatency()}ms, down={GetDownLatency()}ms]";
+			=> $"{GetType().Name}[ping={GetLatency().TotalMilliseconds}ms, up={GetUpLatency().TotalMilliseconds}ms, down={GetDownLatency().TotalMilliseconds}ms]";
 	}
 }

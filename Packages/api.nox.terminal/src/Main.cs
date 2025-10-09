@@ -7,7 +7,7 @@ using Nox.CCK.Mods.Initializers;
 using Nox.Terminals;
 
 namespace api.nox.terminal {
-	public class Main : MainModInitializer, ITerminalAPI {
+	public class Main : IMainModInitializer, ITerminalAPI {
 		internal        MainModCoreAPI CoreAPI;
 		internal static Main           Instance;
 		private         CommandManager _manager;

@@ -25,7 +25,7 @@ using Logger = Nox.CCK.Utils.Logger;
 using USceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace api.nox.world {
-	public class Main : MainModInitializer, IWorldAPI {
+	public class Main : IMainModInitializer, IWorldAPI {
 		#region Variables
 
 		internal static Main              Instance;
@@ -39,32 +39,32 @@ namespace api.nox.world {
 		internal INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("network")
-				?.GetEntry<INetworkAPI>();
+				?.GetInstance<INetworkAPI>();
 
 		internal IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("user")
-				?.GetEntry<IUserAPI>();
+				?.GetInstance<IUserAPI>();
 
 		internal ISearchAPI SearchAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("search")
-				?.GetEntry<ISearchAPI>();
+				?.GetInstance<ISearchAPI>();
 
 		internal ITableAPI TableAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("table")
-				?.GetEntry<ITableAPI>();
+				?.GetInstance<ITableAPI>();
 
 		internal IOfflineAPI OfflineAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("offline")
-				?.GetEntry<IOfflineAPI>();
+				?.GetInstance<IOfflineAPI>();
 
 		internal ISessionAPI SessionAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("session")
-				?.GetEntry<ISessionAPI>();
+				?.GetInstance<ISessionAPI>();
 
 		public readonly UnityEvent<IWorldDescriptor, Scene> OnWorldLoaded = new();
 

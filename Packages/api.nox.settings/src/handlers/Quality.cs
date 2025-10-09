@@ -1,5 +1,5 @@
 using System.Linq;
-using api.nox.settings.prefabs;
+using Nox.CCK.Settings;
 using Nox.CCK.Utils;
 using UnityEngine;
 
@@ -10,6 +10,9 @@ namespace api.nox.settings.handlers {
 
 		public static string[] GetConfigPath()
 			=> new[] { "settings", "graphic", "quality" };
+
+		protected override GameObject GetPrefab()
+			=> Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/dropdown.prefab");
 
 		public Quality() {
 			SetLabel($"settings.entry.{string.Join(".", GetPath())}.label");

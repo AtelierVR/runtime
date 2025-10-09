@@ -9,7 +9,7 @@ using Nox.Users;
 using UnityEngine.Device;
 
 namespace api.nox.discord {
-	public class DiscordSystem : MainModInitializer {
+	public class DiscordSystem : IMainModInitializer {
 		internal static MainModCoreAPI   CoreAPI;
 		private         DiscordRpcClient _client;
 
@@ -18,12 +18,12 @@ namespace api.nox.discord {
 		internal static IUserAPI UserAPI
 			=> CoreAPI.ModAPI
 				.GetMod("user")
-				?.GetEntry<IUserAPI>();
+				?.GetInstance<IUserAPI>();
 
 		private EventSubscription _userFetchSub;
 
 		private static string GetDllPath() {
-			var mod    = CoreAPI.ModAPI.GetMod(CoreAPI.ModMetadata.GetId());
+			var mod    = CoreAPI.ModAPI.GetSelf();
 			var folder = mod.GetData("folder", "");
 			if (string.IsNullOrEmpty(folder))
 				throw new NullReferenceException();

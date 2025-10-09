@@ -14,7 +14,7 @@ namespace Nox.ModLoader.Cores.Events {
 			_mod     = mod;
 			_channel = channel;
 		}
-		
+
 		// ReSharper disable Unity.PerformanceAnalysis
 		private void Receive(EventContext context) {
 			var data = new EventData {
@@ -22,7 +22,7 @@ namespace Nox.ModLoader.Cores.Events {
 				Data             = context.Data,
 				InternalSource   = context.Source,
 				SourceChannel    = context.Channel,
-				CallbackFunction = context.Callback ?? (_ => { })
+				CallbackFunction = context.Callback ?? (_ => _mod.CoreAPI.LoggerAPI.LogDebug($"Event {context.EventName} had no callback function set."))
 			};
 			foreach (var sub in _subscriptions.ToArray())
 				if (sub.EventName == null || sub.EventName == context.EventName)
@@ -30,19 +30,19 @@ namespace Nox.ModLoader.Cores.Events {
 						sub.Callback(data);
 					} catch (Exception e) {
 						Logger.LogError($"Error while invoking event callback: {e} of event {context.EventName}");
+						Logger.LogException(e);
 					}
 		}
 
 		private void Emit(EventContext context) {
-			var ncontext = new EventContext(context) { CurrentChannel = _channel, Source = _mod };
-			var mod      = context.Destination != null ? _mod.CoreAPI.LocalModAPI.GetInternalMod(context.Destination) : null;
+			var ctx = new EventContext(context) { CurrentChannel = _channel, Source = _mod };
+			var mod = context.Destination != null ? ModManager.GetMod(context.Destination) : null;
 			if (mod != null)
-				mod.CoreAPI.LocalEventAPI.Receive(ncontext);
+				mod.CoreAPI.LocalEventAPI.Receive(ctx);
 			else
-				foreach (var imod in _mod.CoreAPI.LocalModAPI.GetInternalMods()) {
+				foreach (var imod in ModManager.GetMods())
 					if (context.Channel.HasFlag(CCK.Mods.Events.EventEntryFlags.Main))
-						imod.CoreAPI?.LocalEventAPI.Receive(ncontext);
-				}
+						imod.CoreAPI?.LocalEventAPI.Receive(ctx);
 		}
 
 		public void Emit(CCK.Mods.Events.EventContext context)
@@ -200,7 +200,7 @@ namespace Nox.ModLoader.Cores.Events {
 
 		public ModLoader.Mods.Mod InternalSource { get; internal set; }
 
-		public Mod Source
+		public IMod Source
 			=> InternalSource;
 
 		public void Callback(params object[] args)

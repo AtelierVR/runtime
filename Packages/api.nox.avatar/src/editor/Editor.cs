@@ -9,7 +9,7 @@ using Nox.CCK.Utils;
 using Nox.Users;
 
 namespace api.nox.avatar {
-	public class Editor : EditorModInitializer {
+	public class Editor : IEditorModInitializer {
 		internal static EditorModCoreAPI     CoreAPI;
 		private         LanguagePack         _lang;
 		internal static AvatarBuilderPanel   Builder;
@@ -20,8 +20,7 @@ namespace api.nox.avatar {
 		public static IUserAPI UserAPI
 			=> CoreAPI.ModAPI
 				.GetMod("user")
-				.GetMains()
-				.FirstOrDefault() as IUserAPI;
+				?.GetInstance<IUserAPI>();
 
 		public void OnInitializeEditor(EditorModCoreAPI api) {
 			CoreAPI = api;

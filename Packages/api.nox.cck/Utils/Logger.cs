@@ -165,7 +165,7 @@ namespace Nox.CCK.Utils {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		public static void OnLog(LogType type, object message, Object context = null, string tag = null) {
-			if (type == LogType.Debug && !Config.Load().Get(new[] { "debug_logging" }, Application.isEditor))
+			if (type == LogType.Debug && !Config.Load().Get("debug.logging", Application.isEditor))
 				return;
 
 			message ??= "<null>";

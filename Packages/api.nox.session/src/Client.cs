@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using api.nox.session.client;
 using api.nox.session.client.handlers;
+using api.nox.session.widget;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
@@ -9,20 +11,15 @@ using Nox.CCK.Mods.Initializers;
 using Nox.Instances;
 using Nox.Sessions;
 using Nox.UI;
+using Nox.UI.Widgets;
+using UnityEngine;
 
 namespace api.nox.session {
-	public class Client : ClientModInitializer {
+	public class Client : IClientModInitializer {
 		internal static IUiAPI UiAPI
 			=> Main.Instance.CoreAPI.ModAPI
 				.GetMod("ui")
-				.GetClients()
-				.FirstOrDefault() as IUiAPI;
-
-		internal static IInstanceAPI InstanceAPI
-			=> Main.Instance.CoreAPI.ModAPI
-				.GetMod("instance")
-				.GetMains()
-				.FirstOrDefault() as IInstanceAPI;
+				.GetInstance<IUiAPI>();
 
 		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object
 			=> string.IsNullOrEmpty(ns)
@@ -45,6 +42,8 @@ namespace api.nox.session {
 			_events = new[] {
 				CoreAPI.EventAPI.Subscribe("menu_goto", OnGoto),
 				CoreAPI.EventAPI.Subscribe("session_handlers_request", OnHandlerRequest),
+				CoreAPI.EventAPI.Subscribe("widget_request", OnWidgetRequest),
+				CoreAPI.EventAPI.Subscribe("respawn", RespawnWidget.OnRespawn)
 			};
 		}
 
@@ -58,6 +57,18 @@ namespace api.nox.session {
 				page = SessionPage.OnGotoAction(menu, context.Data[2..]);
 			if (page == null) return;
 			Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.GetId(), page);
+		}
+
+		private static void OnWidgetRequest(EventData context) {
+			if (!context.TryGet(0, out int mid)) return;
+			if (!context.TryGet(1, out RectTransform tr)) return;
+			var menu = UiAPI?.Get<IMenu>(mid);
+			if (menu == null) return;
+			List<(GameObject, IWidget)> widgets = new();
+			if (RespawnWidget.TryMake(menu, tr, out var widget))
+				widgets.Add(widget);
+			foreach (var value in widgets)
+				context.Callback(value.Item2, value.Item1);
 		}
 
 

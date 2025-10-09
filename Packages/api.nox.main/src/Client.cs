@@ -9,27 +9,26 @@ using UnityEngine.Scripting;
 
 namespace api.nox.main {
 	[Preserve]
-	public class Client : ClientModInitializer {
+	public class Client : IClientModInitializer {
 		private static ClientModCoreAPI _coreAPI;
 
 		public void OnInitializeClient(ClientModCoreAPI api)
 			=> _coreAPI = api;
-
-
-		private static T GetMainClass<T>(string id) where T : class
-			=> _coreAPI.ModAPI
-				.GetMod(id)
-				.GetMains()
-				.FirstOrDefault() as T;
-
+		
 		private static IWorldAPI WorldAPI
-			=> GetMainClass<IWorldAPI>("world");
+			=> _coreAPI.ModAPI
+				.GetMod("world")
+				?.GetInstance<IWorldAPI>();
 
 		private static IOfflineAPI OfflineAPI
-			=> GetMainClass<IOfflineAPI>("offline");
+			=> _coreAPI.ModAPI
+				.GetMod("offline")
+				?.GetInstance<IOfflineAPI>();
 
 		private static ISessionAPI SessionAPI
-			=> GetMainClass<ISessionAPI>("session");
+			=> _coreAPI.ModAPI
+				.GetMod("session")
+				?.GetInstance<ISessionAPI>();
 
 		public async UniTask OnPostInitializeClientAsync() {
 			var world = await WorldAPI.LoadFromAssets(
@@ -41,7 +40,5 @@ namespace api.nox.main {
 			var session = SessionAPI.New(adapter);
 			await session.SetCurrent();
 		}
-
-		public void OnDisposeClient() { }
 	}
 }

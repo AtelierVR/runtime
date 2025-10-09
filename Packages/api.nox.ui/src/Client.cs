@@ -1,11 +1,13 @@
-﻿using Nox.CCK.Language;
+﻿using api.nox.ui.modals;
+using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.UI;
+using Nox.UI.modals;
 using UnityEngine;
 
 namespace api.nox.ui {
-	public class Client : IUiAPI, ClientModInitializer {
+	public class Client : IUiAPI, IClientModInitializer {
 		internal        MenuManager      Manager;
 		private         PageManager      _pages;
 		public          ClientModCoreAPI CoreAPI;
@@ -48,5 +50,12 @@ namespace api.nox.ui {
 
 		public void SendDisplay(int menuId, IPage page)
 			=> PageManager.SendDisplay(menuId, page);
+
+		public IModalBuilder MakeModal(IMenu menu) {
+			if (menu is IModalMenu m)
+				return new ModalBuilder(m);
+			Debug.LogError($"Menu {menu} is not a modal menu");
+			return null;
+		}
 	}
 }

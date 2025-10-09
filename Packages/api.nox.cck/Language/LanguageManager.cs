@@ -105,6 +105,11 @@ namespace Nox.CCK.Language {
 		}
 
 		public static void AddPack(LanguagePack pack) {
+			if (!pack || LanguagePacks.Contains(pack)) return;
+			pack.languages ??= Array.Empty<LanguagePack.LanguageData>();
+			pack.languages = pack.languages
+				.Where(l => l != null && !string.IsNullOrEmpty(l.IETF) && l.entries != null)
+				.ToArray();
 			LanguagePacks.Add(pack);
 			OnPackListUpdated.Invoke();
 		}

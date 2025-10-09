@@ -4,7 +4,7 @@ using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Mods.Panels;
 
 namespace api.nox.keybinding {
-	public class KeyBindingEditor : EditorModInitializer {
+	public class KeyBindingEditor : IEditorModInitializer {
 		internal static EditorModCoreAPI CoreAPI;
 
 		private static EditorPanel     _kbPanel;

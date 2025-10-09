@@ -28,7 +28,7 @@ namespace Nox.CCK.Mods.Events {
 	public interface EventData {
 		public string          EventName { get; }
 		public object[]        Data      { get; }
-		public Mod             Source    { get; }
+		public IMod             Source    { get; }
 		public void            Callback(params object[] args);
 		public EventEntryFlags SourceChannel { get; }
 

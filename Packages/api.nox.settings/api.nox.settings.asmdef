@@ -7,7 +7,7 @@
         "Nox.Settings",
         "Nox.Controllers",
         "Nox.UI",
-        "Unity.TextMeshPro"
+        "Nox.CCK.Settings"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

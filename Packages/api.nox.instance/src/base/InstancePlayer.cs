@@ -9,7 +9,7 @@ namespace api.nox.instance {
 		public string display;
 		
 		public IUserIdentifier GetIdentifier()
-			=> Main.Instance.UserAPI.Make(user);
+			=> Main.UserAPI.Make(user);
 
 		public string GetDisplay()
 			=> display;

@@ -6,12 +6,11 @@ using Nox.CCK.Mods.Initializers;
 using Nox.UI;
 
 namespace api.nox.instance {
-	public class Client : ClientModInitializer {
+	public class Client : IClientModInitializer {
 		internal static IUiAPI UiAPI
 			=> Main.Instance.CoreAPI.ModAPI
 				.GetMod("ui")
-				.GetClients()
-				.FirstOrDefault() as IUiAPI;
+				.GetInstance<IUiAPI>();
 
 		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object
 			=> string.IsNullOrEmpty(ns)

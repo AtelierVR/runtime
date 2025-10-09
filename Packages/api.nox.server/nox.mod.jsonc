@@ -1,7 +1,10 @@
 {
   "type": "mod",
   "id": "api.nox.server",
-  "provides": [],
+  "provides": [
+    "fr.hactazia.server",
+    "server"
+  ],
   "name": "Server Information",
   "version": "1.0.0",
   "description": "Provides the Test API for the game.",

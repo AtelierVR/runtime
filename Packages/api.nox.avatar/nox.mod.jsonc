@@ -32,17 +32,22 @@
     },
     {
       "id": "ui",
-      "type": "recommends",
+      "type": "depends",
       "version": ">=1.0.0"
     },
     {
       "id": "search",
-      "type": "recommends",
+      "type": "depends",
       "version": ">=1.0.0"
     },
     {
       "id": "table",
-      "type": "recommends",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "user",
+      "type": "depends",
       "version": ">=1.0.0"
     }
   ],

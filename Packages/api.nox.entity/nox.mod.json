@@ -24,13 +24,7 @@
     }
   ],
   "contributors": [],
-  "relations": [
-    {
-      "id": "keybinding",
-      "type": "depends",
-      "version": ">=0.0.0"
-    }
-  ],
+  "relations": [],
   "entrypoints": {
     "main": [
       "api.nox.entity.Main"

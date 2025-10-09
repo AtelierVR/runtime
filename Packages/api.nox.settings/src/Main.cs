@@ -9,7 +9,7 @@ using Nox.Settings;
 using UnityEngine.Events;
 
 namespace api.nox.settings {
-	public class Main : MainModInitializer, ISettingAPI {
+	public class Main : IMainModInitializer, ISettingAPI {
 		internal static readonly List<IHandler> Handlers = new();
 		public static            Main           Instance;
 		public                   MainModCoreAPI CoreAPI;
@@ -18,7 +18,7 @@ namespace api.nox.settings {
 		public static IControllerAPI ControllerAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("controller")
-				.GetEntry<IControllerAPI>();
+				.GetInstance<IControllerAPI>();
 
 		internal static readonly UnityEvent<IHandler> OnHandlerAdded   = new();
 		internal static readonly UnityEvent<IHandler> OnHandlerRemoved = new();

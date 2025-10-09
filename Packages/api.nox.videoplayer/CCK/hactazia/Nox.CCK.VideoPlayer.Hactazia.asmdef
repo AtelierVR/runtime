@@ -1,0 +1,26 @@
+{
+    "name": "Nox.CCK.VideoPlayer.Hactazia",
+    "rootNamespace": "",
+    "references": [
+        "Nox.CCK",
+        "UniTask",
+        "Nox.VideoPlayer",
+        "Nox.CCK.VideoPlayer",
+        "Hactazia.VideoPlayer"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "fr.hactazia.videoplayer",
+            "expression": "",
+            "define": "HAS_HACTAZIA_VIDEOPLAYER"
+        }
+    ],
+    "noEngineReferences": false
+}

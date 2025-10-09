@@ -1,7 +1,7 @@
 using UnityEngine;
 
 namespace Nox.Avatars.Rigging {
-	public interface IRiggingModule {
+	public interface IRiggingModule: IAvatarModule {
 		public Transform GetAnchor();
 
 		public Transform GetPart(HumanBodyBones bone);

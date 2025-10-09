@@ -5,30 +5,26 @@ using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
+using Nox.Jint;
 using Nox.Worlds;
 
 namespace api.nox.session.jint {
-	public class Main : MainModInitializer {
+	public class Main : IMainModInitializer {
 		internal static MainModCoreAPI      CoreAPI;
-		internal static Main                Instance;
 		private         EventSubscription[] _events = Array.Empty<EventSubscription>();
 
-		public static string GetModulePath() {
-			var folder = Path.Combine(Constants.ConfigPath, "jint_modules");
-			if (!Directory.Exists(folder))
-				Directory.CreateDirectory(folder);
-			return folder;
-		}
-		
-		internal static MainModInitializer WorldAPI
-			=> CoreAPI.ModAPI.GetMod("world").GetMains().FirstOrDefault();
+		internal static IWorldAPI WorldAPI
+			=> CoreAPI.ModAPI
+				.GetMod("world")
+				.GetInstance<IWorldAPI>();
 
-		internal static MainModInitializer JintAPI
-			=> CoreAPI.ModAPI.GetMod("jint").GetMains().FirstOrDefault();
+		internal static IJintAPI JintAPI
+			=> CoreAPI.ModAPI
+				.GetMod("jint")
+				.GetInstance<IJintAPI>();
 
 		public void OnInitializeMain(MainModCoreAPI api) {
 			CoreAPI  = api;
-			Instance = this;
 			_events = new[] {
 				api.EventAPI.Subscribe("world_check_request", OnCheckRequest),
 			};
@@ -47,7 +43,6 @@ namespace api.nox.session.jint {
 				CoreAPI.EventAPI.Unsubscribe(e);
 			_events  = Array.Empty<EventSubscription>();
 			CoreAPI  = null;
-			Instance = null;
 		}
 	}
 }

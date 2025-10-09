@@ -9,7 +9,7 @@ using UnityEngine.EventSystems;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.controller {
-	public class Main : IControllerAPI, MainModInitializer {
+	public class Main : IControllerAPI, IMainModInitializer {
 		public static Main Instance { get; private set; }
 
 		private IController    _current;

@@ -50,7 +50,7 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		public object Get() {
-			if (_rigBuilder == null) return 0f;
+			if (!_rigBuilder) return 0f;
 
 			foreach (var layer in _rigBuilder.layers) {
 				if (!layer.rig || !layer.rig.name.Contains(_rigName)) continue;
@@ -93,16 +93,6 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 					constraint.data = data;
 				}
 			}
-		}
-
-		public T GetValue<T>() {
-			var val = Get();
-			if (val is T result) return result;
-			return default(T);
-		}
-
-		public void SetValue<T>(T value) {
-			Set((object)value);
 		}
 	}
 }

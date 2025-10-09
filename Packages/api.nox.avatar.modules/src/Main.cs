@@ -5,13 +5,14 @@ using Nox.CCK.Avatars.EyeLooks;
 using Nox.CCK.Avatars.Parameters;
 using Nox.CCK.Avatars.Playable;
 using Nox.CCK.Avatars.Rigging;
+using Nox.CCK.Avatars.Voice;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
 using UnityEngine;
 
 namespace api.nox.avatar.modules {
-	public class Main : MainModInitializer {
+	public class Main : IMainModInitializer {
 		internal static MainModCoreAPI      CoreAPI;
 		private         EventSubscription[] _events;
 
@@ -20,8 +21,8 @@ namespace api.nox.avatar.modules {
 			_events = new[] {
 				api.EventAPI.Subscribe("avatar_check_request", OnCheckRequest),
 			};
-			PlayableAvatarModule.GetAssetController = () => CoreAPI.AssetAPI
-				.GetAsset<RuntimeAnimatorController>("avatar", "animations/Default.controller");
+			PlayableAvatarModule.GetAssetController = () 
+				=> CoreAPI.AssetAPI.GetAsset<RuntimeAnimatorController>("avatar", "animations/Default.controller");
 		}
 
 		private static void OnCheckRequest(EventData context) {
@@ -33,6 +34,7 @@ namespace api.nox.avatar.modules {
 			valid &= PlayableAvatarModule.Check(descriptor);
 			valid &= RiggingAvatarModule.Check(descriptor);
 			valid &= EyeLookAvatarModule.Check(descriptor);
+			valid &= VoiceAvatarModule.Check(descriptor);
 			context.Callback(valid);
 		}
 

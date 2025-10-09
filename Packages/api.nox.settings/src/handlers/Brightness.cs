@@ -1,10 +1,14 @@
-using api.nox.settings.prefabs;
+using Nox.CCK.Settings;
 using Nox.CCK.Utils;
+using UnityEngine;
 
 namespace api.nox.settings.handlers {
 	public sealed class Brightness : RangeHandler {
 		public override string[] GetPath()
 			=> new[] { "accessibility", "visual", "brightness" };
+
+		public override GameObject GetPrefab()
+			=> Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/range.prefab");
 
 		public Brightness() {
 			SetRange(0.2f, 1f);

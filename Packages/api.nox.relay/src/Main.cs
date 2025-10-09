@@ -11,6 +11,7 @@ using Nox.Avatars;
 using Nox.CCK.Mods.Events;
 using Nox.Controllers;
 using Nox.Entities;
+using Nox.Microphone;
 using Nox.Network;
 using Nox.Sessions;
 using Nox.Users;
@@ -19,7 +20,7 @@ using UnityEngine.Events;
 using Random = UnityEngine.Random;
 
 namespace api.nox.relay {
-	public class Main : MainModInitializer {
+	public class Main : IMainModInitializer {
 		public readonly List<Connection>    Connections = new();
 		public static   Main                Instance;
 		internal        MainModCoreAPI      CoreAPI;
@@ -28,37 +29,42 @@ namespace api.nox.relay {
 		internal static IEntityAPI EntityAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("entity")
-				.GetEntry<IEntityAPI>();
+				.GetInstance<IEntityAPI>();
 
 		internal static INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("network")
-				.GetEntry<INetworkAPI>();
+				.GetInstance<INetworkAPI>();
 
 		internal static IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("user")
-				.GetEntry<IUserAPI>();
+				.GetInstance<IUserAPI>();
 
 		internal static IWorldAPI WorldAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("world")
-				.GetEntry<IWorldAPI>();
+				.GetInstance<IWorldAPI>();
 
 		internal static IAvatarAPI AvatarAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("avatar")
-				.GetEntry<IAvatarAPI>();
+				.GetInstance<IAvatarAPI>();
 
 		internal static ISessionAPI SessionAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("session")
-				.GetEntry<ISessionAPI>();
+				.GetInstance<ISessionAPI>();
 
 		internal static IControllerAPI ControllerAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("controller")
-				.GetEntry<IControllerAPI>();
+				.GetInstance<IControllerAPI>();
+
+		internal static IMicrophoneAPI MicrophoneAPI
+			=> Instance.CoreAPI.ModAPI
+				.GetMod("microphone")
+				.GetInstance<IMicrophoneAPI>();
 
 		public static UnityEvent<Connection> OnConnectionAdded   = new();
 		public static UnityEvent<Connection> OnConnectionRemoved = new();

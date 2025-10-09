@@ -18,7 +18,7 @@ namespace api.nox.user.network {
 		}
 
 		public async UniTask<CurrentUser> FetchCurrent() {
-			if (Main.Instance.NetworkAPI == null)
+			if (Main.NetworkAPI == null)
 				return null;
 			var address = ServerAddress;
 			if (string.IsNullOrEmpty(address)) {
@@ -26,7 +26,7 @@ namespace api.nox.user.network {
 				return null;
 			}
 
-			var request = Main.Instance.NetworkAPI.MakeRequest();
+			var request = Main.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, "/api/users/@me");
 			await request.Send();
 			var response = request.GetMasterResponse<CurrentUser>();
@@ -76,7 +76,7 @@ namespace api.nox.user.network {
 			=> Fetch(id.ToString(), from);
 
 		public async UniTask<User> Fetch(string identifier, string from = null) {
-			if (Main.Instance.NetworkAPI == null)
+			if (Main.NetworkAPI == null)
 				return null;
 			var ide = UserIdentifier.FromString(identifier);
 			if (ide.IsLocal())
@@ -87,7 +87,7 @@ namespace api.nox.user.network {
 				return null;
 			}
 
-			var request = Main.Instance.NetworkAPI.MakeRequest();
+			var request = Main.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, $"/api/users/{ide.ToString()}");
 			await request.Send();
 			var response = request.GetMasterResponse<User>();
@@ -102,7 +102,7 @@ namespace api.nox.user.network {
 		}
 
 		public async UniTask<SearchResponse> Search(SearchRequest data, string from = null) {
-			if (Main.Instance.NetworkAPI == null)
+			if (Main.NetworkAPI == null)
 				return null;
 			var address = from ?? CurrentUser?.GetServerAddress() ?? ServerAddress;
 			if (string.IsNullOrEmpty(address)) {
@@ -110,7 +110,7 @@ namespace api.nox.user.network {
 				return null;
 			}
 
-			var request = Main.Instance.NetworkAPI.MakeRequest();
+			var request = Main.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, $"/api/users?{data.ToParams()}");
 			await request.Send();
 			var response = request.GetMasterResponse<SearchResponse>();
@@ -128,7 +128,7 @@ namespace api.nox.user.network {
 		}
 
 		public async UniTask<bool> Logout() {
-			if (Main.Instance.NetworkAPI == null)
+			if (Main.NetworkAPI == null)
 				return false;
 
 			var address = ServerAddress;
@@ -137,7 +137,7 @@ namespace api.nox.user.network {
 				return false;
 			}
 
-			var request = Main.Instance.NetworkAPI.MakeRequest();
+			var request = Main.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, "/api/auth/logout");
 			await request.Send();
 
@@ -169,14 +169,14 @@ namespace api.nox.user.network {
 		}
 
 		public async UniTask<LoginResponse> Login(LoginRequest form, string address) {
-			if (Main.Instance.NetworkAPI == null)
+			if (Main.NetworkAPI == null)
 				return new LoginResponse { Error = "Network API is not initialized." };
 			if (string.IsNullOrEmpty(address)) {
 				Logger.LogError("Cannot logout: no server address provided.");
 				return new LoginResponse { Error = "No server address provided." };
 			}
 
-			var request = Main.Instance.NetworkAPI.MakeRequest();
+			var request = Main.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, "/api/auth/login");
 			request.SetBody(form.ToJson(), "application/json");
 			request.SetMethod("POST");
@@ -213,7 +213,7 @@ namespace api.nox.user.network {
 		}
 
 		public async UniTask<IntegrityResponse> CreateIntegrity(string server) {
-			if (Main.Instance.NetworkAPI == null)
+			if (Main.NetworkAPI == null)
 				return new IntegrityResponse { Error = "Network API is not initialized." };
 			var address = ServerAddress;
 			if (string.IsNullOrEmpty(address)) {
@@ -221,7 +221,7 @@ namespace api.nox.user.network {
 				return new IntegrityResponse { Error = "No server address provided." };
 			}
 
-			var request = Main.Instance.NetworkAPI.MakeRequest();
+			var request = Main.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, "/api/users/@me/integrity");
 			request.SetBody(
 				new JObject {
@@ -251,7 +251,7 @@ namespace api.nox.user.network {
 		}
 
 		public async UniTask<AuthToken> GetToken(string server) {
-			if (Main.Instance.NetworkAPI == null)
+			if (Main.NetworkAPI == null)
 				return null;
 
 			if (string.IsNullOrEmpty(server)) {
@@ -302,7 +302,7 @@ namespace api.nox.user.network {
 		}
 
 		public async UniTask<SendVerificationCodeResponse> SendVerificationCode(string type, string from = null) {
-			if (Main.Instance.NetworkAPI == null)
+			if (Main.NetworkAPI == null)
 				return new SendVerificationCodeResponse { success = false, message = "Network API is not initialized." };
 
 			var address = from ?? CurrentUser?.GetServerAddress() ?? ServerAddress;
@@ -311,7 +311,7 @@ namespace api.nox.user.network {
 				return new SendVerificationCodeResponse { success = false, message = "No server address provided." };
 			}
 
-			var request = Main.Instance.NetworkAPI.MakeRequest();
+			var request = Main.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, $"/api/auth/{type}/send");
 			await request.Send();
 			var response = request.GetMasterResponse<SendVerificationCodeResponse>();
@@ -326,7 +326,7 @@ namespace api.nox.user.network {
 		}
 
 		public async UniTask<CurrentUser> UpdateCurrentUser(UpdateCurrentUserRequest data, string from = null) {
-			if (Main.Instance.NetworkAPI == null)
+			if (Main.NetworkAPI == null)
 				return null;
 
 			var address = from ?? CurrentUser?.GetServerAddress() ?? ServerAddress;
@@ -335,7 +335,7 @@ namespace api.nox.user.network {
 				return null;
 			}
 
-			var request = Main.Instance.NetworkAPI.MakeRequest();
+			var request = Main.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, "/api/users/@me");
 			request.SetBody(data.ToJson(), "application/json");
 			request.SetMethod("POST");

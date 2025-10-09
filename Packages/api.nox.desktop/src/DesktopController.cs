@@ -43,7 +43,9 @@ namespace api.nox.desktop {
 		/// Get the proxy mod API.
 		/// </summary>
 		private static IControllerAPI ControllerAPI
-			=> Client.CoreAPI.ModAPI.GetMod("controller").GetMains().FirstOrDefault() as IControllerAPI;
+			=> Client.CoreAPI.ModAPI
+				.GetMod("controller")
+				.GetInstance<IControllerAPI>();
 
 		/// <summary>
 		/// Check if the current proxy is better than Desktop proxy.
@@ -438,6 +440,9 @@ namespace api.nox.desktop {
 					case "rig/ik/upper_spine/position_weight":
 					case "rig/ik/upper_spine/hint_weight":
 						param.Set(0f);
+						break;
+					case "rig/ik/head/target":
+						param.Set(true);
 						break;
 				}
 			}

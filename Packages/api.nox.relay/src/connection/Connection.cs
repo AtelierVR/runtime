@@ -62,6 +62,7 @@ namespace api.nox.relay.connection {
 				case ResponseType.AvatarParams:
 				case ResponseType.Traveling:
 				case ResponseType.Teleport:
+				case ResponseType.Voice:
 					var iid      = buffer.ReadByte();
 					var instance = Instances.FirstOrDefault(x => x.InternalId == iid);
 					if (instance != null)
@@ -217,10 +218,7 @@ namespace api.nox.relay.connection {
 
 		public async UniTask<types.Latency.RelayResponseLatency> RequestLatency()
 			=> _lastLatency = await Request<types.Latency.RelayResponseLatency>(
-				new types.Latency.RelayRequestLatency {
-					ConnectionId = Id,
-					InitialTime  = DateTime.UtcNow
-				},
+				types.Latency.RelayRequestLatency.Now(Id),
 				RequestType.Latency,
 				ResponseType.Latency,
 				NextState()

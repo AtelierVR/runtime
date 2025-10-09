@@ -15,42 +15,37 @@ using ISearchRequest = Nox.Instances.ISearchRequest;
 using ISearchResponse = Nox.Instances.ISearchResponse;
 
 namespace api.nox.instance {
-	public class Main : MainModInitializer, IInstanceAPI {
+	public class Main : IMainModInitializer, IInstanceAPI {
 		internal static Main           Instance;
 		internal        MainModCoreAPI CoreAPI;
 		internal        Network        Network;
 		private         LanguagePack   _language;
 		private         Search         _search;
 
-		internal INetworkAPI NetworkAPI
+		internal static INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("network")
-				?.GetMains()
-				.FirstOrDefault() as INetworkAPI;
+				?.GetInstance<INetworkAPI>();
 
-		internal IUserAPI UserAPI
+		internal static IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("user")
-				?.GetMains()
-				.FirstOrDefault() as IUserAPI;
+				?.GetInstance<IUserAPI>();
 
-		internal IWorldAPI WorldAPI
+		internal static IWorldAPI WorldAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("world")
-				?.GetMains()
-				.FirstOrDefault() as IWorldAPI;
+				?.GetInstance<IWorldAPI>();
 
-		internal ISearchAPI SearchAPI
+		internal static ISearchAPI SearchAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("search")
-				.GetMains()
-				.FirstOrDefault() as ISearchAPI;
-		
-		internal ISessionAPI SessionAPI
+				?.GetInstance<ISearchAPI>();
+
+		internal static ISessionAPI SessionAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("session")
-				.GetMains()
-				.FirstOrDefault() as ISessionAPI;
+				?.GetInstance<ISessionAPI>();
 
 		public async UniTask<IInstance> Fetch(IInstanceIdentifier identifier)
 			=> await Network.Fetch(InstanceIdentifier.FromBase(identifier));

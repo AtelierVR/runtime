@@ -5,9 +5,11 @@ using System.Threading;
 using Autohand;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
+using Nox.Avatars.Camera;
 using Nox.Avatars.Controllers;
 using Nox.Avatars.Parameters;
 using Nox.Avatars.Players;
+using Nox.Avatars.Rigging;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
@@ -37,7 +39,7 @@ namespace api.nox.xr {
 		private static IControllerAPI ControllerAPI
 			=> Client.CoreAPI.ModAPI
 				.GetMod("controller")
-				?.GetEntry<IControllerAPI>();
+				?.GetInstance<IControllerAPI>();
 
 		/// <summary>
 		/// Check if the current proxy is better than XR proxy.
@@ -315,6 +317,9 @@ namespace api.nox.xr {
 						// param.Set(Client.Instance.HasFootRight());
 						param.Set(false);
 						break;
+					case "rig/ik/head/target":
+						param.Set(true);
+						break;
 				}
 			}
 
@@ -477,6 +482,12 @@ namespace api.nox.xr {
 			var parameterModule = _attachedRuntimeAvatar?.GetDescriptor()
 				?.GetModules<IParameterModule>()
 				.FirstOrDefault();
+			var cameraModule = _attachedRuntimeAvatar?.GetDescriptor()
+				?.GetModules<ICameraModule>()
+				.FirstOrDefault();
+			var riggingModule = _attachedRuntimeAvatar?.GetDescriptor()
+				?.GetModules<IRiggingModule>()
+				.FirstOrDefault();
 			if (parameterModule == null) return;
 			var parameters = parameterModule.GetParameters();
 			foreach (var param in parameters) {
@@ -521,6 +532,13 @@ namespace api.nox.xr {
 						param.Set(localVelocity);
 						break;
 					}
+					case "VelocityMagnitude" or "velocity_magnitude": {
+						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
+						var value         = (float)param.Get();
+						if (Mathf.Approximately(value, worldVelocity.magnitude)) continue;
+						param.Set(worldVelocity.magnitude);
+						break;
+					}
 
 					// Tracking de la tête - position et rotation
 					case "tracking/head/active": {
@@ -531,7 +549,16 @@ namespace api.nox.xr {
 						break;
 					}
 					case "tracking/head/position": {
-						var cPos  = player.headCamera.transform.position;
+						var cPos = player.headCamera.transform.position;
+
+						if (riggingModule != null && cameraModule != null) {
+							var headBone = riggingModule.GetBone(HumanBodyBones.Head);
+							if (headBone == cameraModule.GetAnchor()) {
+								cPos += cameraModule.GetOffset();
+							}
+						}
+
+
 						var value = (Vector3)param.Get();
 						if (Vector3.Distance(value, cPos) < 0.001f) continue;
 						param.Set(cPos);

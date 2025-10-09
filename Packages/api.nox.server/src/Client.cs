@@ -13,24 +13,21 @@ using Nox.Users;
 using UnityEngine;
 
 namespace api.nox.server {
-	public class Client : ClientModInitializer {
+	public class Client : IClientModInitializer {
 		internal static IUiAPI UiAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("ui")
-				.GetClients()
-				.FirstOrDefault() as IUiAPI;
+				.GetInstance<IUiAPI>();
 
 		internal static IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("user")
-				.GetMains()
-				.FirstOrDefault() as IUserAPI;
+				.GetInstance<IUserAPI>();
 
 		internal static INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("network")
-				.GetMains()
-				.FirstOrDefault() as INetworkAPI;
+				.GetInstance<INetworkAPI>();
 
 		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object
 			=> string.IsNullOrEmpty(ns)

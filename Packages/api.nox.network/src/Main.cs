@@ -15,7 +15,7 @@ using UnityEngine.Networking;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.network {
-	public class Main : MainModInitializer, INetworkAPI {
+	public class Main : IMainModInitializer, INetworkAPI {
 		internal        IModCoreAPI  CoreAPI;
 		internal static Main         Instance;
 		private         LanguagePack _language;
@@ -23,7 +23,7 @@ namespace api.nox.network {
 
 		internal static IUserAPI UserAPI
 			=> Main.Instance.CoreAPI.ModAPI.GetMod("user")
-				?.GetEntry<IUserAPI>();
+				?.GetInstance<IUserAPI>();
 
 		public void OnInitialize(IModCoreAPI api) {
 			CoreAPI  = api;

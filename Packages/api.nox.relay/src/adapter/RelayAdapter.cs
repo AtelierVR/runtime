@@ -127,9 +127,10 @@ namespace api.nox.relay {
 
 		public void OnUpdate() {
 			if (!_session.IsCurrent()) return;
+			var local = _entities.GetEntities<RelayLocalPlayer>().FirstOrDefault();
+			local?.SendVoice();
 			if (_isTraveling || Tps == 0 || _lastUpdate.AddSeconds(1f / Tps) > DateTime.UtcNow) return;
 			_lastUpdate = DateTime.UtcNow;
-			var local = _entities.GetEntities<RelayLocalPlayer>().FirstOrDefault();
 			var other = _entities.GetEntities<RelayRemotePlayer>();
 			UpdatePlayerDistance(ref local, ref other);
 			UpdatePhysicalPlayers(ref local, ref other);
@@ -285,6 +286,14 @@ namespace api.nox.relay {
 
 		public IEntity[] GetEntities()
 			=> _entities.GetEntities().ToArray();
+
+		public bool AttachAudio(AudioClip clip) {
+			throw new NotImplementedException();
+		}
+
+		public void DetachAudio(AudioClip clip) {
+			throw new NotImplementedException();
+		}
 
 		public IDimension GetDimension()
 			=> _dimension;

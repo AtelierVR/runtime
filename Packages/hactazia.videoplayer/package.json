@@ -1,5 +1,5 @@
 {
-  "name": "hactazia.videoplayer",
+  "name": "fr.hactazia.videoplayer",
   "displayName": "Hactazia - Video Player",
   "description": "A high-performance FFmpeg-based video player for Unity with texture rendering and audio support",
   "version": "1.0.0",
@@ -15,7 +15,7 @@
   ],
   "author": {
     "name": "Hactazia",
-    "email": "contact@hactazia.com"
+    "email": "contact@gmail.com"
   },
   "dependencies": {
     "com.unity.render-pipelines.core": "14.0.0"

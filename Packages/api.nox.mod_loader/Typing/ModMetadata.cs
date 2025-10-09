@@ -401,12 +401,9 @@ namespace Nox.ModLoader.Typing {
 		/// <param name="relation"></param>
 		/// <returns></returns>
 		public bool Match(CCK.Mods.Metadata.Relation relation) {
-			if (Match(relation.GetId())) {
-				if (relation.GetVersion() == null) return true;
-				return relation.GetVersion().Matches(GetVersion());
-			}
-
-			return false;
+			if (!Match(relation.GetId())) return false;
+			return relation.GetVersion() == null
+				|| relation.GetVersion().Matches(GetVersion());
 		}
 
 		// Serialization

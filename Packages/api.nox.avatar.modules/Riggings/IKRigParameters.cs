@@ -26,6 +26,12 @@ namespace Nox.CCK.Avatars.Rigging {
 				module.Parameters.Add(new IKWeightParameter($"rig/ik/{snakeCaseLayerName}/position_weight", layerName, IKWeightParameter.WeightType.Position, rigBuilder));
 				module.Parameters.Add(new IKWeightParameter($"rig/ik/{snakeCaseLayerName}/rotation_weight", layerName, IKWeightParameter.WeightType.Rotation, rigBuilder));
 				module.Parameters.Add(new IKWeightParameter($"rig/ik/{snakeCaseLayerName}/hint_weight", layerName, IKWeightParameter.WeightType.Hint, rigBuilder));
+
+				// Paramètres spéciaux pour HipsHead (contraintes Multi)
+				if (layerName == IKRigGenerator.HipsHead) {
+					module.Parameters.Add(new HipConstraintWeightParameter($"rig/ik/{snakeCaseLayerName}/hip_position_weight", HipConstraintWeightParameter.ConstraintType.Position, rigBuilder));
+					module.Parameters.Add(new HipConstraintWeightParameter($"rig/ik/{snakeCaseLayerName}/hip_rotation_weight", HipConstraintWeightParameter.ConstraintType.Rotation, rigBuilder));
+				}
 			}
 
 			for (var i = 0; i < (int)HumanBodyBones.LastBone; i++) {

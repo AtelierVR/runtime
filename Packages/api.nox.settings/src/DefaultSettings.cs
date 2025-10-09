@@ -10,7 +10,10 @@ namespace api.nox.settings {
 				new Brightness(),
 				new BloomIntensity(),
 				new Quality(),
-				new AntiAliasing()
+				new AntiAliasing(),
+				new Resolution(),
+				new WindowSize(),
+				new ModalTesting()
 			};
 
 		public static (string, string, string) Split(this IHandler handler) {

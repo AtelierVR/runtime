@@ -1,3 +1,5 @@
+using Nox.UI.modals;
+
 namespace Nox.UI {
 	/// <summary>
 	/// Interface for a menu in the UI.

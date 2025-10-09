@@ -1,0 +1,19 @@
+{
+  "name": "Nox.CCK.Avatars.Voice",
+  "rootNamespace": "",
+  "references": [
+    "Nox.Avatars",
+    "Nox.CCK",
+    "UniTask",
+    "Nox.Avatars.Voice"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

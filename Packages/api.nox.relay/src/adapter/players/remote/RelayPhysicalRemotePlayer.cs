@@ -3,6 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.Avatars.Parameters;
+using Nox.Avatars.Voice;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
@@ -155,14 +156,15 @@ namespace api.nox.relay {
 			root.transform.localPosition = Vector3.zero;
 			root.transform.localRotation = Quaternion.identity;
 
-			var parameterModule = Avatar?.GetDescriptor()
+			var parameterModule = Avatar.GetDescriptor()
 				?.GetModules<IParameterModule>()
 				.FirstOrDefault();
 
 			if (parameterModule == null) {
-				Logger.LogWarning("Avatar has no parameter module, cannot configure tracking parameters.");
-				return true;
+				Logger.LogError("Avatar does not have a ParameterModule, cannot set avatar.");
+				return false;
 			}
+
 
 			var parameters = parameterModule.GetParameters();
 			foreach (var param in parameters) {
@@ -187,8 +189,31 @@ namespace api.nox.relay {
 				param.Deserialize(net.Value.Item1);
 			}
 
+
+			SetVoice(Reference.GetAudio());
+
 			root.SetActive(true);
 			return true;
+		}
+
+		public override void SetVoice(AudioClip clip) {
+			var voiceModule = Avatar.GetDescriptor()
+				?.GetModules<IVoiceModule>()
+				.FirstOrDefault();
+
+			if (voiceModule == null) {
+				Logger.LogWarning("Avatar does not have a VoiceModule, cannot set audio clip.");
+				return;
+			}
+
+			var source = voiceModule.GetSource();
+
+			source.clip   = clip;
+			source.loop   = true;
+			source.mute   = false;
+			source.volume = 1.0f;
+
+			source.Play();
 		}
 	}
 }

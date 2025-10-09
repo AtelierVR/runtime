@@ -5,15 +5,16 @@ using api.nox.ui.defaults;
 using api.nox.ui.histories;
 using api.nox.ui.layouts;
 using Cysharp.Threading.Tasks;
-using Nox.CCK.Mods.Cores;
 using Nox.CCK.Utils;
 using Nox.UI;
+using Nox.UI.modals;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Logger = Nox.CCK.Utils.Logger;
 using Object = UnityEngine.Object;
 
 namespace api.nox.ui.menus {
-	public class Menu : MonoBehaviour, INoxObject, IMenu {
+	public class Menu : MonoBehaviour, INoxObject, IMenu, IModalMenu {
 		[Header("Menu Settings")]
 		public string defaultKey = HomePage.GetStaticKey();
 
@@ -23,7 +24,8 @@ namespace api.nox.ui.menus {
 		public BottomOrbiter bottomOrbiter;
 
 		public TopOrbiter    topOrbiter;
-		public RectTransform container;
+		public RectTransform contentContainer;
+		public RectTransform modalContainer;
 		public GameObject    parent;
 
 		internal HistoryList History;
@@ -242,7 +244,7 @@ namespace api.nox.ui.menus {
 		public void Dispose() {
 			SetActive(false);
 			History.Clear();
-			foreach (UnityEngine.Transform child in container)
+			foreach (UnityEngine.Transform child in contentContainer)
 				Destroy(child.gameObject);
 			History = null;
 		}
@@ -261,7 +263,7 @@ namespace api.nox.ui.menus {
 
 		public async UniTask SetPage(IPage newPage, IPage oldPage = null, PageFlags flags = PageFlags.None) {
 			try {
-				var content = await newPage.GetContentAsync(container);
+				var content = await newPage.GetContentAsync(contentContainer);
 				if (!content) {
 					Debug.LogError($"Page {newPage.GetKey()} does not have content.");
 					return;
@@ -276,7 +278,7 @@ namespace api.nox.ui.menus {
 					rect.pivot     = new Vector2(0.5f, 0.5f);
 				}
 
-				foreach (UnityEngine.Transform child in container)
+				foreach (UnityEngine.Transform child in contentContainer)
 					if (child.gameObject.activeSelf && child.gameObject != content)
 						child.gameObject.SetActive(false);
 
@@ -288,12 +290,57 @@ namespace api.nox.ui.menus {
 					newPage.OnRestore(oldPage);
 
 				newPage.OnDisplay(oldPage);
+
+				UpdateForeground();
 				content.SetActive(true);
 
 				UpdateLayout.UpdateImmediate(content);
 			} catch (Exception e) {
 				Logger.LogException(e);
 			}
+		}
+
+		public bool     activeForeground;
+		public IModal[] Modals = Array.Empty<IModal>();
+
+		public RectTransform GetModalContainer()
+			=> modalContainer;
+
+		public bool GetActiveForeground()
+			=> activeForeground;
+
+		private void UpdateForeground() {
+			var li = new List<GameObject>();
+			li.AddRange(Reference.GetReferences("foreground", contentContainer.gameObject));
+			li.AddRange(Reference.GetReferences("modal_interaction", gameObject));
+			foreach (var go in li)
+				go.SetActive(activeForeground);
+		}
+
+		public void SetActiveForeground(bool active) {
+			activeForeground = active;
+			UpdateForeground();
+		}
+
+		public IModal[] GetModals()
+			=> Modals;
+
+		public void RegisterModal(IModal modal) {
+			if (modal == null) return;
+			Client.CoreAPI.LoggerAPI.LogDebug($"Registering modal '{modal}' to menu '{GetId()}'", modal is Object o ? o : modal.GetContent());
+			var list = Modals.ToList();
+			if (!list.Contains(modal))
+				list.Add(modal);
+			Modals = list.ToArray();
+		}
+
+		public void UnregisterModal(IModal modal) {
+			if (modal == null) return;
+			Client.CoreAPI.LoggerAPI.LogDebug($"Unregistering modal '{modal}' from menu '{GetId()}'", modal is Object o ? o : modal.GetContent());
+			var list = Modals.ToList();
+			if (list.Contains(modal))
+				list.Remove(modal);
+			Modals = list.ToArray();
 		}
 	}
 }

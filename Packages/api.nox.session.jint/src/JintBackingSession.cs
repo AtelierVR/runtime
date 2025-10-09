@@ -33,7 +33,7 @@ namespace api.nox.session.jint {
 					ctx => {
 						ctx.LimitMemory(4_194_304);
 						ctx.LimitRecursion(1024);
-						ctx.EnableModules(new DefaultModuleLoader(Main.GetModulePath()));
+						ctx.EnableModules(new DefaultModuleLoader(Main.JintAPI.GetModulesPath()));
 					}
 				);
 

@@ -1,4 +1,5 @@
-using api.nox.settings.prefabs;
+using Nox.CCK.Language;
+using Nox.CCK.Settings;
 using Nox.CCK.Utils;
 using UnityEngine;
 
@@ -7,19 +8,24 @@ namespace api.nox.settings.handlers {
 		public override string[] GetPath()
 			=> new[] { "graphic", "anti_aliasing" };
 
+		protected override GameObject GetPrefab()
+			=> Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/dropdown.prefab");
+
+
 		public static string[] GetConfigPath()
 			=> new[] { "settings", "graphic", "msaa" };
 
-		private static readonly (string, string)[] AntiAliasingOptions = {
-			("Off", 0.ToString()),
-			("2x", 2.ToString()),
-			("4x", 4.ToString()),
-			("8x", 8.ToString())
-		};
+		private static (string, string)[] GetAntiAliasingOptions()
+			=> new[] {
+				(LanguageManager.Get("settings.entry.graphic.anti_aliasing.option.off"), 0.ToString()),
+				(LanguageManager.Get("settings.entry.graphic.anti_aliasing.option.x2"), 1.ToString()),
+				(LanguageManager.Get("settings.entry.graphic.anti_aliasing.option.x4"), 2.ToString()),
+				(LanguageManager.Get("settings.entry.graphic.anti_aliasing.option.x8"), 3.ToString())
+			};
 
 		public AntiAliasing() {
 			SetLabel($"settings.entry.{string.Join(".", GetPath())}.label");
-			SetOptions(AntiAliasingOptions);
+			SetOptions(GetAntiAliasingOptions());
 			Value = Config.Load().Get(GetConfigPath(), Value);
 			SetValue(Value.ToString(), false);
 		}

@@ -11,11 +11,11 @@ using Nox.UI.Widgets;
 using UnityEngine;
 
 namespace api.nox.terminal {
-	public class Client : ClientModInitializer {
+	public class Client : IClientModInitializer {
 		internal static IUiAPI UiAPI
 			=> Main.Instance.CoreAPI.ModAPI
 				.GetMod("ui")
-				.GetEntry<IUiAPI>();
+				.GetInstance<IUiAPI>();
 
 		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object
 			=> string.IsNullOrEmpty(ns)
@@ -28,7 +28,6 @@ namespace api.nox.terminal {
 				: Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(ns, path);
 
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
-
 		internal static Client           Instance;
 		internal        ClientModCoreAPI CoreAPI;
 

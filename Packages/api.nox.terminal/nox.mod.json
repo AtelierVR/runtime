@@ -26,7 +26,7 @@
   "contributors": [],
   "relations": [
     {
-      "id": "main",
+      "id": "ui",
       "type": "depends",
       "version": ">=1.0.0"
     }

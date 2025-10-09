@@ -10,7 +10,7 @@ using UnityEngine.Serialization;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.statistics {
-	public class Main : MainModInitializer {
+	public class Main : IMainModInitializer {
 		private       PlayTimeTracker _playTimeTracker;
 		public static MainModCoreAPI  CoreAPI;
 

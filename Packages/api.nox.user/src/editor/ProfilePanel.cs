@@ -91,7 +91,7 @@ namespace api.nox.user {
 				return;
 			}
 
-			image.image = await Main.Instance.NetworkAPI.FetchTexture(url);
+			image.image = await Main.NetworkAPI.FetchTexture(url);
 		}
 	}
 }

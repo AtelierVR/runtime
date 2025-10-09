@@ -71,7 +71,7 @@ namespace api.nox.instance.client {
 			_bannerTokenSource = new CancellationTokenSource();
 			var url = user.Item1?.GetBannerUrl();
 			if (!string.IsNullOrEmpty(url)) {
-				var texture = await Main.Instance.NetworkAPI.FetchTexture(url, token: _bannerTokenSource.Token);
+				var texture = await Main.NetworkAPI.FetchTexture(url, token: _bannerTokenSource.Token);
 				banner.sprite = texture
 					? Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero)
 					: null;
@@ -89,7 +89,7 @@ namespace api.nox.instance.client {
 			_thumbnailTokenSource = new CancellationTokenSource();
 			var url = user.Item1?.GetThumbnailUrl();
 			if (!string.IsNullOrEmpty(url)) {
-				var texture = await Main.Instance.NetworkAPI.FetchTexture(url, token: _thumbnailTokenSource.Token);
+				var texture = await Main.NetworkAPI.FetchTexture(url, token: _thumbnailTokenSource.Token);
 				thumbnail.sprite = texture
 					? Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero)
 					: null;

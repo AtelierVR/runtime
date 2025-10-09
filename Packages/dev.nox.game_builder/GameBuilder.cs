@@ -15,7 +15,7 @@ using UnityEngine.UIElements;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace dev.nox.game_builder {
-	public class GameBuilder : EditorModInitializer {
+	public class GameBuilder : IEditorModInitializer {
 		public static EditorModCoreAPI CoreAPI;
 		private       EditorPanel      _buildPanel;
 
@@ -374,10 +374,15 @@ namespace dev.nox.game_builder {
 				var hasCustom = item.Q("has-custom");
 				var isEditor  = item.Q("is-editor");
 
-				noMain.style.display    = mod.GetMains().Length          == 0 ? DisplayStyle.Flex : DisplayStyle.None;
-				noClient.style.display  = mod.GetClients().Length        == 0 ? DisplayStyle.Flex : DisplayStyle.None;
-				hasCustom.style.display = mod.GetCustomsEntries().Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
-				isEditor.style.display  = mod.GetEditors().Length        > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+				var main   = mod.GetInstances<IMainModInitializer>().Length;
+				var client = mod.GetInstances<IClientModInitializer>().Length;
+				var editor = mod.GetInstances<IEditorModInitializer>().Length;
+				var other  = mod.GetInstances<IModInitializer>().Length - main - client - editor;
+
+				noMain.style.display    = main   == 0 ? DisplayStyle.Flex : DisplayStyle.None;
+				noClient.style.display  = client == 0 ? DisplayStyle.Flex : DisplayStyle.None;
+				hasCustom.style.display = other  > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+				isEditor.style.display  = editor > 0 ? DisplayStyle.Flex : DisplayStyle.None;
 
 				container.Add(item);
 			}

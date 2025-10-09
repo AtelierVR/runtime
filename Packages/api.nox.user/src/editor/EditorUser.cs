@@ -4,7 +4,7 @@ using Nox.CCK.Mods.Panels;
 
 namespace api.nox.user
 {
-    public class EditorUser : EditorModInitializer
+    public class EditorUser : IEditorModInitializer
     {
         internal static EditorModCoreAPI CoreAPI;
         private AuthPanel _auth;

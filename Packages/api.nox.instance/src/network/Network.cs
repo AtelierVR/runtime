@@ -19,13 +19,13 @@ namespace api.nox.instance.network {
 			=> Fetch(id.ToString(), from);
 
 		public async UniTask<Instance> Fetch(string identifier, string from = null) {
-			if (Main.Instance.NetworkAPI == null)
+			if (Main.NetworkAPI == null)
 				return null;
 
 			var ide = InstanceIdentifier.FromString(identifier);
 			if (ide.IsLocal())
 				ide.Server = from;
-			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.GetServerAddress();
+			var address = from ?? Main.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.GetServerAddress();
 			if (string.IsNullOrEmpty(address)) {
 				Logger.LogError($"Cannot fetch user for {identifier}: no server address provided.");
 				return null;
@@ -34,7 +34,7 @@ namespace api.nox.instance.network {
 			if (address == ide.GetServerAddress())
 				ide.Server = "::"; // Use "::" to indicate local server in the identifier
 
-			var request = Main.Instance.NetworkAPI.MakeRequest();
+			var request = Main.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, $"/api/instance/{ide.ToString()}");
 			await request.Send();
 			var response = request.GetMasterResponse<Instance>();
@@ -49,16 +49,16 @@ namespace api.nox.instance.network {
 		}
 
 		public async UniTask<SearchResponse> Search(SearchRequest data, string from = null) {
-			if (Main.Instance.NetworkAPI == null)
+			if (Main.NetworkAPI == null)
 				return null;
 
-			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress();
+			var address = from ?? Main.UserAPI?.GetCurrent()?.GetServerAddress();
 			if (string.IsNullOrEmpty(address)) {
 				Logger.LogError("Cannot search users: no server address provided.");
 				return null;
 			}
 
-			var request = Main.Instance.NetworkAPI.MakeRequest();
+			var request = Main.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, $"/api/instances?{data.ToParams()}");
 			await request.Send();
 			var response = request.GetMasterResponse<SearchResponse>();

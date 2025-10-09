@@ -11,8 +11,9 @@
     "Nox.Avatars.Parameters",
     "Nox.CCK.Avatars.Playable",
     "Nox.CCK.Avatars.StateMachines",
-    "UniTask",
-    "Nox.Avatars.StateMachines"
+    "Nox.Avatars.StateMachines",
+    "Nox.CCK.Avatars.Voice",
+    "UniTask"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

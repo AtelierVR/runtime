@@ -4,32 +4,38 @@ using Nox.Avatars;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.Controllers;
+using Nox.Microphone;
 using Nox.UI;
 using Nox.Users;
 
 namespace api.nox.desktop {
-	public class Client : ClientModInitializer {
+	public class Client : IClientModInitializer {
 		internal static ClientModCoreAPI CoreAPI;
 
 		internal static IControllerAPI ControllerAPI
 			=> CoreAPI.ModAPI
 				.GetMod("controller")
-				.GetEntry<IControllerAPI>();
+				.GetInstance<IControllerAPI>();
 
 		internal static IUiAPI UiAPI
 			=> CoreAPI.ModAPI
 				.GetMod("ui")
-				.GetEntry<IUiAPI>();
+				.GetInstance<IUiAPI>();
 
 		internal static IAvatarAPI AvatarAPI
 			=> CoreAPI.ModAPI
 				.GetMod("avatar")
-				.GetEntry<IAvatarAPI>();
+				.GetInstance<IAvatarAPI>();
 
 		internal static IUserAPI UserAPI
 			=> CoreAPI.ModAPI
 				.GetMod("user")
-				.GetEntry<IUserAPI>();
+				.GetInstance<IUserAPI>();
+
+		internal static IMicrophoneAPI MicrophoneAPI
+			=> CoreAPI.ModAPI
+				.GetMod("microphone")
+				.GetInstance<IMicrophoneAPI>();
 
 		public async UniTask OnInitializeClientAsync(ClientModCoreAPI api) {
 			CoreAPI = api;

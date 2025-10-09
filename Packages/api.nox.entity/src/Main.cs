@@ -3,7 +3,7 @@ using Nox.CCK.Utils;
 using Nox.Entities;
 
 namespace api.nox.entity {
-	public class Main : IEntityAPI, MainModInitializer {
+	public class Main : IEntityAPI, IMainModInitializer {
 		
 		[NoxPublic(NoxAccess.Method)]
 		public IEntityManager New()

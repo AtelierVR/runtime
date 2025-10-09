@@ -4,7 +4,7 @@ using Nox.CCK.Mods.Initializers;
 using Nox.UI;
 
 namespace api.nox.ui.defaults {
-	public class DefaultPagesClient : ClientModInitializer {
+	public class DefaultPagesClient : IClientModInitializer {
 		private ClientModCoreAPI  _coreAPI;
 		private EventSubscription _event;
 

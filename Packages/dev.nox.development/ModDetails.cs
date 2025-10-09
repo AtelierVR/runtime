@@ -14,7 +14,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace dev.nox.development {
-	public class ModDetails : EditorModInitializer {
+	public class ModDetails : IEditorModInitializer {
 		internal static EditorModCoreAPI CoreAPI;
 		private         EditorPanel      _buildPanel;
 
@@ -50,7 +50,7 @@ namespace dev.nox.development {
 			private readonly string   _version;
 			internal         DateTime LastModified { get; set; } = DateTime.MinValue;
 
-			internal ModUserData(Mod mod) {
+			internal ModUserData(IMod mod) {
 				var meta = mod.GetMetadata();
 				_modId   = meta.GetId();
 				_version = meta.GetVersion().ToString(); // Convert Version to string
@@ -59,7 +59,7 @@ namespace dev.nox.development {
 			public bool Equals(string modId)
 				=> _modId == modId;
 
-			public bool NeedsUpdate(Mod mod) {
+			public bool NeedsUpdate(IMod mod) {
 				var meta = mod.GetMetadata();
 				return _version != meta.GetVersion().ToString() || DateTime.Now - LastModified > TimeSpan.FromSeconds(5);
 			}
@@ -177,7 +177,7 @@ namespace dev.nox.development {
 			_lastUpdate = DateTime.Now;
 		}
 
-		private void OnModAdded(Mod mod) {
+		private void OnModAdded(IMod mod) {
 			var modsList = _root.Q<VisualElement>("mods-list");
 			if (modsList == null) return;
 
@@ -204,7 +204,7 @@ namespace dev.nox.development {
 			child.RemoveFromHierarchy();
 		}
 
-		private void UpdateModItem(VisualElement item, Mod mod) {
+		private void UpdateModItem(VisualElement item, IMod mod) {
 			if (item == null || mod == null) return;
 
 			var meta = mod.GetMetadata();

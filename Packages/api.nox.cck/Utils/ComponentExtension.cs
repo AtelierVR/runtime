@@ -155,7 +155,7 @@ namespace Nox.CCK.Utils {
 			if (Application.isPlaying) Object.Destroy(@object);
 			else UnityEditor.EditorApplication.delayCall += () => Object.DestroyImmediate(@object);
 			#else
-			Destroy(instance);
+			Object.Destroy(@object);
 			#endif
 		}
 
@@ -164,7 +164,7 @@ namespace Nox.CCK.Utils {
 			if (Application.isPlaying) Object.DestroyImmediate(@object);
 			else UnityEditor.EditorApplication.delayCall += () => Object.DestroyImmediate(@object);
 			#else
-			DestroyImmediate(instance);
+			Object.DestroyImmediate(@object);
 			#endif
 		}
 	}

@@ -17,9 +17,10 @@ using NoxTransform = Nox.CCK.Utils.Transform;
 using Transform = UnityEngine.Transform;
 
 namespace api.nox.relay {
-	public abstract class RelayPlayer : IPlayer, IPlayerAvatar, IDisposable {
+	public abstract class RelayPlayer : IPlayer, IPlayerAvatar, IDisposable, IAudioEntity {
 		public InstancePlayer Reference;
 		public RelayAdapter   Adapter;
+		public AudioClip      AudioClip;
 
 		private readonly  Dictionary<string, object>              _properties = new();
 		internal readonly Dictionary<ushort, NoxTransform>        Transforms  = new();
@@ -223,6 +224,14 @@ namespace api.nox.relay {
 		public override string ToString()
 			=> $"{GetType().Name}[Id={GetId()}, Display={GetDisplay()}, Identifier={ToIdentifier()}, IsMaster={IsMaster()}]";
 
+		public AudioClip GetAudio()
+			=> AudioClip;
+
+		public void SetAudio(AudioClip clip) {
+			AudioClip = clip;
+			if (TryGetPhysical<RelayPhysicalRemotePlayer>(out var physical))
+				physical.SetVoice(clip);
+		}
 
 		public void Dispose() {
 			DestroyPhysical();

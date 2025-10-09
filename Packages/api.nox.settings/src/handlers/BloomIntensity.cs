@@ -1,5 +1,6 @@
-using api.nox.settings.prefabs;
+using Nox.CCK.Settings;
 using Nox.CCK.Utils;
+using UnityEngine;
 
 namespace api.nox.settings.handlers {
 	public sealed class BloomIntensity : RangeHandler {
@@ -32,6 +33,9 @@ namespace api.nox.settings.handlers {
 				config.Save();
 			}
 		}
+
+		public override GameObject GetPrefab()
+			=> Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/range.prefab");
 
 		public override void OnValueChanged(float value) {
 			Value = value;

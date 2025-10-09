@@ -29,6 +29,11 @@
       "id": "entity",
       "type": "depends",
       "version": ">=1.0.0"
+    },
+    {
+      "id": "controller",
+      "type": "depends",
+      "version": ">=1.0.0"
     }
   ],
   "entrypoints": {

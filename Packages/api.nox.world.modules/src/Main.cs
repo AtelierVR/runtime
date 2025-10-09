@@ -8,7 +8,7 @@ using Nox.CCK.Worlds.Scenes;
 using Nox.CCK.Worlds.Spawns;
 
 namespace api.nox.world.modules {
-	public class Main : MainModInitializer {
+	public class Main : IMainModInitializer {
 		internal static MainModCoreAPI      CoreAPI;
 		private         EventSubscription[] _events;
 

@@ -4,7 +4,7 @@ using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Mods.Panels;
 
 namespace api.nox.controller {
-	public class Editor : EditorModInitializer {
+	public class Editor : IEditorModInitializer {
 		internal static EditorModCoreAPI CoreAPI;
 
 		private static EditorPanel     _controllerPanel;

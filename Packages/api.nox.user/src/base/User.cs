@@ -36,19 +36,19 @@ namespace api.nox.user {
 			=> server;
 
 		public UniTask<IServer> GetServer()
-			=> Main.Instance.ServerAPI.Fetch(server);
+			=> Main.ServerAPI.Fetch(server);
 
 		public string GetThumbnailUrl()
 			=> thumbnail;
 
 		public UniTask<Texture2D> GetThumbnail()
-			=> Main.Instance.NetworkAPI.FetchTexture(thumbnail);
+			=> Main.NetworkAPI.FetchTexture(thumbnail);
 
 		public string GetBannerUrl()
 			=> banner;
 
 		public UniTask<Texture2D> GetBanner()
-			=> Main.Instance.NetworkAPI.FetchTexture(banner);
+			=> Main.NetworkAPI.FetchTexture(banner);
 
 		public string[] GetLinks()
 			=> links ?? Array.Empty<string>();

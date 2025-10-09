@@ -9,7 +9,7 @@ using UnityEngine.InputSystem;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.keybinding {
-	public class KeyBindingSystem : IKeyBindingManager, MainModInitializer {
+	public class KeyBindingSystem : IKeyBindingManager, IMainModInitializer {
 		public void OnInitializeMain(MainModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;

@@ -9,8 +9,7 @@ namespace Nox.ModLoader.Cores.Loggers {
 
 		public LoggerAPI(ModLoader.Mods.Mod mod)
 			=> _mod = mod;
-
-
+		
 		public void Log(string message)
 			=> Logger.Log(message, tag: _mod.Metadata.GetId());
 

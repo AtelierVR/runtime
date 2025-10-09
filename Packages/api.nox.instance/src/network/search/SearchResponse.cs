@@ -67,10 +67,10 @@ namespace api.nox.instance.network {
 					new SearchRequest {
 						Query = query,
 						World = !string.IsNullOrEmpty(world)
-							? Main.Instance.WorldAPI.Make(world)
+							? Main.WorldAPI.Make(world)
 							: null,
 						Owner = !string.IsNullOrEmpty(owner)
-							? Main.Instance.UserAPI.Make(owner)
+							? Main.UserAPI.Make(owner)
 							: null,
 						Limit = limit
 					}
@@ -84,10 +84,10 @@ namespace api.nox.instance.network {
 					new SearchRequest {
 						Query = query,
 						World = !string.IsNullOrEmpty(world)
-							? Main.Instance.WorldAPI.Make(world)
+							? Main.WorldAPI.Make(world)
 							: null,
 						Owner = !string.IsNullOrEmpty(owner)
-							? Main.Instance.UserAPI.Make(owner)
+							? Main.UserAPI.Make(owner)
 							: null,
 						Offset = offset - limit,
 						Limit  = limit

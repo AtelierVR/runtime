@@ -26,6 +26,11 @@
   "contributors": [],
   "relations": [
     {
+      "id": "terminal",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
       "id": "world",
       "type": "depends",
       "version": ">=1.0.0"
@@ -42,6 +47,11 @@
     },
     {
       "id": "controller",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
+      "id": "ui",
       "type": "depends",
       "version": ">=1.0.0"
     }

@@ -1,0 +1,49 @@
+{
+  "type": "mod",
+  "id": "api.nox.microphone",
+  "provides": [
+    "fr.hactazia.microphone",
+    "microphone"
+  ],
+  "name": "Microphone Initialization",
+  "version": "1.0.0",
+  "description": "Provides the Microphone action to use the game.",
+  "license": "GPL-3.0",
+  "icon": null,
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.microphone",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.microphone/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [
+    {
+      "id": "settings",
+      "type": "depends",
+      "version": ">=1.0.0"
+    }
+  ],
+  "entrypoints": {
+    "main": [
+      "api.nox.microphone.Main"
+    ],
+    "editor": [
+      "api.nox.microphone.Editor"
+    ],
+    "client": [
+      "api.nox.microphone.Client"
+    ]
+  },
+  "references": [],
+  "sides": [],
+  "permissions": [],
+  "kernel": true
+}

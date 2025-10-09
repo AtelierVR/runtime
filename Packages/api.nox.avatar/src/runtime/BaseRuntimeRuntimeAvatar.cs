@@ -6,10 +6,11 @@ namespace api.nox.avatar {
 	public abstract class BaseRuntimeRuntimeAvatar : IRuntimeAvatar {
 		public IAvatarDescriptor Descriptor;
 		public IAvatarIdentifier Identifier;
+		public string            Id;
 		public GameObject        Root;
 
 		public virtual string GetId()
-			=> Root.GetInstanceID().ToString();
+			=> Id;
 
 		public virtual IAvatarDescriptor GetDescriptor()
 			=> Descriptor;

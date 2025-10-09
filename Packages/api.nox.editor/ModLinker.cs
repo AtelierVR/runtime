@@ -21,7 +21,7 @@ namespace Nox.Editor {
 
 		public static void EnsureLinkerClassExists() {
 			var li = new List<string>();
-			
+
 			foreach (var (path, fullNames) in GetAssemblyByMod()) {
 				UpdateLinkXml(path, fullNames);
 				li.AddRange(fullNames);
@@ -45,54 +45,59 @@ namespace Nox.Editor {
 
 
 		private static void UpdateLinkXml(string path, string[] assemblies) {
-			XmlDocument doc;
-			XmlElement  linkerElement;
+			try {
+				XmlDocument doc;
+				XmlElement  linkerElement;
 
-			if (File.Exists(path)) {
-				// Charger le fichier existant
-				doc = new XmlDocument();
-				doc.Load(path);
-				linkerElement = doc.DocumentElement;
-			} else {
-				// Créer un nouveau fichier
-				doc = new XmlDocument();
-				doc.AppendChild(doc.CreateXmlDeclaration("1.0", "utf-8", null));
-				linkerElement = doc.CreateElement("linker");
-				doc.AppendChild(linkerElement);
+				if (File.Exists(path)) {
+					// Charger le fichier existant
+					doc = new XmlDocument();
+					doc.Load(path);
+					linkerElement = doc.DocumentElement;
+				} else {
+					// Créer un nouveau fichier
+					doc = new XmlDocument();
+					doc.AppendChild(doc.CreateXmlDeclaration("1.0", "utf-8", null));
+					linkerElement = doc.CreateElement("linker");
+					doc.AppendChild(linkerElement);
+				}
+
+				// Supprimer les anciennes entrées de mods
+				var existingAssemblies = linkerElement?.SelectNodes("assembly");
+				var toRemove           = new List<XmlNode>();
+
+				if (existingAssemblies != null) {
+					toRemove.AddRange(
+						from XmlNode assemblyNode in existingAssemblies
+						let nameAttr = assemblyNode.Attributes?["fullname"]
+						select assemblyNode
+					);
+
+					foreach (var node in toRemove)
+						linkerElement.RemoveChild(node);
+				}
+
+				// Ajouter les nouvelles entrées
+				foreach (var assembly in assemblies.OrderBy(a => a)) {
+					var assemblyElement = doc.CreateElement("assembly");
+					assemblyElement.SetAttribute("fullname", assembly);
+					assemblyElement.SetAttribute("preserve", "all");
+					if (linkerElement != null) linkerElement.AppendChild(assemblyElement);
+				}
+
+				// Sauvegarder le fichier
+				var settings = new XmlWriterSettings {
+					Indent       = true,
+					IndentChars  = "\t",
+					NewLineChars = "\n"
+				};
+
+				using var writer = XmlWriter.Create(path, settings);
+				doc.Save(writer);
+			} catch (Exception e) {
+				Logger.LogError($"Failed to update link.xml at {path}: {e}");
+				Logger.LogException(e);
 			}
-
-			// Supprimer les anciennes entrées de mods
-			var existingAssemblies = linkerElement?.SelectNodes("assembly");
-			var toRemove           = new List<XmlNode>();
-
-			if (existingAssemblies != null) {
-				toRemove.AddRange(
-					from XmlNode assemblyNode in existingAssemblies
-					let nameAttr = assemblyNode.Attributes?["fullname"]
-					select assemblyNode
-				);
-
-				foreach (var node in toRemove)
-					linkerElement.RemoveChild(node);
-			}
-
-			// Ajouter les nouvelles entrées
-			foreach (var assembly in assemblies.OrderBy(a => a)) {
-				var assemblyElement = doc.CreateElement("assembly");
-				assemblyElement.SetAttribute("fullname", assembly);
-				assemblyElement.SetAttribute("preserve", "all");
-				if (linkerElement != null) linkerElement.AppendChild(assemblyElement);
-			}
-
-			// Sauvegarder le fichier
-			var settings = new XmlWriterSettings {
-				Indent       = true,
-				IndentChars  = "\t",
-				NewLineChars = "\n"
-			};
-
-			using var writer = XmlWriter.Create(path, settings);
-			doc.Save(writer);
 		}
 	}
 }

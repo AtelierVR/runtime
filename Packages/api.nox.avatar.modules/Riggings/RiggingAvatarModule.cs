@@ -12,7 +12,7 @@ using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
 
 namespace Nox.CCK.Avatars.Rigging {
-	public class RiggingAvatarModule : MonoBehaviour, IAvatarModule, IRiggingModule, IParameterGroup {
+	public class RiggingAvatarModule : MonoBehaviour, IRiggingModule, IParameterGroup {
 		private IAvatarDescriptor _descriptor;
 		private Transform         _anchor;
 
@@ -36,6 +36,7 @@ namespace Nox.CCK.Avatars.Rigging {
 			_descriptor = runtimeAvatar.GetDescriptor();
 			IKRigGenerator.CreateIKRig(this);
 			IKRigParameters.SetupParameters(this);
+			HeadTarget.CreateTargets(this);
 			return UniTask.FromResult(true);
 		}
 

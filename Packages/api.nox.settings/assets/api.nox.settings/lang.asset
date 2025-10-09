@@ -16,7 +16,7 @@ MonoBehaviour:
   - IETF: en-US
     entries:
     - key: settings.page.accessibility.title
-      value: "Accessibility"
+      value: "Accessibility Settings"
     - key: settings.page.accessibility.label
       value: "Accessibility"
     - key: settings.no_settings.title
@@ -46,7 +46,7 @@ MonoBehaviour:
     - key: settings.group.accessibility.interface.label
       value: "Interface"
     - key: settings.page.graphic.title
-      value: "Graphics"
+      value: "Graphics Settings"
     - key: settings.page.graphic.label
       value: "Graphics"
     - key: settings.group.graphic.general.label
@@ -55,10 +55,40 @@ MonoBehaviour:
       value: "Quality"
     - key: settings.entry.graphic.anti_aliasing.label
       value: "Anti-Aliasing"
+    - key: settings.entry.graphic.resolution.label
+      value: "Resolution"
+    - key: settings.entry.graphic.window_size.label
+      value: "Window Mode"
+    - key: settings.entry.graphic.window_size.option.fullscreen
+      value: "Fullscreen"
+    - key: settings.entry.graphic.window_size.option.maximized
+      value: "Maximized Window"
+    - key: settings.entry.graphic.window_size.option.windowed
+      value: "Windowed"
+    - key: settings.entry.graphic.resolution.option
+      value: "{0}x{1} ({2} Hz)"
+    - key: settings.entry.graphic.anti_aliasing.option.off
+      value: "Off"
+    - key: settings.entry.graphic.anti_aliasing.option.x2
+      value: "2x"
+    - key: settings.entry.graphic.anti_aliasing.option.x4
+      value: "4x"
+    - key: settings.entry.graphic.anti_aliasing.option.x8
+      value: "8x"
+    - key: settings.page.debug.label
+      value: "Debug"
+    - key: settings.page.debug.title
+      value: "Debug Settings"
+    - key: settings.group.debug.general.label
+      value: "General"
+    - key: settings.debug.modal
+      value: "Example Modal"
+    - key: settings.debug.modal.open
+      value: "Open"
   - IETF: fr-FR
     entries:
     - key: settings.page.accessibility.title
-      value: "Accessibilité"
+      value: "Paramètres d'accessibilité"
     - key: settings.page.accessibility.label
       value: "Accessibilité"
     - key: settings.no_settings.title
@@ -88,7 +118,7 @@ MonoBehaviour:
     - key: settings.group.accessibility.interface.label
       value: "Interface"
     - key: settings.page.graphic.title
-      value: "Graphismes"
+      value: "Paramètres graphiques"
     - key: settings.page.graphic.label
       value: "Graphismes"
     - key: settings.group.graphic.general.label
@@ -97,3 +127,33 @@ MonoBehaviour:
       value: "Qualité"
     - key: settings.entry.graphic.anti_aliasing.label
       value: "Anti-Aliasing"
+    - key: settings.entry.graphic.resolution.label
+      value: "Résolution"
+    - key: settings.entry.graphic.window_size.label
+      value: "Mode d'affichage"
+    - key: settings.entry.graphic.window_size.option.fullscreen
+      value: "Plein écran"
+    - key: settings.entry.graphic.window_size.option.maximized
+      value: "Fenêtre maximisée"
+    - key: settings.entry.graphic.window_size.option.windowed
+      value: "Fenêtre"
+    - key: settings.entry.graphic.resolution.option
+      value: "{0}x{1} ({2} Hz)"
+    - key: settings.entry.graphic.anti_aliasing.option.off
+      value: "Désactivé"
+    - key: settings.entry.graphic.anti_aliasing.option.x2
+      value: "2x"
+    - key: settings.entry.graphic.anti_aliasing.option.x4
+      value: "4x"
+    - key: settings.entry.graphic.anti_aliasing.option.x8
+      value: "8x"
+    - key: settings.page.debug.label
+      value: "Débogage"
+    - key: settings.page.debug.title
+      value: "Paramètres de débogage"
+    - key: settings.group.debug.general.label
+      value: "Général"
+    - key: settings.debug.modal
+      value: "Exemple de modal"
+    - key: settings.debug.modal.open
+      value: "Ouvrir"
