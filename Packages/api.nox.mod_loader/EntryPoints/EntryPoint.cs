@@ -314,5 +314,77 @@ namespace Nox.ModLoader.EntryPoints {
 
 			profiler.Set("update", Name, Profiler.At.End, DateTime.UtcNow);
 		}
+		
+		public void OnFixedUpdate() {
+			if (!IsEnabled() || _state != InitializerState.PostInitialized)
+				return;
+
+			var profiler = Mod.Profiler;
+			profiler.Set("fixed_update", Name, Profiler.At.Start, DateTime.UtcNow);
+
+			for (var i = 0; i < _instances.Length; i++) {
+				var instance = _instances[i];
+				profiler.Set("fixed_update", Name, i.ToString(), Profiler.At.Start, DateTime.UtcNow);
+
+				try {
+					instance.OnFixedUpdate();
+
+					if (instance is IMainModInitializer m) 
+						m.OnFixedUpdateMain();
+
+					if (instance is IEditorModInitializer e) 
+						e.OnFixedUpdateEditor();
+
+					if (instance is IServerModInitializer s) 
+						s.OnFixedUpdateServer();
+
+					if (instance is IClientModInitializer c) 
+						c.OnFixedUpdateClient();
+				} catch (Exception e) {
+					Mod.CoreAPI.LoggerAPI.LogError($"Failed to fixed-update mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}!");
+					Mod.CoreAPI.LoggerAPI.LogException(e);
+				}
+
+				profiler.Set("fixed_update", Name, i.ToString(), Profiler.At.End, DateTime.UtcNow);
+			}
+
+			profiler.Set("fixed_update", Name, Profiler.At.End, DateTime.UtcNow);
+		}
+		
+		public void OnLateUpdate() {
+			if (!IsEnabled() || _state != InitializerState.PostInitialized)
+				return;
+
+			var profiler = Mod.Profiler;
+			profiler.Set("late_update", Name, Profiler.At.Start, DateTime.UtcNow);
+
+			for (var i = 0; i < _instances.Length; i++) {
+				var instance = _instances[i];
+				profiler.Set("late_update", Name, i.ToString(), Profiler.At.Start, DateTime.UtcNow);
+
+				try {
+					instance.OnLateUpdate();
+
+					if (instance is IMainModInitializer m) 
+						m.OnLateUpdateMain();
+
+					if (instance is IEditorModInitializer e) 
+						e.OnLateUpdateEditor();
+
+					if (instance is IServerModInitializer s) 
+						s.OnLateUpdateServer();
+
+					if (instance is IClientModInitializer c) 
+						c.OnLateUpdateClient();
+				} catch (Exception e) {
+					Mod.CoreAPI.LoggerAPI.LogError($"Failed to late-update mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}!");
+					Mod.CoreAPI.LoggerAPI.LogException(e);
+				}
+
+				profiler.Set("late_update", Name, i.ToString(), Profiler.At.End, DateTime.UtcNow);
+			}
+
+			profiler.Set("late_update", Name, Profiler.At.End, DateTime.UtcNow);
+		}
 	}
 }

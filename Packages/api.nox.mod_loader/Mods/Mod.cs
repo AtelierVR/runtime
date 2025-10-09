@@ -143,11 +143,26 @@ namespace Nox.ModLoader.Mods {
 			Profiler.Set("pre_disposed", Profiler.At.Start, DateTime.UtcNow);
 		}
 
-		public void Update() { }
+		public void Update() {
+			Profiler.Set("update", Profiler.At.Start, DateTime.UtcNow);
+			foreach (var entry in _entryPoints)
+				entry.OnUpdate();
+			Profiler.Set("updated", Profiler.At.Start, DateTime.UtcNow);
+		}
 
-		public void FixedUpdate() { }
+		public void FixedUpdate() {
+			Profiler.Set("fixed_update", Profiler.At.Start, DateTime.UtcNow);
+			foreach (var entry in _entryPoints)
+				entry.OnFixedUpdate();
+			Profiler.Set("fixed_updated", Profiler.At.Start, DateTime.UtcNow);
+		}
 
-		public void LateUpdate() { }
+		public void LateUpdate() {
+			Profiler.Set("late_update", Profiler.At.Start, DateTime.UtcNow);
+			foreach (var entry in _entryPoints)
+				entry.OnLateUpdate();
+			Profiler.Set("late_updated", Profiler.At.Start, DateTime.UtcNow);
+		}
 
 		public async UniTask Dispose() {
 			Profiler.Set("dispose", Profiler.At.Start, DateTime.UtcNow);

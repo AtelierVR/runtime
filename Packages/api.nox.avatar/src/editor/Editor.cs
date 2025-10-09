@@ -46,13 +46,13 @@ namespace api.nox.avatar {
 		}
 
 		public void OnUpdateEditor() {
+			if (!HasOnePanelOpened()) return;
 			Builder.Update();
 			Publisher.Update();
 		}
 
 		internal static bool HasOnePanelOpened()
-			=> (_builderPanel != null && _builderPanel.IsActive()) ||
-			   (_publisherPanel != null && _publisherPanel.IsActive());
+			=> (_builderPanel != null && _builderPanel.IsActive()) || (_publisherPanel != null && _publisherPanel.IsActive());
 	}
 }
 #endif

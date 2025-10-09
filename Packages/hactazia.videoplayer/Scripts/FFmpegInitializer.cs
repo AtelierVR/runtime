@@ -49,10 +49,7 @@ namespace Hactazia.VideoPlayer {
 
 		public static void Shutdown() {
 			lock (SyncRoot) {
-				if (!_initialized) {
-					return;
-				}
-
+				if (!_initialized) return;
 				ffmpeg.avformat_network_deinit();
 				_initialized = false;
 			}

@@ -306,11 +306,20 @@ namespace api.nox.avatar.editor {
 		}
 
 		internal void Update() {
+			Logger.LogDebug("AvatarPublisherPanel Update");
 			if (!Editor.HasOnePanelOpened() || _root.childCount == 0) return;
+			
 			var user = Main.Instance.UserAPI.GetCurrent();
-			if (_lastDisplay == DisplayFlags.NotLogged && user != null)
+			
+			// Amélioration de la logique de détection de connexion
+			var isLoggedIn = user != null && !string.IsNullOrEmpty(user.GetServerAddress());
+			
+			// Si l'utilisateur est connecté mais qu'on affiche "NotLogged", corriger l'affichage
+			if (_lastDisplay == DisplayFlags.NotLogged && isLoggedIn) 
 				OnLogged().Forget();
-			if (_lastDisplay != DisplayFlags.NotLogged && user == null)
+			
+			// Si l'utilisateur n'est pas connecté mais qu'on n'affiche pas "NotLogged", corriger l'affichage
+			else if (_lastDisplay != DisplayFlags.NotLogged && !isLoggedIn) 
 				SetDisplay(DisplayFlags.NotLogged);
 			
 			// Utiliser l'avatar courant de l'AvatarEditorHelper
