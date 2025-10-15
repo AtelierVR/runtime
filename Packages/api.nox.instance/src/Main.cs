@@ -2,6 +2,7 @@ using System.Linq;
 using api.nox.instance.network;
 using api.nox.instance.search;
 using Cysharp.Threading.Tasks;
+using JetBrains.Annotations;
 using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
@@ -62,7 +63,9 @@ namespace api.nox.instance {
 		public IInstanceIdentifier Make(string identifier)
 			=> InstanceIdentifier.FromString(identifier);
 
-
+		public IInstanceIdentifier Make(uint id, string from)
+			=> new InstanceIdentifier(id, null, from);
+		
 		public ISearchRequest MakeSearchRequest()
 			=> new SearchRequest();
 

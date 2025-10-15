@@ -72,8 +72,8 @@ namespace api.nox.relay.connection {
 					var disconnect = new types.Disconnect.RelayEventDisconnect();
 					if (disconnect.FromBuffer(buffer.Clone(5, length))) {
 						Logger.Log($"Disconnect {disconnect.Reason}");
-						_lastHandshake = null;
-						_lastLatency   = null;
+						LastHandshake = null;
+						_lastLatency  = null;
 						Connector.Close().Forget();
 					} else {
 						Logger.LogError($"Failed to parse disconnect");
@@ -100,14 +100,14 @@ namespace api.nox.relay.connection {
 		internal readonly List<RelayInstance> Instances = new();
 
 		private DateTime                                _lastLatencyRequest = DateTime.MinValue;
-		private types.Handshakes.RelayResponseHandshake _lastHandshake;
+		public  types.Handshakes.RelayResponseHandshake LastHandshake;
 		private types.Latency.RelayResponseLatency      _lastLatency;
 
 		public ClientStatus Status
-			=> _lastHandshake?.Status ?? ClientStatus.Disconnected;
+			=> LastHandshake?.Status ?? ClientStatus.Disconnected;
 
 		public ushort ClientId
-			=> _lastHandshake?.ClientId ?? ushort.MaxValue;
+			=> LastHandshake?.ClientId ?? ushort.MaxValue;
 
 		public double Latency
 			=> _lastLatency?.GetLatency().TotalMilliseconds ?? -1;
@@ -119,8 +119,8 @@ namespace api.nox.relay.connection {
 				await Connector.Close();
 			}
 
-			_lastHandshake = null;
-			_lastLatency   = null;
+			LastHandshake = null;
+			_lastLatency  = null;
 			Main.Instance.Connections.Remove(this);
 			Main.OnConnectionRemoved.Invoke(this);
 		}
@@ -204,7 +204,7 @@ namespace api.nox.relay.connection {
 		}
 
 		public async UniTask<types.Handshakes.RelayResponseHandshake> RequestHandshake()
-			=> _lastHandshake = await Request<types.Handshakes.RelayResponseHandshake>(
+			=> LastHandshake = await Request<types.Handshakes.RelayResponseHandshake>(
 				new types.Handshakes.RelayRequestHandshake {
 					ConnectionId    = Id,
 					ProtocolVersion = ProtocolVersion,

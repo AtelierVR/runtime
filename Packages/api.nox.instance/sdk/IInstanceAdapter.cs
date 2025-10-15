@@ -1,5 +1,5 @@
 namespace Nox.Instances {
-	public class IInstanceAdapter {
-		
+	public interface IInstanceAdapter {
+		public IInstanceIdentifier GetInstance();
 	}
 }

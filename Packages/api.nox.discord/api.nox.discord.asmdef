@@ -4,7 +4,9 @@
     "references": [
         "Nox.CCK",
         "UniTask",
-        "Nox.Users"
+        "Nox.Users",
+        "Nox.Sessions",
+        "Nox.Instances"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

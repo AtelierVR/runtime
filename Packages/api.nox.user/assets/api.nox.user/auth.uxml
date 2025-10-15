@@ -1,42 +1,52 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
-    <Style src="project://database/Assets/Mods/api.nox.world/Resources/Style.uss?fileID=7433441132597879392&amp;guid=e5801f130c21d4a43937749c0d48a9cd&amp;type=3#Style" />
+    <Style src="project://database/Packages/api.nox.mod_loader/Resources/nox.cck.style.uss?fileID=7433441132597879392&amp;guid=ee18ab989d89a1a479332bd224e51c94&amp;type=3#nox.cck.style" />
+    <Style src="project://database/Packages/api.nox.user/assets/api.nox.user/style.uss?fileID=7433441132597879392&amp;guid=7a4732f6a01130340a9ac8dff0185c3f&amp;type=3#style" />
     <engine:VisualElement style="flex-grow: 1; padding-top: 4px; padding-bottom: 4px;">
-        <engine:GroupBox style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;">
-            <engine:VisualElement style="flex-grow: 1; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); border-bottom-width: 1px; padding-bottom: 4px; padding-top: 4px; flex-direction: row; padding-right: 8px; padding-left: 8px;">
-                <engine:Label text="User Login" style="margin-right: 3px; margin-left: 3px; flex-grow: 1;" />
-                <engine:Label text="v0.0.0" name="version" />
-            </engine:VisualElement>
-        </engine:GroupBox>
         <engine:GroupBox style="flex-grow: 1; justify-content: center; align-self: auto; align-items: center; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 8px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px;">
-            <engine:VisualElement style="flex-grow: 0; flex-shrink: 0; align-self: auto; max-width: 300px; align-items: stretch; min-width: initial; width: 100%;">
-                <engine:VisualElement name="content" style="flex-grow: 1; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-left-radius: 4px; border-top-right-radius: 4px; border-bottom-right-radius: 4px; border-bottom-left-radius: 4px; border-left-color: rgb(47, 47, 47); border-right-color: rgb(47, 47, 47); border-top-color: rgb(47, 47, 47); border-bottom-color: rgb(47, 47, 47); padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; margin-top: 2px; margin-bottom: 2px; display: flex;">
-                    <engine:Label text="Login" style="margin-bottom: 8px; -unity-text-align: upper-center; -unity-font-style: bold; font-size: 16px;" />
-                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
-                        <engine:Label text="Server" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:TextField name="server" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
-                    </engine:VisualElement>
-                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
-                        <engine:Label text="Identifiant" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:TextField name="identifier" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
-                    </engine:VisualElement>                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 8px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
-                        <engine:Label text="Password" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                        <engine:TextField name="password" password="true" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
-                    </engine:VisualElement>
-                    <engine:VisualElement name="verification-panel" style="flex-grow: 1; display: none;">
-                        <engine:Label text="Two-Factor Authentication Required" style="margin-top: 8px; margin-bottom: 4px; -unity-text-align: upper-center; -unity-font-style: bold; color: rgb(255, 165, 0);" />
-                        <engine:Label name="verification-message" text="Please enter your verification code to continue." style="margin-bottom: 8px; -unity-text-align: upper-center; font-size: 12px; color: rgb(180, 180, 180);" />
-                        <engine:VisualElement name="method-selection" style="flex-grow: 1; margin-bottom: 8px; display: none;">
-                            <engine:Label text="Choose verification method:" style="margin-bottom: 4px; font-size: 12px;" />
-                            <engine:DropdownField name="verification-methods" style="margin-bottom: 4px;" />
+            <engine:VisualElement style="flex-grow: 1; align-self: center; justify-content: center;">
+                <engine:VisualElement style="flex-grow: 0;">
+                    <engine:Button text="Button" />
+                </engine:VisualElement>
+            </engine:VisualElement>
+            <engine:VisualElement name="address" style="flex-grow: 1; justify-content: flex-start; display: none;">
+                <engine:Label text="Label" name="address_error" style="padding-top: 4px; padding-right: 16px; padding-bottom: 4px; padding-left: 16px; -unity-text-align: upper-center; color: rgb(255, 255, 255); display: none; border-left-color: rgb(64, 13, 14); border-right-color: rgb(64, 13, 14); border-top-color: rgb(64, 13, 14); border-bottom-color: rgb(64, 13, 14); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; margin-top: 4px; margin-right: 4px; margin-bottom: 32px; margin-left: 4px; border-top-left-radius: 2px; border-top-right-radius: 2px; border-bottom-right-radius: 2px; border-bottom-left-radius: 2px; background-color: rgb(159, 7, 18); align-self: center;" />
+                <engine:VisualElement style="flex-grow: 0; flex-shrink: 0; min-width: 320px; flex-direction: row; max-width: 100%;">
+                    <engine:TextField placeholder-text="Server Address" name="address_input" class="large" style="flex-grow: 1; flex-shrink: 1; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;" />
+                    <engine:Button text="▶" name="address_submit" class="large" />
+                </engine:VisualElement>
+            </engine:VisualElement>
+            <engine:VisualElement name="login" style="flex-grow: 1; justify-content: flex-start; display: none;">
+                <engine:VisualElement style="flex-grow: 0; flex-shrink: 0; min-width: 320px; max-width: 100%;">
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-bottom: 16px;">
+                        <engine:Button text="◀" name="login_back" class="large" style="flex-shrink: 1;" />
+                        <engine:VisualElement style="flex-grow: 1;">
+                            <engine:Label text="Login" style="flex-shrink: 1; flex-grow: 1; -unity-text-align: middle-left; -unity-font-style: bold; margin-left: 8px;" />
                         </engine:VisualElement>
-                        <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 1px; margin-right: 3px; margin-bottom: 1px; margin-left: 3px;">
-                            <engine:Label text="Code" style="flex-grow: 0; -unity-text-align: middle-left; width: 28%;" />
-                            <engine:TextField name="verification-code" max-length="6" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
-                        </engine:VisualElement>
-                        <engine:Button name="send-email-code" text="Send Email Code" style="margin-top: 4px; margin-bottom: 4px; display: none;" />
-                        <engine:Button name="back-to-login" text="Back to Login" style="margin-top: 4px;" />
                     </engine:VisualElement>
-                    <engine:Button text="Login" style="margin-top: 8px;" name="login-button" />
+                    <engine:Label text="Label" name="login_error" style="padding-top: 4px; padding-right: 16px; padding-bottom: 4px; padding-left: 16px; -unity-text-align: upper-center; color: rgb(255, 255, 255); display: none; border-left-color: rgb(64, 13, 14); border-right-color: rgb(64, 13, 14); border-top-color: rgb(64, 13, 14); border-bottom-color: rgb(64, 13, 14); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; margin-top: 4px; margin-right: 4px; margin-bottom: 16px; margin-left: 4px; border-top-left-radius: 2px; border-top-right-radius: 2px; border-bottom-right-radius: 2px; border-bottom-left-radius: 2px; background-color: rgb(159, 7, 18); align-self: center;" />
+                    <engine:TextField placeholder-text="Identifier" name="login_identifier_input" keyboard-type="Social" class="large" style="flex-grow: 1; flex-shrink: 1;" />
+                    <engine:TextField placeholder-text="Password" name="login_password_input" password="true" class="large" style="flex-grow: 1; flex-shrink: 1;" />
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 8px;">
+                        <engine:Button text="Connect" name="login_submit" class="large" style="flex-grow: 1; flex-shrink: 1;" />
+                    </engine:VisualElement>
+                </engine:VisualElement>
+            </engine:VisualElement>
+            <engine:VisualElement name="verification" style="flex-grow: 1; justify-content: flex-start;">
+                <engine:VisualElement style="flex-grow: 0; flex-shrink: 0; min-width: 320px; max-width: 100%;">
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-bottom: 16px;">
+                        <engine:Button text="◀" name="verification_back" class="large" style="flex-shrink: 1;" />
+                        <engine:VisualElement style="flex-grow: 1;">
+                            <engine:Label text="Verification" style="flex-shrink: 1; flex-grow: 1; -unity-text-align: middle-left; -unity-font-style: bold; margin-left: 8px;" />
+                        </engine:VisualElement>
+                    </engine:VisualElement>
+                    <engine:Label text="Label" name="verification_error" style="padding-top: 4px; padding-right: 16px; padding-bottom: 4px; padding-left: 16px; -unity-text-align: upper-center; color: rgb(255, 255, 255); display: none; border-left-color: rgb(64, 13, 14); border-right-color: rgb(64, 13, 14); border-top-color: rgb(64, 13, 14); border-bottom-color: rgb(64, 13, 14); border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; margin-top: 4px; margin-right: 4px; margin-bottom: 16px; margin-left: 4px; border-top-left-radius: 2px; border-top-right-radius: 2px; border-bottom-right-radius: 2px; border-bottom-left-radius: 2px; background-color: rgb(159, 7, 18); align-self: center;" />
+                    <engine:DropdownField label="Method" name="verification_methods" class="large" style="margin-bottom: 16px;" />
+                    <engine:Label text="Label" name="verification_label" style="margin-top: 1px; margin-right: 6px; margin-bottom: 4px; margin-left: 6px; -unity-font-style: bold;" />
+                    <engine:TextField placeholder-text="0000" name="verification_input" keyboard-type="OneTimeCode" class="large verification" style="flex-grow: 1; flex-shrink: 1;" />
+                    <engine:Label text="Label" name="verification_description" style="margin-top: 1px; margin-right: 6px; margin-bottom: 4px; margin-left: 6px; color: rgb(153, 153, 153); font-size: 10px;" />
+                    <engine:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 8px;">
+                        <engine:Button text="Connect" name="verification_submit" class="large" style="flex-grow: 1; flex-shrink: 1;" />
+                    </engine:VisualElement>
                 </engine:VisualElement>
             </engine:VisualElement>
         </engine:GroupBox>

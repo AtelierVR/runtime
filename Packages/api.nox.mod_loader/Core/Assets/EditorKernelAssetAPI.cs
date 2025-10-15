@@ -8,6 +8,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using UnityEditor;
 
 namespace Nox.ModLoader.Cores.Assets {
 	public class EditorKernelAssetAPI : IAssetAPI {
@@ -266,7 +267,7 @@ namespace Nox.ModLoader.Cores.Assets {
 
 			foreach (var n in namespaces) {
 				var dirpath = ToRelative(Path.Combine(_kernelMod.GetData<string>("assets"), n, name));
-				var asset   = UnityEditor.AssetDatabase.LoadAssetAtPath<T>(dirpath);
+				var asset   = AssetDatabase.LoadAssetAtPath<T>(dirpath);
 				if (asset) return asset;
 			}
 
@@ -379,6 +380,7 @@ namespace Nox.ModLoader.Cores.Assets {
 		public async UniTask<Scene> LoadOverrideWorld(string ns, string name, LoadSceneMode mode = LoadSceneMode.Single) {
 			List<string> namespaces = new() { ns };
 			var          mod        = ModManager.GetMod(ns);
+
 			if (mod != null) {
 				var meta = mod.GetMetadata();
 				namespaces.Add(meta.GetId());
@@ -387,18 +389,16 @@ namespace Nox.ModLoader.Cores.Assets {
 
 			foreach (var n in namespaces) {
 				var dirpath = ToRelative(Path.Combine(_kernelMod.GetData<string>("assets"), ns, name));
-				for (var i = 0; i < SceneManager.sceneCountInBuildSettings; i++) {
-					var sc = SceneUtility.GetScenePathByBuildIndex(i);
-					if (FormatPath(sc) != FormatPath(dirpath)) continue;
-					var id = SceneUtility.GetBuildIndexByScenePath(sc);
-					if (id == -1) return default;
-					var scene = SceneManager.GetSceneByBuildIndex(id);
-					if (!scene.isLoaded) await SceneManager.LoadSceneAsync(id, mode);
-					scene = SceneManager.GetSceneByBuildIndex(id);
-					return scene;
-				}
-
-				return default;
+				var scenes = AssetDatabase.FindAssets("t:Scene")
+					.Select(AssetDatabase.GUIDToAssetPath)
+					.Where(p => FormatPath(p) == FormatPath(dirpath))
+					.ToArray();
+				if (scenes.Length == 0) continue;
+				var scenePath = scenes[0];
+				var scene     = SceneManager.GetSceneByPath(scenePath);
+				if (!scene.isLoaded) await SceneManager.LoadSceneAsync(scenePath, mode);
+				scene = SceneManager.GetSceneByPath(scenePath);
+				return scene;
 			}
 
 			return default;
@@ -418,16 +418,15 @@ namespace Nox.ModLoader.Cores.Assets {
 
 			foreach (var n in namespaces) {
 				var dirpath = ToRelative(Path.Combine(_kernelMod.GetData<string>("assets"), ns, name));
-
-				for (var i = 0; i < SceneManager.sceneCountInBuildSettings; i++) {
-					var sc = SceneUtility.GetScenePathByBuildIndex(i);
-					if (FormatPath(sc) != FormatPath(dirpath)) continue;
-					var id = SceneUtility.GetBuildIndexByScenePath(sc);
-					if (id == -1) return;
-					var scene = SceneManager.GetSceneByBuildIndex(id);
-					if (scene.isLoaded) await SceneManager.UnloadSceneAsync(scene);
-					return;
-				}
+				var scenes = AssetDatabase.FindAssets("t:Scene")
+					.Select(AssetDatabase.GUIDToAssetPath)
+					.Where(p => FormatPath(p) == FormatPath(dirpath))
+					.ToArray();
+				if (scenes.Length == 0) continue;
+				var scenePath = scenes[0];
+				var scene     = SceneManager.GetSceneByPath(scenePath);
+				if (scene.isLoaded) await SceneManager.UnloadSceneAsync(scene);
+				return;
 			}
 		}
 
@@ -443,11 +442,12 @@ namespace Nox.ModLoader.Cores.Assets {
 			foreach (var n in namespaces) {
 				var dirpath = ToRelative(Path.Combine(_kernelMod.GetData<string>("assets"), ns, name));
 
-				for (var i = 0; i < SceneManager.sceneCountInBuildSettings; i++) {
-					var sc = SceneUtility.GetScenePathByBuildIndex(i);
-					if (FormatPath(sc) != FormatPath(dirpath)) continue;
+				var scenes = AssetDatabase.FindAssets("t:Scene")
+					.Select(AssetDatabase.GUIDToAssetPath)
+					.Where(p => FormatPath(p) == FormatPath(dirpath))
+					.ToArray();
+				if (scenes.Length != 0)
 					return true;
-				}
 			}
 
 			return false;
@@ -465,14 +465,14 @@ namespace Nox.ModLoader.Cores.Assets {
 			foreach (var n in namespaces) {
 				var dirpath = ToRelative(Path.Combine(_kernelMod.GetData<string>("assets"), n, name));
 
-				for (var i = 0; i < SceneManager.sceneCountInBuildSettings; i++) {
-					var sc = SceneUtility.GetScenePathByBuildIndex(i);
-					if (FormatPath(sc) != FormatPath(dirpath)) continue;
-					var id = SceneUtility.GetBuildIndexByScenePath(sc);
-					if (id == -1) return false;
-					var scene = SceneManager.GetSceneByBuildIndex(id);
-					return scene.isLoaded;
-				}
+				var scenes = AssetDatabase.FindAssets("t:Scene")
+					.Select(AssetDatabase.GUIDToAssetPath)
+					.Where(p => FormatPath(p) == FormatPath(dirpath))
+					.ToArray();
+				if (scenes.Length == 0) continue;
+				var scenePath = scenes[0];
+				var scene     = SceneManager.GetSceneByPath(scenePath);
+				return scene.isLoaded;
 			}
 
 			return false;
@@ -490,14 +490,14 @@ namespace Nox.ModLoader.Cores.Assets {
 			foreach (var n in namespaces) {
 				var dirpath = ToRelative(Path.Combine(_kernelMod.GetData<string>("assets"), n, name));
 
-				for (var i = 0; i < SceneManager.sceneCountInBuildSettings; i++) {
-					var sc = SceneUtility.GetScenePathByBuildIndex(i);
-					if (FormatPath(sc) != FormatPath(dirpath)) continue;
-					var id = SceneUtility.GetBuildIndexByScenePath(sc);
-					if (id == -1) return default;
-					var scene = SceneManager.GetSceneByBuildIndex(id);
-					return scene.isLoaded ? scene : default;
-				}
+				var scenes = AssetDatabase.FindAssets("t:Scene")
+					.Select(AssetDatabase.GUIDToAssetPath)
+					.Where(p => FormatPath(p) == FormatPath(dirpath))
+					.ToArray();
+				if (scenes.Length == 0) continue;
+				var scenePath = scenes[0];
+				var scene     = SceneManager.GetSceneByPath(scenePath);
+				return scene.isLoaded ? scene : default;
 			}
 
 			return default;

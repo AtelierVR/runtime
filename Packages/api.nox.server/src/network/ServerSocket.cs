@@ -212,7 +212,7 @@ namespace api.nox.server.network {
 					break;
 				} catch (Exception ex) {
 					Logger.LogError($"Unexpected error while listening: {ex.Message}");
-					OnError.Invoke(ex);
+					if (OnError != null) OnError.Invoke(ex);
 					await HandleDisconnection();
 					break;
 				}

@@ -100,6 +100,12 @@ namespace api.nox.server {
 
 			if (Socket.Item2 != null)
 				await Socket.Item2.Dispose();
+			
+			if(user == null) {
+				Logger.LogDebug("No current user, not connecting to server.");
+				Socket = (null, null);
+				return;
+			}
 
 			Socket = (user.ToIdentifier(), null);
 

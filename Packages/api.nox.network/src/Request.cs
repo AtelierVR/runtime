@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
@@ -7,6 +8,8 @@ using Nox.Network;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Text;
+using System.Security.Cryptography.X509Certificates;
+using System.Net.Security;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.network {
@@ -26,8 +29,58 @@ namespace api.nox.network {
 		// Headers par défaut calculés une seule fois au démarrage statique
 		private static readonly Dictionary<string, string> DefaultHeaders = new();
 		private static bool _defaultHeadersInitialized;
+		private static bool _sslInitialized = false;
+		
+		// Gestionnaire de certificats SSL pour Unity
+		private static bool AcceptAllCertificates(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) {
+			#if UNITY_EDITOR || DEVELOPMENT_BUILD
+			// En développement, on accepte tous les certificats pour éviter les problèmes SSL
+			if (sslPolicyErrors != SslPolicyErrors.None) {
+				Logger.LogWarning($"SSL Certificate validation failed: {sslPolicyErrors}. Accepting anyway in development mode.");
+			}
+			return true;
+			#else
+			// En production, on peut être plus strict
+			if (sslPolicyErrors == SslPolicyErrors.None)
+				return true;
+				
+			// Accepter seulement les erreurs de nom qui ne matchent pas (communes avec les API de test)
+			if (sslPolicyErrors == SslPolicyErrors.RemoteCertificateNameMismatch) {
+				Logger.LogWarning($"SSL Certificate name mismatch detected, but accepting connection.");
+				return true;
+			}
+			
+			Logger.LogError($"SSL Certificate validation failed: {sslPolicyErrors}");
+			return false;
+			#endif
+		}
+		
+		private static void InitializeSSL() {
+			if (_sslInitialized) return;
+			
+			lock (DefaultHeaders) {
+				if (_sslInitialized) return;
+				
+				try {
+					// Configurer le gestionnaire de certificats SSL pour Unity
+					#if !UNITY_WEBGL
+					System.Net.ServicePointManager.ServerCertificateValidationCallback = AcceptAllCertificates;
+					System.Net.ServicePointManager.SecurityProtocol = 
+						System.Net.SecurityProtocolType.Tls12 | 
+						System.Net.SecurityProtocolType.Tls11 | 
+						System.Net.SecurityProtocolType.Tls;
+					#endif
+					
+					_sslInitialized = true;
+					Logger.Log("SSL certificate validation configured successfully.");
+				} catch (Exception e) {
+					Logger.LogError($"Failed to configure SSL: {e.Message}");
+				}
+			}
+		}
 		
 		public Request() {
+			InitializeSSL();
 			InitializeDefaultHeaders();
 			SetHeaders(DefaultHeaders);
 		}
@@ -146,20 +199,16 @@ namespace api.nox.network {
 
 			// Mettre à jour les headers dynamiques seulement si nécessaire
 			UpdateDynamicHeaders();
-
+			
 			// Optimiser l'application des headers - éviter LINQ
-			foreach (var kvp in RequestHeaders) {
-				if (!string.IsNullOrEmpty(kvp.Value)) {
-					RequestObject.SetRequestHeader(kvp.Key, kvp.Value);
-				}
-			}
+			foreach (var kvp in RequestHeaders.Where(kvp => !string.IsNullOrEmpty(kvp.Value))) 
+				RequestObject.SetRequestHeader(kvp.Key, kvp.Value);
 
 			try {
 				Logger.Log($"Sending request to {GetMethod()} {RequestObject.url}...");
-
 				await RequestObject.SendWebRequest().WithCancellation(token);
 			} catch (Exception e) {
-				Logger.LogError($"Failed to send request to {RequestObject.url}: {e.Message}");
+				Logger.LogError($"Failed to send request to {GetMethod()} {RequestObject.url}: {e.Message}");
 			}
 
 			// Cache seulement si nécessaire
@@ -171,32 +220,29 @@ namespace api.nox.network {
 		private void UpdateDynamicHeaders() {
 			// Mise à jour des headers qui peuvent changer entre les requêtes
 			var currentUser = Main.UserAPI?.GetCurrent()?.ToIdentifier().ToString();
-			if (!string.IsNullOrEmpty(currentUser)) {
+			if (!string.IsNullOrEmpty(currentUser)) 
 				RequestHeaders["x-nox-user"] = currentUser;
-			}
 
 			// Optimiser la construction de la liste des mods
-			if (Main.Instance?.CoreAPI?.ModAPI != null) {
-				lock (StringBuilder) {
-					StringBuilder.Clear();
-					var mods = Main.Instance.CoreAPI.ModAPI.GetMods();
-					bool first = true;
+			if (Main.Instance?.CoreAPI?.ModAPI == null) return;
+			
+			lock (StringBuilder) {
+				StringBuilder.Clear();
+				var mods  = Main.Instance.CoreAPI.ModAPI.GetMods();
+				var first = true;
 					
-					foreach (var mod in mods) {
-						if (mod?.IsLoaded() == true) {
-							var metadata = mod.GetMetadata();
-							if (metadata != null) {
-								if (!first) StringBuilder.Append("; ");
-								StringBuilder.Append(metadata.GetId());
-								StringBuilder.Append('/');
-								StringBuilder.Append(metadata.GetVersion());
-								first = false;
-							}
-						}
-					}
-					
-					RequestHeaders["x-nox-mods"] = StringBuilder.ToString();
+				foreach (var mod in mods) {
+					if (mod?.IsLoaded() != true) continue;
+					var metadata = mod.GetMetadata();
+					if (metadata == null) continue;
+					if (!first) StringBuilder.Append("; ");
+					StringBuilder.Append(metadata.GetId());
+					StringBuilder.Append('/');
+					StringBuilder.Append(metadata.GetVersion());
+					first = false;
 				}
+					
+				RequestHeaders["x-nox-mods"] = StringBuilder.ToString();
 			}
 		}
 
@@ -219,9 +265,8 @@ namespace api.nox.network {
 			if (data == null || data.Length == 0)
 				return default;
 
-			if (TypeConverters.TryGetValue(typeof(T), out var converter)) {
+			if (TypeConverters.TryGetValue(typeof(T), out var converter)) 
 				return (T)converter(data);
-			}
 
 			try {
 				var json = System.Text.Encoding.UTF8.GetString(data);
@@ -242,9 +287,8 @@ namespace api.nox.network {
 			RequestObject.uploadHandler = new UploadHandlerRaw(data);
 			
 			// Ajuster automatiquement le timeout pour les gros uploads
-			if (data.Length > 1024 * 1024) { // Plus de 1MB
+			if (data.Length > 1024 * 1024)  // Plus de 1MB
 				SetTimeoutForUpload(data.Length);
-			}
 		}
 
 		public void SetBody(byte[] data, string contentType = null) {
@@ -255,9 +299,8 @@ namespace api.nox.network {
 			RequestObject.uploadHandler = new UploadHandlerRaw(uploadData);
 			
 			// Ajuster automatiquement le timeout pour les gros uploads
-			if (uploadData.Length > 1024 * 1024) { // Plus de 1MB
+			if (uploadData.Length > 1024 * 1024) // Plus de 1MB
 				SetTimeoutForUpload(uploadData.Length);
-			}
 		}
 
 		public void SetMethod(string method) {
@@ -272,13 +315,12 @@ namespace api.nox.network {
 		public int GetCacheDuration()
 			=> CacheDuration;
 
-		public void SetCacheDuration(int cacheTime = -1) {
-			if (cacheTime < 0)
-				CacheDuration = Cache.DefaultCacheDuration;
-			else if (cacheTime > 0)
-				CacheDuration  = cacheTime;
-			else CacheDuration = 0; // Disable caching
-		}
+		public void SetCacheDuration(int cacheTime = -1) 
+			=> CacheDuration = cacheTime switch {
+				< 0 => Cache.DefaultCacheDuration,
+				> 0 => cacheTime,
+				_   => 0
+			};
 
 		/// <summary>
 		/// Gets the current download progress of the request.
@@ -298,16 +340,14 @@ namespace api.nox.network {
 
 		public static string MergeUrl(Uri url, string path)
 			=> MergeUrl(url.ToString(), path);
-
-		private static readonly char[] _urlTrimChars = { '/' };
 		
 		public static string MergeUrl(string url, string path) {
 			if (string.IsNullOrEmpty(url)) return path ?? string.Empty;
 			if (string.IsNullOrEmpty(path)) return url;
 				
 			// Optimisation : éviter les allocations de string avec EndsWith/StartsWith
-			bool urlEndsWithSlash = url[url.Length - 1] == '/';
-			bool pathStartsWithSlash = path[0] == '/';
+			var urlEndsWithSlash    = url[^1] == '/';
+			var pathStartsWithSlash = path[0] == '/';
 			
 			// Utiliser StringBuilder pour une seule allocation
 			lock (StringBuilder) {

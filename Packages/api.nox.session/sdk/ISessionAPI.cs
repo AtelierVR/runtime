@@ -46,5 +46,11 @@ namespace Nox.Sessions {
 		/// <param name="options">Options for the session, please refer to the adapter documentation for available options.</param>
 		/// <returns>If the session is successfully created, it will return the session instance, otherwise it will return null.</returns>
 		public ISession MakeSession(string adapter, Dictionary<string, object> options = null);
+
+		/// <summary>
+		/// Get the current session, if any.
+		/// </summary>
+		/// <returns></returns>
+		public ISession GetCurrent();
 	}
 }

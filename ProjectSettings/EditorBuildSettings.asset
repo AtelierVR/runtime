@@ -6,14 +6,96 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_Recovery/0.unity
+    guid: 9d3f09e9ab69b93409b5646e484b1e9c
+  - enabled: 1
+    path: Assets/AutoHand/Examples/Scenes/Desktop/Desktop Player.unity
+    guid: bb1eab65b7f030d4fab81d20430b0b3d
+  - enabled: 1
+    path: Assets/AutoHand/Examples/Scenes/XR/Demo.unity
+    guid: 9935fff7a54383d4a8ca954c1411c833
+  - enabled: 1
+    path: Assets/AutoHand/Examples/Scenes/XR/Tutorial Video Scene.unity
+    guid: dc74935531a6487409eb101722a98460
+  - enabled: 1
+    path: Assets/GitIgnore_Avatar/GoGo/GoModel/GoBone/Avatar GoBone.unity
+    guid: 798fd65a9d8b3ec4382d9d07e5a384a7
+  - enabled: 1
+    path: Assets/GitIgnore_Avatar/OpenMe.unity
+    guid: 02fdcea21931f7d4fadf43d9f72c15b6
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/Bitgem/StylisedWater/URP/Examples/Example-Scene-01.unity
+    guid: fc967860e2508924e943ba0223c2ed3b
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/OpenMe.unity
+    guid: f76a4b4cc6fed0a4eb97657257962a00
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/BORDEL/VRCDefaultWorldScene.unity
+    guid: 3a376bda79aebc04da612b859a4aab40
+  - enabled: 1
+    path: Assets/GitIgnore_BORDEL/FastSky/Demo/FastSkyDemo.unity
+    guid: 66ba89bf341ac754b8002ea71a6aa1e1
+  - enabled: 1
     path: Assets/OpenME.unity
     guid: 72f73d93637f36d428e530292b77d863
+  - enabled: 1
+    path: Assets/Samples/Avatars/1.0.0/OpenMe.unity
+    guid: d1daeea0afdffe74c9af7111ca457ca0
   - enabled: 1
     path: Assets/Samples/Worlds/DemoWorld.unity
     guid: 39830c7dbe00a6843a4da18a86873368
   - enabled: 1
-    path: Assets/GitIgnore_Avatar/OpenMe.unity
-    guid: 02fdcea21931f7d4fadf43d9f72c15b6
+    path: Assets/Samples/Worlds/New Scene.unity
+    guid: b8ce853cf9a3b2b478f94ddd668c4528
+  - enabled: 1
+    path: Assets/Samples/XR Hands/1.5.1/HandVisualizer/HandVisualizer.unity
+    guid: ab7acf0d9677fbe4db51bc36647d4fcb
+  - enabled: 1
+    path: Assets/Samples/XR Interaction Toolkit/3.1.1/Hands Interaction Demo/HandsDemoScene.unity
+    guid: 3ff35cecbcc52cc42945cf531638a60a
+  - enabled: 1
+    path: Assets/Samples/XR Interaction Toolkit/3.2.1/Starter Assets/DemoScene.unity
+    guid: 319dafa5c80f29f428dc1e0d03f04177
+  - enabled: 1
+    path: Assets/Scenes/BasicScene.unity
+    guid: 4e9fef26e6adb88479ad1b9834a32d94
+  - enabled: 1
+    path: Assets/Scenes/SampleScene.unity
+    guid: 55daccc09a3b69647bbab145b54a3ab3
+  - enabled: 1
+    path: Packages/com.keviniglesias.basicmotions/Unity Demo Scenes/Human Basic Motions/Human
+      Basic Motions - Unity Demo Scene.unity
+    guid: cc778ff8e7d7b874d9ef5cf06279e322
+  - enabled: 1
+    path: Packages/dev.nox.game_builder/buildscenes/main.unity
+    guid: eaaaa443d7bb2384a99758427d41bfd8
+  - enabled: 1
+    path: Packages/api.nox.main/assets/api.nox.main/worlds/default/default.unity
+    guid: 6846bd5ba84175847ac059e62f04fe89
+  - enabled: 1
+    path: Packages/api.nox.main/assets/api.nox.main/worlds/error/error.unity
+    guid: 39db45c140203674a86a8de1e290e984
+  - enabled: 1
+    path: Packages/api.nox.xr/assets/api.nox.xr/Editor.unity
+    guid: 1babc5969d2cbd94eb5c37fc7708b40f
+  - enabled: 1
+    path: Packages/com.unity.render-pipelines.universal/Editor/SceneTemplates/Basic.unity
+    guid: e026d555eae824f65922633f37a14385
+  - enabled: 1
+    path: Packages/com.unity.render-pipelines.universal/Editor/SceneTemplates/Standard.unity
+    guid: 5cae0d87369a2405eaa962b8d920b947
+  - enabled: 1
+    path: Packages/com.unity.xr.core-utils/Tests/Runtime/Scenes/ConvexHullPerformanceTest.unity
+    guid: 14fc8b46bbbe44c8384c288cda0b3a64
+  - enabled: 1
+    path: Packages/com.unity.xr.core-utils/Tests/Runtime/Scenes/CustomApproximatelyPerformanceTest.unity
+    guid: a401cbed40abb430895eec5ceb8b5353
+  - enabled: 1
+    path: Packages/com.unity.xr.core-utils/Tests/Runtime/Scenes/PointInPolygonPerformanceTest.unity
+    guid: d469f69adcddc4b1a91654a826f73b4d
+  - enabled: 1
+    path: Packages/com.unity.xr.interaction.toolkit/Tests/Tests/Conecast Stress Test.unity
+    guid: 543f4c2924b7f3147bacb8012ec0c603
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

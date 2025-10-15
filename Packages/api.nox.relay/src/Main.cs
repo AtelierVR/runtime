@@ -11,6 +11,7 @@ using Nox.Avatars;
 using Nox.CCK.Mods.Events;
 using Nox.Controllers;
 using Nox.Entities;
+using Nox.Instances;
 using Nox.Microphone;
 using Nox.Network;
 using Nox.Sessions;
@@ -55,6 +56,11 @@ namespace api.nox.relay {
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("session")
 				.GetInstance<ISessionAPI>();
+
+		internal static IInstanceAPI InstanceAPI
+			=> Instance.CoreAPI.ModAPI
+				.GetMod("instance")
+				.GetInstance<IInstanceAPI>();
 
 		internal static IControllerAPI ControllerAPI
 			=> Instance.CoreAPI.ModAPI

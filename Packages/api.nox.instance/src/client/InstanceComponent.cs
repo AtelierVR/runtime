@@ -112,24 +112,22 @@ namespace api.nox.instance.client {
 			_thumbnailTokenSource = null;
 		}
 
-		private void OnJoinClicked() {
-			var world = Page.World.ToIdentifier();
-			world.SetVersion(Page.Version);
-			var data = Page.Instance.GetConnectionData().GetData();
-			data.Add("set_current", true);
-			data.Add("server", Page.Instance.GetServerAddress());
-			data.Add("instance", Page.Instance.GetId());
-			data.Add("name", Page.Instance.GetTitle());
-			data.Add("short_name", Page.Instance.GetName());
-			data.Add("thumbnail", Main.NetworkAPI.FetchTexture(Page.Instance.GetThumbnailUrl()));
-			Main.SessionAPI.MakeSession(
+		private void OnJoinClicked() 
+			=> Main.SessionAPI.MakeSession(
 				"external:"
 				+ Page.Instance
 					.GetConnectionData()
 					.GetMethod(),
-				data
+				new Dictionary<string, object> {
+					{ "set_current", true },
+					{ "server", Page.Instance.GetServerAddress() },
+					{ "instance", Page.Instance.GetId() },
+					{ "name", Page.Instance.GetTitle() },
+					{ "short_name", Page.Instance.GetName() },
+					{ "thumbnail", Main.NetworkAPI.FetchTexture(Page.Instance.GetThumbnailUrl()) },
+					{ "data", Page.Instance.GetConnectionData().GetData<JObject>() }
+				}
 			);
-		}
 
 		public static (GameObject, InstanceComponent) Generate(InstancePage instancePage, RectTransform parent) {
 			var content              = Instantiate(Client.GetAsset<GameObject>("prefabs/split.prefab", "ui"), parent);

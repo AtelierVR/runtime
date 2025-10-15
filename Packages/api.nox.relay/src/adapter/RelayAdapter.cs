@@ -15,14 +15,15 @@ using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.CCK.Utils;
 using Nox.Entities;
-using Nox.Players;
+using Nox.Instances;
 using Nox.Sessions;
 using Nox.Worlds;
 using UnityEngine;
+using IPlayer = Nox.Players.IPlayer;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay {
-	public class RelayAdapter : IAdapter, INoxObject {
+	public class RelayAdapter : IAdapter, IInstanceAdapter, INoxObject {
 		private          RelayDimension    _dimension;
 		private readonly IEntityManager    _entities;
 		private          ISession          _session;
@@ -47,6 +48,7 @@ namespace api.nox.relay {
 			EntitiesRoot = new GameObject($"[{GetType().Name}Entities]");
 			UnityEngine.Object.DontDestroyOnLoad(EntitiesRoot);
 		}
+
 
 		public void OnEnter(EnterResponse ev) {
 			Tps           = ev.Tps;
@@ -337,9 +339,9 @@ namespace api.nox.relay {
 				return;
 			}
 
-			var scene = _dimension.GetScene();
+			var scene     = _dimension.GetScene();
 			var instances = scene?.GetInstances();
-			var main = instances != null && instances.Length > 0 ? instances[0] : null;
+			var main      = instances is { Length: > 0 } ? instances[0] : null;
 			if (main == null) {
 				Logger.LogWarning($"OnDeselect: {this} could not locate the main instance. Skipping visibility updates.");
 				await UniTask.Yield();
@@ -388,6 +390,14 @@ namespace api.nox.relay {
 			_entities.UnregisterEntity(player);
 			_session.OnPlayerLeft(player);
 			player.Dispose();
+		}
+
+		public IInstanceIdentifier GetInstance() {
+			var instanceId = Instance?.MasterId ?? 0;
+			var server     = Connection?.LastHandshake?.MasterAddress;
+			return server != null
+				? Main.InstanceAPI.Make(instanceId, server)
+				: null;
 		}
 	}
 }

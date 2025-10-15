@@ -88,7 +88,7 @@ namespace api.nox.settings {
 		}
 
 		public void OnDisposeMain() {
-			foreach (var handler in Handlers)
+			foreach (var handler in Handlers.ToArray())
 				Remove(handler.GetPath());
 			Handlers.Clear();
 			_handlers = Array.Empty<IHandler>();

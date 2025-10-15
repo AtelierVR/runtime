@@ -5,6 +5,7 @@ using api.nox.relay.connection;
 using api.nox.relay.types.Authentication;
 using api.nox.relay.types.Traveling;
 using Cysharp.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using Nox.CCK.Mods.Events;
 using Nox.Sessions;
 using UnityEngine;
@@ -18,28 +19,45 @@ namespace api.nox.relay {
 				? new Dictionary<string, object>()
 				: opts;
 
+			var conn = options.TryGetValue("data", out var data) && data is JObject jToken
+				? jToken
+				: null;
+
+			if (conn == null) {
+				context.Callback(false);
+				return;
+			}
+
 			// verify that connections is string[]
-			if (!options.TryGetValue("connections", out var connectionsObj) || connectionsObj is not string[] connections) {
-				Logger.LogError("Relay adapter requires 'connections' to be set in options as string[]");
+			if (!conn.TryGetValue("a", out var ao) || ao is not JArray ja) {
+				Logger.LogError("Relay adapter requires 'a' to be set in options as JArray");
+				return;
+			}
+
+			// Convert JArray to string array
+			string[] a;
+			try {
+				a = ja.ToObject<string[]>();
+			} catch {
+				Logger.LogError("Relay adapter requires 'a' to be set in options as string[]");
+				return;
+			}
+
+			if (a == null) {
+				Logger.LogError("Relay adapter requires 'a' to be set in options as string[]");
 				return;
 			}
 
 			// verify that elements is <proto>://<address>:<port>
 			var regex = new System.Text.RegularExpressions.Regex(@"^[a-zA-Z][a-zA-Z0-9+.-]*://[a-zA-Z0-9.-]+:\d+$");
-			foreach (var connection in connections)
+			foreach (var connection in a)
 				if (!regex.IsMatch(connection)) {
 					Logger.LogError($"Relay adapter requires 'connections' to be set in options as string[] with elements in format <proto>://<address>:<port>, got '{connection}'");
 					return;
 				}
 
-			if (connections.Length == 0) {
+			if (a.Length == 0) {
 				Logger.LogError("Relay adapter requires 'connections' to be set in options as string[] with at least one connection");
-				return;
-			}
-
-			// verify that address is string
-			if (!options.TryGetValue("address", out var addressObj) || addressObj is not string) {
-				Logger.LogError("Relay adapter requires 'address' to be set in options as string");
 				return;
 			}
 
@@ -64,10 +82,24 @@ namespace api.nox.relay {
 			var options = !context.TryGet<Dictionary<string, object>>(1, out var opts)
 				? new Dictionary<string, object>()
 				: opts;
-			var connections = options.TryGetValue("connections", out var l0)
-				&& l0 is string[] l1
-					? l1
-					: Array.Empty<string>();
+
+			var conn = options.TryGetValue("data", out var data) && data is JObject jToken
+				? jToken
+				: null;
+
+			var connections = Array.Empty<string>();
+			if (conn != null && conn.TryGetValue("a", out var ao) && ao is JArray ja) {
+				try {
+					var converted = ja.ToObject<string[]>();
+					if (converted != null) {
+						connections = converted;
+					}
+				} catch {
+					// Log error but continue with empty array
+					Logger.LogError("Failed to convert 'a' to string array in OnMakeAdapter");
+				}
+			}
+
 			var address = options.TryGetValue("address", out var a0)
 				&& a0 is string a1
 					? a1
@@ -132,7 +164,7 @@ namespace api.nox.relay {
 		private static async UniTask PrepareAsync(ISession session, RelayAdapter adapter, string[] connections, string address, string server, uint instance, bool setCurrent) {
 			adapter.SetState(false, "Fetching token...", 0.05f);
 			var token = await Main.UserAPI.GetToken(server);
-			
+
 			if (token == null) {
 				adapter.SetState(false, "Failed to fetch token", -1f);
 				Logger.LogError($"Failed to fetch token for server {server}");

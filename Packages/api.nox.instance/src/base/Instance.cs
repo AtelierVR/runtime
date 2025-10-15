@@ -17,7 +17,7 @@ namespace api.nox.instance {
 		public string           owner;
 		public string[]         tags;
 		public string           world;
-		public string           address;
+		public Connection       connection;
 		public ushort           client_count;
 		public InstancePlayer[] players;
 
@@ -49,7 +49,7 @@ namespace api.nox.instance {
 			=> world;
 
 		public IConnection GetConnectionData()
-			=> new Connection(address);
+			=> connection;
 
 		public ushort GetPlayerCount()
 			=> client_count;

@@ -1,3 +1,4 @@
+using System.IO;
 using api.nox.user.network;
 using api.nox.user.search;
 using Cysharp.Threading.Tasks;
@@ -34,7 +35,7 @@ namespace api.nox.user {
 				?.GetInstance<ISearchAPI>();
 
 		public async UniTask OnInitializeMainAsync(MainModCoreAPI api) {
-			CoreAPI = api;
+			CoreAPI   = api;
 			Instance  = this;
 			Network   = new Network();
 			_language = api.AssetAPI.GetAsset<LanguagePack>("lang.asset");
@@ -84,10 +85,10 @@ namespace api.nox.user {
 		public IUserIdentifier Make(uint id, string server = "::")
 			=> new UserIdentifier(id, server);
 
-		public Nox.Users.ISearchRequest MakeSearchRequest()
+		public ISearchRequest MakeSearchRequest()
 			=> new SearchRequest();
 
-		public async UniTask<Nox.Users.ISearchResponse> Search(Nox.Users.ISearchRequest request, string from = null)
+		public async UniTask<ISearchResponse> Search(ISearchRequest request, string from = null)
 			=> await Network.Search(SearchRequest.FromBase(request), from);
 
 		public async UniTask<IAuthToken> GetToken(string address)

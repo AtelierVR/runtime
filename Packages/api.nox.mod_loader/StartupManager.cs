@@ -105,8 +105,10 @@ namespace Nox.ModLoader {
 					$"Enabling Mod {mod.Metadata.GetId()}@{mod.Metadata.GetVersion()}...",
 					(float)i / results.Mods.Length
 				);
-				mod.GetEntry(EntryPoint.MainEntry).Enable();
-				mod.GetEntry(EntryPoint.EditorEntry).Enable();
+				var mainEntry = mod.GetEntry(EntryPoint.MainEntry);
+				if (mainEntry != null) mainEntry.Enable();
+				var editorEntry = mod.GetEntry(EntryPoint.EditorEntry);
+				if (editorEntry != null) editorEntry.Enable();
 			}
 
 			foreach (var mod in results.Mods)

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Panels;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace api.nox.user {
@@ -76,7 +75,7 @@ namespace api.nox.user {
 				logoutButton.SetEnabled(false);
 				var success = await Main.Instance.Network.Logout();
 				if (success) {
-					EditorUser.CoreAPI.PanelAPI.SetActivePanel("auth");
+					EditorUser.CoreAPI.PanelAPI.SetActivePanel(EditorUser.Auth.GetId());
 					EditorUser.CoreAPI.PanelAPI.UpdatePanelList();
 				} else logoutButton.SetEnabled(true);
 			};

@@ -13,5 +13,7 @@ namespace Nox.Instances {
 		public ISearchRequest MakeSearchRequest();
 
 		public IInstanceIdentifier Make(string identifier);
+		
+		public IInstanceIdentifier Make(uint id, string from);
 	}
 }

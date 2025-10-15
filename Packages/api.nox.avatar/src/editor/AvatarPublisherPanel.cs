@@ -306,7 +306,6 @@ namespace api.nox.avatar.editor {
 		}
 
 		internal void Update() {
-			Logger.LogDebug("AvatarPublisherPanel Update");
 			if (!Editor.HasOnePanelOpened() || _root.childCount == 0) return;
 			
 			var user = Main.Instance.UserAPI.GetCurrent();

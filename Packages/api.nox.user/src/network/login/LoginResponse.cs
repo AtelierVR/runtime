@@ -5,8 +5,11 @@ using Nox.Users;
 namespace api.nox.user.network {
 	[Serializable]
 	public class LoginResponse : ILoginResponse, INoxObject {
-		[NonSerialized] public string               Error;
-		[NonSerialized] public VerificationRequired Verification = VerificationRequired.None;
+		[NonSerialized]
+		public string Error;
+
+		[NonSerialized]
+		public VerificationRequired Verification = VerificationRequired.None;
 
 		public string               token;
 		public long                 expires;
@@ -15,6 +18,9 @@ namespace api.nox.user.network {
 
 		public bool IsError()
 			=> !string.IsNullOrEmpty(Error);
+
+		public bool IsVerificationRequired()
+			=> IsError() && Verification.Required;
 
 		public string GetError()
 			=> Error;

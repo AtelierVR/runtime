@@ -491,6 +491,9 @@
     <Reference Include="Esprima">
       <HintPath>U:\Projets\nox\runtime\Library\PackageCache\com.jint.unity@9b16e8d86afa\Packages\Esprima.dll</HintPath>
     </Reference>
+    <Reference Include="BouncyCastle.Crypto">
+      <HintPath>U:\Projets\nox\runtime\Packages\api.nox.cck\Plugins\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Android.Types">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>
     </Reference>

@@ -548,6 +548,9 @@
     <Reference Include="Esprima">
       <HintPath>U:\Projets\nox\runtime\Library\PackageCache\com.jint.unity@9b16e8d86afa\Packages\Esprima.dll</HintPath>
     </Reference>
+    <Reference Include="BouncyCastle.Crypto">
+      <HintPath>U:\Projets\nox\runtime\Packages\api.nox.cck\Plugins\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Android.Types">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>
     </Reference>
@@ -990,6 +993,10 @@
     <ProjectReference Include="Nox.Microphone.csproj">
       <Project>{e0d9386c-0c6f-5b17-7ced-24aa9a2d8430}</Project>
       <Name>Nox.Microphone</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Instances.csproj">
+      <Project>{f4a96811-5ab6-e173-59f9-c7a0c465d2d3}</Project>
+      <Name>Nox.Instances</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

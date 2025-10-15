@@ -46,15 +46,10 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.discord\DiscordSystem.cs" />
-    <Compile Include="Packages\api.nox.discord\ReadyMessage.cs" />
-    <Compile Include="Packages\api.nox.discord\Assets.cs" />
-    <Compile Include="Packages\api.nox.discord\RichPresence.cs" />
-    <Compile Include="Packages\api.nox.discord\DiscordRpcClient.cs" />
-    <None Include="Packages\api.nox.discord\lib\DiscordRPC.xml" />
+    <Compile Include="Packages\api.nox.discord\src\Main.cs" />
+    <Compile Include="Packages\api.nox.discord\src\DiscordRpc.cs" />
     <None Include="Packages\api.nox.discord\link.xml" />
     <None Include="Packages\api.nox.discord\package.json" />
-    <None Include="Packages\api.nox.discord\lib\DiscordRPC.deps.json" />
     <None Include="Packages\api.nox.discord\api.nox.discord.asmdef" />
     <None Include="Packages\api.nox.discord\nox.mod.json" />
     <Reference Include="UnityEngine">
@@ -486,6 +481,9 @@
     <Reference Include="Esprima">
       <HintPath>U:\Projets\nox\runtime\Library\PackageCache\com.jint.unity@9b16e8d86afa\Packages\Esprima.dll</HintPath>
     </Reference>
+    <Reference Include="BouncyCastle.Crypto">
+      <HintPath>U:\Projets\nox\runtime\Packages\api.nox.cck\Plugins\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Android.Types">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>
     </Reference>
@@ -876,6 +874,14 @@
     <ProjectReference Include="Nox.Users.csproj">
       <Project>{c237149e-58f6-bdd3-6473-3bc76e6fd9f4}</Project>
       <Name>Nox.Users</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Sessions.csproj">
+      <Project>{0874ac54-00dd-a011-6c68-4b824efa4828}</Project>
+      <Name>Nox.Sessions</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Instances.csproj">
+      <Project>{f4a96811-5ab6-e173-59f9-c7a0c465d2d3}</Project>
+      <Name>Nox.Instances</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

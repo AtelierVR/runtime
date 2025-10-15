@@ -188,11 +188,10 @@ namespace api.nox.user.network {
 			Logger.LogDebug($"Login response: {response.HasError()} {response.GetError()}");
 			if (response.HasError()) {
 				var errorInfo = response.GetError();
-
 				return new LoginResponse {
 					Error = errorInfo.GetMessage(),
 					Verification = new VerificationRequired {
-						Required = errorInfo.GetCode() == 20 && errorInfo.GetStatus() == 428,
+						Required = errorInfo.GetCode() == 20,
 						Methods  = login?.methods ?? Array.Empty<VerificationMethod>()
 					}
 				};

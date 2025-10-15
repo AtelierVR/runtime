@@ -11,10 +11,10 @@ namespace api.nox.user.network {
 		public string request;
 
 		public bool IsVerificationRequired()
-			=> error != null && error.code == 20; // Code 20 = verification required
+			=> error is { code: 20 }; // Code 20 = verification required
 
 		public VerificationMethod[] GetVerificationMethods()
-			=> data?.methods ?? new VerificationMethod[0];
+			=> data?.methods ?? Array.Empty<VerificationMethod>();
 
 		public string GetMessage()
 			=> error?.message ?? "Verification required";

@@ -28,11 +28,16 @@
       "id": "user",
       "type": "recommends",
       "version": ">=1.0.0"
+    },
+    {
+      "id": "session",
+      "type": "recommends",
+      "version": ">=1.0.0"
     }
   ],
   "entrypoints": {
     "main": [
-      "api.nox.discord.DiscordSystem"
+      "api.nox.discord.Main"
     ]
   },
   "references": [],

@@ -3,17 +3,28 @@ using Newtonsoft.Json.Linq;
 using Nox.CCK.Utils;
 using Nox.Users;
 
-namespace api.nox.user.network {	public class LoginRequest : ILoginRequest, INoxObject {
+namespace api.nox.user.network {
+	public class LoginRequest : ILoginRequest, INoxObject {
 		internal string Identifier;
 		internal string Password;
 		internal string FactorCode;
+		internal string PublicKey;
 
-		public string ToJson()
-			=> new JObject {
+		public string ToJson() {
+			var obj = new JObject {
 				["identifier"] = Identifier,
-				["password"]   = Hashing.Sha256(Password),
-				["factor_code"] = FactorCode
-			}.ToString();
+				["password"]   = Password,
+			};
+
+			if (!string.IsNullOrEmpty(PublicKey))
+				obj["public_key"] = PublicKey;
+
+			if (!string.IsNullOrEmpty(FactorCode))
+				obj["factor_code"] = FactorCode;
+
+			return obj.ToString();
+		}
+
 		public override string ToString()
 			=> $"{GetType().Name}[identifier={Identifier}, password={string.Join("", Password.Split().Select(c => '*'))}, factor_code={(!string.IsNullOrEmpty(FactorCode) ? "***" : "null")}]";
 
@@ -29,6 +40,14 @@ namespace api.nox.user.network {	public class LoginRequest : ILoginRequest, INox
 
 		public ILoginRequest SetFactorCode(string factorCode) {
 			FactorCode = factorCode;
+			return this;
+		}
+
+		public string GetPublicKey()
+			=> PublicKey;
+
+		public ILoginRequest SetPublicKey(string publicKey) {
+			PublicKey = publicKey;
 			return this;
 		}
 

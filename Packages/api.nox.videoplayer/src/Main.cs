@@ -89,7 +89,7 @@ namespace api.nox.videoplayer {
 				YtDl.CancelDownload();
 			if (!FFmpeg.IsDownloading)
 				FFmpeg.CancelDownload();
-			foreach (var handler in Handlers)
+			foreach (var handler in Handlers.ToArray())
 				Remove(handler.GetId());
 			Handlers.Clear();
 			_handlers = Array.Empty<IHandler>();

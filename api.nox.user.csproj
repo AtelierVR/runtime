@@ -48,11 +48,13 @@
   <ItemGroup>
     <Compile Include="Packages\api.nox.user\src\search\SearchWorker.cs" />
     <Compile Include="Packages\api.nox.user\src\client\widget\UserWidget.cs" />
+    <Compile Include="Packages\api.nox.user\src\editor\AddressInput.cs" />
     <Compile Include="Packages\api.nox.user\src\obsolete\pages\ProfilePage.cs" />
     <Compile Include="Packages\api.nox.user\src\network\update\UpdateCurrentUserRequest.cs" />
     <Compile Include="Packages\api.nox.user\src\network\login\VerificationMethod.cs" />
     <Compile Include="Packages\api.nox.user\src\search\SearchResult.cs" />
     <Compile Include="Packages\api.nox.user\src\network\login\LoginRequest.cs" />
+    <Compile Include="Packages\api.nox.user\src\editor\VerificationInput.cs" />
     <Compile Include="Packages\api.nox.user\src\editor\EditorUser.cs" />
     <Compile Include="Packages\api.nox.user\src\base\User.cs" />
     <Compile Include="Packages\api.nox.user\src\network\update\UpdateCurrentUserResponse.cs" />
@@ -67,12 +69,13 @@
     <Compile Include="Packages\api.nox.user\src\network\search\SearchRequest.cs" />
     <Compile Include="Packages\api.nox.user\src\editor\ProfilePanel.cs" />
     <Compile Include="Packages\api.nox.user\src\network\Network.cs" />
+    <Compile Include="Packages\api.nox.user\src\editor\AuthentificationPanel.cs" />
     <Compile Include="Packages\api.nox.user\src\search\SearchData.cs" />
     <Compile Include="Packages\api.nox.user\src\network\login\ErrorResponseWithData.cs" />
     <Compile Include="Packages\api.nox.user\src\network\search\SearchResponse.cs" />
     <Compile Include="Packages\api.nox.user\src\network\AuthToken.cs" />
     <Compile Include="Packages\api.nox.user\src\client\UserComponent.cs" />
-    <Compile Include="Packages\api.nox.user\src\editor\AuthPanel.cs" />
+    <Compile Include="Packages\api.nox.user\src\editor\LoginInput.cs" />
     <Compile Include="Packages\api.nox.user\src\network\login\LoginResponse.cs" />
     <Compile Include="Packages\api.nox.user\src\network\UpdateCurrentUserRequest.cs" />
     <Compile Include="Packages\api.nox.user\src\Client.cs" />
@@ -83,6 +86,7 @@
     <None Include="Packages\api.nox.user\package.json" />
     <None Include="Packages\api.nox.user\assets\api.nox.user\auth.uxml" />
     <None Include="Packages\api.nox.user\api.nox.user.asmdef" />
+    <None Include="Packages\api.nox.user\assets\api.nox.user\style.uss" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -511,6 +515,9 @@
     </Reference>
     <Reference Include="Esprima">
       <HintPath>U:\Projets\nox\runtime\Library\PackageCache\com.jint.unity@9b16e8d86afa\Packages\Esprima.dll</HintPath>
+    </Reference>
+    <Reference Include="BouncyCastle.Crypto">
+      <HintPath>U:\Projets\nox\runtime\Packages\api.nox.cck\Plugins\BouncyCastle.Crypto.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Android.Types">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>

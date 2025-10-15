@@ -1,22 +1,34 @@
-using System.Collections.Generic;
+using System;
+using System.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Nox.CCK.Utils;
 using Nox.Instances;
 
 namespace api.nox.instance {
-	public class Connection : IConnection {
-		private const    string                     Method = "relay";
-		private readonly Dictionary<string, object> _data;
+	[Serializable]
+	// ReSharper disable InconsistentNaming
+	public class Connection : IConnection, INoxObject {
+		public string method;
+		public string data;
 
 		public string GetMethod()
-			=> Method;
+			=> method;
 
-		public Connection(string address)
-			=> _data = new Dictionary<string, object> {
-				{ "address", address },
-				{ "connections", new[] { "udp://" + address, "tcp://" + address } }
-			};
-
-
-		public Dictionary<string, object> GetData()
-			=> _data;
+		public T GetData<T>() where T : class {
+			Logger.LogDebug($"Decoding connection data: {data}");
+			if (string.IsNullOrEmpty(data))
+				return null;
+			try {
+				var json = Encoding.UTF8.GetString(Convert.FromBase64String(data));
+				Logger.LogDebug($"Decoded connection data: {json}");
+				if (typeof(T) == typeof(JObject))
+					return JObject.Parse(json) as T;
+				return JsonConvert.DeserializeObject<T>(json);
+			} catch (Exception e) {
+				Logger.LogException(e);
+				return null;
+			}
+		}
 	}
 }

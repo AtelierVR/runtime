@@ -26,6 +26,12 @@ namespace Nox.CCK.Utils {
 		private static readonly object FileLock = new();
 
 		#if UNITY_EDITOR
+		[InitializeOnLoadMethod]
+		private static void EditorInit() {
+			Init();
+			IsInitialized = true;
+		}
+		
 		[MenuItem("Nox/Logger/Open Latest Log")]
 		private static void OpenLatestLog() {
 			if (File.Exists(LogFile))
