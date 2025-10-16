@@ -107,6 +107,7 @@ namespace api.nox.relay {
 		private string _lastVoiceId;
 
 		public void SendVoice() {
+			return; // Disabled for now
 			var voice = Main.MicrophoneAPI.GetCurrent();
 
 			if (voice?.GetName() != _lastVoiceId) {
@@ -120,7 +121,8 @@ namespace api.nox.relay {
 			if (!clip) return;
 
 			var packet = types.Voice.InstanceRequestVoice.CreateRequest(clip);
-			Adapter.Instance.SendVoice(packet).Forget();
+			if (!packet.IsEmpty())
+				Adapter.Instance.SendVoice(packet).Forget();
 		}
 	}
 }

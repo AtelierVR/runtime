@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using Nox.Servers;
@@ -15,10 +16,12 @@ namespace api.nox.user {
 		public string   bio;
 		public string   thumbnail;
 		public string   banner;
-		public string[] links;
+		public Entry[]  links;
 		public string[] tags;
 		public float    rank;
 		public string   certificate;
+		public int      followers;
+		public int      following;
 
 		public uint GetId()
 			=> id;
@@ -50,8 +53,8 @@ namespace api.nox.user {
 		public UniTask<Texture2D> GetBanner()
 			=> Main.NetworkAPI.FetchTexture(banner);
 
-		public string[] GetLinks()
-			=> links ?? Array.Empty<string>();
+		public IEntry[] GetLinks()
+			=> links.Cast<IEntry>().ToArray();
 
 		public IRelationship GetRelationships()
 			=> null;
@@ -90,6 +93,12 @@ namespace api.nox.user {
 				+ string.Join("\n", lines)
 				+ "\n-----END CERTIFICATE-----";
 		}
+
+		public int GetFollowers()
+			=> followers;
+
+		public int GetFollowing()
+			=> following;
 
 		public override string ToString()
 			=> $"{GetType().Name}[id={id}, username={username}, server={server}]";

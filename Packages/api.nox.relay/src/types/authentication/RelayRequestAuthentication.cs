@@ -3,59 +3,38 @@ using Nox.Users;
 
 namespace api.nox.relay.types.Authentication {
 	public class RelayRequestAuthentication : RelayRequest {
-		public AuthenticationFlags Flags;
-		public string              Token;
+		public AuthenticationAction Action;
 
-		public void SetIntegrity(string token) {
-			Flags = AuthenticationFlags.UseIntegrity;
-			Token = token;
-		}
+		public byte[] PublicKey; // Client's public key (for RequestChallenge)
+		public byte[] Signature; // Signature of the challenge (for ResolveChallenge)
+		public uint   UserId;    // User ID (for ResolveChallenge)
+		public string Server;    // Server address (for ResolveChallenge)
 
-		public void SetAuth(IAuthToken authToken) {
-			if (authToken == null) SetGuest();
-			else if (authToken.IsIntegrity()) SetIntegrity(authToken.GetToken());
-			else SetToken(authToken.GetToken());
-		}
+		public static RelayRequestAuthentication CreateRequest()
+			=> new() {
+				Action = AuthenticationAction.RequestChallenge,
+			};
 
-		public void SetGuest() {
-			Flags = AuthenticationFlags.UseGuest;
-			Token = "";
-		}
-
-		public void SetToken(string token) {
-			Flags = AuthenticationFlags.None;
-			Token = token;
-		}
-
-		public static RelayRequestAuthentication CreateIntegrity(string token) {
-			var request = new RelayRequestAuthentication();
-			request.SetIntegrity(token);
-			return request;
-		}
-
-		public static RelayRequestAuthentication CreateGuest() {
-			var request = new RelayRequestAuthentication();
-			request.SetGuest();
-			return request;
-		}
-
-		public static RelayRequestAuthentication CreateToken(string token) {
-			var request = new RelayRequestAuthentication();
-			request.SetToken(token);
-			return request;
-		}
-
-		public static RelayRequestAuthentication CreateAuth(IAuthToken authToken) {
-			var request = new RelayRequestAuthentication();
-			request.SetAuth(authToken);
-			return request;
-		}
+		public static RelayRequestAuthentication CreateResponse(byte[] publicKey, byte[] signature, uint userId, string server)
+			=> new() {
+				Action    = AuthenticationAction.ResolveChallenge,
+				PublicKey = publicKey,
+				Signature = signature,
+				UserId    = userId,
+				Server    = server,
+			};
 
 		public override Buffer ToBuffer() {
 			var buffer = new Buffer();
-			buffer.Write(Flags);
-			if (Flags is not AuthenticationFlags.UseGuest)
-				buffer.Write(Token);
+			buffer.Write(Action);
+			if (Action != AuthenticationAction.ResolveChallenge)
+				return buffer;
+			buffer.Write((ushort)PublicKey.Length);
+			buffer.Write(PublicKey);
+			buffer.Write((ushort)Signature.Length);
+			buffer.Write(Signature);
+			buffer.Write(UserId);
+			buffer.Write(Server);
 			return buffer;
 		}
 	}

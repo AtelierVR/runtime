@@ -9,13 +9,14 @@ using UnityEngine.UI;
 
 namespace api.nox.user.client {
 	public class UserComponent : MonoBehaviour {
-		public GameObject   withBanner;
-		public GameObject   withoutBanner;
-		public Image        banner;
-		public Image        thumbnail;
-		public TextLanguage display;
-		public TextLanguage identifier;
-		public UserPage     Page;
+		public GameObject        withBanner;
+		public GameObject        withoutBanner;
+		public Image             banner;
+		public Image             thumbnail;
+		public TextLanguage      display;
+		public TextLanguage      identifier;
+		public UserPage          Page;
+		public AspectRatioFitter fitter;
 
 		public void UpdateContent(IUser user) {
 			if (user == null) return;
@@ -67,8 +68,11 @@ namespace api.nox.user.client {
 				var texture = await Main.NetworkAPI
 					.FetchTexture(user.GetBannerUrl())
 					.AttachExternalCancellation(_bannerTokenSource.Token);
-				if (texture) {
-					banner.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+				if (texture && texture.height > 0) {
+					banner.sprite      = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+					fitter.aspectRatio = (float)texture.width / texture.height;
+					if (fitter.aspectRatio <= 1.333333333) // 4:3 minimum
+						fitter.aspectRatio = 1.333333333f;
 					withBanner.SetActive(true);
 					withoutBanner.SetActive(false);
 				} else {
@@ -125,6 +129,7 @@ namespace api.nox.user.client {
 			component.banner        = Reference.GetComponent<Image>("banner", profile);
 			component.withBanner    = Reference.GetReference("with_banner", profile);
 			component.withoutBanner = Reference.GetReference("without_banner", profile);
+			component.fitter        = Reference.GetComponent<AspectRatioFitter>("banner_aspect", profile);
 
 			// generate dashboard
 			container = Instantiate(Client.GetAsset<GameObject>("prefabs/container_full.prefab", "ui"), splitContent);

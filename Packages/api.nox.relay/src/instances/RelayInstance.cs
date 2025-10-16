@@ -169,6 +169,8 @@ namespace api.nox.relay.Instances {
 		public async UniTask<bool> SendVoice(types.Voice.InstanceRequestVoice request) {
 			request.InternalId   = InternalId;
 			request.ConnectionId = Connection.Id;
+			if (request.IsEmpty())
+				Logger.LogWarning("Sending empty voice packet");
 			return (await Connection.Emit(request.ToBuffer(), RequestType.Voice)).Item1;
 		}
 	}

@@ -8,6 +8,7 @@ using Nox.CCK.Utils;
 using Nox.Network;
 using Nox.Tables;
 using Nox.Users;
+using IEntry = Nox.Tables.IEntry;
 
 namespace api.nox.table {
 	public class Main : IMainModInitializer, ITableAPI {

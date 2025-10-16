@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using api.nox.relay.connection;
 using api.nox.relay.types.Authentication;
@@ -7,6 +8,7 @@ using api.nox.relay.types.Traveling;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Nox.CCK.Mods.Events;
+using Nox.CCK.Utils;
 using Nox.Sessions;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
@@ -214,9 +216,32 @@ namespace api.nox.relay {
 			}
 
 			adapter.SetState(false, "Authenticating with relay...", 0.225f);
-			var request = RelayRequestAuthentication.CreateAuth(token);
+			var request = RelayRequestAuthentication.CreateRequest();
 			var auth    = await connection.RequestAuthentication(request);
-			if (auth.IsError) {
+			if (auth.IsError()) {
+				adapter.SetState(false, $"Authentication failed: {auth.Reason}", -1f);
+				Logger.LogError($"Authentication failed: {auth.Result} - {auth.Reason}");
+				await session.Dispose();
+				return;
+			}
+
+			var challenge = auth.Challenge;
+			Logger.LogDebug($"Received challenge: {challenge.Length}{string.Join(", ", challenge.Select(c => c.ToString("X2")))}");
+
+			var keys = Crypto.GetKeys();
+			var sign = Crypto.Sign(challenge, keys);
+
+			var user = Main.UserAPI.GetCurrent();
+
+			request = RelayRequestAuthentication.CreateResponse(
+				Crypto.ExportPublicKey(keys),
+				sign,
+				user?.GetId()            ?? 0,
+				user?.GetServerAddress() ?? string.Empty
+			);
+
+			auth = await connection.RequestAuthentication(request);
+			if (auth.IsError()) {
 				adapter.SetState(false, $"Authentication failed: {auth.Reason}", -1f);
 				Logger.LogError($"Authentication failed: {auth.Result} - {auth.Reason}");
 				await session.Dispose();
@@ -290,7 +315,7 @@ namespace api.nox.relay {
 			var player = adapter.NewPlayer<RelayLocalPlayer>(enter.Player);
 
 			adapter.SetState(false, "Setting local player avatar...", 0.925f);
-			if (!await player.SetAvatar(player.GetAvatar())) {
+			if (player.GetAvatar() != null && !await player.SetAvatar(player.GetAvatar())) {
 				adapter.SetState(false, "Failed to set local player avatar", -1f);
 				Logger.LogError($"Failed to set local player avatar for instance {instance}");
 				await session.Dispose();

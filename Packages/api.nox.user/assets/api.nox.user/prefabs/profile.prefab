@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 7161022699450673845}
   - component: {fileID: 4770608987223136463}
   - component: {fileID: 8517375603519149581}
+  - component: {fileID: 3384533322356736716}
   m_Layer: 5
   m_Name: profile
   m_TagString: Untagged
@@ -189,6 +190,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Key: button_content
   Refrence: {fileID: 5260273237795081175}
+--- !u!114 &3384533322356736716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 154529899771836339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7b0678e90722794f8a65be8b45ee25e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Nox.CCK::Nox.CCK.Utils.Reference
+  Key: banner_aspect
+  Refrence: {fileID: 4535862892904839467}
 --- !u!1 &436080208899268940
 GameObject:
   m_ObjectHideFlags: 0
@@ -432,8 +447,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 210.57343, y: -22.505}
-  m_SizeDelta: {x: 389.14685, y: 0}
+  m_AnchoredPosition: {x: 460, y: -20.11}
+  m_SizeDelta: {x: 888, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5133651589725816242
 CanvasRenderer:
@@ -463,10 +478,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '[user.display]'
+  m_text: '{0}'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 6026d55515fe31d4480b045f0a9fa12a, type: 2}
-  m_sharedMaterial: {fileID: -1949014368919984135, guid: 6026d55515fe31d4480b045f0a9fa12a, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -938,8 +953,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 210.57343, y: -59.015}
-  m_SizeDelta: {x: 389.14685, y: 0}
+  m_AnchoredPosition: {x: 460, y: -53.16}
+  m_SizeDelta: {x: 888, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1576280623109520903
 CanvasRenderer:
@@ -971,8 +986,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: '[user.idenifier]'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: c2e7393e02cab1945ac022d74890616e, type: 2}
-  m_sharedMaterial: {fileID: 1198171421344041964, guid: c2e7393e02cab1945ac022d74890616e, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1472,7 +1487,7 @@ GameObject:
   - component: {fileID: 7239155616623011497}
   - component: {fileID: 3708167386450422670}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Aspect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1496,7 +1511,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 315.86014}
+  m_SizeDelta: {x: 0, y: 690}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7239155616623011497
 CanvasRenderer:
@@ -1688,8 +1703,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 210.57343, y: -402.44077}
-  m_SizeDelta: {x: 421.14685, y: 0}
+  m_AnchoredPosition: {x: 460, y: -771.7167}
+  m_SizeDelta: {x: 920, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &3699755053049352134
 MonoBehaviour:
@@ -2161,8 +2176,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 210.57343, y: -158.10556}
-  m_SizeDelta: {x: 421.14685, y: 0}
+  m_AnchoredPosition: {x: 460, y: -345}
+  m_SizeDelta: {x: 920, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5923960361648472103
 CanvasRenderer:

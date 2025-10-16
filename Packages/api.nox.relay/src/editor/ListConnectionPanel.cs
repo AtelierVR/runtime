@@ -160,10 +160,10 @@ namespace api.nox.relay.editor {
 			}
 
 
-			var request = RelayRequestAuthentication.CreateAuth(await UserAPI.GetToken(UserAPI.GetCurrent()?.GetServerAddress()));
+			var request = RelayRequestAuthentication.CreateRequest();
 
 			var auth = await connection.RequestAuthentication(request);
-			if (auth.IsError) {
+			if (auth.IsError()) {
 				UnityEditor.EditorUtility.DisplayDialog($"Error: {auth.Result}", auth.Reason, "OK");
 				Logger.Log($"Authentication failed: {auth.Reason}");
 				await connection.Dispose();

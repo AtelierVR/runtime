@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -142,15 +143,17 @@ namespace Nox.CCK.Utils {
 			return Encoding.UTF8.GetString(decryptedBytes);
 		}
 
-		public static byte[] Sign(string data, RSA rsa) {
-			var dataBytes = Encoding.UTF8.GetBytes(data);
-			return rsa.SignData(dataBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-		}
+		public static byte[] Sign(string data, RSA rsa)
+			=> Sign(Encoding.UTF8.GetBytes(data), rsa);
 
-		public static bool Verify(string data, byte[] signature, RSA rsa) {
-			var dataBytes = Encoding.UTF8.GetBytes(data);
-			return rsa.VerifyData(dataBytes, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-		}
+		public static byte[] Sign(byte[] data, RSA rsa)
+			=> rsa.SignData(data, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+
+		public static bool Verify(string data, byte[] signature, RSA rsa)
+			=> Verify(Encoding.UTF8.GetBytes(data), signature, rsa);
+
+		public static bool Verify(byte[] data, byte[] signature, RSA rsa)
+			=> rsa.VerifyData(data, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 
 		/// <summary>
 		/// Compresse une clé publique RSA en format compact pour transmission
@@ -161,6 +164,17 @@ namespace Nox.CCK.Utils {
 				.Select(line => line.Trim())
 				.Where(line => !line.StartsWith("-----") && !string.IsNullOrWhiteSpace(line));
 			return string.Join("", lines);
+		}
+
+		public static byte[] ExportPublicKey(RSA rsa) {
+			var parameters = rsa.ExportParameters(false);
+			return parameters.Modulus.Concat(parameters.Exponent).ToArray();
+		}
+
+		public static string GetKeyFingerprint(RSA keys) {
+			using var sha256 = SHA256.Create();
+			var       hash   = sha256.ComputeHash(ExportPublicKey(keys));
+			return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
 		}
 	}
 }

@@ -4,22 +4,13 @@ using Buffer = Nox.CCK.Utils.Buffer;
 
 namespace api.nox.relay.types.Authentication {
 	public class RelayResponseAuthentication : RelayResponse {
-		public bool IsError
-			=> Result is AuthenticationResult.Unknown
-				or AuthenticationResult.MasterError
-				or AuthenticationResult.InvalidToken
-				or AuthenticationResult.Blacklisted;
-
 		public AuthenticationResult Result;
-		public DateTime             ExpireAt = DateTime.MinValue;
 		public string               Reason;
 
-		public bool HasExpiration
-			=> ExpireAt != DateTime.MinValue;
-
-		// Player information
 		public IUserIdentifier Identifier;
 		public string          Display;
+		public DateTime        ExpireAt;
+		public byte[]          Challenge;
 
 		public static RelayResponseAuthentication CreateUnknown(ushort id, string reason)
 			=> new() {
@@ -32,25 +23,35 @@ namespace api.nox.relay.types.Authentication {
 			buffer.Goto(0);
 			Result = buffer.ReadEnum<AuthenticationResult>();
 			switch (Result) {
-				case AuthenticationResult.Unknown or AuthenticationResult.MasterError:
-					if (buffer.Remaining >= 2) // ushort of the string length of optional string
-						Reason  = buffer.ReadString();
-					else Reason = "Unknown error";
+				case AuthenticationResult.Challenge:
+					Challenge = buffer.ReadBytes(buffer.ReadByte());
+					return true;
+				case AuthenticationResult.Invalid:
+				case AuthenticationResult.MasterError:
+				case AuthenticationResult.Signature:
+				case AuthenticationResult.Unknown:
+					Reason = buffer.Remaining >= 2
+						? buffer.ReadString()
+						: "Unknown error";
 					return true;
 				case AuthenticationResult.Success:
-					Identifier = Main.UserAPI.Make(buffer.ReadUShort(), buffer.ReadString());
-					Display    = buffer.ReadString();
+					Identifier = Main.UserAPI.Make(
+						buffer.ReadUInt(),
+						buffer.ReadString()
+					);
+					Display = buffer.ReadString();
 					return true;
 				case AuthenticationResult.Blacklisted:
 					ExpireAt = buffer.ReadDateTime();
 					Reason   = buffer.ReadString();
 					return true;
-				case AuthenticationResult.InvalidToken:
-					Reason = "Invalid token";
-					return true;
+				default:
+					return false;
 			}
-
-			return false;
 		}
+
+		public bool IsError()
+			=> Result     != AuthenticationResult.Success
+				&& Result != AuthenticationResult.Challenge;
 	}
 }

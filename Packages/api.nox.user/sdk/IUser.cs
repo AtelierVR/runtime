@@ -9,12 +9,14 @@ namespace Nox.Users {
 		public string          GetServerAddress();
 		public string          GetThumbnailUrl();
 		public string          GetBannerUrl();
-		public string[]        GetLinks();
+		public IEntry[]        GetLinks();
 		public IRelationship   GetRelationships();
 		public string[]        GetTags();
 		public float           GetRank();
 		public UniTask<IUser>  Refresh();
 		public IUserIdentifier ToIdentifier();
 		public string          GetCertificate();
+		public int             GetFollowers();
+		public int             GetFollowing();
 	}
 }
