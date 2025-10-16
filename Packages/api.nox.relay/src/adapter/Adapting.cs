@@ -234,10 +234,10 @@ namespace api.nox.relay {
 			var user = Main.UserAPI.GetCurrent();
 
 			request = RelayRequestAuthentication.CreateResponse(
-				Crypto.ExportPublicKey(keys),
+				Crypto.ExportPublicKeyToDer(keys),
 				sign,
 				user?.GetId()            ?? 0,
-				user?.GetServerAddress() ?? string.Empty
+				user?.GetServerAddress() ?? "::"
 			);
 
 			auth = await connection.RequestAuthentication(request);

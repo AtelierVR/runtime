@@ -35,6 +35,7 @@ namespace api.nox.relay.types.Authentication {
 			buffer.Write(Signature);
 			buffer.Write(UserId);
 			buffer.Write(Server);
+			Logger.Log(buffer.ToString());
 			return buffer;
 		}
 	}

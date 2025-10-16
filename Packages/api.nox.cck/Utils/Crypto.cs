@@ -3,9 +3,12 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Security;
+using Org.BouncyCastle.X509;
 
 namespace Nox.CCK.Utils {
 	public static class Crypto {
@@ -166,15 +169,32 @@ namespace Nox.CCK.Utils {
 			return string.Join("", lines);
 		}
 
-		public static byte[] ExportPublicKey(RSA rsa) {
+		public static byte[] ExportPublicKeyToDer(RSA rsa) {
 			var parameters = rsa.ExportParameters(false);
-			return parameters.Modulus.Concat(parameters.Exponent).ToArray();
+			var rsaPublicKey = new RsaKeyParameters(
+				false,
+				new Org.BouncyCastle.Math.BigInteger(1, parameters.Modulus),
+				new Org.BouncyCastle.Math.BigInteger(1, parameters.Exponent)
+			);
+
+			var publicKeyInfo = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(rsaPublicKey);
+			return publicKeyInfo.GetDerEncoded();
 		}
 
-		public static string GetKeyFingerprint(RSA keys) {
-			using var sha256 = SHA256.Create();
-			var       hash   = sha256.ComputeHash(ExportPublicKey(keys));
-			return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+		/// <summary>
+		/// Importe une clé publique depuis un format DER
+		/// </summary>
+		public static RSA ImportPublicKeyFromDer(byte[] derData) {
+			var publicKeyInfo = SubjectPublicKeyInfo.GetInstance(derData);
+			var rsaPublicKey  = (RsaKeyParameters)PublicKeyFactory.CreateKey(publicKeyInfo);
+
+			var rsa = RSA.Create();
+			var parameters = new RSAParameters {
+				Modulus  = rsaPublicKey.Modulus.ToByteArrayUnsigned(),
+				Exponent = rsaPublicKey.Exponent.ToByteArrayUnsigned()
+			};
+			rsa.ImportParameters(parameters);
+			return rsa;
 		}
 	}
 }
