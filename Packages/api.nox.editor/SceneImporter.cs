@@ -8,54 +8,61 @@ using Logger = Nox.CCK.Utils.Logger;
 namespace Nox.Editor {
 	public class SceneImporter : AssetPostprocessor {
 		private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths) {
+			var scenes = EditorBuildSettings.scenes.ToList();
+			var old    = EditorBuildSettings.scenes.ToList();
+
 			foreach (var asset in importedAssets)
 				if (asset.EndsWith(".unity")) {
 					Logger.Log("Scene imported: " + asset);
-					var                            scene          = SceneManager.GetSceneByPath(asset);
-					List<EditorBuildSettingsScene> originalScenes = EditorBuildSettings.scenes.ToList();
-					if (originalScenes.All(s => s.path != asset)) {
-						originalScenes.Add(new EditorBuildSettingsScene(asset, true));
-						EditorBuildSettings.scenes = originalScenes.ToArray();
-					}
+					var scene = SceneManager.GetSceneByPath(asset);
+					if (scenes.All(s => s.path != asset))
+						scenes.Add(new EditorBuildSettingsScene(asset, true));
 				}
 
 			foreach (var asset in deletedAssets)
 				if (asset.EndsWith(".unity")) {
 					Logger.Log("Scene deleted: " + asset);
-					List<EditorBuildSettingsScene> originalScenes = EditorBuildSettings.scenes.ToList();
-					originalScenes.RemoveAll(s => s.path == asset);
-					EditorBuildSettings.scenes = originalScenes.ToArray();
+					scenes.RemoveAll(s => s.path == asset);
 				}
 
 			foreach (var asset in movedAssets)
 				if (asset.EndsWith(".unity")) {
 					Logger.Log("Scene moved: " + asset);
-					var                            scene          = SceneManager.GetSceneByPath(asset);
-					List<EditorBuildSettingsScene> originalScenes = EditorBuildSettings.scenes.ToList();
-					originalScenes.RemoveAll(s => s.path == asset);
-					originalScenes.Add(new EditorBuildSettingsScene(asset, true));
-					EditorBuildSettings.scenes = originalScenes.ToArray();
+					var scene = SceneManager.GetSceneByPath(asset);
+					scenes.RemoveAll(s => s.path == asset);
+					scenes.Add(new EditorBuildSettingsScene(asset, true));
 				}
 
 			foreach (var asset in movedFromAssetPaths)
 				if (asset.EndsWith(".unity")) {
 					Logger.Log("Scene moved from: " + asset);
-					List<EditorBuildSettingsScene> originalScenes = EditorBuildSettings.scenes.ToList();
-					originalScenes.RemoveAll(s => s.path == asset);
-					EditorBuildSettings.scenes = originalScenes.ToArray();
+					scenes.RemoveAll(s => s.path == asset);
 				}
 
-			EditorBuildSettings.scenes = EditorBuildSettings.scenes.Distinct().ToArray();
+			var newScenes = scenes.Distinct().ToArray();
+			if (!old.Except(newScenes).Any())
+				return;
+
+			EditorBuildSettings.scenes = newScenes;
 			AssetDatabase.SaveAssets();
+			Logger.Log("Updated scenes in build settings.");
 		}
 
 		[MenuItem("Nox/Scenes/Refresh Scenes in Build Settings"), InitializeOnLoadMethod]
 		public static void RefreshScenesInBuildSettings() {
-			var scenes = AssetDatabase.FindAssets("t:Scene")
+			var oldScenes = EditorBuildSettings.scenes;
+			var newScenes = AssetDatabase.FindAssets("t:Scene")
 				.Select(AssetDatabase.GUIDToAssetPath)
 				.Select(path => new EditorBuildSettingsScene(path, true))
-				.ToList();
-			EditorBuildSettings.scenes = scenes.Distinct().ToArray();
+				.Distinct()
+				.ToArray();
+
+			if (!oldScenes.Except(newScenes).Any()) {
+				Logger.Log("Scenes in build settings are already up to date.");
+				return;
+			}
+
+			EditorBuildSettings.scenes = newScenes;
 			AssetDatabase.SaveAssets();
 			Logger.Log("Refreshed scenes in build settings.");
 		}
