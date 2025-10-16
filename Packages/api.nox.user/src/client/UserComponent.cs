@@ -71,8 +71,10 @@ namespace api.nox.user.client {
 				if (texture && texture.height > 0) {
 					banner.sprite      = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
 					fitter.aspectRatio = (float)texture.width / texture.height;
-					if (fitter.aspectRatio <= 1.333333333) // 4:3 minimum
-						fitter.aspectRatio = 1.333333333f;
+					if (fitter.aspectRatio <= 1.3333333333333333f) // 4:3 minimum
+						fitter.aspectRatio = 1.3333333333333333f;
+					if (fitter.aspectRatio >= 2.75f) // 11:4 maximum
+						fitter.aspectRatio = 2.75f;
 					withBanner.SetActive(true);
 					withoutBanner.SetActive(false);
 				} else {
