@@ -60,6 +60,7 @@ namespace api.nox.relay.connection {
 				case ResponseType.Custom:
 				case ResponseType.AvatarChanged:
 				case ResponseType.AvatarParams:
+				case ResponseType.PlayerUpdate:
 				case ResponseType.Traveling:
 				case ResponseType.Teleport:
 				case ResponseType.Voice:

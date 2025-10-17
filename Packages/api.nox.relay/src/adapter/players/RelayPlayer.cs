@@ -195,9 +195,19 @@ namespace api.nox.relay {
 
 		[NoxPublic(NoxAccess.Method)]
 		public void SetDisplay(string display) {
-			Logger.LogWarning($"{nameof(SetDisplay)} is not currently implemented for {GetType().Name}.");
+			if (Reference == null) {
+				Logger.LogWarning($"Cannot set display name: Reference is null for {GetType().Name}");
+				return;
+			}
+			
+			if (string.Equals(Reference.Display, display, StringComparison.Ordinal)) {
+				return; // No change needed
+			}
+			
+			Reference.Display = display;
+			Logger.LogDebug($"Updated display name for player {GetId()}: {display}");
 		}
-
+		
 		public abstract bool TryGetPhysical<T>(out T physical) where T : Physical;
 
 		public abstract bool MakePhysical();

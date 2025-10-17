@@ -56,10 +56,13 @@
     <Compile Include="Packages\api.nox.relay\src\types\RelayResponse.cs" />
     <Compile Include="Packages\api.nox.relay\src\connection\ClientMultiPacketManager.cs" />
     <Compile Include="Packages\api.nox.relay\src\adapter\RelayState.cs" />
+    <Compile Include="Packages\api.nox.relay\src\types\player_update\PlayerUpdateFlags.cs" />
+    <Compile Include="Packages\api.nox.relay\src\types\player_update\PlayerUpdateResult.cs" />
     <Compile Include="Packages\api.nox.relay\src\adapter\Adapting.cs" />
     <Compile Include="Packages\api.nox.relay\src\connection\Connection.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\quit\QuitEvent.cs" />
     <Compile Include="Packages\api.nox.relay\src\adapter\players\RelayPlayer.cs" />
+    <Compile Include="Packages\api.nox.relay\src\types\player_update\RequestPlayerUpdate.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\authentication\AuthenticationAction.cs" />
     <Compile Include="Packages\api.nox.relay\src\connector\UdpConnector.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\transform\InstanceRequestTransform.cs" />
@@ -109,6 +112,7 @@
     <Compile Include="Packages\api.nox.relay\src\types\authentication\RelayResponseAuthentication.cs" />
     <Compile Include="Packages\api.nox.relay\src\adapter\entity\RelayEntity.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\disconnect\RelayEventDisconnect.cs" />
+    <Compile Include="Packages\api.nox.relay\src\types\player_update\PlayerUpdateEvent.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\quit\QuitType.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\avatar\AvatarChangedEvent.cs" />
     <Compile Include="Packages\api.nox.relay\src\types\enter\InstanceRequestEnter.cs" />

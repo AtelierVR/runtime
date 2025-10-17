@@ -8,9 +8,11 @@ using api.nox.relay.types.Enter;
 using api.nox.relay.types.Join;
 using api.nox.relay.types.Leave;
 using api.nox.relay.types.Player;
+using api.nox.relay.types.PlayerUpdate;
 using api.nox.relay.types.Quit;
 using api.nox.relay.types.Transform;
 using api.nox.relay.types.Traveling;
+// using api.nox.relay.types.PlayerUpdate;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.CCK.Utils;
@@ -58,7 +60,7 @@ namespace api.nox.relay {
 		}
 
 		public void OnJoin(JoinEvent ev) {
-			Logger.LogDebug($"OnJoin: {ev}");
+			Logger.LogDebug($"OnJoin: {ev} {ev.Player.Flags}");
 			NewPlayer<RelayRemotePlayer>(ev.Player);
 		}
 
@@ -108,6 +110,25 @@ namespace api.nox.relay {
 			if (player == null) return;
 			foreach (var param in ev.Parameters)
 				player.SetParameter(param.Key, param.Value, DeliveryType.RemoteModified);
+		}
+
+		public void OnPlayerUpdated(PlayerUpdateEvent ev) {
+			Logger.LogDebug($"OnPlayerUpdate: PlayerId={ev.PlayerId}, Flags={ev.Flags}");
+			var player = _entities.GetEntity<RelayPlayer>(ev.PlayerId);
+			if (player == null) {
+				Logger.LogWarning($"Player with ID {ev.PlayerId} not found for PlayerUpdate event");
+				return;
+			}
+		
+			if (ev.Flags.HasFlag(PlayerUpdateFlags.DisplayName) && !string.IsNullOrEmpty(ev.DisplayName)) {
+				player.SetDisplay(ev.DisplayName);
+			}
+		
+			if (ev.Flags.HasFlag(PlayerUpdateFlags.Flags)) {
+				player.Reference.Flags = ev.PlayerFlags;
+				if (ev.PlayerFlags.HasFlag(InstancePlayerFlags.InstanceMaster))
+					_session.OnAuthorityTransferred(player);
+			}
 		}
 
 		public void OnLeave(LeaveEvent ev) {
@@ -289,14 +310,6 @@ namespace api.nox.relay {
 		public IEntity[] GetEntities()
 			=> _entities.GetEntities().ToArray();
 
-		public bool AttachAudio(AudioClip clip) {
-			throw new NotImplementedException();
-		}
-
-		public void DetachAudio(AudioClip clip) {
-			throw new NotImplementedException();
-		}
-
 		public IDimension GetDimension()
 			=> _dimension;
 
@@ -335,7 +348,6 @@ namespace api.nox.relay {
 			Logger.LogDebug($"OnDeselect: {this}");
 			if (_dimension == null) {
 				Logger.LogWarning($"OnDeselect: {this} has no dimension assigned. Skipping visibility updates.");
-				await UniTask.Yield();
 				return;
 			}
 
@@ -344,7 +356,6 @@ namespace api.nox.relay {
 			var main      = instances is { Length: > 0 } ? instances[0] : null;
 			if (main == null) {
 				Logger.LogWarning($"OnDeselect: {this} could not locate the main instance. Skipping visibility updates.");
-				await UniTask.Yield();
 				return;
 			}
 

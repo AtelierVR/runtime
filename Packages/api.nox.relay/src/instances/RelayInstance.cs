@@ -16,15 +16,16 @@ namespace api.nox.relay.Instances {
 
 		public Connection Connection;
 
-		public readonly UnityEvent<types.Traveling.TravelingEvent>  OnTraveling     = new();
-		public readonly UnityEvent<types.Quit.QuitEvent>            OnQuit          = new();
-		public readonly UnityEvent<types.Enter.EnterResponse>       OnEnter         = new();
-		public readonly UnityEvent<types.Join.JoinEvent>            OnJoin          = new();
-		public readonly UnityEvent<types.Leave.LeaveEvent>          OnLeave         = new();
-		public readonly UnityEvent<types.Avatar.AvatarChangedEvent> OnAvatarChanged = new();
-		public readonly UnityEvent<types.Transform.TransformEvent>  OnTransform     = new();
-		public readonly UnityEvent<types.Voice.VoiceEvent>          OnVoice         = new();
-		public readonly UnityEvent<types.Avatar.AvatarParamsEvent>  OnAvatarParams  = new();
+		public readonly UnityEvent<types.Traveling.TravelingEvent>       OnTraveling     = new();
+		public readonly UnityEvent<types.Quit.QuitEvent>                 OnQuit          = new();
+		public readonly UnityEvent<types.Enter.EnterResponse>            OnEnter         = new();
+		public readonly UnityEvent<types.Join.JoinEvent>                 OnJoin          = new();
+		public readonly UnityEvent<types.Leave.LeaveEvent>               OnLeave         = new();
+		public readonly UnityEvent<types.Avatar.AvatarChangedEvent>      OnAvatarChanged = new();
+		public readonly UnityEvent<types.Transform.TransformEvent>       OnTransform     = new();
+		public readonly UnityEvent<types.Voice.VoiceEvent>               OnVoice         = new();
+		public readonly UnityEvent<types.Avatar.AvatarParamsEvent>       OnAvatarParams  = new();
+		public readonly UnityEvent<types.PlayerUpdate.PlayerUpdateEvent> OnPlayerUpdated = new();
 
 		internal async UniTask OnReceived(ushort length, ushort state, ResponseType type, Buffer buffer) {
 			await UniTask.SwitchToMainThread();
@@ -74,6 +75,11 @@ namespace api.nox.relay.Instances {
 					var voice = new types.Voice.VoiceEvent { ConnectionId = Connection.Id, InternalId = InternalId };
 					if (voice.FromBuffer(buffer)) OnVoice.Invoke(voice);
 					else Logger.LogWarning($"Failed to parse voice event for instance {InternalId}");
+					break;
+				case ResponseType.PlayerUpdate:
+					var playerUpdate = new types.PlayerUpdate.PlayerUpdateEvent { ConnectionId = Connection.Id, InternalId = InternalId };
+					if (playerUpdate.FromBuffer(buffer)) OnPlayerUpdated.Invoke(playerUpdate);
+					else Logger.LogWarning($"Failed to parse player update event for instance {InternalId}");
 					break;
 				default:
 					Logger.LogDebug($"Received unknown response type {type} for instance {InternalId}");
@@ -172,6 +178,18 @@ namespace api.nox.relay.Instances {
 			if (request.IsEmpty())
 				Logger.LogWarning("Sending empty voice packet");
 			return (await Connection.Emit(request.ToBuffer(), RequestType.Voice)).Item1;
+		}
+
+		public async UniTask<types.PlayerUpdate.PlayerUpdateEvent> RequestPlayerUpdate(types.PlayerUpdate.RequestPlayerUpdate request) {
+			request.InternalId   = InternalId;
+			request.ConnectionId = Connection.Id;
+			return await Connection.Request<types.PlayerUpdate.PlayerUpdateEvent>(
+					request,
+					RequestType.PlayerUpdate,
+					ResponseType.PlayerUpdate,
+					Connection.NextState()
+				)
+				?? types.PlayerUpdate.PlayerUpdateEvent.CreateFailure(Connection.Id, InternalId, "Unknown player update request");
 		}
 	}
 }

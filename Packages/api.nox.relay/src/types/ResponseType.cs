@@ -22,7 +22,8 @@ namespace api.nox.relay.types {
 		AvatarParams        = 0x0F,
 		Join                = 0x10,
 		Leave               = 0x11,
-		Sessions            = 0x12,
-		Voice               = 0x13,
+		PlayerUpdate        = 0x12,
+		Sessions            = 0x13,
+		Voice               = 0x14,
 	}
 }

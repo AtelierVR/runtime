@@ -269,6 +269,7 @@ namespace api.nox.relay {
 			adapter.Instance.OnAvatarChanged.AddListener(adapter.OnAvatarChanged);
 			adapter.Instance.OnTransform.AddListener(adapter.OnTransform);
 			adapter.Instance.OnAvatarParams.AddListener(adapter.OnAvatarParams);
+			adapter.Instance.OnPlayerUpdated.AddListener(adapter.OnPlayerUpdated);
 
 			adapter.SetState(false, "Connecting to an instance...", 0.3f);
 			var enter = await adapter.Instance.RequestEnter();
@@ -318,6 +319,7 @@ namespace api.nox.relay {
 			adapter.Instance.OnTraveling.AddListener(adapter.OnTraveling);
 			adapter.Instance.OnEnter.AddListener(adapter.OnEnter);
 
+			Logger.LogDebug($"Local player: {enter.Player.Display} ({enter.Player.Id}, {enter.Player.Flags})");
 			var player = adapter.NewPlayer<RelayLocalPlayer>(enter.Player);
 
 			adapter.SetState(false, "Setting local player avatar...", 0.925f);
