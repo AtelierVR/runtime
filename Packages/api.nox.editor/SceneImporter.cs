@@ -40,9 +40,9 @@ namespace Nox.Editor {
 				}
 
 			var newScenes = scenes.Distinct().ToArray();
-			if (!old.Except(newScenes).Any())
+			if (!old.Except(newScenes).Any() && !newScenes.Except(old).Any())
 				return;
-
+			
 			EditorBuildSettings.scenes = newScenes;
 			AssetDatabase.SaveAssets();
 			Logger.Log("Updated scenes in build settings.");
