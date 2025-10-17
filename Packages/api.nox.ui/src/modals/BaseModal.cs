@@ -9,7 +9,9 @@ namespace api.nox.ui.modals {
 		public IModalMenu Menu;
 
 		public void Close() {
-			gameObject.SetActive(false);
+			if (gameObject)
+				gameObject.SetActive(false);
+			if (Menu == null) return;
 			var modals = Menu.GetModals();
 			var active = modals.Any(m => m.IsOpen());
 			Menu.SetActiveForeground(active);
@@ -34,7 +36,9 @@ namespace api.nox.ui.modals {
 			=> Dispose();
 
 		public void Dispose() {
-			Close();
+			if (Menu != null && gameObject != null && gameObject.activeSelf) {
+				Close();
+			}
 			if (gameObject)
 				Destroy(gameObject);
 			Menu?.UnregisterModal(this);
