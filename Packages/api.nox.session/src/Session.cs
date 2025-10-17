@@ -84,6 +84,7 @@ namespace api.nox.session {
 
 		public void OnPlayerLeft(IPlayer player) {
 			Logger.LogDebug($"OnPlayerLeft: {player}");
+			
 			Main.Instance.CoreAPI.EventAPI.Emit("session_player_left", this, player);
 			OnPlayerLeftListener.Invoke(player);
 
@@ -94,6 +95,7 @@ namespace api.nox.session {
 
 		public void OnAuthorityTransferred(IPlayer player) {
 			Logger.LogDebug($"OnAuthorityTransferred: {player}");
+			
 			Main.Instance.CoreAPI.EventAPI.Emit("session_authority_transferred", this, player);
 			OnAuthorityTransferredListener.Invoke(player);
 
@@ -127,12 +129,7 @@ namespace api.nox.session {
 				return Array.Empty<IWorldDescriptor>();
 			}
 
-			var mainIndex = dimension.GetMainIndex();
-			if (mainIndex < 0) {
-				Logger.LogWarning($"{this}: GetDescriptors received an invalid main index {mainIndex}. Returning no descriptors.");
-				return Array.Empty<IWorldDescriptor>();
-			}
-
+			var mainIndex  = dimension.GetMainIndex();
 			var descriptor = mainInstance.GetDescriptor(mainIndex);
 			return descriptor != null
 				? new[] { descriptor }
