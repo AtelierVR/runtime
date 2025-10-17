@@ -103,9 +103,6 @@ namespace api.nox.relay.connection {
 		public  types.Handshakes.RelayResponseHandshake LastHandshake;
 		private types.Latency.RelayResponseLatency      _lastLatency;
 
-		public ClientStatus Status
-			=> LastHandshake?.Status ?? ClientStatus.Disconnected;
-
 		public ushort ClientId
 			=> LastHandshake?.ClientId ?? ushort.MaxValue;
 
@@ -127,9 +124,10 @@ namespace api.nox.relay.connection {
 
 		public void Update() {
 			Connector.Update();
-			if (Status == ClientStatus.Disconnected || !Connector.IsConnected()) return;
+			if (LastHandshake == null || !Connector.IsConnected()) return;
 
-			if (_lastLatencyRequest.AddSeconds(types.Latency.RelayRequestLatency.IntervalLatencyRequest) < DateTime.Now) {
+			// Only send latency requests if handshake is completed
+			if (_lastLatencyRequest.AddSeconds(LastHandshake.KeepAliveInterval) < DateTime.Now) {
 				_lastLatencyRequest = DateTime.Now;
 				RequestLatency().Forget();
 			}

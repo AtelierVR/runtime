@@ -215,6 +215,12 @@ namespace api.nox.relay {
 				return;
 			}
 
+			// Configure buffer size based on server's MaxPacketSize
+			if (hand.MaxPacketSize > 0) {
+				connection.Connector.SetBufferSize(hand.MaxPacketSize);
+				Logger.LogDebug($"Set connector buffer size to {hand.MaxPacketSize} bytes from handshake");
+			}
+
 			adapter.SetState(false, "Authenticating with relay...", 0.225f);
 			var request = RelayRequestAuthentication.CreateRequest();
 			var auth    = await connection.RequestAuthentication(request);

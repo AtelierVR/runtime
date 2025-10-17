@@ -9,6 +9,7 @@ namespace api.nox.relay.connector {
 		bool          IsConnected();
 		IPEndPoint    Remote();
 		UniTask<bool> Connect(string address, ushort port);
+		void SetBufferSize(int size);
 		UniTask       Close();
 
 		event OnReceived OnReceivedEvent;
