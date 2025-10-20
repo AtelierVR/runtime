@@ -1,6 +1,7 @@
 using System.Net;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
+using UnityEngine.Events;
 
 namespace api.nox.relay.connector {
 	public interface IConnector {
@@ -8,13 +9,11 @@ namespace api.nox.relay.connector {
 
 		bool          IsConnected();
 		IPEndPoint    Remote();
-		UniTask<bool> Connect(string address, ushort port);
-		void SetBufferSize(int size);
+		UniTask<bool> Connect(string    address, ushort port);
+		void          SetBufferSize(int size);
 		UniTask       Close();
 
-		event OnReceived OnReceivedEvent;
-
-		delegate void OnReceived(Buffer buffer);
+		UnityEvent<Buffer> OnReceived { get; }
 
 		UniTask<bool> Send(Buffer buffer);
 		void          Update();

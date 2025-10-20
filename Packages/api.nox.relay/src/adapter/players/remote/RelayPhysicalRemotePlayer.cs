@@ -25,8 +25,15 @@ namespace api.nox.relay {
 				var tps   = Reference.Adapter.Tps;
 				var lerpT = 1f - Mathf.Exp(-tps * Time.deltaTime);
 				transform.GetPositionAndRotation(out var position, out var rotation);
-				position = Vector3.Lerp(position, move.GetPosition(), lerpT);
-				rotation = Quaternion.Slerp(rotation, move.GetRotation(), lerpT);
+				
+				if (Vector3.Distance(position, move.GetPosition()) <= 5f) {
+					position = Vector3.Lerp(position, move.GetPosition(), lerpT);
+					rotation = Quaternion.Slerp(rotation, move.GetRotation(), lerpT);
+				} else {
+					position = move.GetPosition();
+					rotation = move.GetRotation();
+				}
+
 				transform.SetPositionAndRotation(position, rotation);
 			}
 		}

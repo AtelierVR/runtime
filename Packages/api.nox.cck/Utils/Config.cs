@@ -98,6 +98,9 @@ namespace Nox.CCK.Utils {
 			return current[propertyPathName[^1]];
 		}
 
+		public JObject Get()
+			=> _jsonObject;
+
 		public T Get<T>(string propertyName, T defaultValue = default)
 			=> Get(propertyName.Split('.'), defaultValue);
 

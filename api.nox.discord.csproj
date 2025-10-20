@@ -46,8 +46,8 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.discord\src\Main.cs" />
-    <Compile Include="Packages\api.nox.discord\src\DiscordRpc.cs" />
+    <Compile Include="Packages\api.nox.discord\Scripts\DiscordRpc.cs" />
+    <Compile Include="Packages\api.nox.discord\Scripts\Main.cs" />
     <None Include="Packages\api.nox.discord\link.xml" />
     <None Include="Packages\api.nox.discord\package.json" />
     <None Include="Packages\api.nox.discord\api.nox.discord.asmdef" />

@@ -24,7 +24,7 @@ namespace api.nox.session.jint {
 		public ObjectInstance    Context;
 
 		private JintEngine _engine;
-
+		
 		public void Initialize() {
 			if (_engine != null) return;
 
@@ -121,7 +121,8 @@ namespace api.nox.session.jint {
 				if (methodRef.IsUndefined()) return;
 				_engine.Invoke(methodRef, args);
 			} catch (Exception e) {
-				Logger.LogError(e, this);
+				Logger.LogError($"Error invoking method '{method}': {e.Message}", this);
+				Logger.LogException(e, this);
 			}
 		}
 
@@ -133,7 +134,8 @@ namespace api.nox.session.jint {
 					? null
 					: _engine.Invoke(methodRef, args);
 			} catch (Exception e) {
-				Logger.LogError(e, this);
+				Logger.LogError($"Error invoking method '{method}': {e.Message}", this);
+				Logger.LogException(e, this);
 				return null;
 			}
 		}
@@ -146,7 +148,8 @@ namespace api.nox.session.jint {
 				var result = _engine.Invoke(methodRef, args);
 				return (T)result.ToObject();
 			} catch (Exception e) {
-				Logger.LogError(e, this);
+				Logger.LogError($"Error invoking method '{method}': {e.Message}", this);
+				Logger.LogException(e, this);
 				return default;
 			}
 		}
@@ -156,9 +159,6 @@ namespace api.nox.session.jint {
 			Main.CoreAPI.EventAPI.Emit("jint_engine_destroyed", this, _engine);
 			_engine = null;
 		}
-
-		public UniTask<bool> Setup(IRuntimeWorld runtime)
-			=> UniTask.FromResult(true);
 
 		public void OnSessionSelected()
 			=> Invoke("onSessionSelected");
@@ -172,7 +172,7 @@ namespace api.nox.session.jint {
 		public void OnPlayerLeft(IPlayer player)
 			=> Invoke("onPlayerLeft", player);
 
-		public void OnAuthorityTransferred(IPlayer @new)
-			=> Invoke("onAuthorityTransferred", @new);
+		public void OnAuthorityTransferred(IPlayer player)
+			=> Invoke("onAuthorityTransferred", player);
 	}
 }

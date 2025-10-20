@@ -187,17 +187,9 @@ namespace Nox.ModLoader.EntryPoints {
 				eventCtx.Emit("mod_pre_dispose", Mod, Name, ExecutionEventStatus.Start, instance);
 
 				try {
-					instance.OnPreDispose();
-					await instance.OnPreDisposeAsync();
-
-					if (instance is IMainModInitializer m) {
-						m.OnPreDisposeMain();
-						await m.OnPreDisposeMainAsync();
-					}
-
-					if (instance is IEditorModInitializer e) {
-						e.OnPreDisposeEditor();
-						await e.OnPreDisposeEditorAsync();
+					if (instance is IClientModInitializer c) {
+						c.OnPreDisposeClient();
+						await c.OnPreDisposeClientAsync();
 					}
 
 					if (instance is IServerModInitializer s) {
@@ -205,10 +197,18 @@ namespace Nox.ModLoader.EntryPoints {
 						await s.OnPreDisposeServerAsync();
 					}
 
-					if (instance is IClientModInitializer c) {
-						c.OnPreDisposeClient();
-						await c.OnPreDisposeClientAsync();
+					if (instance is IEditorModInitializer e) {
+						e.OnPreDisposeEditor();
+						await e.OnPreDisposeEditorAsync();
 					}
+
+					if (instance is IMainModInitializer m) {
+						m.OnPreDisposeMain();
+						await m.OnPreDisposeMainAsync();
+					}
+
+					instance.OnPreDispose();
+					await instance.OnPreDisposeAsync();
 
 					eventCtx.Emit("mod_pre_dispose", Mod, Name, ExecutionEventStatus.Success, instance);
 				} catch (Exception e) {
@@ -243,17 +243,9 @@ namespace Nox.ModLoader.EntryPoints {
 				eventCtx.Emit("mod_dispose", Mod, Name, ExecutionEventStatus.Start, instance);
 
 				try {
-					instance.OnDispose();
-					await instance.OnDisposeAsync();
-
-					if (instance is IMainModInitializer m) {
-						m.OnDisposeMain();
-						await m.OnDisposeMainAsync();
-					}
-
-					if (instance is IEditorModInitializer e) {
-						e.OnDisposeEditor();
-						await e.OnDisposeEditorAsync();
+					if (instance is IClientModInitializer c) {
+						c.OnDisposeClient();
+						await c.OnDisposeClientAsync();
 					}
 
 					if (instance is IServerModInitializer s) {
@@ -261,11 +253,19 @@ namespace Nox.ModLoader.EntryPoints {
 						await s.OnDisposeServerAsync();
 					}
 
-					if (instance is IClientModInitializer c) {
-						c.OnDisposeClient();
-						await c.OnDisposeClientAsync();
+					if (instance is IEditorModInitializer e) {
+						e.OnDisposeEditor();
+						await e.OnDisposeEditorAsync();
 					}
 
+					if (instance is IMainModInitializer m) {
+						m.OnDisposeMain();
+						await m.OnDisposeMainAsync();
+					}
+
+					instance.OnDispose();
+					await instance.OnDisposeAsync();
+					
 					eventCtx.Emit("mod_dispose", Mod, Name, ExecutionEventStatus.Success, instance);
 				} catch (Exception e) {
 					Mod.CoreAPI.LoggerAPI.LogError($"Failed to dispose mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}!");
@@ -278,7 +278,7 @@ namespace Nox.ModLoader.EntryPoints {
 
 			profiler.Set("dispose", Name, Profiler.At.End, DateTime.UtcNow);
 		}
-		
+
 		public void OnUpdate() {
 			if (!IsEnabled() || _state != InitializerState.PostInitialized)
 				return;
@@ -293,16 +293,16 @@ namespace Nox.ModLoader.EntryPoints {
 				try {
 					instance.OnUpdate();
 
-					if (instance is IMainModInitializer m) 
+					if (instance is IMainModInitializer m)
 						m.OnUpdateMain();
 
-					if (instance is IEditorModInitializer e) 
+					if (instance is IEditorModInitializer e)
 						e.OnUpdateEditor();
 
-					if (instance is IServerModInitializer s) 
+					if (instance is IServerModInitializer s)
 						s.OnUpdateServer();
 
-					if (instance is IClientModInitializer c) 
+					if (instance is IClientModInitializer c)
 						c.OnUpdateClient();
 				} catch (Exception e) {
 					Mod.CoreAPI.LoggerAPI.LogError($"Failed to update mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}!");
@@ -314,7 +314,7 @@ namespace Nox.ModLoader.EntryPoints {
 
 			profiler.Set("update", Name, Profiler.At.End, DateTime.UtcNow);
 		}
-		
+
 		public void OnFixedUpdate() {
 			if (!IsEnabled() || _state != InitializerState.PostInitialized)
 				return;
@@ -329,16 +329,16 @@ namespace Nox.ModLoader.EntryPoints {
 				try {
 					instance.OnFixedUpdate();
 
-					if (instance is IMainModInitializer m) 
+					if (instance is IMainModInitializer m)
 						m.OnFixedUpdateMain();
 
-					if (instance is IEditorModInitializer e) 
+					if (instance is IEditorModInitializer e)
 						e.OnFixedUpdateEditor();
 
-					if (instance is IServerModInitializer s) 
+					if (instance is IServerModInitializer s)
 						s.OnFixedUpdateServer();
 
-					if (instance is IClientModInitializer c) 
+					if (instance is IClientModInitializer c)
 						c.OnFixedUpdateClient();
 				} catch (Exception e) {
 					Mod.CoreAPI.LoggerAPI.LogError($"Failed to fixed-update mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}!");
@@ -350,7 +350,7 @@ namespace Nox.ModLoader.EntryPoints {
 
 			profiler.Set("fixed_update", Name, Profiler.At.End, DateTime.UtcNow);
 		}
-		
+
 		public void OnLateUpdate() {
 			if (!IsEnabled() || _state != InitializerState.PostInitialized)
 				return;
@@ -365,16 +365,16 @@ namespace Nox.ModLoader.EntryPoints {
 				try {
 					instance.OnLateUpdate();
 
-					if (instance is IMainModInitializer m) 
+					if (instance is IMainModInitializer m)
 						m.OnLateUpdateMain();
 
-					if (instance is IEditorModInitializer e) 
+					if (instance is IEditorModInitializer e)
 						e.OnLateUpdateEditor();
 
-					if (instance is IServerModInitializer s) 
+					if (instance is IServerModInitializer s)
 						s.OnLateUpdateServer();
 
-					if (instance is IClientModInitializer c) 
+					if (instance is IClientModInitializer c)
 						c.OnLateUpdateClient();
 				} catch (Exception e) {
 					Mod.CoreAPI.LoggerAPI.LogError($"Failed to late-update mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}!");

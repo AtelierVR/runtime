@@ -5,6 +5,8 @@ using System.Net.Sockets;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Events;
+using Buffer = Nox.CCK.Utils.Buffer;
 
 namespace api.nox.relay.connector {
 	public class UdpConnector : IConnector {
@@ -13,9 +15,7 @@ namespace api.nox.relay.connector {
 		private          bool       _isConnected;
 		private          IPEndPoint _remoteEndPoint;
 		private volatile bool       _shouldStop;
-		private readonly ConcurrentQueue<Nox.CCK.Utils.Buffer> _receivedDataQueue = new();
-
-		public event IConnector.OnReceived OnReceivedEvent;
+		private readonly ConcurrentQueue<Buffer> _receivedDataQueue = new();
 
 		public static string GetStaticProtocolName()
 			=> "udp";
@@ -29,6 +29,8 @@ namespace api.nox.relay.connector {
 		public IPEndPoint Remote()
 			=> _remoteEndPoint;
 
+		public UnityEvent<Buffer> OnReceived { get; } = new();
+		
 		public async UniTask<bool> Connect(string address, ushort port) {
 			try {
 				// Nettoyer les connexions précédentes
@@ -109,9 +111,8 @@ namespace api.nox.relay.connector {
 			// Cette méthode peut être utilisée pour des opérations de maintenance
 			// dans le thread principal Unity si nécessaire
 
-			while (_receivedDataQueue.TryDequeue(out var receivedBuffer)) {
-				OnReceivedEvent?.Invoke(receivedBuffer);
-			}
+			while (_receivedDataQueue.TryDequeue(out var receivedBuffer)) 
+				OnReceived.Invoke(receivedBuffer);
 		}
 
 		private void StartReceiveThread() {

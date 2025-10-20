@@ -75,14 +75,14 @@
     <Compile Include="Packages\api.nox.main\src\tiles\HomeWidget.cs" />
     <Compile Include="Packages\api.nox.main\src\Client.cs" />
     <Compile Include="Packages\api.nox.main\src\tiles\instance\InstanceTile.cs" />
-    <None Include="Packages\api.nox.main\assets\api.nox.main\worlds\default\TexturedFresnelStandard.shader" />
-    <None Include="Packages\api.nox.main\assets\api.nox.main\shaders\BluredColor.hlsl" />
+    <None Include="Packages\api.nox.main\Assets\api.nox.main\worlds\default\TexturedFresnelStandard.shader" />
+    <None Include="Packages\api.nox.main\Assets\api.nox.main\shaders\BluredColor.hlsl" />
     <None Include="Packages\api.nox.main\package.json" />
     <None Include="Packages\api.nox.main\nox.mod.json" />
-    <None Include="Packages\api.nox.main\assets\api.nox.main\worlds\default\TexturedStableFresnelCommon.cginc" />
+    <None Include="Packages\api.nox.main\Assets\api.nox.main\worlds\default\TexturedStableFresnelCommon.cginc" />
     <None Include="Packages\api.nox.main\link.xml" />
     <None Include="Packages\api.nox.main\api.nox.main.asmdef" />
-    <None Include="Packages\api.nox.main\assets\api.nox.main\worlds\default\Horizontal Skybox.shader" />
+    <None Include="Packages\api.nox.main\Assets\api.nox.main\worlds\default\Horizontal Skybox.shader" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>

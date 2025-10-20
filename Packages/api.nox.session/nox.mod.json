@@ -36,6 +36,11 @@
       "version": ">=1.0.0"
     },
     {
+      "id": "search",
+      "type": "depends",
+      "version": ">=1.0.0"
+    },
+    {
       "id": "player",
       "type": "depends",
       "version": ">=1.0.0"

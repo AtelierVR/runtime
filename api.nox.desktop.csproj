@@ -46,17 +46,17 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.desktop\src\DesktopPlayer.cs" />
-    <Compile Include="Packages\api.nox.desktop\src\DesktopPlayerControllerLink.cs" />
-    <Compile Include="Packages\api.nox.desktop\src\DesktopCrosshair.cs" />
-    <Compile Include="Packages\api.nox.desktop\src\DesktopController.cs" />
-    <Compile Include="Packages\api.nox.desktop\src\Client.cs" />
-    <Compile Include="Packages\api.nox.desktop\src\Keybindings.cs" />
+    <Compile Include="Packages\api.nox.desktop\Scripts\Client.cs" />
+    <Compile Include="Packages\api.nox.desktop\Scripts\DesktopCrosshair.cs" />
+    <Compile Include="Packages\api.nox.desktop\Scripts\DesktopController.cs" />
+    <Compile Include="Packages\api.nox.desktop\Scripts\DesktopPlayer.cs" />
+    <Compile Include="Packages\api.nox.desktop\Scripts\DesktopPlayerControllerLink.cs" />
+    <Compile Include="Packages\api.nox.desktop\Scripts\Keybindings.cs" />
     <None Include="Packages\api.nox.desktop\api.nox.desktop.asmdef" />
     <None Include="Packages\api.nox.desktop\link.xml" />
     <None Include="Packages\api.nox.desktop\package.json" />
     <None Include="Packages\api.nox.desktop\nox.mod.json" />
-    <None Include="Packages\api.nox.desktop\assets\api.nox.desktop\desktop-controller-styles.uss" />
+    <None Include="Packages\api.nox.desktop\Assets\api.nox.desktop\desktop-controller-styles.uss" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>

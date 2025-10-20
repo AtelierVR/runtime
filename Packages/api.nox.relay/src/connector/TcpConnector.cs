@@ -1,24 +1,23 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
+using api.nox.relay.types;
 using Cysharp.Threading.Tasks;
-using Nox.CCK.Utils;
 using UnityEngine;
+using UnityEngine.Events;
+using Buffer = Nox.CCK.Utils.Buffer;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay.connector {
 	public class TcpConnector : IConnector {
-		private          Socket                            _socket;
-		private          Thread                            _receiveThread;
-		private          bool                              _isConnected;
-		private          IPEndPoint                        _remoteEndPoint;
-		private          int                               _bufferSize = 1024;
-		private volatile bool                              _shouldStop;
-		private readonly ConcurrentQueue<Nox.CCK.Utils.Buffer> _receivedDataQueue = new();
-
-		public event IConnector.OnReceived OnReceivedEvent;
+		private TcpClient _tcpClient;
+		private NetworkStream _stream;
+		private bool _isConnected;
+		private IPEndPoint _remoteEndPoint;
+		private volatile bool _shouldStop;
+		private readonly ConcurrentQueue<Buffer> _receivedDataQueue = new();
+		private int _bufferSize = 8192;
 
 		public static string GetStaticProtocolName()
 			=> "tcp";
@@ -27,37 +26,37 @@ namespace api.nox.relay.connector {
 			=> GetStaticProtocolName();
 
 		public bool IsConnected()
-			=> _isConnected && _socket is { Connected: true };
-
+			=> _isConnected && _tcpClient is { Connected: true };
 
 		public IPEndPoint Remote()
 			=> _remoteEndPoint;
 
+		public UnityEvent<Buffer> OnReceived { get; } = new();
 
 		public async UniTask<bool> Connect(string address, ushort port) {
 			try {
 				// Nettoyer les connexions précédentes
 				await Close();
 
-				// Créer le socket TCP
-				_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
 				// Parser l'adresse
-				if (!IPAddress.TryParse(address, out var ipAddress)) {
+				IPAddress ipAddress;
+				if (!IPAddress.TryParse(address, out ipAddress)) {
 					var hostEntry = await Dns.GetHostEntryAsync(address);
 					ipAddress = hostEntry.AddressList[0];
 				}
 
 				_remoteEndPoint = new IPEndPoint(ipAddress, port);
 
-				// Connexion asynchrone
-				await _socket.ConnectAsync(_remoteEndPoint);
+				// Créer le client TCP et se connecter
+				_tcpClient = new TcpClient();
+				await _tcpClient.ConnectAsync(ipAddress, port);
+				_stream = _tcpClient.GetStream();
 
 				_isConnected = true;
-				_shouldStop  = false;
+				_shouldStop = false;
 
-				// Démarrer le thread de réception
-				StartReceiveThread();
+				// Démarrer la lecture asynchrone
+				StartReceiveAsync().Forget();
 
 				return true;
 			} catch (Exception ex) {
@@ -67,42 +66,53 @@ namespace api.nox.relay.connector {
 			}
 		}
 
-		public void SetBufferSize(int size)
-			=> _bufferSize = size;
-
+		public void SetBufferSize(int size) {
+			_bufferSize = size;
+			if (_tcpClient != null) {
+				_tcpClient.ReceiveBufferSize = size;
+				_tcpClient.SendBufferSize = size;
+			}
+		}
 
 		public async UniTask Close() {
-			_shouldStop  = true;
+			_shouldStop = true;
 			_isConnected = false;
 
-			// Arrêter le thread de réception
-			if (_receiveThread is { IsAlive: true })
-				_receiveThread.Join(1000); // Attendre 1 seconde maximum
-
-			// Fermer le socket
-			if (_socket != null)
+			// Fermer le stream
+			if (_stream != null) {
 				try {
-					_socket.Shutdown(SocketShutdown.Both);
-					_socket.Close();
+					await _stream.FlushAsync();
+					_stream.Close();
+				} catch (Exception ex) {
+					Debug.LogWarning($"TcpConnector: Erreur lors de la fermeture du stream - {ex.Message}");
+				} finally {
+					_stream = null;
+				}
+			}
+
+			// Fermer le client TCP
+			if (_tcpClient != null) {
+				try {
+					_tcpClient.Close();
 				} catch (Exception ex) {
 					Debug.LogWarning($"TcpConnector: Erreur lors de la fermeture - {ex.Message}");
 				} finally {
-					_socket = null;
+					_tcpClient = null;
 				}
+			}
 
-			await UniTask.CompletedTask;
+			// Vider la queue
+			while (_receivedDataQueue.TryDequeue(out _)) { }
 		}
 
-		public async UniTask<bool> Send(Nox.CCK.Utils.Buffer buffer) {
-			if (!IsConnected())
+		public async UniTask<bool> Send(Buffer buffer) {
+			if (!IsConnected() || _stream == null)
 				return false;
 
 			try {
-				var dataToSend = new byte[buffer.length];
-				Array.Copy(buffer.data, 0, dataToSend, 0, buffer.length);
-
-				var bytesSent = await _socket.SendAsync(dataToSend, SocketFlags.None);
-				return bytesSent == buffer.length;
+				await _stream.WriteAsync(buffer.data, 0, buffer.length);
+				await _stream.FlushAsync();
+				return true;
 			} catch (Exception ex) {
 				Debug.LogError($"TcpConnector: Échec d'envoi - {ex.Message}");
 				_isConnected = false;
@@ -111,70 +121,40 @@ namespace api.nox.relay.connector {
 		}
 
 		public void Update() {
-			// Cette méthode peut être utilisée pour des opérations de maintenance
-			// dans le thread principal Unity si nécessaire
-
-			while (_receivedDataQueue.TryDequeue(out var receivedBuffer)) 
-				OnReceivedEvent?.Invoke(receivedBuffer);
+			// Traiter les données reçues dans la queue
+			while (_receivedDataQueue.TryDequeue(out var buffer)) {
+				OnReceived?.Invoke(buffer);
+			}
 		}
 
-		private void StartReceiveThread() {
-			_receiveThread = new Thread(ReceiveThreadWorker) {
-				IsBackground = true,
-				Name         = "TcpConnector-Receive"
-			};
-			_receiveThread.Start();
-		}
-
-		private void ReceiveThreadWorker() {
+		private async UniTaskVoid StartReceiveAsync() {
 			var buffer = new byte[_bufferSize];
 
 			while (!_shouldStop && IsConnected()) {
 				try {
-					if (_socket.Available > 0) {
-						// Utiliser Math.Min pour s'assurer que la taille ne dépasse pas la longueur du buffer
-						var maxReceive = Math.Min(_socket.Available, buffer.Length);
-						var bytesReceived = _socket.Receive(buffer, 0, maxReceive, SocketFlags.None);
+					var bytesRead = await _stream.ReadAsync(buffer, 0, buffer.Length);
 
-						if (bytesReceived > 0) {
-							// Créer un Buffer pour les données reçues
-							var receivedBuffer = new Nox.CCK.Utils.Buffer();
-							receivedBuffer.data = new byte[bytesReceived];
-							Array.Copy(buffer, 0, receivedBuffer.data, 0, bytesReceived);
-							receivedBuffer.length = (ushort)bytesReceived;
-							receivedBuffer.offset = 0;
-
-							// Enqueue received data to the thread-safe queue
-							_receivedDataQueue.Enqueue(receivedBuffer);
-						} else if (bytesReceived == 0) {
-							// Connexion fermée par le serveur
-							_isConnected = false;
-							break;
-						}
+					if (bytesRead > 0) {
+						var receivedBuffer = new Buffer();
+						receivedBuffer.data = new byte[bytesRead];
+						Array.Copy(buffer, 0, receivedBuffer.data, 0, bytesRead);
+						receivedBuffer.length = (ushort)bytesRead;
+						receivedBuffer.offset = 0;
+						_receivedDataQueue.Enqueue(receivedBuffer);
 					} else {
-						// Pause courte pour éviter une boucle intensive
-						Thread.Sleep(1);
+						// Connexion fermée par le serveur
+						Debug.Log("TcpConnector: Connexion fermée par le serveur");
+						_isConnected = false;
+						break;
 					}
-				} catch (SocketException ex) {
+				} catch (Exception ex) {
 					if (!_shouldStop) {
 						Debug.LogError($"TcpConnector: Erreur de réception - {ex.Message}");
 						_isConnected = false;
 					}
-
-					break;
-				} catch (Exception ex) {
-					Debug.LogError($"TcpConnector: Erreur inattendue - {ex.Message}");
-					_isConnected = false;
 					break;
 				}
 			}
-
-			Debug.Log("TcpConnector: Thread de réception arrêté");
-		}
-
-		// Destructeur pour s'assurer que les ressources sont libérées
-		~TcpConnector() {
-			Close().Forget();
 		}
 	}
 }

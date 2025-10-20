@@ -1,6 +1,7 @@
 using Nox.Sessions;
 using Nox.Worlds;
 using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.offline {
 	public class RelayDimension : IDimension {
@@ -30,6 +31,11 @@ namespace api.nox.offline {
 			=> _isActive = isActive;
 
 		public IWorldDescriptor GetDescriptor(int index) {
+			if (index > 0) {
+				Logger.LogWarning("RelayDimension.GetDescriptor only supports a single instance. Requested index: " + index);
+				return null;
+			}
+
 			var instances = _runtimeWorld.GetInstances();
 			if (index < 0 || index >= instances.Length) return null;
 			var main = instances[index];
@@ -37,6 +43,11 @@ namespace api.nox.offline {
 		}
 
 		public GameObject GetAnchor(int index) {
+			if (index > 0) {
+				Logger.LogWarning("RelayDimension.GetAnchor only supports a single instance. Requested index: " + index);
+				return null;
+			}
+
 			var instances = _runtimeWorld.GetInstances();
 			if (index < 0 || index >= instances.Length) return null;
 			return instances[index].GetAnchor(index == 0 ? GetMainIndex() : throw new System.NotImplementedException());

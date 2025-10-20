@@ -1,0 +1,37 @@
+{
+  "type": "mod",
+  "id": "api.nox.control",
+  "provides": [
+    "fr.hactazia.control",
+    "control"
+  ],
+  "name": "XR System",
+  "version": "1.0.0",
+  "description": "Control API",
+  "license": "GPL-3.0",
+  "icon": null,
+  "contact": {
+    "email": "hactazia@gmail.com",
+    "source": "https://github.com/AtelierVR/api.nox.control",
+    "website": "https://nox.hactazia.fr/",
+    "issues": "https://github.com/AtelierVR/api.nox.control/issues"
+  },
+  "authors": [
+    {
+      "name": "Hactazia",
+      "email": "hactazia@gmail.com",
+      "website": "https://hactazia.fr/"
+    }
+  ],
+  "contributors": [],
+  "relations": [],
+  "entrypoints": {
+    "main": [
+      "api.nox.control.Main"
+    ]
+  },
+  "references": [],
+  "sides": [],
+  "permissions": [],
+  "kernel": true
+}

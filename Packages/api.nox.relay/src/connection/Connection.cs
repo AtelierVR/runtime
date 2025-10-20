@@ -4,9 +4,9 @@ using System.Linq;
 using api.nox.relay.connector;
 using api.nox.relay.Instances;
 using api.nox.relay.types;
-using api.nox.relay.types.Instance;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
+using UnityEngine.Events;
 using Buffer = Nox.CCK.Utils.Buffer;
 
 namespace api.nox.relay.connection {
@@ -24,7 +24,7 @@ namespace api.nox.relay.connection {
 		private Connection(IConnector connector) {
 			Id                        =  Main.Instance.NextId();
 			Connector                 =  connector;
-			Connector.OnReceivedEvent += OnReceived;
+			Connector.OnReceived.AddListener(OnReceived);
 			Main.Instance.Connections.Add(this);
 			Main.OnConnectionAdded.Invoke(this);
 		}
@@ -150,7 +150,7 @@ namespace api.nox.relay.connection {
 			if (!Connector.IsConnected()) return (false, ushort.MaxValue);
 			var buffer                          = new Buffer();
 			if (state == ushort.MaxValue) state = NextState();
-			buffer.Write((ushort)(data.length + 4));
+			buffer.Write((ushort)(data.length + 5));
 			buffer.Write(state);
 			buffer.Write(type);
 			buffer.Write(data.ToBuffer());
@@ -165,7 +165,8 @@ namespace api.nox.relay.connection {
 			byte         timeout = 5)
 			where T : RelayResponse, new() {
 			T res = null;
-			var rec = new IConnector.OnReceived(
+
+			var rec = new UnityAction<Buffer>(
 				buffer => {
 					if (buffer.length < 5) return;
 					buffer.Goto(0);
@@ -180,19 +181,19 @@ namespace api.nox.relay.connection {
 					Logger.LogError($"Requested: Failed to parse {responseType}");
 				}
 			);
-			Connector.OnReceivedEvent += rec;
+			Connector.OnReceived.AddListener(rec);
 			var t0 = DateTime.Now;
 
 			var (ok, _) = await Emit(request.ToBuffer(), oType, state);
 			if (!ok) {
-				Connector.OnReceivedEvent -= rec;
+				Connector.OnReceived.RemoveListener(rec);
 				Logger.LogWarning($"Requested: failed {oType} {state}");
 				return null;
 			}
 
 			var time = DateTime.Now;
 			await UniTask.WaitUntil(() => (DateTime.Now - time).TotalSeconds > timeout || res != null);
-			Connector.OnReceivedEvent -= rec;
+			Connector.OnReceived.RemoveListener(rec);
 			if (res != null) {
 				res.Time = (t0, DateTime.Now);
 				return res;

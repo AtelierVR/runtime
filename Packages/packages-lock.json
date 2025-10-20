@@ -18,6 +18,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "api.nox.control": {
+      "version": "file:api.nox.control",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "api.nox.controller": {
       "version": "file:api.nox.controller",
       "depth": 0,
@@ -399,6 +405,15 @@
       "dependencies": {
         "com.unity.modules.uielements": "1.0.0"
       }
+    },
+    "com.unity.multiplayer.playmode": {
+      "version": "1.6.1",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "2.0.2"
+      },
+      "url": "https://packages.unity.com"
     },
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.5",

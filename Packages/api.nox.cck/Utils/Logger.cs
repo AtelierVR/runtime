@@ -5,13 +5,14 @@ using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using ILogger = UnityEngine.ILogger;
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif // UNITY_EDITOR
 
 namespace Nox.CCK.Utils {
-	public class Logger {
+	public class Logger : ILogger {
 		public const long MaxLogSize = 1024 * 1024 * 10; // 10 MB
 
 		public static string LogDir
@@ -25,6 +26,15 @@ namespace Nox.CCK.Utils {
 
 		private static readonly object FileLock = new();
 
+		// ILogger implementation
+		public ILogHandler logHandler { get; set; } = ULogger.unityLogger.logHandler;
+		public bool logEnabled { get; set; } = true;
+		public UnityEngine.LogType filterLogType { get; set; } = UnityEngine.LogType.Log;
+
+		private Logger() {
+			// Constructor privé pour le singleton
+		}
+		
 		#if UNITY_EDITOR
 		[InitializeOnLoadMethod]
 		private static void EditorInit() {
@@ -153,6 +163,100 @@ namespace Nox.CCK.Utils {
 		public static void LogDebug(object message, Object context, string tag = null)
 			=> OnLog(LogType.Debug, message, context, tag: tag);
 
+		// ILogger interface methods
+		public void LogFormat(UnityEngine.LogType logType, string format, params object[] args) {
+			if (!logEnabled) return;
+			var message = string.Format(format, args);
+			OnLog(ConvertLogType(logType), message);
+		}
+
+		public void LogFormat(UnityEngine.LogType logType, Object context, string format, params object[] args) {
+			if (!logEnabled) return;
+			var message = string.Format(format, args);
+			OnLog(ConvertLogType(logType), message, context);
+		}
+
+		public void LogException(Exception exception, Object context) {
+			if (!logEnabled) return;
+			OnLog(LogType.Exception, exception, context);
+		}
+
+		public bool IsLogTypeAllowed(UnityEngine.LogType logType) {
+			if (!logEnabled) return false;
+			return (int)filterLogType >= (int)logType;
+		}
+
+		public void Log(UnityEngine.LogType logType, object message) {
+			if (!logEnabled) return;
+			OnLog(ConvertLogType(logType), message);
+		}
+
+		public void Log(UnityEngine.LogType logType, object message, Object context) {
+			if (!logEnabled) return;
+			OnLog(ConvertLogType(logType), message, context);
+		}
+
+		public void Log(UnityEngine.LogType logType, string tag, object message) {
+			if (!logEnabled) return;
+			OnLog(ConvertLogType(logType), message, tag: tag);
+		}
+
+		public void Log(UnityEngine.LogType logType, string tag, object message, Object context) {
+			if (!logEnabled) return;
+			OnLog(ConvertLogType(logType), message, context, tag: tag);
+		}
+
+		public void Log(object message) {
+			if (!logEnabled) return;
+			OnLog(LogType.Log, message);
+		}
+
+		public void Log(string tag, object message) {
+			if (!logEnabled) return;
+			OnLog(LogType.Log, message, tag: tag);
+		}
+
+		public void Log(string tag, object message, Object context) {
+			if (!logEnabled) return;
+			OnLog(LogType.Log, message, context, tag: tag);
+		}
+
+		public void LogWarning(string tag, object message) {
+			if (!logEnabled) return;
+			OnLog(LogType.Warning, message, tag: tag);
+		}
+
+		public void LogWarning(string tag, object message, Object context) {
+			if (!logEnabled) return;
+			OnLog(LogType.Warning, message, context, tag: tag);
+		}
+
+		public void LogError(string tag, object message) {
+			if (!logEnabled) return;
+			OnLog(LogType.Error, message, tag: tag);
+		}
+
+		public void LogError(string tag, object message, Object context) {
+			if (!logEnabled) return;
+			OnLog(LogType.Error, message, context, tag: tag);
+		}
+
+		public void LogException(Exception exception) {
+			if (!logEnabled) return;
+			OnLog(LogType.Exception, exception);
+		}
+
+		private static LogType ConvertLogType(UnityEngine.LogType type)
+			=> type switch {
+				UnityEngine.LogType.Error => LogType.Error,
+				UnityEngine.LogType.Assert => LogType.Assert,
+				UnityEngine.LogType.Warning => LogType.Warning,
+				UnityEngine.LogType.Log => LogType.Log,
+				UnityEngine.LogType.Exception => LogType.Exception,
+				_ => LogType.Log
+			};
+		
+
 		public static readonly string[] IgnoreStack = {
 			"AsyncUniTask",
 			"AwaiterActions",
@@ -181,8 +285,10 @@ namespace Nox.CCK.Utils {
 					if (!IsInitialized) {
 						Init();
 						IsInitialized = true;
-					} else if (!File.Exists(LogFile) || new FileInfo(LogFile).Length > MaxLogSize)
+					} else if (!File.Exists(LogFile) || new FileInfo(LogFile).Length > MaxLogSize) {
 						Init();
+						Log("Log file exceeded maximum size and was rotated.", "Logger");
+					}
 
 					var stackTrace = new System.Diagnostics.StackTrace(2, true);
 					var frames     = stackTrace.GetFrames();

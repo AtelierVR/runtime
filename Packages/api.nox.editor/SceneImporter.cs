@@ -8,13 +8,12 @@ using Logger = Nox.CCK.Utils.Logger;
 namespace Nox.Editor {
 	public class SceneImporter : AssetPostprocessor {
 		private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths) {
-			var scenes = EditorBuildSettings.scenes.ToList();
-			var old    = EditorBuildSettings.scenes.ToList();
+			var old = EditorBuildSettings.scenes.ToArray();
 
+			var scenes = EditorBuildSettings.scenes.ToList();
 			foreach (var asset in importedAssets)
 				if (asset.EndsWith(".unity")) {
 					Logger.Log("Scene imported: " + asset);
-					var scene = SceneManager.GetSceneByPath(asset);
 					if (scenes.All(s => s.path != asset))
 						scenes.Add(new EditorBuildSettingsScene(asset, true));
 				}
@@ -28,7 +27,6 @@ namespace Nox.Editor {
 			foreach (var asset in movedAssets)
 				if (asset.EndsWith(".unity")) {
 					Logger.Log("Scene moved: " + asset);
-					var scene = SceneManager.GetSceneByPath(asset);
 					scenes.RemoveAll(s => s.path == asset);
 					scenes.Add(new EditorBuildSettingsScene(asset, true));
 				}
@@ -40,13 +38,20 @@ namespace Nox.Editor {
 				}
 
 			var newScenes = scenes.Distinct().ToArray();
-			if (!old.Except(newScenes).Any() && !newScenes.Except(old).Any())
+
+			var newPaths = new HashSet<string>(newScenes.Select(s => s.path));
+			var oldPaths = new HashSet<string>(old.Select(s => s.path));
+			var hasChanges = !newPaths.SetEquals(oldPaths);
+			if (!hasChanges) {
+				Logger.Log("Nothing to remove");
 				return;
-			
+			}
+
 			EditorBuildSettings.scenes = newScenes;
 			AssetDatabase.SaveAssets();
 			Logger.Log("Updated scenes in build settings.");
 		}
+
 
 		[MenuItem("Nox/Scenes/Refresh Scenes in Build Settings"), InitializeOnLoadMethod]
 		public static void RefreshScenesInBuildSettings() {

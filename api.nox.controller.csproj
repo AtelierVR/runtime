@@ -46,12 +46,12 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.controller\src\editor\ControllerPanel.cs" />
-    <Compile Include="Packages\api.nox.controller\src\editor\Editor.cs" />
-    <Compile Include="Packages\api.nox.controller\src\Main.cs" />
+    <Compile Include="Packages\api.nox.controller\Scripts\editor\Editor.cs" />
+    <Compile Include="Packages\api.nox.controller\Scripts\editor\ControllerPanel.cs" />
+    <Compile Include="Packages\api.nox.controller\Scripts\Main.cs" />
     <None Include="Packages\api.nox.controller\link.xml" />
     <None Include="Packages\api.nox.controller\api.nox.controller.asmdef" />
-    <None Include="Packages\api.nox.controller\assets\api.nox.controller\controller-panel.uxml" />
+    <None Include="Packages\api.nox.controller\Assets\api.nox.controller\controller-panel.uxml" />
     <None Include="Packages\api.nox.controller\package.json" />
     <None Include="Packages\api.nox.controller\nox.mod.json" />
     <Reference Include="UnityEngine">
