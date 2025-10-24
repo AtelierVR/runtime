@@ -13,8 +13,11 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
+  - _USEENDNOISE_ON
   - _USEGLOBALPOSITION_ON
+  - _USEPIXELNOISE_ON
   - _USETEXTURE_ON
+  - _USEUVNOISE_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -33,7 +36,10 @@ Material:
     m_Floats:
     - _ColorMask: 15
     - _Complexity: 3
+    - _EndNoiseScale: 50
+    - _EndNoiseStrength: 0.014
     - _FluidStrength: 1
+    - _PixelNoiseStrength: 0.002
     - _Scale: 10
     - _Speed: 0.15
     - _Stencil: 0
@@ -42,8 +48,12 @@ Material:
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
     - _Steps: 3
+    - _UVNoiseStrength: 0.1
+    - _UseEndNoise: 1
     - _UseGlobalPosition: 1
+    - _UsePixelNoise: 1
     - _UseTexture: 1
+    - _UseUVNoise: 1
     - unity_GUIZTestMode: 4
     m_Colors:
     - _Color1: {r: 0.14901961, g: 0.14901961, b: 0.14901961, a: 1}
