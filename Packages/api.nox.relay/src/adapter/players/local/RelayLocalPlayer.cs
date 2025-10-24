@@ -2,11 +2,12 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.Avatars.Parameters;
+using Nox.Avatars.Players;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay {
-	public class RelayLocalPlayer : RelayPlayer {
+	public class RelayLocalPlayer : RelayPlayer, ILocalPlayerAvatar {
 		private RelayPhysicalLocalPlayer _physical;
 
 		public override bool IsLocal()
@@ -60,36 +61,6 @@ namespace api.nox.relay {
 					return false;
 				}
 
-				var properties = GetProperties<RelayParameter>();
-				var parameterModule = avatar?.GetDescriptor()
-					?.GetModules<IParameterModule>()
-					.FirstOrDefault();
-
-				if (parameterModule == null)
-					return true;
-				var parameters = parameterModule.GetParameters();
-
-				foreach (var prop in properties) {
-					var linked = parameters.FirstOrDefault(p => p.GetName() == prop.GetKey());
-					if (linked == null) {
-						RemoveProperty(prop.GetKey());
-						continue;
-					}
-
-					prop.Attach(linked);
-				}
-
-				foreach (var parameter in parameters) {
-					var linked = properties.FirstOrDefault(p => p.GetKey() == parameter.GetName());
-					if (linked == null) {
-						linked = new RelayParameter(parameter);
-						AddProperty(linked);
-						continue;
-					}
-
-					linked.Attach(parameter);
-				}
-
 				return true;
 			}
 
@@ -98,9 +69,7 @@ namespace api.nox.relay {
 		}
 
 		public override IAvatarIdentifier GetAvatar()
-			=> RelayExtensions.TryCurrentController(out var controller)
-				? controller.GetAvatar().GetIdentifier()
-				: null;
+			=> RelayExtensions.GetRuntimeAvatarController()?.GetIdentifier();
 
 		public override bool HasPhysical()
 			=> _physical;
@@ -125,5 +94,53 @@ namespace api.nox.relay {
 			if (!packet.IsEmpty())
 				Adapter.Instance.SendVoice(packet).Forget();
 		}
+
+		public UniTask<bool> OnAvatarReady() {
+			var properties = GetProperties<RelayParameter>();
+			var parameterModule = RelayExtensions
+				.GetRuntimeAvatarController()
+				?.GetDescriptor()
+				?.GetModules<IParameterModule>()
+				.FirstOrDefault();
+
+			if (parameterModule == null)
+				return UniTask.FromResult(true);
+
+			var parameters = parameterModule.GetParameters();
+
+			foreach (var prop in properties) {
+				var linked = parameters.FirstOrDefault(p => p.GetName() == prop.GetKey());
+				if (linked == null) {
+					Logger.LogDebug($"Unlinking parameter '{prop.GetKey()}' from local player '{GetDisplay()}'");
+					RemoveProperty(prop.GetKey());
+					continue;
+				}
+
+				if (prop.GetReference() == linked)
+					continue;
+				Logger.LogDebug($"Re-linking parameter '{prop.GetKey()}' to local player '{GetDisplay()}'");
+				prop.Attach(linked);
+			}
+
+			foreach (var parameter in parameters) {
+				var linked = properties.FirstOrDefault(p => p.GetKey() == parameter.GetName());
+				if (linked == null) {
+					Logger.LogDebug($"Linking new parameter '{parameter.GetName()}' to local player '{GetDisplay()}'");
+					linked = new RelayParameter(this, parameter);
+					AddProperty(linked);
+					continue;
+				}
+
+				if (linked.GetReference() == parameter)
+					continue;
+				Logger.LogDebug($"Re-linking parameter '{parameter.GetName()}' to local player '{GetDisplay()}'");
+				linked.Attach(parameter);
+			}
+
+			return UniTask.FromResult(true);
+		}
+
+		public UniTask<bool> OnAvatarFailed(string reason)
+			=> UniTask.FromResult(true);
 	}
 }

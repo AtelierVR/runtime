@@ -165,6 +165,13 @@ namespace Nox.CCK.Avatars.Parameters {
 		internal AnimatorControllerPlayable Controller;
 		internal Animator                   Animator;
 
+		public override bool IsValid()
+			=> Animator
+				&& Controller.IsValid()
+				&& Parameter != null
+				&& Enumerable.Range(0, Controller.GetParameterCount())
+					.Any(i => Controller.GetParameter(i).nameHash == Parameter.nameHash);
+
 		protected override void SetFloat(float value)
 			=> Animator.SetFloat(GetHash(), value);
 
@@ -186,6 +193,11 @@ namespace Nox.CCK.Avatars.Parameters {
 
 	public class AnimatorBaseParameter : BaseParameter {
 		internal Animator Animator;
+
+		public override bool IsValid()
+			=> Animator
+				&& Parameter != null
+				&& Animator.parameters.Any(p => p.nameHash == Parameter.nameHash);
 
 		protected override void SetFloat(float value)
 			=> Animator.SetFloat(GetHash(), value);
@@ -276,11 +288,15 @@ namespace Nox.CCK.Avatars.Parameters {
 		public void Deserialize(byte[] data)
 			=> Set(data);
 
+		public virtual bool IsValid()
+			=> false;
+		
 		protected abstract void  SetFloat(float value);
 		protected abstract void  SetInteger(int value);
 		protected abstract void  SetBool(bool   value);
 		protected abstract float GetFloat();
 		protected abstract int   GetInteger();
 		protected abstract bool  GetBool();
+
 	}
 }

@@ -17,6 +17,9 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		public string GetName()
 			=> _name;
 
+		public bool IsValid()
+			=> _transform;
+
 		public int GetHash()
 			=> _name.GetHashCode();
 
@@ -32,16 +35,16 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		public bool IsSavable()
 			=> true;
 
-		public object Get() {
-			return _transform != null ? _transform.rotation : Quaternion.identity;
-		}
+		public object Get()
+			=> _transform
+				? _transform.rotation
+				: Quaternion.identity;
+
 
 		public void Set(object value) {
-			if (_isReadOnly || _transform == null) return;
-
-			if (value is Quaternion rotation) {
+			if (_isReadOnly || !_transform) return;
+			if (value is Quaternion rotation)
 				_transform.rotation = rotation;
-			}
 		}
 
 		public byte[] Serialize()

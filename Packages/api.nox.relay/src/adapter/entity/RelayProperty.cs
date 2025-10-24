@@ -2,6 +2,11 @@ using Nox.Entities;
 
 namespace api.nox.relay {
 	public abstract class RelayProperty : IProperty {
+		public RelayPlayer Owner;
+
+		public RelayProperty(RelayPlayer player)
+			=> Owner = player;
+
 		public abstract string GetKey();
 
 		public abstract PropertyFlags GetFlags();

@@ -82,7 +82,7 @@ namespace api.nox.avatar.modules {
 			// Affichage et modification de la valeur selon le type
 			EditorGUI.BeginChangeCheck();
 
-			var s = $"{param.GetName()}";
+			var s = $"{param.GetName()}/{param.GetHash()}";
 			var readOnly = param.IsReadOnly();
 
 			// Désactiver les contrôles GUI si le paramètre est en lecture seule

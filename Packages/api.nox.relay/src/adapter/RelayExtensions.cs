@@ -1,3 +1,4 @@
+using Nox.Avatars;
 using Nox.Avatars.Controllers;
 using Nox.Entities;
 using Transform = Nox.CCK.Utils.Transform;
@@ -32,6 +33,11 @@ namespace api.nox.relay {
 				return UnityEngine.Vector3.Distance(ma.GetPosition(), mb.GetPosition());
 			return -1d;
 		}
+		
+		public static IRuntimeAvatar GetRuntimeAvatarController()
+			=> TryCurrentController(out var controller)
+				? controller.GetAvatar()
+				: null;
 		
 		public static bool TryCurrentController(out IControllerAvatar controller) {
 			if (Main.ControllerAPI?.GetCurrent() is IControllerAvatar ca) {

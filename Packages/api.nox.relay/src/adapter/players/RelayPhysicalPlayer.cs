@@ -7,6 +7,7 @@ using Nox.CCK.Development;
 using Nox.CCK.Players;
 using UnityEngine;
 using Gizmos = Nox.CCK.Development.Gizmos;
+using Logger = Nox.CCK.Utils.Logger;
 using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.relay {
@@ -58,38 +59,6 @@ namespace api.nox.relay {
 
 			go = part.gameObject;
 			return true;
-		}
-
-		private void Update() {
-			var avatar = GetAvatar();
-			var parameterModule = avatar?.GetDescriptor()
-				?.GetModules<IParameterModule>()
-				.FirstOrDefault();
-
-			if (parameterModule == null) return;
-			var parameters = parameterModule.GetParameters();
-			var properties = Reference.GetProperties<RelayParameter>();
-
-			foreach (var prop in properties) {
-				var linked = parameters.FirstOrDefault(p => p.GetName() == prop.GetKey());
-				if (linked == null) {
-					Reference.RemoveProperty(prop.GetKey());
-					continue;
-				}
-
-				prop.Attach(linked);
-			}
-
-			foreach (var parameter in parameters) {
-				var linked = properties.FirstOrDefault(p => p.GetKey() == parameter.GetName());
-				if (linked == null) {
-					linked = new RelayParameter(parameter);
-					Reference.AddProperty(linked);
-					continue;
-				}
-
-				linked.Attach(parameter);
-			}
 		}
 	}
 }

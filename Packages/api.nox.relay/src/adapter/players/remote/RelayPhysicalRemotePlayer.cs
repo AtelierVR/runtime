@@ -1,11 +1,9 @@
-using System;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.Avatars.Parameters;
 using Nox.Avatars.Voice;
-using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
@@ -13,10 +11,10 @@ using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.relay {
 	public class RelayPhysicalRemotePlayer : RelayPhysicalPlayer {
-		public IRuntimeAvatar Avatar;
+		private IRuntimeAvatar _avatar;
 
 		public override IRuntimeAvatar GetAvatar()
-			=> Avatar;
+			=> _avatar;
 
 		public override void OnMove(ushort part, NoxTransform move) { }
 
@@ -28,10 +26,10 @@ namespace api.nox.relay {
 		}
 
 		public override void OnParameter(int key, byte[] value) {
-			if (Avatar == null)
+			if (_avatar == null)
 				return;
 
-			var parameterModule = Avatar?.GetDescriptor()
+			var parameterModule = _avatar?.GetDescriptor()
 				?.GetModules<IParameterModule>()
 				.FirstOrDefault();
 
@@ -50,14 +48,14 @@ namespace api.nox.relay {
 			if (identifier == null || !identifier.IsValid())
 				return null;
 
-			if (identifier.Equals(Avatar?.GetIdentifier()))
-				return Avatar;
+			if (identifier.Equals(_avatar?.GetIdentifier()))
+				return _avatar;
 
 			_avatarLoadingCts?.Cancel();
 			_avatarLoadingCts = new CancellationTokenSource();
 			await UniTask.SwitchToMainThread();
 
-			if (Avatar == null) {
+			if (_avatar == null) {
 				var loading = await Main.AvatarAPI.LoadLoading(token: _avatarLoadingCts.Token);
 				if (loading == null) {
 					Logger.LogWarning("Failed to create loading avatar for PhysicalRemotePlayer", this);
@@ -125,39 +123,38 @@ namespace api.nox.relay {
 
 		private async UniTask<bool> SetAvatar(IRuntimeAvatar runtimeAvatar) {
 			Logger.LogDebug("Setting avatar for XRController");
-			if (runtimeAvatar == Avatar)
+			if (runtimeAvatar == _avatar)
 				return true;
 
-			var old = Avatar;
-			Avatar = runtimeAvatar;
+			var old = _avatar;
+			_avatar = runtimeAvatar;
 
-			if (Avatar == null) {
+			if (_avatar == null) {
 				Logger.LogWarning("Setting avatar to null, removing current avatar.");
-				Avatar = old;
+				_avatar = old;
 				return false;
 			}
 
-			var root = Avatar.GetDescriptor().GetAnchor();
+			var root = _avatar.GetDescriptor().GetAnchor();
 			if (!root) {
 				Logger.LogError("Avatar descriptor root is null, cannot set avatar.");
-				Avatar = old;
+				_avatar = old;
 				return false;
 			}
 
-			RelayParameter[] properties;
-			if (old != null) {
-				properties = Reference.GetProperties<RelayParameter>();
-				foreach (var prop in properties)
-					prop.Detach();
+			if (old != null) 
 				await old.Dispose();
-			}
+			
+			var properties = Reference.GetProperties<RelayParameter>();
+			foreach (var prop in properties)
+				Reference.RemoveProperty(prop.GetKey());
 
 			Logger.LogDebug($"Attaching avatar to {runtimeAvatar.GetDescriptor()}", runtimeAvatar.GetDescriptor().GetAnchor());
 			root.transform.SetParent(transform, false);
 			root.transform.localPosition = Vector3.zero;
 			root.transform.localRotation = Quaternion.identity;
 
-			var parameterModule = Avatar.GetDescriptor()
+			var parameterModule = _avatar.GetDescriptor()
 				?.GetModules<IParameterModule>()
 				.FirstOrDefault();
 
@@ -165,8 +162,7 @@ namespace api.nox.relay {
 				Logger.LogError("Avatar does not have a ParameterModule, cannot set avatar.");
 				return false;
 			}
-
-
+			
 			var parameters = parameterModule.GetParameters();
 			foreach (var param in parameters) {
 				if (param.IsReadOnly()) continue;
@@ -189,21 +185,25 @@ namespace api.nox.relay {
 			foreach (var prop in properties) {
 				var linked = parameters.FirstOrDefault(p => p.GetName() == prop.GetKey());
 				if (linked == null) {
+					Logger.LogDebug($"Removing parameter {prop.GetKey()} for player {Reference.GetId()}");
 					Reference.RemoveProperty(prop.GetKey());
 					continue;
 				}
 
+				Logger.LogDebug($"Linking parameter {prop.GetKey()} for player {Reference.GetId()}");
 				prop.Attach(linked);
 			}
 
 			foreach (var parameter in parameters) {
 				var linked = properties.FirstOrDefault(p => p.GetKey() == parameter.GetName());
 				if (linked == null) {
-					linked = new RelayParameter(parameter);
+					Logger.LogDebug($"Adding parameter {parameter.GetName()} for player {Reference.GetId()}");
+					linked = new RelayParameter(Reference, parameter);
 					Reference.AddProperty(linked);
 					continue;
 				}
 
+				Logger.LogDebug($"Re-linking parameter {linked.GetKey()} for player {Reference.GetId()}");
 				linked.Attach(parameter);
 			}
 
@@ -220,7 +220,7 @@ namespace api.nox.relay {
 		}
 
 		public override void SetVoice(AudioClip clip) {
-			var voiceModule = Avatar.GetDescriptor()
+			var voiceModule = _avatar.GetDescriptor()
 				?.GetModules<IVoiceModule>()
 				.FirstOrDefault();
 

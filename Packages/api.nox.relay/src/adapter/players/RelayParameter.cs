@@ -1,5 +1,6 @@
 using System;
 using Nox.Avatars.Parameters;
+using Nox.CCK.Utils;
 using Nox.Entities;
 
 namespace api.nox.relay {
@@ -10,7 +11,7 @@ namespace api.nox.relay {
 		private string        _name;
 		private PropertyFlags _flags;
 
-		public RelayParameter(IParameter parameter) {
+		public RelayParameter(RelayPlayer player, IParameter parameter) : base(player) {
 			_reference       = parameter;
 			_lastValue       = parameter.Get();
 			_lastSerialValue = parameter.Serialize();
@@ -19,6 +20,9 @@ namespace api.nox.relay {
 				| (_reference.IsSyncable() ? PropertyFlags.Synced : PropertyFlags.None)
 				| (_reference.IsSavable() ? PropertyFlags.Persistent : PropertyFlags.None);
 		}
+
+		public IParameter GetReference()
+			=> _reference;
 
 		public void Attach(IParameter parameter) {
 			if (parameter == null)
@@ -40,8 +44,16 @@ namespace api.nox.relay {
 		public override string GetKey()
 			=> _name;
 
-		public override bool IsDirty()
-			=> !Equals(_lastValue, GetValue());
+		public override bool IsDirty() {
+			if (!_reference?.IsValid() ?? true) {
+				Logger.LogDebug($"[RelayParameter] Parameter '{_name}' is invalid {Owner.GetDisplay()}.");
+				return false;
+			}
+
+			return (_reference?.IsValid() ?? false)
+				&& !Equals(_lastValue, GetValue());
+		}
+
 
 		public override void SetDirty(bool dirty = true) {
 			if (dirty || _reference == null) return;

@@ -61,7 +61,7 @@ namespace api.nox.discord {
 		}
 
 		private string ToDisplay(ref DiscordRpc.DiscordUser user)
-			=> $"{user.username}({(user.discriminator == "0" ? "" : $"#{user.discriminator}")})";
+			=> $"{user.username}{(user.discriminator == "0" ? "" : $"#{user.discriminator}")}";
 
 		private void OnRequest(ref DiscordRpc.DiscordUser user) {
 			_coreAPI.LoggerAPI.LogDebug($"Friend request from {ToDisplay(ref user)} ({user.userId})");

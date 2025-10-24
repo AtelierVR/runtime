@@ -141,13 +141,13 @@ namespace api.nox.desktop {
 
 			if (identifier == null || !identifier.IsValid()) {
 				if (playerAvatar != null)
-					await playerAvatar.SendAvatarFailed("Invalid avatar identifier.");
+					await playerAvatar.OnAvatarFailed("Invalid avatar identifier.");
 				return null;
 			}
 
 			if (identifier.Equals(_attachedRuntimeAvatar?.GetIdentifier())) {
 				if (playerAvatar != null)
-					await playerAvatar.SendAvatarReady();
+					await playerAvatar.OnAvatarReady();
 				return _attachedRuntimeAvatar;
 			}
 
@@ -174,7 +174,7 @@ namespace api.nox.desktop {
 				err.SetIdentifier(identifier);
 				await SetAvatar(err);
 				if (playerAvatar != null)
-					await playerAvatar.SendAvatarFailed("Avatar asset not found.");
+					await playerAvatar.OnAvatarFailed("Avatar asset not found.");
 				return null;
 			}
 
@@ -204,7 +204,7 @@ namespace api.nox.desktop {
 				err.SetIdentifier(identifier);
 				await SetAvatar(err);
 				if (playerAvatar != null)
-					await playerAvatar.SendAvatarFailed("Failed to load avatar from cache.");
+					await playerAvatar.OnAvatarFailed("Failed to load avatar from cache.");
 				return null;
 			}
 
@@ -212,7 +212,7 @@ namespace api.nox.desktop {
 			avatar.SetIdentifier(identifier);
 			await SetAvatar(avatar);
 			if (playerAvatar != null)
-				await playerAvatar.SendAvatarReady();
+				await playerAvatar.OnAvatarReady();
 			return avatar;
 		}
 

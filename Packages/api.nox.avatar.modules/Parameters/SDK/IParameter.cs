@@ -7,6 +7,12 @@ namespace Nox.Avatars.Parameters {
 		public string GetName();
 
 		/// <summary>
+		/// Checks if the parameter is valid.
+		/// </summary>
+		/// <returns></returns>
+		public bool IsValid();
+		
+		/// <summary>
 		/// Gets the unique identifier of the parameter.
 		/// </summary>
 		/// <returns></returns>

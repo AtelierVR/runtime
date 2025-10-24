@@ -9,7 +9,7 @@ namespace api.nox.relay {
 		private          bool          _dirty;
 		private          PropertyFlags _flags;
 
-		public RawRelayProperty(string key, object value) {
+		public RawRelayProperty(RelayPlayer player, string key, object value) : base(player) {
 			if (string.IsNullOrEmpty(key))
 				throw new ArgumentException("Property key cannot be null or empty", nameof(key));
 			_key = key;
