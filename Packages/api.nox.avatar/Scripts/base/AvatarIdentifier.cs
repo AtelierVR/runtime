@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Nox.Avatars;
 
@@ -102,10 +103,16 @@ namespace api.nox.avatar {
 			_metadata["v"] = new[] { version.ToString() };
 		}
 
-		public bool Equals(IAvatarIdentifier other) {
+		public override bool Equals(object obj)
+			=> obj is IAvatarIdentifier identifier && Equals(identifier);
+
+		public override int GetHashCode()
+			=> HashCode.Combine(GetId(), GetServerAddress());
+
+		private bool Equals(IAvatarIdentifier other) {
 			if (other == null) return false;
 			if (ReferenceEquals(this, other)) return true;
-			return _id == other.GetId() && Server == other.GetServerAddress();
+			return GetHashCode() == other.GetHashCode();
 		}
 	}
 }

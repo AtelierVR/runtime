@@ -135,6 +135,11 @@ namespace api.nox.desktop {
 			=> SetAvatar(Client.AvatarAPI.Make(user?.GetAvatarId())).Forget();
 
 		public async UniTask<IRuntimeAvatar> SetAvatar(IAvatarIdentifier identifier, Action<string, float> onProgress = null) {
+			if (identifier.Equals(_attachedPlayer?.ToIdentifier())) {
+				Logger.LogDebug("Avatar identifier matches player identifier, no need to load.");
+				return _attachedRuntimeAvatar;
+			}
+
 			Logger.LogDebug($"Loading avatar for identifier {identifier?.ToString() ?? "null"}");
 
 			var playerAvatar = _attachedPlayer as ILocalPlayerAvatar;
