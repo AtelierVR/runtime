@@ -12,6 +12,8 @@ Shader "Custom/FluidBackground"
         _Steps ("Steps", Range(1, 10)) = 1
         [Toggle] _UseGlobalPosition ("Use Global Position", Float) = 1
         [Toggle] _UseTexture ("Use Texture", Float) = 0
+        [Toggle] _UsePixelNoise ("Use Pixel Noise", Float) = 0
+        _PixelNoiseStrength ("Pixel Noise Strength", Range(0.0, 1.0)) = 0.05
         
         // Propriétés pour le masque UI
         [HideInInspector] _StencilComp ("Stencil Comparison", Float) = 8
@@ -88,6 +90,8 @@ Shader "Custom/FluidBackground"
             float _FluidStrength;
             float _UseGlobalPosition;
             float _UseTexture;
+            float _UsePixelNoise;
+            float _PixelNoiseStrength;
             int _Steps;
             
             sampler2D _MainTex;
@@ -115,6 +119,15 @@ Shader "Custom/FluidBackground"
             float noise(float2 p)
             {
                 return frac(sin(dot(p, float2(12.9898, 78.233))) * 43758.5453);
+            }
+            
+            // Fonction de bruit améliorée pour éviter les patterns diagonaux
+            float betterNoise(float2 p)
+            {
+                // Utiliser plusieurs fonctions de hash pour un meilleur aléatoire
+                float3 p3 = frac(float3(p.xyx) * float3(443.897, 441.423, 437.195));
+                p3 += dot(p3, p3.yzx + 19.19);
+                return frac((p3.x + p3.y) * p3.z);
             }
 
             // Bruit de Perlin simplifié
@@ -228,6 +241,23 @@ Shader "Custom/FluidBackground"
                 
                 // Appliquer l'alpha du masque
                 col.a *= maskAlpha;
+                
+                // Appliquer le noise par pixel si activé
+                if (_UsePixelNoise > 0.5)
+                {
+                    // Générer un noise unique pour chaque pixel basé sur sa position écran
+                    float2 pixelPos = i.screenPos.xy / i.screenPos.w * _ScreenParams.xy;
+                    float pixelNoise = betterNoise(pixelPos);
+                    
+                    // Centrer le noise autour de 0 pour obtenir des valeurs positives et négatives
+                    pixelNoise = (pixelNoise - 0.5) * 2.0;
+                    
+                    // Appliquer le noise aux couleurs RGB
+                    col.rgb += pixelNoise * _PixelNoiseStrength;
+                    
+                    // Clamper pour éviter les débordements
+                    col.rgb = saturate(col.rgb);
+                }
                 
                 #ifdef UNITY_UI_ALPHACLIP
                 clip (col.a - 0.001);
