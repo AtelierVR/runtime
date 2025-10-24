@@ -1,12 +1,10 @@
-using Cysharp.Threading.Tasks;
-using Nox.Avatars;
 using Nox.Entities;
 using Nox.Users;
 using UnityEngine;
 using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace Nox.Players {
-	public interface IPlayer : IEntity {
+	public interface IPlayer : ILivingEntity, IMovingEntity, IMultiPartEntity {
 		/// <summary>
 		/// Get the display name of the player.
 		/// </summary>

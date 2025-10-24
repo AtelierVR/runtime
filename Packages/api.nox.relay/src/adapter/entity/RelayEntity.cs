@@ -1,80 +1,129 @@
 using System.Collections.Generic;
-using Nox.CCK.Utils;
+using System.Linq;
+using Nox.CCK.Players;
 using Nox.Entities;
 using UnityEngine;
-using Transform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.relay {
 	public abstract class RelayEntity : IEntity {
-		public int GetId() {
-			throw new System.NotImplementedException();
+		protected readonly List<RelayProperty> Properties = new();
+		protected readonly List<RelayPart>     Transforms = new();
+
+		public abstract ushort GetId();
+
+		#region Properties
+
+		IProperty[] IEntity.GetProperties()
+			=> GetProperties<IProperty>().ToArray();
+
+		public T[] GetProperties<T>() where T : IProperty
+			=> Properties.OfType<T>().ToArray();
+
+		bool IEntity.TryGetProperty(string key, out IProperty property)
+			=> TryGetProperty(key, out property);
+
+		private bool TryGetProperty<T>(string key, out T property) where T : IProperty {
+			var prop = GetProperties<IProperty>().FirstOrDefault(p => p.GetKey() == key);
+			if (prop is T pt) {
+				property = pt;
+				return true;
+			}
+
+			property = default;
+			return false;
 		}
 
-		public Dictionary<string, object> GetProperties() {
-			throw new System.NotImplementedException();
+		public void AddProperty(RelayProperty property)
+			=> Properties.Add(property);
+
+		public void RemoveProperty(string id)
+			=> Properties.RemoveAll(p => p.GetKey() == id);
+
+		#endregion
+
+		#region Moving
+
+		public virtual Vector3 GetPosition()
+			=> TryGetPart(PlayerRig.Base.ToIndex(), out var part) && part.TryGetPosition(out var position)
+				? position
+				: Vector3.zero;
+
+		public virtual void SetPosition(Vector3 position, bool markDirty = true) {
+			if (!TryGetPart(PlayerRig.Base.ToIndex(), out var part)) return;
+			part.SetPosition(position, markDirty);
 		}
 
-		public T GetProperty<T>(string key, T defaultValue) where T : struct {
-			throw new System.NotImplementedException();
+		public virtual Quaternion GetRotation()
+			=> TryGetPart(PlayerRig.Base.ToIndex(), out var part) && part.TryGetRotation(out var rotation)
+				? rotation
+				: Quaternion.identity;
+
+
+		public virtual void SetRotation(Quaternion rotation, bool markDirty = true) {
+			if (!TryGetPart(PlayerRig.Base.ToIndex(), out var part)) return;
+			part.SetRotation(rotation, markDirty);
 		}
 
-		public void SetProperty<T>(string key, T value) where T : struct {
-			throw new System.NotImplementedException();
+		public virtual Vector3 GetScale()
+			=> TryGetPart(PlayerRig.Base.ToIndex(), out var part) && part.TryGetScale(out var scale)
+				? scale
+				: Vector3.zero;
+
+		public virtual void SetScale(Vector3 scale, bool markDirty = true) {
+			if (!TryGetPart(PlayerRig.Base.ToIndex(), out var part)) return;
+			part.SetScale(scale, markDirty);
 		}
 
-		public void RemoveProperty(string key) {
-			throw new System.NotImplementedException();
+		public Vector3 GetVelocity()
+			=> TryGetPart(PlayerRig.Base.ToIndex(), out var part) && part.TryGetVelocity(out var velocity)
+				? velocity
+				: Vector3.zero;
+
+		public virtual void SetVelocity(Vector3 velocity, bool markDirty = true) {
+			if (!TryGetPart(PlayerRig.Base.ToIndex(), out var part)) return;
+			part.SetVelocity(velocity, markDirty);
 		}
 
-		public Vector3 GetPosition() {
-			throw new System.NotImplementedException();
+		public Vector3 GetAngularVelocity()
+			=> TryGetPart(PlayerRig.Base.ToIndex(), out var part) && part.TryGetAngularVelocity(out var angularVelocity)
+				? angularVelocity
+				: Vector3.zero;
+
+		public virtual void SetAngularVelocity(Vector3 angular, bool markDirty = true) {
+			if (!TryGetPart(PlayerRig.Base.ToIndex(), out var part)) return;
+			part.SetAngularVelocity(angular, markDirty);
 		}
 
-		public Quaternion GetRotation() {
-			throw new System.NotImplementedException();
+		#endregion
+
+		#region MultiPart
+
+		public RelayPart[] GetParts()
+			=> Transforms.ToArray();
+
+		public bool TryGetPart(ushort id, out IPart part) {
+			var relayPart = Transforms.FirstOrDefault(t => t.GetId() == id);
+			if (relayPart != null) {
+				part = relayPart;
+				return true;
+			}
+
+			part = null;
+			return false;
 		}
 
-		public void SetPosition(Vector3 position) {
-			throw new System.NotImplementedException();
-		}
+		#endregion
 
-		public void SetRotation(Quaternion rotation) {
-			throw new System.NotImplementedException();
-		}
+		#region Physical
 
-		public Vector3 GetVelocity() {
-			throw new System.NotImplementedException();
-		}
+		public abstract bool HasPhysical();
 
-		public void SetVelocity(Vector3 velocity) {
-			throw new System.NotImplementedException();
-		}
+		public abstract bool TryGetPhysical<T>(out T physical) where T : Physical;
 
-		public Vector3 GetAngularVelocity() {
-			throw new System.NotImplementedException();
-		}
+		public abstract bool MakePhysical();
 
-		public void SetAngularVelocity(Vector3 angular) {
-			throw new System.NotImplementedException();
-		}
+		public abstract void DestroyPhysical();
 
-		public bool TryGetPhysical<T>(out T physical) where T : Physical {
-			throw new System.NotImplementedException();
-		}
-
-		public bool MakePhysical() {
-			throw new System.NotImplementedException();
-		}
-
-		public void DestroyPhysical() {
-			throw new System.NotImplementedException();
-		}
-
-		public void Move(Transform transform)
-			=> Move(transform, DeliveryType.LocalModified);
-
-		public void Move(Transform transform, DeliveryType delivery) {
-			throw new System.NotImplementedException();
-		}
+		#endregion
 	}
 }

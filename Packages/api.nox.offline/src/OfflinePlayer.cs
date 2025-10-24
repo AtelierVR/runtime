@@ -14,21 +14,36 @@ using Transform = UnityEngine.Transform;
 
 namespace api.nox.offline {
 	public class OfflinePlayer : IPlayer {
-		internal OfflinePlayer(OfflineAdapter context, int id) {
+		internal OfflinePlayer(OfflineAdapter context, ushort id) {
 			_id          = id;
 			_context     = context;
 			CreationTime = DateTime.UtcNow;
-			_properties  = new Dictionary<string, object>();
+			_properties  = new List<OfflineProperty>();
 		}
 
-		private readonly  int                        _id;
-		private readonly  Dictionary<string, object> _properties;
-		private readonly  OfflineAdapter             _context;
-		internal readonly DateTime                   CreationTime;
+		private readonly  ushort                _id;
+		private readonly  List<OfflineProperty> _properties;
+		private readonly  OfflineAdapter        _context;
+		internal readonly DateTime              CreationTime;
 
 		[NoxPublic(NoxAccess.Method)]
-		public int GetId()
+		public ushort GetId()
 			=> _id;
+
+		public IProperty[] GetProperties()
+			=> _properties.Cast<IProperty>().ToArray();
+
+		public bool TryGetProperty(string key, out IProperty property) {
+			var prop = _properties.FirstOrDefault(p => p.GetKey() == key);
+			if (prop != null) {
+				property = prop;
+				return true;
+			}
+
+			property = null;
+			return false;
+		}
+
 
 		[NoxPublic(NoxAccess.Method)]
 		public bool IsLocal()
@@ -48,27 +63,6 @@ namespace api.nox.offline {
 		[NoxPublic(NoxAccess.Method)]
 		public void SetDisplay(string display)
 			=> Logger.LogWarning("OfflinePlayer does not support changing display name.");
-
-		[NoxPublic(NoxAccess.Method)]
-		public Dictionary<string, object> GetProperties()
-			=> _properties;
-
-		[NoxPublic(NoxAccess.Method)]
-		public T GetProperty<T>(string key, T defaultValue) where T : struct {
-			if (_properties.TryGetValue(key, out var value) && value is T typedValue)
-				return typedValue;
-			return defaultValue;
-		}
-
-		[NoxPublic(NoxAccess.Method)]
-		public void SetProperty<T>(string key, T value) where T : struct
-			=> _properties[key] = value;
-
-		[NoxPublic(NoxAccess.Method)]
-		public void RemoveProperty(string key) {
-			if (_properties.ContainsKey(key))
-				_properties.Remove(key);
-		}
 
 		private static bool TryGetPart(ushort index, out Transform part) {
 			var controller = Main.ControllerAPI.GetCurrent();
@@ -90,21 +84,23 @@ namespace api.nox.offline {
 				? transform.position
 				: Vector3.zero;
 
+
 		[NoxPublic(NoxAccess.Method)]
 		public Quaternion GetRotation()
 			=> TryGetPart(PlayerRig.Base.ToIndex(), out var transform)
 				? transform.rotation
 				: Quaternion.identity;
 
+
 		[NoxPublic(NoxAccess.Method)]
-		public void SetPosition(Vector3 position) {
+		public void SetPosition(Vector3 position, bool markDirty = true) {
 			var nox = new NoxTransform();
 			nox.SetPosition(position);
 			SetPart(PlayerRig.Base.ToIndex(), nox);
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public void SetRotation(Quaternion rotation) {
+		public void SetRotation(Quaternion rotation, bool markDirty = true) {
 			var nox = new NoxTransform();
 			nox.SetRotation(rotation);
 			SetPart(PlayerRig.Base.ToIndex(), nox);
@@ -118,7 +114,7 @@ namespace api.nox.offline {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		[NoxPublic(NoxAccess.Method)]
-		public void SetVelocity(Vector3 velocity) {
+		public void SetVelocity(Vector3 velocity, bool markDirty = true) {
 			var nox = new NoxTransform();
 			nox.SetVelocity(velocity);
 			SetPart(PlayerRig.Base.ToIndex(), nox);
@@ -132,11 +128,14 @@ namespace api.nox.offline {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		[NoxPublic(NoxAccess.Method)]
-		public void SetAngularVelocity(Vector3 angular) {
+		public void SetAngularVelocity(Vector3 angular, bool markDirty = true) {
 			var nox = new NoxTransform();
 			nox.SetAngularVelocity(angular);
 			SetPart(PlayerRig.Base.ToIndex(), nox);
 		}
+
+		public bool HasPhysical()
+			=> false;
 
 		public bool TryGetPhysical<T>(out T physical) where T : Physical {
 			Logger.LogWarning("OfflinePlayer does not support physical objects.");
@@ -218,5 +217,26 @@ namespace api.nox.offline {
 
 		public void Move(NoxTransform transform)
 			=> MovePart(PlayerRig.Base.ToIndex(), transform);
+
+		public OfflinePart[] GetParts() {
+			var controller = Main.ControllerAPI.GetCurrent();
+			return controller != null
+				? controller.GetParts().Select(t => new OfflinePart(t)).ToArray()
+				: Array.Empty<OfflinePart>();
+		}
+
+		IPart[] IMultiPartEntity.GetParts()
+			=> GetParts().Cast<IPart>().ToArray();
+
+		bool IMultiPartEntity.TryGetPart(ushort name, out IPart part) {
+			var offlinePart = GetParts().FirstOrDefault(p => p.GetId() == name);
+			if (offlinePart != null) {
+				part = offlinePart;
+				return true;
+			}
+
+			part = null;
+			return false;
+		}
 	}
 }

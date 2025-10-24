@@ -6,7 +6,7 @@ using NoxTransform = Nox.CCK.Utils.Transform;
 namespace api.nox.relay {
 	public class RelayPhysicalLocalPlayer : RelayPhysicalPlayer {
 		public override IRuntimeAvatar GetAvatar()
-			=> RelayLocalPlayer.TryCurrentController(out var controller)
+			=> RelayExtensions.TryCurrentController(out var controller)
 				? controller.GetAvatar()
 				: null;
 

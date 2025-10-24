@@ -268,7 +268,7 @@ namespace api.nox.relay {
 			adapter.Instance.OnLeave.AddListener(adapter.OnLeave);
 			adapter.Instance.OnAvatarChanged.AddListener(adapter.OnAvatarChanged);
 			adapter.Instance.OnTransform.AddListener(adapter.OnTransform);
-			adapter.Instance.OnAvatarParams.AddListener(adapter.OnAvatarParams);
+			adapter.Instance.OnProperties.AddListener(adapter.OnProperties);
 			adapter.Instance.OnPlayerUpdated.AddListener(adapter.OnPlayerUpdated);
 
 			adapter.SetState(false, "Connecting to an instance...", 0.3f);

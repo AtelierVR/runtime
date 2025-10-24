@@ -9,12 +9,15 @@ using api.nox.relay.types.Join;
 using api.nox.relay.types.Leave;
 using api.nox.relay.types.Player;
 using api.nox.relay.types.PlayerUpdate;
+using api.nox.relay.types.Properties;
 using api.nox.relay.types.Quit;
 using api.nox.relay.types.Transform;
 using api.nox.relay.types.Traveling;
 // using api.nox.relay.types.PlayerUpdate;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
+using Nox.CCK.Network;
+using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using Nox.Entities;
 using Nox.Instances;
@@ -51,7 +54,6 @@ namespace api.nox.relay {
 			UnityEngine.Object.DontDestroyOnLoad(EntitiesRoot);
 		}
 
-
 		public void OnEnter(EnterResponse ev) {
 			Tps           = ev.Tps;
 			Threshold     = ev.Threshold;
@@ -66,16 +68,16 @@ namespace api.nox.relay {
 
 		public void OnTransform(TransformEvent ev) {
 			switch (ev.Type) {
-				case TransformType.Player: {
-					var player = _entities.GetEntity<RelayPlayer>(ev.PlayerId);
-					if (player == null) return;
-					player.MovePart(ev.PlayerRig, ev.Transform, DeliveryType.RemoteModified);
+				case TransformType.EntityPart: {
+					var entity = _entities.GetEntity<IMultiPartEntity>(ev.EntityId);
+					if (entity == null) return;
+					entity.Move(ev.PartRig, ev.Transform, false);
 					break;
 				}
-				case TransformType.Entity: {
-					var entity = _entities.GetEntity<RelayEntity>(ev.EntityId);
+				case TransformType.BaseEntity: {
+					var entity = _entities.GetEntity<IMovingEntity>(ev.EntityId);
 					if (entity == null) return;
-					entity.Move(ev.Transform, DeliveryType.RemoteModified);
+					entity.Move(ev.Transform, false);
 					break;
 				}
 				case TransformType.ByPath: {
@@ -101,15 +103,35 @@ namespace api.nox.relay {
 					break;
 				}
 				default:
-					break;
+					Logger.LogWarning($"Unknown TransformType received: {ev.Type}");
+					throw new ArgumentOutOfRangeException();
 			}
 		}
 
-		public void OnAvatarParams(AvatarParamsEvent ev) {
-			var player = _entities.GetEntity<RelayPlayer>(ev.PlayerId);
-			if (player == null) return;
-			foreach (var param in ev.Parameters)
-				player.SetParameter(param.Key, param.Value, DeliveryType.RemoteModified);
+		public void OnProperties(PropertiesEvent ev) {
+			var forEntity  = _entities.GetEntity<IEntity>(ev.ForEntityId);
+			var fromEntity = _entities.GetEntity<IEntity>(ev.FromEntityId);
+			if (forEntity == null || fromEntity == null) return;
+			
+			var table = forEntity.GetProperties()
+				.ToDictionary(p => p.GetKey().Hash(), p => p);
+
+			foreach (var param in ev.Parameters) {
+				if (!table.TryGetValue(param.Key, out var property))
+					continue;
+
+				if (property == null) {
+					Logger.LogWarning($"Unknown property found: {param.Key} ({fromEntity.GetId()} -> {forEntity.GetId()})");
+					continue;
+				}
+
+				if (!property.GetFlags().HasFlag(PropertyFlags.Synced)) {
+					Logger.LogWarning($"Ignoring non-synced property: {param.Key} ({fromEntity.GetId()} -> {forEntity.GetId()})");
+					continue;
+				}
+
+				property.Deserialize(param.Value);
+			}
 		}
 
 		public void OnPlayerUpdated(PlayerUpdateEvent ev) {
@@ -119,11 +141,11 @@ namespace api.nox.relay {
 				Logger.LogWarning($"Player with ID {ev.PlayerId} not found for PlayerUpdate event");
 				return;
 			}
-		
+
 			if (ev.Flags.HasFlag(PlayerUpdateFlags.DisplayName) && !string.IsNullOrEmpty(ev.DisplayName)) {
 				player.SetDisplay(ev.DisplayName);
 			}
-		
+
 			if (ev.Flags.HasFlag(PlayerUpdateFlags.Flags)) {
 				player.Reference.Flags = ev.PlayerFlags;
 				if (ev.PlayerFlags.HasFlag(InstancePlayerFlags.InstanceMaster))
@@ -150,34 +172,63 @@ namespace api.nox.relay {
 
 		public void OnUpdate() {
 			if (!_session.IsCurrent()) return;
-			var local = _entities.GetEntities<RelayLocalPlayer>().FirstOrDefault();
-			local?.SendVoice();
+
 			if (_isTraveling || Tps == 0 || _lastUpdate.AddSeconds(1f / Tps) > DateTime.UtcNow) return;
 			_lastUpdate = DateTime.UtcNow;
-			var other = _entities.GetEntities<RelayRemotePlayer>();
-			UpdatePlayerDistance(ref local, ref other);
-			UpdatePhysicalPlayers(ref local, ref other);
-			local?.SendTransform();
-			local?.SendParameters();
+
+			var local = _entities.GetEntities<IPlayer>()
+				.FirstOrDefault(p => p.IsLocal());
+			var others = _entities.GetEntities<IEntity>()
+				.Where(p => p.GetId() != local?.GetId())
+				.ToArray();
+
+			if (local != null) {
+				UpdatePhysical(local, others);
+				SendTransform(local);
+				SendProperties(local);
+			}
+
+			foreach (var other in others) {
+				SendTransform(other);
+				SendProperties(other);
+			}
 		}
 
-		private void UpdatePhysicalPlayers(ref RelayLocalPlayer local, ref RelayRemotePlayer[] others) {
+		private void SendTransform(IEntity entity) {
+			if (entity is not IMultiPartEntity parted) return;
+			foreach (var part in parted.GetParts()) {
+				if (!part.IsDirty()) continue;
+				var packet = InstanceRequestTransform.CreatePart(entity.GetId(), part);
+				Instance.SendTransform(packet).Forget();
+				part.SetDirty(false);
+			}
+		}
+
+		private void SendProperties(IEntity entity) {
+			var properties = entity.GetProperties()
+				.Where(p => p.IsDirty())
+				.ToArray();
+			if (properties.Length == 0) return;
+			var packet = InstanceRequestProperties.CreateRequest(entity.GetId(), properties);
+			Instance.SendProperties(packet).Forget();
+			foreach (var prop in properties)
+				prop.SetDirty(false);
+		}
+
+
+		private void UpdatePhysical(IEntity local, IEntity[] others) {
 			if (local == null || others == null || others.Length == 0) return;
 			if (!local.HasPhysical())
 				local.MakePhysical();
 			foreach (var other in others) {
 				var physical = other.HasPhysical();
-				if (other.DistanceToLocal > _renderEntity && physical)
+				var distance = other.DistanceWith(local);
+				if (distance < 0f) continue;
+				if (distance > _renderEntity && physical)
 					other.DestroyPhysical();
-				else if (other.DistanceToLocal <= _renderEntity && !physical)
+				else if (distance <= _renderEntity && !physical)
 					other.MakePhysical();
 			}
-		}
-
-		private static void UpdatePlayerDistance(ref RelayLocalPlayer local, ref RelayRemotePlayer[] others) {
-			if (local == null || others == null || others.Length == 0) return;
-			foreach (var other in others)
-				other.DistanceToLocal = Vector3.Distance(local.GetPosition(), other.GetPosition());
 		}
 
 		public void OnQuit(QuitEvent ev) {

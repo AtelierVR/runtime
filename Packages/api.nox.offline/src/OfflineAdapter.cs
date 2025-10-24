@@ -16,8 +16,8 @@ namespace api.nox.offline {
 		private          OfflineDimension _dimension;
 		private readonly IEntityManager   _entities;
 		private          int              _masterPlayerId;
-		private          int              _nextPlayerId;
-		internal         ISession         _session;
+		private          ushort           _nextPlayerId;
+		private          ISession         _session;
 		private          OfflineState     _state = new(true);
 		public           string           Name;
 		public           string           ShortName;
@@ -28,6 +28,7 @@ namespace api.nox.offline {
 			_masterPlayerId = -1;
 			_nextPlayerId   = 0;
 			_entities       = Main.EntityAPI.New();
+			ShortName       = null;
 		}
 
 		public void SetDimension(IRuntimeWorld runtimeWorld) {
@@ -99,9 +100,9 @@ namespace api.nox.offline {
 				return;
 			}
 
-			var scene = _dimension.GetScene();
+			var scene     = _dimension.GetScene();
 			var instances = scene?.GetInstances();
-			var main = instances != null && instances.Length > 0 ? instances[0] : null;
+			var main      = instances is { Length: > 0 } ? instances[0] : null;
 			if (main == null) {
 				Logger.LogWarning($"OnDeselect: {this} could not locate the main instance. Skipping visibility updates.");
 				await UniTask.Yield();

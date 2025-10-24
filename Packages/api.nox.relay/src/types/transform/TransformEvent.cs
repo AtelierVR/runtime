@@ -1,40 +1,33 @@
 using api.nox.relay.types.Instance;
 using Nox.CCK.Utils;
 
-namespace api.nox.relay.types.Transform
-{
-	public class TransformEvent : RelayInstanceResponse
-	{
+namespace api.nox.relay.types.Transform {
+	public class TransformEvent : RelayInstanceResponse {
 		public TransformType Type;
 
 		public Nox.CCK.Utils.Transform Transform;
 
 		// Type == Player
-		public ushort PlayerId;
-		public ushort PlayerRig;
+		public ushort EntityId;
+		public ushort PartRig;
 
 		// Type == ByPath
 		public string Path;
 
-		// Type == Entity
-		public ushort EntityId;
-
-		public override bool FromBuffer(Buffer buffer)
-		{
+		public override bool FromBuffer(Buffer buffer) {
 			buffer.Goto(0);
 			InternalId = buffer.ReadByte();
-			Type = buffer.ReadEnum<TransformType>();
+			Type       = buffer.ReadEnum<TransformType>();
 
-			switch (Type)
-			{
-				case TransformType.Player:
-					PlayerId = buffer.ReadUShort();
-					PlayerRig = buffer.ReadUShort();
+			switch (Type) {
+				case TransformType.EntityPart:
+					EntityId = buffer.ReadUShort();
+					PartRig  = buffer.ReadUShort();
 					break;
 				case TransformType.ByPath:
 					Path = buffer.ReadString();
 					break;
-				case TransformType.Entity:
+				case TransformType.BaseEntity:
 					EntityId = buffer.ReadUShort();
 					break;
 				default:
@@ -59,9 +52,9 @@ namespace api.nox.relay.types.Transform
 
 		public override string ToString()
 			=> $"{GetType().Name}[ConnectionId={ConnectionId}, InternalId={InternalId}, Type={Type}"
-				+ $"{(Type == TransformType.Player ? $", PlayerId={PlayerId}, PlayerRig={PlayerRig}" : "")}"
+				+ $"{(Type == TransformType.EntityPart ? $", EntityId={EntityId}, PartRig={PartRig}" : "")}"
 				+ $"{(Type == TransformType.ByPath ? $", Path={Path}" : "")}"
-				+ $"{(Type == TransformType.Entity ? $", EntityId={EntityId}" : "")}"
+				+ $"{(Type == TransformType.BaseEntity ? $", EntityId={EntityId}" : "")}"
 				+ $", Transform={Transform}]";
 	}
 }

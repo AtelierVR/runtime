@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Nox.CCK.Players {
@@ -66,7 +67,9 @@ namespace Nox.CCK.Players {
 
 		// positions of head parts
 		RightEye = 52,
-		LeftEye  = 53
+		LeftEye  = 53,
+
+		None = ushort.MaxValue
 	}
 
 	public static class PlayerRigExtension {
@@ -125,7 +128,7 @@ namespace Nox.CCK.Players {
 				PlayerRig.RightPinkyNail  => HumanBodyBones.RightLittleIntermediate,
 				PlayerRig.RightEye        => HumanBodyBones.RightEye,
 				PlayerRig.LeftEye         => HumanBodyBones.LeftEye,
-				_                         => default
+				_                         => HumanBodyBones.LastBone
 			};
 
 		public static PlayerRig ToPlayerRig(this HumanBodyBones bones)
@@ -183,10 +186,20 @@ namespace Nox.CCK.Players {
 				HumanBodyBones.RightLittleIntermediate => PlayerRig.RightPinkyNail,
 				HumanBodyBones.RightEye                => PlayerRig.RightEye,
 				HumanBodyBones.LeftEye                 => PlayerRig.LeftEye,
-				_                                      => default
+				_                                      => PlayerRig.None
 			};
 
 		public static ushort ToIndex(this PlayerRig rig)
 			=> (ushort)rig;
+
+		public static PlayerRig ToPlayerRig(this ushort index)
+			=> Enum.IsDefined(typeof(PlayerRig), index)
+				? (PlayerRig)index
+				: PlayerRig.None;
+
+		public static HumanBodyBones ToHumanBodyBones(this ushort index)
+			=> Enum.IsDefined(typeof(HumanBodyBones), index)
+				? (HumanBodyBones)index
+				: HumanBodyBones.LastBone;
 	}
 }

@@ -428,6 +428,7 @@ namespace api.nox.desktop {
 			foreach (var param in parameters) {
 				var n = param.GetName();
 				switch (n) {
+					case "IsLocal" or "local":
 					case "tracking/head/active":
 						param.Set(true);
 						break;
@@ -547,6 +548,14 @@ namespace api.nox.desktop {
 						var value         = (Vector3)param.Get();
 						if (value == localVelocity) continue;
 						param.Set(localVelocity);
+						break;
+					}
+					case "VelocityMagnitude" or "velocity_magnitude": {
+						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
+						var magnitude     = worldVelocity.magnitude;
+						var value         = (float)param.Get();
+						if (Mathf.Approximately(value, magnitude)) continue;
+						param.Set(magnitude);
 						break;
 					}
 					case "tracking/head/rotation": {

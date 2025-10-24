@@ -317,6 +317,8 @@ namespace api.nox.xr {
 						// param.Set(Client.Instance.HasFootRight());
 						param.Set(false);
 						break;
+					case "VRMode" or "in_vr":
+					case "IsLocal" or "local":
 					case "rig/ik/head/target":
 						param.Set(true);
 						break;
@@ -634,7 +636,6 @@ namespace api.nox.xr {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		public void SetPart(ushort index, NoxTransform tr) {
-			Logger.LogWarning($"{tr} {index} {tr.DeliveryType}");
 			var part = GetParts()
 				.FirstOrDefault(p => p.Key == index);
 

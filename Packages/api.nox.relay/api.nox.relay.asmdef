@@ -18,7 +18,8 @@
         "Nox.Worlds.Spawns",
         "Nox.Avatars.Voice",
         "Nox.Microphone",
-        "Nox.Instances"
+        "Nox.Instances",
+        "Nox.Avatars.Rigging"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

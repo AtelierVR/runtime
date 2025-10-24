@@ -1,4 +1,7 @@
+using System;
+
 namespace api.nox.relay.types.Player {
+	[Flags]
 	public enum InstancePlayerFlags : uint {
 		None              = 0,
 		IsBot             = 1 << 0,

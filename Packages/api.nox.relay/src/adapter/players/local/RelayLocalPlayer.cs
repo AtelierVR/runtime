@@ -1,77 +1,41 @@
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
-using Nox.Avatars.Controllers;
-using Nox.CCK.Utils;
+using Nox.Avatars.Parameters;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay {
 	public class RelayLocalPlayer : RelayPlayer {
+		private RelayPhysicalLocalPlayer _physical;
+
 		public override bool IsLocal()
 			=> true;
 
-		private RelayPhysicalLocalPlayer _physicalComponent;
-
-		public void SendTransform() {
-			var trs = Transforms
-				.Where(e => e.Value.DeliveryType == DeliveryType.LocalModified)
-				.ToArray();
-			if (trs.Length == 0) return;
-			foreach (var tr in trs) {
-				var packet = types.Transform.InstanceRequestTransform.CreatePlayer(Reference.Id, tr.Key, tr.Value);
-				Adapter.Instance.SendTransform(packet).Forget();
-				tr.Value.DeliveryType = DeliveryType.None;
-				Transforms[tr.Key]    = tr.Value;
-			}
-		}
-
-		public void SendParameters() {
-			var paramsToSend = Parameters
-				.Where(p => p.Value.Item2 == DeliveryType.LocalModified)
-				.ToArray();
-			if (paramsToSend.Length == 0) return;
-			var dictionary = paramsToSend.ToDictionary(p => p.Key, p => p.Value.Item1);
-			var packet     = types.Avatar.InstanceRequestAvatarParams.CreateRequest(Reference.Id, dictionary);
-			Adapter.Instance.SendAvatarParams(packet).Forget();
-			foreach (var p in paramsToSend)
-				Parameters[p.Key] = (p.Value.Item1, DeliveryType.None);
-		}
-
 		public override bool TryGetPhysical<T>(out T physical) {
-			physical = _physicalComponent as T;
+			physical = _physical as T;
 			return physical;
 		}
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		public override bool MakePhysical() {
-			if (_physicalComponent)
-				return _physicalComponent;
+			if (_physical)
+				return _physical;
 			var parent   = Adapter.EntitiesRoot;
 			var prefab   = Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("physical/local_player.prefab");
 			var instance = Object.Instantiate(prefab, GetPosition(), GetRotation(), parent.transform);
-			_physicalComponent = instance.GetComponent<RelayPhysicalLocalPlayer>();
-			instance.name      = $"[{_physicalComponent.GetType().Name}_{GetId()}]";
-			_physicalComponent.SetReference(this);
+			_physical     = instance.GetComponent<RelayPhysicalLocalPlayer>();
+			instance.name = $"[{_physical.GetType().Name}_{GetId()}]";
+			_physical.SetReference(this);
 			Logger.Log($"Created physical component for player {GetDisplay()} ({GetId()}) at {GetPosition()}");
-			return _physicalComponent;
+			return _physical;
 		}
 
 		public override void DestroyPhysical() {
-			if (!_physicalComponent) return;
+			if (!_physical) return;
 			Logger.Log($"Destroying physical component for player {GetDisplay()} ({GetId()}) at {GetPosition()}");
-			Object.Destroy(_physicalComponent.gameObject);
-			_physicalComponent = null;
-		}
-
-		internal static bool TryCurrentController(out IControllerAvatar controller) {
-			if (Main.ControllerAPI.GetCurrent() is IControllerAvatar ca) {
-				controller = ca;
-				return true;
-			}
-
-			controller = null;
-			return false;
+			Object.Destroy(_physical.gameObject);
+			_physical = null;
 		}
 
 		public override async UniTask<bool> SetAvatar(IAvatarIdentifier identifier) {
@@ -82,27 +46,64 @@ namespace api.nox.relay {
 
 			var packet = types.Avatar.InstanceRequestAvatarChanged.CreateRequest(Reference.Id, identifier);
 
-			if (!TryCurrentController(out var controller)) {
+			if (!RelayExtensions.TryCurrentController(out var controller)) {
 				Logger.LogWarning("Cannot set avatar: no controller available");
 				return false;
 			}
 
 			var response = await Adapter.Instance.RequestAvatarChange(packet);
 
-			if (response.IsSuccess)
-				return await controller.SetAvatar(identifier) != null;
+			if (response.IsSuccess) {
+				var avatar = await controller.SetAvatar(identifier);
+				if (avatar == null) {
+					Logger.LogWarning("Failed to set avatar: loaded avatar is null");
+					return false;
+				}
+
+				var properties = GetProperties<RelayParameter>();
+				var parameterModule = avatar?.GetDescriptor()
+					?.GetModules<IParameterModule>()
+					.FirstOrDefault();
+
+				if (parameterModule == null)
+					return true;
+				var parameters = parameterModule.GetParameters();
+
+				foreach (var prop in properties) {
+					var linked = parameters.FirstOrDefault(p => p.GetName() == prop.GetKey());
+					if (linked == null) {
+						RemoveProperty(prop.GetKey());
+						continue;
+					}
+
+					prop.Attach(linked);
+				}
+
+				foreach (var parameter in parameters) {
+					var linked = properties.FirstOrDefault(p => p.GetKey() == parameter.GetName());
+					if (linked == null) {
+						linked = new RelayParameter(parameter);
+						AddProperty(linked);
+						continue;
+					}
+
+					linked.Attach(parameter);
+				}
+
+				return true;
+			}
 
 			Logger.LogWarning($"Failed to request avatar change: {response}");
 			return false;
 		}
 
 		public override IAvatarIdentifier GetAvatar()
-			=> TryCurrentController(out var controller)
+			=> RelayExtensions.TryCurrentController(out var controller)
 				? controller.GetAvatar().GetIdentifier()
 				: null;
 
 		public override bool HasPhysical()
-			=> _physicalComponent;
+			=> _physical;
 
 		private string _lastVoiceId;
 

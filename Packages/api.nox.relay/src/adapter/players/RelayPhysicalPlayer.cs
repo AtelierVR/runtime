@@ -1,11 +1,10 @@
-using System;
 using System.Linq;
 using Nox.Avatars;
 using Nox.Avatars.Parameters;
 using Nox.Avatars.Players;
+using Nox.Avatars.Rigging;
 using Nox.CCK.Development;
-using Nox.CCK.Utils;
-using Nox.Players;
+using Nox.CCK.Players;
 using UnityEngine;
 using Gizmos = Nox.CCK.Development.Gizmos;
 using NoxTransform = Nox.CCK.Utils.Transform;
@@ -15,12 +14,11 @@ namespace api.nox.relay {
 	/// Component physique pour les joueurs relay, permettant l'interaction avec le système physique Unity
 	/// </summary>
 	[Gizmos("relay.physical.player")]
-	public abstract class RelayPhysicalPlayer : PlayerPhysical, IPlayerPhysicalAvatar {
+	public abstract class RelayPhysicalPlayer : RelayPhysicalEntity, IPlayerPhysicalAvatar {
 		protected RelayPlayer Reference;
 
-		public void SetReference(RelayPlayer player) {
-			Reference = player;
-		}
+		public void SetReference(RelayPlayer player)
+			=> Reference = player;
 
 		private void OnDrawGizmos() {
 			Gizmos.color = Color.green;
@@ -37,6 +35,31 @@ namespace api.nox.relay {
 
 		public abstract void SetVoice(AudioClip clip);
 
+		public override bool TryGetPart(ushort id, out GameObject go) {
+			var avatar = GetAvatar();
+			if (avatar == null) {
+				go = null;
+				return false;
+			}
+
+			var module = avatar.GetDescriptor()
+				.GetModules<IRiggingModule>()
+				.FirstOrDefault();
+			if (module == null) {
+				go = null;
+				return false;
+			}
+
+			var part = module.GetPart(id.ToHumanBodyBones());
+			if (!part) {
+				go = null;
+				return false;
+			}
+
+			go = part.gameObject;
+			return true;
+		}
+
 		private void Update() {
 			var avatar = GetAvatar();
 			var parameterModule = avatar?.GetDescriptor()
@@ -44,15 +67,28 @@ namespace api.nox.relay {
 				.FirstOrDefault();
 
 			if (parameterModule == null) return;
-			foreach (var param in parameterModule.GetParameters()) {
-				if (!param.IsSyncable()) continue;
-				var serialized = param.Serialize();
-				if (Reference.Parameters.TryGetValue(param.GetHash(), out var data)) {
-					if (data.Item2 == DeliveryType.RemoteModified) continue;
-					if (data.Item1.SequenceEqual(serialized)) continue;
+			var parameters = parameterModule.GetParameters();
+			var properties = Reference.GetProperties<RelayParameter>();
+
+			foreach (var prop in properties) {
+				var linked = parameters.FirstOrDefault(p => p.GetName() == prop.GetKey());
+				if (linked == null) {
+					Reference.RemoveProperty(prop.GetKey());
+					continue;
 				}
 
-				Reference.Parameters[param.GetHash()] = (serialized, DeliveryType.LocalModified);
+				prop.Attach(linked);
+			}
+
+			foreach (var parameter in parameters) {
+				var linked = properties.FirstOrDefault(p => p.GetKey() == parameter.GetName());
+				if (linked == null) {
+					linked = new RelayParameter(parameter);
+					Reference.AddProperty(linked);
+					continue;
+				}
+
+				linked.Attach(parameter);
 			}
 		}
 	}

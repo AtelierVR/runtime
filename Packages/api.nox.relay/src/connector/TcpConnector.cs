@@ -114,7 +114,7 @@ namespace api.nox.relay.connector {
 				await _stream.FlushAsync();
 				return true;
 			} catch (Exception ex) {
-				Debug.LogError($"TcpConnector: Échec d'envoi - {ex.Message}");
+				Logger.LogError($"TcpConnector: Échec d'envoi - {ex.Message}");
 				_isConnected = false;
 				return false;
 			}

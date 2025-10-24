@@ -2,14 +2,15 @@ using UnityEngine;
 
 namespace Nox.CCK.Utils {
 	public class Transform {
-		private Vector3    position;
-		private Quaternion rotation;
-		private Vector3    scale;
-		private Vector3    velocity;
-		private Vector3    angularVelocity;
+		private Vector3        _position;
+		private Quaternion     _rotation;
+		private Vector3        _scale;
+		private Vector3        _velocity;
+		private Vector3        _angularVelocity;
+		private TransformFlags _flags = TransformFlags.None;
 
-		public DeliveryType DeliveryType = DeliveryType.None;
-		public TransformFlags        Flags { get; private set; } = TransformFlags.None;
+		public TransformFlags Flags
+			=> _flags;
 
 		// POSITION
 
@@ -18,23 +19,23 @@ namespace Nox.CCK.Utils {
 		/// </summary>
 		/// <returns></returns>
 		public Vector3 GetPosition()
-			=> Flags.HasFlag(TransformFlags.Position) ? position : Vector3.zero;
+			=> _flags.HasFlag(TransformFlags.Position) ? _position : Vector3.zero;
 
 		/// <summary>
 		/// Set the position of the transform.
 		/// </summary>
 		/// <param name="value">Vector3 of the new position</param>
 		public void SetPosition(Vector3 value) {
-			position =  value;
-			Flags    |= TransformFlags.Position;
+			_position =  value;
+			_flags    |= TransformFlags.Position;
 		}
 
 		/// <summary>
 		/// Reset the position of the transform.
 		/// </summary>
 		public void ResetPosition() {
-			position =  Vector3.zero;
-			Flags    &= ~TransformFlags.Position;
+			_position =  Vector3.zero;
+			_flags    &= ~TransformFlags.Position;
 		}
 
 		// ROTATION
@@ -44,23 +45,23 @@ namespace Nox.CCK.Utils {
 		/// </summary>
 		/// <returns></returns>
 		public Quaternion GetRotation()
-			=> Flags.HasFlag(TransformFlags.Rotation) ? rotation : Quaternion.identity;
+			=> _flags.HasFlag(TransformFlags.Rotation) ? _rotation : Quaternion.identity;
 
 		/// <summary>
 		/// Set the rotation of the transform.
 		/// </summary>
 		/// <param name="value">Quaternion of the new rotation</param>
 		public void SetRotation(Quaternion value) {
-			rotation =  value;
-			Flags    |= TransformFlags.Rotation;
+			_rotation =  value;
+			_flags    |= TransformFlags.Rotation;
 		}
 
 		/// <summary>
 		/// Reset the rotation of the transform.
 		/// </summary>
 		public void ResetRotation() {
-			rotation =  Quaternion.identity;
-			Flags    &= ~TransformFlags.Rotation;
+			_rotation =  Quaternion.identity;
+			_flags    &= ~TransformFlags.Rotation;
 		}
 
 		// SCALE
@@ -70,23 +71,23 @@ namespace Nox.CCK.Utils {
 		/// </summary>
 		/// <returns></returns>
 		public Vector3 GetScale()
-			=> Flags.HasFlag(TransformFlags.Scale) ? scale : Vector3.one;
+			=> _flags.HasFlag(TransformFlags.Scale) ? _scale : Vector3.one;
 
 		/// <summary>
 		/// Set the scale of the transform.
 		/// </summary>
 		/// <param name="value">Vector3 of the new scale</param>
 		public void SetScale(Vector3 value) {
-			scale =  value;
-			Flags |= TransformFlags.Scale;
+			_scale =  value;
+			_flags |= TransformFlags.Scale;
 		}
 
 		/// <summary>
 		/// Reset the scale of the transform.
 		/// </summary>
 		public void ResetScale() {
-			scale =  Vector3.one;
-			Flags &= ~TransformFlags.Scale;
+			_scale =  Vector3.one;
+			_flags &= ~TransformFlags.Scale;
 		}
 
 		// VELOCITY
@@ -96,23 +97,23 @@ namespace Nox.CCK.Utils {
 		/// </summary>
 		/// <returns></returns>
 		public Vector3 GetVelocity()
-			=> Flags.HasFlag(TransformFlags.Velocity) ? velocity : Vector3.zero;
+			=> _flags.HasFlag(TransformFlags.Velocity) ? _velocity : Vector3.zero;
 
 		/// <summary>
 		/// Set the velocity of the transform.
 		/// </summary>
 		/// <param name="value">Vector3 of the new velocity</param>
 		public void SetVelocity(Vector3 value) {
-			velocity =  value;
-			Flags    |= TransformFlags.Velocity;
+			_velocity =  value;
+			_flags    |= TransformFlags.Velocity;
 		}
 
 		/// <summary>
 		/// Reset the velocity of the transform.
 		/// </summary>
 		public void ResetVelocity() {
-			velocity =  Vector3.zero;
-			Flags    &= ~TransformFlags.Velocity;
+			_velocity =  Vector3.zero;
+			_flags    &= ~TransformFlags.Velocity;
 		}
 
 		// ANGULAR VELOCITY
@@ -122,23 +123,23 @@ namespace Nox.CCK.Utils {
 		/// </summary>
 		/// <returns></returns>
 		public Vector3 GetAngularVelocity()
-			=> Flags.HasFlag(TransformFlags.AngularVelocity) ? angularVelocity : Vector3.zero;
+			=> _flags.HasFlag(TransformFlags.AngularVelocity) ? _angularVelocity : Vector3.zero;
 
 		/// <summary>
 		/// Set the angular velocity of the transform.
 		/// </summary>
 		/// <param name="value">Vector3 of the new angular velocity</param>
 		public void SetAngularVelocity(Vector3 value) {
-			angularVelocity =  value;
-			Flags           |= TransformFlags.AngularVelocity;
+			_angularVelocity =  value;
+			_flags           |= TransformFlags.AngularVelocity;
 		}
 
 		/// <summary>
 		/// Reset the angular velocity of the transform.
 		/// </summary>
 		public void ResetAngularVelocity() {
-			angularVelocity =  Vector3.zero;
-			Flags           &= ~TransformFlags.AngularVelocity;
+			_angularVelocity =  Vector3.zero;
+			_flags           &= ~TransformFlags.AngularVelocity;
 		}
 
 		/// <summary>
@@ -167,34 +168,28 @@ namespace Nox.CCK.Utils {
 		/// <param name="threshold">Threshold for the comparison (optional)</param>
 		/// <returns>True if the transform is equal</returns>
 		public bool Equals(Transform transform, float threshold = float.Epsilon)
-			=> Flags == transform.Flags
-				&& IsSamePosition(transform.position, threshold)
-				&& IsSameRotation(transform.rotation, threshold)
-				&& IsSameScale(transform.scale, threshold)
-				&& IsSameVelocity(transform.velocity, threshold)
-				&& IsSameAngularVelocity(transform.angularVelocity, threshold);
+			=> _flags == transform._flags
+				&& IsSamePosition(transform._position, threshold)
+				&& IsSameRotation(transform._rotation, threshold)
+				&& IsSameScale(transform._scale, threshold)
+				&& IsSameVelocity(transform._velocity, threshold)
+				&& IsSameAngularVelocity(transform._angularVelocity, threshold);
 
 		public bool IsSameScale(Vector3 value, float threshold = float.Epsilon)
-			=> Flags.HasFlag(TransformFlags.Scale) && Vector3.Distance(scale, value) < threshold;
+			=> _flags.HasFlag(TransformFlags.Scale) && Vector3.Distance(_scale, value) < threshold;
 
 		public bool IsSamePosition(Vector3 value, float threshold = float.Epsilon)
-			=> Flags.HasFlag(TransformFlags.Position) && Vector3.Distance(position, value) < threshold;
+			=> _flags.HasFlag(TransformFlags.Position) && Vector3.Distance(_position, value) < threshold;
 
 		public bool IsSameRotation(Quaternion value, float threshold = float.Epsilon)
-			=> Flags.HasFlag(TransformFlags.Rotation) && Quaternion.Angle(rotation, value) < threshold;
+			=> _flags.HasFlag(TransformFlags.Rotation) && Quaternion.Angle(_rotation, value) < threshold;
 
 		public bool IsSameVelocity(Vector3 value, float threshold = float.Epsilon)
-			=> Flags.HasFlag(TransformFlags.Velocity) && Vector3.Distance(velocity, value) < threshold;
+			=> _flags.HasFlag(TransformFlags.Velocity) && Vector3.Distance(_velocity, value) < threshold;
 
 		public bool IsSameAngularVelocity(Vector3 value, float threshold = float.Epsilon)
-			=> Flags.HasFlag(TransformFlags.AngularVelocity) && Vector3.Distance(angularVelocity, value) < threshold;
-	}
+			=> _flags.HasFlag(TransformFlags.AngularVelocity) && Vector3.Distance(_angularVelocity, value) < threshold;
 
-
-	public enum DeliveryType {
-		None,
-		LocalModified,
-		RemoteModified
 	}
 
 	[System.Flags]

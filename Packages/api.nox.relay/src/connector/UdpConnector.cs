@@ -7,6 +7,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using Buffer = Nox.CCK.Utils.Buffer;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay.connector {
 	public class UdpConnector : IConnector {
@@ -90,7 +91,7 @@ namespace api.nox.relay.connector {
 			await UniTask.CompletedTask;
 		}
 
-		public async UniTask<bool> Send(Nox.CCK.Utils.Buffer buffer) {
+		public async UniTask<bool> Send(Buffer buffer) {
 			if (!IsConnected())
 				return false;
 
@@ -101,7 +102,7 @@ namespace api.nox.relay.connector {
 				var bytesSent = await _udpClient.SendAsync(dataToSend, dataToSend.Length);
 				return bytesSent == buffer.length;
 			} catch (Exception ex) {
-				Debug.LogError($"UdpConnector: Échec d'envoi - {ex.Message}");
+				Logger.LogError($"UdpConnector: Échec d'envoi - {ex.Message}");
 				_isConnected = false;
 				return false;
 			}

@@ -20,22 +20,10 @@ namespace api.nox.relay {
 		public override void OnMove(ushort part, NoxTransform move) { }
 
 		private void Update() {
-			foreach (var (key, move) in Reference.Transforms) {
-				if (key != PlayerRig.Base.ToIndex()) continue;
-				var tps   = Reference.Adapter.Tps;
-				var lerpT = 1f - Mathf.Exp(-tps * Time.deltaTime);
-				transform.GetPositionAndRotation(out var position, out var rotation);
-				
-				if (Vector3.Distance(position, move.GetPosition()) <= 5f) {
-					position = Vector3.Lerp(position, move.GetPosition(), lerpT);
-					rotation = Quaternion.Slerp(rotation, move.GetRotation(), lerpT);
-				} else {
-					position = move.GetPosition();
-					rotation = move.GetRotation();
-				}
-
-				transform.SetPositionAndRotation(position, rotation);
-			}
+			var tps   = Reference.Adapter.Tps;
+			var lerpT = 1f - Mathf.Exp(-tps * Time.deltaTime);
+			foreach (var part in Reference.GetParts())
+				part.LerpTarget(lerpT);
 		}
 
 		public override void OnParameter(int key, byte[] value) {
@@ -189,13 +177,29 @@ namespace api.nox.relay {
 						break;
 				}
 			}
+			
+			var properties = Reference.GetProperties<RelayParameter>();
 
-			foreach (var net in Reference.Parameters) {
-				var param = parameters.FirstOrDefault(pa => pa.GetHash() == net.Key);
-				if (param == null || param.IsReadOnly() || !param.IsSyncable()) continue;
-				param.Deserialize(net.Value.Item1);
+			foreach (var prop in properties) {
+				var linked = parameters.FirstOrDefault(p => p.GetName() == prop.GetKey());
+				if (linked == null) {
+					Reference.RemoveProperty(prop.GetKey());
+					continue;
+				}
+
+				prop.Attach(linked);
 			}
 
+			foreach (var parameter in parameters) {
+				var linked = properties.FirstOrDefault(p => p.GetKey() == parameter.GetName());
+				if (linked == null) {
+					linked = new RelayParameter(parameter);
+					Reference.AddProperty(linked);
+					continue;
+				}
+
+				linked.Attach(parameter);
+			}
 
 			SetVoice(Reference.GetAudio());
 

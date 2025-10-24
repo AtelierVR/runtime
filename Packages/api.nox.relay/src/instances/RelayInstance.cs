@@ -24,7 +24,7 @@ namespace api.nox.relay.Instances {
 		public readonly UnityEvent<types.Avatar.AvatarChangedEvent>      OnAvatarChanged = new();
 		public readonly UnityEvent<types.Transform.TransformEvent>       OnTransform     = new();
 		public readonly UnityEvent<types.Voice.VoiceEvent>               OnVoice         = new();
-		public readonly UnityEvent<types.Avatar.AvatarParamsEvent>       OnAvatarParams  = new();
+		public readonly UnityEvent<types.Properties.PropertiesEvent>     OnProperties    = new();
 		public readonly UnityEvent<types.PlayerUpdate.PlayerUpdateEvent> OnPlayerUpdated = new();
 
 		internal async UniTask OnReceived(ushort length, ushort state, ResponseType type, Buffer buffer) {
@@ -61,10 +61,10 @@ namespace api.nox.relay.Instances {
 					if (avatar.FromBuffer(buffer)) OnAvatarChanged.Invoke(avatar);
 					else Logger.LogWarning($"Failed to parse avatar changed event for instance {InternalId}");
 					break;
-				case ResponseType.AvatarParams:
-					var avatarParams = new types.Avatar.AvatarParamsEvent { ConnectionId = Connection.Id, InternalId = InternalId };
-					if (avatarParams.FromBuffer(buffer)) OnAvatarParams.Invoke(avatarParams);
-					else Logger.LogWarning($"Failed to parse avatar params event for instance {InternalId}");
+				case ResponseType.Properties:
+					var properties = new types.Properties.PropertiesEvent { ConnectionId = Connection.Id, InternalId = InternalId };
+					if (properties.FromBuffer(buffer)) OnProperties.Invoke(properties);
+					else Logger.LogWarning($"Failed to parse properties event for instance {InternalId}");
 					break;
 				case ResponseType.Transform:
 					var transform = new types.Transform.TransformEvent { ConnectionId = Connection.Id, InternalId = InternalId };
@@ -166,10 +166,10 @@ namespace api.nox.relay.Instances {
 				?? types.Avatar.AvatarChangedEvent.CreateUnknown(Connection.Id, InternalId, "Unknown avatar change request");
 		}
 
-		public async UniTask<bool> SendAvatarParams(types.Avatar.InstanceRequestAvatarParams request) {
+		public async UniTask<bool> SendProperties(types.Properties.InstanceRequestProperties request) {
 			request.InternalId   = InternalId;
 			request.ConnectionId = Connection.Id;
-			return (await Connection.Emit(request.ToBuffer(), RequestType.AvatarParams)).Item1;
+			return (await Connection.Emit(request.ToBuffer(), RequestType.Properties)).Item1;
 		}
 
 		public async UniTask<bool> SendVoice(types.Voice.InstanceRequestVoice request) {
