@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 7986859561489629374, guid: 869b8e4cfb42bab4ea8147444d3c25d9, type: 3}
       propertyPath: m_Name
-      value: container Variant
+      value: container_full
       objectReference: {fileID: 0}
     - target: {fileID: 8035704760222708617, guid: 869b8e4cfb42bab4ea8147444d3c25d9, type: 3}
       propertyPath: m_MinWidth

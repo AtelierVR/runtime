@@ -9,6 +9,7 @@ Shader "Custom/FluidBackground"
         _Scale ("Scale", Range(0.1, 10.0)) = 2.0
         _Complexity ("Complexity", Range(1, 5)) = 3
         _FluidStrength ("Fluid Strength", Range(0.1, 2.0)) = 1.0
+        _Steps ("Steps", Range(1, 10)) = 1
         [Toggle] _UseGlobalPosition ("Use Global Position", Float) = 1
         [Toggle] _UseTexture ("Use Texture", Float) = 0
         
@@ -87,6 +88,7 @@ Shader "Custom/FluidBackground"
             float _FluidStrength;
             float _UseGlobalPosition;
             float _UseTexture;
+            int _Steps;
             
             sampler2D _MainTex;
             float4 _MainTex_ST;
@@ -190,12 +192,16 @@ Shader "Custom/FluidBackground"
                 // Combiner avec le bruit pour une frontière lisse mais organique
                 float separation = f + wave;
                 
+                // Multiplier la séparation par le nombre de steps pour créer des répétitions
+                // On utilise fmod pour créer un pattern qui se répète
+                float repeatedSeparation = fmod(separation * _Steps, 1.0);
+                
                 // Seuil fixe pour une séparation stable
                 float threshold = 0.5;
                 
                 // Transition très fine pour éviter la ligne claire
                 float edge = 0.005; // Très petite largeur de transition
-                float mixFactor = smoothstep(threshold - edge, threshold + edge, separation);
+                float mixFactor = smoothstep(threshold - edge, threshold + edge, repeatedSeparation);
                 
                 // Sélectionner la couleur basée sur la séparation - transition nette
                 fixed4 col = mixFactor > 0.5 ? _Color2 : _Color1;

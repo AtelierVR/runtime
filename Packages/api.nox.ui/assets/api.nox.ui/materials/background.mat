@@ -35,12 +35,13 @@ Material:
     - _Complexity: 3
     - _FluidStrength: 1
     - _Scale: 10
-    - _Speed: 1.41
+    - _Speed: 0.15
     - _Stencil: 0
     - _StencilComp: 8
     - _StencilOp: 0
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
+    - _Steps: 3
     - _UseGlobalPosition: 1
     - _UseTexture: 1
     - unity_GUIZTestMode: 4
