@@ -39,8 +39,7 @@ namespace api.nox.relay.connector {
 				await Close();
 
 				// Parser l'adresse
-				IPAddress ipAddress;
-				if (!IPAddress.TryParse(address, out ipAddress)) {
+				if (!IPAddress.TryParse(address, out var ipAddress)) {
 					var hostEntry = await Dns.GetHostEntryAsync(address);
 					ipAddress = hostEntry.AddressList[0];
 				}
@@ -60,7 +59,7 @@ namespace api.nox.relay.connector {
 
 				return true;
 			} catch (Exception ex) {
-				Debug.LogError($"TcpConnector: Échec de connexion - {ex.Message}");
+				Logger.LogError(new Exception("Erreur de connexion TCP", ex), tag: nameof(TcpConnector));
 				_isConnected = false;
 				return false;
 			}
@@ -84,7 +83,7 @@ namespace api.nox.relay.connector {
 					await _stream.FlushAsync();
 					_stream.Close();
 				} catch (Exception ex) {
-					Debug.LogWarning($"TcpConnector: Erreur lors de la fermeture du stream - {ex.Message}");
+					Logger.LogWarning(new Exception("Erreur lors de la fermeture du stream", ex), tag: nameof(TcpConnector));
 				} finally {
 					_stream = null;
 				}
@@ -95,7 +94,7 @@ namespace api.nox.relay.connector {
 				try {
 					_tcpClient.Close();
 				} catch (Exception ex) {
-					Debug.LogWarning($"TcpConnector: Erreur lors de la fermeture - {ex.Message}");
+					Logger.LogWarning(new Exception("Erreur lors de la fermeture du client TCP", ex), tag: nameof(TcpConnector));
 				} finally {
 					_tcpClient = null;
 				}
@@ -114,7 +113,7 @@ namespace api.nox.relay.connector {
 				await _stream.FlushAsync();
 				return true;
 			} catch (Exception ex) {
-				Logger.LogError($"TcpConnector: Échec d'envoi - {ex.Message}");
+				Logger.LogError(new Exception("Erreur d'envoi", ex), tag: nameof(TcpConnector));
 				_isConnected = false;
 				return false;
 			}
@@ -143,7 +142,7 @@ namespace api.nox.relay.connector {
 						if (offset + 2 > bytesRead) break;
 						var packetLength = (ushort)((buffer[offset] << 8) | buffer[offset + 1]);
 						if (offset + packetLength > bytesRead) break;
-						
+
 						if (packetLength < 5) {
 							offset += packetLength;
 							continue;
@@ -163,7 +162,7 @@ namespace api.nox.relay.connector {
 					}
 				} catch (Exception ex) {
 					if (!_shouldStop) {
-						Debug.LogError($"TcpConnector: Erreur de réception - {ex.Message}");
+						Logger.LogException(new Exception("TcpConnector: Erreur de réception", ex), tag: nameof(TcpConnector));
 						_isConnected = false;
 					}
 
