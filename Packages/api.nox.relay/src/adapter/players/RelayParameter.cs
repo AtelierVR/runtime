@@ -21,10 +21,10 @@ namespace api.nox.relay {
 		}
 
 		public void Attach(IParameter parameter) {
-			if (parameter == null || _reference == null)
+			if (parameter == null)
 				throw new ArgumentNullException(nameof(parameter), "Cannot attach null parameter.");
 			if (_reference == parameter) return;
-			if (parameter.GetName() != _reference.GetName())
+			if (_reference != null && parameter.GetName() != _reference.GetName())
 				throw new InvalidOperationException("Cannot attach parameter with different name.");
 			if (_lastValue != null)
 				parameter.Set(_lastValue);
@@ -75,6 +75,7 @@ namespace api.nox.relay {
 		}
 
 		public void Detach() {
+			if (_reference == null) return;
 			_lastValue       = _reference.Get();
 			_lastSerialValue = _reference.Serialize();
 			_reference       = null;
