@@ -85,6 +85,7 @@
     <Compile Include="Packages\api.nox.ui\src\layouts\top\Histories.cs" />
     <None Include="Packages\api.nox.ui\link.xml" />
     <None Include="Packages\api.nox.ui\api.nox.ui.asmdef" />
+    <None Include="Packages\api.nox.ui\assets\api.nox.ui\Shaders\FluidBackground.shader" />
     <None Include="Packages\api.nox.ui\assets\api.nox.ui\Shaders\UIBlur.shader" />
     <None Include="Packages\api.nox.ui\nox.mod.json" />
     <None Include="Packages\api.nox.ui\package.json" />
