@@ -28,7 +28,7 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 			=> false;
 
 		public bool IsSyncable()
-			=> true;
+			=> false;
 
 		public bool IsSavable()
 			=> true;

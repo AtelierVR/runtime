@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -143,8 +144,13 @@ namespace api.nox.relay {
 				return false;
 			}
 
-			if (old != null)
+			RelayParameter[] properties;
+			if (old != null) {
+				properties = Reference.GetProperties<RelayParameter>();
+				foreach (var prop in properties)
+					prop.Detach();
 				await old.Dispose();
+			}
 
 			Logger.LogDebug($"Attaching avatar to {runtimeAvatar.GetDescriptor()}", runtimeAvatar.GetDescriptor().GetAnchor());
 			root.transform.SetParent(transform, false);
@@ -177,8 +183,8 @@ namespace api.nox.relay {
 						break;
 				}
 			}
-			
-			var properties = Reference.GetProperties<RelayParameter>();
+
+			properties = Reference.GetProperties<RelayParameter>();
 
 			foreach (var prop in properties) {
 				var linked = parameters.FirstOrDefault(p => p.GetName() == prop.GetKey());
@@ -205,6 +211,12 @@ namespace api.nox.relay {
 
 			root.SetActive(true);
 			return true;
+		}
+
+		private void OnDestroy() {
+			var properties = Reference.GetProperties<RelayParameter>();
+			foreach (var prop in properties)
+				prop.Detach();
 		}
 
 		public override void SetVoice(AudioClip clip) {
