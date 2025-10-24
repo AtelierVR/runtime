@@ -11,13 +11,13 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay.connector {
 	public class TcpConnector : IConnector {
-		private TcpClient _tcpClient;
-		private NetworkStream _stream;
-		private bool _isConnected;
-		private IPEndPoint _remoteEndPoint;
-		private volatile bool _shouldStop;
+		private          TcpClient               _tcpClient;
+		private          NetworkStream           _stream;
+		private          bool                    _isConnected;
+		private          IPEndPoint              _remoteEndPoint;
+		private volatile bool                    _shouldStop;
 		private readonly ConcurrentQueue<Buffer> _receivedDataQueue = new();
-		private int _bufferSize = 8192;
+		private          int                     _bufferSize        = 8192;
 
 		public static string GetStaticProtocolName()
 			=> "tcp";
@@ -53,7 +53,7 @@ namespace api.nox.relay.connector {
 				_stream = _tcpClient.GetStream();
 
 				_isConnected = true;
-				_shouldStop = false;
+				_shouldStop  = false;
 
 				// Démarrer la lecture asynchrone
 				StartReceiveAsync().Forget();
@@ -70,12 +70,12 @@ namespace api.nox.relay.connector {
 			_bufferSize = size;
 			if (_tcpClient != null) {
 				_tcpClient.ReceiveBufferSize = size;
-				_tcpClient.SendBufferSize = size;
+				_tcpClient.SendBufferSize    = size;
 			}
 		}
 
 		public async UniTask Close() {
-			_shouldStop = true;
+			_shouldStop  = true;
 			_isConnected = false;
 
 			// Fermer le stream
@@ -121,10 +121,8 @@ namespace api.nox.relay.connector {
 		}
 
 		public void Update() {
-			// Traiter les données reçues dans la queue
-			while (_receivedDataQueue.TryDequeue(out var buffer)) {
+			while (_receivedDataQueue.TryDequeue(out var buffer))
 				OnReceived?.Invoke(buffer);
-			}
 		}
 
 		private async UniTaskVoid StartReceiveAsync() {
@@ -133,25 +131,42 @@ namespace api.nox.relay.connector {
 			while (!_shouldStop && IsConnected()) {
 				try {
 					var bytesRead = await _stream.ReadAsync(buffer, 0, buffer.Length);
+					var offset    = 0;
 
-					if (bytesRead > 0) {
-						var receivedBuffer = new Buffer();
-						receivedBuffer.data = new byte[bytesRead];
-						Array.Copy(buffer, 0, receivedBuffer.data, 0, bytesRead);
-						receivedBuffer.length = (ushort)bytesRead;
-						receivedBuffer.offset = 0;
-						_receivedDataQueue.Enqueue(receivedBuffer);
-					} else {
-						// Connexion fermée par le serveur
-						Debug.Log("TcpConnector: Connexion fermée par le serveur");
+					if (bytesRead == 0) {
+						Logger.Log("Connexion fermée par le serveur", tag: nameof(TcpConnector));
 						_isConnected = false;
 						break;
+					}
+
+					while (offset < bytesRead) {
+						if (offset + 2 > bytesRead) break;
+						var packetLength = (ushort)((buffer[offset] << 8) | buffer[offset + 1]);
+						if (offset + packetLength > bytesRead) break;
+						
+						if (packetLength < 5) {
+							offset += packetLength;
+							continue;
+						}
+
+						var packetData = new byte[packetLength];
+						Array.Copy(buffer, offset, packetData, 0, packetLength);
+						_receivedDataQueue.Enqueue(
+							new Buffer {
+								data   = packetData,
+								length = packetLength,
+								offset = 0
+							}
+						);
+
+						offset += packetLength;
 					}
 				} catch (Exception ex) {
 					if (!_shouldStop) {
 						Debug.LogError($"TcpConnector: Erreur de réception - {ex.Message}");
 						_isConnected = false;
 					}
+
 					break;
 				}
 			}
