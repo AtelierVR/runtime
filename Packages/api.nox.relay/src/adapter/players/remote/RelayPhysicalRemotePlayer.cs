@@ -1,8 +1,10 @@
+using System;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.Avatars.Parameters;
+using Nox.Avatars.Rigging;
 using Nox.Avatars.Voice;
 using Nox.CCK.Utils;
 using UnityEngine;
@@ -142,9 +144,9 @@ namespace api.nox.relay {
 				return false;
 			}
 
-			if (old != null) 
+			if (old != null)
 				await old.Dispose();
-			
+
 			var properties = Reference.GetProperties<RelayParameter>();
 			foreach (var prop in properties)
 				Reference.RemoveProperty(prop.GetKey());
@@ -162,19 +164,19 @@ namespace api.nox.relay {
 				Logger.LogError("Avatar does not have a ParameterModule, cannot set avatar.");
 				return false;
 			}
-			
+
 			var parameters = parameterModule.GetParameters();
 			foreach (var param in parameters) {
 				if (param.IsReadOnly()) continue;
 				var n = param.GetName();
 				switch (n) {
 					case "tracking/head/active":
-						param.Set(true);
-						break;
 					case "tracking/left_hand/active":
 					case "tracking/right_hand/active":
 					case "tracking/left_foot/active":
 					case "tracking/right_foot/active":
+					case "tracking/left_toe/active":
+					case "tracking/right_toe/active":
 						param.Set(false);
 						break;
 				}
@@ -205,6 +207,19 @@ namespace api.nox.relay {
 
 				Logger.LogDebug($"Re-linking parameter {linked.GetKey()} for player {Reference.GetId()}");
 				linked.Attach(parameter);
+			}
+
+			foreach (var p in Reference.GetParts())
+				Reference.RemovePart(p.GetId());
+
+			var rigModule = _avatar.GetDescriptor()
+				?.GetModules<IRiggingModule>()
+				.FirstOrDefault();
+
+			foreach (var part in rigModule?.GetParts() ?? Array.Empty<IRigPart>()) {
+				var relayPart = new RelayPart(Reference, part);
+				Reference.AddPart(relayPart);
+				Logger.LogDebug($"Linking transform '{part.GetId()}' to local player '{Reference.GetDisplay()}'");
 			}
 
 			SetVoice(Reference.GetAudio());

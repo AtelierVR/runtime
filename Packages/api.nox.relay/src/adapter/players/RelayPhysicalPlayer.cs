@@ -1,13 +1,11 @@
 using System.Linq;
 using Nox.Avatars;
-using Nox.Avatars.Parameters;
 using Nox.Avatars.Players;
 using Nox.Avatars.Rigging;
 using Nox.CCK.Development;
 using Nox.CCK.Players;
 using UnityEngine;
 using Gizmos = Nox.CCK.Development.Gizmos;
-using Logger = Nox.CCK.Utils.Logger;
 using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.relay {
@@ -36,28 +34,32 @@ namespace api.nox.relay {
 
 		public abstract void SetVoice(AudioClip clip);
 
-		public override bool TryGetPart(ushort id, out GameObject go) {
+		public override bool TryGetPart(ushort id, out Transform go, out Rigidbody rigid) {
 			var avatar = GetAvatar();
 			if (avatar == null) {
-				go = null;
+				go    = null;
+				rigid = null;
 				return false;
 			}
 
 			var module = avatar.GetDescriptor()
 				.GetModules<IRiggingModule>()
 				.FirstOrDefault();
+			
 			if (module == null) {
-				go = null;
+				go    = null;
+				rigid = null;
 				return false;
 			}
 
-			var part = module.GetPart(id.ToHumanBodyBones());
-			if (!part) {
-				go = null;
+			if (!module.TryGetPart(id, out var part)) {
+				go    = null;
+				rigid = null;
 				return false;
 			}
 
-			go = part.gameObject;
+			go    = part.GetTransform();
+			rigid = part.GetRigidbody();
 			return true;
 		}
 	}

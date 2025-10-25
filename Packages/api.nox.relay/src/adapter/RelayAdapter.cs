@@ -70,32 +70,40 @@ namespace api.nox.relay {
 			switch (ev.Type) {
 				case TransformType.EntityPart: {
 					var entity = _entities.GetEntity<IMultiPartEntity>(ev.EntityId);
-					if (entity == null) return;
+					if (entity == null) {
+						Logger.LogWarning($"Entity with ID {ev.EntityId} not found for {nameof(IMultiPartEntity)}", tag: nameof(RelayAdapter));
+						return;
+					}
+
 					entity.Move(ev.PartRig, ev.Transform, false);
 					break;
 				}
 				case TransformType.BaseEntity: {
 					var entity = _entities.GetEntity<IMovingEntity>(ev.EntityId);
-					if (entity == null) return;
+					if (entity == null) {
+						Logger.LogWarning($"Entity with ID {ev.EntityId} not found for {nameof(IMovingEntity)}", tag: nameof(RelayAdapter));
+						return;
+					}
+
 					entity.Move(ev.Transform, false);
 					break;
 				}
 				case TransformType.ByPath: {
 					var path = ev.Path.Split(ComponentExtension.PathSeparator);
 					if (!int.TryParse(path[0], out var index)) {
-						Logger.LogWarning($"Invalid entity path received: {ev.Path}");
+						Logger.LogWarning($"Invalid entity path received: {ev.Path}", tag: nameof(RelayAdapter));
 						return;
 					}
 
 					var scene = _dimension.GetScene().GetInstance(index)?.GetScene();
 					if (!scene.HasValue) {
-						Logger.LogWarning($"No scene found for entity path: {ev.Path}");
+						Logger.LogWarning($"No scene found for entity path: {ev.Path}", tag: nameof(RelayAdapter));
 						return;
 					}
 
 					var transform = scene.Value.GetByPath(path.Skip(1).ToArray());
 					if (!transform) {
-						Logger.LogWarning($"No transform found for entity path: {ev.Path}");
+						Logger.LogWarning($"No transform found for entity path: {ev.Path}", tag: nameof(RelayAdapter));
 						return;
 					}
 
@@ -103,7 +111,7 @@ namespace api.nox.relay {
 					break;
 				}
 				default:
-					Logger.LogWarning($"Unknown TransformType received: {ev.Type}");
+					Logger.LogWarning($"Unknown TransformType received: {ev.Type}", tag: nameof(RelayAdapter));
 					throw new ArgumentOutOfRangeException();
 			}
 		}
@@ -112,7 +120,7 @@ namespace api.nox.relay {
 			var forEntity  = _entities.GetEntity<IEntity>(ev.ForEntityId);
 			var fromEntity = _entities.GetEntity<IEntity>(ev.FromEntityId);
 			if (forEntity == null || fromEntity == null) return;
-			
+
 			var table = forEntity.GetProperties()
 				.ToDictionary(p => p.GetKey().Hash(), p => p);
 

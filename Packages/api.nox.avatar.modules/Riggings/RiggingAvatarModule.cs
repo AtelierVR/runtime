@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.Avatars.Parameters;
 using Nox.Avatars.Rigging;
+using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
@@ -16,8 +17,8 @@ namespace Nox.CCK.Avatars.Rigging {
 		private IAvatarDescriptor _descriptor;
 		private Transform         _anchor;
 
-		public List<IParameter>                      Parameters = new();
-		public Dictionary<HumanBodyBones, Transform> Parts      = new();
+		public readonly List<IParameter>  Parameters = new();
+		public readonly List<RiggingPart> Parts      = new();
 
 		public Transform GetAnchor() {
 			if (_anchor) return _anchor;
@@ -40,11 +41,32 @@ namespace Nox.CCK.Avatars.Rigging {
 			return UniTask.FromResult(true);
 		}
 
-		public Transform GetPart(HumanBodyBones bone)
-			=> Parts.GetValueOrDefault(bone);
+		bool IRiggingModule.TryGetPart(ushort id, out IRigPart part) {
+			part = Parts.FirstOrDefault(p => p.GetId() == id);
+			return part != null;
+		}
 
-		public void SetPart(HumanBodyBones bone, Transform part)
-			=> Parts[bone] = part;
+		public Transform GetPart(HumanBodyBones bone) {
+			var index = bone.ToIndex();
+			var part  = Parts.FirstOrDefault(p => p.GetId() == index);
+			return part?.GetTransform();
+		}
+
+		public IRigPart[] GetParts()
+			=> Parts.Cast<IRigPart>().ToArray();
+
+
+		public void SetPart(HumanBodyBones bone, Transform part) {
+			var index        = bone.ToIndex();
+			var existingPart = Parts.FirstOrDefault(p => p.GetId() == index);
+			if (existingPart != null) {
+				existingPart.SetTransform(part);
+				return;
+			}
+
+			var rigPart = new RiggingPart(index, part);
+			Parts.Add(rigPart);
+		}
 
 		public Transform GetBone(HumanBodyBones bone)
 			=> _descriptor.GetAnimator().GetBoneTransform(bone);

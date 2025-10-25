@@ -1,5 +1,9 @@
+using Nox.Avatars.Rigging;
+using Nox.CCK.Utils;
 using Nox.Entities;
 using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
+using Transform = UnityEngine.Transform;
 
 namespace api.nox.relay {
 	/// <summary>
@@ -7,28 +11,33 @@ namespace api.nox.relay {
 	/// </summary>
 	public class RelayPart : Nox.CCK.Utils.Transform, IPart {
 		private readonly RelayEntity _entity;
-		private readonly ushort      _id;
+		private readonly IRigPart    _part;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RelayPart"/> class.
 		/// </summary>
 		/// <param name="entity"></param>
-		/// <param name="id"></param>
-		public RelayPart(RelayEntity entity, ushort id) {
+		/// <param name="part"></param>
+		public RelayPart(RelayEntity entity, IRigPart part) {
 			_entity = entity;
-			_id     = id;
+			_part   = part;
 		}
 
 		/// <summary>
 		/// Tries to get the GameObject associated with this part.
 		/// </summary>
-		/// <param name="gameObject"></param>
+		/// <param name="go"></param>
+		/// <param name="rigid"></param>
 		/// <returns></returns>
-		private bool TryGet(out GameObject gameObject) {
-			if (_entity.TryGetPhysical<RelayPhysicalEntity>(out var physical))
-				return physical.TryGetPart(_id, out gameObject);
-			gameObject = null;
-			return false;
+		private bool TryGet(out Transform go, out Rigidbody rigid) {
+			if (_part == null) {
+				go    = null;
+				rigid = null;
+				return false;
+			}
+
+			_part.TryGetTransform(out go, out rigid);
+			return go;
 		}
 
 		/// <summary>
@@ -36,7 +45,7 @@ namespace api.nox.relay {
 		/// </summary>
 		/// <returns></returns>
 		public ushort GetId()
-			=> _id;
+			=> _part.GetId();
 
 		/// <summary>
 		/// Try to get the position of the part.
@@ -44,12 +53,12 @@ namespace api.nox.relay {
 		/// <param name="position"></param>
 		/// <returns></returns>
 		public bool TryGetPosition(out Vector3 position) {
-			if (!TryGet(out var gameObject)) {
-				position = Vector3.zero;
-				return false;
+			if (!TryGet(out var transform, out _)) {
+				position = GetPosition();
+				return Flags.HasFlag(TransformFlags.Position);
 			}
 
-			position = gameObject.transform.position;
+			position = transform.position;
 			return true;
 		}
 
@@ -59,129 +68,85 @@ namespace api.nox.relay {
 		/// <param name="rotation"></param>
 		/// <returns></returns>
 		public bool TryGetRotation(out Quaternion rotation) {
-			if (!TryGet(out var gameObject)) {
-				rotation = Quaternion.identity;
-				return false;
+			if (!TryGet(out var transform, out _)) {
+				rotation = GetRotation();
+				return Flags.HasFlag(TransformFlags.Rotation);
 			}
 
-			rotation = gameObject.transform.rotation;
+			rotation = transform.rotation;
 			return true;
 		}
 
 		/// <summary>
 		/// Try to get the scale of the part.
 		/// </summary>
-		/// <param name="scale"></param>
-		/// <returns></returns>
 		public bool TryGetScale(out Vector3 scale) {
-			if (!TryGet(out var gameObject)) {
-				scale = Vector3.one;
-				return false;
+			if (!TryGet(out var transform, out _)) {
+				scale = GetScale();
+				return Flags.HasFlag(TransformFlags.Scale);
 			}
 
-			scale = gameObject.transform.localScale;
+			scale = transform.localScale;
 			return true;
 		}
 
 		/// <summary>
 		/// Try to get the velocity of the part.
 		/// </summary>
-		/// <param name="velocity"></param>
-		/// <returns></returns>
 		public bool TryGetVelocity(out Vector3 velocity) {
-			if (!TryGet(out var gameObject)) {
-				velocity = Vector3.zero;
-				return false;
+			if (!TryGet(out _, out var rigid) || !rigid) {
+				velocity = GetVelocity();
+				return Flags.HasFlag(TransformFlags.Velocity);
 			}
 
-			if (!gameObject.TryGetComponent<Rigidbody>(out var rb)) {
-				velocity = Vector3.zero;
-				return false;
-			}
-
-			velocity = rb.linearVelocity;
+			velocity = rigid.linearVelocity;
 			return true;
 		}
 
 		/// <summary>
 		/// Try to get the angular velocity of the part.
 		/// </summary>
-		/// <param name="angularVelocity"></param>
-		/// <returns></returns>
 		public bool TryGetAngularVelocity(out Vector3 angularVelocity) {
-			if (!TryGet(out var gameObject)) {
-				angularVelocity = Vector3.zero;
-				return false;
+			if (!TryGet(out _, out var rigid) || !rigid) {
+				angularVelocity = GetAngularVelocity();
+				return Flags.HasFlag(TransformFlags.AngularVelocity);
 			}
 
-			if (!gameObject.TryGetComponent<Rigidbody>(out var rb)) {
-				angularVelocity = Vector3.zero;
-				return false;
-			}
-
-			angularVelocity = rb.angularVelocity;
+			angularVelocity = rigid.angularVelocity;
 			return true;
 		}
 
-		/// <summary>
-		/// Set the position of the part.
-		/// </summary>
-		/// <param name="position"></param>
-		/// <param name="markDirty"></param>
-		public void SetPosition(Vector3 position, bool markDirty) {
-			if (TryGet(out var gameObject))
-				gameObject.transform.position = position;
+
+		void IPart.SetPosition(Vector3 position, bool markDirty) {
+			if (TryGet(out var transform, out _))
+				transform.position = position;
 			SetPosition(position);
-			if (markDirty) SetDirty();
 		}
 
-		/// <summary>
-		/// Set the rotation of the part.
-		/// </summary>
-		/// <param name="rotation"></param>
-		/// <param name="markDirty"></param>
-		public void SetRotation(Quaternion rotation, bool markDirty) {
-			if (TryGet(out var gameObject))
-				gameObject.transform.rotation = rotation;
+		void IPart.SetRotation(Quaternion rotation, bool markDirty) {
+			if (TryGet(out var transform, out _)) 
+				transform.rotation = rotation;
 			SetRotation(rotation);
-			if (markDirty) SetDirty();
 		}
 
-		/// <summary>
-		/// Set the scale of the part.
-		/// </summary>
-		/// <param name="scale"></param>
-		/// <param name="markDirty"></param>
-		public void SetScale(Vector3 scale, bool markDirty) {
-			if (TryGet(out var gameObject))
-				gameObject.transform.localScale = scale;
+		void IPart.SetScale(Vector3 scale, bool markDirty) {
+			if (TryGet(out var transform, out _)) 
+				transform.localScale = scale;
 			SetScale(scale);
-			if (markDirty) SetDirty();
 		}
 
-		/// <summary>
-		/// Set the velocity of the part.
-		/// </summary>
-		/// <param name="velocity"></param>
-		/// <param name="markDirty"></param>
-		public void SetVelocity(Vector3 velocity, bool markDirty) {
-			if (TryGet(out var gameObject) && gameObject.TryGetComponent<Rigidbody>(out var rb))
-				rb.linearVelocity = velocity;
+		void IPart.SetVelocity(Vector3 velocity, bool markDirty) {
+			if (TryGet(out _, out var rigid) && rigid) 
+				rigid.linearVelocity = velocity;
 			SetVelocity(velocity);
-			if (markDirty) SetDirty();
 		}
 
-		/// <summary>
-		/// Set the angular velocity of the part.
-		/// </summary>
-		/// <param name="angularVelocity"></param>
-		/// <param name="markDirty"></param>
-		public void SetAngularVelocity(Vector3 angularVelocity, bool markDirty) {
-			if (TryGet(out var gameObject) && gameObject.TryGetComponent<Rigidbody>(out var rb))
-				rb.angularVelocity = angularVelocity;
+		void IPart.SetAngularVelocity(Vector3 angularVelocity, bool markDirty) {
+			if (TryGet(out _, out var rigid) && rigid) 
+				rigid.angularVelocity = angularVelocity;
 			SetAngularVelocity(angularVelocity);
-			if (markDirty) SetDirty();
 		}
+
 
 		public bool IsDirty()
 			=> TryGetPosition(out var p)            && !IsSamePosition(p)
@@ -200,8 +165,10 @@ namespace api.nox.relay {
 		}
 
 		public void LerpTarget(float time) {
-			if (!TryGet(out var gameObject)) return;
-			gameObject.transform.GetPositionAndRotation(out var position, out var rotation);
+			if (!TryGet(out var transform, out _) || !transform)
+				return;
+
+			transform.GetPositionAndRotation(out var position, out var rotation);
 
 			if (!IsSamePosition(position)) {
 				var p = GetPosition();
@@ -221,7 +188,7 @@ namespace api.nox.relay {
 				};
 			}
 
-			gameObject.transform.SetPositionAndRotation(position, rotation);
+			transform.SetPositionAndRotation(position, rotation);
 		}
 	}
 }

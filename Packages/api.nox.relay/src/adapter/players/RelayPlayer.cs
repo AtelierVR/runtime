@@ -119,7 +119,7 @@ namespace api.nox.relay {
 
 		public void Dispose() {
 			DestroyPhysical();
-			Transforms.Clear();
+			Parts.Clear();
 			Reference = null;
 			Adapter   = null;
 		}

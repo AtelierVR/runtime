@@ -46,7 +46,7 @@ namespace api.nox.relay {
 
 		public override bool IsDirty() {
 			if (!_reference?.IsValid() ?? true) {
-				Logger.LogDebug($"[RelayParameter] Parameter '{_name}' is invalid {Owner.GetDisplay()}.");
+				Logger.LogDebug($"Parameter '{_name}' is invalid {Owner.GetDisplay()}.", tag: nameof(RelayParameter));
 				return false;
 			}
 

@@ -191,6 +191,9 @@ namespace Nox.CCK.Players {
 
 		public static ushort ToIndex(this PlayerRig rig)
 			=> (ushort)rig;
+		
+		public static ushort ToIndex(this HumanBodyBones bones)
+			=> bones.ToPlayerRig().ToIndex();
 
 		public static PlayerRig ToPlayerRig(this ushort index)
 			=> Enum.IsDefined(typeof(PlayerRig), index)

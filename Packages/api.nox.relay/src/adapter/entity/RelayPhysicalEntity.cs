@@ -8,6 +8,6 @@ namespace api.nox.relay {
 		public new Rigidbody rigidbody
 			=> body ??= GetComponent<Rigidbody>();
 
-		public abstract bool TryGetPart(ushort id, out GameObject go);
+		public abstract bool TryGetPart(ushort id, out Transform go, out Rigidbody rigid);
 	}
 }

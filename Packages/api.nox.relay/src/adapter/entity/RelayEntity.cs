@@ -7,7 +7,7 @@ using UnityEngine;
 namespace api.nox.relay {
 	public abstract class RelayEntity : IEntity {
 		protected readonly List<RelayProperty> Properties = new();
-		protected readonly List<RelayPart>     Transforms = new();
+		protected readonly List<RelayPart>     Parts      = new();
 
 		public abstract ushort GetId();
 
@@ -18,6 +18,15 @@ namespace api.nox.relay {
 
 		public T[] GetProperties<T>() where T : IProperty
 			=> Properties.OfType<T>().ToArray();
+
+		public T[] GetParts<T>() where T : IPart
+			=> Parts.OfType<T>().ToArray();
+
+		public void AddPart(RelayPart part)
+			=> Parts.Add(part);
+
+		public void RemovePart(ushort id)
+			=> Parts.RemoveAll(p => p.GetId() == id);
 
 		bool IEntity.TryGetProperty(string key, out IProperty property)
 			=> TryGetProperty(key, out property);
@@ -99,10 +108,10 @@ namespace api.nox.relay {
 		#region MultiPart
 
 		public RelayPart[] GetParts()
-			=> Transforms.ToArray();
+			=> Parts.ToArray();
 
 		public bool TryGetPart(ushort id, out IPart part) {
-			var relayPart = Transforms.FirstOrDefault(t => t.GetId() == id);
+			var relayPart = Parts.FirstOrDefault(t => t.GetId() == id);
 			if (relayPart != null) {
 				part = relayPart;
 				return true;

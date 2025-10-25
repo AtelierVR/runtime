@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.Avatars.Parameters;
 using Nox.Avatars.Players;
+using Nox.Avatars.Rigging;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
@@ -96,6 +97,29 @@ namespace api.nox.relay {
 		}
 
 		public UniTask<bool> OnAvatarReady() {
+			SetupParameters();
+			SetupTransforms();
+			return UniTask.FromResult(true);
+		}
+
+		private void SetupTransforms() {
+			Parts.Clear();
+			var rigModule = RelayExtensions
+				.GetRuntimeAvatarController()
+				?.GetDescriptor()
+				?.GetModules<IRiggingModule>()
+				.FirstOrDefault();
+			if (rigModule == null) return;
+			var parts = rigModule.GetParts();
+			foreach (var part in parts) {
+				var relayPart = new RelayPart(this, part);
+				Parts.Add(relayPart);
+				Logger.LogDebug($"Linking transform '{part.GetId()}' to local player '{GetDisplay()}'");
+			}
+			
+		}
+
+		private void SetupParameters() {
 			var properties = GetProperties<RelayParameter>();
 			var parameterModule = RelayExtensions
 				.GetRuntimeAvatarController()
@@ -104,7 +128,7 @@ namespace api.nox.relay {
 				.FirstOrDefault();
 
 			if (parameterModule == null)
-				return UniTask.FromResult(true);
+				return;
 
 			var parameters = parameterModule.GetParameters();
 
@@ -136,8 +160,6 @@ namespace api.nox.relay {
 				Logger.LogDebug($"Re-linking parameter '{parameter.GetName()}' to local player '{GetDisplay()}'");
 				linked.Attach(parameter);
 			}
-
-			return UniTask.FromResult(true);
 		}
 
 		public UniTask<bool> OnAvatarFailed(string reason)

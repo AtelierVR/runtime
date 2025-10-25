@@ -158,61 +158,47 @@ Shader "Custom/FluidBackground"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                // Precompute time values
                 float time = _Time.y * _Speed;
                 float slowTime1 = time * 0.2;
                 float slowTime2 = time * 0.15;
                 float slowTime3 = time * 0.3;
                 float slowTime4 = time * 0.2;
                 
-                // Choose between global position (screen space) or local UV
                 float2 uv = (_UseGlobalPosition > 0.5) ? 
                     (i.screenPos.xy / i.screenPos.w * _Scale * 0.1) : 
                     (i.uv * _Scale);
                 
-                // Create smoother fluid patterns in motion
                 float2 p = uv + float2(sin(slowTime1) * 0.3, cos(slowTime2) * 0.3);
                 
-                // Precompute constant offsets
                 static const float2 offset1 = float2(3.2, 2.3);
                 static const float2 offset2 = float2(1.7, 9.2);
                 static const float2 offset3 = float2(8.3, 2.8);
                 
-                // Use fewer layers for smoother motion
                 float2 q = float2(
                     fbm(p),
                     fbm(p + offset1)
                 );
                 
-                // Precompute fluid factor
                 float fluidFactor = _FluidStrength * 0.5;
                 float2 qScaled = fluidFactor * q;
                 
-                // Reduce complexity for more fluidity
                 float2 r = float2(
                     fbm(p + qScaled + offset2 + 0.1 * time),
                     fbm(p + qScaled + offset3 + 0.08 * time)
                 );
                 
-                // Create smooth fluid pattern
                 float f = fbm(p + _FluidStrength * 0.3 * r);
                 
-                // Add large smooth wave to vary separation
                 float wave = sin(uv.x * 2.0 + slowTime3) * cos(uv.y * 1.5 - slowTime4) * 0.15;
                 
-                // Combine with noise for smooth but organic boundary
                 float separation = f + wave;
                 
-                // Multiply separation by number of steps to create repetitions
-                float repeatedSeparation = frac(separation * _Steps); // frac is more efficient than fmod
+                float repeatedSeparation = frac(separation * _Steps);
                 
-                // Very fine transition to avoid clear line
-                float mixFactor = smoothstep(0.495, 0.505, repeatedSeparation); // Precomputed threshold ± edge
+                float mixFactor = smoothstep(0.495, 0.505, repeatedSeparation);
                 
-                // Select color based on separation - sharp transition
                 fixed4 col = (mixFactor > 0.5) ? _Color2 : _Color1;
                 
-                // If using texture, sample and combine it
                 if (_UseTexture > 0.5)
                 {
                     fixed4 texColor = tex2D(_MainTex, i.uv);
@@ -220,22 +206,16 @@ Shader "Custom/FluidBackground"
                     col.a *= texColor.a;
                 }
                 
-                // Apply vertex color (for UI compatibility)
                 col *= i.color;
                 
-                // Calculate UI mask alpha
                 #ifdef UNITY_UI_CLIP_RECT
                 col.a *= UnityGet2DClipping(i.worldPosition.xy, _ClipRect);
                 #endif
                 
-                // Apply per-pixel noise if enabled
                 if (_UsePixelNoise > 0.5)
                 {
-                    // Generate unique noise for each pixel based on screen position
                     float2 pixelPos = i.screenPos.xy / i.screenPos.w * _ScreenParams.xy;
-                    float pixelNoise = (betterNoise(pixelPos) - 0.5) * 2.0; // Combine in one line
-                    
-                    // Apply noise to RGB colors
+                    float pixelNoise = (betterNoise(pixelPos) - 0.5) * 2.0;
                     col.rgb = saturate(col.rgb + pixelNoise * _PixelNoiseStrength);
                 }
                 
