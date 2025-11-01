@@ -4,6 +4,7 @@ using Nox.Avatars;
 using Nox.Avatars.Parameters;
 using Nox.Avatars.Players;
 using Nox.Avatars.Rigging;
+using Nox.CCK.Network;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
@@ -105,6 +106,9 @@ namespace api.nox.relay {
 		}
 
 		private void SetupTransforms() {
+			// Sauvegarder les valeurs des anciennes parts
+			var oldParts = GetParts().ToDictionary(p => p.GetId(), p => p);
+
 			foreach (var part in GetParts())
 				RemovePart(part.GetId());
 			var rigModule = RelayExtensions
@@ -117,11 +121,29 @@ namespace api.nox.relay {
 			foreach (var part in parts) {
 				var relayPart = new RelayRigPart(this, part);
 				AddPart(relayPart);
-				Logger.LogDebug($"Linking transform '{part.GetId()}' to local player '{GetDisplay()}'");
+
+				// Restaurer les valeurs de l'ancienne part si elle existe
+				if (oldParts.TryGetValue(part.GetId(), out var oldPart)) {
+					if (oldPart.TryGetPosition(out var position))
+						relayPart.SetPosition(position);
+					if (oldPart.TryGetRotation(out var rotation))
+						relayPart.SetRotation(rotation);
+					if (oldPart.TryGetScale(out var scale))
+						relayPart.SetScale(scale);
+					if (oldPart.TryGetVelocity(out var velocity))
+						relayPart.SetVelocity(velocity);
+					if (oldPart.TryGetAngularVelocity(out var angularVelocity))
+						relayPart.SetAngularVelocity(angularVelocity);
+				}
+
+				relayPart.SetDirty(DirtyBy.Local);
 			}
 		}
 
 		private void SetupParameters() {
+			// Sauvegarder les valeurs des anciens paramètres
+			var oldProperties = GetProperties<RelayParameter>().ToDictionary(p => p.GetKey(), p => p.GetValue());
+
 			var properties = GetProperties<RelayParameter>();
 			foreach (var p in properties)
 				RemoveProperty(p.GetKey());
@@ -136,8 +158,16 @@ namespace api.nox.relay {
 				return;
 
 			var parameters = parameterModule.GetParameters();
-			foreach (var p in parameters)
-				AddProperty(new RelayParameter(this, p));
+			foreach (var p in parameters) {
+				var pa = new ReferencedRelayParameter(this, p);
+				AddProperty(pa);
+
+				// Restaurer la valeur de l'ancien paramètre si il existe
+				if (oldProperties.TryGetValue(p.GetName(), out var oldValue))
+					pa.SetValue(oldValue, DirtyBy.Local);
+
+				pa.SetDirty(DirtyBy.Local);
+			}
 		}
 
 		public UniTask<bool> OnAvatarFailed(string reason)

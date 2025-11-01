@@ -437,21 +437,21 @@ namespace api.nox.desktop {
 			foreach (var param in parameters) {
 				var n = param.GetName();
 				switch (n) {
-					case "IsLocal" or "local":
-					case "tracking/head/active":
-						param.Set(true);
-						break;
+					case "rig/ik/head/target":
 					case "tracking/left_hand/active":
 					case "tracking/right_hand/active":
 					case "tracking/left_foot/active":
 					case "tracking/right_foot/active":
+					case "tracking/right_toes/active":
+					case "tracking/left_toes/active":
 						param.Set(false);
 						break;
 					case "rig/ik/upper_spine/position_weight":
 					case "rig/ik/upper_spine/hint_weight":
 						param.Set(0f);
 						break;
-					case "rig/ik/head/target":
+					case "tracking/head/active":
+					case "IsLocal" or "local":
 						param.Set(true);
 						break;
 				}

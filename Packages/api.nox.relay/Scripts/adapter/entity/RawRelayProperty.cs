@@ -9,16 +9,17 @@ namespace api.nox.relay {
 		private          DirtyBy       _dirty;
 		private          PropertyFlags _flags;
 
-		public RawRelayProperty(RelayPlayer player, string key, object value) : base(player) {
+		public RawRelayProperty(RelayEntity player, string key, int hash, object value) : base(player) {
 			if (string.IsNullOrEmpty(key))
 				throw new ArgumentException("Property key cannot be null or empty", nameof(key));
-			_key = key;
+			_key  = key;
 			_value = value
 				?? throw new ArgumentNullException(nameof(value), "Property value cannot be null");
 		}
 
 		public override string GetKey()
 			=> _key;
+
 
 		public override object GetValue()
 			=> _value;
@@ -51,13 +52,12 @@ namespace api.nox.relay {
 		public override DirtyBy GetDirty()
 			=> _dirty;
 
-		public override void SetDirty(DirtyBy dirty) {
-			_dirty = dirty switch {
+		public override void SetDirty(DirtyBy dirty)
+			=> _dirty = dirty switch {
 				DirtyBy.Local                  => DirtyBy.Local,
 				DirtyBy.None or DirtyBy.Remote => DirtyBy.None,
 				_                              => throw new ArgumentOutOfRangeException(nameof(dirty), dirty, null)
 			};
-		}
 
 		public override string ToString()
 			=> $"{GetType().Name}[Key={_key}, Value={_value}, Flags={_flags}, Dirty={_dirty}]";

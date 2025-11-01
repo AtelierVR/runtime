@@ -17,23 +17,12 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		public int GetHash()
 			=> _parameterName.GetHashCode();
 
+		public ParameterFlags GetFlags()
+			=> ParameterFlags.LocalEditable
+				| ParameterFlags.RemoteEditableByLocal;
+
 		public ParameterType GetValueType()
 			=> ParameterType.Bool;
-
-		public bool IsReadOnly()
-			=> false;
-
-		public bool IsSyncable()
-			=> false;
-
-		public bool IsSavable()
-			=> true;
-
-		public byte[] Serialize()
-			=> Get().ToBytes();
-
-		public void Deserialize(byte[] data)
-			=> Set(data);
 
 		public object Get()
 			=> _target.enabled;

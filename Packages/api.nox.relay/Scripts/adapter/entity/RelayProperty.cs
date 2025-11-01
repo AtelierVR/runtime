@@ -1,12 +1,13 @@
 using Nox.CCK.Network;
 using Nox.Entities;
+using UnityEngine;
 
 namespace api.nox.relay {
 	public abstract class RelayProperty : IProperty {
-		public RelayPlayer Owner;
+		public RelayEntity Owner;
 
-		protected RelayProperty(RelayPlayer player)
-			=> Owner = player;
+		protected RelayProperty(RelayEntity entity)
+			=> Owner = entity;
 
 		public abstract string GetKey();
 

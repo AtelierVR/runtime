@@ -127,6 +127,10 @@ namespace api.nox.relay {
 				return false;
 			}
 
+			// Sauvegarder les valeurs des anciens paramètres et parts AVANT de les supprimer
+			var oldProperties = Reference.GetProperties<RelayParameter>().ToDictionary(p => p.GetKey(), p => p.GetValue());
+			var oldParts      = Reference.GetParts().ToDictionary(p => p.GetId(), p => p);
+
 			// Remove old properties and parts BEFORE disposing the old avatar
 			var properties = Reference.GetProperties<RelayParameter>();
 			foreach (var prop in properties)
@@ -161,7 +165,7 @@ namespace api.nox.relay {
 			var parameters = parameterModule.GetParameters();
 
 			foreach (var param in parameters) {
-				if (param.IsReadOnly()) continue;
+				if (param.GetFlags().HasFlag(ParameterFlags.LocalEditable)) continue;
 				var n = param.GetName();
 				switch (n) {
 					case "tracking/head/active":
@@ -178,8 +182,12 @@ namespace api.nox.relay {
 
 
 			foreach (var parameter in parameters) {
-				var relayParam = new RelayParameter(Reference, parameter);
+				var relayParam = new ReferencedRelayParameter(Reference, parameter);
 				Reference.AddProperty(relayParam);
+
+				// Restaurer la valeur de l'ancien paramètre si il existe
+				if (oldProperties.TryGetValue(parameter.GetName(), out var oldValue)) 
+					relayParam.SetValue(oldValue, Nox.CCK.Network.DirtyBy.Remote);
 			}
 
 
@@ -190,6 +198,20 @@ namespace api.nox.relay {
 			foreach (var part in rigModule?.GetParts() ?? Array.Empty<IRigPart>()) {
 				var relayPart = new RelayRigPart(Reference, part);
 				Reference.AddPart(relayPart);
+
+				// Restaurer les valeurs de l'ancienne part si elle existe
+				if (oldParts.TryGetValue(part.GetId(), out var oldPart)) {
+					if (oldPart.TryGetPosition(out var position))
+						relayPart.SetPosition(position);
+					if (oldPart.TryGetRotation(out var rotation))
+						relayPart.SetRotation(rotation);
+					if (oldPart.TryGetScale(out var scale))
+						relayPart.SetScale(scale);
+					if (oldPart.TryGetVelocity(out var velocity))
+						relayPart.SetVelocity(velocity);
+					if (oldPart.TryGetAngularVelocity(out var angularVelocity))
+						relayPart.SetAngularVelocity(angularVelocity);
+				}
 			}
 
 			return true;

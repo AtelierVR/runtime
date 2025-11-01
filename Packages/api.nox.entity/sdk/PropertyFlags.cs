@@ -2,7 +2,8 @@ namespace Nox.Entities {
 	[System.Flags]
 	public enum PropertyFlags {
 		None       = 0,
-		Synced     = 1 << 1,
-		Persistent = 1 << 2
+		LocalEmit  = 1 << 0,
+		RemoteEmit = 1 << 1,
+		Synced     = LocalEmit | RemoteEmit,
 	}
 }

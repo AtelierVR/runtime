@@ -28,19 +28,19 @@ namespace Nox.CCK.Avatars.Parameters {
 			return true;
 		}
 
-		public AvatarParameters  parameters;
-		public IAvatarDescriptor Descriptor;
+		public AvatarParameters parameters;
+		public IRuntimeAvatar   Runtime;
 
 		private readonly Dictionary<int, object> _history = new();
 
 		public async UniTask<bool> Setup(IRuntimeAvatar runtimeAvatar) {
 			await UniTask.Yield();
-			Descriptor = runtimeAvatar.GetDescriptor();
+			Runtime = runtimeAvatar;
 			return true;
 		}
 
 		public IParameter[] GetParameters() {
-			var animator = Descriptor?.GetAnimator();
+			var animator = Runtime?.GetDescriptor()?.GetAnimator();
 			if (!animator)
 				return Array.Empty<IParameter>();
 
@@ -73,9 +73,11 @@ namespace Nox.CCK.Avatars.Parameters {
 			}
 
 			// Ajout des paramètres des modules
-			var modules = Descriptor.GetModules()
-				.OfType<IParameterGroup>()
-				.Where(m => !ReferenceEquals(m, this)); // Exclure ce module pour éviter la récursion
+			var modules = Runtime?.GetDescriptor()
+					?.GetModules()
+					.OfType<IParameterGroup>()
+					.Where(m => !ReferenceEquals(m, this))
+				?? Array.Empty<IParameterGroup>(); // Exclure ce module pour éviter la récursion
 
 			foreach (var module in modules)
 			foreach (var moduleParameter in module.GetParameters()) {
@@ -95,7 +97,7 @@ namespace Nox.CCK.Avatars.Parameters {
 			=> GetParameters().FirstOrDefault(p => p.GetHash() == hash);
 
 		private AnimatorControllerPlayable[] GetAllControllers() {
-			var animator    = Descriptor.GetAnimator();
+			var animator    = Runtime?.GetDescriptor()?.GetAnimator();
 			var controllers = new List<AnimatorControllerPlayable>();
 			if (!animator) return controllers.ToArray();
 			for (var i = 0; i < animator.playableGraph.GetRootPlayableCount(); i++)
@@ -129,7 +131,7 @@ namespace Nox.CCK.Avatars.Parameters {
 			};
 
 		public void Update() {
-			var animator = Descriptor?.GetAnimator();
+			var animator = Runtime?.GetDescriptor()?.GetAnimator();
 			if (!animator) return;
 
 			// Récupération des paramètres de l'Animator

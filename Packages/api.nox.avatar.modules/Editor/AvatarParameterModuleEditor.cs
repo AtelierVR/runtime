@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System;
+using System.Linq;
 using Nox.CCK.Avatars.Parameters;
 using Nox.Avatars.Parameters;
 using Nox.CCK.Network;
@@ -60,7 +61,7 @@ namespace api.nox.avatar.modules {
 			}
 
 			// Récupérer l'animateur depuis les paramètres runtime
-			var animator = runtimeParams.Length > 0 ? _target.Descriptor?.GetAnimator() : null;
+			var animator = runtimeParams.Length > 0 ? _target.Runtime.GetDescriptor()?.GetAnimator() : null;
 			if (!animator) {
 				EditorGUILayout.HelpBox("Aucun animateur trouvé sur l'avatar.", MessageType.Warning);
 				Repaint();
@@ -71,11 +72,17 @@ namespace api.nox.avatar.modules {
 			EditorGUILayout.LabelField($"Paramètres runtime: {runtimeParams.Length}", EditorStyles.boldLabel);
 			EditorGUILayout.Space(5);
 
+			var isLocal = runtimeParams
+					.FirstOrDefault(e => e.GetName().Contains("IsLocal"))
+					?.Get()
+					.ToBool()
+				?? true;
+
 			foreach (var param in runtimeParams)
-				DrawRuntimeParameterField(param);
+				DrawRuntimeParameterField(param, isLocal);
 		}
 
-		private void DrawRuntimeParameterField(IParameter param) {
+		private static void DrawRuntimeParameterField(IParameter param, bool isLocal = false) {
 			EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
 			EditorGUI.indentLevel++;
@@ -83,94 +90,94 @@ namespace api.nox.avatar.modules {
 			// Affichage et modification de la valeur selon le type
 			EditorGUI.BeginChangeCheck();
 
-			var s        = $"{param.GetName()}/{param.GetHash()}";
-			var readOnly = param.IsReadOnly();
+			var s        = $"{param.GetName()}";
+			var editable = param.GetFlags().HasFlag(isLocal ? ParameterFlags.LocalEditable : ParameterFlags.RemoteEditable);
 
 			// Désactiver les contrôles GUI si le paramètre est en lecture seule
-			EditorGUI.BeginDisabledGroup(readOnly);
+			EditorGUI.BeginDisabledGroup(!editable);
 
 			switch (param.GetValueType()) {
 				case ParameterType.Bool:
 					var boolValue    = param.Get().ToBool();
 					var newBoolValue = EditorGUILayout.Toggle(s, boolValue);
-					if (EditorGUI.EndChangeCheck() && !readOnly)
+					if (EditorGUI.EndChangeCheck() && editable)
 						param.Set(newBoolValue);
 					break;
 
 				case ParameterType.Int:
 					var intValue    = param.Get().ToInt();
 					var newIntValue = EditorGUILayout.IntField(s, intValue);
-					if (EditorGUI.EndChangeCheck() && !readOnly)
+					if (EditorGUI.EndChangeCheck() && editable)
 						param.Set(newIntValue);
 					break;
 
 				case ParameterType.UInt:
 					var uintValue    = param.Get().ToUInt();
 					var newUIntValue = EditorGUILayout.IntField(s, uintValue.ToInt());
-					if (EditorGUI.EndChangeCheck() && !readOnly)
+					if (EditorGUI.EndChangeCheck() && editable)
 						param.Set(newUIntValue.ToInt());
 					break;
 
 				case ParameterType.Long:
 					var longValue    = param.Get().ToLong();
 					var newLongValue = EditorGUILayout.LongField(s, longValue);
-					if (EditorGUI.EndChangeCheck() && !readOnly)
+					if (EditorGUI.EndChangeCheck() && editable)
 						param.Set(newLongValue);
 					break;
 
 				case ParameterType.ULong:
 					var ulongValue    = param.Get().ToULong();
 					var newULongValue = EditorGUILayout.LongField(s, ulongValue.ToLong());
-					if (EditorGUI.EndChangeCheck() && !readOnly)
+					if (EditorGUI.EndChangeCheck() && editable)
 						param.Set(newULongValue.ToULong());
 					break;
 
 				case ParameterType.Byte:
 					var byteValue    = param.Get().ToByte();
 					var newByteValue = EditorGUILayout.IntField(s, byteValue);
-					if (EditorGUI.EndChangeCheck() && !readOnly)
+					if (EditorGUI.EndChangeCheck() && editable)
 						param.Set(newByteValue.ToByte());
 					break;
 
 				case ParameterType.Short:
 					var shortValue    = param.Get().ToShort();
 					var newShortValue = EditorGUILayout.IntField(s, shortValue);
-					if (EditorGUI.EndChangeCheck() && !readOnly)
+					if (EditorGUI.EndChangeCheck() && editable)
 						param.Set(newShortValue);
 					break;
 
 				case ParameterType.UShort:
 					var ushortValue    = param.Get().ToUShort();
 					var newUShortValue = EditorGUILayout.IntField(s, ushortValue);
-					if (EditorGUI.EndChangeCheck() && !readOnly)
+					if (EditorGUI.EndChangeCheck() && editable)
 						param.Set(newUShortValue);
 					break;
 
 				case ParameterType.Float:
 					var floatValue    = param.Get().ToFloat();
 					var newFloatValue = EditorGUILayout.FloatField(s, floatValue);
-					if (EditorGUI.EndChangeCheck() && !readOnly)
+					if (EditorGUI.EndChangeCheck() && editable)
 						param.Set(newFloatValue);
 					break;
 
 				case ParameterType.Double:
 					var doubleValue    = param.Get().ToDouble();
 					var newDoubleValue = EditorGUILayout.DoubleField(s, doubleValue);
-					if (EditorGUI.EndChangeCheck() && !readOnly)
+					if (EditorGUI.EndChangeCheck() && editable)
 						param.Set(newDoubleValue);
 					break;
 
 				case ParameterType.String:
 					var stringValue    = param.Get().ToString();
 					var newStringValue = EditorGUILayout.TextField(s, stringValue);
-					if (EditorGUI.EndChangeCheck() && !readOnly)
+					if (EditorGUI.EndChangeCheck() && editable)
 						param.Set(newStringValue);
 					break;
 
 				case ParameterType.Vector3:
 					var vector3Value    = param.Get().ToVector3();
 					var newVector3Value = EditorGUILayout.Vector3Field(s, vector3Value);
-					if (EditorGUI.EndChangeCheck() && !readOnly)
+					if (EditorGUI.EndChangeCheck() && editable)
 						param.Set(newVector3Value);
 					break;
 
@@ -178,7 +185,7 @@ namespace api.nox.avatar.modules {
 					var quaternionValue = param.Get().ToQuaternion();
 					var eulerAngles     = quaternionValue.eulerAngles;
 					var newEulerAngles  = EditorGUILayout.Vector3Field(s + " (Euler)", eulerAngles);
-					if (EditorGUI.EndChangeCheck() && !readOnly)
+					if (EditorGUI.EndChangeCheck() && editable)
 						param.Set(Quaternion.Euler(newEulerAngles));
 					break;
 
@@ -189,7 +196,7 @@ namespace api.nox.avatar.modules {
 							? System.Text.Encoding.UTF8.GetString(byteArrayValue)
 							: string.Empty
 					);
-					if (EditorGUI.EndChangeCheck() && !readOnly)
+					if (EditorGUI.EndChangeCheck() && editable)
 						param.Set(
 							!string.IsNullOrEmpty(newByteArrayValue)
 								? System.Text.Encoding.UTF8.GetBytes(newByteArrayValue)
@@ -205,7 +212,7 @@ namespace api.nox.avatar.modules {
 			EditorGUI.EndDisabledGroup();
 
 			// Afficher une indication si le paramètre est en lecture seule
-			if (readOnly) {
+			if (!editable) {
 				EditorGUI.indentLevel++;
 				EditorGUILayout.LabelField("", "(Lecture seule)", EditorStyles.miniLabel);
 				EditorGUI.indentLevel--;

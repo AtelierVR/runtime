@@ -28,14 +28,9 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		public ParameterType GetValueType()
 			=> ParameterType.Float;
 
-		public bool IsReadOnly()
-			=> false;
-
-		public bool IsSyncable()
-			=> false;
-
-		public bool IsSavable()
-			=> true;
+		public ParameterFlags GetFlags()
+			=> ParameterFlags.LocalEditable
+				| ParameterFlags.RemoteEditableByLocal;
 
 		public object Get() {
 			if (!_rigBuilder) return 0f;
@@ -44,17 +39,11 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		}
 
 		public void Set(object value) {
-			if (!_rigBuilder || value is not float weight) return;
+			if (!_rigBuilder) return;
 			foreach (var layer in _rigBuilder.layers.Where(layer => layer.rig && layer.rig.name == _layerName)) {
-				layer.rig.weight = Mathf.Clamp01(weight);
+				layer.rig.weight = Mathf.Clamp01(value.ToFloat());
 				break;
 			}
 		}
-
-		public byte[] Serialize()
-			=> Get().ToBytes();
-
-		public void Deserialize(byte[] data)
-			=> Set(data);
 	}
 }

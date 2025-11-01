@@ -30,21 +30,10 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		public ParameterType GetValueType()
 			=> ParameterType.Float;
 
-		public bool IsReadOnly()
-			=> false;
-
-		public bool IsSyncable()
-			=> false;
-
-		public bool IsSavable()
-			=> true;
-
-		public byte[] Serialize()
-			=> Get().ToBytes();
-
-		public void Deserialize(byte[] data)
-			=> Set(data);
-
+		public ParameterFlags GetFlags()
+			=> ParameterFlags.LocalEditable
+				| ParameterFlags.RemoteEditableByLocal;
+		
 		// ReSharper disable Unity.PerformanceAnalysis
 		public object Get() {
 			if (!_rigBuilder) return 0f;
@@ -64,7 +53,9 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		public void Set(object value) {
-			if (!_rigBuilder || !(value is float weight)) return;
+			if (!_rigBuilder) return;
+
+			var weight = value.ToFloat();
 
 			foreach (var layer in _rigBuilder.layers.Where(layer => layer.rig && layer.rig.name.Contains("Hip"))) {
 				if (_constraintType == ConstraintType.Position) {

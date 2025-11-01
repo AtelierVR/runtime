@@ -27,28 +27,16 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		public ParameterType GetValueType()
 			=> ParameterType.Vector3;
 
-		public bool IsReadOnly()
-			=> false;
-
-		public bool IsSyncable()
-			=> false;
-
-		public bool IsSavable()
-			=> true;
+		public ParameterFlags GetFlags()
+			=> ParameterFlags.Persistent;
 
 		public object Get()
 			=> _module?.GetPart(_bone)?.position ?? Vector3.zero;
 
 
 		public void Set(object value) {
-			if (!_module || value is not Vector3 position) return;
-			_module.GetPart(_bone).position = position;
+			if (!_module) return;
+			_module.GetPart(_bone).position = value.ToVector3();
 		}
-
-		public byte[] Serialize()
-			=> Get().ToBytes();
-
-		public void Deserialize(byte[] data)
-			=> Set(data);
 	}
 }

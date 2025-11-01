@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using api.nox.offline;
 using api.nox.relay.connection;
@@ -106,8 +107,8 @@ namespace api.nox.relay {
 		}
 
 		public void OnProperties(PropertiesEvent ev) {
-			var entity   = _entities.GetEntity<IEntity>(ev.EntityId);
-			var byEntity = _entities.GetEntity<IEntity>(ev.ByEntityId);
+			var entity   = _entities.GetEntity<RelayEntity>(ev.EntityId);
+			var byEntity = _entities.GetEntity<RelayEntity>(ev.ByEntityId);
 			if (entity == null) {
 				Logger.LogWarning($"Entity with ID {ev.EntityId} not found for Properties event");
 				return;
@@ -118,17 +119,21 @@ namespace api.nox.relay {
 				return;
 			}
 
-			var table = entity.GetProperties()
-				.ToDictionary(p => p.GetKey().Hash(), p => p);
+			var table = new Dictionary<int, RelayParameter>();
+			foreach (var prop in entity.GetProperties<RelayParameter>()) 
+				table[prop.GetKey().Hash()] = prop;
+			var isByLocal = entity.GetId() == byEntity.GetId();
 
 			foreach (var param in ev.Parameters) {
 				if (!table.TryGetValue(param.Key, out var property)) {
 					Logger.LogWarning($"Property with key hash {param.Key} not found for entity {entity.GetId()}");
+					property = new UndefinedRelayParameter(entity, param.Key, param.Value);
+					entity.AddProperty(property);
 					continue;
 				}
 
-				if (!property.GetFlags().HasFlag(PropertyFlags.Synced)) {
-					Logger.LogWarning($"Ignoring non-synced property: {param.Key} ({byEntity.GetId()} -> {entity.GetId()})");
+				if (!property.GetFlags().HasFlag(isByLocal ? PropertyFlags.LocalEmit : PropertyFlags.RemoteEmit)) {
+					Logger.LogWarning($"Ignoring non-synced property: {param.Key} ({byEntity.GetId()} -> {entity.GetId()}) ({property.GetFlags()})");
 					continue;
 				}
 
@@ -214,8 +219,9 @@ namespace api.nox.relay {
 		}
 
 		private void SendProperties(IEntity entity) {
+			var isLocal = entity is IPlayer player && player.IsLocal();
 			var properties = entity.GetProperties()
-				.Where(p => p.GetDirty() == DirtyBy.Local && p.GetFlags().HasFlag(PropertyFlags.Synced))
+				.Where(p => p.GetDirty() == DirtyBy.Local && p.GetFlags().HasFlag(isLocal ? PropertyFlags.LocalEmit : PropertyFlags.RemoteEmit))
 				.ToArray();
 			if (properties.Length == 0) return;
 

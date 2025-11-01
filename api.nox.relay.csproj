@@ -72,6 +72,7 @@
     <Compile Include="Packages\api.nox.relay\Scripts\adapter\RelayExtensions.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\voice\InstanceRequestVoice.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\transform\TransformEvent.cs" />
+    <Compile Include="Packages\api.nox.relay\Scripts\adapter\players\UndefinedRelayParameter.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\player_update\PlayerUpdateFlags.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\transform\TransformType.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\enter\EnterResult.cs" />
@@ -89,6 +90,7 @@
     <Compile Include="Packages\api.nox.relay\Scripts\adapter\players\remote\RelayPhysicalRemotePlayer.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\instance\RelayInstanceRequest.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\join\JoinEvent.cs" />
+    <Compile Include="Packages\api.nox.relay\Scripts\adapter\players\ReferencedRelayParameter.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\enter\EnterResponse.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\traveling\InstanceRequestTraveling.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\adapter\entity\RelayProperty.cs" />

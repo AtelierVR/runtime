@@ -27,28 +27,17 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		public ParameterType GetValueType()
 			=> ParameterType.Quaternion;
 
-		public bool IsReadOnly()
-			=> false;
+		public ParameterFlags GetFlags()
+			=> ParameterFlags.Persistent;
 
-		public bool IsSyncable()
-			=> false;
-
-		public bool IsSavable()
-			=> true;
 
 		public object Get()
 			=> _module?.GetPart(_bone).rotation ?? Quaternion.identity;
 
 
 		public void Set(object value) {
-			if (!_module || value is not Quaternion rotation) return;
-			_module.GetPart(_bone).rotation = rotation;
+			if (!_module) return;
+			_module.GetPart(_bone).rotation = value.ToQuaternion();
 		}
-
-		public byte[] Serialize()
-			=> Get().ToBytes();
-
-		public void Deserialize(byte[] data)
-			=> Set(data);
 	}
 }

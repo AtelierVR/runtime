@@ -117,28 +117,28 @@ namespace api.nox.relay {
 		public DirtyBy GetDirty()
 			=> _dirty;
 
-	public void SetDirty(DirtyBy by) {
-		switch (by) {
-			case DirtyBy.Remote:
-				_dirty = DirtyBy.None;
-				return;
-			case DirtyBy.Local:
-				_dirty = DirtyBy.Local;
-				return;
-			case DirtyBy.None:
-				_dirty = DirtyBy.None;
-				// Ne pas réinitialiser les flags de transformation ici
-				// car ils sont nécessaires pour les comparaisons futures
-				// ResetPosition();
-				// ResetRotation();
-				// ResetScale();
-				// ResetVelocity();
-				// ResetAngularVelocity();
-				return;
-			default:
-				throw new ArgumentOutOfRangeException(nameof(by), by, null);
+		public void SetDirty(DirtyBy by) {
+			switch (by) {
+				case DirtyBy.Remote:
+					_dirty = DirtyBy.None;
+					return;
+				case DirtyBy.Local:
+					_dirty = DirtyBy.Local;
+					return;
+				case DirtyBy.None:
+					_dirty = DirtyBy.None;
+					// Ne pas réinitialiser les flags de transformation ici
+					// car ils sont nécessaires pour les comparaisons futures
+					// ResetPosition();
+					// ResetRotation();
+					// ResetScale();
+					// ResetVelocity();
+					// ResetAngularVelocity();
+					return;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(by), by, null);
+			}
 		}
-	}
 
 		public void Update(float time) {
 			if (!TryGet(out var transform, out _) || !transform)

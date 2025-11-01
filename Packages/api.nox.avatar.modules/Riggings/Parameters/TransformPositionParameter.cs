@@ -26,14 +26,8 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		public ParameterType GetValueType()
 			=> ParameterType.Vector3;
 
-		public bool IsReadOnly()
-			=> _isReadOnly;
-
-		public bool IsSyncable()
-			=> false;
-
-		public bool IsSavable()
-			=> true;
+		public ParameterFlags GetFlags()
+			=> ParameterFlags.Persistent;
 
 		public object Get()
 			=> _transform
@@ -43,14 +37,7 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 
 		public void Set(object value) {
 			if (_isReadOnly || !_transform) return;
-			if (value is Vector3 position) 
-				_transform.position = position;
+			_transform.position = value.ToVector3();
 		}
-
-		public byte[] Serialize()
-			=> Get().ToBytes();
-
-		public void Deserialize(byte[] data)
-			=> Set(data);
 	}
 }

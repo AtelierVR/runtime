@@ -95,4 +95,6 @@ crashlytics-build.properties
 
 mono_crash.*
 
-
+.idea/*
+.vscode/*
+!.vscode/settings.json

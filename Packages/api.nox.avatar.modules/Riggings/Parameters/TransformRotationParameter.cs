@@ -26,14 +26,8 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		public ParameterType GetValueType()
 			=> ParameterType.Quaternion;
 
-		public bool IsReadOnly()
-			=> _isReadOnly;
-
-		public bool IsSyncable()
-			=> false;
-
-		public bool IsSavable()
-			=> true;
+		public ParameterFlags GetFlags()
+			=> ParameterFlags.Persistent;
 
 		public object Get()
 			=> _transform
@@ -43,14 +37,7 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 
 		public void Set(object value) {
 			if (_isReadOnly || !_transform) return;
-			if (value is Quaternion rotation)
-				_transform.rotation = rotation;
+			_transform.rotation = value.ToQuaternion();
 		}
-
-		public byte[] Serialize()
-			=> Get().ToBytes();
-
-		public void Deserialize(byte[] data)
-			=> Set(data);
 	}
 }

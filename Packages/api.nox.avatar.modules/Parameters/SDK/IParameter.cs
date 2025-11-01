@@ -16,23 +16,10 @@ namespace Nox.Avatars.Parameters {
 		public int GetHash();
 
 		/// <summary>
-		/// Checks if the parameter is syncable with networks.
+		/// Gets the flags associated with the parameter.
 		/// </summary>
 		/// <returns></returns>
-		public bool IsSyncable();
-
-		/// <summary>
-		/// Checks if the parameter can be saved.
-		/// Or reset to default when the avatar is (re)initialized.
-		/// </summary>
-		/// <returns></returns>
-		public bool IsSavable();
-
-		/// <summary>
-		/// Checks if the parameter is read-only.
-		/// </summary>
-		/// <returns></returns>
-		public bool IsReadOnly();
+		public ParameterFlags GetFlags();
 
 		/// <summary>
 		/// Gets the type of the parameter value.

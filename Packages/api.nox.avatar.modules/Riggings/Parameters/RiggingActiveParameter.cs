@@ -27,27 +27,16 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		public ParameterType GetValueType()
 			=> ParameterType.Bool;
 
-		public bool IsReadOnly()
-			=> false;
-
-		public bool IsSyncable()
-			=> false;
-
-		public bool IsSavable()
-			=> true;
+		public ParameterFlags GetFlags()
+			=> ParameterFlags.LocalEditable
+				| ParameterFlags.RemoteEditableByLocal;
 
 		public object Get()
 			=> _module && _module.IsActive(_bone);
 
 		public void Set(object value) {
-			if (!_module || value is not bool active) return;
-			_module.SetActive(_bone, active);
+			if (!_module) return;
+			_module.SetActive(_bone, value.ToBool());
 		}
-
-		public byte[] Serialize()
-			=> Get().ToBytes();
-
-		public void Deserialize(byte[] data)
-			=> Set(data);
 	}
 }

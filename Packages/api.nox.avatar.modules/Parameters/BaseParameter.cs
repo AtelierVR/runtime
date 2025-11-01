@@ -14,14 +14,10 @@ namespace Nox.CCK.Avatars.Parameters {
 		public int GetHash()
 			=> Parameter.nameHash;
 
-		public bool IsSyncable()
-			=> Entry?.synced ?? false;
-
-		public bool IsSavable()
-			=> Entry?.savable ?? false;
-
-		public bool IsReadOnly()
-			=> false;
+		public ParameterFlags GetFlags()
+			=> ParameterFlags.Editable
+				| (Entry?.synced  == true ? ParameterFlags.Syncable : ParameterFlags.None)
+				| (Entry?.savable == true ? ParameterFlags.Persistent : ParameterFlags.None);
 
 		public ParameterType GetValueType()
 			=> Parameter.type switch {
@@ -66,12 +62,6 @@ namespace Nox.CCK.Avatars.Parameters {
 					throw new ArgumentOutOfRangeException($"Unsupported parameter type: {Parameter.type}");
 			}
 		}
-
-		public byte[] Serialize()
-			=> Get().ToBytes();
-
-		public void Deserialize(byte[] data)
-			=> Set(data);
 
 		protected abstract void SetFloat(float value);
 
