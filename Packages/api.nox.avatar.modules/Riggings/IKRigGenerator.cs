@@ -51,7 +51,7 @@ namespace Nox.CCK.Avatars.Rigging {
 		public static RigBuilder CreateIKRig(RiggingAvatarModule module) {
 			var rigBuilder = CreateRigBuilder(module);
 			rigBuilder.enabled = false;
-			
+
 			CreateUpperSpine(module, rigBuilder);
 			CreateLeftArm(module, rigBuilder);
 			CreateRightArm(module, rigBuilder);
@@ -76,6 +76,9 @@ namespace Nox.CCK.Avatars.Rigging {
 		private static void CreateUpperSpine(RiggingAvatarModule module, RigBuilder rigBuilder) {
 			var upperSpine = new GameObject(UpperSpine);
 			upperSpine.transform.SetParent(rigBuilder.transform);
+			upperSpine.transform.localPosition = Vector3.zero;
+			upperSpine.transform.localRotation = Quaternion.identity;
+			upperSpine.transform.localScale    = Vector3.one;
 
 			var rig = upperSpine.AddComponent<Rig>();
 			rig.weight = 1.0f;
@@ -83,6 +86,9 @@ namespace Nox.CCK.Avatars.Rigging {
 
 			var contraint = new GameObject("IK_UpperSpineConstraint");
 			contraint.transform.SetParent(upperSpine.transform);
+			contraint.transform.localPosition = Vector3.zero;
+			contraint.transform.localRotation = Quaternion.identity;
+			contraint.transform.localScale    = Vector3.one;
 			var constraint = contraint.AddComponent<TwoBoneIKConstraint>();
 
 			constraint.data.root   = module.GetBone(HumanBodyBones.Chest);
@@ -124,6 +130,9 @@ namespace Nox.CCK.Avatars.Rigging {
 		private static void CreateArm(string name, HumanBodyBones upperBone, HumanBodyBones lowerBone, HumanBodyBones handBone, RiggingAvatarModule module, RigBuilder rigBuilder) {
 			var arm = new GameObject(name);
 			arm.transform.SetParent(rigBuilder.transform);
+			arm.transform.localPosition = Vector3.zero;
+			arm.transform.localRotation = Quaternion.identity;
+			arm.transform.localScale    = Vector3.one;
 
 			var rig = arm.AddComponent<Rig>();
 			rig.weight = 1.0f;
@@ -131,6 +140,9 @@ namespace Nox.CCK.Avatars.Rigging {
 
 			var contraint = new GameObject($"IK_{name}Constraint");
 			contraint.transform.SetParent(arm.transform);
+			contraint.transform.localPosition = Vector3.zero;
+			contraint.transform.localRotation = Quaternion.identity;
+			contraint.transform.localScale    = Vector3.one;
 			var constraint = contraint.AddComponent<TwoBoneIKConstraint>();
 
 			constraint.data.root   = module.GetBone(upperBone);
@@ -172,6 +184,9 @@ namespace Nox.CCK.Avatars.Rigging {
 		private static void CreateLeg(string name, HumanBodyBones upperBone, HumanBodyBones lowerBone, HumanBodyBones footBone, RiggingAvatarModule module, RigBuilder rigBuilder) {
 			var leg = new GameObject(name);
 			leg.transform.SetParent(rigBuilder.transform);
+			leg.transform.localPosition = Vector3.zero;
+			leg.transform.localRotation = Quaternion.identity;
+			leg.transform.localScale    = Vector3.one;
 
 			var rig = leg.AddComponent<Rig>();
 			rig.weight = 1.0f;
@@ -179,6 +194,9 @@ namespace Nox.CCK.Avatars.Rigging {
 
 			var contraint = new GameObject($"IK_{name}Constraint");
 			contraint.transform.SetParent(leg.transform);
+			contraint.transform.localPosition = Vector3.zero;
+			contraint.transform.localRotation = Quaternion.identity;
+			contraint.transform.localScale    = Vector3.one;
 			var constraint = contraint.AddComponent<TwoBoneIKConstraint>();
 
 			constraint.data.root   = module.GetBone(upperBone);
@@ -216,6 +234,9 @@ namespace Nox.CCK.Avatars.Rigging {
 		private static void CreateToe(string name, HumanBodyBones toeBone, RiggingAvatarModule module, RigBuilder rigBuilder) {
 			var toe = new GameObject(name);
 			toe.transform.SetParent(rigBuilder.transform);
+			toe.transform.localPosition = Vector3.zero;
+			toe.transform.localRotation = Quaternion.identity;
+			toe.transform.localScale    = Vector3.one;
 
 			var rig = toe.AddComponent<Rig>();
 			rig.weight = 1.0f;
@@ -223,6 +244,9 @@ namespace Nox.CCK.Avatars.Rigging {
 
 			var contraint = new GameObject($"IK_{name}Constraint");
 			contraint.transform.SetParent(toe.transform);
+			contraint.transform.localPosition = Vector3.zero;
+			contraint.transform.localRotation = Quaternion.identity;
+			contraint.transform.localScale    = Vector3.one;
 			var constraint = contraint.AddComponent<DampedTransform>();
 
 			constraint.data.constrainedObject = module.GetBone(toeBone);
