@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.Avatars.Parameters;
 using Nox.CCK.Build;
+using Nox.CCK.Network;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
@@ -50,18 +51,13 @@ namespace api.nox.avatar.editor {
 
 			parameters?.GetParameter("IsLocal")?.Set(true);
 			parameters?.GetParameter("is_local")?.Set(true);
-
 			parameters?.GetParameter("Grounded")?.Set(true);
 			parameters?.GetParameter("grounded")?.Set(true);
-
 			parameters?.GetParameter("Upright")?.Set(1.0f);
 			parameters?.GetParameter("upright")?.Set(1.0f);
-
 			parameters?.GetParameter("VRMode")?.Set(0);
 			parameters?.GetParameter("use_xr")?.Set(false);
-
 			parameters?.GetParameter("TrackingType")?.Set(3);
-
 			parameters?.GetParameter("tracking/left_hand/active")?.Set(false);
 			parameters?.GetParameter("tracking/right_hand/active")?.Set(false);
 			parameters?.GetParameter("tracking/head/active")?.Set(false);

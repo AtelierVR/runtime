@@ -11,7 +11,8 @@
         "Nox.Servers",
         "Nox.Search",
         "Nox.UI",
-        "Nox.ModLoader"
+        "Nox.ModLoader",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

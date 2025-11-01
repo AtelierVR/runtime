@@ -50,7 +50,7 @@ namespace api.nox.server.client {
 			identifier.UpdateText("server.identifier", new[] { server.GetAddress() });
 
 			if (!string.IsNullOrEmpty(server.GetDescription())) {
-				descriptionText.UpdateText("server.description", new[] { server.GetDescription() });
+				descriptionText.SetMarkdown(server.GetDescription());
 				descriptionContainer.SetActive(true);
 			} else descriptionContainer.SetActive(false);
 

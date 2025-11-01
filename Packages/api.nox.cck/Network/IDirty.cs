@@ -4,12 +4,12 @@ namespace Nox.CCK.Network {
 		/// Check if the object is dirty (has been modified).
 		/// </summary>
 		/// <returns></returns>
-		public bool IsDirty();
+		public DirtyBy GetDirty();
 
 		/// <summary>
 		/// Mark the object as dirty or clean.
 		/// </summary>
 		/// <param name="dirty"></param>
-		public void SetDirty(bool dirty = true);
+		public void SetDirty(DirtyBy dirty);
 	}
 }

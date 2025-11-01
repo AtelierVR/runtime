@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Nox.CCK.Network;
 using UnityEngine;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
@@ -93,14 +94,14 @@ namespace api.nox.offline {
 
 
 		[NoxPublic(NoxAccess.Method)]
-		public void SetPosition(Vector3 position, bool markDirty = true) {
+		public void SetPosition(Vector3 position, DirtyBy markDirty) {
 			var nox = new NoxTransform();
 			nox.SetPosition(position);
 			SetPart(PlayerRig.Base.ToIndex(), nox);
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public void SetRotation(Quaternion rotation, bool markDirty = true) {
+		public void SetRotation(Quaternion rotation, DirtyBy markDirty) {
 			var nox = new NoxTransform();
 			nox.SetRotation(rotation);
 			SetPart(PlayerRig.Base.ToIndex(), nox);
@@ -114,7 +115,7 @@ namespace api.nox.offline {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		[NoxPublic(NoxAccess.Method)]
-		public void SetVelocity(Vector3 velocity, bool markDirty = true) {
+		public void SetVelocity(Vector3 velocity, DirtyBy markDirty) {
 			var nox = new NoxTransform();
 			nox.SetVelocity(velocity);
 			SetPart(PlayerRig.Base.ToIndex(), nox);
@@ -128,7 +129,7 @@ namespace api.nox.offline {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		[NoxPublic(NoxAccess.Method)]
-		public void SetAngularVelocity(Vector3 angular, bool markDirty = true) {
+		public void SetAngularVelocity(Vector3 angular, DirtyBy markDirty) {
 			var nox = new NoxTransform();
 			nox.SetAngularVelocity(angular);
 			SetPart(PlayerRig.Base.ToIndex(), nox);
@@ -182,7 +183,7 @@ namespace api.nox.offline {
 		}
 
 		// ReSharper disable Unity.PerformanceAnalysis
-		public void MovePart(ushort part, NoxTransform transform) {
+		public void MovePart(ushort part, NoxTransform transform, DirtyBy markDirty) {
 			if (!TryGetPart(part, out var tr)) return;
 
 			if (!transform.IsSamePosition(tr.position))
@@ -214,9 +215,6 @@ namespace api.nox.offline {
 			Teleport(spawn.GetPosition(), spawn.GetRotation());
 			Logger.LogDebug($"Player {_id} respawned at {spawn.GetPosition()}");
 		}
-
-		public void Move(NoxTransform transform)
-			=> MovePart(PlayerRig.Base.ToIndex(), transform);
 
 		public OfflinePart[] GetParts() {
 			var controller = Main.ControllerAPI.GetCurrent();

@@ -2,7 +2,7 @@ using Nox.Avatars.Parameters;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using System.Linq;
-using Nox.CCK.Avatars.Parameters;
+using Nox.CCK.Network;
 
 namespace Nox.CCK.Avatars.Rigging.Parameters {
 	public class IKWeightParameter : IParameter {

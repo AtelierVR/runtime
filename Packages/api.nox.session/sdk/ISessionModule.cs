@@ -1,3 +1,4 @@
+using Nox.Entities;
 using Nox.Players;
 using Nox.Worlds;
 using UnityEngine;
@@ -17,7 +18,11 @@ namespace Nox.Sessions {
 		public void OnAuthorityTransferred(IPlayer @new) { }
 
 		public void OnSceneLoaded(IWorldDescriptor descriptor, int index, GameObject anchor) { }
-		
+
 		public void OnSceneUnloaded(int index) { }
+
+		public void OnEntityRegistered(IEntity entity) { }
+
+		public void OnEntityUnregistered(IEntity entity) { }
 	}
 }

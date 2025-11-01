@@ -11,7 +11,8 @@
         "Nox.Search",
         "Nox.Network",
         "Nox.Sessions",
-        "Nox.Players"
+        "Nox.Players",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,8 +1,7 @@
 using Nox.Avatars.Parameters;
-using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using System.Linq;
-using Nox.CCK.Avatars.Parameters;
+using Nox.CCK.Network;
 
 namespace Nox.CCK.Avatars.Rigging.Parameters {
 	public class RigBuilderLayerActiveParameter : IParameter {
@@ -18,9 +17,6 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 
 		public string GetName()
 			=> _parameterName;
-
-		public bool IsValid()
-			=> _rigBuilder && _rigBuilder.layers.Any(l => l.rig && l.rig.name == _layerName);
 
 		public int GetHash()
 			=> _parameterName.GetHashCode();

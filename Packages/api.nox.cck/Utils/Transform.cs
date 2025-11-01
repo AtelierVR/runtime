@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace Nox.CCK.Utils {
 	public class Transform {
+		public const float DefaultThreshold = 0.0001f;
 		private Vector3        _position;
 		private Quaternion     _rotation;
 		private Vector3        _scale;
@@ -33,10 +34,8 @@ namespace Nox.CCK.Utils {
 		/// <summary>
 		/// Reset the position of the transform.
 		/// </summary>
-		public void ResetPosition() {
-			_position =  Vector3.zero;
-			_flags    &= ~TransformFlags.Position;
-		}
+		public void ResetPosition() 
+			=> _flags    &= ~TransformFlags.Position;
 
 		// ROTATION
 
@@ -59,10 +58,9 @@ namespace Nox.CCK.Utils {
 		/// <summary>
 		/// Reset the rotation of the transform.
 		/// </summary>
-		public void ResetRotation() {
-			_rotation =  Quaternion.identity;
-			_flags    &= ~TransformFlags.Rotation;
-		}
+		public void ResetRotation()
+			=> _flags &= ~TransformFlags.Rotation;
+
 
 		// SCALE
 
@@ -85,10 +83,8 @@ namespace Nox.CCK.Utils {
 		/// <summary>
 		/// Reset the scale of the transform.
 		/// </summary>
-		public void ResetScale() {
-			_scale =  Vector3.one;
-			_flags &= ~TransformFlags.Scale;
-		}
+		public void ResetScale()
+			=> _flags &= ~TransformFlags.Scale;
 
 		// VELOCITY
 
@@ -111,10 +107,9 @@ namespace Nox.CCK.Utils {
 		/// <summary>
 		/// Reset the velocity of the transform.
 		/// </summary>
-		public void ResetVelocity() {
-			_velocity =  Vector3.zero;
-			_flags    &= ~TransformFlags.Velocity;
-		}
+		public void ResetVelocity()
+			=> _flags &= ~TransformFlags.Velocity;
+
 
 		// ANGULAR VELOCITY
 
@@ -137,10 +132,8 @@ namespace Nox.CCK.Utils {
 		/// <summary>
 		/// Reset the angular velocity of the transform.
 		/// </summary>
-		public void ResetAngularVelocity() {
-			_angularVelocity =  Vector3.zero;
-			_flags           &= ~TransformFlags.AngularVelocity;
-		}
+		public void ResetAngularVelocity()
+			=> _flags &= ~TransformFlags.AngularVelocity;
 
 		/// <summary>
 		/// Create a new empty transform.
@@ -167,7 +160,7 @@ namespace Nox.CCK.Utils {
 		/// <param name="transform">Transform to compare</param>
 		/// <param name="threshold">Threshold for the comparison (optional)</param>
 		/// <returns>True if the transform is equal</returns>
-		public bool Equals(Transform transform, float threshold = float.Epsilon)
+		public bool Equals(Transform transform, float threshold = DefaultThreshold)
 			=> _flags == transform._flags
 				&& IsSamePosition(transform._position, threshold)
 				&& IsSameRotation(transform._rotation, threshold)
@@ -175,21 +168,23 @@ namespace Nox.CCK.Utils {
 				&& IsSameVelocity(transform._velocity, threshold)
 				&& IsSameAngularVelocity(transform._angularVelocity, threshold);
 
-		public bool IsSameScale(Vector3 value, float threshold = float.Epsilon)
+		public bool IsSameScale(Vector3 value, float threshold = DefaultThreshold)
 			=> _flags.HasFlag(TransformFlags.Scale) && Vector3.Distance(_scale, value) < threshold;
 
-		public bool IsSamePosition(Vector3 value, float threshold = float.Epsilon)
+		public bool IsSamePosition(Vector3 value, float threshold = DefaultThreshold)
 			=> _flags.HasFlag(TransformFlags.Position) && Vector3.Distance(_position, value) < threshold;
 
-		public bool IsSameRotation(Quaternion value, float threshold = float.Epsilon)
+		public bool IsSameRotation(Quaternion value, float threshold = DefaultThreshold)
 			=> _flags.HasFlag(TransformFlags.Rotation) && Quaternion.Angle(_rotation, value) < threshold;
 
-		public bool IsSameVelocity(Vector3 value, float threshold = float.Epsilon)
+		public bool IsSameVelocity(Vector3 value, float threshold = DefaultThreshold)
 			=> _flags.HasFlag(TransformFlags.Velocity) && Vector3.Distance(_velocity, value) < threshold;
 
-		public bool IsSameAngularVelocity(Vector3 value, float threshold = float.Epsilon)
+		public bool IsSameAngularVelocity(Vector3 value, float threshold = DefaultThreshold)
 			=> _flags.HasFlag(TransformFlags.AngularVelocity) && Vector3.Distance(_angularVelocity, value) < threshold;
 
+		public override string ToString()
+			=> $"{GetType().Name}[Flags={_flags}, Position={GetPosition()}, Rotation={GetRotation()}, Scale={GetScale()}, Velocity={GetVelocity()}, AngularVelocity={GetAngularVelocity()}]";
 	}
 
 	[System.Flags]

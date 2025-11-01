@@ -1,3 +1,4 @@
+using Nox.CCK.Network;
 using Nox.Entities;
 using Nox.Users;
 using UnityEngine;
@@ -54,7 +55,8 @@ namespace Nox.Players {
 		/// </summary>
 		/// <param name="part"></param>
 		/// <param name="transform"></param>
-		public void MovePart(ushort part, NoxTransform transform);
+		/// <param name="markDirty"></param>
+		public void MovePart(ushort part, NoxTransform transform, DirtyBy markDirty = DirtyBy.Local);
 
 		/// <summary>
 		/// Teleport the player to a spawn point.

@@ -1,6 +1,6 @@
 using Nox.Avatars.Parameters;
-using Nox.CCK.Avatars.Parameters;
 using UnityEngine;
+using Nox.CCK.Network;
 
 namespace Nox.CCK.Avatars.Rigging.Parameters {
 	public class TransformPositionParameter : IParameter {

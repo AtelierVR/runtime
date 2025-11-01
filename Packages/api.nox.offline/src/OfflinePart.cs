@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Nox.CCK.Network;
 using Nox.Entities;
 using UnityEngine;
 
@@ -12,10 +13,10 @@ namespace api.nox.offline {
 			_transform = pair.Value;
 		}
 
-		public bool IsDirty()
-			=> false;
+		public DirtyBy GetDirty()
+			=> DirtyBy.None;
 
-		public void SetDirty(bool dirty = true) { }
+		public void SetDirty(DirtyBy dirty) { }
 
 		public ushort GetId()
 			=> _id;
@@ -55,23 +56,26 @@ namespace api.nox.offline {
 			return false;
 		}
 
-		public void SetPosition(Vector3 position, bool markDirty = true)
+		public void SetPosition(Vector3 position, DirtyBy markDirty)
 			=> _transform.position = position;
 
-		public void SetRotation(Quaternion rotation, bool markDirty = true)
+		public void SetRotation(Quaternion rotation, DirtyBy markDirty)
 			=> _transform.rotation = rotation;
 
-		public void SetScale(Vector3 scale, bool markDirty = true)
+		public void SetScale(Vector3 scale, DirtyBy markDirty)
 			=> _transform.localScale = scale;
 
-		public void SetVelocity(Vector3 velocity, bool markDirty = true) {
+		public void SetVelocity(Vector3 velocity, DirtyBy markDirty) {
 			if (!_transform.TryGetComponent(out Rigidbody rb)) return;
 			rb.linearVelocity = velocity;
 		}
 
-		public void SetAngularVelocity(Vector3 angularVelocity, bool markDirty = true) {
+		public void SetAngularVelocity(Vector3 angularVelocity, DirtyBy markDirty) {
 			if (!_transform.TryGetComponent(out Rigidbody rb)) return;
 			rb.angularVelocity = angularVelocity;
 		}
+
+		public override string ToString()
+			=> $"{GetType().Name}[Id={GetId()}, Transform={_transform}]";
 	}
 }

@@ -1,3 +1,4 @@
+using Nox.CCK.Network;
 using UnityEngine;
 using Transform = Nox.CCK.Utils.Transform;
 
@@ -17,7 +18,7 @@ namespace Nox.Entities {
 		/// </summary>
 		/// <param name="position"></param>
 		/// <param name="markDirty"></param>
-		public void SetPosition(Vector3 position, bool markDirty = true);
+		public void SetPosition(Vector3 position, DirtyBy markDirty);
 
 		/// <summary>
 		/// Get the velocity of the entity.
@@ -30,7 +31,7 @@ namespace Nox.Entities {
 		/// </summary>
 		/// <param name="velocity"></param>
 		/// <param name="markDirty"></param>
-		public void SetVelocity(Vector3 velocity, bool markDirty = true);
+		public void SetVelocity(Vector3 velocity, DirtyBy markDirty);
 
 		/// <summary>
 		/// Get the rotation of the entity.
@@ -43,7 +44,7 @@ namespace Nox.Entities {
 		/// </summary>
 		/// <param name="rotation"></param>
 		/// <param name="markDirty"></param>
-		public void SetRotation(Quaternion rotation, bool markDirty = true);
+		public void SetRotation(Quaternion rotation, DirtyBy markDirty);
 
 		/// <summary>
 		/// Get the angular velocity of the entity.
@@ -56,6 +57,6 @@ namespace Nox.Entities {
 		/// </summary>
 		/// <param name="angularVelocity"></param>
 		/// <param name="markDirty"></param>
-		public void SetAngularVelocity(Vector3 angularVelocity, bool markDirty = true);
+		public void SetAngularVelocity(Vector3 angularVelocity, DirtyBy markDirty);
 	}
 }

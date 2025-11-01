@@ -24,6 +24,7 @@ namespace api.nox.session {
 		}
 
 		public void OnUpdateEditor() {
+			if (!_sessionsPanelInstance.IsActive()) return;
 			_sessionsPanel?.Update();
 		}
 

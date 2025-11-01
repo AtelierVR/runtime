@@ -1,3 +1,6 @@
+using Nox.CCK.Network;
+using UnityEngine.Events;
+
 namespace Nox.Avatars.Parameters {
 	public interface IParameter {
 		/// <summary>
@@ -6,12 +9,6 @@ namespace Nox.Avatars.Parameters {
 		/// <returns></returns>
 		public string GetName();
 
-		/// <summary>
-		/// Checks if the parameter is valid.
-		/// </summary>
-		/// <returns></returns>
-		public bool IsValid();
-		
 		/// <summary>
 		/// Gets the unique identifier of the parameter.
 		/// </summary>
@@ -56,9 +53,5 @@ namespace Nox.Avatars.Parameters {
 		/// </summary>
 		/// <param name="value"></param>
 		public void Set(object value);
-
-		public byte[] Serialize();
-
-		public void Deserialize(byte[] data);
 	}
 }

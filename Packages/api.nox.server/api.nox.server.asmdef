@@ -8,7 +8,8 @@
         "api.nox.jint",
         "Nox.Users",
         "Nox.Network",
-        "Nox.UI"
+        "Nox.UI",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -29,6 +29,10 @@ MonoBehaviour:
       value: "{0}"
     - key: user.identifier
       value: "{0}"
+    - key: user.about.bio
+      value: "Bio"
+    - key: user.bio
+      value: "{0}"
   - IETF: fr-FR
     entries:
     - key: user.search.data.title

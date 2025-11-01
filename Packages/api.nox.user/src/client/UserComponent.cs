@@ -5,6 +5,7 @@ using Nox.CCK.Language;
 using Nox.CCK.Utils;
 using Nox.Users;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace api.nox.user.client {
@@ -17,6 +18,8 @@ namespace api.nox.user.client {
 		public TextLanguage      identifier;
 		public UserPage          Page;
 		public AspectRatioFitter fitter;
+		public GameObject        bioContainer;
+		public TextLanguage      bioText;
 
 		public void UpdateContent(IUser user) {
 			if (user == null) return;
@@ -30,6 +33,11 @@ namespace api.nox.user.client {
 					user.GetServerAddress()
 				}
 			);
+
+			if (!string.IsNullOrEmpty(user.GetBio())) {
+				bioText.SetMarkdown(user.GetBio());
+				bioContainer.SetActive(true);
+			} else bioContainer.SetActive(false);
 
 			UpdateThumbnail(user).Forget();
 			UpdateBanner(user).Forget();
@@ -98,6 +106,7 @@ namespace api.nox.user.client {
 			banner.sprite    = null;
 			withBanner.SetActive(false);
 			withoutBanner.SetActive(true);
+			bioContainer.SetActive(false);
 		}
 
 		public void UpdateLoading() {
@@ -107,6 +116,7 @@ namespace api.nox.user.client {
 			banner.sprite    = null;
 			withBanner.SetActive(false);
 			withoutBanner.SetActive(true);
+			bioContainer.SetActive(false);
 		}
 
 		public static (GameObject, UserComponent) Generate(UserPage userPage, RectTransform parent) {
@@ -135,6 +145,32 @@ namespace api.nox.user.client {
 
 			// generate dashboard
 			container = Instantiate(Client.GetAsset<GameObject>("prefabs/container_full.prefab", "ui"), splitContent);
+
+			var withTitleAsset = Client.GetAsset<GameObject>("prefabs/with_title.prefab", "ui");
+			var scrollAsset    = Client.GetAsset<GameObject>("prefabs/scroll.prefab", "ui");
+			var listAsset      = Client.GetAsset<GameObject>("prefabs/list.prefab", "ui");
+			var boxAsset       = Client.GetAsset<GameObject>("prefabs/box.prefab", "ui");
+
+			var withTitle = Instantiate(
+				withTitleAsset,
+				Reference.GetComponent<RectTransform>("content", container)
+			);
+
+			var contentDash = Reference.GetComponent<RectTransform>("content", withTitle);
+			// setup scroll + list
+			var scroll      = Instantiate(scrollAsset, contentDash);
+			var list        = Instantiate(listAsset, Reference.GetComponent<RectTransform>("content", scroll));
+			var listContent = Reference.GetComponent<RectTransform>("content", list);
+
+			// add box description
+			component.bioContainer = Instantiate(boxAsset, listContent);
+			Reference.GetComponent<TextLanguage>("text", component.bioContainer).UpdateText("user.about.bio");
+			component.bioText = Reference.GetComponent<TextLanguage>(
+				"text", Instantiate(
+					Client.GetAsset<GameObject>("prefabs/text.prefab", "ui"),
+					Reference.GetComponent<RectTransform>("content", component.bioContainer)
+				)
+			);
 
 			return (content, component);
 		}

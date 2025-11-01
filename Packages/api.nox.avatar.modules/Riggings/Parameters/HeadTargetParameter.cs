@@ -1,6 +1,5 @@
 using Nox.Avatars.Parameters;
-using Nox.CCK.Avatars.Parameters;
-using UnityEngine;
+using Nox.CCK.Network;
 
 namespace Nox.CCK.Avatars.Rigging.Parameters {
 	public class HeadTargetParameter : IParameter {
@@ -14,9 +13,6 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 
 		public string GetName()
 			=> _parameterName;
-
-		public bool IsValid()
-			=> _target;
 
 		public int GetHash()
 			=> _parameterName.GetHashCode();

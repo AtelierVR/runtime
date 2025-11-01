@@ -3,6 +3,7 @@ using Nox.Entities;
 using Nox.Players;
 using Nox.Worlds;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Nox.Sessions {
 	public interface ISession {
@@ -78,6 +79,18 @@ namespace Nox.Sessions {
 		/// </summary>
 		/// <param name="player"></param>
 		void OnAuthorityTransferred(IPlayer player);
+		
+		/// <summary>
+		/// Notify the session that an entity has been registered.
+		/// </summary>
+		/// <param name="entity"></param>
+		void OnEntityRegistered(IEntity entity);
+		
+		/// <summary>
+		/// Notify the session that an entity has been unregistered.
+		/// </summary>
+		/// <param name="entity"></param>
+		void OnEntityUnregistered(IEntity entity);
 
 		/// <summary>
 		/// Check if the session matches a specific world identifier.
@@ -134,5 +147,6 @@ namespace Nox.Sessions {
 		/// </summary>
 		/// <returns></returns>
 		public IDimension GetDimension();
+
 	}
 }

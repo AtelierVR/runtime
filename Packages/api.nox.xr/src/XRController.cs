@@ -11,6 +11,7 @@ using Nox.Avatars.Parameters;
 using Nox.Avatars.Players;
 using Nox.Avatars.Rigging;
 using Nox.CCK.Mods.Events;
+using Nox.CCK.Network;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;

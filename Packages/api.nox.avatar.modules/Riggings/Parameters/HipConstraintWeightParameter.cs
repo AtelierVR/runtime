@@ -2,7 +2,7 @@ using Nox.Avatars.Parameters;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using System.Linq;
-using Nox.CCK.Avatars.Parameters;
+using Nox.CCK.Network;
 
 namespace Nox.CCK.Avatars.Rigging.Parameters {
 	public class HipConstraintWeightParameter : IParameter {
@@ -23,9 +23,6 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 
 		public string GetName()
 			=> _parameterName;
-
-		public bool IsValid()
-			=> _rigBuilder && _rigBuilder.layers.Any(l => l.rig && l.rig.name.Contains("Hip"));
 
 		public int GetHash()
 			=> _parameterName.GetHashCode();
@@ -50,11 +47,9 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		public object Get() {
-			if (_rigBuilder == null) return 0f;
+			if (!_rigBuilder) return 0f;
 
-			foreach (var layer in _rigBuilder.layers) {
-				if (!layer.rig || !layer.rig.name.Contains("Hip")) continue;
-
+			foreach (var layer in _rigBuilder.layers.Where(layer => layer.rig && layer.rig.name.Contains("Hip"))) {
 				if (_constraintType == ConstraintType.Position) {
 					var positionConstraint = layer.rig.GetComponentInChildren<MultiPositionConstraint>();
 					if (positionConstraint) return positionConstraint.weight;
@@ -69,11 +64,9 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		public void Set(object value) {
-			if (_rigBuilder == null || !(value is float weight)) return;
+			if (!_rigBuilder || !(value is float weight)) return;
 
-			foreach (var layer in _rigBuilder.layers) {
-				if (!layer.rig || !layer.rig.name.Contains("Hip")) continue;
-
+			foreach (var layer in _rigBuilder.layers.Where(layer => layer.rig && layer.rig.name.Contains("Hip"))) {
 				if (_constraintType == ConstraintType.Position) {
 					var positionConstraint                            = layer.rig.GetComponentInChildren<MultiPositionConstraint>();
 					if (positionConstraint) positionConstraint.weight = Mathf.Clamp01(weight);

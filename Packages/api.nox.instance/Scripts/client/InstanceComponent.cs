@@ -74,7 +74,7 @@ namespace api.nox.instance.client {
 			);
 
 			if (!string.IsNullOrEmpty(instance.GetDescription())) {
-				descriptionText.UpdateText("instance.description", new[] { instance.GetDescription() });
+				descriptionText.SetMarkdown(instance.GetDescription());
 				descriptionContainer.SetActive(true);
 			} else descriptionContainer.SetActive(false);
 

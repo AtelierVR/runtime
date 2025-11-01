@@ -2,6 +2,7 @@
 using System;
 using Nox.CCK.Avatars.Parameters;
 using Nox.Avatars.Parameters;
+using Nox.CCK.Network;
 using UnityEditor;
 using UnityEngine;
 
@@ -40,7 +41,7 @@ namespace api.nox.avatar.modules {
 
 			serializedObject.ApplyModifiedProperties();
 
-			if (Application.isPlaying) 
+			if (Application.isPlaying)
 				Repaint();
 		}
 
@@ -82,7 +83,7 @@ namespace api.nox.avatar.modules {
 			// Affichage et modification de la valeur selon le type
 			EditorGUI.BeginChangeCheck();
 
-			var s = $"{param.GetName()}/{param.GetHash()}";
+			var s        = $"{param.GetName()}/{param.GetHash()}";
 			var readOnly = param.IsReadOnly();
 
 			// Désactiver les contrôles GUI si le paramètre est en lecture seule
@@ -90,93 +91,93 @@ namespace api.nox.avatar.modules {
 
 			switch (param.GetValueType()) {
 				case ParameterType.Bool:
-					var boolValue    = (bool)param.Get();
+					var boolValue    = param.Get().ToBool();
 					var newBoolValue = EditorGUILayout.Toggle(s, boolValue);
 					if (EditorGUI.EndChangeCheck() && !readOnly)
 						param.Set(newBoolValue);
 					break;
 
 				case ParameterType.Int:
-					var intValue    = (int)param.Get();
+					var intValue    = param.Get().ToInt();
 					var newIntValue = EditorGUILayout.IntField(s, intValue);
 					if (EditorGUI.EndChangeCheck() && !readOnly)
 						param.Set(newIntValue);
 					break;
 
 				case ParameterType.UInt:
-					var uintValue    = (uint)param.Get();
-					var newUIntValue = EditorGUILayout.IntField(s, (int)uintValue);
+					var uintValue    = param.Get().ToUInt();
+					var newUIntValue = EditorGUILayout.IntField(s, uintValue.ToInt());
 					if (EditorGUI.EndChangeCheck() && !readOnly)
-						param.Set((uint)newUIntValue);
+						param.Set(newUIntValue.ToInt());
 					break;
 
 				case ParameterType.Long:
-					var longValue    = (long)param.Get();
+					var longValue    = param.Get().ToLong();
 					var newLongValue = EditorGUILayout.LongField(s, longValue);
 					if (EditorGUI.EndChangeCheck() && !readOnly)
 						param.Set(newLongValue);
 					break;
 
 				case ParameterType.ULong:
-					var ulongValue    = (ulong)param.Get();
-					var newULongValue = EditorGUILayout.LongField(s, (long)ulongValue);
+					var ulongValue    = param.Get().ToULong();
+					var newULongValue = EditorGUILayout.LongField(s, ulongValue.ToLong());
 					if (EditorGUI.EndChangeCheck() && !readOnly)
-						param.Set((ulong)newULongValue);
+						param.Set(newULongValue.ToULong());
 					break;
 
 				case ParameterType.Byte:
-					var byteValue    = (byte)param.Get();
+					var byteValue    = param.Get().ToByte();
 					var newByteValue = EditorGUILayout.IntField(s, byteValue);
 					if (EditorGUI.EndChangeCheck() && !readOnly)
-						param.Set((byte)newByteValue);
+						param.Set(newByteValue.ToByte());
 					break;
 
 				case ParameterType.Short:
-					var shortValue    = (short)param.Get();
+					var shortValue    = param.Get().ToShort();
 					var newShortValue = EditorGUILayout.IntField(s, shortValue);
 					if (EditorGUI.EndChangeCheck() && !readOnly)
 						param.Set(newShortValue);
 					break;
 
 				case ParameterType.UShort:
-					var ushortValue    = (ushort)param.Get();
+					var ushortValue    = param.Get().ToUShort();
 					var newUShortValue = EditorGUILayout.IntField(s, ushortValue);
 					if (EditorGUI.EndChangeCheck() && !readOnly)
 						param.Set(newUShortValue);
 					break;
 
 				case ParameterType.Float:
-					var floatValue    = (float)param.Get();
+					var floatValue    = param.Get().ToFloat();
 					var newFloatValue = EditorGUILayout.FloatField(s, floatValue);
 					if (EditorGUI.EndChangeCheck() && !readOnly)
 						param.Set(newFloatValue);
 					break;
 
 				case ParameterType.Double:
-					var doubleValue    = (double)param.Get();
+					var doubleValue    = param.Get().ToDouble();
 					var newDoubleValue = EditorGUILayout.DoubleField(s, doubleValue);
 					if (EditorGUI.EndChangeCheck() && !readOnly)
 						param.Set(newDoubleValue);
 					break;
 
 				case ParameterType.String:
-					var stringValue    = (string)param.Get();
+					var stringValue    = param.Get().ToString();
 					var newStringValue = EditorGUILayout.TextField(s, stringValue);
 					if (EditorGUI.EndChangeCheck() && !readOnly)
 						param.Set(newStringValue);
 					break;
 
 				case ParameterType.Vector3:
-					var vector3Value    = param.Get() is Vector3 v3 ? v3 : Vector3.zero;
+					var vector3Value    = param.Get().ToVector3();
 					var newVector3Value = EditorGUILayout.Vector3Field(s, vector3Value);
 					if (EditorGUI.EndChangeCheck() && !readOnly)
 						param.Set(newVector3Value);
 					break;
 
 				case ParameterType.Quaternion:
-					var quaternionValue = param.Get() is Quaternion q ? q : Quaternion.identity;
-					var eulerAngles = quaternionValue.eulerAngles;
-					var newEulerAngles = EditorGUILayout.Vector3Field(s + " (Euler)", eulerAngles);
+					var quaternionValue = param.Get().ToQuaternion();
+					var eulerAngles     = quaternionValue.eulerAngles;
+					var newEulerAngles  = EditorGUILayout.Vector3Field(s + " (Euler)", eulerAngles);
 					if (EditorGUI.EndChangeCheck() && !readOnly)
 						param.Set(Quaternion.Euler(newEulerAngles));
 					break;
@@ -195,7 +196,7 @@ namespace api.nox.avatar.modules {
 								: Array.Empty<byte>()
 						);
 					break;
-				
+
 				default:
 					EditorGUILayout.LabelField(s, $"Type {param.GetValueType()} non supporté pour l'édition.");
 					break;

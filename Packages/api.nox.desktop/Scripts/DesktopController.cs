@@ -135,22 +135,26 @@ namespace api.nox.desktop {
 			=> SetAvatar(Client.AvatarAPI.Make(user?.GetAvatarId())).Forget();
 
 		public async UniTask<IRuntimeAvatar> SetAvatar(IAvatarIdentifier identifier, Action<string, float> onProgress = null) {
+			var playerAvatar = _attachedPlayer as ILocalPlayerAvatar;
+
 			if (identifier.Equals(_attachedPlayer?.ToIdentifier())) {
 				Logger.LogDebug("Avatar identifier matches player identifier, no need to load.");
+				if (playerAvatar != null)
+					await playerAvatar.OnAvatarReady();
 				return _attachedRuntimeAvatar;
 			}
 
-			Logger.LogDebug($"Loading avatar for identifier {identifier?.ToString() ?? "null"}");
+			Logger.LogDebug($"Loading avatar for identifier {identifier.ToString() ?? "null"}");
 
-			var playerAvatar = _attachedPlayer as ILocalPlayerAvatar;
-
-			if (identifier == null || !identifier.IsValid()) {
+			if (!identifier.IsValid()) {
+				Logger.LogWarning($"Invalid avatar identifier: {identifier?.ToString() ?? "null"}");
 				if (playerAvatar != null)
 					await playerAvatar.OnAvatarFailed("Invalid avatar identifier.");
 				return null;
 			}
 
 			if (identifier.Equals(_attachedRuntimeAvatar?.GetIdentifier())) {
+				Logger.LogDebug("Avatar identifier matches current avatar, no need to load.");
 				if (playerAvatar != null)
 					await playerAvatar.OnAvatarReady();
 				return _attachedRuntimeAvatar;

@@ -42,10 +42,7 @@ namespace Nox.Editor {
 			var newPaths = new HashSet<string>(newScenes.Select(s => s.path));
 			var oldPaths = new HashSet<string>(old.Select(s => s.path));
 			var hasChanges = !newPaths.SetEquals(oldPaths);
-			if (!hasChanges) {
-				Logger.Log("Nothing to remove");
-				return;
-			}
+			if (!hasChanges) return;
 
 			EditorBuildSettings.scenes = newScenes;
 			AssetDatabase.SaveAssets();

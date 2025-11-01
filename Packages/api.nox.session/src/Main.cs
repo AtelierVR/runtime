@@ -35,10 +35,13 @@ namespace api.nox.session {
 		public void OnInitializeMain(MainModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
-			_lang   = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
+			_lang    = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
 			LanguageManager.AddPack(_lang);
 			_commands = new Commands();
 		}
+
+		public ISession[] GetAllSessions()
+			=> _sessions.Cast<ISession>().ToArray();
 
 		public async UniTask OnDisposeMainAsync() {
 			_commands.Dispose();
@@ -88,11 +91,13 @@ namespace api.nox.session {
 			if (oSession != null)
 				await oSession.OnDeselect(nSession);
 			CurrentId = id;
-			if (nSession != null)
-				await nSession.OnSelect(oSession);
 
 			var local = nSession?.GetAdapter()?.GetLocalPlayer();
 			ControllerAPI.GetCurrent()?.SetPlayer(local);
+
+			if (nSession != null)
+				await nSession.OnSelect(oSession);
+
 
 			CoreAPI.EventAPI.Emit("session_current_changed", nSession, oSession);
 			OnCurrentChanged?.Invoke(nSession, oSession);

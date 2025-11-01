@@ -28,6 +28,8 @@ namespace api.nox.session {
 		public readonly UnityEvent<IPlayer>                      OnPlayerLeftListener           = new();
 		public readonly UnityEvent<IPlayer>                      OnAuthorityTransferredListener = new();
 		public readonly UnityEvent<IAdapterState, IAdapterState> OnStateChangedListener         = new();
+		public readonly UnityEvent<IEntity>                      OnEntityRegisteredListener     = new();
+		public readonly UnityEvent<IEntity>                      OnEntityUnregisteredListener   = new();
 
 		[NoxPublic(NoxAccess.Method)]
 		public ushort GetId()
@@ -84,7 +86,7 @@ namespace api.nox.session {
 
 		public void OnPlayerLeft(IPlayer player) {
 			Logger.LogDebug($"OnPlayerLeft: {player}");
-			
+
 			Main.Instance.CoreAPI.EventAPI.Emit("session_player_left", this, player);
 			OnPlayerLeftListener.Invoke(player);
 
@@ -95,13 +97,35 @@ namespace api.nox.session {
 
 		public void OnAuthorityTransferred(IPlayer player) {
 			Logger.LogDebug($"OnAuthorityTransferred: {player}");
-			
+
 			Main.Instance.CoreAPI.EventAPI.Emit("session_authority_transferred", this, player);
 			OnAuthorityTransferredListener.Invoke(player);
 
 			foreach (var descriptor in GetDescriptors().Where(e => e != null))
 			foreach (var module in descriptor.GetModules<ISessionModule>())
 				module.OnAuthorityTransferred(player);
+		}
+
+		public void OnEntityRegistered(IEntity entity) {
+			Logger.LogDebug($"OnEntityRegistered: {entity}");
+
+			Main.Instance.CoreAPI.EventAPI.Emit("session_entity_registered", this, entity);
+			OnEntityRegisteredListener.Invoke(entity);
+
+			foreach (var descriptor in GetDescriptors().Where(e => e != null))
+			foreach (var module in descriptor.GetModules<ISessionModule>())
+				module.OnEntityRegistered(entity);
+		}
+
+		public void OnEntityUnregistered(IEntity entity) {
+			Logger.LogDebug($"OnEntityUnregistered: {entity}");
+
+			Main.Instance.CoreAPI.EventAPI.Emit("session_entity_unregistered", this, entity);
+			OnEntityUnregisteredListener.Invoke(entity);
+
+			foreach (var descriptor in GetDescriptors().Where(e => e != null))
+			foreach (var module in descriptor.GetModules<ISessionModule>())
+				module.OnEntityUnregistered(entity);
 		}
 
 		public IWorldDescriptor[] GetDescriptors() {
@@ -220,6 +244,15 @@ namespace api.nox.session {
 
 		public UnityEvent<IPlayer> OnPlayerLeftEvent()
 			=> OnPlayerLeftListener;
+
+		public UnityEvent<IAdapterState, IAdapterState> OnStateChangedEvent()
+			=> OnStateChangedListener;
+
+		public UnityEvent<IEntity> OnEntityRegisteredEvent()
+			=> OnEntityRegisteredListener;
+
+		public UnityEvent<IEntity> OnEntityUnregisteredEvent()
+			=> OnEntityUnregisteredListener;
 
 		public UnityEvent<IPlayer> OnAuthorityTransferredEvent()
 			=> OnAuthorityTransferredListener;

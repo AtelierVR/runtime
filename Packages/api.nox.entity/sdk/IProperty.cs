@@ -16,7 +16,7 @@ namespace Nox.Entities {
 		/// </summary>
 		/// <returns></returns>
 		public object GetValue();
-		
+
 		public PropertyFlags GetFlags();
 
 		/// <summary>
@@ -24,6 +24,7 @@ namespace Nox.Entities {
 		/// You can be sure that the type of the value matches the type of the property.
 		/// </summary>
 		/// <param name="value"></param>
-		public void SetValue(object value);
+		/// <param name="by"></param>
+		public void SetValue(object value, DirtyBy by);
 	}
 }

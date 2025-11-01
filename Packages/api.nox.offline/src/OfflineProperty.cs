@@ -1,29 +1,34 @@
+using Nox.CCK.Network;
 using Nox.Entities;
 
 namespace api.nox.offline {
 	public class OfflineProperty : IProperty {
-		public bool          IsDirty() {
+		public DirtyBy GetDirty()
+			=> DirtyBy.None;
+
+		public void SetDirty(DirtyBy dirty) { }
+
+		public byte[] Serialize() {
 			throw new System.NotImplementedException();
 		}
-		public void          SetDirty(bool dirty = true) {
+
+		public void Deserialize(byte[] data, DirtyBy dirtyBy) {
 			throw new System.NotImplementedException();
 		}
-		public byte[]        Serialize() {
+
+		public string GetKey() {
 			throw new System.NotImplementedException();
 		}
-		public void          Deserialize(byte[] data) {
+
+		public object GetValue() {
 			throw new System.NotImplementedException();
 		}
-		public string        GetKey() {
-			throw new System.NotImplementedException();
-		}
-		public object        GetValue() {
-			throw new System.NotImplementedException();
-		}
+
 		public PropertyFlags GetFlags() {
 			throw new System.NotImplementedException();
 		}
-		public void          SetValue(object value) {
+
+		public void SetValue(object value, DirtyBy dirtyBy) {
 			throw new System.NotImplementedException();
 		}
 	}

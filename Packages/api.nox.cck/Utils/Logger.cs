@@ -3,7 +3,7 @@ using Object = UnityEngine.Object;
 using System.IO;
 using System;
 using System.Linq;
-using Cysharp.Threading.Tasks;
+using System.Threading;
 using UnityEngine;
 using ILogger = UnityEngine.ILogger;
 
@@ -27,21 +27,21 @@ namespace Nox.CCK.Utils {
 		private static readonly object FileLock = new();
 
 		// ILogger implementation
-		public ILogHandler logHandler { get; set; } = ULogger.unityLogger.logHandler;
-		public bool logEnabled { get; set; } = true;
+		public ILogHandler         logHandler    { get; set; } = ULogger.unityLogger.logHandler;
+		public bool                logEnabled    { get; set; } = true;
 		public UnityEngine.LogType filterLogType { get; set; } = UnityEngine.LogType.Log;
 
 		private Logger() {
 			// Constructor privé pour le singleton
 		}
-		
+
 		#if UNITY_EDITOR
 		[InitializeOnLoadMethod]
 		private static void EditorInit() {
 			Init();
 			IsInitialized = true;
 		}
-		
+
 		[MenuItem("Nox/Logger/Open Latest Log")]
 		private static void OpenLatestLog() {
 			if (File.Exists(LogFile))
@@ -119,11 +119,9 @@ namespace Nox.CCK.Utils {
 					File.Move(LogFile, newFileName);
 				}
 
-				using (var fs = new FileStream(LogFile, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite)) {
-					// Création du fichier sans verrou exclusif
-				}
-
-				LogID = (byte)UnityEngine.Random.Range(byte.MinValue, byte.MaxValue);
+				// Create the file
+				File.Create(LogFile).Dispose();
+				LogID = (byte)new System.Random().Next(byte.MinValue, byte.MaxValue);
 
 				File.AppendAllLines(
 					LogFile, new[] {
@@ -248,14 +246,14 @@ namespace Nox.CCK.Utils {
 
 		private static LogType ConvertLogType(UnityEngine.LogType type)
 			=> type switch {
-				UnityEngine.LogType.Error => LogType.Error,
-				UnityEngine.LogType.Assert => LogType.Assert,
-				UnityEngine.LogType.Warning => LogType.Warning,
-				UnityEngine.LogType.Log => LogType.Log,
+				UnityEngine.LogType.Error     => LogType.Error,
+				UnityEngine.LogType.Assert    => LogType.Assert,
+				UnityEngine.LogType.Warning   => LogType.Warning,
+				UnityEngine.LogType.Log       => LogType.Log,
 				UnityEngine.LogType.Exception => LogType.Exception,
-				_ => LogType.Log
+				_                             => LogType.Log
 			};
-		
+
 
 		public static readonly string[] IgnoreStack = {
 			"AsyncUniTask",
@@ -278,43 +276,63 @@ namespace Nox.CCK.Utils {
 			if (type == LogType.Debug && !Config.Load().Get("debug.logging", Application.isEditor))
 				return;
 
+
 			message ??= "<null>";
 
 			try {
-				lock (FileLock) {
-					if (!IsInitialized) {
-						Init();
-						IsInitialized = true;
-					} else if (!File.Exists(LogFile) || new FileInfo(LogFile).Length > MaxLogSize) {
-						Init();
-						Log("Log file exceeded maximum size and was rotated.", "Logger");
-					}
+				// Capture stack trace synchronously on the calling thread
+				var stackTrace = new System.Diagnostics.StackTrace(2, true);
+				var frames     = stackTrace.GetFrames();
+				var timestamp  = DateTime.Now;
 
-					var stackTrace = new System.Diagnostics.StackTrace(2, true);
-					var frames     = stackTrace.GetFrames();
-					var old        = 0;
-					var methodName = "<UnknownMethod>";
-					var className  = "<UnknownClass>";
+				// Write to file in a separate thread
+				ThreadPool.QueueUserWorkItem(
+					_ => {
+						try {
+							var old        = 0;
+							var methodName = "<UnknownMethod>";
+							var className  = "<UnknownClass>";
 
-					if (frames is { Length: > 0 }) {
-						methodName = frames[old].GetMethod().Name;
-						className  = frames[old].GetMethod().DeclaringType?.Name ?? className;
-						while ((className.StartsWith("<") || IgnoreStack.Any(s => $"{className}.{methodName}".Contains(s))) && frames.Length > ++old) {
-							methodName = frames[old].GetMethod().Name;
-							className  = frames[old].GetMethod().DeclaringType?.Name ?? className;
+							if (frames is { Length: > 0 }) {
+								methodName = frames[old].GetMethod().Name;
+								className  = frames[old].GetMethod().DeclaringType?.Name ?? className;
+								while ((className.StartsWith("<") || IgnoreStack.Any(s => $"{className}.{methodName}".Contains(s))) && frames.Length > ++old) {
+									methodName = frames[old].GetMethod().Name;
+									className  = frames[old].GetMethod().DeclaringType?.Name ?? className;
+								}
+							}
+
+							var logMessage       = message.ToString();
+							var stackTraceString = stackTrace.ToString();
+
+							lock (FileLock) {
+								if (!IsInitialized) {
+									Init();
+									IsInitialized = true;
+								} else if (!File.Exists(LogFile) || new FileInfo(LogFile).Length > MaxLogSize) {
+									Init();
+									// Note: Avoid recursive call here, just log directly
+									using (var fs = new FileStream(LogFile, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+									using (var writer = new StreamWriter(fs)) {
+										writer.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} {LogID:X2}] [Log] [Logger.OnLog] Log file exceeded maximum size and was rotated.");
+									}
+								}
+
+								using (var fs = new FileStream(LogFile, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+								using (var writer = new StreamWriter(fs)) {
+									writer.WriteLine($"[{timestamp:yyyy-MM-dd HH:mm:ss.fff} {LogID:X2}] [{type}] [{(string.IsNullOrEmpty(tag) ? "" : tag + ":")}{className}.{methodName}] {logMessage}");
+
+									if (type is LogType.Error or LogType.Exception)
+										writer.Write(stackTraceString + "\n");
+								}
+							}
+						} catch (Exception e) {
+							// Can't use custom logging here to avoid infinite recursion
+							ULogger.LogException(e);
 						}
 					}
+				);
 
-					File.AppendAllText(
-						LogFile,
-						$"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} {LogID:X2}] [{type}] [{(string.IsNullOrEmpty(tag) ? "" : tag + ":")}{className}.{methodName}] {message}{Environment.NewLine}"
-					);
-
-					if (type is LogType.Error or LogType.Exception)
-						File.AppendAllText(LogFile, stackTrace + "\n");
-				}
-
-				// Log côté Unity
 				switch (type) {
 					case LogType.Log:       ULogger.Log($"[<color=cyan>{type}</color>] {(string.IsNullOrEmpty(tag) ? "" : $"[{tag}]")} {message}", context); break;
 					case LogType.Warning:   ULogger.LogWarning($"[<color=yellow>{type}</color>] {message}", context); break;

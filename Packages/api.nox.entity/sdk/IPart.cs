@@ -47,34 +47,34 @@ namespace Nox.Entities {
 		/// </summary>
 		/// <param name="position"></param>
 		/// <param name="markDirty"></param>
-		public void SetPosition(Vector3 position, bool markDirty = true);
+		public void SetPosition(Vector3 position, DirtyBy markDirty);
 
 		/// <summary>
 		/// Set the rotation of this part in world space.
 		/// </summary>
 		/// <param name="rotation"></param>
 		/// <param name="markDirty"></param>
-		public void SetRotation(Quaternion rotation, bool markDirty = true);
+		public void SetRotation(Quaternion rotation, DirtyBy markDirty);
 
 		/// <summary>
 		/// Set the scale of this part in world space.
 		/// </summary>
 		/// <param name="scale"></param>
 		/// <param name="markDirty"></param>
-		public void SetScale(Vector3 scale, bool markDirty = true);
+		public void SetScale(Vector3 scale, DirtyBy markDirty);
 
 		/// <summary>
 		/// Set the velocity of this part in world space.
 		/// </summary>
 		/// <param name="velocity"></param>
 		/// <param name="markDirty"></param>
-		public void SetVelocity(Vector3 velocity, bool markDirty = true);
+		public void SetVelocity(Vector3 velocity, DirtyBy markDirty);
 
 		/// <summary>
 		/// Set the angular velocity of this part in world space.
 		/// </summary>
 		/// <param name="angularVelocity"></param>
 		/// <param name="markDirty"></param>
-		public void SetAngularVelocity(Vector3 angularVelocity, bool markDirty = true);
+		public void SetAngularVelocity(Vector3 angularVelocity, DirtyBy markDirty);
 	}
 }
