@@ -30,23 +30,40 @@ namespace api.nox.control {
 
 		public void Start() {
 			if (_isRunning) return;
-			_listener.Start();
-			_isRunning               = true;
-			_cancellationTokenSource = new CancellationTokenSource();
-			AcceptClientsAsync(_cancellationTokenSource.Token).Forget();
-			Logger.Log($"WebSocket Server started on port {GetPort()}");
+			
+			try {
+				_listener.Start();
+				_isRunning               = true;
+				_cancellationTokenSource = new CancellationTokenSource();
+				AcceptClientsAsync(_cancellationTokenSource.Token).Forget();
+				Logger.Log($"WebSocket Server started on port {GetPort()}");
+			}
+			catch (SocketException ex) {
+				Logger.LogError($"Failed to start WebSocket server on port {GetPort()}: {ex.Message}");
+				throw;
+			}
 		}
 
 		public void Stop() {
 			if (!_isRunning) return;
 			_isRunning = false;
-			_cancellationTokenSource?.Cancel();
-			_cancellationTokenSource?.Dispose();
-			foreach (var client in _clients.ToArray())
-				client.Disconnect();
-			_clients.Clear();
-			_listener.Stop();
-			Logger.Log($"WebSocket Server stopped on port {GetPort()}");
+			
+			try {
+				_cancellationTokenSource?.Cancel();
+				_cancellationTokenSource?.Dispose();
+				
+				// Disconnect all clients
+				foreach (var client in _clients.ToArray())
+					client.Disconnect();
+				_clients.Clear();
+				
+				// Stop the listener
+				_listener?.Stop();
+				Logger.Log($"WebSocket Server stopped on port {GetPort()}");
+			}
+			catch (Exception ex) {
+				Logger.LogError($"Error stopping WebSocket server: {ex.Message}");
+			}
 		}
 
 		public UniTask Broadcast(string ev, params object[] args)

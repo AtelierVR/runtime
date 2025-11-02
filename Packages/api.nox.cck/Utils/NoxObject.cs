@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -9,10 +9,25 @@ using UnityEngine;
 using UnityEngine.Events;
 
 namespace Nox.CCK.Utils {
+	/// <summary>
+	/// Base interface for Nox objects, providing methods to invoke asynchronous methods via reflection.
+	/// </summary>
 	public interface INoxObject {
+		/// <summary>
+		/// Invokes an asynchronous method without returning a value.
+		/// </summary>
+		/// <param name="method">The name of the method to invoke.</param>
+		/// <param name="args">The arguments to pass to the method.</param>
+		/// <returns>A task representing the asynchronous operation.</returns>
 		public async UniTask InvokeAsyncMethod(string method, params object[] args)
 			=> await CallAsyncMethod<object>(method, args);
 
+		/// <summary>
+		/// Invokes an asynchronous method that returns an INoxObject.
+		/// </summary>
+		/// <param name="method">The name of the method to invoke.</param>
+		/// <param name="args">The arguments to pass to the method.</param>
+		/// <returns>A task representing the asynchronous operation with the INoxObject result.</returns>
 		public async UniTask<INoxObject> CallAsyncMethod(string method, params object[] args)
 			=> await CallAsyncMethod<INoxObject>(method, args);
 

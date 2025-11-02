@@ -40,7 +40,7 @@
         "**/*.cubemap": true,
         "**/*.flare": true,
         "**/*.mat": false,
-        "**/*.meta": true,
+        "**/*.meta": false,
         "**/*.prefab": false,
         "**/*.unity": false,
         "build/": true,

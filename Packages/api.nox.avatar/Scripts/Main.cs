@@ -6,6 +6,7 @@ using api.nox.avatar.search;
 using Cysharp.Threading.Tasks;
 using Nox.Avatar;
 using Nox.Avatars;
+using Nox.CCK.Avatars;
 using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
@@ -52,14 +53,29 @@ namespace api.nox.avatar {
 		public void OnInitializeMain(MainModCoreAPI api) {
 			Instance = this;
 			CoreAPI  = api;
-			_lang    = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
+
+			_lang = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
 			LanguageManager.AddPack(_lang);
+
+			AvatarSetup.OnCheckRequest = OnCheckRequest;
+
 			Network = new Network();
 			Cache   = new Cache();
 			_search = new Search();
 		}
 
+		private bool OnCheckRequest(IAvatarDescriptor descriptor) {
+			var valid = true;
+			CoreAPI.EventAPI.Emit("avatar_check_request", descriptor, new Action<object[]>(OnCallback));
+			return valid;
+			void OnCallback(object[] args) {
+				if (args.Length > 0 && args[0] is false)
+					valid = false;
+			}
+		}
+
 		public void OnDisposeMain() {
+			AvatarSetup.OnCheckRequest = null;
 			LanguageManager.RemovePack(_lang);
 			Cache?.Dispose();
 			Cache = null;

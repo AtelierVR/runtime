@@ -61,7 +61,6 @@
     <Compile Include="Packages\api.nox.avatar\Scripts\base\AvatarAsset.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\builder\Builder.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\runtime\AssetBundleRuntimeRuntimeAvatar.cs" />
-    <Compile Include="Packages\api.nox.avatar\Scripts\AvatarSetup.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\search\SearchHandler.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\editor\Editor.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\network\search\AssetSearchResponse.cs" />

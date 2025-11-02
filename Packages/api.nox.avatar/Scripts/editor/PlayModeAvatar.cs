@@ -1,13 +1,14 @@
+#if UNITY_EDITOR
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Nox.Avatars;
 using Nox.Avatars.Parameters;
 using Nox.CCK.Avatars;
 using Nox.CCK.Build;
 using UnityEngine;
-using UnityEngine.Animations.Rigging;
 using Logger = Nox.CCK.Utils.Logger;
 
-namespace Nox.Avatars.Editor {
+namespace api.nox.avatar.editor {
 	[RequireComponent(typeof(IAvatarDescriptor))]
 	public class PlayModeAvatar : MonoBehaviour, IRuntimeAvatar, IRemoveOnBuild {
 		public string GetId()
@@ -20,9 +21,9 @@ namespace Nox.Avatars.Editor {
 		public IAvatarIdentifier GetIdentifier()
 			=> null;
 
-		public void SetIdentifier(IAvatarIdentifier identifier) 
+		public void SetIdentifier(IAvatarIdentifier identifier)
 			=> Logger.LogWarning("PlayModeAvatar does not support setting an identifier.");
-		
+
 
 		public async UniTask Dispose()
 			=> await UniTask.Yield();
@@ -39,28 +40,14 @@ namespace Nox.Avatars.Editor {
 			}
 
 			Logger.Log("Avatar starting...");
-			
-			// Temporarily disable rigging to prevent TransformStreamHandle errors during setup
-			var animator = descriptor.GetAnimator();
-			if (!animator) {
-				Logger.LogError("Animator component missing in avatar descriptor, destroying avatar.");
-				enabled = false;
-				return;
-			}
-			
-			var rigBuilder = animator?.GetComponent<RigBuilder>();
-			bool wasRigBuilderEnabled = false;
-			if (rigBuilder != null) {
-				wasRigBuilderEnabled = rigBuilder.enabled;
-				rigBuilder.enabled = false;
-			}
 
 			try {
 				if (!await AvatarSetup.Prepare(this)) {
 					Logger.LogError("Avatar preparation failed, destroying avatar.");
 					enabled = false;
 					return;
-				} 
+				}
+
 				Logger.Log("Avatar prepared successfully.");
 
 				var parameters = descriptor
@@ -81,16 +68,11 @@ namespace Nox.Avatars.Editor {
 				parameters?.GetParameter("tracking/right_foot/active")?.Set(false);
 				parameters?.GetParameter("tracking/left_toes/active")?.Set(false);
 				parameters?.GetParameter("tracking/right_toes/active")?.Set(false);
-			}
-			finally {
-				// Re-enable rigging after setup is complete and wait a frame
-				if (rigBuilder != null && wasRigBuilderEnabled) {
-					await UniTask.Yield();
-					rigBuilder.enabled = true;
-					// Build the rigging safely after everything is set up
-					rigBuilder.Build();
-				}
+			} catch (System.Exception ex) {
+				Logger.LogError($"Exception during avatar setup: {ex}");
+				enabled = false;
 			}
 		}
 	}
 }
+#endif

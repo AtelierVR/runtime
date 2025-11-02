@@ -165,16 +165,17 @@ namespace api.nox.world.client {
 			if (token.IsCancellationRequested)
 				return Array.Empty<IInstance>();
 
-			if (Client.InstanceAPI == null) {
+			var instanceAPI = Client.InstanceAPI;
+			if (instanceAPI == null) {
 				Logger.LogError("InstanceAPI is not available", this, tag: "WorldComponent");
 				return Array.Empty<IInstance>();
 			}
 
-			var request = Client.InstanceAPI
+			var request = instanceAPI
 				.MakeSearchRequest()
 				.SetWorld(world.ToIdentifier());
 
-			var response = await Client.InstanceAPI.Search(request, server)
+			var response = await instanceAPI.Search(request, server)
 				.AttachExternalCancellation(token);
 			if (token.IsCancellationRequested)
 				return Array.Empty<IInstance>();

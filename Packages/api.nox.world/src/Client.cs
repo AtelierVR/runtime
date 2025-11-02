@@ -15,24 +15,29 @@ using UnityEngine;
 namespace api.nox.world {
 	public class Client : IClientModInitializer {
 		internal static IUiAPI UiAPI
-			=> Main.Instance.CoreAPI.ModAPI
-				.GetMod("ui")
+			=> Main.Instance?.CoreAPI?.ModAPI?
+				.GetMod("ui")?
 				.GetInstance<IUiAPI>();
 
 		internal static IInstanceAPI InstanceAPI
-			=> Main.Instance.CoreAPI.ModAPI
-				.GetMod("instance")
+			=> Main.Instance?.CoreAPI?.ModAPI?
+				.GetMod("instance")?
 				.GetInstance<IInstanceAPI>();
 
-		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object
-			=> string.IsNullOrEmpty(ns)
-				? Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(path)
-				: Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(ns, path);
+		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object {
+		if (Main.Instance?.CoreAPI?.AssetAPI == null) return null;
+		return string.IsNullOrEmpty(ns)
+			? Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(path)
+			: Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(ns, path);
+	}
 
-		public static UniTask<T> GetAssetAsync<T>(string path, string ns = null) where T : UnityEngine.Object
-			=> string.IsNullOrEmpty(ns)
-				? Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(path)
-				: Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(ns, path);
+	public static UniTask<T> GetAssetAsync<T>(string path, string ns = null) where T : UnityEngine.Object {
+		if (Main.Instance?.CoreAPI?.AssetAPI == null) 
+			return UniTask.FromResult<T>(null);
+		return string.IsNullOrEmpty(ns)
+			? Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(path)
+			: Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(ns, path);
+	}
 
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
 

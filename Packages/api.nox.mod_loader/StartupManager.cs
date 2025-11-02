@@ -34,14 +34,28 @@ namespace Nox.ModLoader {
 
 		[MenuItem("Nox/Play Mode/Auto Start Enable")]
 		private static void AutoStartEnable() {
+			if (AutoStart) {
+				Logger.Log("Auto Start is already enabled...");
+				return;
+			}
+
 			AutoStart = true;
 			Logger.Log("Auto Start Enabled...");
+			if (EditorApplication.isPlaying)
+				AsyncInitialize().Forget();
 		}
 
 		[MenuItem("Nox/Play Mode/Auto Start Disable")]
 		private static void AutoStartDisable() {
+			if (!AutoStart) {
+				Logger.Log("Auto Start is already disabled...");
+				return;
+			}
+
 			AutoStart = false;
 			Logger.Log("Auto Start Disabled...");
+			if (EditorApplication.isPlaying)
+				AsyncReloadMods().Forget();
 		}
 
 		[UnityEditor.Callbacks.DidReloadScripts]

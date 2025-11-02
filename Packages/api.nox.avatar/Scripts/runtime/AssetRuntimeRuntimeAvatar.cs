@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
+using Nox.CCK.Avatars;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 using Object = UnityEngine.Object;

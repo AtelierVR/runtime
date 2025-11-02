@@ -39,10 +39,25 @@ namespace Nox.CCK.Avatars.Rigging {
 		public static void SetActive(this RiggingAvatarModule riggingModule, HumanBodyBones bone, bool active) {
 			var rigBuilder = riggingModule.GetRigBuilder();
 			if (!rigBuilder) return;
+			
+			// Don't modify rigging if the RigBuilder is disabled or not properly initialized
+			if (!rigBuilder.enabled) return;
+			
 			var name = IKRigGenerator.GetRigFromBone(bone);
 			foreach (var layer in rigBuilder.layers.Where(layer => layer.rig && layer.rig.name == name))
 				layer.active = active;
-			rigBuilder.Build();
+			
+			// Only build if we're not in the middle of animation processing
+			// This prevents TransformStreamHandle resolution errors
+			if (Application.isPlaying && rigBuilder.isActiveAndEnabled) {
+				try {
+					rigBuilder.Build();
+				}
+				catch (System.InvalidOperationException ex) when (ex.Message.Contains("TransformStreamHandle")) {
+					// Log warning but don't crash - the build will happen on next frame
+					Debug.LogWarning($"RigBuilder.Build() failed due to timing issue: {ex.Message}. Will retry on next frame.");
+				}
+			}
 		}
 	}
 }

@@ -167,5 +167,13 @@ namespace Nox.CCK.Utils {
 			Object.DestroyImmediate(@object);
 			#endif
 		}
+
+		public static GameObject Find(this GameObject parent, string name) {
+			if (parent.name.Equals(name, StringComparison.OrdinalIgnoreCase))
+				return parent;
+			return (from UnityTransform child in parent.transform
+				select Find(child.gameObject, name))
+				.FirstOrDefault(result => result);
+		}
 	}
 }

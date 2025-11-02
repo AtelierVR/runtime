@@ -6,8 +6,10 @@ using Nox.Avatars;
 using Nox.CCK.Build;
 using Nox.CCK.Utils;
 
-namespace api.nox.avatar {
-	public class AvatarSetup {
+namespace Nox.CCK.Avatars {
+	public static class AvatarSetup {
+		public static Func<IAvatarDescriptor, bool> OnCheckRequest;
+
 		public static async UniTask<bool> Prepare(IRuntimeAvatar avatar, Action<float> progress = null, CancellationToken token = default) {
 			if (avatar == null) {
 				Logger.LogError("Avatar descriptor is null.");
@@ -30,8 +32,9 @@ namespace api.nox.avatar {
 
 			descriptor.FindModules();
 
-			var valid = true;
-			Main.Instance.CoreAPI.EventAPI.Emit("avatar_check_request", descriptor, new Action<object[]>(OnCheckRequest));
+			if (OnCheckRequest == null)
+				Logger.LogWarning("No OnCheckRequest is set, the avatar preparation will proceed without external validation.");
+			var valid = OnCheckRequest?.Invoke(descriptor) ?? true;
 
 			if (!valid) {
 				Logger.LogError("A mod asked to cancel the avatar preparation.");
@@ -94,11 +97,6 @@ namespace api.nox.avatar {
 
 			progress?.Invoke(1.0f);
 			return true;
-
-			void OnCheckRequest(object[] args) {
-				if (args.Length > 0 && args[0] is false)
-					valid = false;
-			}
 		}
 	}
 }

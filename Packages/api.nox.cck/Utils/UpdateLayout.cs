@@ -16,7 +16,13 @@ namespace Nox.CCK.Utils {
 		}
 	}
 
+	/// <summary>
+	/// Interface for components that need to update their layout.
+	/// </summary>
 	public interface IUpdateLayout {
+		/// <summary>
+		/// Updates the component's layout.
+		/// </summary>
 		void UpdateLayout();
 	}
 }

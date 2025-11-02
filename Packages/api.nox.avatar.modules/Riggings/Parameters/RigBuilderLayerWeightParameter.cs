@@ -20,7 +20,7 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 			=> _parameterName;
 
 		public bool IsValid()
-			=> _rigBuilder && _rigBuilder.layers.Any(l => l.rig && l.rig.name == _layerName);
+			=> _rigBuilder && _rigBuilder.enabled && _rigBuilder.layers.Any(l => l.rig && l.rig.name == _layerName);
 
 		public int GetHash()
 			=> _parameterName.GetHashCode();
@@ -39,10 +39,22 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		}
 
 		public void Set(object value) {
-			if (!_rigBuilder) return;
+			if (!_rigBuilder || !_rigBuilder.enabled) return;
+			
 			foreach (var layer in _rigBuilder.layers.Where(layer => layer.rig && layer.rig.name == _layerName)) {
 				layer.rig.weight = Mathf.Clamp01(value.ToFloat());
 				break;
+			}
+			
+			// Only rebuild if safe to do so  
+			if (Application.isPlaying && _rigBuilder.isActiveAndEnabled) {
+				try {
+					_rigBuilder.Build();
+				}
+				catch (System.InvalidOperationException ex) when (ex.Message.Contains("TransformStreamHandle")) {
+					// Silently handle timing issues - build will happen later
+					UnityEngine.Debug.LogWarning($"RigBuilder build skipped due to timing: {ex.Message}");
+				}
 			}
 		}
 	}
