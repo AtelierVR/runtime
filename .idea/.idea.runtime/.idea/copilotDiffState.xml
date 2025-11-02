@@ -3,6 +3,80 @@
   <component name="CopilotDiffPersistence">
     <option name="pendingDiffs">
       <map>
+        <entry key="$PROJECT_DIR$/Assets/GitIgnore_Avatar/_PoiyomiShaders/Scripts/ThryEditor/Editor/ThryAssemblyDefinition.asmdef">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/Assets/GitIgnore_Avatar/_PoiyomiShaders/Scripts/ThryEditor/Editor/ThryAssemblyDefinition.asmdef" />
+              <option name="originalContent" value="{&#10;    &quot;name&quot;: &quot;ThryAssemblyDefinition&quot;,&#10;    &quot;rootNamespace&quot;: &quot;&quot;,&#10;    &quot;references&quot;: [],&#10;    &quot;includePlatforms&quot;: [&#10;        &quot;Editor&quot;&#10;    ],&#10;    &quot;excludePlatforms&quot;: [],&#10;    &quot;allowUnsafeCode&quot;: true,&#10;    &quot;overrideReferences&quot;: false,&#10;    &quot;precompiledReferences&quot;: [],&#10;    &quot;autoReferenced&quot;: true,&#10;    &quot;defineConstraints&quot;: [],&#10;    &quot;versionDefines&quot;: [],&#10;    &quot;noEngineReferences&quot;: false&#10;}" />
+              <option name="updatedContent" value="{&#10;    &quot;name&quot;: &quot;ThryAssemblyDefinition&quot;,&#10;    &quot;rootNamespace&quot;: &quot;&quot;,&#10;    &quot;references&quot;: [],&#10;    &quot;includePlatforms&quot;: [&#10;        &quot;Editor&quot;&#10;    ],&#10;    &quot;excludePlatforms&quot;: [],&#10;    &quot;allowUnsafeCode&quot;: true,&#10;    &quot;overrideReferences&quot;: true,&#10;    &quot;precompiledReferences&quot;: [&#10;        &quot;System.Drawing.Common.dll&quot;&#10;    ],&#10;    &quot;autoReferenced&quot;: true,&#10;    &quot;defineConstraints&quot;: [],&#10;    &quot;versionDefines&quot;: [],&#10;    &quot;noEngineReferences&quot;: false&#10;}" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/Assets/Gitignore_RINDO/Plugins/VRCCore-Editor.dll.meta.new">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/Assets/Gitignore_RINDO/Plugins/VRCCore-Editor.dll.meta.new" />
+              <option name="updatedContent" value="fileFormatVersion: 2&#10;guid: 8571fe39e7caaac448e66ea4f714ace4&#10;PluginImporter:&#10;  externalObjects: {}&#10;  serializedVersion: 2&#10;  iconMap: {}&#10;  executionOrder: {}&#10;  defineConstraints: []&#10;  isPreloaded: 0&#10;  isOverridable: 0&#10;  isExplicitlyReferenced: 0&#10;  validateReferences: 0&#10;  platformData:&#10;  - first:&#10;      Any: &#10;    second:&#10;      enabled: 0&#10;      settings: {}&#10;  - first:&#10;      Editor: Editor&#10;    second:&#10;      enabled: 1&#10;      settings:&#10;        DefaultValueInitialized: true&#10;  - first:&#10;      Windows Store Apps: WindowsStoreApps&#10;    second:&#10;      enabled: 0&#10;      settings:&#10;        CPU: AnyCPU&#10;  userData: &#10;  assetBundleName: &#10;  assetBundleVariant: &#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/Assets/Gitignore_RINDO/Plugins/VRCSDK3A-Editor.dll.meta.new">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/Assets/Gitignore_RINDO/Plugins/VRCSDK3A-Editor.dll.meta.new" />
+              <option name="updatedContent" value="fileFormatVersion: 2&#10;guid: 6f0831a9b7054a54ab4fa8a42ae2a329&#10;PluginImporter:&#10;  externalObjects: {}&#10;  serializedVersion: 2&#10;  iconMap: {}&#10;  executionOrder: {}&#10;  defineConstraints: []&#10;  isPreloaded: 0&#10;  isOverridable: 0&#10;  isExplicitlyReferenced: 0&#10;  validateReferences: 0&#10;  platformData:&#10;  - first:&#10;      Any: &#10;    second:&#10;      enabled: 0&#10;      settings: {}&#10;  - first:&#10;      Editor: Editor&#10;    second:&#10;      enabled: 1&#10;      settings:&#10;        DefaultValueInitialized: true&#10;  - first:&#10;      Windows Store Apps: WindowsStoreApps&#10;    second:&#10;      enabled: 0&#10;      settings:&#10;        CPU: AnyCPU&#10;  userData: &#10;  assetBundleName: &#10;  assetBundleVariant: &#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/Assets/Gitignore_RINDO/Plugins/VRCSDK3A.dll.meta.new">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/Assets/Gitignore_RINDO/Plugins/VRCSDK3A.dll.meta.new" />
+              <option name="updatedContent" value="fileFormatVersion: 2&#10;guid: 910c50dd902daa849ab09d763628fd07&#10;PluginImporter:&#10;  externalObjects: {}&#10;  serializedVersion: 2&#10;  iconMap: {}&#10;  executionOrder: {}&#10;  defineConstraints: []&#10;  isPreloaded: 0&#10;  isOverridable: 0&#10;  isExplicitlyReferenced: 0&#10;  validateReferences: 0&#10;  platformData:&#10;  - first:&#10;      Any: &#10;    second:&#10;      enabled: 0&#10;      settings: {}&#10;  - first:&#10;      Editor: Editor&#10;    second:&#10;      enabled: 1&#10;      settings:&#10;        DefaultValueInitialized: true&#10;  - first:&#10;      Windows Store Apps: WindowsStoreApps&#10;    second:&#10;      enabled: 0&#10;      settings:&#10;        CPU: AnyCPU&#10;  userData: &#10;  assetBundleName: &#10;  assetBundleVariant: &#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/Assets/Gitignore_RINDO/Plugins/VRCSDKBase-Editor.dll.meta.new">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/Assets/Gitignore_RINDO/Plugins/VRCSDKBase-Editor.dll.meta.new" />
+              <option name="updatedContent" value="fileFormatVersion: 2&#10;guid: 953ba5ea4b83de8428c98e26280ab280&#10;PluginImporter:&#10;  externalObjects: {}&#10;  serializedVersion: 2&#10;  iconMap: {}&#10;  executionOrder: {}&#10;  defineConstraints: []&#10;  isPreloaded: 0&#10;  isOverridable: 0&#10;  isExplicitlyReferenced: 0&#10;  validateReferences: 0&#10;  platformData:&#10;  - first:&#10;      Any: &#10;    second:&#10;      enabled: 0&#10;      settings: {}&#10;  - first:&#10;      Editor: Editor&#10;    second:&#10;      enabled: 1&#10;      settings:&#10;        DefaultValueInitialized: true&#10;  - first:&#10;      Windows Store Apps: WindowsStoreApps&#10;    second:&#10;      enabled: 0&#10;      settings:&#10;        CPU: AnyCPU&#10;  userData: &#10;  assetBundleName: &#10;  assetBundleVariant: &#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/Assets/Gitignore_RINDO/Plugins/VRCSDKBase.dll.meta.new">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/Assets/Gitignore_RINDO/Plugins/VRCSDKBase.dll.meta.new" />
+              <option name="updatedContent" value="fileFormatVersion: 2&#10;guid: a7f4a272d8a982d44b64e27c40cbe448&#10;PluginImporter:&#10;  externalObjects: {}&#10;  serializedVersion: 2&#10;  iconMap: {}&#10;  executionOrder: {}&#10;  defineConstraints: []&#10;  isPreloaded: 0&#10;  isOverridable: 0&#10;  isExplicitlyReferenced: 0&#10;  validateReferences: 0&#10;  platformData:&#10;  - first:&#10;      Any: &#10;    second:&#10;      enabled: 0&#10;      settings: {}&#10;  - first:&#10;      Editor: Editor&#10;    second:&#10;      enabled: 1&#10;      settings:&#10;        DefaultValueInitialized: true&#10;  - first:&#10;      Windows Store Apps: WindowsStoreApps&#10;    second:&#10;      enabled: 0&#10;      settings:&#10;        CPU: AnyCPU&#10;  userData: &#10;  assetBundleName: &#10;  assetBundleVariant: &#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/Packages/api.nox.avatar.modules/Resources/PlayableAvatarModuleEditor.uss">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/Packages/api.nox.avatar.modules/Resources/PlayableAvatarModuleEditor.uss" />
+              <option name="originalContent" value="&#10;" />
+              <option name="updatedContent" value=".header {&#10;    background-color: rgba(0, 0, 0, 0.1);&#10;    padding: 10px;&#10;    margin-bottom: 10px;&#10;    border-radius: 5px;&#10;}&#10;&#10;.header-label {&#10;    font-size: 14px;&#10;    -unity-font-style: bold;&#10;    -unity-text-align: middle-center;&#10;}&#10;&#10;.info-box {&#10;    background-color: rgba(100, 150, 255, 0.1);&#10;    border-color: rgba(100, 150, 255, 0.5);&#10;    border-width: 1px;&#10;    border-radius: 3px;&#10;    padding: 8px;&#10;    margin: 5px 0;&#10;}&#10;&#10;.controller-box {&#10;    background-color: rgba(255, 255, 255, 0.05);&#10;    border-radius: 5px;&#10;    padding: 10px;&#10;    margin: 5px 0;&#10;}&#10;&#10;.controller-header {&#10;    font-size: 12px;&#10;    -unity-font-style: bold;&#10;    margin-bottom: 5px;&#10;}&#10;&#10;.layer-row {&#10;    flex-direction: row;&#10;    padding: 3px 0;&#10;    border-bottom-width: 1px;&#10;    border-bottom-color: rgba(255, 255, 255, 0.1);&#10;}&#10;&#10;.layer-name {&#10;    min-width: 120px;&#10;    max-width: 120px;&#10;}&#10;&#10;.layer-weight {&#10;    min-width: 100px;&#10;    max-width: 100px;&#10;}&#10;&#10;.layer-state {&#10;    min-width: 150px;&#10;    max-width: 150px;&#10;}&#10;&#10;.layer-time {&#10;    min-width: 100px;&#10;    max-width: 100px;&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/Packages/api.nox.avatar.modules/Resources/PlayableAvatarModuleEditor.uss.meta">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/Packages/api.nox.avatar.modules/Resources/PlayableAvatarModuleEditor.uss.meta" />
+              <option name="updatedContent" value="fileFormatVersion: 2&#10;guid: de56ghc012345678901234567890123d&#10;timeCreated: 1736697600&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/Packages/api.nox.avatar.modules/Resources/PlayableAvatarModuleEditor.uxml.meta">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/Packages/api.nox.avatar.modules/Resources/PlayableAvatarModuleEditor.uxml.meta" />
+              <option name="updatedContent" value="fileFormatVersion: 2&#10;guid: cd45fgb901234567890123456789012c&#10;timeCreated: 1736697600&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/Packages/api.nox.control/Scripts/Client.cs">
           <value>
             <PendingDiffInfo>

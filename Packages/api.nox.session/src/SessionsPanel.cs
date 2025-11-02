@@ -5,6 +5,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
 using Nox.CCK.Mods.Panels;
+using Nox.CCK.Network;
 using Nox.Players;
 using Nox.Sessions;
 using UnityEditor;
@@ -142,11 +143,13 @@ namespace api.nox.session {
 			public string Key   { get; }
 			public string Value { get; }
 			public string Type  { get; }
+			public string Hash  { get; }
 
 			public PropertyViewModel(string key, string value, string type = "String") {
 				Key   = key;
 				Value = value;
 				Type  = type;
+				Hash  = key?.Hash().ToString() ?? "0";
 			}
 		}
 
@@ -1040,6 +1043,31 @@ namespace api.nox.session {
 				}
 			};
 			_propertiesListView.columns.Add(typeColumn);
+
+			// Hash Column
+			var hashColumn = new Column {
+				title    = "Hash",
+				width    = 100,
+				minWidth = 80,
+				makeCell = () => new Label {
+					style = {
+						unityTextAlign = UnityEngine.TextAnchor.MiddleCenter,
+						color          = new UnityEngine.Color(0.6f, 0.6f, 0.8f),
+						fontSize       = 10
+					}
+				},
+				bindCell = (element, index) => {
+					if (element is not Label label) return;
+					if (index < 0 || index >= _propertyItems.Count) {
+						label.text = "ERROR";
+						return;
+					}
+
+					var vm = _propertyItems[index];
+					label.text = vm.Hash;
+				}
+			};
+			_propertiesListView.columns.Add(hashColumn);
 		}
 
 		private void UpdatePlayerProperties() {

@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Packages/api.nox.avatar.modules/Resources/AvatarParameterModuleEditor.uss" />
+    <ui:VisualElement name="root" style="flex-grow: 1;">
+        <ui:VisualElement name="header" class="header">
+            <ui:Label text="Avatar Parameter Module" name="header-label" class="header-label" />
+        </ui:VisualElement>
+        
+        <ui:VisualElement style="padding: 10px;">
+            <uie:PropertyField name="parameters-property" label="Avatar Parameters Asset" />
+            
+            <ui:VisualElement name="runtime-section" style="margin-top: 10px;">
+                <ui:Label name="info-label" class="info-box" />
+                <ui:ScrollView name="parameters-container" style="margin-top: 10px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
+

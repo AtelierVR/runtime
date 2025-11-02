@@ -57,13 +57,17 @@
     <Compile Include="Packages\api.nox.avatar.modules\Editor\AvatarParameterModuleEditor.cs" />
     <None Include="Packages\api.nox.avatar.modules\link.xml" />
     <None Include="Packages\api.nox.avatar.modules\Resources\EyeLookAvatarModule.Item.uxml" />
+    <None Include="Packages\api.nox.avatar.modules\Resources\PlayableAvatarModuleEditor.uss" />
     <None Include="Packages\api.nox.avatar.modules\nox.mod.json" />
     <None Include="Packages\api.nox.avatar.modules\Resources\EyeLookAvatarModule.uxml" />
+    <None Include="Packages\api.nox.avatar.modules\Resources\PlayableAvatarModuleEditor.uxml" />
     <None Include="Packages\api.nox.avatar.modules\Resources\EyeLookTransform.uxml" />
     <None Include="Packages\api.nox.avatar.modules\package.json" />
     <None Include="Packages\api.nox.avatar.modules\Resources\AvatarParametersEntryEditor.uxml" />
     <None Include="Packages\api.nox.avatar.modules\Resources\EyeLookAvatarModule.ListItem.uxml" />
+    <None Include="Packages\api.nox.avatar.modules\Resources\AvatarParameterModuleEditor.uxml" />
     <None Include="Packages\api.nox.avatar.modules\Resources\EyeLookMuscle.uxml" />
+    <None Include="Packages\api.nox.avatar.modules\Resources\AvatarParameterModuleEditor.uss" />
     <None Include="Packages\api.nox.avatar.modules\Resources\AvatarParametersEditor.uxml" />
     <None Include="Packages\api.nox.avatar.modules\Resources\ControllersMergerAvatarModule.uxml" />
     <None Include="Packages\api.nox.avatar.modules\Resources\EyeLookBlendShape.uxml" />
