@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace dev.nox.development {
 	public class MissingComponentRemover : EditorWindow {
-		[MenuItem("Tools/Nox/Remove Missing Components")]
+		[MenuItem("Nox/Tools/Remove Missing Components")]
 		public static void ShowWindow() {
 			GetWindow<MissingComponentRemover>("Missing Component Remover");
 		}
@@ -152,7 +152,7 @@ namespace dev.nox.development {
 		}
 
 		// Méthode statique pour utilisation rapide
-		[MenuItem("Tools/Nox/Quick Remove Missing Components")]
+		[MenuItem("Nox/Tools/Quick Remove Missing Components")]
 		public static void QuickRemoveMissingComponents() {
 			GameObject[] selectedObjects = Selection.gameObjects;
 

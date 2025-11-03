@@ -15,7 +15,7 @@ public class FBXAnimationExporter : EditorWindow
     private Vector2 scrollPosition;
     private List<AnimationClip> animationClips = new List<AnimationClip>();
 
-    [MenuItem("Tools/FBX Animation Exporter")]
+    [MenuItem("Nox/Tools/FBX Animation Exporter")]
     public static void ShowWindow()
     {
         GetWindow<FBXAnimationExporter>("FBX Animation Exporter");

@@ -44,7 +44,7 @@ namespace dev.nox.development {
 		private Texture2D _previewTexture;
 		private Vector2 _scrollPosition = Vector2.zero;
 		
-		[MenuItem("Tools/Screenshot Tool")]
+		[MenuItem("Nox/Tools/Screenshot Tool")]
 		public static void ShowWindow() {
 			GetWindow<Screenshot>("Screenshot Tool");
 		}

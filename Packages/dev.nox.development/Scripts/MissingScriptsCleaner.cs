@@ -5,7 +5,7 @@ using UnityEngine;
 namespace dev.nox.development {
 public class MissingScriptsCleaner : EditorWindow
 {
-    [MenuItem("Tools/Clean Missing Scripts in Scene")]
+    [MenuItem("Nox/Tools/Clean Missing Scripts in Scene")]
     private static void CleanMissingScriptsInScene()
     {
         int totalCount = 0;

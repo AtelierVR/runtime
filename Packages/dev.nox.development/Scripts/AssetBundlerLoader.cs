@@ -8,7 +8,7 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace dev.nox.development {
 	public class AssetBundleLoader : EditorWindow {
-		[MenuItem("Tools/AssetBundle Loader")]
+		[MenuItem("Nox/Tools/AssetBundle Loader")]
 		public static void ShowWindow()
 			=> GetWindow<AssetBundleLoader>("AssetBundle Loader");
 
