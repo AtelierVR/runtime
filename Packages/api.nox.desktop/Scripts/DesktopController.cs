@@ -520,14 +520,14 @@ namespace api.nox.desktop {
 			foreach (var param in parameters) {
 				var n = param.GetName();
 				switch (n) {
-					case "grounded" or "Grounded": {
+					case "Grounded": {
 						var grounded = player.IsGrounded();
 						var value    = (bool)param.Get();
 						if (value == grounded) continue;
 						param.Set(grounded);
 						break;
 					}
-					case "VelocityX" or "velocity_x": {
+					case "VelocityX": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
 						var value         = (float)param.Get();
@@ -535,7 +535,7 @@ namespace api.nox.desktop {
 						param.Set(localVelocity.x);
 						break;
 					}
-					case "VelocityY" or "velocity_y": {
+					case "VelocityY" : {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
 						var value         = (float)param.Get();
@@ -543,7 +543,7 @@ namespace api.nox.desktop {
 						param.Set(localVelocity.y);
 						break;
 					}
-					case "VelocityZ" or "velocity_z": {
+					case "VelocityZ" : {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
 						var value         = (float)param.Get();
@@ -551,7 +551,7 @@ namespace api.nox.desktop {
 						param.Set(localVelocity.z);
 						break;
 					}
-					case "Velocity" or "velocity": {
+					case "Velocity" : {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
 						var value         = (Vector3)param.Get();
@@ -559,7 +559,7 @@ namespace api.nox.desktop {
 						param.Set(localVelocity);
 						break;
 					}
-					case "VelocityMagnitude" or "velocity_magnitude": {
+					case "VelocityMagnitude": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var magnitude     = worldVelocity.magnitude;
 						var value         = (float)param.Get();
@@ -567,13 +567,13 @@ namespace api.nox.desktop {
 						param.Set(magnitude);
 						break;
 					}
-					case "tracking/head/rotation": {
+					/*case "tracking/head/rotation": {
 						var cRot  = player.headCamera.transform.rotation;
 						var value = (Quaternion)param.Get();
 						if (Quaternion.Angle(value, cRot) < 0.001f) continue;
 						param.Set(cRot);
 						break;
-					}
+					}*/
 				}
 			}
 		}
