@@ -567,13 +567,13 @@ namespace api.nox.desktop {
 						param.Set(magnitude);
 						break;
 					}
-					/*case "tracking/head/rotation": {
+					case "tracking/head/rotation": {
 						var cRot  = player.headCamera.transform.rotation;
 						var value = (Quaternion)param.Get();
 						if (Quaternion.Angle(value, cRot) < 0.001f) continue;
 						param.Set(cRot);
 						break;
-					}*/
+					}
 				}
 			}
 		}
