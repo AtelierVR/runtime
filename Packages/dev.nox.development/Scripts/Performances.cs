@@ -470,7 +470,7 @@ namespace dev.nox.development {
 			
 			_lastUpdate = DateTime.UtcNow;
 			
-			var profilers = _mod.GetProfiler();
+			var profilers = _mod.GetProfiler().ToArray();
 			Array.Sort(profilers, (p1, p2) => string.Compare(p1.GetName(), p2.GetName(), StringComparison.Ordinal));
 			
 			UpdateProfilers(profilers);

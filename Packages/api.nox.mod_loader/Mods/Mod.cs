@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods;
@@ -21,8 +20,8 @@ namespace Nox.ModLoader.Mods {
 
 		public abstract Assembly[] GetAssemblies();
 
-		public Profile[] GetProfiler()
-			=> Profiler.Profiles.ToArray();
+		public IEnumerable<Profile> GetProfiler()
+			=> Profiler.GetAllProfiles();
 
 		public ModMetadata GetMetadata()
 			=> Metadata;
@@ -74,23 +73,40 @@ namespace Nox.ModLoader.Mods {
 			return instances.ToArray();
 		}
 
-		public EntryPoint GetEntry(string name)
-			=> _entryPoints.FirstOrDefault(e => e.Name == name);
+		public EntryPoint GetEntry(string name) {
+			foreach (var entry in _entryPoints)
+				if (entry.Name == name)
+					return entry;
+			return null;
+		}
 
 		#endregion
 
 		public virtual bool IsLoaded()
 			=> true;
 
+		public bool HasUpdate;
+		public bool HasFixedUpdate;
+		public bool HasLateUpdate;
+
 		public virtual UniTask<bool> Load() {
 			CoreAPI.EventAPI.Emit(new ModEventContext("mod_loaded", this));
 
-			_entryPoints = Metadata
-				.GetEntryPoints()
-				.GetAll()
-				.Keys
-				.Select(entry => new EntryPoint(this, entry))
-				.ToArray();
+			var entryPointKeys = Metadata.GetEntryPoints().GetAll().Keys;
+			_entryPoints = new EntryPoint[entryPointKeys.Count];
+			var index = 0;
+			foreach (var entry in entryPointKeys)
+				_entryPoints[index++] = new EntryPoint(this, entry);
+			
+			HasUpdate = false;
+			HasFixedUpdate = false;
+			HasLateUpdate = false;
+			
+			foreach (var entry in _entryPoints) {
+				if (entry.HasUpdate) HasUpdate = true;
+				if (entry.HasFixedUpdate) HasFixedUpdate = true;
+				if (entry.HasLateUpdate) HasLateUpdate = true;
+			}
 
 			return UniTask.FromResult(true);
 		}
@@ -144,6 +160,7 @@ namespace Nox.ModLoader.Mods {
 		}
 
 		public void Update() {
+			if (!HasUpdate) return;
 			Profiler.Set("update", Profiler.At.Start, DateTime.UtcNow);
 			foreach (var entry in _entryPoints)
 				entry.OnUpdate();
@@ -151,6 +168,7 @@ namespace Nox.ModLoader.Mods {
 		}
 
 		public void FixedUpdate() {
+			if (!HasFixedUpdate) return;
 			Profiler.Set("fixed_update", Profiler.At.Start, DateTime.UtcNow);
 			foreach (var entry in _entryPoints)
 				entry.OnFixedUpdate();
@@ -158,6 +176,7 @@ namespace Nox.ModLoader.Mods {
 		}
 
 		public void LateUpdate() {
+			if (!HasLateUpdate) return;
 			Profiler.Set("late_update", Profiler.At.Start, DateTime.UtcNow);
 			foreach (var entry in _entryPoints)
 				entry.OnLateUpdate();
