@@ -9,8 +9,9 @@ namespace Nox.Editor {
 		public static void Init() {
 			ScriptingDefinitions.Add("NOX_SDK", NamedBuildTarget.Standalone);
 			PlayerSettings.stripEngineCode = false;
-			PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone, ScriptingImplementation.Mono2x);
-			PlayerSettings.SetApiCompatibilityLevel(NamedBuildTarget.Standalone, ApiCompatibilityLevel.NET_Standard);
+			PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone, ScriptingImplementation.IL2CPP);
+			PlayerSettings.SetApiCompatibilityLevel(NamedBuildTarget.Standalone, ApiCompatibilityLevel.NET_Standard_2_0);
+			PlayerSettings.SetEditorAssembliesCompatibilityLevel(EditorAssembliesCompatibilityLevel.NET_Standard);
 			PlayerSettings.insecureHttpOption = InsecureHttpOption.AlwaysAllowed;
 			ModLinkerHelper.EnsureLinkerClassExists();
 		}

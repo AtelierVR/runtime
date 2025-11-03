@@ -3,7 +3,6 @@ using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 using Logger = Nox.CCK.Utils.Logger;
 
@@ -21,6 +20,8 @@ namespace api.nox.main {
 		public void OnInitialize(IModCoreAPI api) {
 			_coreAPI = api;
 
+			api.LoggerAPI.Log("api.nox.main initialized");
+
 			_lang = api.AssetAPI.GetAsset<LanguagePack>("pack.asset");
 			LanguageManager.AddPack(_lang);
 
@@ -31,7 +32,7 @@ namespace api.nox.main {
 			var count = SceneManager.sceneCountInBuildSettings;
 			for (var i = 0; i < count; i++) {
 				var path = SceneUtility.GetScenePathByBuildIndex(i);
-				Logger.LogDebug($"Scene {i}: {path}");
+				api.LoggerAPI.LogDebug($"Scene {i}: {path}");
 			}
 		}
 
@@ -39,11 +40,11 @@ namespace api.nox.main {
 		private void OnExitEvent(EventData data) {
 			#if UNITY_EDITOR
 			if (!EditorApplication.isPlaying) return;
-			Logger.Log("Stopping play mode due to exit event");
+			_coreAPI.LoggerAPI.Log("Stopping play mode due to exit event");
 			EditorApplication.isPlaying = false;
 			#else
-			Logger.Log("Quitting application due to exit event");
-			Application.Quit();
+			_coreAPI.LoggerAPI.Log("Quitting application due to exit event");
+			UnityEngine.Application.Quit();
 			#endif
 		}
 

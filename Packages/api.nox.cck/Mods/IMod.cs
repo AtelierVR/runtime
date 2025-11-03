@@ -71,7 +71,7 @@ namespace Nox.CCK.Mods {
 		/// Gets the profiling data for the mod.
 		/// </summary>
 		/// <returns>An array of profiling profiles.</returns>
-		public Profile[] GetProfiler();
+		public IEnumerable<Profile> GetProfiler();
 
 		/// <summary>
 		/// Gets the AppDomain in which the mod is running.

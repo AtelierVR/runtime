@@ -2,6 +2,7 @@ using System.Linq;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Utils;
 using Nox.Worlds;
 using Nox.Offline;
 using Nox.Sessions;
@@ -12,9 +13,9 @@ namespace api.nox.main {
 	public class Client : IClientModInitializer {
 		private static ClientModCoreAPI _coreAPI;
 
-		public void OnInitializeClient(ClientModCoreAPI api)
+		public void OnInitializeClient(ClientModCoreAPI api) 
 			=> _coreAPI = api;
-		
+
 		private static IWorldAPI WorldAPI
 			=> _coreAPI.ModAPI
 				.GetMod("world")
