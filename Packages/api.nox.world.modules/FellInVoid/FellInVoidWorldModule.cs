@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.Players;
@@ -35,17 +34,23 @@ namespace Nox.CCK.Worlds.FellInVoid {
 
 		public float fallThreshold = -100f;
 
-		public ISession Session;
+		public  IPlayer  LocalPlayer;
 
-		public void OnLoaded(ISession session)
-			=> Session = session;
+		public void OnPlayerJoined(IPlayer player) {
+			if (!player.IsLocal()) return;
+			LocalPlayer = player;
+		}
 
-		public void Update() {
-			if (Session == null) return;
-			var local = Session.GetAdapter().GetLocalPlayer();
-			var pos   = local.GetPosition();
+		public void OnPlayerLeft(IPlayer player) {
+			if (!player.IsLocal()) return;
+			LocalPlayer = null;
+		}
+
+		public void FixedUpdate() {
+			if (LocalPlayer == null) return;
+			var pos = LocalPlayer.GetPosition();
 			if (pos.y < fallThreshold)
-				local.Respawn();
+				LocalPlayer.Respawn();
 		}
 	}
 }
