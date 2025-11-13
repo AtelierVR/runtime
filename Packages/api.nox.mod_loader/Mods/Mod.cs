@@ -14,7 +14,8 @@ namespace Nox.ModLoader.Mods {
 		internal CoreAPI            CoreAPI;
 		internal IAssetAPI          AssetAPI;
 		internal Typing.ModMetadata Metadata;
-		public   Profiler           Profiler;
+
+		public readonly Profiler Profiler;
 
 		public abstract AppDomain GetAppDomain();
 
@@ -97,15 +98,15 @@ namespace Nox.ModLoader.Mods {
 			var index = 0;
 			foreach (var entry in entryPointKeys)
 				_entryPoints[index++] = new EntryPoint(this, entry);
-			
-			HasUpdate = false;
+
+			HasUpdate      = false;
 			HasFixedUpdate = false;
-			HasLateUpdate = false;
-			
+			HasLateUpdate  = false;
+
 			foreach (var entry in _entryPoints) {
-				if (entry.HasUpdate) HasUpdate = true;
+				if (entry.HasUpdate) HasUpdate           = true;
 				if (entry.HasFixedUpdate) HasFixedUpdate = true;
-				if (entry.HasLateUpdate) HasLateUpdate = true;
+				if (entry.HasLateUpdate) HasLateUpdate   = true;
 			}
 
 			return UniTask.FromResult(true);
