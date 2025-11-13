@@ -204,6 +204,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "api.nox.yantra": {
+      "version": "file:api.nox.yantra",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.cysharp.unitask": {
       "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
       "depth": 0,
