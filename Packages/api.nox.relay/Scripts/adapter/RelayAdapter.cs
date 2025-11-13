@@ -505,10 +505,8 @@ namespace api.nox.relay {
 		public bool IsConnected()
 			=> Connection != null && Connection.Connector.IsConnected();
 
-		public UniTask<bool> EmitEvent(string @event, byte[] raw) {
-			Logger.LogWarning($"Not implemented: {nameof(EmitEvent)} for {this}");
-			return UniTask.FromResult(false);
-		}
+		public UniTask<bool> EmitEvent(string @event, byte[] raw)
+			=> Instance.SendEvent(InstanceRequestEvent.CreateBroadcast(@event, raw));
 
 		public DateTime GetTime()
 			=> Connection.LastLatency?.IntermediateTime ?? DateTime.UnixEpoch;
