@@ -167,7 +167,10 @@ namespace api.nox.session.jint {
 
 		public void Invoke(string method, params object[] args) {
 			try {
-				if (_engine == null || Context == null) return;
+				if (_engine == null || Context == null) {
+					Logger.LogWarning("Engine or Context is null", this);
+					return;
+				}
 				var methodRef = Context.Get(method);
 				if (methodRef.IsUndefined()) return;
 				_engine.Invoke(methodRef, args);
@@ -179,7 +182,10 @@ namespace api.nox.session.jint {
 
 		public object Call(string method, object[] args) {
 			try {
-				if (_engine == null || Context == null) return null;
+				if (_engine == null || Context == null) {
+					Logger.LogWarning("Engine or Context is null", this);
+					return null;
+				}
 				var methodRef = Context.Get(method);
 				return methodRef.IsUndefined()
 					? null
@@ -193,7 +199,10 @@ namespace api.nox.session.jint {
 
 		public T Call<T>(string method, object[] args) {
 			try {
-				if (_engine == null || Context == null) return default;
+				if (_engine == null || Context == null) {
+					Logger.LogWarning("Engine or Context is null", this);
+					return default;
+				}
 				var methodRef = Context.Get(method);
 				if (methodRef.IsUndefined()) return default;
 				var result = _engine.Invoke(methodRef, args);
