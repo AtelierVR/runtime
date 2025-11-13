@@ -47,7 +47,16 @@ namespace Nox.CCK.Jint {
 			=> GetBacking() != null
 				? GetBacking().Call<T>(functionName, args)
 				: default;
-
+		
+		public void InvokeFunction(string functionName)
+			=> InvokeFunction(functionName, Array.Empty<object>());
+		
+		public object CallFunction(string functionName)
+			=> CallFunction(functionName, Array.Empty<object>());
+		
+		public T CallFunction<T>(string functionName)
+			=> CallFunction<T>(functionName, Array.Empty<object>());
+		
 		public void Awake()
 			=> InvokeFunction("onAwake");
 
