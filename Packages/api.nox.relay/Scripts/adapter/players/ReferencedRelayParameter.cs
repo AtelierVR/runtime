@@ -90,7 +90,6 @@ namespace api.nox.relay {
 			var old = _reference.Get().ToBool();
 			_reference.Set(value);
 			var @new = _reference.Get().ToBool();
-			Logger.LogDebug($"SetValue: Parameter '{_name}' changed from '{old}' to '{@new}' by {dirty} ({value.ToBool()})");
 			OnValueChanged(value, dirty);
 		}
 
