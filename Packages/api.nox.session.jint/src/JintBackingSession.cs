@@ -7,12 +7,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Jint.Native;
+using Jint.Native.Function;
 using Jint.Runtime;
 using Jint.Runtime.Modules;
 using Nox.Jint;
 using Nox.Players;
 using Nox.Sessions;
-using Nox.Worlds;
 using JintEngine = Jint.Engine;
 using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
@@ -24,7 +24,7 @@ namespace api.nox.session.jint {
 		public ObjectInstance    Context;
 
 		private JintEngine _engine;
-		
+
 		public void Initialize() {
 			if (_engine != null) return;
 
@@ -69,9 +69,10 @@ namespace api.nox.session.jint {
 					"behaviour", builder => builder
 						.ExportObject("gameObject", gameObject)
 						.ExportObject("transform", gameObject.transform)
+						.ExportObject("rigidbody", gameObject.GetComponent<Rigidbody>())
 						.ExportFunction("id", () => GetInstanceID())
 				);
-
+				
 				_engine.AddModule(
 					"players", builder => builder
 						.ExportFunction("getLocal", () => module.Session.GetAdapter().GetLocalPlayer())
@@ -79,6 +80,56 @@ namespace api.nox.session.jint {
 						.ExportFunction("getAll", () => module.Session.GetAdapter().GetPlayers())
 						.ExportFunction("getCount", () => module.Session.GetAdapter().GetPlayerCount())
 						.ExportFunction("getAt", args => new ObjectWrapper(_engine, module.Session.GetAdapter().GetPlayer((int)args.At(0).AsNumber())))
+				);
+
+				var netAdapter = module.Session.GetAdapter() as INetworkedAdapter;
+				_engine.AddModule(
+					"network", builder => builder
+						.ExportFunction("getTime", () => JsValue.FromObject(_engine, netAdapter?.GetTime() ?? DateTime.Now))
+						.ExportFunction("isConnected", () => netAdapter?.IsConnected() ?? false)
+						.ExportFunction("getLatency", () => netAdapter?.GetLatency()   ?? 0.0)
+						.ExportFunction(
+							"emitEvent", args => {
+								if (netAdapter == null)
+									return false;
+
+								var eventName = args.At(0).AsString();
+								var eventData = !args.At(1).IsUndefined()
+									? args.At(1).ToObject() as byte[]
+									: Array.Empty<byte>();
+
+								var emitting = netAdapter.EmitEvent(eventName, eventData).AsTask();
+								if (emitting.IsCompletedSuccessfully)
+									return JsValue.FromObject(_engine, emitting.Result);
+								if (emitting.IsFaulted)
+									return false;
+								if (emitting.IsCanceled)
+									return false;
+
+								var promiseFactory = _engine.Evaluate(
+										@"(function() {
+												var resolve, reject;
+												var p = new Promise(function(res, rej) { resolve = res; reject = rej; });
+												return { promise: p, resolve: resolve, reject: reject };
+										})"
+									)
+									.AsObject();
+
+								var promise = promiseFactory.Get("promise");
+								var resolve = promiseFactory.Get("resolve") as FunctionInstance;
+								var reject  = promiseFactory.Get("reject") as FunctionInstance;
+
+								emitting.ContinueWith(
+									t => {
+										if (t.IsFaulted || t.IsCanceled) {
+											_engine.Invoke(reject!, false);
+										} else _engine.Invoke(resolve!, JsValue.FromObject(_engine, t.Result));
+									}
+								);
+
+								return promise;
+							}
+						)
 				);
 
 				var m = JintEngine.PrepareModule(Script.GetContent());
@@ -101,8 +152,8 @@ namespace api.nox.session.jint {
 
 		private void SetExports(string property, object value) {
 			try {
-				var context = Context;
-				var export  = context.Get("exports");
+				if (_engine == null || Context == null) return;
+				var export  = Context.Get("exports");
 				if (export.IsUndefined())
 					export = new ObjectWrapper(_engine, new Dictionary<string, object>());
 				if (!export.IsObject())
@@ -116,7 +167,7 @@ namespace api.nox.session.jint {
 
 		public void Invoke(string method, params object[] args) {
 			try {
-				if (_engine == null) return;
+				if (_engine == null || Context == null) return;
 				var methodRef = Context.Get(method);
 				if (methodRef.IsUndefined()) return;
 				_engine.Invoke(methodRef, args);
@@ -128,7 +179,7 @@ namespace api.nox.session.jint {
 
 		public object Call(string method, object[] args) {
 			try {
-				if (_engine == null) return null;
+				if (_engine == null || Context == null) return null;
 				var methodRef = Context.Get(method);
 				return methodRef.IsUndefined()
 					? null
@@ -142,7 +193,7 @@ namespace api.nox.session.jint {
 
 		public T Call<T>(string method, object[] args) {
 			try {
-				if (_engine == null) return default;
+				if (_engine == null || Context == null) return default;
 				var methodRef = Context.Get(method);
 				if (methodRef.IsUndefined()) return default;
 				var result = _engine.Invoke(methodRef, args);
@@ -157,7 +208,9 @@ namespace api.nox.session.jint {
 		private void OnDestroy() {
 			if (_engine == null) return;
 			Main.CoreAPI.EventAPI.Emit("jint_engine_destroyed", this, _engine);
-			_engine = null;
+			_engine.Dispose();
+			_engine  = null;
+			Context = null;
 		}
 
 		public void OnSessionSelected()
@@ -174,5 +227,8 @@ namespace api.nox.session.jint {
 
 		public void OnAuthorityTransferred(IPlayer player)
 			=> Invoke("onAuthorityTransferred", player);
+
+		public void OnEventTriggered(string @event, byte[] raw, IPlayer sender)
+			=> Invoke("onEvent", @event, raw, sender);
 	}
 }
