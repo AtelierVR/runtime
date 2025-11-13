@@ -31,8 +31,8 @@ export function onClick() {
             utf8.push(0xf0 | (charcode >> 18), 0x80 | ((charcode >> 12) & 0x3f), 0x80 | ((charcode >> 6) & 0x3f), 0x80 | (charcode & 0x3f));
         }
     }
-    var buffer = new Uint8Array(utf8);
-    emitEvent("testEvent", buffer);
+    
+    emitEvent("testEvent", utf8);
 }
 
 export function onEvent(name, raw, sender) {

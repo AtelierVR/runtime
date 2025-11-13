@@ -505,8 +505,15 @@ namespace api.nox.relay {
 		public bool IsConnected()
 			=> Connection != null && Connection.Connector.IsConnected();
 
-		public UniTask<bool> EmitEvent(string @event, byte[] raw)
-			=> Instance.SendEvent(InstanceRequestEvent.CreateBroadcast(@event, raw));
+		public UniTask<bool> EmitEvent(string @event, byte[] raw) {
+			try {
+				return Instance.SendEvent(InstanceRequestEvent.CreateBroadcast(@event, raw));
+			} catch (Exception e) {
+				Logger.LogError($"Error emitting event '{@event}': {e.Message}", tag: nameof(RelayAdapter));
+				Logger.LogException(e, tag: nameof(RelayAdapter));
+				return UniTask.FromResult(false);
+			}
+		}
 
 		public DateTime GetTime()
 			=> Connection.LastLatency?.IntermediateTime ?? DateTime.UnixEpoch;

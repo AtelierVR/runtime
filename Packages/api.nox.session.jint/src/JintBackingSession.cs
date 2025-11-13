@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Jint.Native;
+using Jint.Native.Array;
 using Jint.Native.Function;
 using Jint.Runtime;
 using Jint.Runtime.Modules;
@@ -72,7 +73,7 @@ namespace api.nox.session.jint {
 						.ExportObject("rigidbody", gameObject.GetComponent<Rigidbody>())
 						.ExportObject("id", GetInstanceID())
 				);
-				
+
 				_engine.AddModule(
 					"players", builder => builder
 						.ExportFunction("getLocal", () => module.Session.GetAdapter().GetLocalPlayer())
@@ -87,24 +88,50 @@ namespace api.nox.session.jint {
 					"network", builder => builder
 						.ExportFunction("getTime", () => JsValue.FromObject(_engine, netAdapter?.GetTime() ?? DateTime.Now))
 						.ExportFunction("isConnected", () => netAdapter?.IsConnected() ?? false)
-						.ExportFunction("getLatency", () => netAdapter?.GetLatency()   ?? 0.0)
 						.ExportFunction(
 							"emitEvent", args => {
-								if (netAdapter == null)
+								if (netAdapter == null) {
+									Logger.LogWarning("Network adapter is null", this);
 									return false;
+								}
 
-								var eventName = args.At(0).AsString();
-								var eventData = !args.At(1).IsUndefined()
-									? args.At(1).ToObject() as byte[]
-									: Array.Empty<byte>();
+								var    @event = args.At(0).AsString();
+								byte[] raw;
 
-								var emitting = netAdapter.EmitEvent(eventName, eventData).AsTask();
+								var dataArg = args.At(1);
+								if (dataArg.IsUndefined() || dataArg.IsNull())
+									raw = Array.Empty<byte>();
+								else if (!dataArg.IsObject()) {
+									Logger.LogWarning($"data argument is not an object (type: {dataArg.Type})", this);
+									return false;
+								} else {
+									var obj = dataArg.AsObject();
+									if (obj is not ArrayInstance arrayInstance) {
+										Logger.LogWarning("data argument is not an array", this);
+										return false;
+									}
+
+									var length = (int)arrayInstance.Length;
+									raw = new byte[length];
+									for (var i = 0; i < length; i++) {
+										var element = arrayInstance.Get(i.ToString());
+										raw[i] = element.IsNumber()
+											? (byte)element.AsNumber()
+											: (byte)0;
+									}
+								}
+
+								var emitting = netAdapter.EmitEvent(@event, raw).AsTask();
 								if (emitting.IsCompletedSuccessfully)
 									return JsValue.FromObject(_engine, emitting.Result);
-								if (emitting.IsFaulted)
+								if (emitting.IsFaulted) {
+									Logger.LogError($"Error emitting event '{@event}': {emitting.Exception}", this);
 									return false;
-								if (emitting.IsCanceled)
+								}
+								if (emitting.IsCanceled) {
+									Logger.LogWarning($"Emitting event '{@event}' was canceled", this);
 									return false;
+								}
 
 								var promiseFactory = _engine.Evaluate(
 										@"(function() {
@@ -122,6 +149,7 @@ namespace api.nox.session.jint {
 								emitting.ContinueWith(
 									t => {
 										if (t.IsFaulted || t.IsCanceled) {
+											Logger.LogError($"Error emitting event '{@event}': {t.Exception}", this);
 											_engine.Invoke(reject!, false);
 										} else _engine.Invoke(resolve!, JsValue.FromObject(_engine, t.Result));
 									}
@@ -153,7 +181,7 @@ namespace api.nox.session.jint {
 		private void SetExports(string property, object value) {
 			try {
 				if (_engine == null || Context == null) return;
-				var export  = Context.Get("exports");
+				var export = Context.Get("exports");
 				if (export.IsUndefined())
 					export = new ObjectWrapper(_engine, new Dictionary<string, object>());
 				if (!export.IsObject())
@@ -171,6 +199,7 @@ namespace api.nox.session.jint {
 					Logger.LogWarning("Engine or Context is null", this);
 					return;
 				}
+
 				var methodRef = Context.Get(method);
 				if (methodRef.IsUndefined()) return;
 				_engine.Invoke(methodRef, args);
@@ -186,6 +215,7 @@ namespace api.nox.session.jint {
 					Logger.LogWarning("Engine or Context is null", this);
 					return null;
 				}
+
 				var methodRef = Context.Get(method);
 				return methodRef.IsUndefined()
 					? null
@@ -203,6 +233,7 @@ namespace api.nox.session.jint {
 					Logger.LogWarning("Engine or Context is null", this);
 					return default;
 				}
+
 				var methodRef = Context.Get(method);
 				if (methodRef.IsUndefined()) return default;
 				var result = _engine.Invoke(methodRef, args);
@@ -218,7 +249,7 @@ namespace api.nox.session.jint {
 			if (_engine == null) return;
 			Main.CoreAPI.EventAPI.Emit("jint_engine_destroyed", this, _engine);
 			_engine.Dispose();
-			_engine  = null;
+			_engine = null;
 			Context = null;
 		}
 
