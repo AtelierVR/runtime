@@ -1,0 +1,25 @@
+{
+    "name": "api.nox.yantra.editor",
+    "rootNamespace": "",
+    "references": [
+        "Nox.CCK",
+        "Nox.YantraJS",
+        "Nox.CCK.YantraJS",
+        "api.nox.yantra",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
+

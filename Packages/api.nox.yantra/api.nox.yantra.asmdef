@@ -1,0 +1,23 @@
+{
+    "name": "api.nox.yantra",
+    "rootNamespace": "api.nox.yantra",
+    "references": [
+        "Nox.CCK",
+        "UniTask",
+        "Nox.YantraJS",
+        "Unity.TextMeshPro",
+        "Nox.CCK.YantraJS"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "YantraJS.Core.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
+
