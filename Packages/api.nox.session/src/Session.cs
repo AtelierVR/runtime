@@ -30,6 +30,7 @@ namespace api.nox.session {
 		public readonly UnityEvent<IAdapterState, IAdapterState> OnStateChangedListener         = new();
 		public readonly UnityEvent<IEntity>                      OnEntityRegisteredListener     = new();
 		public readonly UnityEvent<IEntity>                      OnEntityUnregisteredListener   = new();
+		public readonly UnityEvent<string, byte[], IPlayer>      OnEventTriggeredListener       = new();
 
 		[NoxPublic(NoxAccess.Method)]
 		public ushort GetId()
@@ -126,6 +127,17 @@ namespace api.nox.session {
 			foreach (var descriptor in GetDescriptors().Where(e => e != null))
 			foreach (var module in descriptor.GetModules<ISessionModule>())
 				module.OnEntityUnregistered(entity);
+		}
+
+		public void OnEventTriggered(string @event, byte[] raw, IPlayer sender) {
+			Logger.LogDebug($"OnEventTriggered: {@event} by {sender}");
+
+			Main.Instance.CoreAPI.EventAPI.Emit("session_event_triggered", this, @event, raw, sender);
+			OnEventTriggeredListener.Invoke(@event, raw, sender);
+			
+			foreach (var descriptor in GetDescriptors().Where(e => e != null))
+			foreach (var module in descriptor.GetModules<ISessionModule>())
+				module.OnEventTriggered(@event, raw, sender);
 		}
 
 		public IWorldDescriptor[] GetDescriptors() {

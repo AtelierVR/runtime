@@ -79,18 +79,26 @@ namespace Nox.Sessions {
 		/// </summary>
 		/// <param name="player"></param>
 		void OnAuthorityTransferred(IPlayer player);
-		
+
 		/// <summary>
 		/// Notify the session that an entity has been registered.
 		/// </summary>
 		/// <param name="entity"></param>
 		void OnEntityRegistered(IEntity entity);
-		
+
 		/// <summary>
 		/// Notify the session that an entity has been unregistered.
 		/// </summary>
 		/// <param name="entity"></param>
 		void OnEntityUnregistered(IEntity entity);
+
+		/// <summary>
+		/// Notify the session that an event has been triggered.
+		/// </summary>
+		/// <param name="event"></param>
+		/// <param name="raw"></param>
+		/// <param name="sender"></param>
+		void OnEventTriggered(string @event, byte[] raw, IPlayer sender);
 
 		/// <summary>
 		/// Check if the session matches a specific world identifier.
@@ -147,6 +155,5 @@ namespace Nox.Sessions {
 		/// </summary>
 		/// <returns></returns>
 		public IDimension GetDimension();
-
 	}
 }

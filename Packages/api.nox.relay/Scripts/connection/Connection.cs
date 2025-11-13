@@ -22,8 +22,8 @@ namespace api.nox.relay.connection {
 		public readonly IConnector Connector;
 
 		private Connection(IConnector connector) {
-			Id                        =  Main.Instance.NextId();
-			Connector                 =  connector;
+			Id        = Main.Instance.NextId();
+			Connector = connector;
 			Connector.OnReceived.AddListener(OnReceived);
 			Main.Instance.Connections.Add(this);
 			Main.OnConnectionAdded.Invoke(this);
@@ -74,7 +74,7 @@ namespace api.nox.relay.connection {
 					if (disconnect.FromBuffer(buffer.Clone(5, length))) {
 						Logger.Log($"Disconnect {disconnect.Reason}");
 						LastHandshake = null;
-						_lastLatency  = null;
+						LastLatency   = null;
 						Connector.Close().Forget();
 					} else {
 						Logger.LogError($"Failed to parse disconnect");
@@ -102,15 +102,14 @@ namespace api.nox.relay.connection {
 
 		private DateTime                                _lastLatencyRequest = DateTime.MinValue;
 		public  types.Handshakes.RelayResponseHandshake LastHandshake;
-		private types.Latency.RelayResponseLatency      _lastLatency;
+		public  types.Latency.RelayResponseLatency      LastLatency;
 
 		public ushort ClientId
 			=> LastHandshake?.ClientId ?? ushort.MaxValue;
 
 		public double Latency
-			=> _lastLatency?.GetLatency().TotalMilliseconds ?? -1;
-
-
+			=> LastLatency?.GetLatency().TotalMilliseconds ?? -1;
+		
 		public async UniTask Dispose() {
 			if (Connector.IsConnected()) {
 				await RequestDisconnect();
@@ -118,7 +117,7 @@ namespace api.nox.relay.connection {
 			}
 
 			LastHandshake = null;
-			_lastLatency  = null;
+			LastLatency   = null;
 			Main.Instance.Connections.Remove(this);
 			Main.OnConnectionRemoved.Invoke(this);
 		}
@@ -217,7 +216,7 @@ namespace api.nox.relay.connection {
 			);
 
 		public async UniTask<types.Latency.RelayResponseLatency> RequestLatency()
-			=> _lastLatency = await Request<types.Latency.RelayResponseLatency>(
+			=> LastLatency = await Request<types.Latency.RelayResponseLatency>(
 				types.Latency.RelayRequestLatency.Now(Id),
 				RequestType.Latency,
 				ResponseType.Latency,

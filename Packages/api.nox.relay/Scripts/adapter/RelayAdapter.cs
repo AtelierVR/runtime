@@ -27,7 +27,7 @@ using IPlayer = Nox.Players.IPlayer;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay {
-	public class RelayAdapter : IAdapter, IInstanceAdapter, INoxObject {
+	public class RelayAdapter : IAdapter, IInstanceAdapter, INoxObject, INetworkedAdapter {
 		private          RelayDimension    _dimension;
 		private readonly IEntityManager    _entities;
 		private          ISession          _session;
@@ -120,7 +120,7 @@ namespace api.nox.relay {
 			}
 
 			var table = new Dictionary<int, RelayParameter>();
-			foreach (var prop in entity.GetProperties<RelayParameter>()) 
+			foreach (var prop in entity.GetProperties<RelayParameter>())
 				table[prop.GetKey().Hash()] = prop;
 			var isByLocal = entity.GetId() == byEntity.GetId();
 
@@ -488,5 +488,25 @@ namespace api.nox.relay {
 				? Main.InstanceAPI.Make(instanceId, server)
 				: null;
 		}
+
+		public bool IsConnected()
+			=> Connection != null && Connection.Connector.IsConnected();
+
+		public UniTask<bool> EmitEvent(string @event, byte[] raw) {
+			Logger.LogWarning($"Not implemented: {nameof(EmitEvent)} for {this}");
+			return UniTask.FromResult(false);
+		}
+
+		public DateTime GetTime()
+			=> Connection.LastLatency?.IntermediateTime ?? DateTime.UnixEpoch;
+
+		public double GetLatency()
+			=> Connection.LastLatency?.GetLatency().TotalMilliseconds ?? double.MaxValue;
+
+		public int GetTps()
+			=> Tps;
+
+		public double GetThreshold()
+			=> Threshold;
 	}
 }

@@ -24,5 +24,7 @@ namespace Nox.Sessions {
 		public void OnEntityRegistered(IEntity entity) { }
 
 		public void OnEntityUnregistered(IEntity entity) { }
+
+		public void OnEventTriggered(string @event, byte[] raw, IPlayer sender) { }
 	}
 }
