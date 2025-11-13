@@ -632,7 +632,7 @@ MonoBehaviour:
   target: 0
   publishId: 1
   publishServer: hactazia.fr
-  publishVersion: 4
+  publishVersion: 6
   isCompiled: 0
 --- !u!114 &497432693
 MonoBehaviour:
@@ -882,12 +882,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 585968212}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 10}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1908271383}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &585968219
 Rigidbody:
@@ -930,18 +930,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   asset: {fileID: -6750239444755058063, guid: c10079710428c5147943f022db27a34a, type: 3}
   exports:
-  - key: new_export
+  - key: target
     value: 
-    reference: {fileID: 585968215}
-    type: UnityEngine.MeshRenderer, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+    reference: {fileID: 1908271383}
+    type: UnityEngine.Transform, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
-  - key: new_export_1
-    value: 
-    reference: {fileID: 497432689}
-    type: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  - key: new_export_2
-    value: 2147483647
+  - key: distance
+    value: 10
     reference: {fileID: 0}
     type: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089
 --- !u!1 &707441168
@@ -1569,6 +1564,38 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1757606335}
   m_CullTransparentMesh: 1
+--- !u!1 &1908271382
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1908271383}
+  m_Layer: 0
+  m_Name: Target
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1908271383
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1908271382}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2, z: 10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 585968217}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2144385836
 GameObject:
   m_ObjectHideFlags: 0
@@ -1628,7 +1655,7 @@ SceneRoots:
   - {fileID: 2144385838}
   - {fileID: 1625806936}
   - {fileID: 497432691}
-  - {fileID: 585968217}
+  - {fileID: 1908271383}
   - {fileID: 235990507}
   - {fileID: 97338198}
   - {fileID: 707441171}
