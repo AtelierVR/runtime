@@ -25,5 +25,6 @@ namespace api.nox.relay.types {
 		PlayerUpdate        = 0x12,
 		Sessions            = 0x13,
 		Voice               = 0x14,
+		Event               = 0x15,
 	}
 }

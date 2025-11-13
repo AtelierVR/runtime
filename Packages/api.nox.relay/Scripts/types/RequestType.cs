@@ -19,9 +19,10 @@ namespace api.nox.relay.types {
 		Teleport            = 0x0C,
 		AvatarChanged       = 0x0D,
 		ServerConfig        = 0x0E,
-		Properties        = 0x0F,
-		PlayerUpdate        = 0x10,
-		Sessions            = 0x12,
-		Voice               = 0x13,
+		Properties          = 0x0F,
+		PlayerUpdate        = 0x12,
+		Sessions            = 0x13,
+		Voice               = 0x14,
+		Event               = 0x15,
 	}
 }

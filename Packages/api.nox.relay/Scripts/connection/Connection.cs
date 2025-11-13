@@ -64,6 +64,7 @@ namespace api.nox.relay.connection {
 				case ResponseType.Traveling:
 				case ResponseType.Teleport:
 				case ResponseType.Voice:
+				case ResponseType.Event:
 					var iid      = buffer.ReadByte();
 					var instance = Instances.FirstOrDefault(x => x.InternalId == iid);
 					if (instance != null)
@@ -109,7 +110,7 @@ namespace api.nox.relay.connection {
 
 		public double Latency
 			=> LastLatency?.GetLatency().TotalMilliseconds ?? -1;
-		
+
 		public async UniTask Dispose() {
 			if (Connector.IsConnected()) {
 				await RequestDisconnect();

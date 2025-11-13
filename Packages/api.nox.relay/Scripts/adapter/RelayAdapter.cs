@@ -6,6 +6,7 @@ using api.nox.relay.connection;
 using api.nox.relay.Instances;
 using api.nox.relay.types.Avatar;
 using api.nox.relay.types.Enter;
+using api.nox.relay.types.Event;
 using api.nox.relay.types.Join;
 using api.nox.relay.types.Leave;
 using api.nox.relay.types.Player;
@@ -257,6 +258,18 @@ namespace api.nox.relay {
 
 		public void OnTraveling(TravelingEvent ev)
 			=> OnTravelingAsync(ev).Forget();
+
+
+		public void OnEvent(EventEvent ev) {
+			Logger.LogDebug($"OnEvent: {ev} from SenderId={ev.SenderId}");
+			var player = _entities.GetEntity<RelayPlayer>(ev.SenderId);
+			if (player == null) {
+				Logger.LogWarning($"Player with ID {ev.SenderId} not found for Event event");
+				return;
+			}
+
+			_session.OnEventTriggered(ev.Name, ev.Payload, player);
+		}
 
 		private async UniTask OnTravelingFailed(TravelingEvent _, string reason)
 			=> await Instance.RequestTraveling(TravelingAction.Failed, reason);

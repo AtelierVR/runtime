@@ -26,6 +26,7 @@ namespace api.nox.relay.Instances {
 		public readonly UnityEvent<types.Voice.VoiceEvent>               OnVoice         = new();
 		public readonly UnityEvent<types.Properties.PropertiesEvent>     OnProperties    = new();
 		public readonly UnityEvent<types.PlayerUpdate.PlayerUpdateEvent> OnPlayerUpdated = new();
+		public readonly UnityEvent<types.Event.EventEvent>               OnEvent         = new();
 
 		internal async UniTask OnReceived(ushort length, ushort state, ResponseType type, Buffer buffer) {
 			await UniTask.SwitchToMainThread();
@@ -80,6 +81,11 @@ namespace api.nox.relay.Instances {
 					var playerUpdate = new types.PlayerUpdate.PlayerUpdateEvent { ConnectionId = Connection.Id, InternalId = InternalId };
 					if (playerUpdate.FromBuffer(buffer)) OnPlayerUpdated.Invoke(playerUpdate);
 					else Logger.LogWarning($"Failed to parse player update event for instance {InternalId}");
+					break;
+				case ResponseType.Event:
+					var eventEvent = new types.Event.EventEvent { ConnectionId = Connection.Id, InternalId = InternalId };
+					if (eventEvent.FromBuffer(buffer)) OnEvent.Invoke(eventEvent);
+					else Logger.LogWarning($"Failed to parse event event for instance {InternalId}");
 					break;
 				default:
 					Logger.LogDebug($"Received unknown response type {type} for instance {InternalId}");
@@ -190,6 +196,12 @@ namespace api.nox.relay.Instances {
 					Connection.NextState()
 				)
 				?? types.PlayerUpdate.PlayerUpdateEvent.CreateFailure(Connection.Id, InternalId, "Unknown player update request");
+		}
+
+		public async UniTask<bool> SendEvent(types.Event.InstanceRequestEvent request) {
+			request.InternalId   = InternalId;
+			request.ConnectionId = Connection.Id;
+			return (await Connection.Emit(request.ToBuffer(), RequestType.Event)).Item1;
 		}
 	}
 }

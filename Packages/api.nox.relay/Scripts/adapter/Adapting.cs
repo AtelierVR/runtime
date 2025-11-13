@@ -270,6 +270,7 @@ namespace api.nox.relay {
 			adapter.Instance.OnTransform.AddListener(adapter.OnTransform);
 			adapter.Instance.OnProperties.AddListener(adapter.OnProperties);
 			adapter.Instance.OnPlayerUpdated.AddListener(adapter.OnPlayerUpdated);
+			adapter.Instance.OnEvent.AddListener(adapter.OnEvent);
 
 			adapter.SetState(false, "Connecting to an instance...", 0.3f);
 			var enter = await adapter.Instance.RequestEnter();

@@ -85,6 +85,7 @@
     <Compile Include="Packages\api.nox.relay\Scripts\types\authentication\AuthenticationAction.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\adapter\RelayExtensions.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\voice\InstanceRequestVoice.cs" />
+    <Compile Include="Packages\api.nox.relay\Scripts\types\event\InstanceRequestEvent.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\transform\TransformEvent.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\adapter\players\UndefinedRelayParameter.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\player_update\PlayerUpdateFlags.cs" />
@@ -107,6 +108,7 @@
     <Compile Include="Packages\api.nox.relay\Scripts\adapter\players\ReferencedRelayParameter.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\enter\EnterResponse.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\traveling\InstanceRequestTraveling.cs" />
+    <Compile Include="Packages\api.nox.relay\Scripts\types\event\EventEvent.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\adapter\entity\RelayProperty.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\avatar\AvatarChangedResult.cs" />
     <Compile Include="Packages\api.nox.relay\Scripts\types\traveling\TravelingAction.cs" />
