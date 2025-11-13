@@ -70,7 +70,7 @@ namespace api.nox.session.jint {
 						.ExportObject("gameObject", gameObject)
 						.ExportObject("transform", gameObject.transform)
 						.ExportObject("rigidbody", gameObject.GetComponent<Rigidbody>())
-						.ExportFunction("id", () => GetInstanceID())
+						.ExportObject("id", GetInstanceID())
 				);
 				
 				_engine.AddModule(
