@@ -84,6 +84,7 @@ jobs:
         env:
           # Unity license configuration
           # Pour configurer : https://github.com/AtelierVR/runtime/settings/secrets/actions
+          # Pour Unity Personal : encoder Unity_lic.ulf en base64 et créer UNITY_LICENSE
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
