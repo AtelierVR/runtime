@@ -2,11 +2,44 @@ using Nox.CCK.Avatars.Rigging.Parameters;
 using Nox.CCK.Utils;
 using UnityEngine;
 
+#if HAS_FINALIK
+using RootMotion.FinalIK;
+#endif
+
 namespace Nox.CCK.Avatars.Rigging {
 	public static class IKRigParameters {
 		public static void SetupParameters(RiggingAvatarModule module) {
 			module.Parameters.Clear();
 
+			#if HAS_FINALIK
+			// FinalIK VR: paramètres simplifiés pour VRIK
+			SetupVRIKParameters(module);
+			#else
+			// Legacy RigBuilder: paramètres complets pour chaque layer
+			SetupRigBuilderParameters(module);
+			#endif
+
+			// Paramètres communs pour tous les bones
+			for (var i = 0; i < (int)HumanBodyBones.LastBone; i++) {
+				var bone = (HumanBodyBones)i;
+				if (!module.GetPart(bone)) continue;
+				module.Parameters.Add(new RiggingActiveParameter(bone, module));
+				module.Parameters.Add(new RiggingPositionParameter(bone, module));
+				module.Parameters.Add(new RiggingRotationParameter(bone, module));
+			}
+		}
+
+		#if HAS_FINALIK
+		private static void SetupVRIKParameters(RiggingAvatarModule module) {
+			var vrik = module.GetVRIK();
+			if (!vrik) return;
+
+			// Paramètres globaux VRIK
+			// TODO: Ajouter des paramètres spécifiques pour VRIK si nécessaire
+			// Par exemple: spine weights, locomotion settings, etc.
+		}
+		#else
+		private static void SetupRigBuilderParameters(RiggingAvatarModule module) {
 			var rigBuilder = module.GetRigBuilder();
 			if (!rigBuilder) return;
 
@@ -33,14 +66,7 @@ namespace Nox.CCK.Avatars.Rigging {
 					module.Parameters.Add(new HipConstraintWeightParameter($"rig/ik/{snakeCaseLayerName}/hip_rotation_weight", HipConstraintWeightParameter.ConstraintType.Rotation, rigBuilder));
 				}
 			}
-
-			for (var i = 0; i < (int)HumanBodyBones.LastBone; i++) {
-				var bone = (HumanBodyBones)i;
-				if (!module.GetPart(bone)) continue;
-				module.Parameters.Add(new RiggingActiveParameter(bone, module));
-				module.Parameters.Add(new RiggingPositionParameter(bone, module));
-				module.Parameters.Add(new RiggingRotationParameter(bone, module));
-			}
 		}
+		#endif
 	}
 }

@@ -2,13 +2,14 @@
     "name": "Nox.CCK.Avatars.Rigging",
     "rootNamespace": "",
     "references": [
-        "GUID:4792fe99b5fd471e8575849004f76a10",
-        "GUID:1f5c4ea7910ca214c8bbca97bce87a2d",
-        "GUID:7f7d1af65c2641843945d409d28f2e20",
+        "Nox.Avatars",
+        "Nox.CCK",
+        "Unity.Animation.Rigging",
         "Nox.Avatars.Parameters",
         "Nox.Avatars.Rigging",
         "UniTask",
-        "GUID:9c3ea01e9c7f43f3bac8bf5fbf857a82"
+        "Nox.CCK.Avatars.Parameters",
+        "RootMotion"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -17,6 +18,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "rootmotion.finalik",
+            "expression": "",
+            "define": "HAS_FINALIK"
+        }
+    ],
     "noEngineReferences": false
 }

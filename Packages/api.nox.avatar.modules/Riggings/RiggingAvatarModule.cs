@@ -12,6 +12,10 @@ using UnityEngine.Animations.Rigging;
 using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
 
+#if HAS_FINALIK
+using RootMotion.FinalIK;
+#endif
+
 namespace Nox.CCK.Avatars.Rigging {
 	public class RiggingAvatarModule : MonoBehaviour, IRiggingModule, IParameterGroup {
 		private IAvatarDescriptor _descriptor;
@@ -19,6 +23,19 @@ namespace Nox.CCK.Avatars.Rigging {
 
 		public readonly List<IParameter>  Parameters = new();
 		public readonly List<RiggingPart> Parts      = new();
+
+		#if HAS_FINALIK
+		private VRIK _vrik;
+
+		public VRIK GetVRIK()
+			=> _vrik ? _vrik : _vrik = _descriptor.GetAnimator().GetOrAddComponent<VRIK>();
+		#endif
+
+		// GetRigBuilder est toujours disponible pour la compatibilité avec IKRigGenerator
+		private RigBuilder _rigBuilder;
+
+		public RigBuilder GetRigBuilder()
+			=> _rigBuilder ? _rigBuilder : _rigBuilder = _descriptor.GetAnimator().GetOrAddComponent<RigBuilder>();
 
 		public Transform GetAnchor() {
 			if (_anchor) return _anchor;
@@ -30,12 +47,17 @@ namespace Nox.CCK.Avatars.Rigging {
 			return _anchor;
 		}
 
-		public RigBuilder GetRigBuilder()
-			=> _descriptor.GetAnimator().GetOrAddComponent<RigBuilder>();
-
 		public UniTask<bool> Setup(IRuntimeAvatar runtimeAvatar) {
 			_descriptor = runtimeAvatar.GetDescriptor();
+
+			#if HAS_FINALIK
+			// Utilise FinalIK VR (préféré)
+			FinalIKRigGenerator.CreateVRIKRig(this);
+			#else
+			// Utilise RigBuilder (legacy)
 			IKRigGenerator.CreateIKRig(this);
+			#endif
+
 			IKRigParameters.SetupParameters(this);
 			HeadTarget.CreateTargets(this);
 			return UniTask.FromResult(true);

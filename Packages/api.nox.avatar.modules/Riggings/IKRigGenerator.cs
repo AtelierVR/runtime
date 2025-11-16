@@ -7,10 +7,13 @@ using Transform = UnityEngine.Transform;
 
 namespace Nox.CCK.Avatars.Rigging {
 	/// <summary>
-	/// Générateur statique pour les systèmes IK de rigging avatar
+	/// Générateur statique pour les systèmes IK de rigging avatar (Legacy - RigBuilder)
 	/// 
 	/// Note: GameObject names use "IKRig_" prefix to avoid conflicts with Unity's human bone mapping system.
 	/// This prevents ambiguous bone references that can cause avatar validation errors.
+	/// 
+	/// Ce système est utilisé quand HAS_FINALIK n'est pas défini. 
+	/// Quand FinalIK est disponible, préférez utiliser FinalIKRigGenerator.
 	/// </summary>
 	public static class IKRigGenerator {
 		public const string HipsHead   = "IKRig_HipsHead";

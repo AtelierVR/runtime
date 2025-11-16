@@ -60,15 +60,6 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.yantra\Scripts\Main.cs" />
-    <Compile Include="Packages\api.nox.yantra\Scripts\YantraBacking.cs" />
-    <Compile Include="Packages\api.nox.yantra\Scripts\Logger.cs" />
-    <Compile Include="Packages\api.nox.yantra\Scripts\Manager.cs" />
-    <None Include="Packages\api.nox.yantra\Resources\api.nox.yantra.yantrascript.uxml" />
-    <None Include="Packages\api.nox.yantra\nox.mod.json" />
-    <None Include="Packages\api.nox.yantra\link.xml" />
-    <None Include="Packages\api.nox.yantra\package.json" />
-    <None Include="Packages\api.nox.yantra\api.nox.yantra.asmdef" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -848,6 +839,9 @@
       <Project>{4611cc8e-5297-e913-af2f-f7745cec99c6}</Project>
       <Name>Nox.CCK.YantraJS</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Packages\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

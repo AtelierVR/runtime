@@ -204,12 +204,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.yantra": {
-      "version": "file:api.nox.yantra",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "com.cysharp.unitask": {
       "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
       "depth": 0,
@@ -775,6 +769,12 @@
     },
     "nuget-packages": {
       "version": "file:nuget-packages",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "rootmotion.finalik": {
+      "version": "file:rootmotion.finalik",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

@@ -1,7 +1,4 @@
 ﻿#if UNITY_EDITOR
-using System.Collections.Generic;
-using System.Linq;
-using Nox.Avatars;
 using Nox.CCK.Avatars;
 using UnityEngine;
 using UnityEditor;

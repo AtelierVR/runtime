@@ -61,7 +61,203 @@ EditorBuildSettings:
     guid: 4e9fef26e6adb88479ad1b9834a32d94
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity
-    guid: 55daccc09a3b69647bbab145b54a3ab3
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Packages/rootmotion.finalik/Baker/_DEMOS/Humanoid Baker.unity
+    guid: 0bd8d9a8cbacde343967c95c4458318e
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Aim IK/Aim Boxing.unity
+    guid: 723636789bb96481ba1f2aad8b8837e9
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Aim IK/Aim Controller.unity
+    guid: f097b72f6aff88c4c8120011f31f3891
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Aim IK/Aim Swing.unity
+    guid: dfa34265300d7414bbf930eaa6bfb70e
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Aim IK/Aim Weapon.unity
+    guid: 912d260eace234ee1b283ba7f07dd3d7
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Aim IK/AimIK Pole.unity
+    guid: 4cb81a7ab90c447829d4d26f8ca89245
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Aim IK/Second Hand On Gun.unity
+    guid: 76a7b3578da45e14fbb46967d1abd801
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Aim IK/Terrain Offset.unity
+    guid: 625128834590c457595556a63cd0d2fc
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Baker/Humanoid Baker (AimIK).unity
+    guid: 00987384d60623849896282c10c1246a
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Baker/Humanoid Baker (FBBIK).unity
+    guid: dc28baf245f02b842b80506ea0a6a92d
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Baker/Humanoid Baker (LimbIK).unity
+    guid: b13a1f0803c8ac64c887ea9c04891f6a
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Biped IK/Biped IK.unity
+    guid: 91d841eb8ee2f3043a1306d5ed5880c5
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/CCD IK/CCD IK 2D.unity
+    guid: ac6d72f62ff624a668172c39e3639634
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/CCD IK/CCD IK.unity
+    guid: 7cdefd61256654a66ba209970153a134
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/CCD IK/FABRIK Root/FABRIK Root.unity
+    guid: 8c3a06490bd824f38ba8dae3780a889c
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/CCD IK/Mech Spider.unity
+    guid: bb1f846cefd024029b6b716581825a6c
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FABRIK/FABRIK 2D.unity
+    guid: d9b0b114fa9cf4420831389d6b453b5a
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FABRIK/FABRIK.unity
+    guid: 003e33451c0114fefa907ebb80cdd058
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Amplifier.unity
+    guid: 1a221864c2d4141cfab6c79846565174
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Body Tilt.unity
+    guid: 15dd3a3d1606b41ab8169e92e914a946
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Bomb.unity
+    guid: 015690240b1d64d65975f48bbca923c5
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Boxing.unity
+    guid: b85ace1101bfa4110b70af1c694c1745
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Carry Box.unity
+    guid: 0c1f1d575fa3e405d8214cda9f3e60ae
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Driving.unity
+    guid: eb8a7e9cae153408d8242a655f13e2ac
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Effector Offset.unity
+    guid: 56ab62ebe17334ae19eab6a1dd946afc
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/First Person Shooter (Recoil).unity
+    guid: 6b33fdae1f2dc4c7c875a10e438ea419
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/First Person Shooter.unity
+    guid: 133e8d48ba7914813954c2a5b5d4e8bd
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Head Effector (Hand Controllers).unity
+    guid: d67a9d6cb5f28114d8a006db1dd1860c
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Head Effector.unity
+    guid: f971715c34ef7496f930e939d65b2634
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Hit Reaction.unity
+    guid: 8777d34ec9e694f2c98e65d98922b023
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Holding Hands.unity
+    guid: 45f325b7eef7b4c3dbb04f3c83398709
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Inertia.unity
+    guid: 8064853db60c34f9d93fc3372647e7e9
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Interaction Character-Character.unity
+    guid: cbedbd696f39a46c9bd4bd5d94c55c4a
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Interaction Pick Up 2-Handed.unity
+    guid: c8c08a518832d484b8d8de7804c18a97
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Interaction Trigger.unity
+    guid: 583d03f8c5b5e4b30b67347ab343a511
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Interaction Walls.unity
+    guid: 57465d524287546bba2116eb2e39ad01
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Interaction.unity
+    guid: 6aa7e7dc669224b66abda13816fd66e8
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Kissing Rig.unity
+    guid: d0377e8a32b944328bf2c301c8265a73
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Mapping To Ragdoll.unity
+    guid: 92d2f08133f9e43e3baf1be5c19efa98
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Motion Absorb.unity
+    guid: c2e2ef913e2ad4a7ba3fdbcee7344b0b
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Offset Effector.unity
+    guid: 0ef9773715d234a1c826469b246b2209
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Penetration Avoidance.unity
+    guid: 888b8015bdd29f540b676314d9b6576e
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Ragdoll Utility.unity
+    guid: 87d20d0d91268468bb51673c2d887ee2
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Recoil.unity
+    guid: d48f3468e9a994c9ea6cee5166cf194d
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Shoulder Rotator.unity
+    guid: bc5f346da81df4248903956bdc9fb735
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Soccer Kick.unity
+    guid: 5dbb4eff88e3f47b38c68608647d0b25
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Third Person Shooter (Recoil).unity
+    guid: c88a802d4e78a4de0954ca1379bccaa0
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Third Person Shooter.unity
+    guid: aa33116ee83374550a1567c7933bc758
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/FBBIK/Two Handed Prop.unity
+    guid: c7a1e7ad90d994a1c9e6970fc57b8417
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Finger Rig/Finger Rig.unity
+    guid: 55beaad4f644f4592a8a19bdd259401f
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Grounder/Grounder.unity
+    guid: 9bc02b49b041b414d982dde33b24d7f8
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Leg IK/Leg IK.unity
+    guid: c0000a97a282c134c92d24d49d76a75f
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Limb IK/LimbIK Bend Goal.unity
+    guid: d87e6a87e0971f44a84b91db0b6258d2
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Look At IK/LookAt Controller.unity
+    guid: d4e9ce9d99ee4b146b2f5dbd8fe14faf
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Rotation Limits/Rotation Limits.unity
+    guid: 0b8026c3c09aa423aac7dc8017e58e86
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/Rotation Limits/Turret.unity
+    guid: 3331caf4c834342f083a159e5ab50603
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/VRIK/VRIK (Animated Locomotion).unity
+    guid: 20e7a82a9c260894cab875fd831bd5a7
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/VRIK/VRIK (Basic Head & Hands
+      Calibration).unity
+    guid: 514dd711a487d2d47a1f009108e1c04a
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/VRIK/VRIK (Basic).unity
+    guid: 79f672ccc196fa143882bcb5e333cdcf
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/VRIK/VRIK (Calibration).unity
+    guid: e3b3977f14c1e92489be1774a9df3113
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/VRIK/VRIK (Grounder).unity
+    guid: 61eee84f62d48a04bb3fdf1427bce05f
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/VRIK/VRIK (Hit Reaction).unity
+    guid: fffb16a3dd355504f8eba21f3b455737
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/VRIK/VRIK (Moving Platform Controller).unity
+    guid: 33de6a5fcc199c045b748ef01d1fd174
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/VRIK/VRIK (Moving Platform).unity
+    guid: dc412329386244249a719a00b7632e14
+  - enabled: 1
+    path: Packages/rootmotion.finalik/FinalIK/_DEMOS/VRIK/VRIK (Twist Relaxers).unity
+    guid: f667b39ffe0bdfd4b948ee5001b31562
   - enabled: 1
     path: Packages/com.keviniglesias.basicmotions/Unity Demo Scenes/Human Basic Motions/Human
       Basic Motions - Unity Demo Scene.unity

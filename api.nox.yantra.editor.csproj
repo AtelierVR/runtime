@@ -60,10 +60,6 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.yantra\Editor\YantraFileEditor.cs" />
-    <Compile Include="Packages\api.nox.yantra\Editor\YantraScriptEditor.cs" />
-    <Compile Include="Packages\api.nox.yantra\Editor\FileImporter.cs" />
-    <None Include="Packages\api.nox.yantra\Editor\api.nox.yantra.editor.asmdef" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -1006,6 +1002,9 @@
       <Project>{bb3728ba-c2d8-d796-84ba-55474a34ff99}</Project>
       <Name>api.nox.yantra</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Packages\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
