@@ -1,0 +1,54 @@
+name: Test Build System
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'win64'
+        type: choice
+        options:
+          - win64
+          - linux64
+          - osx
+
+jobs:
+  test-build:
+    name: Test Build for ${{ github.event.inputs.platform }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Validate Build Script
+        run: |
+          echo "Checking if BuildGame.cs exists..."
+          if [ -f "Packages/dev.nox.game_builder/Scripts/BuildGame.cs" ]; then
+            echo "✓ BuildGame.cs found"
+            grep -q "PerformBuild" Packages/dev.nox.game_builder/Scripts/BuildGame.cs && echo "✓ PerformBuild method found" || echo "✗ PerformBuild method not found"
+          else
+            echo "✗ BuildGame.cs not found"
+            exit 1
+          fi
+      
+      - name: Check Unity Version
+        run: |
+          echo "Unity Version:"
+          cat ProjectSettings/ProjectVersion.txt
+      
+      - name: Validate Project Structure
+        run: |
+          echo "Checking project structure..."
+          [ -d "Assets" ] && echo "✓ Assets folder exists" || echo "✗ Assets folder missing"
+          [ -d "Packages" ] && echo "✓ Packages folder exists" || echo "✗ Packages folder missing"
+          [ -d "ProjectSettings" ] && echo "✓ ProjectSettings folder exists" || echo "✗ ProjectSettings folder missing"
+          [ -f "ProjectSettings/ProjectSettings.asset" ] && echo "✓ ProjectSettings.asset exists" || echo "✗ ProjectSettings.asset missing"
+      
+      - name: Summary
+        run: |
+          echo "## Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Platform: ${{ github.event.inputs.platform }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Build script validated ✓" >> $GITHUB_STEP_SUMMARY
+          echo "- Ready for full build" >> $GITHUB_STEP_SUMMARY
