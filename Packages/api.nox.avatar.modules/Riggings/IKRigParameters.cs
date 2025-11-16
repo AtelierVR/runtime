@@ -13,7 +13,7 @@ namespace Nox.CCK.Avatars.Rigging {
 
 			#if HAS_FINALIK
 			// FinalIK VR: paramètres simplifiés pour VRIK
-			SetupVRIKParameters(module);
+			SetupVrikParameters(module);
 			#else
 			// Legacy RigBuilder: paramètres complets pour chaque layer
 			SetupRigBuilderParameters(module);
@@ -30,15 +30,24 @@ namespace Nox.CCK.Avatars.Rigging {
 		}
 
 		#if HAS_FINALIK
-		private static void SetupVRIKParameters(RiggingAvatarModule module) {
-			var vrik = module.GetVRIK();
+		private static void SetupVrikParameters(RiggingAvatarModule module) {
+			// Vérifier d'abord si VRIK est autorisé pour éviter l'erreur
+			if (!module.allowVrik) {
+				// Fallback sur RigBuilder si VRIK n'est pas autorisé
+				SetupRigBuilderParameters(module);
+				return;
+			}
+			
+			var vrik = module.GetVrik();
 			if (!vrik) return;
 
 			// Paramètres globaux VRIK
 			// TODO: Ajouter des paramètres spécifiques pour VRIK si nécessaire
 			// Par exemple: spine weights, locomotion settings, etc.
 		}
-		#else
+		#endif
+		
+		// Méthode commune pour RigBuilder (utilisée en legacy et comme fallback)
 		private static void SetupRigBuilderParameters(RiggingAvatarModule module) {
 			var rigBuilder = module.GetRigBuilder();
 			if (!rigBuilder) return;
@@ -67,6 +76,5 @@ namespace Nox.CCK.Avatars.Rigging {
 				}
 			}
 		}
-		#endif
 	}
 }

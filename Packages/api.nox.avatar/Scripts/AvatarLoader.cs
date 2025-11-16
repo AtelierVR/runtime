@@ -42,12 +42,12 @@ namespace api.nox.avatar {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public static async UniTask<AssetBundleRuntimeRuntimeAvatar> LoadFromCache(string hash, Action<float> progress = null, CancellationToken token = default) {
+		public static async UniTask<AssetBundleRuntimeAvatar> LoadFromCache(string hash, Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default) {
 			Logger.Log($"Loading avatar from cache: {hash}");
-
+			
 			var path = AvatarCache.GetIfExist(hash);
 			if (!string.IsNullOrEmpty(path))
-				return await LoadFromPath(path, progress, token);
+				return await LoadFromPath(path, arguments, progress, token);
 
 			Logger.LogError($"Avatar with hash {hash} not found in cache.");
 
@@ -55,15 +55,16 @@ namespace api.nox.avatar {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public static async UniTask<AssetBundleRuntimeRuntimeAvatar> LoadFromPath(string path, Action<float> progress = null, CancellationToken token = default) {
+		public static async UniTask<AssetBundleRuntimeAvatar> LoadFromPath(string path, Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default) {
 			// Attendre qu'un slot de chargement soit disponible
 			await LoadingSemaphore.WaitAsync(token);
+			arguments ??= new Dictionary<string, object>();
 
 			try {
 				Interlocked.Increment(ref _currentLoadingCount);
 				Logger.Log($"Loading avatar from path: {path} (Queue: {_currentLoadingCount}/{MaxConcurrentLoads})");
 
-				var avatar = await AssetBundleRuntimeRuntimeAvatar.Load(path, progress, token);
+				var avatar = await AssetBundleRuntimeAvatar.Load(path, arguments, progress, token);
 				if (avatar == null) {
 					Logger.LogError($"Failed to load avatar from path: {path}");
 					return null;
@@ -78,15 +79,16 @@ namespace api.nox.avatar {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public static async UniTask<AssetRuntimeRuntimeAvatar> LoadFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default) {
+		public static async UniTask<AssetRuntimeAvatar> LoadFromAssets(string ns, string path,Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default) {
 			// Attendre qu'un slot de chargement soit disponible
 			await LoadingSemaphore.WaitAsync(token);
+			arguments ??= new Dictionary<string, object>();
 
 			try {
 				Interlocked.Increment(ref _currentLoadingCount);
 				Logger.Log($"Loading avatar from assets: {ns}:{path} (Queue: {_currentLoadingCount}/{MaxConcurrentLoads})");
 
-				var avatar = await AssetRuntimeRuntimeAvatar.Load(ns, path, progress, token);
+				var avatar = await AssetRuntimeAvatar.Load(ns, path, arguments, progress, token);
 
 				if (avatar == null) {
 					Logger.LogError($"Failed to load avatar from assets: {ns}:{path}");

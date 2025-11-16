@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
+using LogType = UnityEngine.LogType;
 
 namespace dev.nox.game_builder
 {
@@ -23,34 +24,34 @@ namespace dev.nox.game_builder
             var args = ParseCommandLineArguments();
             
             // Get build target from command line or use current
-            BuildTarget buildTarget = args.ContainsKey("buildTarget") 
-                ? GetBuildTargetFromString(args["buildTarget"]) 
+            var buildTarget = args.TryGetValue("buildTarget", out var arg) 
+                ? GetBuildTargetFromString(arg) 
                 : EditorUserBuildSettings.activeBuildTarget;
             
-            Platform platform = buildTarget.GetPlatform();
+            var platform = buildTarget.GetPlatform();
             
             // Get output path
-            string outputPath = args.ContainsKey("customBuildPath") 
+            var outputPath = args.ContainsKey("customBuildPath") 
                 ? args["customBuildPath"] 
                 : "Builds";
             
             // Get build name
-            string buildName = args.ContainsKey("customBuildName") 
+            var buildName = args.ContainsKey("customBuildName") 
                 ? args["customBuildName"] 
                 : Application.productName;
             
             // Get build options
-            BuildOptions buildOptions = ParseBuildOptions(args);
+            var buildOptions = ParseBuildOptions(args);
             
             // Determine if we should build scenes
-            bool buildScenes = !args.ContainsKey("skipScenes") || args["skipScenes"] != "true";
+            var buildScenes = !args.ContainsKey("skipScenes") || args["skipScenes"] != "true";
             
             Debug.Log($"[BuildGame] Starting build for platform: {platform.GetPlatformName()}");
             Debug.Log($"[BuildGame] Output path: {outputPath}");
             Debug.Log($"[BuildGame] Build name: {buildName}");
             Debug.Log($"[BuildGame] Build options: {buildOptions}");
             
-            bool success = BuildPlayer(platform, outputPath, buildName, buildScenes, buildOptions);
+            var success = BuildPlayer(platform, outputPath, buildName, buildScenes, buildOptions);
             
             if (!success)
             {
@@ -105,18 +106,11 @@ namespace dev.nox.game_builder
             if (result.summary.result != BuildResult.Succeeded)
             {
                 Debug.LogError($"[BuildGame] Build failed with {result.summary.totalErrors} error(s)");
-                foreach (var step in result.steps)
-                {
-                    if (step.messages.Length > 0)
-                    {
-                        foreach (var message in step.messages)
-                        {
-                            if (message.type == LogType.Error || message.type == LogType.Exception)
-                            {
-                                Debug.LogError($"[BuildGame] {message.content}");
-                            }
-                        }
-                    }
+                foreach (var step in result.steps) {
+                    if (step.messages.Length <= 0) continue;
+                    foreach (var message in step.messages)
+                        if (message.type is LogType.Error or LogType.Exception)
+                            Debug.LogError($"[BuildGame] {message.content}");
                 }
                 return false;
             }
@@ -179,14 +173,11 @@ namespace dev.nox.game_builder
             var args = new Dictionary<string, string>();
             var commandLineArgs = Environment.GetCommandLineArgs();
             
-            for (int i = 0; i < commandLineArgs.Length; i++)
-            {
-                if (commandLineArgs[i].StartsWith("-") && i + 1 < commandLineArgs.Length)
-                {
-                    string key = commandLineArgs[i].TrimStart('-');
-                    string value = commandLineArgs[i + 1];
-                    args[key] = value;
-                }
+            for (var i = 0; i < commandLineArgs.Length; i++) {
+                if (!commandLineArgs[i].StartsWith("-") || i + 1 >= commandLineArgs.Length) continue;
+                var key   = commandLineArgs[i].TrimStart('-');
+                var value = commandLineArgs[i + 1];
+                args[key] = value;
             }
             
             return args;
@@ -209,7 +200,7 @@ namespace dev.nox.game_builder
         
         private static BuildOptions ParseBuildOptions(Dictionary<string, string> args)
         {
-            BuildOptions options = BuildOptions.None;
+            var options = BuildOptions.None;
             
             // Development build
             if (args.ContainsKey("development") && args["development"] == "true")

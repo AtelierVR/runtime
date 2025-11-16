@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace Nox.Avatars {
 	public interface IRuntimeAvatar {
@@ -7,6 +9,12 @@ namespace Nox.Avatars {
 		/// </summary>
 		/// <returns></returns>
 		public string GetId();
+
+		/// <summary>
+		/// Arguments used to create the avatar.
+		/// </summary>
+		/// <returns></returns>
+		public Dictionary<string, object> GetArguments();
 
 		/// <summary>
 		/// Gets the avatar descriptor, which contains metadata about the avatar.

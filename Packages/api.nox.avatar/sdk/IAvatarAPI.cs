@@ -12,47 +12,50 @@ namespace Nox.Avatars {
 		/// Creates a loading avatar.
 		/// </summary>
 		/// <returns></returns>
-		public UniTask<IRuntimeAvatar> LoadLoading(Action<float> progress = null, CancellationToken token = default);
+		public UniTask<IRuntimeAvatar> LoadLoading(Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Creates a default avatar.
 		/// </summary>
 		/// <returns></returns>
-		public UniTask<IRuntimeAvatar> LoadDefault(Action<float> progress = null, CancellationToken token = default);
+		public UniTask<IRuntimeAvatar> LoadDefault(Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Creates an error avatar.
 		/// </summary>
 		/// <returns></returns>
-		public UniTask<IRuntimeAvatar> LoadError(Action<float> progress = null, CancellationToken token = default);
+		public UniTask<IRuntimeAvatar> LoadError(Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Load an avatar from a given path.
 		/// </summary>
 		/// <param name="path"></param>
+		/// <param name="arguments"></param>
 		/// <param name="progress"></param>
 		/// <param name="token"></param>
 		/// <returns></returns>
-		public UniTask<IRuntimeAvatar> LoadFromPath(string path, Action<float> progress = null, CancellationToken token = default);
+		public UniTask<IRuntimeAvatar> LoadFromPath(string path, Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Load an avatar from a given mod assets.
 		/// </summary>
 		/// <param name="modId"></param>
 		/// <param name="path"></param>
+		/// <param name="arguments"></param>
 		/// <param name="progress"></param>
 		/// <param name="token"></param>
 		/// <returns></returns>
-		public UniTask<IRuntimeAvatar> LoadFromAssets(string modId, string path, Action<float> progress = null, CancellationToken token = default);
+		public UniTask<IRuntimeAvatar> LoadFromAssets(string modId, string path, Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Load an avatar from a given cache hash.
 		/// </summary>
 		/// <param name="hash"></param>
+		/// <param name="arguments"></param>
 		/// <param name="progress"></param>
 		/// <param name="token"></param>
 		/// <returns></returns>
-		public UniTask<IRuntimeAvatar> LoadFromCache(string hash, Action<float> progress = null, CancellationToken token = default);
+		public UniTask<IRuntimeAvatar> LoadFromCache(string hash, Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default);
 
 		public UniTask<IAvatar> Fetch(string identifier, string from = null);
 

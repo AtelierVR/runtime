@@ -4,7 +4,8 @@
     "references": [
         "Nox.CCK",
         "Nox.Controllers",
-        "UniTask"
+        "UniTask",
+        "Nox.Avatars"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

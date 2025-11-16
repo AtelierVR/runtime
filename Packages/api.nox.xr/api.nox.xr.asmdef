@@ -17,7 +17,8 @@
         "Nox.Avatars.Parameters",
         "Nox.Users",
         "Nox.Avatars.Camera",
-        "Nox.Avatars.Rigging"
+        "Nox.Avatars.Rigging",
+        "RootMotion"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -26,6 +27,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "rootmotion.finalik",
+            "expression": "",
+            "define": "HAS_FINALIK"
+        }
+    ],
     "noEngineReferences": false
 }

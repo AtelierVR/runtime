@@ -11,7 +11,6 @@ using Nox.Avatars.Parameters;
 using Nox.Avatars.Players;
 using Nox.Avatars.Rigging;
 using Nox.CCK.Mods.Events;
-using Nox.CCK.Network;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
@@ -21,6 +20,7 @@ using Nox.Controllers;
 using Nox.Players;
 using Nox.UI;
 using Nox.Users;
+using RootMotion.FinalIK;
 using UnityEngine.EventSystems;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using NoxTransform = Nox.CCK.Utils.Transform;
@@ -121,7 +121,6 @@ namespace api.nox.xr {
 
 			xr.Menu.SetActive(false);
 
-
 			if (!await ControllerAPI.SetCurrent(xr)) {
 				Logger.LogError("Failed to set XR proxy as current");
 				Destroy(instance);
@@ -161,6 +160,14 @@ namespace api.nox.xr {
 		private CancellationTokenSource _avatarLoadingCts;
 		private EventSubscription       _onUserUpdate;
 
+		private XRController()
+			=> _avatarParameters = new Dictionary<string, object> {
+				["source"] = this,
+				["xr"]     = true,
+				["local"]  = true
+			};
+
+
 		public void Dispose() {
 			Client.CoreAPI.EventAPI.Unsubscribe(_onUserUpdate);
 			_onUserUpdate = null;
@@ -183,18 +190,18 @@ namespace api.nox.xr {
 		public Collider GetCollider()
 			=> player.bodyCollider;
 
-		public async UniTask Restore(IController controller) {
+		public UniTask Restore(IController controller) {
 			foreach (var ability in controller.GetAbilities())
 				SetAbilities(ability.Key, ability.Value);
 
-			if (controller is IControllerAvatar ca) {
-				await SetAvatar(ca.GetAvatar());
-				ca.SetAvatar(null).Forget();
-			}
+			if (controller is IControllerAvatar ca)
+				SetAvatar(ca.GetAvatar().GetIdentifier()).Forget();
 
 			var p = controller.GetPlayer();
 			controller.SetPlayer(null);
 			SetPlayer(p);
+
+			return UniTask.CompletedTask;
 		}
 
 		public bool TryGetPart(ushort index, out Transform tr)
@@ -328,6 +335,16 @@ namespace api.nox.xr {
 
 			root.SetActive(true);
 
+			#if HAS_FINALIK
+			if (root.TryGetComponent<VRIK>(out var component)) {
+				var proxy = component.GetOrAddComponent<AutoHandVRIK>();
+				proxy.rightHand              = player.handRight;
+				proxy.leftHand               = player.handLeft;
+				proxy.rightTrackedController = player.handRight.transform;
+				proxy.leftTrackedController  = player.handLeft.transform;
+			}
+			#endif
+
 			return true;
 		}
 
@@ -380,6 +397,8 @@ namespace api.nox.xr {
 		private void LoadAvatarFromUser(ICurrentUser user)
 			=> SetAvatar(Client.AvatarAPI.Make(user?.GetAvatarId())).Forget();
 
+		private readonly Dictionary<string, object> _avatarParameters;
+
 		public async UniTask<IRuntimeAvatar> SetAvatar(IAvatarIdentifier identifier, Action<string, float> progress = null) {
 			Logger.LogDebug($"Loading avatar for identifier {identifier?.ToString() ?? "null"}");
 
@@ -415,7 +434,7 @@ namespace api.nox.xr {
 
 			if (asset == null) {
 				Logger.LogWarning($"Avatar asset not found for identifier {identifier.ToString()}");
-				var err = await Client.AvatarAPI.LoadError();
+				var err = await Client.AvatarAPI.LoadError(_avatarParameters);
 				err.SetIdentifier(identifier);
 				await SetAvatar(err);
 				if (playerAvatar != null)
@@ -437,6 +456,7 @@ namespace api.nox.xr {
 
 			var avatar = await Client.AvatarAPI.LoadFromCache(
 				asset.GetHash(),
+				_avatarParameters,
 				progress: p => progress?.Invoke($"Loading avatar {identifier.ToString()}", p),
 				token: _avatarLoadingCts.Token
 			);
@@ -445,7 +465,7 @@ namespace api.nox.xr {
 
 			if (avatar == null) {
 				Logger.LogError($"Failed to load avatar from cache for identifier {identifier.ToString()}");
-				var err = await Client.AvatarAPI.LoadError();
+				var err = await Client.AvatarAPI.LoadError(_avatarParameters);
 				err.SetIdentifier(identifier);
 				await SetAvatar(err);
 				if (playerAvatar != null)
@@ -469,7 +489,7 @@ namespace api.nox.xr {
 
 			Logger.LogDebug("Creating avatar");
 
-			var avatar = await Client.AvatarAPI.LoadLoading();
+			var avatar = await Client.AvatarAPI.LoadLoading(_avatarParameters);
 			if (avatar == null) {
 				Logger.LogError("Failed to create avatar for XRController");
 				return;

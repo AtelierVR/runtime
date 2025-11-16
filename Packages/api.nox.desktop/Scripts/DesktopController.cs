@@ -37,7 +37,16 @@ namespace api.nox.desktop {
 		[SerializeField]
 		private float maxZoom = 60f;
 
-		private float currentZoom = 60f;
+		private float _currentZoom = 60f;
+
+		private DesktopController()
+			=> _avatarParameters = new Dictionary<string, object> {
+				["source"]  = this,
+				["desktop"] = true,
+				["local"]   = true
+			};
+
+		private readonly Dictionary<string, object> _avatarParameters;
 
 		/// <summary>
 		/// Get the proxy mod API.
@@ -179,7 +188,7 @@ namespace api.nox.desktop {
 
 			if (asset == null) {
 				Logger.LogWarning($"Avatar asset not found for identifier {identifier.ToString()}");
-				var err = await Client.AvatarAPI.LoadError();
+				var err = await Client.AvatarAPI.LoadError(_avatarParameters);
 				err.SetIdentifier(identifier);
 				await SetAvatar(err);
 				if (playerAvatar != null)
@@ -201,6 +210,7 @@ namespace api.nox.desktop {
 
 			var avatar = await Client.AvatarAPI.LoadFromCache(
 				asset.GetHash(),
+				_avatarParameters,
 				progress: p => onProgress?.Invoke($"Loading avatar{identifier.ToString()}", p),
 				token: _avatarLoadingCts.Token
 			);
@@ -209,7 +219,7 @@ namespace api.nox.desktop {
 
 			if (avatar == null) {
 				Logger.LogError($"Failed to load avatar from cache for identifier {identifier.ToString()}");
-				var err = await Client.AvatarAPI.LoadError();
+				var err = await Client.AvatarAPI.LoadError(_avatarParameters);
 				err.SetIdentifier(identifier);
 				await SetAvatar(err);
 				if (playerAvatar != null)
@@ -255,7 +265,7 @@ namespace api.nox.desktop {
 
 			Logger.LogDebug("Creating avatar");
 
-			var avatar = await Client.AvatarAPI.LoadLoading();
+			var avatar = await Client.AvatarAPI.LoadLoading(_avatarParameters);
 			if (avatar == null) {
 				Logger.LogError("Failed to create avatar for DesktopController");
 				return;
@@ -277,14 +287,14 @@ namespace api.nox.desktop {
 		public Collider GetCollider()
 			=> player.bodyCollider;
 
-		public async UniTask Restore(IController controller) {
+		public UniTask Restore(IController controller) {
 			foreach (var ability in controller.GetAbilities())
 				SetAbilities(ability.Key, ability.Value);
 
-			if (controller is IControllerAvatar ca) {
-				await SetAvatar(ca.GetAvatar());
-				ca.SetAvatar(null).Forget();
-			}
+			if (controller is IControllerAvatar ca)
+				SetAvatar(ca.GetAvatar().GetIdentifier()).Forget();
+
+			return UniTask.CompletedTask;
 		}
 
 		public bool TryGetPart(ushort index, out Transform tr)
@@ -481,12 +491,12 @@ namespace api.nox.desktop {
 			var scrollInput = Input.GetAxis("Mouse ScrollWheel");
 			if (!(Mathf.Abs(scrollInput) > 0.01f)) return;
 			// Calculer le nouveau zoom
-			currentZoom -= scrollInput * zoomSpeed * 10f;
-			currentZoom =  Mathf.Clamp(currentZoom, minZoom, maxZoom);
+			_currentZoom -= scrollInput * zoomSpeed * 10f;
+			_currentZoom =  Mathf.Clamp(_currentZoom, minZoom, maxZoom);
 
 			// Appliquer le zoom à la caméra
 			if (player?.headCamera)
-				player.headCamera.fieldOfView = currentZoom;
+				player.headCamera.fieldOfView = _currentZoom;
 		}
 
 		private void LateUpdate()
@@ -535,7 +545,7 @@ namespace api.nox.desktop {
 						param.Set(localVelocity.x);
 						break;
 					}
-					case "VelocityY" : {
+					case "VelocityY": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
 						var value         = (float)param.Get();
@@ -543,7 +553,7 @@ namespace api.nox.desktop {
 						param.Set(localVelocity.y);
 						break;
 					}
-					case "VelocityZ" : {
+					case "VelocityZ": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
 						var value         = (float)param.Get();
@@ -551,7 +561,7 @@ namespace api.nox.desktop {
 						param.Set(localVelocity.z);
 						break;
 					}
-					case "Velocity" : {
+					case "Velocity": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
 						var value         = (Vector3)param.Get();

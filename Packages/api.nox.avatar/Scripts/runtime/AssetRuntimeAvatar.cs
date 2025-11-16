@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -9,14 +10,15 @@ using Logger = Nox.CCK.Utils.Logger;
 using Object = UnityEngine.Object;
 
 namespace api.nox.avatar {
-	public class AssetRuntimeRuntimeAvatar : BaseRuntimeRuntimeAvatar {
+	public class AssetRuntimeAvatar : BaseRuntimeAvatar {
 		public (string ns, string path) Path;
 
-		public static async UniTask<AssetRuntimeRuntimeAvatar> Load(string ns, string path, Action<float> progress, CancellationToken token) {
+		public static async UniTask<AssetRuntimeAvatar> Load(string ns, string path, Dictionary<string, object> arguments, Action<float> progress, CancellationToken token) {
 			progress?.Invoke(0);
 
-			var avatar = new AssetRuntimeRuntimeAvatar {
-				Path = (ns, path)
+			var avatar = new AssetRuntimeAvatar {
+				Path      = (ns, path),
+				Arguments = arguments
 			};
 
 			// Load the avatar from the bundle (prefab)

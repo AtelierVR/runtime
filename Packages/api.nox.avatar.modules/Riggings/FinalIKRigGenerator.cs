@@ -13,7 +13,7 @@ namespace Nox.CCK.Avatars.Rigging {
 		public const string VRIKRoot = "VRIK_Root";
 
 		public static VRIK CreateVRIKRig(RiggingAvatarModule module) {
-			var vrik     = module.GetVRIK();
+			var vrik     = module.GetVrik();
 			var animator = module.GetBone(HumanBodyBones.Hips).root.GetComponent<Animator>();
 
 			if (animator == null) {

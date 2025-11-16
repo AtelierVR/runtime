@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -9,29 +10,29 @@ using Logger = Nox.CCK.Utils.Logger;
 using Object = UnityEngine.Object;
 
 namespace api.nox.avatar {
-	public class AssetBundleRuntimeRuntimeAvatar : BaseRuntimeRuntimeAvatar {
+	public class AssetBundleRuntimeAvatar : BaseRuntimeAvatar {
 		public AssetBundle Bundle;
 		public string      Path;
 
 		public bool CanUnloadAssetBundle() {
 			foreach (var a0 in AvatarLoader.Avatar)
-				if (a0 is AssetBundleRuntimeRuntimeAvatar a1 && a1.Path == Path && a1.GetId() != GetId())
+				if (a0 is AssetBundleRuntimeAvatar a1 && a1.Path == Path && a1.GetId() != GetId())
 					return false;
 			return true;
 		}
 
 		private static AssetBundle GetAssetBundle(string path) {
 			foreach (var a0 in AvatarLoader.Avatar)
-				if (a0 is AssetBundleRuntimeRuntimeAvatar a1 && a1.Path == path)
+				if (a0 is AssetBundleRuntimeAvatar a1 && a1.Path == path)
 					return a1.Bundle;
 			return null;
 		}
 
 
-		public static async UniTask<AssetBundleRuntimeRuntimeAvatar> Load(string path, Action<float> progress, CancellationToken token) {
+		public static async UniTask<AssetBundleRuntimeAvatar> Load(string path, Dictionary<string, object> arguments, Action<float> progress, CancellationToken token) {
 			progress?.Invoke(0);
 
-			var avatar = new AssetBundleRuntimeRuntimeAvatar {
+			var avatar = new AssetBundleRuntimeAvatar {
 				Path   = path,
 				Bundle = GetAssetBundle(path)
 			};

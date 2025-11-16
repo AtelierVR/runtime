@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars.Parameters;
@@ -13,6 +14,12 @@ namespace Nox.Avatars.Editor {
 		public string GetId()
 			=> GetInstanceID().ToString();
 
+		public Dictionary<string, object> GetArguments()
+			=> new() {
+				["source"] = this,
+				["local"]  = true
+			};
+
 		// ReSharper disable Unity.PerformanceAnalysis
 		public IAvatarDescriptor GetDescriptor()
 			=> GetComponent<IAvatarDescriptor>();
@@ -20,9 +27,9 @@ namespace Nox.Avatars.Editor {
 		public IAvatarIdentifier GetIdentifier()
 			=> null;
 
-		public void SetIdentifier(IAvatarIdentifier identifier) 
+		public void SetIdentifier(IAvatarIdentifier identifier)
 			=> Logger.LogWarning("PlayModeAvatar does not support setting an identifier.");
-		
+
 
 		public async UniTask Dispose()
 			=> await UniTask.Yield();
@@ -39,7 +46,7 @@ namespace Nox.Avatars.Editor {
 			}
 
 			Logger.Log("Avatar starting...");
-			
+
 			// Temporarily disable rigging to prevent TransformStreamHandle errors during setup
 			var animator = descriptor.GetAnimator();
 			if (!animator) {
@@ -47,12 +54,12 @@ namespace Nox.Avatars.Editor {
 				enabled = false;
 				return;
 			}
-			
-			var rigBuilder = animator?.GetComponent<RigBuilder>();
+
+			var  rigBuilder           = animator?.GetComponent<RigBuilder>();
 			bool wasRigBuilderEnabled = false;
 			if (rigBuilder != null) {
 				wasRigBuilderEnabled = rigBuilder.enabled;
-				rigBuilder.enabled = false;
+				rigBuilder.enabled   = false;
 			}
 
 			try {
@@ -60,7 +67,8 @@ namespace Nox.Avatars.Editor {
 					Logger.LogError("Avatar preparation failed, destroying avatar.");
 					enabled = false;
 					return;
-				} 
+				}
+
 				Logger.Log("Avatar prepared successfully.");
 
 				var parameters = descriptor
@@ -81,8 +89,7 @@ namespace Nox.Avatars.Editor {
 				parameters?.GetParameter("tracking/right_foot/active")?.Set(false);
 				parameters?.GetParameter("tracking/left_toes/active")?.Set(false);
 				parameters?.GetParameter("tracking/right_toes/active")?.Set(false);
-			}
-			finally {
+			} finally {
 				// Re-enable rigging after setup is complete and wait a frame
 				if (rigBuilder != null && wasRigBuilderEnabled) {
 					await UniTask.Yield();

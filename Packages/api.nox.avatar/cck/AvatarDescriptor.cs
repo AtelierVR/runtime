@@ -4,13 +4,13 @@ using System.Linq;
 using Nox.Avatars;
 using Nox.CCK.Build;
 using UnityEngine;
-using Transform = UnityEngine.Transform;
 using Nox.CCK.Utils;
 using Nox.Players;
+using UnityEngine.Serialization;
 
 
 namespace Nox.CCK.Avatars {
-	public class AvatarDescriptor : MonoBehaviour, IAvatarDescriptor, ICompilable {
+	public sealed class AvatarDescriptor : MonoBehaviour, IAvatarDescriptor, ICompilable {
 		public GameObject GetAnchor()
 			=> gameObject;
 
@@ -34,7 +34,7 @@ namespace Nox.CCK.Avatars {
 			=> 9999;
 
 		// ReSharper disable Unity.PerformanceAnalysis
-		public virtual void Compile() {
+		public void Compile() {
 			if (target == Platform.None)
 				target = PlatformExtensions.CurrentPlatform;
 			Modules    = FindModules(this);
@@ -71,6 +71,7 @@ namespace Nox.CCK.Avatars {
 
 		#region Modules
 
+		[SerializeField]
 		public IAvatarModule[] Modules = Array.Empty<IAvatarModule>();
 
 		public T[] GetModules<T>() where T : IAvatarModule

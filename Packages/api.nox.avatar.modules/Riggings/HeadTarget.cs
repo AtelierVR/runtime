@@ -17,7 +17,7 @@ public class HeadTarget : MonoBehaviour {
 
 		#if HAS_FINALIK
 		// FinalIK: utilise le transform du VRIK
-		var origin = avatar.GetVRIK().transform;
+		var origin = avatar.GetVrik().transform;
 		#else
 		// Legacy: utilise le transform du RigBuilder
 		var origin = avatar.GetRigBuilder().transform;
@@ -32,7 +32,7 @@ public class HeadTarget : MonoBehaviour {
 
 		#if HAS_FINALIK
 		// FinalIK: utilise le transform du VRIK
-		var origin = module.GetVRIK().transform.position;
+		var origin = module.GetVrik().transform.position;
 		#else
 		// Legacy: utilise le transform du RigBuilder
 		var origin = module.GetRigBuilder().transform.position;

@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
@@ -13,6 +14,12 @@ namespace api.nox.avatar.editor {
 	public class PlayModeAvatar : MonoBehaviour, IRuntimeAvatar, IRemoveOnBuild {
 		public string GetId()
 			=> GetInstanceID().ToString();
+
+		public Dictionary<string, object> GetArguments()
+			=> new() {
+				["source"] = this,
+				["local"]  = true
+			};
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		public IAvatarDescriptor GetDescriptor()

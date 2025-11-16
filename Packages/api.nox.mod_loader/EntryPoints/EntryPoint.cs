@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Initializers;
@@ -121,8 +122,7 @@ namespace Nox.ModLoader.EntryPoints {
 
 					eventCtx.Emit("mod_initialize", Mod, Name, ExecutionEventStatus.Success, instance);
 				} catch (Exception e) {
-					Mod.CoreAPI.LoggerAPI.LogError($"Failed to initialize mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}: {e.Message}");
-					Mod.CoreAPI.LoggerAPI.LogException(e);
+					Mod.CoreAPI.LoggerAPI.LogException(new Exception($"Failed to initialize mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}", e));
 					eventCtx.Emit("mod_initialize", Mod, Name, ExecutionEventStatus.Error, instance, e);
 				}
 
@@ -175,8 +175,7 @@ namespace Nox.ModLoader.EntryPoints {
 
 					eventCtx.Emit("mod_post_initialize", Mod, Name, ExecutionEventStatus.Success, instance);
 				} catch (Exception e) {
-					Mod.CoreAPI.LoggerAPI.LogError($"Failed to post-initialize mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}: {e.Message}");
-					Mod.CoreAPI.LoggerAPI.LogException(e);
+					Mod.CoreAPI.LoggerAPI.LogException(new Exception($"Failed to post-initialize mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}", e));
 					eventCtx.Emit("mod_post_initialize", Mod, Name, ExecutionEventStatus.Error, instance, e);
 				}
 
@@ -230,8 +229,7 @@ namespace Nox.ModLoader.EntryPoints {
 
 					eventCtx.Emit("mod_pre_dispose", Mod, Name, ExecutionEventStatus.Success, instance);
 				} catch (Exception e) {
-					Mod.CoreAPI.LoggerAPI.LogError($"Failed to pre-dispose mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}: {e.Message}");
-					Mod.CoreAPI.LoggerAPI.LogException(e);
+					Mod.CoreAPI.LoggerAPI.LogException(new Exception($"Failed to pre-dispose mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}", e));
 					eventCtx.Emit("mod_pre_dispose", Mod, Name, ExecutionEventStatus.Error, instance, e);
 				}
 
@@ -286,8 +284,7 @@ namespace Nox.ModLoader.EntryPoints {
 
 					eventCtx.Emit("mod_dispose", Mod, Name, ExecutionEventStatus.Success, instance);
 				} catch (Exception e) {
-					Mod.CoreAPI.LoggerAPI.LogError($"Failed to dispose mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}: {e.Message}");
-					Mod.CoreAPI.LoggerAPI.LogException(e);
+					Mod.CoreAPI.LoggerAPI.LogException(new Exception($"Failed to dispose mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}", e));
 					eventCtx.Emit("mod_dispose", Mod, Name, ExecutionEventStatus.Error, instance, e);
 				}
 
@@ -323,8 +320,7 @@ namespace Nox.ModLoader.EntryPoints {
 					if (instance is IClientModInitializer c)
 						c.OnUpdateClient();
 				} catch (Exception e) {
-					Mod.CoreAPI.LoggerAPI.LogError($"Failed to update mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}: {e.Message}");
-					Mod.CoreAPI.LoggerAPI.LogException(e);
+					Mod.CoreAPI.LoggerAPI.LogException(new Exception($"Failed to update mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}", e));
 				}
 
 				profiler.Set("update", Name, i.ToString(), Profiler.At.End, DateTime.UtcNow);
@@ -359,8 +355,7 @@ namespace Nox.ModLoader.EntryPoints {
 					if (instance is IClientModInitializer c)
 						c.OnFixedUpdateClient();
 				} catch (Exception e) {
-					Mod.CoreAPI.LoggerAPI.LogError($"Failed to fixed-update mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}: {e.Message}");
-					Mod.CoreAPI.LoggerAPI.LogException(e);
+					Mod.CoreAPI.LoggerAPI.LogException(new Exception($"Failed to fixed-update mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}", e));
 				}
 
 				profiler.Set("fixed_update", Name, i.ToString(), Profiler.At.End, DateTime.UtcNow);
@@ -395,8 +390,7 @@ namespace Nox.ModLoader.EntryPoints {
 					if (instance is IClientModInitializer c)
 						c.OnLateUpdateClient();
 				} catch (Exception e) {
-					Mod.CoreAPI.LoggerAPI.LogError($"Failed to late-update mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}: {e.Message}");
-					Mod.CoreAPI.LoggerAPI.LogException(e);
+					Mod.CoreAPI.LoggerAPI.LogException(new Exception($"Failed to late-update mod {Mod.Metadata.GetId()}@{Mod.Metadata.GetVersion()}", e));
 				}
 
 				profiler.Set("late_update", Name, i.ToString(), Profiler.At.End, DateTime.UtcNow);

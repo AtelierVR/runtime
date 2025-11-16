@@ -68,6 +68,7 @@ namespace api.nox.avatar {
 			var valid = true;
 			CoreAPI.EventAPI.Emit("avatar_check_request", descriptor, new Action<object[]>(OnCallback));
 			return valid;
+
 			void OnCallback(object[] args) {
 				if (args.Length > 0 && args[0] is false)
 					valid = false;
@@ -86,49 +87,49 @@ namespace api.nox.avatar {
 			Instance = null;
 		}
 
-		public async UniTask<IRuntimeAvatar> LoadLoading(Action<float> progress = null, CancellationToken token = default) {
+		public async UniTask<IRuntimeAvatar> LoadLoading(Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default) {
 			var            config        = Config.Load();
 			var            custom        = config.Get<string>(new[] { "avatar", "loading" });
 			IRuntimeAvatar runtimeAvatar = null;
 			if (!string.IsNullOrEmpty(custom))
-				runtimeAvatar = await AvatarLoader.LoadFromCache(custom, progress, token);
-			runtimeAvatar ??= await AvatarLoader.LoadFromAssets(CoreAPI.ModMetadata.GetId(), "prefabs/loading.prefab", progress, token);
-			runtimeAvatar ??= await LoadError(progress, token);
+				runtimeAvatar = await AvatarLoader.LoadFromCache(custom, arguments, progress, token);
+			runtimeAvatar ??= await AvatarLoader.LoadFromAssets(CoreAPI.ModMetadata.GetId(), "prefabs/loading.prefab", arguments, progress, token);
+			runtimeAvatar ??= await LoadError(arguments, progress, token);
 			return runtimeAvatar;
 		}
 
-		public async UniTask<IRuntimeAvatar> LoadDefault(Action<float> progress = null, CancellationToken token = default) {
+		public async UniTask<IRuntimeAvatar> LoadDefault(Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default) {
 			var            config        = Config.Load();
 			var            custom        = config.Get<string>(new[] { "avatar", "default" });
 			IRuntimeAvatar runtimeAvatar = null;
 			if (!string.IsNullOrEmpty(custom))
-				runtimeAvatar = await AvatarLoader.LoadFromCache(custom, progress, token);
-			runtimeAvatar ??= await AvatarLoader.LoadFromAssets(CoreAPI.ModMetadata.GetId(), "prefabs/default.prefab", progress, token);
-			runtimeAvatar ??= await LoadError(progress, token);
+				runtimeAvatar = await AvatarLoader.LoadFromCache(custom, arguments, progress, token);
+			runtimeAvatar ??= await AvatarLoader.LoadFromAssets(CoreAPI.ModMetadata.GetId(), "prefabs/default.prefab", arguments, progress, token);
+			runtimeAvatar ??= await LoadError(arguments, progress, token);
 			return runtimeAvatar;
 		}
 
-		public async UniTask<IRuntimeAvatar> LoadError(Action<float> progress = null, CancellationToken token = default) {
+		public async UniTask<IRuntimeAvatar> LoadError(Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default) {
 			var            config        = Config.Load();
 			var            custom        = config.Get<string>(new[] { "avatar", "error" });
 			IRuntimeAvatar runtimeAvatar = null;
 			if (!string.IsNullOrEmpty(custom))
-				runtimeAvatar = await AvatarLoader.LoadFromCache(custom, progress, token);
-			runtimeAvatar ??= await AvatarLoader.LoadFromAssets(CoreAPI.ModMetadata.GetId(), "prefabs/error.prefab", progress, token);
+				runtimeAvatar = await AvatarLoader.LoadFromCache(custom, arguments, progress, token);
+			runtimeAvatar ??= await AvatarLoader.LoadFromAssets(CoreAPI.ModMetadata.GetId(), "prefabs/error.prefab", arguments, progress, token);
 			return runtimeAvatar;
 		}
 
-		public async UniTask<IRuntimeAvatar> LoadFromPath(string path, Action<float> progress = null, CancellationToken token = default)
-			=> await AvatarLoader.LoadFromPath(path, progress, token)
-				?? await LoadError(progress, token);
+		public async UniTask<IRuntimeAvatar> LoadFromPath(string path, Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default)
+			=> await AvatarLoader.LoadFromPath(path, arguments, progress, token)
+				?? await LoadError(arguments, progress, token);
 
-		public async UniTask<IRuntimeAvatar> LoadFromAssets(string modId, string path, Action<float> progress = null, CancellationToken token = default)
-			=> await AvatarLoader.LoadFromAssets(modId, path, progress, token)
-				?? await LoadError(progress, token);
+		public async UniTask<IRuntimeAvatar> LoadFromAssets(string modId, string path, Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default)
+			=> await AvatarLoader.LoadFromAssets(modId, path, arguments, progress, token)
+				?? await LoadError(arguments, progress, token);
 
-		public async UniTask<IRuntimeAvatar> LoadFromCache(string hash, Action<float> progress = null, CancellationToken token = default)
-			=> await AvatarLoader.LoadFromCache(hash, progress, token)
-				?? await LoadError(progress, token);
+		public async UniTask<IRuntimeAvatar> LoadFromCache(string hash, Dictionary<string, object> arguments = null, Action<float> progress = null, CancellationToken token = default)
+			=> await AvatarLoader.LoadFromCache(hash, arguments, progress, token)
+				?? await LoadError(arguments, progress, token);
 
 		public async UniTask<IAvatar> Fetch(string identifier, string from = null)
 			=> await Network.Fetch(identifier, from);

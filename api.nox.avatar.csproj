@@ -61,8 +61,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Packages\api.nox.avatar\Scripts\network\create\CreateAssetRequest.cs" />
-    <Compile Include="Packages\api.nox.avatar\Scripts\runtime\BaseRuntimeRuntimeAvatar.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\builder\BuildResult.cs" />
+    <Compile Include="Packages\api.nox.avatar\Scripts\runtime\AssetBundleRuntimeAvatar.cs" />
+    <Compile Include="Packages\api.nox.avatar\Scripts\runtime\BaseRuntimeAvatar.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\AvatarLoader.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\editor\PlayModeAvatar.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\search\SearchData.cs" />
@@ -71,10 +72,8 @@
     <Compile Include="Packages\api.nox.avatar\Scripts\network\search\AssetSearchRequest.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\base\Avatar.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\network\update\UpdateAvatarRequest.cs" />
-    <Compile Include="Packages\api.nox.avatar\Scripts\runtime\AssetRuntimeRuntimeAvatar.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\base\AvatarAsset.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\builder\Builder.cs" />
-    <Compile Include="Packages\api.nox.avatar\Scripts\runtime\AssetBundleRuntimeRuntimeAvatar.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\search\SearchHandler.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\editor\Editor.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\network\search\AssetSearchResponse.cs" />
@@ -87,6 +86,7 @@
     <Compile Include="Packages\api.nox.avatar\Scripts\search\SearchResult.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\client\Client.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\cache\Caching.cs" />
+    <Compile Include="Packages\api.nox.avatar\Scripts\runtime\AssetRuntimeAvatar.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\editor\AvatarPublisherPanel.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\network\Network.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\network\search\SearchRequest.cs" />
@@ -98,7 +98,7 @@
     <Compile Include="Packages\api.nox.avatar\Scripts\builder\BuildResultType.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\network\create\CreateAvatarRequest.cs" />
     <None Include="Packages\api.nox.avatar\Assets\api.nox.avatar\publisher.uxml" />
-    <None Include="Packages\api.nox.avatar\Resources\AvatarDescriptor.uxml" />
+    <None Include="Packages\api.nox.avatar\Resources\AvatarDescriptorEditor.uxml" />
     <None Include="Packages\api.nox.avatar\Assets\api.nox.avatar\builder.uxml" />
     <None Include="Packages\api.nox.avatar\link.xml" />
     <None Include="Packages\api.nox.avatar\package.json" />

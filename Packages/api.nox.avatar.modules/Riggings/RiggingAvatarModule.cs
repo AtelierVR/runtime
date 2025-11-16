@@ -9,6 +9,7 @@ using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using UnityEngine.Serialization;
 using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
 
@@ -26,9 +27,16 @@ namespace Nox.CCK.Avatars.Rigging {
 
 		#if HAS_FINALIK
 		private VRIK _vrik;
+		public bool allowVrik;
 
-		public VRIK GetVRIK()
-			=> _vrik ? _vrik : _vrik = _descriptor.GetAnimator().GetOrAddComponent<VRIK>();
+		public VRIK GetVrik() {
+			if (allowVrik)
+				return !_vrik
+					? _vrik = _descriptor.GetAnimator().GetOrAddComponent<VRIK>()
+					: _vrik;
+			Logger.LogError("VRIK is not allowed for this avatar. Ensure that the avatar was set up with VRIK support.");
+			return null;
+		}
 		#endif
 
 		// GetRigBuilder est toujours disponible pour la compatibilité avec IKRigGenerator
@@ -48,18 +56,40 @@ namespace Nox.CCK.Avatars.Rigging {
 		}
 
 		public UniTask<bool> Setup(IRuntimeAvatar runtimeAvatar) {
+			// Vérification de sécurité pour éviter les NullReferenceException
+			if (runtimeAvatar == null) {
+				Logger.LogError("RiggingAvatarModule: RuntimeAvatar is null, cannot setup rigging.");
+				return UniTask.FromResult(false);
+			}
+
 			_descriptor = runtimeAvatar.GetDescriptor();
 
+			// Vérification de sécurité pour éviter les NullReferenceException
+			if (_descriptor == null) {
+				Logger.LogError("RiggingAvatarModule: Avatar descriptor is null, cannot setup rigging.");
+				return UniTask.FromResult(false);
+			}
+
 			#if HAS_FINALIK
+
 			// Utilise FinalIK VR (préféré)
-			FinalIKRigGenerator.CreateVRIKRig(this);
+			var arguments = runtimeAvatar.GetArguments();
+			allowVrik = arguments != null
+				&& arguments.TryGetValue("local", out var isLocalObj)
+				&& isLocalObj is true
+				&& arguments.TryGetValue("xr", out var allowXRObj)
+				&& allowXRObj is true;
+			if (allowVrik)
+				FinalIKRigGenerator.CreateVRIKRig(this);
+			else IKRigGenerator.CreateIKRig(this);
+
 			#else
 			// Utilise RigBuilder (legacy)
 			IKRigGenerator.CreateIKRig(this);
+
 			#endif
 
 			IKRigParameters.SetupParameters(this);
-			HeadTarget.CreateTargets(this);
 			return UniTask.FromResult(true);
 		}
 
