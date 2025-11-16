@@ -23,6 +23,7 @@ on:
           - osx
           - android
           - ios
+          - android
       development:
         description: 'Development build'
         required: false
@@ -50,6 +51,9 @@ jobs:
           - targetPlatform: osx
             os: macos-latest
             buildTarget: StandaloneOSX
+          - targetPlatform: android
+            os: ubuntu-latest
+            buildTarget: Android
     
     steps:
       - name: Checkout repository
