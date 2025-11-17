@@ -1146,7 +1146,7 @@ namespace api.nox.session {
 						continue;
 					}
 
-					var key   = prop.GetKey();
+					var key   = prop.GetName();
 					var value = prop.GetValue()?.ToString()     ?? "null";
 					var type  = prop.GetValue()?.GetType().Name ?? "Unknown";
 

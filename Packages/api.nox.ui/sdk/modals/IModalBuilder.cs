@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Nox.UI.modals {
@@ -16,7 +17,7 @@ namespace Nox.UI.modals {
 		/// </summary>
 		/// <param name="closable"></param>
 		public void SetClosable(bool closable);
-
+		
 		/// <summary>
 		/// Returns whether the modal can be closed by the user.
 		/// </summary>
@@ -41,9 +42,15 @@ namespace Nox.UI.modals {
 		public void SetContent(Func<RectTransform, GameObject> generator);
 
 		/// <summary>
+		/// Sets options for the modal.
+		/// </summary>
+		/// <param name="onValue"></param>
+		/// <param name="options"></param>
+		public void SetOptions(Action<string> onValue, Dictionary<string, string[]> options);
+
+		/// <summary>
 		/// Builds the modal and returns the root GameObject.
 		/// </summary>
-		/// <param name="rect"></param>
 		/// <returns></returns>
 		public IModal Build();
 	}

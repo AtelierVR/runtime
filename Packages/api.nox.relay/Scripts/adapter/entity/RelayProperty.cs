@@ -9,7 +9,9 @@ namespace api.nox.relay {
 		protected RelayProperty(RelayEntity entity)
 			=> Owner = entity;
 
-		public abstract string GetKey();
+		public abstract int GetKey();
+		
+		public abstract string GetName();
 
 		public abstract PropertyFlags GetFlags();
 

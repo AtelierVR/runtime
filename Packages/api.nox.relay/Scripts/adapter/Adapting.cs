@@ -217,7 +217,7 @@ namespace api.nox.relay {
 
 			// Configure buffer size based on server's MaxPacketSize
 			if (hand.MaxPacketSize > 0) {
-				connection.Connector.SetBufferSize(hand.MaxPacketSize);
+				connection.Connector.SetMtuSize(hand.MaxPacketSize);
 				Logger.LogDebug($"Set connector buffer size to {hand.MaxPacketSize} bytes from handshake");
 			}
 

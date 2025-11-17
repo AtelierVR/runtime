@@ -8,7 +8,7 @@ namespace api.nox.settings.handlers {
 		public override string[] GetPath()
 			=> new[] { "debug", "modal" };
 
-		public override GameObject GetPrefab()
+		protected override GameObject GetPrefab()
 			=> Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/button.prefab");
 
 		public override GameObject GetContent(RectTransform transform, IMenu menu) {
@@ -19,8 +19,8 @@ namespace api.nox.settings.handlers {
 
 		public ModalTesting() {
 			SetInteractable(true);
-			SetLabelKey("settings.debug.modal");
-			SetButtonTextKey("settings.debug.modal.open");
+			SetLabel("settings.debug.modal");
+			SetButtonText("settings.debug.modal.open");
 		}
 
 		public override void OnClick(IMenu menu) {

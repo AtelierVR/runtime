@@ -11,12 +11,14 @@ namespace api.nox.relay {
 		private          object        _value;
 		private          DirtyBy       _dirty;
 		private readonly string        _name;
+		private readonly int           _key;
 		private readonly PropertyFlags _flags;
 
 		public ReferencedRelayParameter(RelayEntity entity, IParameter parameter) : base(entity) {
 			_reference = parameter ?? throw new ArgumentNullException(nameof(parameter), "Parameter cannot be null during construction.");
 			_value     = _reference.Get();
 			_name      = _reference.GetName();
+			_key       = _reference.GetKey();
 			_flags = PropertyFlags.None
 				| (_reference.GetFlags().HasFlag(ParameterFlags.RemoteEditableByLocal) ? PropertyFlags.LocalEmit : PropertyFlags.None)
 				| (_reference.GetFlags().HasFlag(ParameterFlags.LocalEditableByRemote) ? PropertyFlags.RemoteEmit : PropertyFlags.None);
@@ -29,7 +31,10 @@ namespace api.nox.relay {
 				SetDirty(by);
 		}
 
-		public override string GetKey()
+		public override int GetKey()
+			=> _key;
+
+		public override string GetName()
 			=> _name;
 
 		public override DirtyBy GetDirty()

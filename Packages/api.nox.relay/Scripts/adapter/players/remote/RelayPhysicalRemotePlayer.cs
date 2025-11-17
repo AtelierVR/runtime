@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -128,8 +129,18 @@ namespace api.nox.relay {
 			}
 
 			// Sauvegarder les valeurs des anciens paramètres et parts AVANT de les supprimer
-			var oldProperties = Reference.GetProperties<RelayParameter>().ToDictionary(p => p.GetKey(), p => p.GetValue());
-			var oldParts      = Reference.GetParts().ToDictionary(p => p.GetId(), p => p);
+			var oldProperties = Reference.GetProperties<RelayParameter>()
+				.Distinct(new RelayParameterComparer())
+				.ToDictionary(p => p.GetKey(), p => p.GetValue());
+
+			for (var i = 0; i < oldProperties.Count; i++) {
+				var kvp = oldProperties.ElementAt(i);
+				Logger.LogDebug($"Old Property: {kvp.Key} = {kvp.Value}");
+			}
+
+			var oldParts = Reference.GetParts()
+				.Distinct(new RelayPartComparer())
+				.ToDictionary(p => p.GetId(), p => p);
 
 			// Remove old properties and parts BEFORE disposing the old avatar
 			var properties = Reference.GetProperties<RelayParameter>();
@@ -186,7 +197,7 @@ namespace api.nox.relay {
 				Reference.AddProperty(relayParam);
 
 				// Restaurer la valeur de l'ancien paramètre si il existe
-				if (oldProperties.TryGetValue(parameter.GetName(), out var oldValue)) 
+				if (oldProperties.TryGetValue(parameter.GetKey(), out var oldValue))
 					relayParam.SetValue(oldValue, Nox.CCK.Network.DirtyBy.Remote);
 			}
 
@@ -215,6 +226,22 @@ namespace api.nox.relay {
 			}
 
 			return true;
+		}
+
+		private class RelayParameterComparer : IEqualityComparer<RelayParameter> {
+			public bool Equals(RelayParameter x, RelayParameter y)
+				=> x != null && y != null && x.GetKey() == y.GetKey();
+
+			public int GetHashCode(RelayParameter obj)
+				=> obj.GetKey().GetHashCode();
+		}
+
+		private class RelayPartComparer : IEqualityComparer<RelayPart> {
+			public bool Equals(RelayPart x, RelayPart y)
+				=> x != null && y != null && x.GetId() == y.GetId();
+
+			public int GetHashCode(RelayPart obj)
+				=> obj.GetId().GetHashCode();
 		}
 
 		private void OnDestroy() {

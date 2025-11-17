@@ -189,7 +189,7 @@ namespace api.nox.session.jint {
 				var obj = export.AsObject();
 				obj.Set(property, new ObjectWrapper(_engine, value), true);
 			} catch (Exception e) {
-				Logger.LogException(e, this);
+				Logger.LogException(new Exception($"Error setting export '{property}': {e.Message}", e), this);
 			}
 		}
 
@@ -204,8 +204,7 @@ namespace api.nox.session.jint {
 				if (methodRef.IsUndefined()) return;
 				_engine.Invoke(methodRef, args);
 			} catch (Exception e) {
-				Logger.LogError($"Error invoking method '{method}': {e.Message}", this);
-				Logger.LogException(e, this);
+				Logger.LogException(new Exception($"Error invoking method '{method}'", e), this);
 			}
 		}
 
@@ -221,8 +220,7 @@ namespace api.nox.session.jint {
 					? null
 					: _engine.Invoke(methodRef, args);
 			} catch (Exception e) {
-				Logger.LogError($"Error invoking method '{method}': {e.Message}", this);
-				Logger.LogException(e, this);
+				Logger.LogException(new Exception($"Error invoking method '{method}'", e), this);
 				return null;
 			}
 		}
@@ -239,8 +237,7 @@ namespace api.nox.session.jint {
 				var result = _engine.Invoke(methodRef, args);
 				return (T)result.ToObject();
 			} catch (Exception e) {
-				Logger.LogError($"Error invoking method '{method}': {e.Message}", this);
-				Logger.LogException(e, this);
+				Logger.LogException(new Exception($"Error invoking method '{method}'", e), this);
 				return default;
 			}
 		}

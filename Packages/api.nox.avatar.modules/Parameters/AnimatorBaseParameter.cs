@@ -7,21 +7,21 @@ namespace Nox.CCK.Avatars.Parameters {
 		internal Animator Animator;
 
 		protected override void SetFloat(float value)
-			=> Animator.SetFloat(GetHash(), value);
+			=> Animator.SetFloat(GetKey(), value);
 
 		protected override void SetInteger(int value)
-			=> Animator.SetInteger(GetHash(), value);
+			=> Animator.SetInteger(GetKey(), value);
 
 		protected override void SetBool(bool value)
-			=> Animator.SetBool(GetHash(), value);
+			=> Animator.SetBool(GetKey(), value);
 
 		protected override float GetFloat()
-			=> Animator.GetFloat(GetHash());
+			=> Animator.GetFloat(GetKey());
 
 		protected override int GetInteger()
-			=> Animator.GetInteger(GetHash());
+			=> Animator.GetInteger(GetKey());
 
 		protected override bool GetBool()
-			=> Animator.GetBool(GetHash());
+			=> Animator.GetBool(GetKey());
 	}
 }

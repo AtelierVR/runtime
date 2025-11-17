@@ -134,7 +134,7 @@ namespace api.nox.session {
 
 			Main.Instance.CoreAPI.EventAPI.Emit("session_event_triggered", this, @event, raw, sender);
 			OnEventTriggeredListener.Invoke(@event, raw, sender);
-			
+
 			foreach (var descriptor in GetDescriptors().Where(e => e != null))
 			foreach (var module in descriptor.GetModules<ISessionModule>())
 				module.OnEventTriggered(@event, raw, sender);
@@ -208,13 +208,17 @@ namespace api.nox.session {
 			foreach (var module in modules)
 				module.OnLoaded(this);
 
-			for (var i = 0; i < GetPlayerCount(); i++)
+			for (var i = 0; i < GetPlayerCount(); i++) {
+				var player = GetPlayer(i);
+				if (player == null) continue;
 				foreach (var module in modules)
-					module.OnPlayerJoined(GetPlayer(i));
+					module.OnPlayerJoined(player);
+			}
 
 			var master = Adapter.GetMasterPlayer();
-			foreach (var module in modules)
-				module.OnAuthorityTransferred(master);
+			if (master != null)
+				foreach (var module in modules)
+					module.OnAuthorityTransferred(master);
 
 			if (IsCurrent())
 				foreach (var module in modules)

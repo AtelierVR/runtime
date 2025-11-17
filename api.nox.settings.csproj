@@ -71,6 +71,7 @@
     <Compile Include="Packages\api.nox.settings\src\Client.cs" />
     <Compile Include="Packages\api.nox.settings\src\handlers\Resolution.cs" />
     <Compile Include="Packages\api.nox.settings\src\handlers\BloomIntensity.cs" />
+    <Compile Include="Packages\api.nox.settings\src\monitors\ScreenMonitor.cs" />
     <Compile Include="Packages\api.nox.settings\src\handlers\Quality.cs" />
     <Compile Include="Packages\api.nox.settings\src\DefaultSettings.cs" />
     <None Include="Packages\api.nox.settings\api.nox.settings.asmdef" />

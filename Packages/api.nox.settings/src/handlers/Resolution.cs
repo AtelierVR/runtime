@@ -1,17 +1,15 @@
+using System.Collections.Generic;
 using System.Linq;
-using Nox.CCK.Language;
 using Nox.CCK.Settings;
 using Nox.CCK.Utils;
+using Nox.UI;
+using Nox.UI.modals;
 using UnityEngine;
-using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.settings.handlers {
 	public sealed class Resolution : DropdownHandler {
 		public override string[] GetPath()
 			=> new[] { "graphic", "resolution" };
-
-		protected override GameObject GetPrefab()
-			=> Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/dropdown.prefab");
 
 		public static string[] GetConfigPath(string s)
 			=> new[] { "settings", "graphic", s };
@@ -22,75 +20,90 @@ namespace api.nox.settings.handlers {
 		public static string[] GetConfigHeightPath()
 			=> GetConfigPath("height");
 
-		Vector2Int Value {
-			get {
-				var config = Config.Load();
-				var width  = config.Get(GetConfigWidthPath(), Screen.currentResolution.width);
-				var height = config.Get(GetConfigHeightPath(), Screen.currentResolution.height);
-				return new Vector2Int(width, height);
-			}
-			set {
-				var config = Config.Load();
-				Screen.SetResolution(value.x, value.y, Screen.fullScreenMode, Screen.currentResolution.refreshRateRatio);
-				config.Set(GetConfigWidthPath(), value.x);
-				config.Set(GetConfigHeightPath(), value.y);
-				config.Save();
-			}
+		protected override GameObject GetPrefab()
+			=> Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/dropdown.prefab");
+
+		protected override IModalBuilder GetModalBuilder(IMenu menu)
+			=> Client.UiAPI.MakeModal(menu);
+
+		public Resolution() {
+			SetInteractable(false);
+			SetLabel($"settings.entry.{string.Join(".", GetPath())}.label");
+			SetOptions(GetAvailableResolutions());
+			var v = Value;
+			Value = v;
+			SetButtonText("settings.entry.graphic.resolution.option", v.x.ToString(), v.y.ToString());
 		}
 
-		public Vector2Int FromString(string s) {
+	public static Vector2Int Value {
+		get {
+			var config = Config.Load();
+			var width  = config.Get(GetConfigWidthPath(), Screen.currentResolution.width);
+			var height = config.Get(GetConfigHeightPath(), Screen.currentResolution.height);
+			return new Vector2Int(width, height);
+		}
+		set {
+			var config = Config.Load();
+			
+			// Determine the appropriate window mode based on resolution and current settings
+			var windowMode = WindowSize.GetWindowMode();
+			FullScreenMode mode;
+			
+			// If selecting native resolution, suggest maximized mode
+			if (value.x == Display.main.systemWidth && value.y == Display.main.systemHeight) {
+				if (windowMode == WindowSize.Windowed) {
+					mode = FullScreenMode.MaximizedWindow;
+					WindowSize.SetWindowMode(WindowSize.Maximized, false); // Update window mode without applying
+				} else {
+					mode = windowMode == WindowSize.Fullscreen ? FullScreenMode.ExclusiveFullScreen : FullScreenMode.MaximizedWindow;
+				}
+			} else {
+				// For non-native resolutions, use windowed mode unless explicitly fullscreen
+				if (windowMode == WindowSize.Fullscreen) {
+					mode = FullScreenMode.ExclusiveFullScreen;
+				} else {
+					mode = FullScreenMode.Windowed;
+					WindowSize.SetWindowMode(WindowSize.Windowed, false); // Update window mode without applying
+				}
+			}
+			
+			Screen.SetResolution(value.x, value.y, mode, Screen.currentResolution.refreshRateRatio);
+			config.Set(GetConfigWidthPath(), value.x);
+			config.Set(GetConfigHeightPath(), value.y);
+			config.Save();
+		}
+	}
+
+		private static Vector2Int FromString(string s) {
 			var parts = s.Split('x');
 			if (parts.Length != 2 || !int.TryParse(parts[0], out var width) || !int.TryParse(parts[1], out var height))
-				return new Vector2Int(0, 0);
+				return Vector2Int.zero;
 			return new Vector2Int(width, height);
 		}
 
-		public string ToString(Vector2Int v)
+		private static string ToString(Vector2Int v)
 			=> $"{v.x}x{v.y}";
 
-		public static (string, string)[] GetAvailableResolutions()
+		private static Dictionary<string, string[]> GetAvailableResolutions()
 			=> Screen.resolutions
-				.Where(res => res.refreshRateRatio.Equals(Screen.currentResolution.refreshRateRatio)) // Filter by current refresh rate
-				.Select(
-					res => (
-					LanguageManager.Get(
-						"settings.entry.graphic.resolution.option",
-						res.width, res.height, res.refreshRateRatio.ToString()
-					),
-					$"{res.width}x{res.height}"
-					)
-				)
+				.Select(r => new Vector2Int(r.width, r.height))
 				.Distinct()
-				.ToArray();
+				.OrderBy(r => r.x * r.y)
+				.Reverse()
+				.Select(
+					res => (ToString(res), new[] {
+						"settings.entry.graphic.resolution.option",
+						res.x.ToString(),
+						res.y.ToString()
+					})
+				)
+				.ToDictionary(t => t.Item1, t => t.Item2);
 
 
-		public Resolution() {
-			SetLabel($"settings.entry.{string.Join(".", GetPath())}.label");
-
-			SetOptions(GetAvailableResolutions());
-
-			// Set current value
-			var currentRes = Value;
-			var currentStr = $"{currentRes.x}x{currentRes.y}";
-			SetValue(currentStr);
-		}
-
-		public override void OnValueChanged(string value) {
-			// Parse resolution string (e.g., "1920x1080")
-			var parts = value.Split('x');
-			if (parts.Length != 2 || !int.TryParse(parts[0], out var width) || !int.TryParse(parts[1], out var height)) return;
-			// Find matching resolution with current refresh rate
-			var targetResolution = Screen.resolutions
-				.FirstOrDefault(res => res.width == width && res.height == height && res.refreshRateRatio.Equals(Screen.currentResolution.refreshRateRatio));
-
-			if (targetResolution.width != 0 && targetResolution.height != 0) {
-				Value = new Vector2Int(targetResolution.width, targetResolution.height);
-				return;
-			}
-
-			Logger.LogWarning($"Resolution {value} with current refresh rate not found. Available resolutions:");
-			foreach (var res in Screen.resolutions)
-				Logger.LogWarning($"{res.width}x{res.height} @ {res.refreshRateRatio}");
+		protected override void OnValueChanged(string value) {
+			var res = FromString(value);
+			Value = new Vector2Int(res.x, res.y);
+			SetButtonText("settings.entry.graphic.resolution.option", res.x.ToString(), res.y.ToString());
 		}
 	}
 }

@@ -6,6 +6,7 @@ using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.Microphone;
 using Nox.Settings;
+using Nox.UI;
 
 namespace api.nox.microphone {
 	public class Main : IMainModInitializer, IMicrophoneAPI {
@@ -19,6 +20,11 @@ namespace api.nox.microphone {
 			=> CoreAPI.ModAPI
 				.GetMod("settings")
 				.GetInstance<ISettingAPI>();
+
+		public static IUiAPI UiAPI
+			=> CoreAPI.ModAPI
+				.GetMod("ui")
+				.GetInstance<IUiAPI>();
 
 		public void OnInitializeMain(MainModCoreAPI api) {
 			CoreAPI  = api;

@@ -11,11 +11,11 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.relay.connector {
 	public class UdpConnector : IConnector {
-		private          UdpClient  _udpClient;
-		private          Thread     _receiveThread;
-		private          bool       _isConnected;
-		private          IPEndPoint _remoteEndPoint;
-		private volatile bool       _shouldStop;
+		private          UdpClient               _udpClient;
+		private          Thread                  _receiveThread;
+		private          bool                    _isConnected;
+		private          IPEndPoint              _remoteEndPoint;
+		private volatile bool                    _shouldStop;
 		private readonly ConcurrentQueue<Buffer> _receivedDataQueue = new();
 
 		public static string GetStaticProtocolName()
@@ -31,7 +31,7 @@ namespace api.nox.relay.connector {
 			=> _remoteEndPoint;
 
 		public UnityEvent<Buffer> OnReceived { get; } = new();
-		
+
 		public async UniTask<bool> Connect(string address, ushort port) {
 			try {
 				// Nettoyer les connexions précédentes
@@ -64,10 +64,13 @@ namespace api.nox.relay.connector {
 			}
 		}
 
-		public void SetBufferSize(int size) {
-			// Pour UDP, la taille du buffer est gérée automatiquement
-			// Cette méthode est conservée pour la compatibilité avec l'interface
-		}
+		private int _mtuSize = 1200;
+
+		public void SetMtuSize(int size)
+			=> _mtuSize = size;
+
+		public int GetMtuSize()
+			=> _mtuSize;
 
 		public async UniTask Close() {
 			_shouldStop  = true;
@@ -112,7 +115,7 @@ namespace api.nox.relay.connector {
 			// Cette méthode peut être utilisée pour des opérations de maintenance
 			// dans le thread principal Unity si nécessaire
 
-			while (_receivedDataQueue.TryDequeue(out var receivedBuffer)) 
+			while (_receivedDataQueue.TryDequeue(out var receivedBuffer))
 				OnReceived.Invoke(receivedBuffer);
 		}
 
@@ -134,7 +137,7 @@ namespace api.nox.relay.connector {
 
 						if (receivedData.Length <= 0) continue;
 						// Créer un Buffer pour les données reçues
-						var receivedBuffer = new Nox.CCK.Utils.Buffer();
+						var receivedBuffer = new Buffer();
 						receivedBuffer.data = new byte[receivedData.Length];
 						Array.Copy(receivedData, 0, receivedBuffer.data, 0, receivedData.Length);
 						receivedBuffer.length = (ushort)receivedData.Length;

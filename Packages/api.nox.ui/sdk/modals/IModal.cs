@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Nox.UI.modals {
 	public interface IModal {
@@ -13,5 +14,9 @@ namespace Nox.UI.modals {
 		public GameObject GetContent();
 
 		public void Dispose();
+
+		public UnityEvent OnClose { get; }
+
+		public UnityEvent OnOpen { get; }
 	}
 }

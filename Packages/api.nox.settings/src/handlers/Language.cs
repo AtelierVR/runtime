@@ -3,15 +3,20 @@ using System.Collections.Generic;
 using Nox.CCK.Language;
 using Nox.CCK.Settings;
 using Nox.CCK.Utils;
+using Nox.UI;
+using Nox.UI.modals;
 using UnityEngine;
 
 namespace api.nox.settings.handlers {
 	public sealed class Language : DropdownHandler, IDisposable {
-		public sealed override string[] GetPath()
+		public override string[] GetPath()
 			=> new[] { "accessibility", "interface", "language" };
 
 		protected override GameObject GetPrefab()
 			=> Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/dropdown.prefab");
+
+		protected override IModalBuilder GetModalBuilder(IMenu menu)
+			=> Client.UiAPI.MakeModal(menu);
 
 		public Language() {
 			LanguageManager.OnPackListUpdated.AddListener(OnPacksUpdated);
@@ -22,11 +27,11 @@ namespace api.nox.settings.handlers {
 			SetValue(LanguageManager.CurrentLanguage, false);
 		}
 
-		public override void OnValueChanged(string value) {
-			Value = value;
-		}
 
-		private string Value {
+		protected override void OnValueChanged(string value)
+			=> Value = value;
+
+		private static string Value {
 			get => LanguageManager.CurrentLanguage;
 			set {
 				LanguageManager.CurrentLanguage = value;
@@ -38,16 +43,16 @@ namespace api.nox.settings.handlers {
 
 		private void OnPacksUpdated() {
 			var langs = LanguageManager.GetAvailableLanguages();
-			var res   = new List<(string, string)>();
+			var res   = new Dictionary<string, string[]>();
 
 			foreach (var lang in langs) {
 				var name = LanguageManager.Get(lang, "language");
 				if (string.IsNullOrEmpty(name))
 					name = lang;
-				res.Add((name, lang));
+				res.Add(lang, new[] { "value", name });
 			}
 
-			SetOptions(res.ToArray());
+			SetOptions(res);
 			SetValue(LanguageManager.CurrentLanguage, false);
 		}
 

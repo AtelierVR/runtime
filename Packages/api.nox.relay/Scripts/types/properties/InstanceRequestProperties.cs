@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using api.nox.relay.types.Instance;
-using Nox.CCK.Network;
 using Nox.Entities;
 using Buffer = Nox.CCK.Utils.Buffer;
 
@@ -31,7 +30,7 @@ namespace api.nox.relay.types.Properties {
 				throw new ArgumentException($"Cannot have more than {byte.MaxValue} parameters in an property request.", nameof(parameters));
 			return new InstanceRequestProperties {
 				EntityId   = playerId,
-				Parameters = parameters.ToDictionary(p => p.GetKey().Hash(), p => p.Serialize())
+				Parameters = parameters.ToDictionary(p => p.GetKey(), p => p.Serialize())
 			};
 		}
 
@@ -46,7 +45,7 @@ namespace api.nox.relay.types.Properties {
 				throw new ArgumentException($"Cannot have more than {byte.MaxValue} parameters in an property clear request.", nameof(parameters));
 			return new InstanceRequestProperties {
 				EntityId   = playerId,
-				Parameters = parameters.ToDictionary(p => p.GetKey().Hash(), _ => Array.Empty<byte>())
+				Parameters = parameters.ToDictionary(p => p.GetKey(), _ => Array.Empty<byte>())
 			};
 		}
 	}

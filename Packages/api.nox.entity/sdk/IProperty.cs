@@ -7,9 +7,17 @@ namespace Nox.Entities {
 	public interface IProperty : IDirty, ISerializable {
 		/// <summary>
 		/// Get the key of the property.
+		/// Is normally CRC32 hash of the name.
 		/// </summary>
 		/// <returns></returns>
-		public string GetKey();
+		public int GetKey();
+		
+		/// <summary>
+		/// Get the name of the property.
+		/// (optional, may be null)
+		/// </summary>
+		/// <returns></returns>
+		public string GetName();
 
 		/// <summary>
 		/// Get the value of the property.

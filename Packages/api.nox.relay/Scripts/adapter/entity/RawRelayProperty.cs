@@ -4,22 +4,26 @@ using Nox.Entities;
 
 namespace api.nox.relay {
 	public class RawRelayProperty : RelayProperty {
-		private readonly string        _key;
+		private readonly int           _key;
+		private readonly string        _name;
 		private          object        _value;
 		private          DirtyBy       _dirty;
 		private          PropertyFlags _flags;
 
-		public RawRelayProperty(RelayEntity player, string key, int hash, object value) : base(player) {
-			if (string.IsNullOrEmpty(key))
-				throw new ArgumentException("Property key cannot be null or empty", nameof(key));
+		public RawRelayProperty(RelayEntity player, string name, int key, object value) : base(player) {
+			if (string.IsNullOrEmpty(name))
+				throw new ArgumentException("Property key cannot be null or empty", nameof(name));
 			_key  = key;
+			_name = name;
 			_value = value
 				?? throw new ArgumentNullException(nameof(value), "Property value cannot be null");
 		}
 
-		public override string GetKey()
+		public override int GetKey()
 			=> _key;
 
+		public override string GetName()
+			=> _name;
 
 		public override object GetValue()
 			=> _value;

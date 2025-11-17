@@ -24,7 +24,7 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		public string GetName()
 			=> _parameterName;
 
-		public int GetHash()
+		public int GetKey()
 			=> _parameterName.GetHashCode();
 
 		public ParameterType GetValueType()

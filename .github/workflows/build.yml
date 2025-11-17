@@ -172,7 +172,7 @@ jobs:
             -development true \
             -logFile - \
             || echo "Build completed with code $?"
-      
+
       - name: Upload Build
         uses: actions/upload-artifact@v4
         with:

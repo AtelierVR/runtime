@@ -2,9 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-using api.nox.relay.types;
 using Cysharp.Threading.Tasks;
-using UnityEngine;
 using UnityEngine.Events;
 using Buffer = Nox.CCK.Utils.Buffer;
 using Logger = Nox.CCK.Utils.Logger;
@@ -65,13 +63,15 @@ namespace api.nox.relay.connector {
 			}
 		}
 
-		public void SetBufferSize(int size) {
+		public void SetMtuSize(int size) {
 			_bufferSize = size;
-			if (_tcpClient != null) {
-				_tcpClient.ReceiveBufferSize = size;
-				_tcpClient.SendBufferSize    = size;
-			}
+			if (_tcpClient == null) return;
+			_tcpClient.ReceiveBufferSize = size;
+			_tcpClient.SendBufferSize    = size;
 		}
+
+		public int GetMtuSize()
+			=> _bufferSize;
 
 		public async UniTask Close() {
 			_shouldStop  = true;

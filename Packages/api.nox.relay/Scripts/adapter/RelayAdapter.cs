@@ -122,7 +122,7 @@ namespace api.nox.relay {
 
 			var table = new Dictionary<int, RelayParameter>();
 			foreach (var prop in entity.GetProperties<RelayParameter>())
-				table[prop.GetKey().Hash()] = prop;
+				table[prop.GetKey()] = prop;
 			var isByLocal = entity.GetId() == byEntity.GetId();
 
 			foreach (var param in ev.Parameters) {

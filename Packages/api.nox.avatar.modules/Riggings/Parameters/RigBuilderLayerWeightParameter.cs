@@ -22,7 +22,7 @@ namespace Nox.CCK.Avatars.Rigging.Parameters {
 		public bool IsValid()
 			=> _rigBuilder && _rigBuilder.enabled && _rigBuilder.layers.Any(l => l.rig && l.rig.name == _layerName);
 
-		public int GetHash()
+		public int GetKey()
 			=> _parameterName.GetHashCode();
 
 		public ParameterType GetValueType()

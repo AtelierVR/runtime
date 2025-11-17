@@ -163,7 +163,7 @@ namespace api.nox.relay {
 				AddProperty(pa);
 
 				// Restaurer la valeur de l'ancien paramètre si il existe
-				if (oldProperties.TryGetValue(p.GetName(), out var oldValue))
+				if (oldProperties.TryGetValue(p.GetKey(), out var oldValue))
 					pa.SetValue(oldValue, DirtyBy.Local);
 
 				pa.SetDirty(DirtyBy.Local);

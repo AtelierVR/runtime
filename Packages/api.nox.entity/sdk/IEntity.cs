@@ -15,7 +15,7 @@ namespace Nox.Entities {
 		/// <summary>
 		/// Get a property of the entity by key.
 		/// </summary>
-		public bool TryGetProperty(string key, out IProperty property);
+		public bool TryGetProperty(int key, out IProperty property);
 
 		/// <summary>
 		/// Check if the entity has a physical component.

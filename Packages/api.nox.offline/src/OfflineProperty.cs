@@ -16,7 +16,11 @@ namespace api.nox.offline {
 			throw new System.NotImplementedException();
 		}
 
-		public string GetKey() {
+		public int GetKey() {
+			throw new System.NotImplementedException();
+		}
+
+		public string GetName() {
 			throw new System.NotImplementedException();
 		}
 

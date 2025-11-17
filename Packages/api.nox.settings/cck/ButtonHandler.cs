@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
 using Nox.CCK.Utils;
@@ -22,14 +23,14 @@ namespace Nox.CCK.Settings {
 
 		private Button       _button;
 		private TextLanguage _textLabel;
-		private string       _keyLabel;
-		private string       _keyButtonText;
+		private string[]     _keyLabel;
+		private string[]     _keyButtonText;
 		private bool         _interactable = true;
 
 
 		private TextLanguage _buttonText;
 
-		public abstract GameObject GetPrefab();
+		protected abstract GameObject GetPrefab();
 
 		public virtual GameObject GetContent(RectTransform transform, IMenu menu) {
 			var asset = GetPrefab();
@@ -41,33 +42,43 @@ namespace Nox.CCK.Settings {
 			if (_button)
 				_button.onClick.AddListener(() => OnClick(menu));
 
-			SetLabelKey(_keyLabel);
-			SetButtonTextKey(_keyButtonText);
+			if (_keyLabel != null)
+				SetLabel(_keyLabel[0], _keyLabel.Skip(1).ToArray());
+			else SetLabel(null);
+
+			if (_keyButtonText != null)
+				SetButtonText(_keyButtonText[0], _keyButtonText.Skip(1).ToArray());
+			else SetButtonText(null);
+
 			SetInteractable(_interactable);
 			return go;
 		}
 
-		public void SetLabelKey(string key) {
-			_keyLabel = key;
+		public void SetLabel(string key, params string[] @params) {
+			key       ??= "label.default";
+			@params   ??= Array.Empty<string>();
+			_keyLabel =   new[] { key }.Concat(@params).ToArray();
 			if (_textLabel)
 				_textLabel.UpdateText(key);
 		}
 
-		public void SetButtonTextKey(string key) {
-			_keyButtonText = key;
+		public void SetButtonText(string key, params string[] @params) {
+			key            ??= "button.default";
+			@params        ??= Array.Empty<string>();
+			_keyButtonText =   new[] { key }.Concat(@params).ToArray();
 			if (_buttonText)
-				_buttonText.UpdateText(key);
+				_buttonText.UpdateText(key, @params);
 		}
 
 		public abstract void OnClick(IMenu menu);
 
-		public UniTask<GameObject> GetContentAsync(RectTransform transform, IMenu menu)
+		public virtual UniTask<GameObject> GetContentAsync(RectTransform transform, IMenu menu)
 			=> UniTask.FromResult(GetContent(transform, menu));
 
 		public virtual void SetInteractable(bool interactable) {
 			_interactable = interactable;
-			if (_button)
-				_button.interactable = interactable;
+			if (!_button) return;
+			_button.interactable = interactable;
 		}
 	}
 }

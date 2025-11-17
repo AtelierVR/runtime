@@ -34,7 +34,7 @@ namespace api.nox.offline {
 		public IProperty[] GetProperties()
 			=> _properties.Cast<IProperty>().ToArray();
 
-		public bool TryGetProperty(string key, out IProperty property) {
+		public bool TryGetProperty(int key, out IProperty property) {
 			var prop = _properties.FirstOrDefault(p => p.GetKey() == key);
 			if (prop != null) {
 				property = prop;
@@ -44,7 +44,6 @@ namespace api.nox.offline {
 			property = null;
 			return false;
 		}
-
 
 		[NoxPublic(NoxAccess.Method)]
 		public bool IsLocal()

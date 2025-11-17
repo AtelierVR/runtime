@@ -12,8 +12,11 @@ namespace api.nox.relay {
 			_value = value;
 		}
 
-		public override string GetKey()
-			=> _hash.ToString();
+		public override int GetKey()
+			=> _hash;
+
+		public override string GetName()
+			=> $"Undefined_{_hash}";
 
 		public override object GetValue()
 			=> _value;

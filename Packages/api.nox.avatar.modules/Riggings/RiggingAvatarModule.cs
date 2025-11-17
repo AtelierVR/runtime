@@ -130,7 +130,7 @@ namespace Nox.CCK.Avatars.Rigging {
 			=> Parameters.FirstOrDefault(p => p.GetName() == key);
 
 		public IParameter GetParameter(int hash)
-			=> Parameters.FirstOrDefault(p => p.GetHash() == hash);
+			=> Parameters.FirstOrDefault(p => p.GetKey() == hash);
 
 		public static bool Check(IAvatarDescriptor descriptor) {
 			var modules = descriptor.GetModules<RiggingAvatarModule>();

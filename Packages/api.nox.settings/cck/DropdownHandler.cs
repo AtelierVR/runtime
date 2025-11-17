@@ -1,95 +1,46 @@
-using Cysharp.Threading.Tasks;
-using Nox.CCK.Language;
-using Nox.CCK.Utils;
-using Nox.Settings;
+using System.Collections.Generic;
+using System.Linq;
 using Nox.UI;
+using Nox.UI.modals;
 using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace Nox.CCK.Settings {
-	public abstract class DropdownHandler : IHandler {
-		private (string, string)[] _options;
-		private int                _defaultIndex = 0;
-		private string             _keyLabel;
+	public abstract class DropdownHandler : ButtonHandler {
+		private Dictionary<string, string[]> _options = new();
 
-		private TextLanguage _textLabel;
+		protected abstract IModalBuilder GetModalBuilder(IMenu menu);
 
-		public abstract string[] GetPath();
-
-		public virtual bool IsActive()
-			=> true;
-
-		public virtual void OnUpdated(IHandler handler) { }
-
-		public virtual int CompareTo(IHandler other)
-			=> 0;
-
-		public void SetLabel(string key) {
-			_keyLabel = key;
-			if (_textLabel)
-				_textLabel.UpdateText(key);
-		}
-
-		private TMPro.TMP_Dropdown _dropdown;
-
-
-		protected abstract GameObject GetPrefab();
-
-		public virtual GameObject GetContent(RectTransform transform, IMenu menu) {
-			var asset = GetPrefab();
-			var go    = Object.Instantiate(asset, transform, false);
-			_dropdown  = Reference.GetComponent<TMPro.TMP_Dropdown>("dropdown", go);
-			_textLabel = Reference.GetComponent<TextLanguage>("label", go);
-			UpdateOptions();
-			UpdateValue();
-			SetLabel(_keyLabel);
+		public override GameObject GetContent(RectTransform transform, IMenu menu) {
+			var go = base.GetContent(transform, menu);
+			SetInteractable(menu is IModalMenu);
 			return go;
 		}
 
-		private void UpdateValue() {
-			if (!_dropdown) return;
-			if (_options.Length == 0) return;
-			var index = Mathf.Clamp(_defaultIndex, 0, _options.Length - 1);
-			_dropdown.SetValueWithoutNotify(index);
+		public override void OnClick(IMenu menu) {
+			var builder = GetModalBuilder(menu);
+			if (builder == null) return;
+			builder.SetTitle($"settings.entry.{string.Join(".", GetPath())}.label");
+			builder.SetClosable(true);
+			builder.SetOptions(e => SetValue(e), _options);
+			builder.SetContent("empty");
+			var modal = builder.Build();
+			modal.OnClose.AddListener(() => modal.Dispose());
+			modal.Show();
 		}
 
-		private void UpdateOptions() {
-			if (!_dropdown) return;
-			_dropdown.ClearOptions();
-			var list = new System.Collections.Generic.List<TMPro.TMP_Dropdown.OptionData>();
-			foreach (var (label, value) in _options)
-				list.Add(new TMPro.TMP_Dropdown.OptionData(label));
-			_dropdown.AddOptions(list);
-			_dropdown.SetValueWithoutNotify(Mathf.Clamp(_defaultIndex, 0, _options.Length - 1));
-			_dropdown.onValueChanged.RemoveListener(OnInternalValueChanged);
-			_dropdown.onValueChanged.AddListener(OnInternalValueChanged);
+		protected virtual void OnValueChanged(string value) { }
+
+		protected virtual void SetValue(string value, bool notify = true) {
+			if (_options.Count == 0) return;
+			if (!_options.ContainsKey(value)) return;
+			Logger.LogDebug($"Setting value to {value}");
+			SetButtonText(_options[value][0], _options[value].Skip(1).ToArray());
+			if (!notify) return;
+			OnValueChanged(value);
 		}
 
-		private void OnInternalValueChanged(int index) {
-			if (index < 0 || index >= _options.Length) return;
-			OnValueChanged(_options[index].Item2);
-		}
-		
-		public UniTask<GameObject> GetContentAsync(RectTransform transform, IMenu menu)
-			=> UniTask.FromResult(GetContent(transform, menu));
-
-		public virtual void OnValueChanged(string value) { }
-
-		public virtual void SetValue(string value, bool notify = true) {
-			if (_options == null || _options.Length == 0) return;
-			for (var i = 0; i < _options.Length; i++) {
-				if (_options[i].Item2 != value) continue;
-				_defaultIndex = i;
-				UpdateValue();
-				if (notify)
-					OnInternalValueChanged(i);
-				return;
-			}
-		}
-
-		public virtual void SetOptions((string, string)[] options) {
-			_options = options;
-			UpdateOptions();
-			UpdateValue();
-		}
+		protected virtual void SetOptions(Dictionary<string, string[]> options)
+			=> _options = options;
 	}
 }

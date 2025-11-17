@@ -81,7 +81,7 @@ namespace Nox.CCK.Avatars.Parameters {
 
 			foreach (var module in modules)
 			foreach (var moduleParameter in module.GetParameters()) {
-				var hash = moduleParameter.GetHash();
+				var hash = moduleParameter.GetKey();
 				if (hashSet.Contains(hash)) continue;
 				parametersList.Add(moduleParameter); // Ajouter directement l'IParameter sans cast
 				hashSet.Add(hash);
@@ -94,7 +94,7 @@ namespace Nox.CCK.Avatars.Parameters {
 			=> GetParameters().FirstOrDefault(p => p.GetName() == key);
 
 		public IParameter GetParameter(int hash)
-			=> GetParameters().FirstOrDefault(p => p.GetHash() == hash);
+			=> GetParameters().FirstOrDefault(p => p.GetKey() == hash);
 
 		private AnimatorControllerPlayable[] GetAllControllers() {
 			var animator    = Runtime?.GetDescriptor()?.GetAnimator();

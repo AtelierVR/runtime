@@ -2,6 +2,8 @@ using System.Linq;
 using Nox.UI;
 using Nox.UI.modals;
 using UnityEngine;
+using UnityEngine.Events;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.ui.modals {
 	public sealed class BaseModal : MonoBehaviour, IModal {
@@ -9,8 +11,12 @@ namespace api.nox.ui.modals {
 		public IModalMenu Menu;
 
 		public void Close() {
-			if (gameObject)
-				gameObject.SetActive(false);
+			InternalClose();
+			OnClose.Invoke();
+		}
+
+		private void InternalClose() {
+			gameObject.SetActive(false);
 			if (Menu == null) return;
 			var modals = Menu.GetModals();
 			var active = modals.Any(m => m.IsOpen());
@@ -21,6 +27,7 @@ namespace api.nox.ui.modals {
 			gameObject.SetActive(true);
 			transform.SetAsLastSibling();
 			Menu.SetActiveForeground(true);
+			OnOpen.Invoke();
 		}
 
 		public bool IsOpen()
@@ -36,18 +43,17 @@ namespace api.nox.ui.modals {
 			=> Dispose();
 
 		public void Dispose() {
-			if (Menu != null && gameObject != null && gameObject.activeSelf) {
-				Close();
-			}
-			if (gameObject)
-				Destroy(gameObject);
+			InternalClose();
 			Menu?.UnregisterModal(this);
 			Menu = null;
 		}
 
+		public UnityEvent OnClose { get; } = new();
+		public UnityEvent OnOpen  { get; } = new();
+
 		public void OnCloseClicked()
 			=> Dispose();
-		
+
 		public void Attach(IModalMenu menu) {
 			if (Menu == menu) return;
 			Menu?.UnregisterModal(this);

@@ -46,22 +46,20 @@ namespace api.nox.relay {
 			=> Teleport(position, rotation, Vector3.zero, Vector3.zero);
 
 		public void Teleport(Vector3 position, Quaternion rotation, Vector3 velocity, Vector3 angular) {
-			if (!TryGetPart(PlayerRig.Base.ToIndex(), out var part)) return;
-			part.SetPosition(position, DirtyBy.Local);
-			part.SetRotation(rotation, DirtyBy.Local);
-			part.SetVelocity(velocity, DirtyBy.Local);
-			part.SetAngularVelocity(angular, DirtyBy.Local);
+			SetPosition(position, DirtyBy.Local);
+			SetRotation(rotation, DirtyBy.Local);
+			SetVelocity(velocity, DirtyBy.Local);
+			SetAngularVelocity(angular, DirtyBy.Local);
 		}
 
 
 		[NoxPublic(NoxAccess.Method)]
 		public void Teleport(Transform transform, Rigidbody rb = null) {
-			if (!transform || !TryGetPart(PlayerRig.Base.ToIndex(), out var part)) return;
-			part.SetPosition(transform.position, DirtyBy.Local);
-			part.SetRotation(transform.rotation, DirtyBy.Local);
+			SetPosition(transform.position, DirtyBy.Local);
+			SetRotation(transform.rotation, DirtyBy.Local);
 			if (!rb) return;
-			part.SetVelocity(rb.linearVelocity, DirtyBy.Local);
-			part.SetAngularVelocity(rb.angularVelocity, DirtyBy.Local);
+			SetVelocity(rb.linearVelocity, DirtyBy.Local);
+			SetAngularVelocity(rb.angularVelocity, DirtyBy.Local);
 		}
 
 		public void MovePart(ushort id, Nox.CCK.Utils.Transform transform, DirtyBy markDirty = DirtyBy.Local) {

@@ -37,10 +37,10 @@ namespace api.nox.relay {
 			Parts.RemoveAll(p => p.GetId() == id);
 		}
 
-		bool IEntity.TryGetProperty(string key, out IProperty property)
+		bool IEntity.TryGetProperty(int key, out IProperty property)
 			=> TryGetProperty(key, out property);
 
-		private bool TryGetProperty<T>(string key, out T property) where T : IProperty {
+		private bool TryGetProperty<T>(int key, out T property) where T : IProperty {
 			var prop = GetProperties<IProperty>().FirstOrDefault(p => p.GetKey() == key);
 			if (prop is T pt) {
 				property = pt;
@@ -54,7 +54,7 @@ namespace api.nox.relay {
 		public void AddProperty(RelayProperty property)
 			=> Properties.Add(property);
 
-		public void RemoveProperty(string id)
+		public void RemoveProperty(int id)
 			=> Properties.RemoveAll(p => p.GetKey() == id);
 
 		#endregion

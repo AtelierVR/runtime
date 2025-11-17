@@ -11,7 +11,7 @@ namespace Nox.CCK.Avatars.Parameters {
 		public string GetName()
 			=> Parameter.name;
 
-		public int GetHash()
+		public int GetKey()
 			=> Parameter.nameHash;
 
 		public ParameterFlags GetFlags()

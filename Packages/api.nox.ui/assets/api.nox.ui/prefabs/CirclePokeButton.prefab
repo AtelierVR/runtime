@@ -8,9 +8,37 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1344410001792599933, guid: 7485b17a186dc2343a3799590428013c, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1996412040217567697, guid: 7485b17a186dc2343a3799590428013c, type: 3}
       propertyPath: m_Name
-      value: CirclePokeButton Variant
+      value: CirclePokeButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 2260971311084145389, guid: 7485b17a186dc2343a3799590428013c, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2260971311084145389, guid: 7485b17a186dc2343a3799590428013c, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2260971311084145389, guid: 7485b17a186dc2343a3799590428013c, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2260971311084145389, guid: 7485b17a186dc2343a3799590428013c, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2260971311084145389, guid: 7485b17a186dc2343a3799590428013c, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2260971311084145389, guid: 7485b17a186dc2343a3799590428013c, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2993691817426288060, guid: 7485b17a186dc2343a3799590428013c, type: 3}
       propertyPath: m_Pivot.x

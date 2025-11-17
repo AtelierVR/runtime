@@ -13,7 +13,7 @@ namespace Nox.Avatars.Parameters {
 		/// Gets the unique identifier of the parameter.
 		/// </summary>
 		/// <returns></returns>
-		public int GetHash();
+		public int GetKey();
 
 		/// <summary>
 		/// Gets the flags associated with the parameter.
