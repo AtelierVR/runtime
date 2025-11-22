@@ -148,7 +148,7 @@ namespace api.nox.editor.panel {
 			rootVisualElement.style.flexGrow = 1;
 			var content = Resources.Load<VisualTreeAsset>("Document").CloneTree();
 			content.styleSheets.Add(Resources.Load<StyleSheet>("Style"));
-			content.styleSheets.Add(Resources.Load<StyleSheet>("nox.cck.style"));
+			content.styleSheets.Add(Resources.Load<StyleSheet>("styles/index"));
 			content.style.flexGrow = 1;
 			rootVisualElement.Add(content);
 			UpdateMenu();

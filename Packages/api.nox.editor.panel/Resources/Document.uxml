@@ -1,5 +1,6 @@
-<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
-    <Style src="project://database/Packages/api.nox.editor.panel/Resources/Style.uss?fileID=7433441132597879392&amp;guid=c76f20c75875ce847a8c27b1469d39e0&amp;type=3#Style" />
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+         editor-extension-mode="True">
     <uie:Toolbar>
         <ui:VisualElement class="container" style="flex-grow: 1; flex-direction: row;">
             <uie:ToolbarMenu text="Menu" name="menu" style="border-right-width: 0;" />
