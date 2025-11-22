@@ -19,7 +19,9 @@
         "Nox.Tables",
         "Nox.Search",
         "Nox.UI",
-        "Nox.Avatars.Parameters"
+        "Nox.Avatars.Parameters",
+        "Nox.Editor.Panel",
+        "Nox.Avatars.Editor"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

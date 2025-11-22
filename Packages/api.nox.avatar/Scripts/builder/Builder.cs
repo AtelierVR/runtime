@@ -12,6 +12,7 @@ using UnityEditor;
 using UnityEditor.Build.Pipeline;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using Logger = Nox.CCK.Utils.Logger;
 using Object = UnityEngine.Object;
@@ -21,6 +22,10 @@ using Transform = UnityEngine.Transform;
 namespace api.nox.avatar.builder {
 	public static class Builder {
 		public static bool IsBuilding;
+
+		public static readonly UnityEvent<float, string> OnBuildProgress = new();
+		public static readonly UnityEvent<BuildResult>   OnBuildFinished = new();
+		public static readonly UnityEvent<BuildData>     OnBuildStarted  = new();
 
 		private static readonly Dictionary<string, string> SceneBackups = new();
 
@@ -171,97 +176,147 @@ namespace api.nox.avatar.builder {
 		}
 
 		public static async UniTask<BuildResult> Build(BuildData data) {
-			if (data.Target == Platform.None)
-				data.Target = PlatformExtensions.CurrentPlatform; // Set default filename if not provided
-			if (string.IsNullOrEmpty(data.Filename))
-				data.Filename = GenerateDefaultFilename(data.Descriptor.gameObject.scene.name, data.Target); // Set randomized temp path if not provided
-			if (string.IsNullOrEmpty(data.TempPath))
-				data.TempPath = $"Assets/Temp/{GenerateRandomHash()}/"; // Report progress: Validation
-			data.ProgressCallback?.Invoke(0.05f, "Validating build prerequisites...");
-			await UniTask.Yield();
+			// Wrap user progress callback to also emit UnityEvent
+			var userProgress = data.ProgressCallback;
+			data.ProgressCallback = (p, m) => {
+				try {
+					OnBuildProgress.Invoke(p, m);
+				} catch {
+					/* ignore listener errors */
+				}
 
-			// Validation des prérequis
-			var validation = ValidateBuildPrerequisites(data);
-			if (validation.Type != BuildResultType.Success)
-				return validation;
+				try {
+					userProgress?.Invoke(p, m);
+				} catch {
+					/* ignore user callback errors */
+				}
+			};
 
-			IsBuilding = true;
-			var rollback = EditorSceneManager.GetSceneManagerSetup();
+			// Notify build start
+			try {
+				OnBuildStarted.Invoke(data);
+			} catch {
+				/* ignore listener errors */
+			}
+
+			// Helper to ensure we always raise finished event
+			BuildResult Finish(BuildResult r) {
+				try {
+					OnBuildFinished.Invoke(r);
+				} catch {
+					/* ignore listener errors */
+				}
+
+				return r;
+			}
 
 			try {
-				// Report progress: Preparation
-				data.ProgressCallback?.Invoke(0.10f, "Preparing temporary directories...");
+				if (data.Target == Platform.None)
+					data.Target = PlatformExtensions.CurrentPlatform; // Set default filename if not provided
+				if (string.IsNullOrEmpty(data.Filename))
+					data.Filename = GenerateDefaultFilename(data.Descriptor.gameObject.scene.name, data.Target); // Set randomized temp path if not provided
+				if (string.IsNullOrEmpty(data.TempPath))
+					data.TempPath = $"Assets/Temp/{GenerateRandomHash()}/"; // Report progress: Validation
+				data.ProgressCallback?.Invoke(0.05f, "Validating build prerequisites...");
 				await UniTask.Yield();
 
-				// Préparation des répertoires temporaires
-				var preparation = PrepareTemporaryDirectories(data);
-				if (preparation.Type != BuildResultType.Success)
-					return preparation;
+				// Validation des prérequis
+				var validation = ValidateBuildPrerequisites(data);
+				if (validation.Type != BuildResultType.Success)
+					return Finish(validation);
 
-				// Sauvegarde initiale des scènes
-				if (!EditorSceneManager.SaveOpenScenes()) {
-					return new BuildResult {
-						Type    = BuildResultType.Failed,
-						Message = "Failed to save open scenes. Please ensure all scenes are saved before building."
-					};
+				IsBuilding = true;
+				var rollback = EditorSceneManager.GetSceneManagerSetup();
+
+				try {
+					// Report progress: Preparation
+					data.ProgressCallback?.Invoke(0.10f, "Preparing temporary directories...");
+					await UniTask.Yield();
+
+					// Préparation des répertoires temporaires
+					var preparation = PrepareTemporaryDirectories(data);
+					if (preparation.Type != BuildResultType.Success)
+						return Finish(preparation);
+
+					// Sauvegarde initiale des scènes
+					if (!EditorSceneManager.SaveOpenScenes()) {
+						return Finish(
+							new BuildResult {
+								Type    = BuildResultType.Failed,
+								Message = "Failed to save open scenes. Please ensure all scenes are saved before building."
+							}
+						);
+					}
+
+					AssetDatabase.Refresh();
+
+					// Report progress: Scene backup
+					data.ProgressCallback?.Invoke(0.15f, "Creating scene backup...");
+					await UniTask.Yield();
+
+					// Création de la sauvegarde de scène
+					var scene = data.Descriptor.gameObject.scene;
+					Logger.Log("Creating scene backup before compilation...");
+					if (!CreateSceneBackup(scene)) {
+						return Finish(
+							new BuildResult {
+								Type    = BuildResultType.Failed,
+								Message = "Failed to create scene backup. Build aborted for safety."
+							}
+						);
+					}
+
+					// Report progress: Compiling scripts
+					data.ProgressCallback?.Invoke(0.40f, "Compiling scripts...");
+					await UniTask.Yield();
+
+					// Compilation des scripts
+					var compilation = await CompileScripts(data.Descriptor.gameObject);
+					if (compilation.Type != BuildResultType.Success)
+						return Finish(compilation);
+
+					// Report progress: Processing scenes
+					data.ProgressCallback?.Invoke(0.60f, "Processing prefab and dependencies...");
+					await UniTask.Yield();
+
+					var processing = await ProcessPrefabAndDependencies(data);
+					if (processing.Type != BuildResultType.Success)
+						return Finish(processing);
+
+					// Report progress: Building AssetBundle
+					data.ProgressCallback?.Invoke(0.80f, "Building AssetBundle...");
+					await UniTask.Yield();
+
+					// Création de l'AssetBundle des scènes
+					var assetBundleResult = await BuildPrefabsAssetBundle(data);
+					if (assetBundleResult.Type != BuildResultType.Success)
+						return Finish(assetBundleResult);
+
+					// Report progress: Cleanup
+					data.ProgressCallback?.Invoke(0.95f, "Cleaning up...");
+					await UniTask.Yield();
+
+					// Report progress: Complete
+					data.ProgressCallback?.Invoke(1.0f, "Build completed successfully!");
+					await UniTask.Yield();
+
+					return Finish(
+						new BuildResult {
+							Type = BuildResultType.Success,
+						}
+					);
+				} finally {
+					// S'assurer que le nettoyage se fait toujours, même en cas d'erreur ou de retour anticipé
+					CleanupAndRestoreState(rollback, true, data.TempPath);
 				}
-
-				AssetDatabase.Refresh();
-
-				// Report progress: Scene backup
-				data.ProgressCallback?.Invoke(0.15f, "Creating scene backup...");
-				await UniTask.Yield();
-
-				// Création de la sauvegarde de scène
-				var scene = data.Descriptor.gameObject.scene;
-				Logger.Log("Creating scene backup before compilation...");
-				if (!CreateSceneBackup(scene)) {
-					return new BuildResult {
+			} catch (Exception e) {
+				Logger.LogException(new Exception("Build failed with exception", e));
+				return Finish(
+					new BuildResult {
 						Type    = BuildResultType.Failed,
-						Message = "Failed to create scene backup. Build aborted for safety."
-					};
-				}
-
-				// Report progress: Compiling scripts
-				data.ProgressCallback?.Invoke(0.40f, "Compiling scripts...");
-				await UniTask.Yield();
-
-				// Compilation des scripts
-				var compilation = await CompileScripts(data.Descriptor.gameObject);
-				if (compilation.Type != BuildResultType.Success)
-					return compilation;
-
-				// Report progress: Processing scenes
-				data.ProgressCallback?.Invoke(0.60f, "Processing prefab and dependencies...");
-				await UniTask.Yield();
-
-				var processing = await ProcessPrefabAndDependencies(data);
-				if (processing.Type != BuildResultType.Success)
-					return processing;
-
-				// Report progress: Building AssetBundle
-				data.ProgressCallback?.Invoke(0.80f, "Building AssetBundle...");
-				await UniTask.Yield();
-
-				// Création de l'AssetBundle des scènes
-				var assetBundleResult = await BuildPrefabsAssetBundle(data);
-				if (assetBundleResult.Type != BuildResultType.Success)
-					return assetBundleResult;
-
-				// Report progress: Cleanup
-				data.ProgressCallback?.Invoke(0.95f, "Cleaning up...");
-				await UniTask.Yield();
-
-				// Report progress: Complete
-				data.ProgressCallback?.Invoke(1.0f, "Build completed successfully!");
-				await UniTask.Yield();
-
-				return new BuildResult {
-					Type = BuildResultType.Success,
-				};
-			} finally {
-				// S'assurer que le nettoyage se fait toujours, même en cas d'erreur ou de retour anticipé
-				CleanupAndRestoreState(rollback, true, data.TempPath);
+						Message = e.Message + "\nSee console for details."
+					}
+				);
 			}
 		}
 
@@ -369,24 +424,32 @@ namespace api.nox.avatar.builder {
 
 			var removeScripts = mainObject
 				.GetComponentsInChildren<IRemoveOnBuild>(true)
-				.ToList();
+				.ToArray();
+
+			var exceptions = new List<Exception>();
 
 			foreach (var script in removeScripts)
 				try {
+					if (script == null) continue;
 					Logger.Log($"Removing script: {script.GetType().Name}");
 					script.OnRemoveOnBuild();
 					if (script is Object scriptObject) // In case the script removed itself
-						Object.DestroyImmediate(scriptObject, true);
+						scriptObject.DestroyImmediate();
 				} catch (Exception e) {
-					Logger.LogError($"Failed to remove script {script.GetType().Name}: {e.Message}");
-					compilationFailed = true;
-					break;
+					var ex = new Exception($"Failed to remove script {script?.GetType().Name ?? "null"}", e);
+					Logger.LogException(ex);
+					exceptions.Add(ex);
 				}
 
-			if (compilationFailed)
+			if (exceptions.Count > 0)
 				return new BuildResult {
-					Type    = BuildResultType.Failed,
-					Message = "Script removal failed. Original scenes have been restored from backup."
+					Type = BuildResultType.Failed,
+					Message = string.Join(
+						"\n",
+						new[] { "Script removal failed:" }
+							.Concat(exceptions.Select(e => "\t" + e.Message))
+							.Concat(new[] { "See console for details." })
+					)
 				};
 
 			if (!EditorSceneManager.SaveOpenScenes())

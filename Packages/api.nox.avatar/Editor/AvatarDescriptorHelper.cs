@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using Nox.CCK.Avatars;
 using UnityEngine.Events;
 using UnityEditor;
@@ -6,8 +5,8 @@ using UnityEngine;
 using System.Linq;
 using Logger = Nox.CCK.Utils.Logger;
 
-namespace api.nox.avatar.editor {
-	public class AvatarEditorHelper {
+namespace Nox.Avatars.Editor {
+	public class AvatarDescriptorHelper {
 		public static AvatarDescriptor CurrentAvatar;
 
 		public static readonly UnityEvent<AvatarDescriptor> OnAvatarSelected = new();
@@ -40,7 +39,7 @@ namespace api.nox.avatar.editor {
 			}
 		}
 
-		private static void SetCurrentAvatar(AvatarDescriptor newAvatar) {
+		public static void SetCurrentAvatar(AvatarDescriptor newAvatar) {
 			if (CurrentAvatar == newAvatar) return;
 			Logger.LogDebug($"Current avatar changed to {(newAvatar ? newAvatar.name : "null")}");
 			CurrentAvatar = newAvatar;
@@ -48,4 +47,3 @@ namespace api.nox.avatar.editor {
 		}
 	}
 }
-#endif

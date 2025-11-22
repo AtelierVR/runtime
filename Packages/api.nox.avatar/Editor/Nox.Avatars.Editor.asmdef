@@ -9,7 +9,9 @@
     "Nox.CCK.Avatars",
     "Unity.Animation.Rigging"
   ],
-  "includePlatforms": [],
+  "includePlatforms": [
+    "Editor"
+  ],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
   "overrideReferences": false,

@@ -6,8 +6,6 @@ using Nox.CCK.Build;
 using UnityEngine;
 using Nox.CCK.Utils;
 using Nox.Players;
-using UnityEngine.Serialization;
-
 
 namespace Nox.CCK.Avatars {
 	public sealed class AvatarDescriptor : MonoBehaviour, IAvatarDescriptor, ICompilable {

@@ -56,7 +56,8 @@
       "api.nox.avatar.Main"
     ],
     "editor": [
-      "api.nox.avatar.Editor"
+      "api.nox.avatar.Editor",
+      "api.nox.avatar.editor.BuilderPanel"
     ],
     "client": [
       "api.nox.avatar.Client"

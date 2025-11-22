@@ -93,3 +93,23 @@ MonoBehaviour:
       value: "Search"
     - key: avatar.loader.search_placeholder
       value: "Filter avatars..."
+    - key: avatar.editor.notification.children_avatars
+      value: "{0} child avatars detected. Child avatars are not supported and will be removed during the build process."
+    - key: avatar.editor.notification.children_avatars.action.select_children
+      value: "Select Child Avatars"
+    - key: avatar.editor.notification.no_avatar_descriptor.selected
+      value: "No AvatarDescriptor found. Please add an AvatarDescriptor."
+    - key: avatar.editor.notification.no_avatar_descriptor.found
+      value: "No AvatarDescriptor selected. Please select an AvatarDescriptor."
+    - key: avatar.editor.notification.no_avatar_descriptor.action.select_first
+      value: "Select"
+    - key: avatar.editor.notification.no_avatar_descriptor.action.create_new
+      value: "New"
+    - key: avatar.editor.notification.no_avatar_descriptor.action.create
+      value: "Create"
+    - key: avatar.editor.notification.play_mode
+      value: "Avatar Builder cannot be used in Play Mode. Please exit Play Mode to continue."
+    - key: avatar.editor.notification.user_not_connected
+      value: "You are not logged in. Please log in to access avatar building features."
+    - key: avatar.editor.notification.user_connected
+      value: "Logged in as {0} ({1})"

@@ -1,0 +1,42 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Packages/api.nox.mod_loader/Resources/nox.cck.style.uss?fileID=7433441132597879392&amp;guid=ee18ab989d89a1a479332bd224e51c94&amp;type=3#nox.cck.style" />
+    <Style src="project://database/Packages/api.nox.editor.panel/Resources/Style.uss?fileID=7433441132597879392&amp;guid=c76f20c75875ce847a8c27b1469d39e0&amp;type=3#Style" />
+    <ui:GroupBox class="bb-1 m-0 section">
+        <uie:ObjectField label="Avatar" type="Nox.CCK.Avatars.AvatarDescriptor, Nox.CCK.Avatars" name="selected" class="readonly large" />
+    </ui:GroupBox>
+    <ui:ScrollView style="flex-grow: 1;">
+        <ui:VisualElement name="notifications" class="section" />
+    </ui:ScrollView>
+    <ui:GroupBox class="bt-1 m-0 section">
+        <ui:VisualElement style="flex-grow: 1; flex-direction: row;">
+            <ui:TextField placeholder-text="filler text" name="output" class="large" style="flex-grow: 1;" />
+            <ui:Button text="Select" name="select-output" class="large" style="min-width: 64px;" />
+            <ui:Button text="Open" name="open-output" class="large" style="min-width: 64px;" />
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-grow: 1; flex-direction: row; margin-top: 4px;">
+            <ui:EnumField value="None" type="Nox.CCK.Utils.Platform, Nox.CCK" name="platform" class="large" style="flex-grow: 1;" />
+            <ui:Button text="Build" name="build" class="large" style="min-width: 134px;" />
+        </ui:VisualElement>
+    </ui:GroupBox>
+    <ui:GroupBox name="building" class="m-0 p-0" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-color: rgba(0, 0, 0, 0.5); display: none;">
+        <ui:VisualElement style="flex-grow: 1;" />
+        <ui:VisualElement class="margin section bt-1 background" style="padding-bottom: 16px;">
+            <ui:VisualElement class="bb-1" style="flex-grow: 1; margin-bottom: 8px; padding-bottom: 8px;">
+                <ui:Label text="Building" style="-unity-text-align: upper-center; font-size: 18px;" />
+            </ui:VisualElement>
+            <ui:Label text="Label" name="status" class="margin" style="margin-top: 16px; margin-bottom: 16px;" />
+            <ui:ProgressBar value="22" name="progress" class="margin large" />
+        </ui:VisualElement>
+    </ui:GroupBox>
+    <ui:GroupBox name="result" class="m-0 p-0" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-color: rgba(0, 0, 0, 0.5); display: none;">
+        <ui:VisualElement style="flex-grow: 1;" />
+        <ui:VisualElement class="margin section bt-1 background" style="padding-bottom: 16px;">
+            <ui:VisualElement class="bb-1" style="flex-grow: 1; margin-bottom: 8px; padding-bottom: 8px;">
+                <ui:Label text="Success" name="success" style="color: rgb(0, 255, 0); -unity-text-align: upper-center; font-size: 18px;" />
+                <ui:Label text="Failed" name="failed" style="color: rgb(255, 0, 0); -unity-text-align: upper-center; font-size: 18px;" />
+            </ui:VisualElement>
+            <ui:Label text="Label" name="details" class="margin" style="margin-bottom: 16px; margin-top: 16px;" />
+            <ui:Button text="OK" name="ok" class="large" />
+        </ui:VisualElement>
+    </ui:GroupBox>
+</ui:UXML>
