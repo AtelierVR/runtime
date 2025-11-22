@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Events;
 using ILogger = UnityEngine.ILogger;
 
 #if UNITY_EDITOR
@@ -92,16 +93,30 @@ namespace Nox.CCK.Utils {
 		/// <param name="title"></param>
 		/// <param name="message"></param>
 		/// <param name="progress"></param>
-		public static void ShowProgress(string title, string message, float progress)
-			=> EditorUtility.DisplayProgressBar(title, message, progress);
+		public static void ShowProgress(string title, string message, float progress) {
+			EditorUtility.DisplayProgressBar(title, message, progress);
+			OnProgress.Invoke(true, title, message, progress);
+		}
 
 		/// <summary>
 		/// Clears the progress bar in the Editor.
 		/// </summary>
+		public static void ClearProgress() {
+			EditorUtility.ClearProgressBar();
+			OnProgress.Invoke(false, null, null, -1f);
+		}
+
+		#else
+		
+		public static void ShowProgress(string title, string message, float progress)
+			=> OnProgress.Invoke(true, title, message, progress);
+		
 		public static void ClearProgress()
-			=> EditorUtility.ClearProgressBar();
+			=> OnProgress.Invoke(false, null, null, -1f);
 
 		#endif
+
+		public static readonly UnityEvent<bool, string, string, float> OnProgress = new();
 
 		public static void Init() {
 			lock (FileLock) {
