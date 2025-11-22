@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -80,13 +81,13 @@ namespace Nox.ModLoader.Loader {
 			}
 
 			Logger.LogDebug("Reloading Mods...", tag: nameof(EditorLoader));
-			
+
 			var mods = ModManager.GetMods()
 				.Reverse();
-			
+
 			foreach (var mod in mods)
 				await mod.Unload();
-			
+
 			ModManager.Mods.Clear();
 
 			await LoaderManager.Discover();
@@ -250,3 +251,4 @@ namespace Nox.ModLoader.Loader {
 		#endregion
 	}
 }
+#endif
