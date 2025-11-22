@@ -1,19 +1,22 @@
 using System;
+using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Nox.CCK.Utils {
+	[Serializable]
 	public class ResourceIdentifier {
-		private readonly string   _group;
-		private readonly string[] _path;
+		public string group;
+		public string[] path;
 
 		public string GetGroup()
-			=> _group;
+			=> group;
 
 		public string[] GetPath()
-			=> _path;
+			=> path;
 
 		public ResourceIdentifier(string group, params string[] path) {
-			_group = group;
-			_path  = path;
+			this.group = group;
+			this.path  = path;
 		}
 
 		public static ResourceIdentifier Parse(string identifier) {
@@ -29,12 +32,12 @@ namespace Nox.CCK.Utils {
 		}
 
 		public bool HasGroup()
-			=> !string.IsNullOrEmpty(_group);
+			=> !string.IsNullOrEmpty(group);
 
 		public bool HasPath()
-			=> _path.Length > 0;
+			=> path.Length > 0;
 
 		public override string ToString()
-			=> $"{_group}{(HasPath() && HasGroup() ? ":" : "")}{string.Join("/", _path)}";
+			=> $"{group}{(HasPath() && HasGroup() ? ":" : "")}{string.Join("/", path)}";
 	}
 }
