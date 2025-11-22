@@ -110,13 +110,13 @@ namespace api.nox.server.network {
 				try {
 					_webSocket.Options.SetRequestHeader(header.Key, header.Value);
 				} catch (Exception ex) {
-					Logger.LogError($"Failed to set WebSocket header '{header.Key}': {ex.Message}");
+					Logger.LogException(new Exception($"Error setting WebSocket header {header.Key}", ex));
 				}
 
 			try {
 				await _webSocket.ConnectAsync(_url, _cts.Token);
 			} catch (Exception ex) {
-				Logger.LogError($"Error connecting to WebSocket: {ex.Message}");
+				Logger.LogException(new Exception($"Error while connecting to WebSocket at {_url}", ex));
 				_reconcilable = false;
 				OnError?.Invoke(ex);
 				return false;
@@ -143,7 +143,7 @@ namespace api.nox.server.network {
 			try {
 				await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing connection", CancellationToken.None);
 			} catch (Exception ex) {
-				Logger.LogError($"Error closing WebSocket connection: {ex.Message}");
+				Logger.LogException(new Exception("Error while closing WebSocket connection", ex));
 				OnError?.Invoke(ex);
 			}
 
@@ -206,12 +206,12 @@ namespace api.nox.server.network {
 					// Connexion fermée normalement
 					break;
 				} catch (WebSocketException ex) {
-					Logger.LogError($"WebSocket error: {ex.Message}");
+					Logger.LogException(new Exception("WebSocket error in listening loop", ex));
 					OnError.Invoke(ex);
 					await HandleDisconnection();
 					break;
 				} catch (Exception ex) {
-					Logger.LogError($"Unexpected error while listening: {ex.Message}");
+					Logger.LogException(new Exception("Unexpected error in WebSocket listening loop", ex));
 					if (OnError != null) OnError.Invoke(ex);
 					await HandleDisconnection();
 					break;
@@ -246,7 +246,7 @@ namespace api.nox.server.network {
 						return;
 					}
 				} catch (Exception ex) {
-					Logger.LogError($"Reconnection attempt {retryCount} failed: {ex.Message}");
+					Logger.LogException(new Exception($"Error during reconnection attempt {retryCount}", ex));
 					OnError.Invoke(ex);
 				}
 
@@ -269,7 +269,7 @@ namespace api.nox.server.network {
 				await _webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, _cts.Token);
 				return true;
 			} catch (Exception ex) {
-				Logger.LogError($"Error sending message: {ex.Message}");
+				Logger.LogException(new Exception("Unexpected error in sending message", ex));
 				OnError.Invoke(ex);
 				return false;
 			}

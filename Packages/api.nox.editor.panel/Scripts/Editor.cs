@@ -6,15 +6,20 @@ using Nox.Editor.Panel;
 
 namespace api.nox.editor.panel {
 	public class Editor : IEditorModInitializer, IPanelAPI {
-		internal static  EditorModCoreAPI CoreAPI;
+		internal static EditorModCoreAPI CoreAPI;
 
 		public void OnInitializeEditor(EditorModCoreAPI api)
 			=> CoreAPI = api;
 
+		public void OnPostInitializeEditor() {
+			foreach (var window in WindowManager.GetWindows()) 
+				window.Repaint();
+		}
+
 		public void OnDisposeEditor() {
-			foreach(var window in WindowManager.GetWindows())
+			foreach (var window in WindowManager.GetWindows())
 				window.Close();
-			
+				
 			CoreAPI = null;
 		}
 

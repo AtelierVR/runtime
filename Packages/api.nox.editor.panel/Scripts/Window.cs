@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Nox.CCK.Utils;
 using Nox.Editor.Panel;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -12,8 +13,15 @@ namespace api.nox.editor.panel {
 	public class Window : UnityEditor.EditorWindow, IWindow {
 		private IInstance _active;
 
+		[SerializeField]
+		private ResourceIdentifier _panelId;
+
+		private Dictionary<string, object> _panelData;
+
 		public IInstance GetActive()
-			=> _active;
+			=> _active ??= _panelId != null && PanelManager.TryGetPanel(_panelId, out var panel)
+				? panel.Instantiate(this, _panelData)
+				: throw new InvalidOperationException($"No panel found for id '{_panelId?.ToString() ?? "null"}'");
 
 		public static Window Create() {
 			var window = CreateInstance<Window>();
@@ -24,7 +32,9 @@ namespace api.nox.editor.panel {
 
 		public bool SetActive(IPanel panel, Dictionary<string, object> data = null) {
 			try {
-				_active = panel.Instantiate(this, data ?? new Dictionary<string, object>());
+				_active    = panel.Instantiate(this, data ?? new Dictionary<string, object>());
+				_panelId   = new ResourceIdentifier(null, panel.GetPath());
+				_panelData = data ?? new Dictionary<string, object>();
 				UpdateMenu();
 				UpdateContent();
 			} catch (Exception e) {
@@ -37,7 +47,7 @@ namespace api.nox.editor.panel {
 
 		public void OnDestroy() {
 			Logger.LogDebug("Closing window", tag: nameof(Window), context: this);
-			_active?.OnDestroy();
+			GetActive()?.OnDestroy();
 			WindowManager.RemoveWindow(this);
 			_active = null;
 		}
@@ -49,7 +59,7 @@ namespace api.nox.editor.panel {
 		}
 
 		public void OnFocus() {
-			_active.OnFocus();
+			GetActive().OnFocus();
 			UpdateMenu();
 			UpdateContent();
 		}
@@ -57,7 +67,7 @@ namespace api.nox.editor.panel {
 		public new void Show() {
 			Logger.LogDebug("Showing window", tag: nameof(Window), context: this);
 			base.Show();
-			_active.OnFocus();
+			GetActive().OnFocus();
 		}
 
 		private ToolbarMenu        _menu;
@@ -79,16 +89,16 @@ namespace api.nox.editor.panel {
 				var panels = PanelManager.GetPanels();
 				foreach (var panel in panels)
 					Menu.menu.AppendAction(panel.GetLabel(), OnMenuClick);
-				titleContent = new GUIContent(_active.GetTitle());
+				titleContent = new GUIContent(GetActive().GetTitle());
 			}
 
 			if (Breadcrumbs != null) {
 				while (Breadcrumbs.childCount > 0)
 					Breadcrumbs.PopItem();
-				foreach (var item in _active.GetPanel().GetLabel().Split('/'))
+				foreach (var item in GetActive().GetPanel().GetLabel().Split('/'))
 					Breadcrumbs.PushItem(item);
 			}
-			
+
 			// other UI updates can go here
 		}
 
@@ -96,7 +106,7 @@ namespace api.nox.editor.panel {
 			if (Content == null)
 				return;
 			Content.Clear();
-			var content = _active.GetContent();
+			var content = GetActive().GetContent();
 			content.style.flexGrow = 1;
 			Content.Add(content);
 		}
@@ -107,7 +117,7 @@ namespace api.nox.editor.panel {
 				if (panel.GetLabel() != action.name)
 					continue;
 
-				if (panel == _active.GetPanel()) {
+				if (panel == GetActive().GetPanel()) {
 					Logger.LogDebug($"Panel '{action.name}' is already active. Focusing window.", tag: nameof(Window), context: this);
 					Focus();
 					return;
@@ -132,12 +142,12 @@ namespace api.nox.editor.panel {
 
 
 		public void CreateGUI() {
-			var root = rootVisualElement;
-			root.style.flexGrow = 1;
+			rootVisualElement.Clear();
+			rootVisualElement.style.flexGrow = 1;
 			var content = Resources.Load<VisualTreeAsset>("Document").CloneTree();
 			content.styleSheets.Add(Resources.Load<StyleSheet>("Style"));
 			content.style.flexGrow = 1;
-			root.Add(content);
+			rootVisualElement.Add(content);
 			UpdateMenu();
 			UpdateContent();
 		}
