@@ -10,6 +10,9 @@
         </ui:VisualElement>
     </uie:Toolbar>
     <ui:ScrollView name="scroll_container" style="flex-grow: 1;">
-        <ui:GroupBox name="container" />
+        <ui:GroupBox name="container">
+            <ui:GroupBox name="content" />
+            <ui:VisualElement name="error" style="flex-grow: 1; display: none;" />
+        </ui:GroupBox>
     </ui:ScrollView>
 </ui:UXML>
