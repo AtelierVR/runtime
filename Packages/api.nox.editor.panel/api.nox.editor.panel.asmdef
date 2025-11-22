@@ -1,0 +1,19 @@
+{
+    "name": "api.nox.editor.panel",
+    "rootNamespace": "",
+    "references": [
+        "Nox.Editor.Panel",
+        "Nox.CCK"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

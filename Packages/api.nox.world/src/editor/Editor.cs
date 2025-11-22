@@ -9,10 +9,10 @@ namespace api.nox.world {
 	public class Editor : IEditorModInitializer {
 		private        WorldLoaderPanel  _loader;
 		private        WorldManagerPanel _manager;
-		private static EditorPanel       _loaderPanel;
-		private static EditorPanel       _managerPanel;
-		private static EditorPanel       _builderPanel;
-		private static EditorPanel       _publisherPanel;
+		private static IEditorPanel       _loaderPanel;
+		private static IEditorPanel       _managerPanel;
+		private static IEditorPanel       _builderPanel;
+		private static IEditorPanel       _publisherPanel;
 
 		private         WorldPublisherPanel _publisher;
 		internal static WorldBuilderPanel   Builder;

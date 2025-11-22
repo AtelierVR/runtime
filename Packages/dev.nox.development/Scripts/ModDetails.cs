@@ -16,7 +16,7 @@ using UnityEngine.UIElements;
 namespace dev.nox.development {
 	public class ModDetails : IEditorModInitializer {
 		internal static EditorModCoreAPI CoreAPI;
-		private         EditorPanel      _buildPanel;
+		private         IEditorPanel      _buildPanel;
 
 		public void OnInitializeEditor(EditorModCoreAPI api) {
 			CoreAPI = api;
@@ -135,7 +135,7 @@ namespace dev.nox.development {
 			// Remove items for mods that no longer exist or are filtered out
 			var modsList = _root.Q<VisualElement>("mods-list");
 			var toRemove = new List<VisualElement>();
-			foreach (var child in modsList.Children()) {
+			foreach (var child in modsList?.Children() ?? Enumerable.Empty<VisualElement>()) {
 				if (child.userData is ModUserData userData) {
 					var modExists = filteredMods.Any(
 						m => {
@@ -397,6 +397,8 @@ namespace dev.nox.development {
 				var container = item.Q<VisualElement>($"{sectionName}-entries");
 				var list      = item.Q<VisualElement>($"{sectionName}-list");
 
+				UnityEngine.Debug.Log($"[EntryPoint] Section: {sectionName}, Container: {container != null}, List: {list != null}, Entries: {entries?.Length ?? 0}");
+
 				if (container == null || list == null || entries == null || entries.Length == 0) {
 					if (container != null) {
 						container.style.display = DisplayStyle.None;
@@ -410,6 +412,7 @@ namespace dev.nox.development {
 						label.style.fontSize = 10;
 						label.style.color    = new Color(0.8f, 0.8f, 0.8f);
 						list.Add(label);
+						UnityEngine.Debug.Log($"[EntryPoint] Added {sectionName} entry: {entry}");
 					}
 				}
 			} catch (System.Exception ex) {

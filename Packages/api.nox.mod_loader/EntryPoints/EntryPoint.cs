@@ -185,12 +185,11 @@ namespace Nox.ModLoader.EntryPoints {
 			profiler.Set("post_initialize", Name, Profiler.At.End, DateTime.UtcNow);
 		}
 
-		public async UniTask OnPreDispose() {
-			if (!IsEnabled() || _state != InitializerState.PostInitialized)
-				return;
-			_state = InitializerState.PreDisposed;
-
-			var eventCtx = Mod.CoreAPI.EventAPI;
+	public async UniTask OnPreDispose() {
+		// Ne dispose que les entrées qui ont été désactivées ou qui n'ont jamais été initialisées
+		if (IsEnabled() || _state != InitializerState.PostInitialized)
+			return;
+		_state = InitializerState.PreDisposed;			var eventCtx = Mod.CoreAPI.EventAPI;
 			var profiler = Mod.Profiler;
 
 			eventCtx.Emit(new ModEventContext("mod_pre_dispose", Mod, Name, ExecutionEventStatus.Pre));
@@ -240,12 +239,11 @@ namespace Nox.ModLoader.EntryPoints {
 		}
 
 
-		public async UniTask OnDispose() {
-			if (!IsEnabled() || _state != InitializerState.PreDisposed)
-				return;
-			_state = InitializerState.Disposed;
-
-			var eventCtx = Mod.CoreAPI.EventAPI;
+	public async UniTask OnDispose() {
+		// Ne dispose que les entrées qui ont été désactivées
+		if (IsEnabled() || _state != InitializerState.PreDisposed)
+			return;
+		_state = InitializerState.Disposed;			var eventCtx = Mod.CoreAPI.EventAPI;
 			var profiler = Mod.Profiler;
 
 			eventCtx.Emit(new ModEventContext("mod_dispose", Mod, Name, ExecutionEventStatus.Pre));

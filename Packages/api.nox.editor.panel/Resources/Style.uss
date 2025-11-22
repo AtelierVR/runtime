@@ -1,0 +1,53 @@
+:root {
+}
+
+#options > * {
+    flex-grow: 1;
+}
+
+.container {
+    max-width: 512px;
+    margin-right: auto;
+    margin-left: auto;
+    width: 512px;
+}
+
+#scroll_container > * > * > .unity-scroll-view__content-container {
+    max-width: 512px;
+    margin-right: auto;
+    margin-left: auto;
+    width: 100%;
+    min-height: 100%;
+    flex-direction: row;
+}
+
+#container {
+    background-color: var(--unity-colors-toolbar-background);
+    border-left-color: var(--unity-colors-default-border);
+    border-left-width: 1px;
+    border-right-color: var(--unity-colors-default-border);
+    border-right-width: 1px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-right: auto;
+    margin-left: auto;
+    flex-grow: 1;
+    width: 100%;
+}
+
+#menu {
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-right: 8px;
+    padding-left: 8px;
+}
+
+#menu > .unity-toolbar-menu__arrow {
+    display: none;
+}

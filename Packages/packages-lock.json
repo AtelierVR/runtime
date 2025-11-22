@@ -48,6 +48,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "api.nox.editor.panel": {
+      "version": "file:api.nox.editor.panel",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "api.nox.entity": {
       "version": "file:api.nox.entity",
       "depth": 0,

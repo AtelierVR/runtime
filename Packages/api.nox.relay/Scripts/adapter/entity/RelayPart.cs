@@ -81,36 +81,60 @@ namespace api.nox.relay {
 		}
 
 		void IPart.SetPosition(Vector3 position, DirtyBy markDirty) {
-			if (Vector3.Distance(position, GetPosition()) < DefaultThreshold) return;
+			if (markDirty != DirtyBy.Force && Vector3.Distance(position, GetPosition()) < DefaultThreshold) return;
 			SetPosition(position);
 			SetDirty(markDirty);
 		}
 
 		void IPart.SetRotation(Quaternion rotation, DirtyBy markDirty) {
-			if (Quaternion.Angle(rotation, GetRotation()) < DefaultThreshold) return;
+			if (markDirty != DirtyBy.Force && Quaternion.Angle(rotation, GetRotation()) < DefaultThreshold) return;
 			SetRotation(rotation);
 			SetDirty(markDirty);
 		}
 
 		void IPart.SetScale(Vector3 scale, DirtyBy markDirty) {
-			if (Vector3.Distance(scale, GetScale()) < DefaultThreshold) return;
+			if (markDirty != DirtyBy.Force && Vector3.Distance(scale, GetScale()) < DefaultThreshold) return;
 			SetScale(scale);
 			SetDirty(markDirty);
 		}
 
 		void IPart.SetVelocity(Vector3 velocity, DirtyBy markDirty) {
-			if (Vector3.Distance(velocity, GetVelocity()) < DefaultThreshold) return;
+			Rigidbody rigid;
+
+			if (markDirty == DirtyBy.Force) {
+				SetVelocity(velocity);
+				SetDirty(markDirty);
+				if (TryGet(out _, out rigid) && rigid)
+					rigid.linearVelocity = velocity;
+				return;
+			}
+
+			if (Vector3.Distance(velocity, GetVelocity()) < DefaultThreshold)
+				return;
+
 			SetVelocity(velocity);
 			SetDirty(markDirty);
-			if (markDirty == DirtyBy.Remote && TryGet(out _, out var rigid) && rigid)
+			if (markDirty == DirtyBy.Remote && TryGet(out _, out rigid) && rigid)
 				rigid.linearVelocity = velocity;
 		}
 
 		void IPart.SetAngularVelocity(Vector3 angularVelocity, DirtyBy markDirty) {
-			if (Vector3.Distance(angularVelocity, GetAngularVelocity()) < DefaultThreshold) return;
+			Rigidbody rigid;
+
+			if (markDirty == DirtyBy.Force) {
+				SetAngularVelocity(angularVelocity);
+				SetDirty(markDirty);
+				if (TryGet(out _, out rigid) && rigid)
+					rigid.angularVelocity = angularVelocity;
+				return;
+			}
+
+			if (Vector3.Distance(angularVelocity, GetAngularVelocity()) < DefaultThreshold)
+				return;
+
 			SetAngularVelocity(angularVelocity);
 			SetDirty(markDirty);
-			if (markDirty == DirtyBy.Remote && TryGet(out _, out var rigid) && rigid)
+			if (markDirty == DirtyBy.Remote && TryGet(out _, out rigid) && rigid)
 				rigid.angularVelocity = angularVelocity;
 		}
 
@@ -122,6 +146,7 @@ namespace api.nox.relay {
 				case DirtyBy.Remote:
 					_dirty = DirtyBy.None;
 					return;
+				case DirtyBy.Force:
 				case DirtyBy.Local:
 					_dirty = DirtyBy.Local;
 					return;

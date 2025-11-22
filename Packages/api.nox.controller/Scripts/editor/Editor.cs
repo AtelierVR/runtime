@@ -7,7 +7,7 @@ namespace api.nox.controller {
 	public class Editor : IEditorModInitializer {
 		internal static EditorModCoreAPI CoreAPI;
 
-		private static EditorPanel     _controllerPanel;
+		private static IEditorPanel     _controllerPanel;
 		private        ControllerPanel _controller;
 
 		public void OnInitializeEditor(EditorModCoreAPI api) {

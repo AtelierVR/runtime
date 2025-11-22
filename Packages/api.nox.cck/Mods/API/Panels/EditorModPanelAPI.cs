@@ -3,14 +3,14 @@ namespace Nox.CCK.Mods.Panels
     /// <summary>
     /// API for managing editor panels in the Nox CCK.
     /// </summary>
-    public interface EditorModPanelAPI
+    public interface IEditorModPanelAPI
     {
         /// <summary>
         /// Sets the active panel.
         /// </summary>
         /// <param name="panel">The panel to activate.</param>
         /// <returns>True if successful; otherwise, false.</returns>
-        public bool SetActivePanel(EditorPanel panel);
+        public bool SetActivePanel(IEditorPanel panel);
         
         /// <summary>
         /// Sets the active panel by its ID.
@@ -23,14 +23,14 @@ namespace Nox.CCK.Mods.Panels
         /// Gets the currently active panel.
         /// </summary>
         /// <returns>The active panel, or null if none is active.</returns>
-        public EditorPanel GetActivePanel();
+        public IEditorPanel GetActivePanel();
         
         /// <summary>
         /// Checks if the specified panel is currently active.
         /// </summary>
         /// <param name="panel">The panel to check.</param>
         /// <returns>True if the panel is active; otherwise, false.</returns>
-        public bool IsActivePanel(EditorPanel panel);
+        public bool IsActivePanel(IEditorPanel panel);
         
         /// <summary>
         /// Checks if the panel with the specified ID is currently active.
@@ -44,20 +44,20 @@ namespace Nox.CCK.Mods.Panels
         /// </summary>
         /// <param name="panelId">The ID of the panel.</param>
         /// <returns>The panel, or null if not found.</returns>
-        public EditorPanel GetPanel(string panelId);
+        public IEditorPanel GetPanel(string panelId);
         
         /// <summary>
         /// Gets all available panels.
         /// </summary>
         /// <returns>An array of all panels.</returns>
-        public EditorPanel[] GetPanels();
+        public IEditorPanel[] GetPanels();
         
         /// <summary>
         /// Checks if a panel exists.
         /// </summary>
         /// <param name="panel">The panel to check.</param>
         /// <returns>True if the panel exists; otherwise, false.</returns>
-        public bool HasPanel(EditorPanel panel);
+        public bool HasPanel(IEditorPanel panel);
         
         /// <summary>
         /// Checks if a panel with the specified ID exists.
@@ -71,14 +71,14 @@ namespace Nox.CCK.Mods.Panels
         /// </summary>
         /// <param name="panel">The panel builder to add.</param>
         /// <returns>The created editor panel.</returns>
-        public EditorPanel AddLocalPanel(IEditorPanelBuilder panel);
+        public IEditorPanel AddLocalPanel(IEditorPanelBuilder panel);
         
         /// <summary>
         /// Removes a local panel.
         /// </summary>
         /// <param name="panel">The panel to remove.</param>
         /// <returns>True if successfully removed; otherwise, false.</returns>
-        public bool RemoveLocalPanel(EditorPanel panel);
+        public bool RemoveLocalPanel(IEditorPanel panel);
         
         /// <summary>
         /// Removes a local panel by its ID.
@@ -92,7 +92,7 @@ namespace Nox.CCK.Mods.Panels
         /// </summary>
         /// <param name="panel">The panel to check.</param>
         /// <returns>True if the local panel exists; otherwise, false.</returns>
-        public bool HasLocalPanel(EditorPanel panel);
+        public bool HasLocalPanel(IEditorPanel panel);
         
         /// <summary>
         /// Checks if a local panel with the specified ID exists.
@@ -106,17 +106,27 @@ namespace Nox.CCK.Mods.Panels
         /// </summary>
         /// <param name="panelId">The ID of the panel.</param>
         /// <returns>The local panel, or null if not found.</returns>
-        public EditorPanel GetLocalPanel(string panelId);
+        public IEditorPanel GetLocalPanel(string panelId);
         
         /// <summary>
         /// Gets all local panels.
         /// </summary>
         /// <returns>An array of all local panels.</returns>
-        public EditorPanel[] GetLocalPanels();
+        public IEditorPanel[] GetLocalPanels();
 
         /// <summary>
         /// Updates the panel list (refreshes the panel registry).
         /// </summary>
         public void UpdatePanelList();
+        
+        /// <summary>
+        /// Shows the editor mod panel window.
+        /// </summary>
+        public void ShowWindow();
+        
+        /// <summary>
+        /// Hides the editor mod panel window.
+        /// </summary>
+        public void CloseWindow();
     }
 }

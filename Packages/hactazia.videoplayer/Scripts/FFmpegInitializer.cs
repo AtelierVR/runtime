@@ -18,14 +18,33 @@ namespace Hactazia.VideoPlayer {
 			throw new InvalidOperationException($"{api} failed: {FFmpegDescribe(error)}");
 		}
 
-		private static unsafe string FFmpegDescribe(this int error) {
+		public static unsafe string FFmpegDescribe(this int error) {
 			const int bufferSize = 1024;
 			var       buffer     = stackalloc byte[bufferSize];
 			ffmpeg.av_strerror(error, buffer, bufferSize);
 			return System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)buffer) ?? $"error {error}";
 		}
 
-		public static void EnsureInitialized(string explicitRootPath = null) {
+		private static av_log_set_callback_callback _logCallback;
+
+	private static unsafe void LogCallback(void* ptr, int level, string fmt, byte* vl) {
+		if (level > ffmpeg.av_log_get_level()) return;
+		const int lineSize = 1024;
+		var lineBuffer = stackalloc byte[lineSize];
+		var printPrefix = 1;
+		ffmpeg.av_log_format_line(ptr, level, fmt, vl, lineBuffer, lineSize, &printPrefix);
+		var line = System.Runtime.InteropServices.Marshal.PtrToStringAnsi((IntPtr)lineBuffer);
+		
+		// Filter out verbose HLS/HTTPS logs
+		if (!string.IsNullOrEmpty(line)) {
+			if (line.Contains("HLS request for url") || 
+			    line.Contains("Opening '") || 
+			    line.Contains("Skip ('"))
+				return;
+		}
+		
+		Debug.Log($"[FFmpeg] {line}");
+	}		public static void EnsureInitialized(string explicitRootPath = null) {
 			lock (SyncRoot) {
 				if (_initialized) {
 					return;
@@ -37,13 +56,23 @@ namespace Hactazia.VideoPlayer {
 
 				if (!Directory.Exists(_rootPath)) {
 					Debug.LogWarning($"FFmpeg root path '{_rootPath}' does not exist. Video playback will likely fail.");
+				} else {
+					Debug.Log($"[VideoPlayer] FFmpeg root path set to: {_rootPath}");
 				}
 
 				ffmpeg.RootPath = _rootPath;
-				ffmpeg.av_log_set_level(ffmpeg.AV_LOG_WARNING);
+				
+				unsafe {
+					_logCallback = LogCallback;
+					ffmpeg.av_log_set_callback(_logCallback);
+				}
+				ffmpeg.av_log_set_level(ffmpeg.AV_LOG_VERBOSE);
+				
+				Debug.Log("[VideoPlayer] Initializing FFmpeg network...");
 				ffmpeg.avformat_network_init().ThrowFFmpegException("avformat_network_init");
 				ffmpeg.avdevice_register_all();
 				_initialized = true;
+				Debug.Log("[VideoPlayer] FFmpeg initialized successfully.");
 			}
 		}
 

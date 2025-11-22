@@ -32,7 +32,7 @@ namespace api.nox.avatar.modules {
 			valid &= CameraAvatarModule.Check(descriptor);
 			valid &= AvatarParameterModule.Check(descriptor);
 			valid &= PlayableAvatarModule.Check(descriptor);
-			valid &= RiggingAvatarModule.Check(descriptor);
+			valid &= BaseRiggingModule.Check(descriptor);
 			valid &= EyeLookAvatarModule.Check(descriptor);
 			valid &= VoiceAvatarModule.Check(descriptor);
 			context.Callback(valid);

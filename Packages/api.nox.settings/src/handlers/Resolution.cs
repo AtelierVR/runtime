@@ -35,44 +35,25 @@ namespace api.nox.settings.handlers {
 			SetButtonText("settings.entry.graphic.resolution.option", v.x.ToString(), v.y.ToString());
 		}
 
-	public static Vector2Int Value {
-		get {
-			var config = Config.Load();
-			var width  = config.Get(GetConfigWidthPath(), Screen.currentResolution.width);
-			var height = config.Get(GetConfigHeightPath(), Screen.currentResolution.height);
-			return new Vector2Int(width, height);
-		}
-		set {
-			var config = Config.Load();
-			
-			// Determine the appropriate window mode based on resolution and current settings
-			var windowMode = WindowSize.GetWindowMode();
-			FullScreenMode mode;
-			
-			// If selecting native resolution, suggest maximized mode
-			if (value.x == Display.main.systemWidth && value.y == Display.main.systemHeight) {
-				if (windowMode == WindowSize.Windowed) {
-					mode = FullScreenMode.MaximizedWindow;
-					WindowSize.SetWindowMode(WindowSize.Maximized, false); // Update window mode without applying
-				} else {
-					mode = windowMode == WindowSize.Fullscreen ? FullScreenMode.ExclusiveFullScreen : FullScreenMode.MaximizedWindow;
-				}
-			} else {
-				// For non-native resolutions, use windowed mode unless explicitly fullscreen
-				if (windowMode == WindowSize.Fullscreen) {
-					mode = FullScreenMode.ExclusiveFullScreen;
-				} else {
-					mode = FullScreenMode.Windowed;
-					WindowSize.SetWindowMode(WindowSize.Windowed, false); // Update window mode without applying
-				}
+		public static Vector2Int Value {
+			get {
+				var config = Config.Load();
+				var width  = config.Get(GetConfigWidthPath(), Screen.currentResolution.width);
+				var height = config.Get(GetConfigHeightPath(), Screen.currentResolution.height);
+				return new Vector2Int(width, height);
 			}
-			
-			Screen.SetResolution(value.x, value.y, mode, Screen.currentResolution.refreshRateRatio);
-			config.Set(GetConfigWidthPath(), value.x);
-			config.Set(GetConfigHeightPath(), value.y);
-			config.Save();
+			set {
+				var config = Config.Load();
+				var screen = Screen.currentResolution;
+				var mode   = Screen.fullScreenMode;
+				if (value.x == screen.width && value.y == screen.height)
+					mode = FullScreenMode.MaximizedWindow;
+				Screen.SetResolution(value.x, value.y, mode, Screen.currentResolution.refreshRateRatio);
+				config.Set(GetConfigWidthPath(), value.x);
+				config.Set(GetConfigHeightPath(), value.y);
+				config.Save();
+			}
 		}
-	}
 
 		private static Vector2Int FromString(string s) {
 			var parts = s.Split('x');

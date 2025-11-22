@@ -182,7 +182,7 @@ namespace api.nox.videoplayer {
 			try {
 				var startInfo = new ProcessStartInfo {
 					FileName               = path,
-					Arguments              = $"-J \"{url}\"", // -J for JSON output
+					Arguments              = $"--no-warnings -J \"{url}\"", // -J for JSON output
 					UseShellExecute        = false,
 					RedirectStandardOutput = true,
 					RedirectStandardError  = true,

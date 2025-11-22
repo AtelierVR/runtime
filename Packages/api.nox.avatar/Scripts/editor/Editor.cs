@@ -14,8 +14,8 @@ namespace api.nox.avatar {
 		private         LanguagePack         _lang;
 		internal static AvatarBuilderPanel   Builder;
 		internal static AvatarPublisherPanel Publisher;
-		private static  EditorPanel          _builderPanel;
-		private static  EditorPanel          _publisherPanel;
+		private static  IEditorPanel          _builderPanel;
+		private static  IEditorPanel          _publisherPanel;
 
 		public static IUserAPI UserAPI
 			=> CoreAPI.ModAPI

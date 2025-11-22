@@ -25,6 +25,11 @@ namespace Nox.ModLoader.Cores.Panels {
 			} else Instance.Show();
 		}
 
+		public static void CloseWindow() {
+			Instance?.Close();
+			Instance = null;
+		}
+
 		public void OnGUI() {
 			if (!Instance) Instance = this;
 			if (rootVisualElement.childCount > 0) {
@@ -206,6 +211,7 @@ namespace Nox.ModLoader.Cores.Panels
         public static Panel GetPanel(string panelId) => null;
         internal static Panel[] GetPanels() => new Panel[0];
         internal static bool SetActivePanel(Panel panel) => false;
+		public static void CloseWindow() { }
     }
 }
 

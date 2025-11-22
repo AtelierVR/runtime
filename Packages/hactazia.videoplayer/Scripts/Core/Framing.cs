@@ -9,16 +9,21 @@ namespace Hactazia.VideoPlayer.Core {
 		public bool               IsInputValid { get; private set; }
 		public double             StartTime    { get; private set; }
 
-		private readonly AVMediaType    _mediaType;
-		private readonly AVHWDeviceType _deviceType;
-		private          AVPacket       _currentPacket;
-		private          AVFrame        _currentFrame;
-		private          AVRational     _timeBase;
-		private          double         _timeBaseSeconds;
-		private          long           _pts;
-		private          bool           _disposed;
-
-		public Framing(string url, AVMediaType mediaType, AVHWDeviceType deviceType = AVHWDeviceType.AV_HWDEVICE_TYPE_NONE) {
+	private readonly AVMediaType    _mediaType;
+	private readonly AVHWDeviceType _deviceType;
+	private          AVPacket       _currentPacket;
+	private          AVFrame        _currentFrame;
+	private          AVRational     _timeBase;
+	private          double         _timeBaseSeconds;
+	private          long           _pts;
+	private          bool           _disposed;
+	
+	// PTS discontinuity tracking
+	private          long           _lastDts = ffmpeg.AV_NOPTS_VALUE;
+	private          long           _ptsOffset;
+	private          bool           _discontinuityDetected;		
+	
+	public Framing(string url, AVMediaType mediaType, AVHWDeviceType deviceType = AVHWDeviceType.AV_HWDEVICE_TYPE_NONE) {
 			_mediaType  = mediaType;
 			_deviceType = deviceType;
 			Context     = new Context(url);
@@ -65,15 +70,18 @@ namespace Hactazia.VideoPlayer.Core {
 			_pts      = (long)(timestamp / _timeBaseSeconds);
 		}
 
-		public void Seek(double timestamp) {
-			if (!IsInputValid) return;
-			Context.Seek(Decoder, timestamp);
-			Decoder.Flush();
-			Update(timestamp);
-			_currentPacket = default;
-		}
-
-		public double GetLength()
+	public void Seek(double timestamp) {
+		if (!IsInputValid) return;
+		Context.Seek(Decoder, timestamp);
+		Decoder.Flush();
+		Update(timestamp);
+		_currentPacket = default;
+		
+		// Reset discontinuity tracking
+		_lastDts = ffmpeg.AV_NOPTS_VALUE;
+		_ptsOffset = 0;
+		_discontinuityDetected = false;
+	}		public double GetLength()
 			=> IsInputValid
 				? Context.GetLength(Decoder)
 				: 0d;
@@ -115,25 +123,46 @@ namespace Hactazia.VideoPlayer.Core {
 		}
 
 
-		private bool NeedMoreData() {
-			if (_currentPacket.dts == ffmpeg.AV_NOPTS_VALUE)
-				return true;
-			return _pts >= _currentPacket.dts;
-		}
-
-		private bool TryReadNextFrame() {
-			while (Context.NextFrame(out var packet)) {
-				_currentPacket = packet;
-				if (!Decoder.TryDecode(out var frame))
-					continue;
-				_currentFrame = frame;
-				return true;
+	private void HandleDiscontinuity(AVPacket packet) {
+		if (packet.dts == ffmpeg.AV_NOPTS_VALUE) return;
+		
+		if (_lastDts != ffmpeg.AV_NOPTS_VALUE) {
+			// Detect significant jump in DTS (more than 2 seconds)
+			var dtsDelta = Math.Abs(packet.dts - _lastDts);
+			var deltaSeconds = dtsDelta * _timeBaseSeconds;
+			
+			if (deltaSeconds > 2.0) {
+				_discontinuityDetected = true;
+				_ptsOffset += (packet.dts - _lastDts);
+				UnityEngine.Debug.LogWarning($"[VideoPlayer] Discontinuity detected: {deltaSeconds:F2}s jump. Adjusting PTS offset.");
 			}
-
-			return false;
+		}
+		
+		_lastDts = packet.dts;
+	}
+	
+	private long GetAdjustedDts(AVPacket packet) {
+		if (packet.dts == ffmpeg.AV_NOPTS_VALUE) return ffmpeg.AV_NOPTS_VALUE;
+		return _discontinuityDetected ? packet.dts - _ptsOffset : packet.dts;
+	}
+	
+	private bool NeedMoreData() {
+		if (_currentPacket.dts == ffmpeg.AV_NOPTS_VALUE)
+			return true;
+		var adjustedDts = GetAdjustedDts(_currentPacket);
+		return _pts >= adjustedDts;
+	}	private bool TryReadNextFrame() {
+		while (Context.NextFrame(out var packet)) {
+			HandleDiscontinuity(packet);
+			_currentPacket = packet;
+			if (!Decoder.TryDecode(out var frame))
+				continue;
+			_currentFrame = frame;
+			return true;
 		}
 
-		public void Dispose() {
+		return false;
+	}		public void Dispose() {
 			if (_disposed)
 				return;
 

@@ -8,7 +8,7 @@ namespace api.nox.microphone {
 	public class Editor : IEditorModInitializer {
 		internal static EditorModCoreAPI CoreAPI;
 
-		private static EditorPanel     _listPanel;
+		private static IEditorPanel     _listPanel;
 		private        MicrophonePanel _list;
 
 		public void OnInitializeEditor(EditorModCoreAPI api) {

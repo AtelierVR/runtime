@@ -291,8 +291,11 @@ namespace api.nox.desktop {
 			foreach (var ability in controller.GetAbilities())
 				SetAbilities(ability.Key, ability.Value);
 
-			if (controller is IControllerAvatar ca)
-				SetAvatar(ca.GetAvatar().GetIdentifier()).Forget();
+			if (controller is IControllerAvatar ca) {
+				var identifier = ca.GetAvatar()?.GetIdentifier();
+				if (identifier != null && identifier.IsValid())
+					SetAvatar(identifier).Forget();
+			}
 
 			return UniTask.CompletedTask;
 		}
@@ -376,17 +379,16 @@ namespace api.nox.desktop {
 			} else {
 				if (!tr.IsSamePosition(part.Value.position))
 					part.Value.position = tr.GetPosition();
+				if (!tr.IsSameRotation(part.Value.rotation))
+					part.Value.rotation = tr.GetRotation();
+
+				var rb = part.Value.GetComponent<Rigidbody>();
+
+				if (rb && !tr.IsSameVelocity(rb.linearVelocity))
+					rb.linearVelocity = tr.GetVelocity();
+				if (rb && !tr.IsSameAngularVelocity(rb.angularVelocity))
+					rb.angularVelocity = tr.GetAngularVelocity();
 			}
-
-			if (!tr.IsSameRotation(part.Value.rotation))
-				part.Value.rotation = tr.GetRotation();
-
-			var rb = part.Value.GetComponent<Rigidbody>();
-
-			if (rb && !tr.IsSameVelocity(rb.linearVelocity))
-				rb.linearVelocity = tr.GetVelocity();
-			if (rb && !tr.IsSameAngularVelocity(rb.angularVelocity))
-				rb.angularVelocity = tr.GetAngularVelocity();
 		}
 
 		private IPlayer                 _attachedPlayer;
@@ -425,6 +427,8 @@ namespace api.nox.desktop {
 				_attachedRuntimeAvatar = old;
 				return false;
 			}
+
+			root.name += " Desktop";
 
 			if (old != null)
 				await old.Dispose();

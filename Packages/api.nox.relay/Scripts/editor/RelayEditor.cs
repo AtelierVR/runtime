@@ -7,7 +7,7 @@ namespace api.nox.relay.editor {
 	public class RelayEditor : IEditorModInitializer {
 		internal static EditorModCoreAPI CoreAPI;
 
-		private static EditorPanel         _listPanel;
+		private static IEditorPanel         _listPanel;
 		private        ListConnectionPanel _list;
 
 		public void OnInitializeEditor(EditorModCoreAPI api) {

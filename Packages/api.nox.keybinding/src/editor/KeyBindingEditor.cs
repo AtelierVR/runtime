@@ -7,7 +7,7 @@ namespace api.nox.keybinding {
 	public class KeyBindingEditor : IEditorModInitializer {
 		internal static EditorModCoreAPI CoreAPI;
 
-		private static EditorPanel     _kbPanel;
+		private static IEditorPanel     _kbPanel;
 		private        KeyBindingPanel _kb;
 
 		public void OnInitializeEditor(EditorModCoreAPI api) {

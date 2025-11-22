@@ -6,10 +6,10 @@ using Nox.CCK.Network;
 namespace Nox.CCK.Avatars.Rigging.Parameters {
 	public class RiggingRotationParameter : IParameter {
 		private readonly HumanBodyBones      _bone;
-		private readonly RiggingAvatarModule _module;
+		private readonly BaseRiggingModule _module;
 		private readonly string              _parameterName;
 
-		public RiggingRotationParameter(HumanBodyBones bone, RiggingAvatarModule module) {
+		public RiggingRotationParameter(HumanBodyBones bone, BaseRiggingModule module) {
 			_bone          = bone;
 			_module        = module;
 			_parameterName = $"tracking/{bone.ToString().ToSnakeCase()}/rotation";

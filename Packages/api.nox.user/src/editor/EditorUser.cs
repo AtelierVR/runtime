@@ -7,8 +7,8 @@ namespace api.nox.user {
 		internal static EditorModCoreAPI      CoreAPI;
 		public static   AuthentificationPanel Auth;
 		public static   ProfilePanel          Profile;
-		private static  EditorPanel           _authPanel;
-		private static  EditorPanel           _profilePanel;
+		private static  IEditorPanel           _authPanel;
+		private static  IEditorPanel           _profilePanel;
 
 		public void OnInitializeEditor(EditorModCoreAPI api) {
 			CoreAPI = api;

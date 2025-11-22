@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
@@ -8,89 +7,77 @@ using Nox.Avatars.Rigging;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
-using UnityEngine.Animations.Rigging;
-using UnityEngine.Serialization;
 using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
 
-#if HAS_FINALIK
-using RootMotion.FinalIK;
-#endif
-
 namespace Nox.CCK.Avatars.Rigging {
-	public class RiggingAvatarModule : MonoBehaviour, IRiggingModule, IParameterGroup {
-		private IAvatarDescriptor _descriptor;
-		private Transform         _anchor;
+	public abstract class BaseRiggingModule : MonoBehaviour, IRiggingModule, IParameterGroup {
+		public IAvatarDescriptor Descriptor;
 
 		public readonly List<IParameter>  Parameters = new();
 		public readonly List<RiggingPart> Parts      = new();
 
-		#if HAS_FINALIK
-		private VRIK _vrik;
-		public bool allowVrik;
+		public abstract bool SetupParameters(BaseRiggingModule module);
 
-		public VRIK GetVrik() {
-			if (allowVrik)
-				return !_vrik
-					? _vrik = _descriptor.GetAnimator().GetOrAddComponent<VRIK>()
-					: _vrik;
-			Logger.LogError("VRIK is not allowed for this avatar. Ensure that the avatar was set up with VRIK support.");
-			return null;
-		}
-		#endif
+		public abstract bool IsActive(HumanBodyBones bone);
 
-		// GetRigBuilder est toujours disponible pour la compatibilité avec IKRigGenerator
-		private RigBuilder _rigBuilder;
+		public abstract void SetActive(HumanBodyBones bone, bool active);
 
-		public RigBuilder GetRigBuilder()
-			=> _rigBuilder ? _rigBuilder : _rigBuilder = _descriptor.GetAnimator().GetOrAddComponent<RigBuilder>();
-
-		public Transform GetAnchor() {
-			if (_anchor) return _anchor;
-			_anchor = new GameObject("Rigging Anchor").transform;
-			_anchor.transform.SetParent(transform, false);
-			_anchor.transform.localPosition = Vector3.zero;
-			_anchor.transform.localRotation = Quaternion.identity;
-			_anchor.transform.localScale    = Vector3.one;
-			return _anchor;
-		}
-
-		public UniTask<bool> Setup(IRuntimeAvatar runtimeAvatar) {
+		public async UniTask<bool> Setup(IRuntimeAvatar runtime) {
 			// Vérification de sécurité pour éviter les NullReferenceException
-			if (runtimeAvatar == null) {
-				Logger.LogError("RiggingAvatarModule: RuntimeAvatar is null, cannot setup rigging.");
-				return UniTask.FromResult(false);
+			if (runtime == null) {
+				Logger.LogError("RuntimeAvatar is null, cannot setup rigging.");
+				return false;
 			}
 
-			_descriptor = runtimeAvatar.GetDescriptor();
-
-			// Vérification de sécurité pour éviter les NullReferenceException
-			if (_descriptor == null) {
-				Logger.LogError("RiggingAvatarModule: Avatar descriptor is null, cannot setup rigging.");
-				return UniTask.FromResult(false);
-			}
+			// Supprimer le composant après l'initialisation
+			var anchor = runtime.GetDescriptor().GetAnchor();
 
 			#if HAS_FINALIK
-
 			// Utilise FinalIK VR (préféré)
-			var arguments = runtimeAvatar.GetArguments();
-			allowVrik = arguments != null
+			var arguments = runtime.GetArguments();
+			var ufik = arguments != null
 				&& arguments.TryGetValue("local", out var isLocalObj)
 				&& isLocalObj is true
 				&& arguments.TryGetValue("xr", out var allowXRObj)
 				&& allowXRObj is true;
-			if (allowVrik)
-				FinalIKRigGenerator.CreateVRIKRig(this);
-			else IKRigGenerator.CreateIKRig(this);
 
+			if (ufik) {
+				var fik = anchor.GetOrAddComponent<FinalIKAvatarModule>();
+				fik.Descriptor = runtime.GetDescriptor();
+				FinalIKRigGenerator.Create(fik);
+			} else {
+				var rik = anchor.GetOrAddComponent<RigBuilderAvatarModule>();
+				rik.Descriptor = runtime.GetDescriptor();
+				RigBuilderRigGenerator.Create(rik);
+			}
 			#else
 			// Utilise RigBuilder (legacy)
-			IKRigGenerator.CreateIKRig(this);
-
+			var rik = anchor.GetOrAddComponent<RigBuilderAvatarModule>();
+			rik.Descriptor = runtime.GetDescriptor();
+			IKRigGenerator.CreateIKRig(rik);
 			#endif
 
-			IKRigParameters.SetupParameters(this);
-			return UniTask.FromResult(true);
+			var module = anchor.GetComponent<BaseRiggingModule>();
+			if (!module) {
+				Logger.LogError("BaseRiggingModule component is missing on avatar anchor.");
+				return false;
+			}
+
+			module.Descriptor = runtime.GetDescriptor();
+
+			// Vérification de sécurité pour éviter les NullReferenceException
+			if (module.Descriptor == null) {
+				Logger.LogError("Avatar descriptor is null, cannot setup rigging.");
+				return false;
+			}
+
+			if (!IKRigParameters.SetupParameters(module)) {
+				Logger.LogError("Failed to setup rigging parameters.");
+				return false;
+			}
+
+			return true;
 		}
 
 		bool IRiggingModule.TryGetPart(ushort id, out IRigPart part) {
@@ -121,7 +108,7 @@ namespace Nox.CCK.Avatars.Rigging {
 		}
 
 		public Transform GetBone(HumanBodyBones bone)
-			=> _descriptor.GetAnimator().GetBoneTransform(bone);
+			=> Descriptor.GetAnimator().GetBoneTransform(bone);
 
 		public IParameter[] GetParameters()
 			=> Parameters.Cast<IParameter>().ToArray();
@@ -132,21 +119,11 @@ namespace Nox.CCK.Avatars.Rigging {
 		public IParameter GetParameter(int hash)
 			=> Parameters.FirstOrDefault(p => p.GetKey() == hash);
 
-		public static bool Check(IAvatarDescriptor descriptor) {
-			var modules = descriptor.GetModules<RiggingAvatarModule>();
-
-			var module = modules.Length switch {
-				1 => modules.FirstOrDefault(),
-				0 => descriptor.GetAnchor().AddComponent<RiggingAvatarModule>(),
-				_ => null
+		public static bool Check(IAvatarDescriptor descriptor)
+			=> descriptor.GetModules<BaseRiggingModule>().Length switch {
+				1 => true,
+				0 => descriptor.GetAnchor().AddComponent<RigBuilderAvatarModule>(),
+				_ => false
 			};
-
-			if (!module) {
-				Logger.LogError("Verify that the Avatar prefab has a valid RiggingAvatarModule component.");
-				return false;
-			}
-
-			return true;
-		}
 	}
 }

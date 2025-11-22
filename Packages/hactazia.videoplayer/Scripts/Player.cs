@@ -123,17 +123,22 @@ namespace Hactazia.VideoPlayer {
 		}
 
 		private void BeginPlayback(Func<Framing> videoFactory, Func<Framing> audioFactory) {
+			UnityEngine.Debug.Log("[VideoPlayer] BeginPlayback called");
 			StopPlaybackInternal();
 
 			try {
+				UnityEngine.Debug.Log("[VideoPlayer] Invoking video factory");
 				_videoTimings = videoFactory?.Invoke();
 				if (_videoTimings is { IsInputValid: false }) {
+					UnityEngine.Debug.LogWarning("[VideoPlayer] Video input invalid, disposing");
 					_videoTimings.Dispose();
 					_videoTimings = null;
 				}
 
+				UnityEngine.Debug.Log("[VideoPlayer] Invoking audio factory");
 				_audioTimings = audioFactory?.Invoke();
 				if (_audioTimings is { IsInputValid: false }) {
+					UnityEngine.Debug.LogWarning("[VideoPlayer] Audio input invalid, disposing");
 					_audioTimings.Dispose();
 					_audioTimings = null;
 				}

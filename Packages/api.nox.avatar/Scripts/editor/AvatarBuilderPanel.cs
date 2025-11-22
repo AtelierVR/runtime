@@ -19,9 +19,10 @@ using Object = UnityEngine.Object;
 
 namespace api.nox.avatar.editor {
 	public class AvatarBuilderPanel : IEditorPanelBuilder, IDisposable {
-		
+		private const string PanelId = "builder";
+
 		public string GetId()
-			=> "builder";
+			=> PanelId;
 
 		public string GetName()
 			=> "Avatar/Builder";
@@ -55,6 +56,12 @@ namespace api.nox.avatar.editor {
 			["UnsupportedPlatform"]       = "UnsupportedPlatform",
 			["PlatformMismatch"]          = "PlatformMismatch"
 		};
+
+		[MenuItem("Nox/Avatar/Open Builder")]
+		public static void OpenBuilderPanel() {
+			Editor.CoreAPI.PanelAPI.ShowWindow();
+			Editor.CoreAPI.PanelAPI.SetActivePanel(PanelId);
+		}
 
 
 		public string OutputFolder {
@@ -128,7 +135,7 @@ namespace api.nox.avatar.editor {
 			// Mettre à jour l'UI quand un nouvel avatar est sélectionné
 			if (_descriptorField != null)
 				_descriptorField.SetValueWithoutNotify(newAvatar);
-			
+
 			if (_platformField != null)
 				_platformField.SetValueWithoutNotify(newAvatar?.target ?? Platform.None);
 		}
@@ -463,6 +470,7 @@ namespace api.nox.avatar.editor {
 				if (AvatarEditorHelper.CurrentAvatar != null) {
 					return new[] { AvatarEditorHelper.CurrentAvatar };
 				}
+
 				return ComponentExtension.GetComponentsInChildren<AvatarDescriptor>();
 			}
 		}
@@ -470,7 +478,7 @@ namespace api.nox.avatar.editor {
 		public void Dispose() {
 			// Se désabonner des événements
 			AvatarEditorHelper.OnAvatarSelected.RemoveListener(OnAvatarSelected);
-			
+
 			// Clear cached references
 			_descriptorField   = null;
 			_platformField     = null;
@@ -492,7 +500,7 @@ namespace api.nox.avatar.editor {
 
 			// Utiliser l'avatar courant de l'AvatarEditorHelper
 			var descriptor = AvatarEditorHelper.CurrentAvatar;
-			var user        = Main.Instance.UserAPI.GetCurrent();
+			var user       = Main.Instance.UserAPI.GetCurrent();
 
 			// Check if a scene has a avatar descriptor
 			if (!descriptor)

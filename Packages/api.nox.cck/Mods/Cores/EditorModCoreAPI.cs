@@ -11,7 +11,7 @@ namespace Nox.CCK.Mods.Cores
         /// <summary>
         /// Gets the panel management API for the editor.
         /// </summary>
-        public EditorModPanelAPI PanelAPI { get; }
+        public IEditorModPanelAPI PanelAPI { get; }
         
         /// <summary>
         /// Gets the libraries API for the editor.

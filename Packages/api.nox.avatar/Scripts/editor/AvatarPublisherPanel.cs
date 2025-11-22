@@ -19,8 +19,10 @@ using Avatar = api.nox.avatar.network.Avatar;
 
 namespace api.nox.avatar.editor {
 	public class AvatarPublisherPanel : IEditorPanelBuilder {
+		private const string PanelId = "publisher";
+
 		public string GetId()
-			=> "publisher";
+			=> PanelId;
 
 		public string GetName()
 			=> "Avatar/Publisher";
@@ -39,6 +41,13 @@ namespace api.nox.avatar.editor {
 			Editor.CoreAPI.PanelAPI.SetActivePanel("api.nox.avatar.builder");
 			evt.StopPropagation();
 		}
+
+		[MenuItem("Nox/Avatar/Open Publisher")]
+		public static void OpenBuilderPanel() {
+			Editor.CoreAPI.PanelAPI.ShowWindow();
+			Editor.CoreAPI.PanelAPI.SetActivePanel(PanelId);
+		}
+
 
 		public VisualElement Make(Dictionary<string, object> data) {
 			_root.ClearBindings();
@@ -90,6 +99,7 @@ namespace api.nox.avatar.editor {
 				descriptorField.value = descriptor;
 				descriptorField.RegisterValueChangedCallback(OnDescriptorFieldChanged);
 			}
+
 			platformField?.RegisterValueChangedCallback(
 				e => {
 					var mainDescriptor = AvatarBuilderPanel.Descriptors.Length > 0 ? AvatarBuilderPanel.Descriptors[0] : null;
@@ -307,20 +317,20 @@ namespace api.nox.avatar.editor {
 
 		internal void Update() {
 			if (!Editor.HasOnePanelOpened() || _root.childCount == 0) return;
-			
+
 			var user = Main.Instance.UserAPI.GetCurrent();
-			
+
 			// Amélioration de la logique de détection de connexion
 			var isLoggedIn = user != null && !string.IsNullOrEmpty(user.GetServerAddress());
-			
+
 			// Si l'utilisateur est connecté mais qu'on affiche "NotLogged", corriger l'affichage
-			if (_lastDisplay == DisplayFlags.NotLogged && isLoggedIn) 
+			if (_lastDisplay == DisplayFlags.NotLogged && isLoggedIn)
 				OnLogged().Forget();
-			
+
 			// Si l'utilisateur n'est pas connecté mais qu'on n'affiche pas "NotLogged", corriger l'affichage
-			else if (_lastDisplay != DisplayFlags.NotLogged && !isLoggedIn) 
+			else if (_lastDisplay != DisplayFlags.NotLogged && !isLoggedIn)
 				SetDisplay(DisplayFlags.NotLogged);
-			
+
 			// Utiliser l'avatar courant de l'AvatarEditorHelper
 			var descriptor = AvatarEditorHelper.CurrentAvatar;
 
@@ -949,8 +959,8 @@ namespace api.nox.avatar.editor {
 					fileData,
 					_avatar.GetServerAddress(),
 					onProgress: progress => {
-						var totalSize = fileData.Length / (1024.0 * 1024.0); // Size in MB
-						var sizeUploaded = progress * totalSize;
+						var totalSize    = fileData.Length / (1024.0 * 1024.0); // Size in MB
+						var sizeUploaded = progress        * totalSize;
 						ShowProgress(0.85f + progress * 0.15f, $"Uploading... {sizeUploaded:F2} MB / {totalSize:F2} MB - {progress * 100:F0}%");
 					}
 				);
@@ -1059,7 +1069,7 @@ namespace api.nox.avatar.editor {
 			var descriptorField = _root.Q<ObjectField>("descriptor-field");
 			if (descriptorField != null)
 				descriptorField.SetValueWithoutNotify(newAvatar);
-			
+
 			var platformField = _root.Q<EnumField>("platform-field");
 			if (platformField != null)
 				platformField.SetValueWithoutNotify(newAvatar?.target ?? Platform.None);
@@ -1083,4 +1093,3 @@ namespace api.nox.avatar.editor {
 	}
 }
 #endif
-

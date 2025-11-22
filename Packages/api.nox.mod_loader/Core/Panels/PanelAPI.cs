@@ -2,81 +2,121 @@ using System.Collections.Generic;
 using System.Linq;
 using Nox.CCK.Mods.Panels;
 
-namespace Nox.ModLoader.Cores.Panels
-{
-    public class PanelAPI : EditorModPanelAPI
-    {
-        private readonly ModLoader.Mods.Mod _mod;
-        internal PanelAPI(ModLoader.Mods.Mod mod) { _mod = mod; }
+namespace Nox.ModLoader.Cores.Panels {
+	public class PanelAPI : IEditorModPanelAPI {
+		private readonly ModLoader.Mods.Mod _mod;
 
-        internal readonly List<Panel> Panels = new();
+		internal PanelAPI(ModLoader.Mods.Mod mod)
+			=> _mod = mod;
 
-        // set panel active
-        public bool SetActivePanel(EditorPanel panel) 
-            => panel != null && SetActivePanel(panel.GetFullId());
-        public bool SetActivePanel(string panelId) 
-            => PanelManager.HasPanel(panelId) && PanelManager.SetActivePanel(PanelManager.GetPanel(panelId));
+		internal readonly List<Panel> Panels = new();
 
-        // check if panel is active
-        public EditorPanel GetActivePanel() 
-            => PanelManager.GetActivePanel();
-        public bool IsActivePanel(EditorPanel panel) 
-            => PanelManager.IsActivePanel(panel.GetFullId());
-        public bool IsActivePanel(string panelId) 
-            => PanelManager.IsActivePanel(panelId);
+		// set panel active
+		public bool SetActivePanel(IEditorPanel panel)
+			=> panel != null && SetActivePanel(panel.GetFullId());
 
-        // get panel
-        public EditorPanel GetPanel(string panelId) 
-            => PanelManager.GetPanel(panelId);
-        public EditorPanel[] GetPanels() 
-            => PanelManager.GetPanels() as EditorPanel[];
-        public EditorPanel GetLocalPanel(string panelId) 
-            => GetInternalPanel(panelId);
-        public EditorPanel[] GetLocalPanels() 
-            => Panels.ToArray() as EditorPanel[];
-        internal Panel GetInternalPanel(string panelId) 
-            => Panels.FirstOrDefault(panel => panel.GetId() == panelId || panel.GetFullId() == panelId);
+		public bool SetActivePanel(string panelId)
+			=> TryGetPanel(panelId, out var panel)
+				&& PanelManager.HasPanel(panel.GetFullId())
+				&& PanelManager.SetActivePanel(PanelManager.GetPanel(panel.GetFullId()));
 
-        // has panel
-        public bool HasPanel(EditorPanel panel) 
-            => PanelManager.HasPanel(panel.GetFullId());
-        public bool HasPanel(string panelId) 
-            => PanelManager.HasPanel(panelId);
-        public bool HasLocalPanel(EditorPanel panel) 
-            => HasLocalPanel(panel.GetFullId());
-        public bool HasLocalPanel(string panelId) 
-            => Panels.Any(panel => panel.GetId() == panelId || panel.GetFullId() == panelId);
+		public bool TryGetLocalPanel(string panelId, out IEditorPanel panel) {
+			panel = GetLocalPanel(panelId);
+			return panel != null;
+		}
 
-        // add panel
-        public EditorPanel AddLocalPanel(IEditorPanelBuilder panel)
-        {
-            if (HasLocalPanel(panel.GetId())) return null;
-            var editorPanel = new Panel(panel) { ModId = _mod.Metadata.GetId() };
-            Panels.Add(editorPanel);
-            PanelManager.UpdateMenu();
-            return editorPanel;
-        }
-        public bool RemoveLocalPanel(EditorPanel panel)
-        {
-            if (!HasLocalPanel(panel)) return false;
-            var fullPanel = GetInternalPanel(panel.GetFullId());
-            Panels.Remove(fullPanel);
-            PanelManager.UpdateMenu();
-            return true;
-        }
+		public bool TryGetPanel(string panelId, out IEditorPanel panel) {
+			if (TryGetLocalPanel(panelId, out panel))
+				return true;
+			panel = GetPanel(panelId);
+			return panel != null;
+		}
 
-        /// <summary>
-        /// Remove a local panel by its ID
-        /// </summary>
-        /// <param name="panelId"></param>
-        /// <returns></returns>
-        public bool RemoveLocalPanel(string panelId) 
-            => HasLocalPanel(panelId) && RemoveLocalPanel(GetLocalPanel(panelId));
+		// check if panel is active
+		public IEditorPanel GetActivePanel()
+			=> PanelManager.GetActivePanel();
 
-        /// <summary>
-        /// Update the panel list
-        /// </summary>
-        public void UpdatePanelList() 
-            => PanelManager.UpdateMenu();
-    }
+		public bool IsActivePanel(IEditorPanel panel)
+			=> PanelManager.IsActivePanel(panel.GetFullId());
+
+		public bool IsActivePanel(string panelId)
+			=> TryGetPanel(panelId, out var panel)
+				&& PanelManager.IsActivePanel(panel.GetFullId());
+
+		// get panel
+		public IEditorPanel GetPanel(string panelId)
+			=> PanelManager.GetPanel(panelId);
+
+		public IEditorPanel[] GetPanels()
+			=> PanelManager.GetPanels()
+				.Cast<IEditorPanel>()
+				.ToArray();
+
+		public IEditorPanel GetLocalPanel(string panelId)
+			=> GetInternalPanel(panelId);
+
+		public IEditorPanel[] GetLocalPanels()
+			=> Panels
+				.Cast<IEditorPanel>()
+				.ToArray();
+
+		internal Panel GetInternalPanel(string panelId)
+			=> Panels.FirstOrDefault(panel => panel.GetId() == panelId || panel.GetFullId() == panelId);
+
+		// has panel
+		public bool HasPanel(IEditorPanel panel)
+			=> PanelManager.HasPanel(panel.GetFullId());
+
+		public bool HasPanel(string panelId)
+			=> PanelManager.HasPanel(panelId);
+
+		public bool HasLocalPanel(IEditorPanel panel)
+			=> HasLocalPanel(panel.GetFullId());
+
+		public bool HasLocalPanel(string panelId)
+			=> Panels.Any(panel => panel.GetId() == panelId || panel.GetFullId() == panelId);
+
+		// add panel
+		public IEditorPanel AddLocalPanel(IEditorPanelBuilder panel) {
+			if (HasLocalPanel(panel.GetId())) return null;
+			var editorPanel = new Panel(panel) { ModId = _mod.Metadata.GetId() };
+			Panels.Add(editorPanel);
+			PanelManager.UpdateMenu();
+			return editorPanel;
+		}
+
+		public bool RemoveLocalPanel(IEditorPanel panel) {
+			if (!HasLocalPanel(panel)) return false;
+			var fullPanel = GetInternalPanel(panel.GetFullId());
+			Panels.Remove(fullPanel);
+			PanelManager.UpdateMenu();
+			return true;
+		}
+
+		/// <summary>
+		/// Remove a local panel by its ID
+		/// </summary>
+		/// <param name="panelId"></param>
+		/// <returns></returns>
+		public bool RemoveLocalPanel(string panelId)
+			=> HasLocalPanel(panelId) && RemoveLocalPanel(GetLocalPanel(panelId));
+
+		/// <summary>
+		/// Update the panel list
+		/// </summary>
+		public void UpdatePanelList()
+			=> PanelManager.UpdateMenu();
+
+		/// <summary>
+		/// Show the panel window
+		/// </summary>
+		public void ShowWindow()
+			=> PanelManager.ShowWindow();
+
+		/// <summary>
+		/// Close the panel window
+		/// </summary>
+		public void CloseWindow()
+			=> PanelManager.CloseWindow();
+	}
 }

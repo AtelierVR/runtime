@@ -3,7 +3,7 @@ using Nox.CCK.Mods.Panels;
 using UnityEngine.UIElements;
 
 namespace Nox.ModLoader.Cores.Panels {
-	public class Panel : EditorPanel {
+	public class Panel : IEditorPanel {
 		internal string ModId;
 
 		private readonly IEditorPanelBuilder _builder;

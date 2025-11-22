@@ -47,7 +47,7 @@ namespace Nox.ModLoader {
 		public ILoggerAPI LoggerAPI
 			=> LocalLoggerAPI;
 
-		public EditorModPanelAPI PanelAPI
+		public IEditorModPanelAPI PanelAPI
 			=> LocalPanelAPI;
 
 		public IModAPI ModAPI

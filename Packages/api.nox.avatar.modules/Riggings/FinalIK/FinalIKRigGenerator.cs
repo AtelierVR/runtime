@@ -1,5 +1,6 @@
 #if HAS_FINALIK
 using Nox.Avatars.Rigging;
+using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
 using RootMotion.FinalIK;
@@ -10,86 +11,74 @@ namespace Nox.CCK.Avatars.Rigging {
 	/// Générateur pour les systèmes IK utilisant FinalIK VR (préféré quand disponible)
 	/// </summary>
 	public static class FinalIKRigGenerator {
-		public const string VRIKRoot = "VRIK_Root";
+		public static VRIK Create(FinalIKAvatarModule module) {
+			var rig      = module.GetRig();
+			var animator = module.Descriptor.GetAnimator();
+			var anchor   = module.Descriptor.GetAnchor().transform;
 
-		public static VRIK CreateVRIKRig(BaseRiggingModule module) {
-			var vrik     = module.GetVrik();
-			var animator = module.GetBone(HumanBodyBones.Hips).root.GetComponent<Animator>();
-
-			if (animator == null) {
+			if (!animator) {
 				Debug.LogError("Animator not found on avatar root!");
 				return null;
 			}
 
-			// Configuration de VRIK
-			vrik.solver.spine.headTarget = module.GetOrAddPart(HumanBodyBones.Head, module.GetAnchor());
-			vrik.solver.leftArm.target   = module.GetOrAddPart(HumanBodyBones.LeftHand, module.GetAnchor());
-			vrik.solver.rightArm.target  = module.GetOrAddPart(HumanBodyBones.RightHand, module.GetAnchor());
+			// References
+			rig.references.root = anchor;
+			// Spine
+			rig.references.pelvis = module.GetBone(HumanBodyBones.Hips);
+			rig.references.spine  = module.GetBone(HumanBodyBones.Spine);
+			rig.references.head   = module.GetBone(HumanBodyBones.Head);
+			// Left Arm
+			rig.references.leftShoulder = module.GetBone(HumanBodyBones.LeftShoulder);
+			rig.references.leftUpperArm = module.GetBone(HumanBodyBones.LeftUpperArm);
+			rig.references.leftForearm  = module.GetBone(HumanBodyBones.LeftLowerArm);
+			rig.references.leftHand     = module.GetBone(HumanBodyBones.LeftHand);
+			// Right Arm
+			rig.references.rightShoulder = module.GetBone(HumanBodyBones.RightShoulder);
+			rig.references.rightUpperArm = module.GetBone(HumanBodyBones.RightUpperArm);
+			rig.references.rightForearm  = module.GetBone(HumanBodyBones.RightLowerArm);
+			rig.references.rightHand     = module.GetBone(HumanBodyBones.RightHand);
+			// Left Leg
+			rig.references.leftThigh = module.GetBone(HumanBodyBones.LeftUpperLeg);
+			rig.references.leftCalf  = module.GetBone(HumanBodyBones.LeftLowerLeg);
+			rig.references.leftFoot  = module.GetBone(HumanBodyBones.LeftFoot);
+			rig.references.leftToes  = module.GetBone(HumanBodyBones.LeftToes);
+			// Right Leg
+			rig.references.rightThigh = module.GetBone(HumanBodyBones.RightUpperLeg);
+			rig.references.rightCalf  = module.GetBone(HumanBodyBones.RightLowerLeg);
+			rig.references.rightFoot  = module.GetBone(HumanBodyBones.RightFoot);
+			rig.references.rightToes  = module.GetBone(HumanBodyBones.RightToes);
 
-			// Configuration des jambes
-			vrik.solver.leftLeg.target  = module.GetOrAddPart(HumanBodyBones.LeftFoot, module.GetAnchor());
-			vrik.solver.rightLeg.target = module.GetOrAddPart(HumanBodyBones.RightFoot, module.GetAnchor());
-
-			// Configuration des orteils si disponibles
-			var leftToes  = module.GetBone(HumanBodyBones.LeftToes);
-			var rightToes = module.GetBone(HumanBodyBones.RightToes);
-
-			if (leftToes != null) {
-				vrik.solver.leftLeg.bendGoal = module.GetOrAddPart(HumanBodyBones.LeftToes, module.GetAnchor());
-			}
-
-			if (rightToes != null) {
-				vrik.solver.rightLeg.bendGoal = module.GetOrAddPart(HumanBodyBones.RightToes, module.GetAnchor());
-			}
-
-			// Configuration des coudes (hints)
-			vrik.solver.leftArm.bendGoal  = module.GetOrAddPart(HumanBodyBones.LeftLowerArm, module.GetAnchor());
-			vrik.solver.rightArm.bendGoal = module.GetOrAddPart(HumanBodyBones.RightLowerArm, module.GetAnchor());
-
-			// Configuration du pelvis
-			vrik.solver.spine.pelvisTarget = module.GetOrAddPart(HumanBodyBones.Hips, module.GetAnchor());
-
-		// Poids par défaut optimisés pour VR
-		vrik.solver.spine.headClampWeight      = 1f;
-		vrik.solver.leftArm.positionWeight     = 1f;
-		vrik.solver.rightArm.positionWeight    = 1f;
-		vrik.solver.leftLeg.positionWeight     = 1f;
-		vrik.solver.rightLeg.positionWeight    = 1f;
-		vrik.solver.spine.pelvisPositionWeight = 0f; // Désactivé pour que la tête tire le corps
-		
-		// Activer les rotations pour un meilleur rendu VR
-		vrik.solver.leftArm.rotationWeight  = 1f;
-		vrik.solver.rightArm.rotationWeight = 1f;
-
-		// Configuration pour que la tête tire tout le corps sans déplacer la racine
-		vrik.solver.locomotion.mode = IKSolverVR.Locomotion.Mode.Animated;
-		
-		// Configuration de la locomotion pour stabilité
-		vrik.solver.locomotion.footDistance = 0.3f;
-		vrik.solver.locomotion.stepThreshold = 0.4f;
-		vrik.solver.locomotion.angleThreshold = 60f;
-		vrik.solver.locomotion.maxVelocity   = 0.4f;
-		vrik.solver.locomotion.velocityFactor = 0.4f;
-		vrik.solver.locomotion.rootSpeed     = 40f;
-		vrik.solver.locomotion.stepSpeed     = 3f;
-		
-		// Configuration du spine pour suivre la tête sans déplacer le root
-		vrik.solver.spine.maintainPelvisPosition = 0.5f; // Équilibre entre suivre la tête et rester stable
-		vrik.solver.spine.positionWeight         = 1f;
-		vrik.solver.spine.rotationWeight         = 1f;
-		vrik.solver.spine.pelvisRotationWeight   = 0.2f; // Rotation limitée du pelvis
-		vrik.solver.spine.chestGoalWeight        = 0f;
-		vrik.solver.plantFeet                    = true; // Garder les pieds au sol pour stabilité
-		vrik.solver.spine.neckStiffness          = 0f;
-		vrik.solver.spine.maxRootAngle           = 180f;
-		
-		UpdateParts(module);
-
-			return vrik;
+			// Solver
+			// Spine
+			rig.solver.spine.headTarget   = CreateTarget(module, HumanBodyBones.Head);
+			rig.solver.spine.pelvisTarget = CreateTarget(module, HumanBodyBones.Hips);
+			rig.solver.spine.chestGoal    = CreateTarget(module, HumanBodyBones.Chest);
+			// Left Arm
+			rig.solver.leftArm.target   = CreateTarget(module, HumanBodyBones.LeftHand);
+			rig.solver.leftArm.bendGoal = CreateTarget(module, HumanBodyBones.LeftUpperArm);
+			// Right Arm
+			rig.solver.rightArm.target   = CreateTarget(module, HumanBodyBones.RightHand);
+			rig.solver.rightArm.bendGoal = CreateTarget(module, HumanBodyBones.RightUpperArm);
+			// Left Leg
+			rig.solver.leftLeg.target   = CreateTarget(module, HumanBodyBones.LeftFoot);
+			rig.solver.leftLeg.bendGoal = CreateTarget(module, HumanBodyBones.LeftLowerArm);
+			// Right Leg
+			rig.solver.rightLeg.target   = CreateTarget(module, HumanBodyBones.RightHand);
+			rig.solver.rightLeg.bendGoal = CreateTarget(module, HumanBodyBones.RightLowerArm);
+			// Locomotion
+			rig.solver.locomotion.mode = IKSolverVR.Locomotion.Mode.Animated;
+			
+			return rig;
 		}
 
-		private static void UpdateParts(BaseRiggingModule module) {
-			// Mise à jour des parts si nécessaire
+		private static Transform CreateTarget(FinalIKAvatarModule module, HumanBodyBones bone) {
+			var transform = new GameObject($"VRIK_{bone.ToString()}").transform;
+			transform.parent        = module.transform;
+			transform.localPosition = Vector3.zero;
+			transform.localRotation = Quaternion.identity;
+			transform.localScale    = Vector3.one;
+			module.Parts.Add(new RiggingPart(bone.ToPlayerRig().ToIndex(), transform));
+			return transform;
 		}
 	}
 }

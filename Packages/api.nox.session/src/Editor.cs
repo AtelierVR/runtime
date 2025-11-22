@@ -6,7 +6,7 @@ using Nox.CCK.Mods.Panels;
 namespace api.nox.session {
 	public class Editor : IEditorModInitializer {
 		private         SessionsPanel    _sessionsPanel;
-		private static  EditorPanel      _sessionsPanelInstance;
+		private static  IEditorPanel      _sessionsPanelInstance;
 		internal static EditorModCoreAPI CoreAPI;
 
 		public void OnInitializeEditor(EditorModCoreAPI api) {

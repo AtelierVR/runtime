@@ -5,11 +5,11 @@ using Nox.CCK.Network;
 
 namespace Nox.CCK.Avatars.Rigging.Parameters {
 	public class RiggingActiveParameter : IParameter {
-		private readonly HumanBodyBones      _bone;
-		private readonly RiggingAvatarModule _module;
-		private readonly string              _parameterName;
+		private readonly HumanBodyBones    _bone;
+		private readonly BaseRiggingModule _module;
+		private readonly string            _parameterName;
 
-		public RiggingActiveParameter(HumanBodyBones bone, RiggingAvatarModule module) {
+		public RiggingActiveParameter(HumanBodyBones bone, BaseRiggingModule module) {
 			_bone          = bone;
 			_module        = module;
 			_parameterName = $"tracking/{bone.ToString().ToSnakeCase()}/active";

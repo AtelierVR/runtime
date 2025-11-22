@@ -1,9 +1,6 @@
-using Nox.Avatars.Rigging;
 using Nox.CCK.Utils;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
-using Transform = UnityEngine.Transform;
 
 namespace Nox.CCK.Avatars.Rigging {
 	/// <summary>
@@ -15,43 +12,8 @@ namespace Nox.CCK.Avatars.Rigging {
 	/// Ce système est utilisé quand HAS_FINALIK n'est pas défini. 
 	/// Quand FinalIK est disponible, préférez utiliser FinalIKRigGenerator.
 	/// </summary>
-	public static class IKRigGenerator {
-		public const string HipsHead   = "IKRig_HipsHead";
-		public const string UpperSpine = "IKRig_UpperSpine";
-		public const string LeftArm    = "IKRig_LeftArm";
-		public const string RightArm   = "IKRig_RightArm";
-		public const string LeftLeg    = "IKRig_LeftLeg";
-		public const string RightLeg   = "IKRig_RightLeg";
-		public const string LeftToe    = "IKRig_LeftToe";
-		public const string RightToe   = "IKRig_RightToe";
-
-		public static string GetRigFromBone(HumanBodyBones bone)
-			=> bone switch {
-				HumanBodyBones.Hips                                                                      => HipsHead,
-				HumanBodyBones.Chest or HumanBodyBones.Neck or HumanBodyBones.Head                       => UpperSpine,
-				HumanBodyBones.LeftUpperArm or HumanBodyBones.LeftLowerArm or HumanBodyBones.LeftHand    => LeftArm,
-				HumanBodyBones.RightUpperArm or HumanBodyBones.RightLowerArm or HumanBodyBones.RightHand => RightArm,
-				HumanBodyBones.LeftUpperLeg or HumanBodyBones.LeftLowerLeg or HumanBodyBones.LeftFoot    => LeftLeg,
-				HumanBodyBones.RightUpperLeg or HumanBodyBones.RightLowerLeg or HumanBodyBones.RightFoot => RightLeg,
-				HumanBodyBones.LeftToes                                                                  => LeftToe,
-				HumanBodyBones.RightToes                                                                 => RightToe,
-				_                                                                                        => null
-			};
-
-		public static HumanBodyBones GetBoneFromRig(string rig)
-			=> rig switch {
-				HipsHead   => HumanBodyBones.Hips,
-				UpperSpine => HumanBodyBones.Chest,
-				LeftArm    => HumanBodyBones.LeftHand,
-				RightArm   => HumanBodyBones.RightHand,
-				LeftLeg    => HumanBodyBones.LeftFoot,
-				RightLeg   => HumanBodyBones.RightFoot,
-				LeftToe    => HumanBodyBones.LeftToes,
-				RightToe   => HumanBodyBones.RightToes,
-				_          => HumanBodyBones.LastBone
-			};
-
-		public static RigBuilder CreateIKRig(BaseRiggingModule module) {
+	public static class RigBuilderRigGenerator {
+		public static RigBuilder Create(RigBuilderAvatarModule module) {
 			var rigBuilder = CreateRigBuilder(module);
 			rigBuilder.enabled = false;
 
@@ -62,22 +24,22 @@ namespace Nox.CCK.Avatars.Rigging {
 			CreateRightLeg(module, rigBuilder);
 			CreateLeftToe(module, rigBuilder);
 			CreateRightToe(module, rigBuilder);
-			UpdateParts(module);
 
 			rigBuilder.enabled = true;
 			return rigBuilder;
 		}
 
-		private static RigBuilder CreateRigBuilder(BaseRiggingModule module) {
-			var rigBuilder = module.GetRigBuilder();
+		private static RigBuilder CreateRigBuilder(RigBuilderAvatarModule module) {
+			var rigBuilder = module.GetRig()
+				?? module.Descriptor
+					.GetAnchor()
+					.GetOrAddComponent<RigBuilder>();
 			rigBuilder.layers.Clear();
 			return rigBuilder;
 		}
 
-		private static void UpdateParts(BaseRiggingModule module) { }
-
-		private static void CreateUpperSpine(BaseRiggingModule module, RigBuilder rigBuilder) {
-			var upperSpine = new GameObject(UpperSpine);
+		private static void CreateUpperSpine(RigBuilderAvatarModule module, RigBuilder rigBuilder) {
+			var upperSpine = new GameObject(GetRigFromBone(HumanBodyBones.Head));
 			upperSpine.transform.SetParent(rigBuilder.transform);
 			upperSpine.transform.localPosition = Vector3.zero;
 			upperSpine.transform.localRotation = Quaternion.identity;
@@ -87,7 +49,7 @@ namespace Nox.CCK.Avatars.Rigging {
 			rig.weight = 1.0f;
 			rigBuilder.layers.Add(new RigLayer(rig));
 
-			var contraint = new GameObject("IK_UpperSpineConstraint");
+			var contraint = new GameObject("UpperSpineConstraint");
 			contraint.transform.SetParent(upperSpine.transform);
 			contraint.transform.localPosition = Vector3.zero;
 			contraint.transform.localRotation = Quaternion.identity;
@@ -112,25 +74,25 @@ namespace Nox.CCK.Avatars.Rigging {
 			constraint.data.hintWeight           = 1.0f;
 		}
 
-		private static void CreateLeftArm(BaseRiggingModule module, RigBuilder rigBuilder)
+		private static void CreateLeftArm(RigBuilderAvatarModule module, RigBuilder rigBuilder)
 			=> CreateArm(
-				LeftArm,
+				GetRigFromBone(HumanBodyBones.LeftUpperArm),
 				HumanBodyBones.LeftUpperArm,
 				HumanBodyBones.LeftLowerArm,
 				HumanBodyBones.LeftHand,
 				module, rigBuilder
 			);
 
-		private static void CreateRightArm(BaseRiggingModule module, RigBuilder rigBuilder)
+		private static void CreateRightArm(RigBuilderAvatarModule module, RigBuilder rigBuilder)
 			=> CreateArm(
-				RightArm,
+				GetRigFromBone(HumanBodyBones.RightUpperArm),
 				HumanBodyBones.RightUpperArm,
 				HumanBodyBones.RightLowerArm,
 				HumanBodyBones.RightHand,
 				module, rigBuilder
 			);
 
-		private static void CreateArm(string name, HumanBodyBones upperBone, HumanBodyBones lowerBone, HumanBodyBones handBone, BaseRiggingModule module, RigBuilder rigBuilder) {
+		private static void CreateArm(string name, HumanBodyBones upperBone, HumanBodyBones lowerBone, HumanBodyBones handBone, RigBuilderAvatarModule module, RigBuilder rigBuilder) {
 			var arm = new GameObject(name);
 			arm.transform.SetParent(rigBuilder.transform);
 			arm.transform.localPosition = Vector3.zero;
@@ -141,7 +103,7 @@ namespace Nox.CCK.Avatars.Rigging {
 			rig.weight = 1.0f;
 			rigBuilder.layers.Add(new RigLayer(rig));
 
-			var contraint = new GameObject($"IK_{name}Constraint");
+			var contraint = new GameObject($"{name}Constraint");
 			contraint.transform.SetParent(arm.transform);
 			contraint.transform.localPosition = Vector3.zero;
 			contraint.transform.localRotation = Quaternion.identity;
@@ -166,25 +128,25 @@ namespace Nox.CCK.Avatars.Rigging {
 			constraint.data.hintWeight           = 1.0f;
 		}
 
-		private static void CreateLeftLeg(BaseRiggingModule module, RigBuilder rigBuilder)
+		private static void CreateLeftLeg(RigBuilderAvatarModule module, RigBuilder rigBuilder)
 			=> CreateLeg(
-				LeftLeg,
+				GetRigFromBone(HumanBodyBones.LeftUpperLeg),
 				HumanBodyBones.LeftUpperLeg,
 				HumanBodyBones.LeftLowerLeg,
 				HumanBodyBones.LeftFoot,
 				module, rigBuilder
 			);
 
-		private static void CreateRightLeg(BaseRiggingModule module, RigBuilder rigBuilder)
+		private static void CreateRightLeg(RigBuilderAvatarModule module, RigBuilder rigBuilder)
 			=> CreateLeg(
-				RightLeg,
+				GetRigFromBone(HumanBodyBones.RightUpperLeg),
 				HumanBodyBones.RightUpperLeg,
 				HumanBodyBones.RightLowerLeg,
 				HumanBodyBones.RightFoot,
 				module, rigBuilder
 			);
 
-		private static void CreateLeg(string name, HumanBodyBones upperBone, HumanBodyBones lowerBone, HumanBodyBones footBone, BaseRiggingModule module, RigBuilder rigBuilder) {
+		private static void CreateLeg(string name, HumanBodyBones upperBone, HumanBodyBones lowerBone, HumanBodyBones footBone, RigBuilderAvatarModule module, RigBuilder rigBuilder) {
 			var leg = new GameObject(name);
 			leg.transform.SetParent(rigBuilder.transform);
 			leg.transform.localPosition = Vector3.zero;
@@ -195,7 +157,7 @@ namespace Nox.CCK.Avatars.Rigging {
 			rig.weight = 1.0f;
 			rigBuilder.layers.Add(new RigLayer(rig));
 
-			var contraint = new GameObject($"IK_{name}Constraint");
+			var contraint = new GameObject($"{name}Constraint");
 			contraint.transform.SetParent(leg.transform);
 			contraint.transform.localPosition = Vector3.zero;
 			contraint.transform.localRotation = Quaternion.identity;
@@ -220,21 +182,21 @@ namespace Nox.CCK.Avatars.Rigging {
 			constraint.data.hintWeight           = 1.0f;
 		}
 
-		private static void CreateLeftToe(BaseRiggingModule module, RigBuilder rigBuilder)
+		private static void CreateLeftToe(RigBuilderAvatarModule module, RigBuilder rigBuilder)
 			=> CreateToe(
-				LeftToe,
+				GetRigFromBone(HumanBodyBones.LeftToes),
 				HumanBodyBones.LeftToes,
 				module, rigBuilder
 			);
 
-		private static void CreateRightToe(BaseRiggingModule module, RigBuilder rigBuilder)
+		private static void CreateRightToe(RigBuilderAvatarModule module, RigBuilder rigBuilder)
 			=> CreateToe(
-				RightToe,
+				GetRigFromBone(HumanBodyBones.RightToes),
 				HumanBodyBones.RightToes,
 				module, rigBuilder
 			);
 
-		private static void CreateToe(string name, HumanBodyBones toeBone, BaseRiggingModule module, RigBuilder rigBuilder) {
+		private static void CreateToe(string name, HumanBodyBones toeBone, RigBuilderAvatarModule module, RigBuilder rigBuilder) {
 			var toe = new GameObject(name);
 			toe.transform.SetParent(rigBuilder.transform);
 			toe.transform.localPosition = Vector3.zero;
@@ -245,7 +207,7 @@ namespace Nox.CCK.Avatars.Rigging {
 			rig.weight = 1.0f;
 			rigBuilder.layers.Add(new RigLayer(rig));
 
-			var contraint = new GameObject($"IK_{name}Constraint");
+			var contraint = new GameObject($"{name}Constraint");
 			contraint.transform.SetParent(toe.transform);
 			contraint.transform.localPosition = Vector3.zero;
 			contraint.transform.localRotation = Quaternion.identity;
@@ -261,5 +223,37 @@ namespace Nox.CCK.Avatars.Rigging {
 			constraint.data.dampPosition = 0.1f;
 			constraint.data.dampRotation = 0.1f;
 		}
+
+		public static string GetRigFromBone(HumanBodyBones bone)
+			=> bone switch {
+				HumanBodyBones.Head
+					or HumanBodyBones.Chest
+					or HumanBodyBones.Neck
+					or HumanBodyBones.Spine
+					or HumanBodyBones.Hips
+					=> "RigIK_Spine",
+				HumanBodyBones.LeftUpperArm
+					or HumanBodyBones.LeftLowerArm
+					or HumanBodyBones.LeftHand
+					=> "RigIK_LeftHand",
+				HumanBodyBones.RightUpperArm
+					or HumanBodyBones.RightLowerArm
+					or HumanBodyBones.RightHand
+					=> "RigIK_RightHand",
+				HumanBodyBones.LeftUpperLeg
+					or HumanBodyBones.LeftLowerLeg
+					or HumanBodyBones.LeftFoot
+					=> "RigIK_LeftFoot",
+				HumanBodyBones.RightUpperLeg
+					or HumanBodyBones.RightLowerLeg
+					or HumanBodyBones.RightFoot
+					=> "RigIK_RightFoot",
+				HumanBodyBones.LeftToes
+					=> "RigIK_LeftToe",
+				HumanBodyBones.RightToes
+					=> "RigIK_RightToe",
+				_
+					=> null
+			};
 	}
 }

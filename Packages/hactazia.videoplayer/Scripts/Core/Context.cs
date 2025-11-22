@@ -45,15 +45,25 @@ namespace Hactazia.VideoPlayer.Core {
 		}
 
 		public Context(string url) {
-			if (string.IsNullOrWhiteSpace(url)) return;
+		if (string.IsNullOrWhiteSpace(url)) return;
 
-			FormatContext                       =  ffmpeg.avformat_alloc_context();
-			FormatContext->flags                |= ffmpeg.AVFMT_FLAG_SHORTEST;
-			FormatContext->max_interleave_delta =  100_000_000;
-			FormatContext->avio_flags           =  ffmpeg.AVIO_FLAG_READ | ffmpeg.AVIO_FLAG_NONBLOCK;
+		AVDictionary* options = null;
+		ffmpeg.av_dict_set(&options, "user_agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", 0);
+		ffmpeg.av_dict_set(&options, "reconnect", "1", 0);
+		ffmpeg.av_dict_set(&options, "reconnect_streamed", "1", 0);
+		ffmpeg.av_dict_set(&options, "reconnect_delay_max", "5", 0);
 
-			var contextCopy = FormatContext;
-			ffmpeg.avformat_open_input(&contextCopy, url, null, null).ThrowFFmpegException("avformat_open_input");
+		UnityEngine.Debug.Log($"[VideoPlayer] Opening input: {url}");
+			AVFormatContext* contextCopy = null;
+			var ret = ffmpeg.avformat_open_input(&contextCopy, url, null, &options);
+			ffmpeg.av_dict_free(&options);
+			if (ret < 0) {
+				UnityEngine.Debug.LogError($"[VideoPlayer] avformat_open_input failed with error code: {ret}");
+			}
+			ret.ThrowFFmpegException("avformat_open_input");
+
+			FormatContext = contextCopy;
+			UnityEngine.Debug.Log($"[VideoPlayer] Finding stream info for: {url}");
 			ffmpeg.avformat_find_stream_info(FormatContext, null).ThrowFFmpegException("avformat_find_stream_info");
 
 			CurrentPacket = ffmpeg.av_packet_alloc();
@@ -96,17 +106,44 @@ namespace Hactazia.VideoPlayer.Core {
 			}
 
 			int error;
+			const int maxRetries = 100;
+			var retryCount = 0;
+			
 			do {
 				ffmpeg.av_packet_unref(CurrentPacket);
 				error = ffmpeg.av_read_frame(FormatContext, CurrentPacket);
+				
 				if (error == ffmpeg.AVERROR_EOF) {
 					EndReached = true;
 					packet     = default;
 					return false;
 				}
-
-				error.ThrowFFmpegException("av_read_frame");
-			} while (error == ffmpeg.AVERROR(ffmpeg.EAGAIN));
+				
+				// Handle specific errors gracefully
+				if (error == ffmpeg.AVERROR(ffmpeg.EAGAIN)) {
+					retryCount++;
+					if (retryCount > maxRetries) {
+						UnityEngine.Debug.LogWarning("[VideoPlayer] Too many EAGAIN errors, skipping frame");
+						packet = default;
+						return false;
+					}
+					continue;
+				}
+				
+				// For corrupt packets or invalid data, log but don't throw
+				if (error < 0) {
+					var errorMsg = error.FFmpegDescribe();
+					if (errorMsg.Contains("Packet corrupt") || errorMsg.Contains("Invalid data")) {
+						UnityEngine.Debug.LogWarning($"[VideoPlayer] Skipping corrupt packet: {errorMsg}");
+						// Continue to next packet
+						continue;
+					}
+					// For other errors, throw
+					error.ThrowFFmpegException("av_read_frame");
+				}
+				
+				break;
+			} while (true);
 
 			packet     = *CurrentPacket;
 			EndReached = false;

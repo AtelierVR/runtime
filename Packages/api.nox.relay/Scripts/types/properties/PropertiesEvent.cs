@@ -13,16 +13,16 @@ namespace api.nox.relay.types.Properties {
 
 			InternalId = buffer.ReadByte();
 			EntityId   = buffer.ReadUShort();
+			ByEntityId = buffer.ReadUShort();
 			var parameterCount = buffer.ReadByte();
 
 			for (var i = 0; i < parameterCount; i++) {
 				var parameterId = buffer.ReadInt();
-				var payloadSize = buffer.ReadUShort();
+				var payloadSize = buffer.ReadByte();
 				var payload     = buffer.ReadBytes(payloadSize);
 				Parameters[parameterId] = payload;
 			}
 
-			ByEntityId = buffer.ReadUShort();
 
 			return true;
 		}

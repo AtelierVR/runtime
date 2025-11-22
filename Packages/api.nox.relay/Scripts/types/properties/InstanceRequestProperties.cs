@@ -18,7 +18,7 @@ namespace api.nox.relay.types.Properties {
 
 			foreach (var parameter in Parameters) {
 				buffer.Write(parameter.Key);
-				buffer.Write((ushort)parameter.Value.Length);
+				buffer.Write((byte)parameter.Value.Length);
 				buffer.Write(parameter.Value);
 			}
 

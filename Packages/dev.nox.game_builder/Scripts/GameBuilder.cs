@@ -17,7 +17,7 @@ using Logger = Nox.CCK.Utils.Logger;
 namespace dev.nox.game_builder {
 	public class GameBuilder : IEditorModInitializer {
 		public static EditorModCoreAPI CoreAPI;
-		private       EditorPanel      _buildPanel;
+		private       IEditorPanel      _buildPanel;
 
 		public void OnInitializeEditor(EditorModCoreAPI api) {
 			CoreAPI     = api;

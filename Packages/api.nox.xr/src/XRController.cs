@@ -95,13 +95,18 @@ namespace api.nox.xr {
 				return false;
 			}
 
-			var instance = Instantiate(prefab);
+			GameObject instance = null;
+			try {
+				instance                      = Instantiate(prefab);
+				instance.transform.position   = Vector3.zero;
+				instance.transform.rotation   = Quaternion.identity;
+				instance.transform.localScale = Vector3.one;
+			} catch (Exception e) {
+				Logger.LogError("Failed to instantiate desktop proxy prefab: " + e);
+				return false;
+			}
 
-			instance.transform.position   = Vector3.zero;
-			instance.transform.rotation   = Quaternion.identity;
-			instance.transform.localScale = Vector3.one;
-
-			var xr = instance.GetComponent<XRController>();
+			var xr = instance?.GetComponent<XRController>();
 
 			if (!xr) {
 				Logger.LogError("Failed to get desktop proxy component");
@@ -194,8 +199,11 @@ namespace api.nox.xr {
 			foreach (var ability in controller.GetAbilities())
 				SetAbilities(ability.Key, ability.Value);
 
-			if (controller is IControllerAvatar ca)
-				SetAvatar(ca.GetAvatar().GetIdentifier()).Forget();
+			if (controller is IControllerAvatar ca) {
+				var identifier = ca.GetAvatar()?.GetIdentifier();
+				if (identifier != null && identifier.IsValid())
+					SetAvatar(identifier).Forget();
+			}
 
 			var p = controller.GetPlayer();
 			controller.SetPlayer(null);
@@ -245,16 +253,21 @@ namespace api.nox.xr {
 			}
 		}
 
-		[NoxPublic(NoxAccess.Method)]
-		public Dictionary<ushort, Transform> GetParts()
-			=> new() {
-				{ PlayerRig.Base.ToIndex(), player.transform },
-				{ PlayerRig.Head.ToIndex(), player.headCamera.transform },
-				{ PlayerRig.LeftHand.ToIndex(), player.handLeft.transform },
-				{ PlayerRig.RightHand.ToIndex(), player.handRight.transform }
-			};
-
-
+	[NoxPublic(NoxAccess.Method)]
+	public Dictionary<ushort, Transform> GetParts() {
+		var parts = new Dictionary<ushort, Transform> {
+			{ PlayerRig.Base.ToIndex(), player.transform },
+			{ PlayerRig.Head.ToIndex(), player.headCamera.transform }
+		};
+		
+		if (player.handLeft != null)
+			parts.Add(PlayerRig.LeftHand.ToIndex(), player.handLeft.transform);
+		
+		if (player.handRight != null)
+			parts.Add(PlayerRig.RightHand.ToIndex(), player.handRight.transform);
+		
+		return parts;
+	}
 		[NoxPublic(NoxAccess.Method)]
 		public void SetPlayer(IPlayer p) {
 			_attachedPlayer = p;
@@ -287,11 +300,13 @@ namespace api.nox.xr {
 				return false;
 			}
 
+			root.name += " XR";
+
 			if (old != null)
 				await old.Dispose();
 
 			Logger.LogDebug($"Attaching avatar to {runtimeAvatar.GetDescriptor()}", runtimeAvatar.GetDescriptor().GetAnchor());
-			root.transform.SetParent(player.transform, false);
+			root.transform.SetParent(transform, false);
 			root.transform.localPosition = Vector3.zero;
 			root.transform.localRotation = Quaternion.identity;
 
@@ -338,10 +353,14 @@ namespace api.nox.xr {
 			#if HAS_FINALIK
 			if (root.TryGetComponent<VRIK>(out var component)) {
 				var proxy = component.GetOrAddComponent<AutoHandVRIK>();
-				proxy.rightHand              = player.handRight;
-				proxy.leftHand               = player.handLeft;
-				proxy.rightTrackedController = player.handRight.transform;
-				proxy.leftTrackedController  = player.handLeft.transform;
+				if (player.handRight != null) {
+					proxy.rightHand              = player.handRight;
+					proxy.rightTrackedController = player.handRight.transform;
+				}
+				if (player.handLeft != null) {
+					proxy.leftHand               = player.handLeft;
+					proxy.leftTrackedController  = player.handLeft.transform;
+				}
 			}
 			#endif
 
@@ -604,6 +623,7 @@ namespace api.nox.xr {
 						break;
 					}
 					case "tracking/left_hand/position": {
+						if (player.handLeft == null) continue;
 						var cPos  = player.handLeft.transform.position;
 						var value = (Vector3)param.Get();
 						if (Vector3.Distance(value, cPos) < 0.001f) continue;
@@ -611,6 +631,7 @@ namespace api.nox.xr {
 						break;
 					}
 					case "tracking/left_hand/rotation": {
+						if (player.handLeft == null) continue;
 						var cRot  = player.handLeft.transform.rotation;
 						var value = (Quaternion)param.Get();
 						if (Quaternion.Angle(value, cRot) < 0.001f) continue;
@@ -626,6 +647,7 @@ namespace api.nox.xr {
 						break;
 					}
 					case "tracking/right_hand/position": {
+						if (player.handRight == null) continue;
 						var cPos  = player.handRight.transform.position;
 						var value = (Vector3)param.Get();
 						if (Vector3.Distance(value, cPos) < 0.001f) continue;
@@ -633,6 +655,7 @@ namespace api.nox.xr {
 						break;
 					}
 					case "tracking/right_hand/rotation": {
+						if (player.handRight == null) continue;
 						var cRot  = player.handRight.transform.rotation;
 						var value = (Quaternion)param.Get();
 						if (Quaternion.Angle(value, cRot) < 0.001f) continue;
@@ -657,24 +680,42 @@ namespace api.nox.xr {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		public void SetPart(ushort index, NoxTransform tr) {
-			var part = GetParts()
-				.FirstOrDefault(p => p.Key == index);
+			Rigidbody rb;
 
 			if (index == PlayerRig.Base.ToIndex()) {
 				if (!tr.IsSamePosition(player.transform.position))
 					player.SetPosition(tr.GetPosition());
-			} else {
-				if (!tr.IsSamePosition(part.Value.position))
-					part.Value.position = tr.GetPosition();
+				
+				if (!tr.IsSameRotation(player.transform.rotation))
+					player.SetRotation(tr.GetRotation());
+				
+				rb = player.body;
+				
+				if (rb && !tr.IsSameVelocity(rb.linearVelocity))
+					rb.linearVelocity = tr.GetVelocity();
+				
+				if (rb && !tr.IsSameAngularVelocity(rb.angularVelocity))
+					rb.angularVelocity = tr.GetAngularVelocity();
+				return;
 			}
 
+
+			var part = GetParts()
+				.FirstOrDefault(p => p.Key == index);
+
+			if (!part.Value) return;
+
+			if (!tr.IsSamePosition(part.Value.position))
+				part.Value.position = tr.GetPosition();
+			
 			if (!tr.IsSameRotation(part.Value.rotation))
 				part.Value.rotation = tr.GetRotation();
 
-			var rb = part.Value.GetComponent<Rigidbody>();
+			rb = part.Value.GetComponent<Rigidbody>();
 
 			if (rb && !tr.IsSameVelocity(rb.linearVelocity))
 				rb.linearVelocity = tr.GetVelocity();
+			
 			if (rb && !tr.IsSameAngularVelocity(rb.angularVelocity))
 				rb.angularVelocity = tr.GetAngularVelocity();
 		}
