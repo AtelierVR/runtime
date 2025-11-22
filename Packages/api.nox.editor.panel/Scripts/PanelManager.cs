@@ -33,6 +33,7 @@ namespace api.nox.editor.panel {
 
 		private static bool TryGetPanelFromMod(IMod mod, string[] path, out IPanel panel) {
 			if (mod == null) {
+				Logger.LogError($"NoMod found for {string.Join("/", path)}");
 				panel = null;
 				return false;
 			}
@@ -44,12 +45,20 @@ namespace api.nox.editor.panel {
 					return true;
 				}
 
+			foreach (var p in mod.GetInstances<IPanel>())
+				if (p.GetPath().SequenceEqual(path)) {
+					panel = p;
+					return true;
+				}
+
+			Logger.LogError($"NoPanel found for {string.Join("/", path)} with mod {mod.GetMetadata().GetId()}");
 			panel = null;
 			return false;
 		}
 
 		private static bool TryGetPanelEverywhere(string[] path, out IPanel panel) {
 			if (Editor.CoreAPI == null) {
+				Logger.LogError($"No CoreAPI found for {string.Join("/", path)}");
 				panel = null;
 				return false;
 			}
@@ -62,6 +71,14 @@ namespace api.nox.editor.panel {
 					return true;
 				}
 
+			foreach (var mod in Editor.CoreAPI.ModAPI.GetMods())
+			foreach (var p in mod.GetInstances<IPanel>())
+				if (p.GetPath().SequenceEqual(path)) {
+					panel = p;
+					return true;
+				}
+
+			Logger.LogError($"NoPanel found for {string.Join("/", path)}");
 			panel = null;
 			return false;
 		}

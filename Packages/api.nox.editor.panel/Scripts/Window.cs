@@ -88,6 +88,8 @@ namespace api.nox.editor.panel {
 				foreach (var item in _active.GetPanel().GetLabel().Split('/'))
 					Breadcrumbs.PushItem(item);
 			}
+			
+			// other UI updates can go here
 		}
 
 		private void UpdateContent() {

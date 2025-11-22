@@ -19,6 +19,8 @@ namespace api.nox.editor.panel {
 			var panel = PanelManager.TryGetPanel(new ResourceIdentifier(null, PanelPath), out var p) ? p : null;
 			if (panel == null) {
 				Logger.LogError("DefaultPanel not found in PanelManager.");
+				foreach (var pa in PanelManager.GetPanels())
+					Logger.Log($"Registered panel: {string.Join("/", pa.GetPath())}");
 				return;
 			}
 
