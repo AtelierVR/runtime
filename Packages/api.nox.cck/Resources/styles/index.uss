@@ -1,0 +1,56 @@
+/*@import url("unity-theme://default");*/
+
+@import "variables.uss";
+@import "height.uss";
+@import "width.uss";
+@import "text.uss";
+@import "padding.uss";
+@import "margin.uss";
+@import "flex.uss";
+@import "justify.uss";
+@import "align.uss";
+@import "position.uss";
+@import "rounded.uss";
+@import "opacity.uss";
+@import "background.uss";
+@import "border.uss";
+@import "display.uss";
+
+@import "large.uss";
+@import "notification.uss";
+@import "list.uss";
+@import "section.uss";
+
+.transition {
+    transition-duration: 0.1s;
+}
+
+.readonly .unity-object-field__selector {
+    display: none;
+}
+
+.margin {
+    margin-top: 1px;
+    margin-right: 3px;
+    margin-bottom: 4px;
+    margin-left: 3px;
+}
+
+.margin-x {
+    margin-right: 3px;
+    margin-left: 3px;
+}
+
+.margin-y {
+    margin-top: 1px;
+    margin-bottom: 4px;
+}
+
+.scroll-full > * > * > .unity-scroll-view__content-container {
+    width: 100%;
+    min-height: 100%;
+}
+
+.unity-base-text-field__input--multiline {
+    min-height: 96px;
+}

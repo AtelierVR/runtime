@@ -1,0 +1,27 @@
+.notification {
+    border-color: var(--info-border);
+    background-color: var(--info-background);
+    color: var(--info-text);
+    border-width: var(--border-width);
+    border-radius: var(--boder-radius);
+    padding: var(--padding-medium);
+    flex-direction: row;
+}
+
+.notification.error {
+    border-color: var(--error-border);
+    background-color: var(--error-background);
+    color: var(--error-text);
+}
+
+.notification.warning {
+    border-color: var(--warning-border);
+    background-color: var(--warning-background);
+    color: var(--warning-text);
+}
+
+.notification.success {
+    border-color: var(--success-border);
+    background-color: var(--success-background);
+    color: var(--success-text);
+}

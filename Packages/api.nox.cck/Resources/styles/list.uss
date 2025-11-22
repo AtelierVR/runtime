@@ -1,0 +1,12 @@
+.list > * {
+    margin-top: var(--margin-small);
+    margin-bottom: var(--margin-small);
+}
+
+.list > .first-child {
+    margin-top: var(--margin-none);
+}
+
+.list > .last-child {
+    margin-bottom: var(--margin-none);
+}

@@ -24,6 +24,22 @@
     background-color: var(--color-info);
 }
 
+.bg-default {
+    background-color: var(--background-color);
+}
+
+.bg-black {
+    background-color: var(--color-black);
+}
+
+.bg-modal {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.bg-white {
+    background-color: var(--color-white);
+}
+
 .tint-primary {
     -unity-background-image-tint-color: var(--bg-primary);
 }
