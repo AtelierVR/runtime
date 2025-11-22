@@ -27,109 +27,7 @@ namespace api.nox.avatar.builder {
 		public static readonly UnityEvent<BuildResult>   OnBuildFinished = new();
 		public static readonly UnityEvent<BuildData>     OnBuildStarted  = new();
 
-		private static readonly Dictionary<string, string> SceneBackups = new();
 
-		/// <summary>
-		/// Creates backup copies of scenes before compilation
-		/// </summary>
-		/// <param name="scene">The scene to backup</param>
-		/// <returns>True if backup was created successfully, false otherwise</returns>
-		private static bool CreateSceneBackup(Scene scene) {
-			SceneBackups.Clear();
-
-			try {
-				const string backupPath = "Temp/SceneBackups/";
-				if (Directory.Exists(backupPath)) {
-					Directory.Delete(backupPath, true);
-				}
-
-				Directory.CreateDirectory(backupPath);
-
-				var originalPath = scene.path;
-				if (string.IsNullOrEmpty(originalPath) || !File.Exists(originalPath)) {
-					Logger.LogError($"Scene {scene.name} is not valid or does not exist at path {originalPath}.");
-					return false;
-				}
-
-				var backupFilePath = backupPath     + $"scene_avatar_backup.unity";
-				var backupMetaPath = backupFilePath + ".meta";
-
-				// Copier le fichier de scène
-				File.Copy(originalPath, backupFilePath);
-
-				// Créer un nouveau fichier .meta avec un GUID unique pour le backup
-				var originalMetaContent = File.ReadAllText(originalPath + ".meta");
-				var newGuid             = Guid.NewGuid().ToString("N");
-
-				// Remplacer le GUID dans le contenu du .meta
-				var lines = originalMetaContent.Split('\n');
-				for (var i = 0; i < lines.Length; i++) {
-					if (!lines[i].StartsWith("guid:")) continue;
-					lines[i] = $"guid: {newGuid}";
-					break;
-				}
-
-				var newMetaContent = string.Join("\n", lines);
-				File.WriteAllText(backupMetaPath, newMetaContent);
-
-				SceneBackups.Add(originalPath, backupFilePath);
-				Logger.Log($"Created backup for scene {scene.name} with unique GUID {newGuid}: {originalPath} -> {backupFilePath}");
-
-				return true;
-			} catch (Exception e) {
-				Logger.LogError($"Failed to create scene backup: {e.Message}");
-				return false;
-			}
-		}
-
-		/// <summary>
-		/// Restores scene from backup copy
-		/// </summary>
-		/// <returns>True if restoration was successful, false otherwise</returns>
-		private static bool RestoreSceneBackup() {
-			if (SceneBackups.Count == 0) {
-				Logger.LogWarning("No scene backup found to restore.");
-				return true;
-			}
-
-			try {
-				foreach (var (originalPath, backupPath) in SceneBackups) {
-					if (!File.Exists(backupPath)) {
-						Logger.LogError($"Backup file not found: {backupPath}");
-						continue;
-					}
-
-					// Restaurer seulement le fichier de scène (.unity)
-					// Ne pas restaurer le .meta pour éviter les conflits de GUID
-					File.Copy(backupPath, originalPath, true);
-
-					Logger.Log($"Restored scene from backup: {backupPath} -> {originalPath}");
-				}
-
-				AssetDatabase.Refresh();
-				return true;
-			} catch (Exception e) {
-				Logger.LogError($"Failed to restore scene backup: {e.Message}");
-				return false;
-			}
-		}
-
-		/// <summary>
-		/// Cleans up backup files
-		/// </summary>
-		private static void CleanupSceneBackups() {
-			try {
-				const string backupPath = "Temp/SceneBackups/";
-				if (Directory.Exists(backupPath)) {
-					Directory.Delete(backupPath, true);
-					Logger.Log("Scene backups cleaned up successfully.");
-				}
-
-				SceneBackups.Clear();
-			} catch (Exception e) {
-				Logger.LogWarning($"Failed to cleanup scene backups: {e.Message}");
-			}
-		}
 
 		[MenuItem("Nox/Avatar/Build Avatar")]
 		public static void BuildMenu()
@@ -235,11 +133,14 @@ namespace api.nox.avatar.builder {
 
 					// Préparation des répertoires temporaires
 					var preparation = PrepareTemporaryDirectories(data);
-					if (preparation.Type != BuildResultType.Success)
+					if (preparation.Type != BuildResultType.Success) {
+						EditorSceneManager.RestoreSceneManagerSetup(rollback);
 						return Finish(preparation);
+					}
 
 					// Sauvegarde initiale des scènes
 					if (!EditorSceneManager.SaveOpenScenes()) {
+						EditorSceneManager.RestoreSceneManagerSetup(rollback);
 						return Finish(
 							new BuildResult {
 								Type    = BuildResultType.Failed,
@@ -250,38 +151,26 @@ namespace api.nox.avatar.builder {
 
 					AssetDatabase.Refresh();
 
-					// Report progress: Scene backup
-					data.ProgressCallback?.Invoke(0.15f, "Creating scene backup...");
-					await UniTask.Yield();
-
-					// Création de la sauvegarde de scène
-					var scene = data.Descriptor.gameObject.scene;
-					Logger.Log("Creating scene backup before compilation...");
-					if (!CreateSceneBackup(scene)) {
-						return Finish(
-							new BuildResult {
-								Type    = BuildResultType.Failed,
-								Message = "Failed to create scene backup. Build aborted for safety."
-							}
-						);
-					}
-
 					// Report progress: Compiling scripts
 					data.ProgressCallback?.Invoke(0.40f, "Compiling scripts...");
 					await UniTask.Yield();
 
 					// Compilation des scripts
 					var compilation = await CompileScripts(data.Descriptor.gameObject);
-					if (compilation.Type != BuildResultType.Success)
+					if (compilation.Type != BuildResultType.Success) {
+						EditorSceneManager.RestoreSceneManagerSetup(rollback);
 						return Finish(compilation);
+					}
 
 					// Report progress: Processing scenes
 					data.ProgressCallback?.Invoke(0.60f, "Processing prefab and dependencies...");
 					await UniTask.Yield();
 
 					var processing = await ProcessPrefabAndDependencies(data);
-					if (processing.Type != BuildResultType.Success)
+					if (processing.Type != BuildResultType.Success) {
+						EditorSceneManager.RestoreSceneManagerSetup(rollback);
 						return Finish(processing);
+					}
 
 					// Report progress: Building AssetBundle
 					data.ProgressCallback?.Invoke(0.80f, "Building AssetBundle...");
@@ -289,8 +178,10 @@ namespace api.nox.avatar.builder {
 
 					// Création de l'AssetBundle des scènes
 					var assetBundleResult = await BuildPrefabsAssetBundle(data);
-					if (assetBundleResult.Type != BuildResultType.Success)
+					if (assetBundleResult.Type != BuildResultType.Success) {
+						EditorSceneManager.RestoreSceneManagerSetup(rollback);
 						return Finish(assetBundleResult);
+					}
 
 					// Report progress: Cleanup
 					data.ProgressCallback?.Invoke(0.95f, "Cleaning up...");
@@ -302,12 +193,23 @@ namespace api.nox.avatar.builder {
 
 					return Finish(
 						new BuildResult {
-							Type = BuildResultType.Success,
+							Type   = BuildResultType.Success,
+							Output = assetBundleResult.Output
+						}
+					);
+				} catch (Exception e) {
+					// Restore scene on error
+					EditorSceneManager.RestoreSceneManagerSetup(rollback);
+					Logger.LogException(new Exception("Build failed with exception", e));
+					return Finish(
+						new BuildResult {
+							Type    = BuildResultType.Failed,
+							Message = e.Message + "\nSee console for details."
 						}
 					);
 				} finally {
-					// S'assurer que le nettoyage se fait toujours, même en cas d'erreur ou de retour anticipé
-					CleanupAndRestoreState(rollback, true, data.TempPath);
+					// Cleanup state
+					IsBuilding = false;
 				}
 			} catch (Exception e) {
 				Logger.LogException(new Exception("Build failed with exception", e));
@@ -354,7 +256,10 @@ namespace api.nox.avatar.builder {
 					Message = $"The build target {data.Target} is not supported."
 				};
 
-			return new BuildResult { Type = BuildResultType.Success };
+			return new BuildResult {
+				Type   = BuildResultType.Success,
+				Output = data.OutputPath
+			};
 		}
 
 		/// <summary>
@@ -388,7 +293,10 @@ namespace api.nox.avatar.builder {
 
 			Directory.CreateDirectory(tempPath);
 
-			return new BuildResult { Type = BuildResultType.Success };
+			return new BuildResult {
+				Type   = BuildResultType.Success,
+				Output = tempPath
+			};
 		}
 
 		/// <summary>
@@ -465,7 +373,10 @@ namespace api.nox.avatar.builder {
 			// Wait a frame to ensure file operations are complete
 			await UniTask.Yield();
 
-			return new BuildResult { Type = BuildResultType.Success };
+			return new BuildResult {
+				Type = BuildResultType.Success,
+				Output = null
+			};
 		}
 
 		/// <summary>
@@ -556,7 +467,10 @@ namespace api.nox.avatar.builder {
 				await UniTask.Yield();
 
 				Logger.Log($"Successfully processed avatar prefab");
-				return new BuildResult { Type = BuildResultType.Success };
+				return new BuildResult {
+					Type = BuildResultType.Success,
+					Output = prefabPath
+				};
 
 				void CheckForProblematicComponents(GameObject go) {
 					if (!go) return;
@@ -732,7 +646,10 @@ namespace api.nox.avatar.builder {
 
 				Logger.Log($"Avatar AssetBundle '{data.Filename}' built successfully at: {outputPath}");
 				Logger.Log($"Avatar prefab built without dependencies");
-				return new BuildResult { Type = BuildResultType.Success };
+				return new BuildResult {
+					Type   = BuildResultType.Success,
+					Output = Path.Combine(outputPath, data.Filename)
+				};
 			} catch (Exception e) {
 				Logger.LogError($"Avatar AssetBundle build failed: {e.Message}");
 				return new BuildResult {
@@ -941,61 +858,7 @@ namespace api.nox.avatar.builder {
 			}
 		}
 
-		/// <summary>
-		/// Helper method to cleanup and restore state before returning a build result
-		/// </summary>
-		/// <param name="rollback">The scene manager setup to restore</param>
-		/// <param name="restoreScenes">Whether to restore scenes from backup</param>
-		/// <param name="tempPath">The temporary path to cleanup (optional)</param>
-		/// <param name="cleanupOnError">Whether to cleanup temp files on error (false for debugging)</param>
-		private static void CleanupAndRestoreState(SceneSetup[] rollback, bool restoreScenes = true, string tempPath = null, bool cleanupOnError = false) {
-			Logger.LogWarning("Restoring scene backup...");
-			if (restoreScenes && !RestoreSceneBackup())
-				Logger.LogError("Failed to restore scene backup. Please check the backup files.");
-			CleanupSceneBackups();
 
-			// Nettoyer le répertoire temporaire spécifique si fourni ET si cleanupOnError est true
-			if (cleanupOnError && !string.IsNullOrEmpty(tempPath) && Directory.Exists(tempPath)) {
-				try {
-					Directory.Delete(tempPath, true);
-					Logger.Log($"Cleaned up temporary directory: {tempPath}");
-				} catch (Exception e) {
-					Logger.LogWarning($"Failed to cleanup temporary directory {tempPath}: {e.Message}");
-				}
-			} else if (!cleanupOnError && !string.IsNullOrEmpty(tempPath) && Directory.Exists(tempPath)) {
-				Logger.LogWarning($"Temporary directory preserved for debugging: {tempPath}");
-			}
-
-			// Nettoyer aussi le répertoire Assets/Temp/ de base pour éviter l'accumulation
-			// Mais seulement les anciens dossiers, pas celui en cours de debug
-			if (cleanupOnError) {
-				try {
-					const string baseTempPath = "Assets/Temp/";
-					if (Directory.Exists(baseTempPath)) {
-						// Nettoyer seulement les dossiers plus anciens que 1 heure pour éviter les conflits avec des builds concurrents
-						var directories = Directory.GetDirectories(baseTempPath);
-						foreach (var dir in directories) {
-							var dirInfo = new DirectoryInfo(dir);
-							if (DateTime.Now - dirInfo.CreationTime > TimeSpan.FromHours(1)) {
-								try {
-									Directory.Delete(dir, true);
-									Logger.Log($"Cleaned up old temporary directory: {dir}");
-								} catch {
-									// Ignore errors for individual directory cleanup
-								}
-							}
-						}
-					}
-				} catch (Exception e) {
-					Logger.LogWarning($"Failed to cleanup base temporary directory: {e.Message}");
-				}
-			} else {
-				Logger.LogWarning("Skipping cleanup of temporary directories for debugging purposes");
-			}
-
-			IsBuilding = false;
-			EditorSceneManager.RestoreSceneManagerSetup(rollback);
-		}
 
 		/// <summary>
 		/// Generates a default filename for the asset bundle based on date, random int, and main scene name

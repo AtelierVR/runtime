@@ -84,6 +84,9 @@ namespace api.nox.avatar.editor {
 		public void OnDestroy() {
 			AvatarDescriptorHelper.OnAvatarSelected.RemoveListener(OnAvatarSelected);
 			AvatarNotificationHelper.OnNotificationsChanged.RemoveListener(OnNotificationsChanged);
+			Builder.OnBuildFinished.RemoveListener(OnBuildFinished);
+			Builder.OnBuildStarted.RemoveListener(OnBuildStarted);
+			Builder.OnBuildProgress.RemoveListener(OnBuildProgress);
 			_panel.Instance = null;
 		}
 
@@ -190,7 +193,9 @@ namespace api.nox.avatar.editor {
 			_resultContainer.style.display    = DisplayStyle.Flex;
 			_resultFailedLabel.style.display  = arg0.IsFailed ? DisplayStyle.Flex : DisplayStyle.None;
 			_resultSuccessLabel.style.display = arg0.IsFailed ? DisplayStyle.None : DisplayStyle.Flex;
-			_resultDetailsLabel.text          = arg0.Message;
+			_resultDetailsLabel.text = !arg0.IsFailed
+				? LanguageManager.Get("avatar.builder.result.success", new object[] { arg0.Output })
+				: arg0.Message;
 		}
 
 		private void OnBuildProgress(float progress, string status) {
@@ -222,7 +227,12 @@ namespace api.nox.avatar.editor {
 		private Button        _resultOkButton;
 		private Label         _resultDetailsLabel;
 
+		private VisualElement _content;
+
 		public VisualElement GetContent() {
+			if (_content != null)
+				return _content;
+
 			var root = _panel.API.AssetAPI
 				.GetAsset<VisualTreeAsset>("panels/builder.uxml")
 				.CloneTree();
@@ -252,14 +262,15 @@ namespace api.nox.avatar.editor {
 			_outputField.SetValueWithoutNotify(BuilderPanel.OutputFolder);
 			_platformEnum.RegisterCallback<ChangeEvent<Enum>>(OnPlatformChanged);
 			_resultOkButton.RegisterCallback<ClickEvent>(OnBuildResultOKClicked);
+			
 			_buildingContainer.style.display = DisplayStyle.None;
 			_resultContainer.style.display   = DisplayStyle.None;
 
 			OnNotificationsChanged(AvatarNotificationHelper.Notifications.ToArray());
 			OnAvatarSelected(AvatarDescriptorHelper.CurrentAvatar);
 			if (Builder.IsBuilding) OnBuildStarted();
-			
-			return root;
+
+			return _content = root;
 		}
 	}
 }

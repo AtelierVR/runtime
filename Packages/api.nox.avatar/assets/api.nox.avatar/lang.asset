@@ -113,3 +113,5 @@ MonoBehaviour:
       value: "You are not logged in. Please log in to access avatar building features."
     - key: avatar.editor.notification.user_connected
       value: "Logged in as {0} ({1})"
+    - key: avatar.builder.result.success
+      value: "Avatar build completed successfully!"
