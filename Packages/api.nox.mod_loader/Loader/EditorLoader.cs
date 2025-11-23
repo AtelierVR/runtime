@@ -62,6 +62,8 @@ namespace Nox.ModLoader.Loader {
 
 					// Re-add editor update
 					EditorApplication.update += LoaderManager.OnUpdate;
+
+					ReloadMods();
 					break;
 				case PlayModeStateChange.EnteredEditMode:
 				case PlayModeStateChange.ExitingEditMode:
