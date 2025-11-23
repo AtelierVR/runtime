@@ -65,7 +65,20 @@ namespace Nox.ModLoader.Loader {
 			Logger.ClearProgress();
 		}
 
-		public static void OnUpdate() { }
+		public static void OnUpdate() {
+			foreach (var mod in ModManager.Mods)
+				mod.Update();
+		}
+
+		public static void OnFixedUpdate() {
+			foreach (var mod in ModManager.Mods)
+				mod.FixedUpdate();
+		}
+
+		public static void OnLateUpdate() {
+			foreach (var mod in ModManager.Mods)
+				mod.LateUpdate();
+		}
 
 		public static async UniTask Initialize() {
 			var mods = ModManager.GetMods();

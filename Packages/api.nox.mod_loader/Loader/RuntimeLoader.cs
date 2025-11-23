@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using Nox.ModLoader.EntryPoints;
 using UnityEngine;
@@ -8,13 +9,22 @@ namespace Nox.ModLoader.Loader {
 		private static RuntimeLoader _instance;
 		private        bool          _initialized;
 
+		#if !UNITY_EDITOR
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+		private static void OnBeforeSceneLoad() => Enable();
+		#endif
+
 		public static void Enable() {
 			if (IsLoaded()) {
 				Logger.LogWarning($"{nameof(RuntimeLoader)} is already loaded.", _instance);
 				return;
 			}
 
-			_ = new GameObject($"[{nameof(RuntimeLoader)}]", typeof(RuntimeLoader));
+			var go = new GameObject($"[{nameof(RuntimeLoader)}]");
+			var loader = go.AddComponent<RuntimeLoader>();
+			DontDestroyOnLoad(go);
+			_instance = loader;
+			Logger.Log($"{nameof(RuntimeLoader)} initialized.", loader);
 		}
 
 		public static bool IsLoaded()
@@ -33,15 +43,10 @@ namespace Nox.ModLoader.Loader {
 		}
 
 		private void Awake() {
-			if (_instance) {
-				Logger.LogWarning($"An instance of {nameof(RuntimeLoader)} already exists. Destroying duplicate.", this);
-				Destroy(this);
-				return;
-			}
-
-			_instance = this;
-			DontDestroyOnLoad(this);
-			Logger.Log($"{nameof(RuntimeLoader)} initialized.", this);
+			if (!_instance || _instance == this) return;
+			Logger.LogWarning($"An instance of {nameof(RuntimeLoader)} already exists. Destroying duplicate.", this);
+			Destroy(gameObject);
+			return;
 		}
 
 		private void Start()
@@ -52,6 +57,7 @@ namespace Nox.ModLoader.Loader {
 			#if UNITY_EDITOR
 			LoaderManager.Enable(Application.isBatchMode ? EntryPoint.ServerEntry : EntryPoint.ClientEntry);
 			#else
+			await LoaderManager.Discover();
 			LoaderManager.Enable(EntryPoint.MainEntry, Application.isBatchMode ? EntryPoint.ServerEntry : EntryPoint.ClientEntry);
 			#endif
 			await LoaderManager.Initialize();
@@ -60,6 +66,12 @@ namespace Nox.ModLoader.Loader {
 
 		private void Update()
 			=> LoaderManager.OnUpdate();
+
+		private void FixedUpdate()
+		=> LoaderManager.OnFixedUpdate();
+		
+		private void LateUpdate()
+			=> LoaderManager.OnLateUpdate();
 
 		private void OnDestroy()
 			=> OnDestroyAsync().Forget();
