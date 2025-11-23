@@ -79,8 +79,8 @@
     <Compile Include="Packages\api.nox.avatar\Scripts\search\SearchHandler.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\editor\PublisherPanel.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\editor\Editor.cs" />
-    <Compile Include="Packages\api.nox.avatar\Scripts\network\search\AssetSearchResponse.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\editor\PublisherThumbnail.cs" />
+    <Compile Include="Packages\api.nox.avatar\Scripts\network\search\AssetSearchResponse.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\network\search\SearchResponse.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\base\AvatarIdentifier.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\search\SearchWorker.cs" />
