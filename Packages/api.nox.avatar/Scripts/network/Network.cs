@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Nox.Avatars;
 using Nox.CCK.Utils;
 using UnityEngine;
 using UnityEngine.Events;
@@ -18,7 +19,7 @@ namespace api.nox.avatar.network {
 			Main.Instance.CoreAPI.EventAPI.Emit("avatar_fetch", avatar);
 		}
 
-		public UniTask<Avatar> Fetch(AvatarIdentifier identifier, string from = null)
+		public UniTask<Avatar> Fetch(IAvatarIdentifier identifier, string from = null)
 			=> Fetch(identifier.ToString(), from);
 
 		public UniTask<Avatar> Fetch(uint id, string from = null)

@@ -592,7 +592,7 @@
     },
     "com.unity.test-framework": {
       "version": "1.6.0",
-      "depth": 0,
+      "depth": 1,
       "source": "builtin",
       "dependencies": {
         "com.unity.ext.nunit": "2.0.3",
@@ -765,13 +765,11 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "fr.hactazia.videoplayer": {
-      "version": "file:hactazia.videoplayer",
+    "hactazia.ffplay": {
+      "version": "file:hactazia.ffplay",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {
-        "com.unity.render-pipelines.core": "14.0.0"
-      }
+      "dependencies": {}
     },
     "nuget-packages": {
       "version": "file:nuget-packages",

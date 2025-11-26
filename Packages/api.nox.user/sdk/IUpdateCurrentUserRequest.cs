@@ -22,6 +22,8 @@ namespace Nox.Users {
 
 		public IUpdateCurrentUserRequest SetTags(string[] tags);
 
+		public IUpdateCurrentUserRequest SetAvatar(string avatar);
+
 		public string GetUsername();
 
 		public string GetDisplay();
@@ -41,6 +43,8 @@ namespace Nox.Users {
 		public string[] GetLinks();
 
 		public string GetHome();
+
+		public string GetAvatar();
 
 		public string[] GetTags();
 	}

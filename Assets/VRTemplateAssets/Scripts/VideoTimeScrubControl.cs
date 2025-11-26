@@ -10,7 +10,7 @@ namespace Unity.VRTemplate
     /// <summary>
     /// Connects a UI slider control to a video player, allowing users to scrub to a particular time in th video.
     /// </summary>
-    [RequireComponent(typeof(VideoPlayer))]
+    [RequireComponent(typeof(UnityEngine.Video.VideoPlayer))]
     public class VideoTimeScrubControl : MonoBehaviour
     {
         [SerializeField]
@@ -41,15 +41,15 @@ namespace Unity.VRTemplate
         [Tooltip("If checked, the slider will fade off after a few seconds. If unchecked, the slider will remain on.")]
         bool m_HideSliderAfterFewSeconds;
 
-        bool m_IsDragging;
-        bool m_VideoIsPlaying;
-        bool m_VideoJumpPending;
-        long m_LastFrameBeforeScrub;
-        VideoPlayer m_VideoPlayer;
+        bool                          m_IsDragging;
+        bool                          m_VideoIsPlaying;
+        bool                          m_VideoJumpPending;
+        long                          m_LastFrameBeforeScrub;
+        UnityEngine.Video.VideoPlayer m_VideoPlayer;
 
         void Start()
         {
-            m_VideoPlayer = GetComponent<VideoPlayer>();
+            m_VideoPlayer = GetComponent<UnityEngine.Video.VideoPlayer>();
             if (!m_VideoPlayer.playOnAwake)
             {
                 m_VideoPlayer.playOnAwake = true; // Set play on awake for next enable.

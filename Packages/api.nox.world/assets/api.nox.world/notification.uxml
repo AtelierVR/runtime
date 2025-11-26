@@ -1,5 +1,4 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
-    <Style src="project://database/Assets/Mods/api.nox.world/assets/Style.uss?fileID=7433441132597879392&amp;guid=e5801f130c21d4a43937749c0d48a9cd&amp;type=3#Style" />
     <engine:GroupBox name="box" class="notification-item">
         <engine:VisualElement class="notification-type">
             <engine:Image name="icon" style="width: 24px; height: 24px; margin-top: auto; margin-right: auto; margin-bottom: auto; margin-left: auto;" />

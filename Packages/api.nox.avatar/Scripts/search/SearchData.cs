@@ -1,3 +1,4 @@
+using api.nox.avatar.client;
 using Cysharp.Threading.Tasks;
 using Nox.Search;
 using UnityEngine;
@@ -19,7 +20,7 @@ namespace api.nox.avatar.search {
 		public async UniTask<Texture2D> GetImage()
 			=> await Main.Instance.NetworkAPI.FetchTexture(Reference.GetThumbnailUrl());
 
-		public void OnClick(int menuId) { }
-		// => Client.UiAPI?.SendGoto(menuId, AvatarPage.GetStaticKey(), "avatar", Reference);
+		public void OnClick(int menuId)
+			=> Client.UiAPI?.SendGoto(menuId, AvatarPage.GetStaticKey(), "avatar", Reference);
 	}
 }

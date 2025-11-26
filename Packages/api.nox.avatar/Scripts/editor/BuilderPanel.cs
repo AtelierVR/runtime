@@ -108,7 +108,7 @@ namespace api.nox.avatar.editor {
 			foreach (var notification in arg0) {
 				var element = prefab.CloneTree();
 
-				element.AddToClassList($"notification-{notification.Type.ToString().ToLowerInvariant()}");
+				element.AddToClassList(notification.Type.ToString().ToLowerInvariant());
 				var content = element.Q<VisualElement>("content");
 
 				content.Clear();

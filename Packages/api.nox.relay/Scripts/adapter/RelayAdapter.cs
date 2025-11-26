@@ -222,7 +222,10 @@ namespace api.nox.relay {
 		private void SendProperties(IEntity entity) {
 			var isLocal = entity is IPlayer player && player.IsLocal();
 			var properties = entity.GetProperties()
-				.Where(p => p.GetDirty() == DirtyBy.Local && p.GetFlags().HasFlag(isLocal ? PropertyFlags.LocalEmit : PropertyFlags.RemoteEmit))
+				.Where(
+					p => (p.GetDirty() == DirtyBy.Local && p.GetFlags().HasFlag(isLocal ? PropertyFlags.LocalEmit : PropertyFlags.RemoteEmit))
+						|| isLocal && p.GetUpdated() < DateTime.UtcNow.AddSeconds(-10) // Resend all properties every 10 seconds for local entity)
+				)
 				.ToArray();
 			if (properties.Length == 0) return;
 

@@ -1,3 +1,4 @@
+using System;
 using Nox.CCK.Network;
 using Nox.Entities;
 
@@ -19,6 +20,9 @@ namespace api.nox.offline {
 		public int GetKey() {
 			throw new System.NotImplementedException();
 		}
+
+		public DateTime GetUpdated()
+			=> DateTime.UtcNow;
 
 		public string GetName() {
 			throw new System.NotImplementedException();

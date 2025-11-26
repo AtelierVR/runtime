@@ -91,10 +91,6 @@ crashlytics-build.properties
 /[Aa]ssets/[Pp]olygonmaker/
 /[Tt]hry/*
 
-[Gg]it[Ii]gnore_*
+_*
 
 mono_crash.*
-
-.idea/*
-.vscode/*
-!.vscode/settings.json

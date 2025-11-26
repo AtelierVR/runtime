@@ -12,7 +12,7 @@ namespace Nox.Editor {
 
 			var scenes = EditorBuildSettings.scenes.ToList();
 			foreach (var asset in importedAssets)
-				if (asset.EndsWith(".unity")) {
+				if (asset.EndsWith(".unity") && !asset.StartsWith("Packages/")) {
 					Logger.Log("Scene imported: " + asset);
 					if (scenes.All(s => s.path != asset))
 						scenes.Add(new EditorBuildSettingsScene(asset, true));
@@ -25,7 +25,7 @@ namespace Nox.Editor {
 				}
 
 			foreach (var asset in movedAssets)
-				if (asset.EndsWith(".unity")) {
+				if (asset.EndsWith(".unity") && !asset.StartsWith("Packages/")) {
 					Logger.Log("Scene moved: " + asset);
 					scenes.RemoveAll(s => s.path == asset);
 					scenes.Add(new EditorBuildSettingsScene(asset, true));
@@ -50,7 +50,7 @@ namespace Nox.Editor {
 		}
 
 
-		[MenuItem("Nox/Scenes/Refresh Scenes in Build Settings"), InitializeOnLoadMethod]
+		[MenuItem("Nox/Scenes/Refresh Scenes in Build Settings")]
 		public static void RefreshScenesInBuildSettings() {
 			var oldScenes = EditorBuildSettings.scenes;
 			var newScenes = AssetDatabase.FindAssets("t:Scene")

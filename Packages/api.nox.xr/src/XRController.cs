@@ -364,6 +364,8 @@ namespace api.nox.xr {
 			}
 			#endif
 
+			Client.CoreAPI.EventAPI.Emit("controller_avatar_changed", this, _attachedRuntimeAvatar);
+
 			return true;
 		}
 

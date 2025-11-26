@@ -473,6 +473,8 @@ namespace api.nox.desktop {
 
 			root.SetActive(true);
 
+			Client.CoreAPI.EventAPI.Emit("controller_avatar_changed", this, _attachedRuntimeAvatar);
+
 			return true;
 		}
 

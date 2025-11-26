@@ -11,6 +11,7 @@ using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
+using Nox.Controllers;
 using Nox.Network;
 using Nox.Search;
 using Nox.Tables;
@@ -49,6 +50,11 @@ namespace api.nox.avatar {
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("table")
 				?.GetInstance<ITableAPI>();
+
+		internal IControllerAPI ControllerAPI
+			=> Instance.CoreAPI.ModAPI
+				.GetMod("controller")
+				?.GetInstance<IControllerAPI>();
 
 		public void OnInitializeMain(MainModCoreAPI api) {
 			Instance = this;

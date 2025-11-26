@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Hactazia.VideoPlayer.Components;
+using Hactazia.VideoPlayer.Core;
 using Nox.VideoPlayer;
 using UnityEngine;
 using UnityEngine.Events;
@@ -15,8 +16,8 @@ namespace Nox.CCK.VideoPlayer.Hactazia {
 
 		public string              playQuery;
 		public HactaziaVideoPlayer videoPlayer;
-		public RenderTextureOutput videoOutput;
-		public AudioSource         audioSource;
+		public RenderTextureHandler renderTextureHandler;
+		public AudioSourceHandler  audioSourceHandler;
 
 		private       string   _currentUrl;
 		private       bool     _isReconnecting;
@@ -37,21 +38,38 @@ namespace Nox.CCK.VideoPlayer.Hactazia {
 			set => videoPlayer = value;
 		}
 
-		public AudioSource AudioSource {
-			// ReSharper disable Unity.PerformanceCriticalCodeInvocation
-			get => audioSource ??= GetComponent<AudioSource>() ?? GetComponentInChildren<AudioSource>();
-			set => audioSource = value;
+		public RenderTextureHandler RenderTextureHandler {
+			get => renderTextureHandler ??= GetComponent<RenderTextureHandler>() ?? GetComponentInChildren<RenderTextureHandler>();
+			set => renderTextureHandler = value;
+		}
+
+		public AudioSourceHandler AudioSourceHandler {
+			get => audioSourceHandler ??= GetComponent<AudioSourceHandler>() ?? GetComponentInChildren<AudioSourceHandler>();
+			set => audioSourceHandler = value;
 		}
 
 		#endregion Properties
 
-		#region Unity Lifecycle
+	#region Unity Lifecycle
 
-		private void Awake() {
-			Player.OnPrepareCompleted    += OnPrepareCompleted;
-			Player.OnStarted             += OnStarted;
-			Player.OnLoopPointReached    += OnLoopPointReached;
-			Player.OnErrorReceived       += OnErrorReceived;
+	private void Awake() {
+		// Ensure outputs are initialized
+		if (Player.videoOutput == null) Player.videoOutput = Player.GetComponentInChildren<VideoOutput>();
+		if (Player.audioOutput == null) Player.audioOutput = Player.GetComponentInChildren<AudioOutput>();
+
+		// Connect handlers to outputs
+		if (RenderTextureHandler != null && Player.videoOutput != null) {
+			RenderTextureHandler.SetVideoOutput(Player.videoOutput);
+		}
+		
+		if (AudioSourceHandler != null && Player.audioOutput != null) {
+			AudioSourceHandler.SetAudioOutput(Player.audioOutput);
+		}
+
+		Player.OnPrepareCompleted    += OnPrepareCompleted;
+		Player.OnStarted             += OnStarted;
+		Player.OnLoopPointReached    += OnLoopPointReached;
+		Player.OnErrorReceived       += OnErrorReceived;
 			Player.OnClockResyncOccurred += OnClockResyncOccurred;
 			Player.OnFrameDropped        += OnFrameDropped;
 			Player.OnFrameReady          += OnFrameReady;
@@ -379,13 +397,14 @@ namespace Nox.CCK.VideoPlayer.Hactazia {
 			onResume.Invoke(this);
 		}
 
-		public void SetVolume(float volume) {
-			var clampedVolume = Mathf.Clamp01(volume);
-			AudioSource.volume = clampedVolume;
-			onVolumeChanged.Invoke(this, clampedVolume);
+	public void SetVolume(float volume) {
+		var clampedVolume = Mathf.Clamp01(volume);
+		var audioSource = AudioSourceHandler?.GetComponent<AudioSource>();
+		if (audioSource != null) {
+			audioSource.volume = clampedVolume;
 		}
-
-		public void SetSeek(double time) {
+		onVolumeChanged.Invoke(this, clampedVolume);
+	}		public void SetSeek(double time) {
 			var clampedTime = Math.Clamp(time, 0, Player.GetLength());
 			Player.Seek(clampedTime);
 			onSeek.Invoke(this, clampedTime);
@@ -406,24 +425,24 @@ namespace Nox.CCK.VideoPlayer.Hactazia {
 		public void SetLooping(bool loop)
 			=> Player.SetLoop(loop);
 
-		public RenderTexture GetRender()
-			=> videoOutput?.GetRenderTexture();
-
+	public RenderTexture GetRender()
+		=> RenderTextureHandler?.GetRenderTexture();	
+		
 		public float GetVolume()
-			=> AudioSource.volume;
-
+		=> AudioSourceHandler?.GetComponent<AudioSource>()?.volume ?? 0f;		
+		
 		public bool IsPlaying()
 			=> Player.IsPlaying;
 
 		#endregion Playback
 
-		#region Callbacks
+	#region Callbacks
 
-		private void OnPrepareCompleted(HactaziaVideoPlayer source) {
-			Logger.Log($"Video prepared: {source}");
+	private void OnPrepareCompleted(HactaziaVideoPlayer source) {
+		Logger.Log("Video prepared");
 
-			// Si c'était une reconnexion réussie
-			if (_isReconnecting) {
+		// Si c'était une reconnexion réussie
+		if (_isReconnecting) {
 				_isReconnecting    = false;
 				_reconnectAttempts = 0;
 				Logger.Log("Reconnexion réussie !");
@@ -544,13 +563,13 @@ namespace Nox.CCK.VideoPlayer.Hactazia {
 		public string GetTitle()
 			=> _currentPlaying?.GetTile();
 
-		public string GetSubtitle()
-			=> _currentPlaying?.GetSubtitle();
+	public string GetSubtitle()
+		=> _currentPlaying?.GetSubtitle();
 
-		public Vector2Int GetResolution()
-			=> videoOutput.GetResolution();
+	public Vector2Int GetResolution()
+		=> RenderTextureHandler?.GetResolution() ?? Vector2Int.zero;
 
-		#endregion Metadata
+	#endregion Metadata
 	}
 }
 #endif

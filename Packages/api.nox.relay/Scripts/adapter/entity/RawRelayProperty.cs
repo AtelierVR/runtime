@@ -9,6 +9,7 @@ namespace api.nox.relay {
 		private          object        _value;
 		private          DirtyBy       _dirty;
 		private          PropertyFlags _flags;
+		private          DateTime      _updated;
 
 		public RawRelayProperty(RelayEntity player, string name, int key, object value) : base(player) {
 			if (string.IsNullOrEmpty(name))
@@ -17,6 +18,7 @@ namespace api.nox.relay {
 			_name = name;
 			_value = value
 				?? throw new ArgumentNullException(nameof(value), "Property value cannot be null");
+			_updated = DateTime.UtcNow;
 		}
 
 		public override int GetKey()
@@ -31,8 +33,12 @@ namespace api.nox.relay {
 		public override PropertyFlags GetFlags()
 			=> _flags;
 
+		public override DateTime GetUpdated()
+			=> _updated;
+
 		public override void SetValue(object value, DirtyBy by) {
-			_value = value;
+			_value   = value;
+			_updated = DateTime.UtcNow;
 			SetDirty(by);
 		}
 
@@ -46,7 +52,8 @@ namespace api.nox.relay {
 
 		public override void Deserialize(byte[] data, DirtyBy by) {
 			try {
-				_value = data.FromBytes(_value.GetType());
+				_value   = data.FromBytes(_value.GetType());
+				_updated = DateTime.UtcNow;
 				SetDirty(by);
 			} catch (Exception e) {
 				throw new InvalidOperationException($"Failed to deserialize property '{_key}'", e);
@@ -56,12 +63,15 @@ namespace api.nox.relay {
 		public override DirtyBy GetDirty()
 			=> _dirty;
 
-		public override void SetDirty(DirtyBy dirty)
-			=> _dirty = dirty switch {
+		public override void SetDirty(DirtyBy dirty) {
+			var @new = dirty switch {
 				DirtyBy.Local                  => DirtyBy.Local,
 				DirtyBy.None or DirtyBy.Remote => DirtyBy.None,
 				_                              => throw new ArgumentOutOfRangeException(nameof(dirty), dirty, null)
 			};
+			_dirty   = @new;
+			_updated = DateTime.UtcNow;
+		}
 
 		public override string ToString()
 			=> $"{GetType().Name}[Key={_key}, Value={_value}, Flags={_flags}, Dirty={_dirty}]";

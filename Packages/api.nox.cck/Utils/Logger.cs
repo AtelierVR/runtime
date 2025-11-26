@@ -107,7 +107,6 @@ namespace Nox.CCK.Utils {
 		}
 
 		#else
-		
 		public static void ShowProgress(string title, string message, float progress)
 			=> OnProgress.Invoke(true, title, message, progress);
 		
@@ -116,7 +115,8 @@ namespace Nox.CCK.Utils {
 
 		#endif
 
-		public static readonly UnityEvent<bool, string, string, float> OnProgress = new();
+		public static readonly UnityEvent<bool, string, string, float>     OnProgress = new();
+		public static readonly UnityEvent<LogType, string, string, Object> OnLog      = new();
 
 		public static void Init() {
 			lock (FileLock) {
@@ -147,51 +147,51 @@ namespace Nox.CCK.Utils {
 		}
 
 		public static void Log(object message, string tag = null)
-			=> OnLog(LogType.Log, message, tag: tag);
+			=> Print(LogType.Log, message, tag: tag);
 
 		public static void LogWarning(object message, string tag = null)
-			=> OnLog(LogType.Warning, message, tag: tag);
+			=> Print(LogType.Warning, message, tag: tag);
 
 		public static void LogError(object message, string tag = null)
-			=> OnLog(LogType.Error, message, tag: tag);
+			=> Print(LogType.Error, message, tag: tag);
 
 		public static void LogDebug(object message, string tag = null)
-			=> OnLog(LogType.Debug, message, tag: tag);
+			=> Print(LogType.Debug, message, tag: tag);
 
 		public static void LogException(Exception exception, string tag = null)
-			=> OnLog(LogType.Exception, exception, tag: tag);
+			=> Print(LogType.Exception, exception, tag: tag);
 
 		public static void Log(object message, Object context, string tag = null)
-			=> OnLog(LogType.Log, message, context, tag: tag);
+			=> Print(LogType.Log, message, context, tag: tag);
 
 		public static void LogWarning(object message, Object context, string tag = null)
-			=> OnLog(LogType.Warning, message, context, tag: tag);
+			=> Print(LogType.Warning, message, context, tag: tag);
 
 		public static void LogError(object message, Object context, string tag = null)
-			=> OnLog(LogType.Error, message, context, tag: tag);
+			=> Print(LogType.Error, message, context, tag: tag);
 
 		public static void LogException(Exception exception, Object context, string tag = null)
-			=> OnLog(LogType.Exception, exception, context, tag: tag);
+			=> Print(LogType.Exception, exception, context, tag: tag);
 
 		public static void LogDebug(object message, Object context, string tag = null)
-			=> OnLog(LogType.Debug, message, context, tag: tag);
+			=> Print(LogType.Debug, message, context, tag: tag);
 
 		// ILogger interface methods
 		public void LogFormat(UnityEngine.LogType logType, string format, params object[] args) {
 			if (!logEnabled) return;
 			var message = string.Format(format, args);
-			OnLog(ConvertLogType(logType), message);
+			Print(ConvertLogType(logType), message);
 		}
 
 		public void LogFormat(UnityEngine.LogType logType, Object context, string format, params object[] args) {
 			if (!logEnabled) return;
 			var message = string.Format(format, args);
-			OnLog(ConvertLogType(logType), message, context);
+			Print(ConvertLogType(logType), message, context);
 		}
 
 		public void LogException(Exception exception, Object context) {
 			if (!logEnabled) return;
-			OnLog(LogType.Exception, exception, context);
+			Print(LogType.Exception, exception, context);
 		}
 
 		public bool IsLogTypeAllowed(UnityEngine.LogType logType) {
@@ -201,62 +201,62 @@ namespace Nox.CCK.Utils {
 
 		public void Log(UnityEngine.LogType logType, object message) {
 			if (!logEnabled) return;
-			OnLog(ConvertLogType(logType), message);
+			Print(ConvertLogType(logType), message);
 		}
 
 		public void Log(UnityEngine.LogType logType, object message, Object context) {
 			if (!logEnabled) return;
-			OnLog(ConvertLogType(logType), message, context);
+			Print(ConvertLogType(logType), message, context);
 		}
 
 		public void Log(UnityEngine.LogType logType, string tag, object message) {
 			if (!logEnabled) return;
-			OnLog(ConvertLogType(logType), message, tag: tag);
+			Print(ConvertLogType(logType), message, tag: tag);
 		}
 
 		public void Log(UnityEngine.LogType logType, string tag, object message, Object context) {
 			if (!logEnabled) return;
-			OnLog(ConvertLogType(logType), message, context, tag: tag);
+			Print(ConvertLogType(logType), message, context, tag: tag);
 		}
 
 		public void Log(object message) {
 			if (!logEnabled) return;
-			OnLog(LogType.Log, message);
+			Print(LogType.Log, message);
 		}
 
 		public void Log(string tag, object message) {
 			if (!logEnabled) return;
-			OnLog(LogType.Log, message, tag: tag);
+			Print(LogType.Log, message, tag: tag);
 		}
 
 		public void Log(string tag, object message, Object context) {
 			if (!logEnabled) return;
-			OnLog(LogType.Log, message, context, tag: tag);
+			Print(LogType.Log, message, context, tag: tag);
 		}
 
 		public void LogWarning(string tag, object message) {
 			if (!logEnabled) return;
-			OnLog(LogType.Warning, message, tag: tag);
+			Print(LogType.Warning, message, tag: tag);
 		}
 
 		public void LogWarning(string tag, object message, Object context) {
 			if (!logEnabled) return;
-			OnLog(LogType.Warning, message, context, tag: tag);
+			Print(LogType.Warning, message, context, tag: tag);
 		}
 
 		public void LogError(string tag, object message) {
 			if (!logEnabled) return;
-			OnLog(LogType.Error, message, tag: tag);
+			Print(LogType.Error, message, tag: tag);
 		}
 
 		public void LogError(string tag, object message, Object context) {
 			if (!logEnabled) return;
-			OnLog(LogType.Error, message, context, tag: tag);
+			Print(LogType.Error, message, context, tag: tag);
 		}
 
 		public void LogException(Exception exception) {
 			if (!logEnabled) return;
-			OnLog(LogType.Exception, exception);
+			Print(LogType.Exception, exception);
 		}
 
 		private static LogType ConvertLogType(UnityEngine.LogType type)
@@ -287,18 +287,20 @@ namespace Nox.CCK.Utils {
 		};
 
 		// ReSharper disable Unity.PerformanceAnalysis
-		public static void OnLog(LogType type, object message, Object context = null, string tag = null) {
+		public static void Print(LogType type, object message, Object context = null, string tag = null) {
+			
+			message ??= "<null>";
+			OnLog.Invoke(type, tag, message.ToString(), context);
+			
 			if (type == LogType.Debug && !Config.Load().Get("debug.logging", Application.isEditor))
 				return;
-
-
-			message ??= "<null>";
-
+			
 			try {
 				// Capture stack trace synchronously on the calling thread
 				var stackTrace = new System.Diagnostics.StackTrace(2, true);
 				var frames     = stackTrace.GetFrames();
 				var timestamp  = DateTime.Now;
+
 
 				// Write to file in a separate thread
 				ThreadPool.QueueUserWorkItem(

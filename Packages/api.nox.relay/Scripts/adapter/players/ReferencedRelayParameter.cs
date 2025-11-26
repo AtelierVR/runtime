@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Nox.Avatars.Parameters;
 using Nox.CCK.Network;
-using Nox.CCK.Utils;
 using Nox.Entities;
 
 namespace api.nox.relay {
@@ -13,6 +12,7 @@ namespace api.nox.relay {
 		private readonly string        _name;
 		private readonly int           _key;
 		private readonly PropertyFlags _flags;
+		private          DateTime      _updated;
 
 		public ReferencedRelayParameter(RelayEntity entity, IParameter parameter) : base(entity) {
 			_reference = parameter ?? throw new ArgumentNullException(nameof(parameter), "Parameter cannot be null during construction.");
@@ -22,11 +22,13 @@ namespace api.nox.relay {
 			_flags = PropertyFlags.None
 				| (_reference.GetFlags().HasFlag(ParameterFlags.RemoteEditableByLocal) ? PropertyFlags.LocalEmit : PropertyFlags.None)
 				| (_reference.GetFlags().HasFlag(ParameterFlags.LocalEditableByRemote) ? PropertyFlags.RemoteEmit : PropertyFlags.None);
+			_updated = DateTime.UtcNow;
 		}
 
 
 		private void OnValueChanged(object value, DirtyBy by) {
-			_value = value;
+			_value   = value;
+			_updated = DateTime.UtcNow;
 			if (by == DirtyBy.Local)
 				SetDirty(by);
 		}
@@ -46,12 +48,13 @@ namespace api.nox.relay {
 			=> _reference != null;
 
 		public override void SetDirty(DirtyBy dirty) {
-			_dirty = dirty switch {
+			var @new = dirty switch {
 				DirtyBy.Local                  => DirtyBy.Local,
 				DirtyBy.None or DirtyBy.Remote => DirtyBy.None,
 				_                              => throw new ArgumentOutOfRangeException(nameof(dirty), dirty, null)
 			};
-
+			_dirty   = @new;
+			_updated = DateTime.UtcNow;
 			if (!IsValid()) return;
 			_value = _reference.Get();
 		}
@@ -90,11 +93,12 @@ namespace api.nox.relay {
 		public override PropertyFlags GetFlags()
 			=> _flags;
 
+		public override DateTime GetUpdated()
+			=> _updated;
+
 		public override void SetValue(object value, DirtyBy dirty) {
 			if (!IsValid()) return;
-			var old = _reference.Get().ToBool();
 			_reference.Set(value);
-			var @new = _reference.Get().ToBool();
 			OnValueChanged(value, dirty);
 		}
 

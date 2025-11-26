@@ -1,3 +1,4 @@
+using System;
 using Nox.CCK.Network;
 
 namespace Nox.Entities {
@@ -11,6 +12,12 @@ namespace Nox.Entities {
 		/// </summary>
 		/// <returns></returns>
 		public int GetKey();
+		
+		/// <summary>
+		/// Get the last updated time of the property.
+		/// </summary>
+		/// <returns></returns>
+		public DateTime GetUpdated();
 		
 		/// <summary>
 		/// Get the name of the property.

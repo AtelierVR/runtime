@@ -63,10 +63,12 @@
     <Compile Include="Packages\api.nox.avatar\Scripts\network\create\CreateAssetRequest.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\builder\BuildResult.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\runtime\AssetBundleRuntimeAvatar.cs" />
+    <Compile Include="Packages\api.nox.avatar\Scripts\client\AvatarPage.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\editor\BuilderPanel.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\runtime\BaseRuntimeAvatar.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\AvatarLoader.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\editor\PlayModeAvatar.cs" />
+    <Compile Include="Packages\api.nox.avatar\Scripts\client\widget\AvatarWidget.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\search\SearchData.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\editor\PublisherUI.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\editor\AvatarDescriptorEditor.cs" />
@@ -100,15 +102,17 @@
     <Compile Include="Packages\api.nox.avatar\Scripts\editor\PublisherInstance.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\search\Search.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\builder\BuildResultType.cs" />
+    <Compile Include="Packages\api.nox.avatar\Scripts\client\AvatarComponent.cs" />
     <Compile Include="Packages\api.nox.avatar\Scripts\network\create\CreateAvatarRequest.cs" />
-    <None Include="Packages\api.nox.avatar\Assets\api.nox.avatar\publisher.uxml" />
+    <None Include="Packages\api.nox.avatar\Assets\avatar\publisher.uxml" />
     <None Include="Packages\api.nox.avatar\Resources\AvatarDescriptorEditor.uxml" />
-    <None Include="Packages\api.nox.avatar\Assets\api.nox.avatar\panels\publisher.uxml" />
-    <None Include="Packages\api.nox.avatar\Assets\api.nox.avatar\builder.uxml" />
+    <None Include="Packages\api.nox.avatar\Assets\avatar\panels\publisher.uxml" />
+    <None Include="Packages\api.nox.avatar\Assets\avatar\builder.uxml" />
     <None Include="Packages\api.nox.avatar\link.xml" />
-    <None Include="Packages\api.nox.avatar\Assets\api.nox.avatar\panels\builder.uxml" />
+    <None Include="Packages\api.nox.avatar\Assets\avatar\panels\builder.uxml" />
     <None Include="Packages\api.nox.avatar\package.json" />
     <None Include="Packages\api.nox.avatar\api.nox.avatar.asmdef" />
+    <None Include="Packages\api.nox.avatar\~Examples\Circles.shader" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -1024,6 +1028,10 @@
     <ProjectReference Include="Nox.Avatars.Editor.csproj">
       <Project>{47aef4b9-b613-8477-c36d-859d84cbde32}</Project>
       <Name>Nox.Avatars.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Controllers.csproj">
+      <Project>{7876f9af-a4fc-8e9f-76eb-a1ac927434f2}</Project>
+      <Name>Nox.Controllers</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

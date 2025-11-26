@@ -21,7 +21,8 @@
         "Nox.UI",
         "Nox.Avatars.Parameters",
         "Nox.Editor.Panel",
-        "Nox.Avatars.Editor"
+        "Nox.Avatars.Editor",
+        "Nox.Controllers"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

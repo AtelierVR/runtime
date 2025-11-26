@@ -6,7 +6,7 @@ namespace Unity.VRTemplate
     /// <summary>
     /// Create a RenderTexture for rendering video to a target renderer.
     /// </summary>
-    [RequireComponent(typeof(VideoPlayer))]
+    [RequireComponent(typeof(UnityEngine.Video.VideoPlayer))]
     public class VideoPlayerRenderTexture : MonoBehaviour
     {
         const string k_ShaderName = "Unlit/Texture";
@@ -32,9 +32,9 @@ namespace Unity.VRTemplate
             var renderTexture = new RenderTexture(m_RenderTextureWidth, m_RenderTextureHeight, m_RenderTextureDepth);
             renderTexture.Create();
             var material = new Material(Shader.Find(k_ShaderName));
-            material.mainTexture = renderTexture;
-            GetComponent<VideoPlayer>().targetTexture = renderTexture;
-            m_Renderer.material = material;
+            material.mainTexture                                        = renderTexture;
+            GetComponent<UnityEngine.Video.VideoPlayer>().targetTexture = renderTexture;
+            m_Renderer.material                                         = material;
         }
     }
 }

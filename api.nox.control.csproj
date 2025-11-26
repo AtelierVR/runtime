@@ -64,6 +64,7 @@
     <Compile Include="Packages\api.nox.control\SDK\IClient.cs" />
     <Compile Include="Packages\api.nox.control\Scripts\Main.cs" />
     <Compile Include="Packages\api.nox.control\SDK\IServer.cs" />
+    <Compile Include="Packages\api.nox.control\Scripts\handlers\LoggerHandler.cs" />
     <Compile Include="Packages\api.nox.control\Scripts\handlers\HierarchyHandler.cs" />
     <Compile Include="Packages\api.nox.control\Scripts\handlers\EditorHandler.cs" />
     <Compile Include="Packages\api.nox.control\Scripts\WebSocketServer.cs" />

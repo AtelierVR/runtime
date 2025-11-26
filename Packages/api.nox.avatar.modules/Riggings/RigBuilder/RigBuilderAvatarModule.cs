@@ -61,14 +61,12 @@ namespace Nox.CCK.Avatars.Rigging {
 			}
 		}
 
-		public Transform GetOrAddPart(HumanBodyBones bone, Transform tf) {
-			var part = GetPart(bone);
-			if (part) return part;
+	public Transform GetOrAddPart(HumanBodyBones bone, Transform tf) {
+		var part = GetPart(bone);
+		if (part) return part;
 
-			var tr = GetBone(bone);
-			if (!transform) return null;
-
-			// Use "IK_" prefix to avoid conflicts with Unity's human bone mapping
+		var tr = GetBone(bone);
+		if (!tr) return null;			// Use "IK_" prefix to avoid conflicts with Unity's human bone mapping
 			var p = new GameObject($"IK_{bone}").transform;
 			p.SetParent(tf ?? transform, false);
 			p.position   = tr.position;

@@ -10,57 +10,56 @@ using Nox.SDK.Control;
 
 namespace api.nox.control {
 	public class Main : IMainModInitializer {
-		private WebSocketServer _server;
-		private MainModCoreAPI  _api;
+		internal static WebSocketServer Server;
+		private         MainModCoreAPI  _api;
 
 		public void OnInitializeMain(MainModCoreAPI api) {
 			_api = api;
 			Reload();
+			LoggerHandler.Listen();
 		}
 
 		private void Reload() {
-			if (_server != null) {
-				_server.Stop();
-				_server = null;
+			if (Server != null) {
+				Server.Stop();
+				Server = null;
 			}
 
-			var address = IPAddress.Parse(Config.Load().Get("settings.control.address", "0.0.0.0"));
+			var address       = IPAddress.Parse(Config.Load().Get("settings.control.address", "0.0.0.0"));
 			var preferredPort = Config.Load().Get("settings.control.port", 8000);
-			var port = IsUsablePort(preferredPort, GetFreePort());
-			
-			_server = new WebSocketServer(address, port);
+			var port          = IsUsablePort(preferredPort, GetFreePort());
 
-			_server.OnClientConnected.AddListener(OnClientConnected);
-			_server.OnClientDisconnected.AddListener(OnClientDisconnected);
-			_server.OnEventReceived.AddListener(OnDataReceived);
+			Server = new WebSocketServer(address, port);
+
+			Server.OnClientConnected.AddListener(OnClientConnected);
+			Server.OnClientDisconnected.AddListener(OnClientDisconnected);
+			Server.OnEventReceived.AddListener(OnDataReceived);
 
 			try {
-				_server.Start();
-				_api.LoggerAPI.Log($"Control Server started on port {_server.GetPort()}");
-			}
-			catch (SocketException ex) {
+				Server.Start();
+				_api.LoggerAPI.Log($"Control Server started on port {Server.GetPort()}");
+			} catch (SocketException ex) {
 				_api.LoggerAPI.LogError($"Failed to start Control Server on port {port}: {ex.Message}");
-				
+
 				// Try to get a different free port and retry
 				var freePort = GetFreePort();
 				if (freePort != port) {
 					_api.LoggerAPI.Log($"Retrying with alternative port {freePort}...");
-					_server = new WebSocketServer(address, freePort);
-					_server.OnClientConnected.AddListener(OnClientConnected);
-					_server.OnClientDisconnected.AddListener(OnClientDisconnected);
-					_server.OnEventReceived.AddListener(OnDataReceived);
-					
+					Server = new WebSocketServer(address, freePort);
+					Server.OnClientConnected.AddListener(OnClientConnected);
+					Server.OnClientDisconnected.AddListener(OnClientDisconnected);
+					Server.OnEventReceived.AddListener(OnDataReceived);
+
 					try {
-						_server.Start();
-						_api.LoggerAPI.Log($"Control Server started on alternative port {_server.GetPort()}");
-					}
-					catch (SocketException retryEx) {
+						Server.Start();
+						_api.LoggerAPI.Log($"Control Server started on alternative port {Server.GetPort()}");
+					} catch (SocketException retryEx) {
 						_api.LoggerAPI.LogError($"Failed to start Control Server on alternative port {freePort}: {retryEx.Message}");
-						_server = null;
+						Server = null;
 						throw;
 					}
 				} else {
-					_server = null;
+					Server = null;
 					throw;
 				}
 			}
@@ -89,17 +88,15 @@ namespace api.nox.control {
 
 		public void OnDisposeMain() {
 			try {
-				if (_server != null) {
-					var port = _server.GetPort();
-					_server.Stop();
-					_api?.LoggerAPI.Log($"Control Server stopped on port {port}");
-					_server = null;
-				}
-			}
-			catch (Exception ex) {
+				LoggerHandler.Dispose();
+				if (Server == null) return;
+				var port = Server.GetPort();
+				Server.Stop();
+				_api?.LoggerAPI.Log($"Control Server stopped on port {port}");
+				Server = null;
+			} catch (Exception ex) {
 				_api?.LoggerAPI.LogError($"Error disposing Control Server: {ex.Message}");
-			}
-			finally {
+			} finally {
 				_api = null;
 			}
 		}

@@ -5,17 +5,18 @@ using Nox.Users;
 
 namespace api.nox.user.network {
 	public class UpdateCurrentUserRequest : IUpdateCurrentUserRequest {
-		private string   _username = string.Empty;
-		private string   _display = string.Empty;
-		private string   _email = string.Empty;
-		private string   _password = string.Empty;
+		private string   _username   = string.Empty;
+		private string   _display    = string.Empty;
+		private string   _email      = string.Empty;
+		private string   _password   = string.Empty;
 		private string   _twofaToken = string.Empty;
-		private string   _bio = string.Empty;
-		private string   _thumbnail = string.Empty;
-		private string   _banner = string.Empty;
-		private string[] _links = Array.Empty<string>();
-		private string   _home = string.Empty;
-		private string[] _tags = Array.Empty<string>();
+		private string   _bio        = string.Empty;
+		private string   _thumbnail  = string.Empty;
+		private string   _banner     = string.Empty;
+		private string[] _links      = Array.Empty<string>();
+		private string   _home       = string.Empty;
+		private string   _avatar     = string.Empty;
+		private string[] _tags       = Array.Empty<string>();
 
 		public IUpdateCurrentUserRequest SetUsername(string username) {
 			_username = username;
@@ -72,6 +73,11 @@ namespace api.nox.user.network {
 			return this;
 		}
 
+		public IUpdateCurrentUserRequest SetAvatar(string avatar) {
+			_avatar = avatar;
+			return this;
+		}
+
 		public string GetUsername()
 			=> _username;
 
@@ -101,6 +107,9 @@ namespace api.nox.user.network {
 
 		public string GetHome()
 			=> _home;
+
+		public string GetAvatar()
+			=> _avatar;
 
 		public string[] GetTags()
 			=> _tags ?? Array.Empty<string>();
@@ -151,6 +160,11 @@ namespace api.nox.user.network {
 				obj["home"] = JValue.CreateNull();
 			else if (_home is { Length: > 0 })
 				obj["home"] = JValue.CreateString(_home);
+
+			if (_avatar == null)
+				obj["avatar"] = JValue.CreateNull();
+			else if (_avatar is { Length: > 0 })
+				obj["avatar"] = JValue.CreateString(_avatar);
 
 			if (_tags is { Length: > 0 })
 				obj["tags"] = new JArray(_tags.ToArray<object>());

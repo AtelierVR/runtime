@@ -1,0 +1,17 @@
+{
+    "name": "Hactazia.FFplay",
+    "rootNamespace": "",
+    "references": [
+        "FFmpeg.AutoGen",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

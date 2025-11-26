@@ -6,6 +6,30 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_Avatar/GoGo/GoModel/GoBone/Avatar GoBone.unity
+    guid: 798fd65a9d8b3ec4382d9d07e5a384a7
+  - enabled: 1
+    path: Assets/_Avatar/OpenMe.unity
+    guid: 02fdcea21931f7d4fadf43d9f72c15b6
+  - enabled: 1
+    path: Assets/_BORDEL/Bitgem/StylisedWater/URP/Examples/Example-Scene-01.unity
+    guid: fc967860e2508924e943ba0223c2ed3b
+  - enabled: 1
+    path: Assets/_BORDEL/BORDEL/OpenMe.unity
+    guid: f76a4b4cc6fed0a4eb97657257962a00
+  - enabled: 1
+    path: Assets/_BORDEL/BORDEL/VRCDefaultWorldScene.unity
+    guid: 3a376bda79aebc04da612b859a4aab40
+  - enabled: 1
+    path: Assets/_BORDEL/FastSky/Demo/FastSkyDemo.unity
+    guid: 66ba89bf341ac754b8002ea71a6aa1e1
+  - enabled: 1
+    path: Assets/_Example/OpenMe.unity
+    guid: f87e70a5d263c8346a611db2bedbd708
+  - enabled: 1
+    path: Assets/_RINDO/OpenMe.unity
+    guid: ec77359729a5c644c8c8de8d15b80f40
+  - enabled: 1
     path: Assets/AutoHand/Examples/Scenes/Desktop/Desktop Player.unity
     guid: bb1eab65b7f030d4fab81d20430b0b3d
   - enabled: 1
@@ -17,30 +41,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/AutoHand/Examples/Scenes/XR/Tutorial Video Scene.unity
     guid: dc74935531a6487409eb101722a98460
-  - enabled: 1
-    path: Assets/GitIgnore_Avatar/GoGo/GoModel/GoBone/Avatar GoBone.unity
-    guid: 798fd65a9d8b3ec4382d9d07e5a384a7
-  - enabled: 1
-    path: Assets/GitIgnore_Avatar/OpenMe.unity
-    guid: 02fdcea21931f7d4fadf43d9f72c15b6
-  - enabled: 1
-    path: Assets/GitIgnore_BORDEL/Bitgem/StylisedWater/URP/Examples/Example-Scene-01.unity
-    guid: fc967860e2508924e943ba0223c2ed3b
-  - enabled: 1
-    path: Assets/GitIgnore_BORDEL/BORDEL/OpenMe.unity
-    guid: f76a4b4cc6fed0a4eb97657257962a00
-  - enabled: 1
-    path: Assets/GitIgnore_BORDEL/BORDEL/VRCDefaultWorldScene.unity
-    guid: 3a376bda79aebc04da612b859a4aab40
-  - enabled: 1
-    path: Assets/GitIgnore_BORDEL/FastSky/Demo/FastSkyDemo.unity
-    guid: 66ba89bf341ac754b8002ea71a6aa1e1
-  - enabled: 1
-    path: Assets/GitIgnore_Example/OpenMe.unity
-    guid: f87e70a5d263c8346a611db2bedbd708
-  - enabled: 1
-    path: Assets/Gitignore_RINDO/OpenMe.unity
-    guid: ec77359729a5c644c8c8de8d15b80f40
   - enabled: 1
     path: Assets/OpenME.unity
     guid: 72f73d93637f36d428e530292b77d863
@@ -298,6 +298,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Packages/com.unity.xr.interaction.toolkit/Tests/Tests/Conecast Stress Test.unity
     guid: 543f4c2924b7f3147bacb8012ec0c603
+  - enabled: 1
+    path: Assets/_Recovery/0.unity
+    guid: b97c96fc31061d049bee8cd9d28bb627
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

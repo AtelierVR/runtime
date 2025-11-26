@@ -1,3 +1,4 @@
+using System;
 using Nox.CCK.Network;
 using Nox.Entities;
 using UnityEngine;
@@ -16,6 +17,8 @@ namespace api.nox.relay {
 		public abstract PropertyFlags GetFlags();
 
 		public abstract object GetValue();
+		
+		public abstract DateTime GetUpdated();
 
 		public abstract void SetValue(object value, DirtyBy by);
 
