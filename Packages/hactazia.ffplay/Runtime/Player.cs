@@ -19,6 +19,8 @@ namespace Hactazia.FFPlay
 		public readonly UnityEvent<Exception> OnError = new();
 		public readonly UnityEvent OnReady = new();
 		public readonly UnityEvent OnEnded = new();
+		public readonly UnityEvent OnStalled = new();
+		public readonly UnityEvent OnUnstalled = new();
 
 
 		private Timings _videot;
@@ -70,8 +72,14 @@ namespace Hactazia.FFPlay
 
 		public bool IsPlaying { get; private set; } = false;
 		public bool IsStream { get; private set; } = false;
-
 		public bool IsPaused { get; private set; } = false;
+		public bool IsStalled { get; private set; } = false;
+
+		private double _lastAudioPts = 0d;
+		private double _lastVideoPts = 0d;
+		private float _stallCheckTime = 0f;
+		private const float StallCheckInterval = 0.5f;
+		private const float StallThreshold = 1.0f;
 
 		public void Play(Stream streamV, Stream streamA = null, Stream streamS = null)
 		{
@@ -162,8 +170,17 @@ namespace Hactazia.FFPlay
 				p.Resume();
 			}
 
+			ResetStallDetection();
 			RunThread();
 			IsPlaying = true;
+		}
+
+		private void ResetStallDetection()
+		{
+			IsStalled = false;
+			_stallCheckTime = 0f;
+			_lastAudioPts = audioWorker != null ? audioWorker.pts : 0;
+			_lastVideoPts = videoWorker != null ? videoWorker.pts : 0;
 		}
 
 		public void Seek(double timestamp)
@@ -184,6 +201,7 @@ namespace Hactazia.FFPlay
 			foreach (var p in GetWorkers())
 				p.Seek();
 
+			ResetStallDetection();
 			RunThread();
 		}
 
@@ -215,6 +233,7 @@ namespace Hactazia.FFPlay
 			foreach (var p in GetWorkers())
 				p.Resume();
 			IsPaused = false;
+			ResetStallDetection();
 			RunThread();
 			IsPlaying = true;
 		}
@@ -222,12 +241,63 @@ namespace Hactazia.FFPlay
 		private void Update()
 		{
 			if (IsPaused) return;
+			
+			// Check for end of file
 			foreach (var t in GetTimings())
 				if (t is { IsEndOfFile: true })
 				{
 					Pause();
 					OnEnded.Invoke();
+					return;
 				}
+			
+			// Stall detection
+			_stallCheckTime += Time.deltaTime;
+			if (_stallCheckTime >= StallCheckInterval)
+			{
+				_stallCheckTime = 0f;
+				CheckForStall();
+			}
+		}
+
+		private void CheckForStall()
+		{
+			var currentAudioPts = audioWorker != null ? audioWorker.pts : 0;
+			var currentVideoPts = videoWorker != null ? videoWorker.pts : 0;
+			
+			// Check if pts hasn't progressed (stalled)
+			var audioPtsStalled = _audiot is { IsInputValid: true } && currentAudioPts == _lastAudioPts;
+			var videoPtsStalled = _videot is { IsInputValid: true } && currentVideoPts == _lastVideoPts;
+			
+			// Consider stalled if active streams haven't progressed
+			var hasActiveAudio = _audiot is { IsInputValid: true, IsEndOfFile: false };
+			var hasActiveVideo = _videot is { IsInputValid: true, IsEndOfFile: false };
+			
+			var isCurrentlyStalled = false;
+			if (hasActiveAudio && hasActiveVideo)
+				isCurrentlyStalled = audioPtsStalled && videoPtsStalled;
+			else if (hasActiveAudio)
+				isCurrentlyStalled = audioPtsStalled;
+			else if (hasActiveVideo)
+				isCurrentlyStalled = videoPtsStalled;
+			
+			if (isCurrentlyStalled && !IsStalled)
+			{
+				IsStalled = true;
+				foreach (var p in GetWorkers())
+					p.Pause();
+				OnStalled.Invoke();
+			}
+			else if (!isCurrentlyStalled && IsStalled)
+			{
+				IsStalled = false;
+				foreach (var p in GetWorkers())
+					p.Resume();
+				OnUnstalled.Invoke();
+			}
+			
+			_lastAudioPts = currentAudioPts;
+			_lastVideoPts = currentVideoPts;
 		}
 
 		private void VideoThread()
