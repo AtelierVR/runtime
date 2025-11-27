@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Hactazia.FFPlay {
 	[RequireComponent(typeof(AudioSource))]
-	public class BufferAudioSource : MonoBehaviour {
+	public class AudioForAudioSource : MonoBehaviour {
 		public AudioWorker worker;
 
 		[HideInInspector]
@@ -34,7 +34,7 @@ namespace Hactazia.FFPlay {
 			worker ??= GetComponentInParent<AudioWorker>();
 
 			if (!worker) {
-				Debug.LogError($"[{nameof(BufferAudioSource)}] No AudioWorker found in parent hierarchy.", this);
+				Debug.LogError($"[{nameof(AudioForAudioSource)}] No AudioWorker found in parent hierarchy.", this);
 				enabled = false;
 				return;
 			}

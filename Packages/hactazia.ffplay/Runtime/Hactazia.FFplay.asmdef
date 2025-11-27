@@ -1,6 +1,6 @@
 {
     "name": "Hactazia.FFplay",
-    "rootNamespace": "",
+    "rootNamespace": "Hactazia.FFPlay",
     "references": [
         "FFmpeg.AutoGen",
         "Unity.TextMeshPro"

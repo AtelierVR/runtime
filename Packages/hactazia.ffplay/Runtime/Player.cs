@@ -1,426 +1,406 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using FFmpeg.AutoGen;
-using FFmpeg.Unity;
 using FFmpeg.Unity.Helpers;
-using Hactazia.FFPlay.Helpers;
+using Hactazia.FFPlay.Core;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
-namespace Hactazia.FFPlay
-{
-	public class Player : MonoBehaviour
-	{
-		public readonly UnityEvent OnPrepare = new();
-		public readonly UnityEvent<Exception> OnError = new();
-		public readonly UnityEvent OnReady = new();
-		public readonly UnityEvent OnEnded = new();
-		public readonly UnityEvent OnStalled = new();
-		public readonly UnityEvent OnUnstalled = new();
+namespace Hactazia.FFPlay {
+	/// <summary>
+	/// Optimized media player using a single demuxing thread for all streams.
+	/// Replaces the original Player with 3 threads by a more efficient single-thread design.
+	/// </summary>
+	public class Player : MonoBehaviour {
+		#region Events
 
+		public readonly UnityEvent            OnPrepare   = new();
+		public readonly UnityEvent<Exception> OnError     = new();
+		public readonly UnityEvent            OnReady     = new();
+		public readonly UnityEvent            OnEnded     = new();
+		public readonly UnityEvent            OnStalled   = new();
+		public readonly UnityEvent            OnUnstalled = new();
+		public readonly UnityEvent<bool>      OnLooping   = new();
+		public readonly UnityEvent<double>    OnSeeked    = new();
+		public readonly UnityEvent<PlayState> OnPlayState = new();
 
-		private Timings _videot;
-		private Timings _audiot;
-		private Timings _subtlt;
+		#endregion
 
+		#region Fields
 
-		public double timeAsDouble
-			=> AudioSettings.dspTime;
+		private          IStreamTimings _timings;
+		private          Thread         _demuxThread;
+		private readonly object         _threadLock = new();
 
-		public double PlaybackTime
-			=> IsPaused ? _pauseTime : timeAsDouble - _timeOffset;
-
-		public double VideoTime
-			=> timeAsDouble - _timeOffset + videoOffset;
-
-		public double AudioTime
-			=> timeAsDouble - _timeOffset + audioOffset;
-
-		public double SubtitleTime
-			=> timeAsDouble - _timeOffset + subtitleOffset;
-
-
-		public IEnumerable<Timings> GetTimings()
-			=> new[] { _videot, _audiot, _subtlt };
-
-		public IEnumerable<Thread> GetThreads()
-			=> new[] { _videoq, _audioq, _subtlq };
-
-		public IEnumerable<BaseWorker> GetWorkers()
-			=> new BaseWorker[] { videoWorker, audioWorker, subtitleWorker };
-
-		private Thread _videoq;
-		private Thread _audioq;
-		private Thread _subtlq;
-
-		private readonly object _threadLock = new();
-
-		public double videoOffset = 0d;
-		public double audioOffset = 0d;
+		public double videoOffset    = 0d;
+		public double audioOffset    = 0d;
 		public double subtitleOffset = 0d;
 
-		public VideoWorker videoWorker;
-		public AudioWorker audioWorker;
+		public VideoWorker    videoWorker;
+		public AudioWorker    audioWorker;
 		public SubtitleWorker subtitleWorker;
 
 		private double _timeOffset = 0d;
-		private double _pauseTime = 0d;
+		private double _pauseTime  = 0d;
 
-		public bool IsPlaying { get; private set; } = false;
-		public bool IsStream { get; private set; } = false;
-		public bool IsPaused { get; private set; } = false;
-		public bool IsStalled { get; private set; } = false;
+		// Frame buffer for audio
+		private AVFrame[] _audioFrames = new AVFrame[500];
 
-		private double _lastAudioPts = 0d;
-		private double _lastVideoPts = 0d;
-		private float _stallCheckTime = 0f;
-		private const float StallCheckInterval = 0.5f;
-		private const float StallThreshold = 1.0f;
+		#endregion
 
-		public void Play(Stream streamV, Stream streamA = null, Stream streamS = null)
-		{
+		#region Properties
+
+		public double TimeAsDouble
+			=> AudioSettings.dspTime;
+
+		public double PlaybackTime
+			=> IsPaused ? _pauseTime : TimeAsDouble - _timeOffset;
+
+		public double VideoTime
+			=> TimeAsDouble - _timeOffset + videoOffset;
+
+		public double AudioTime
+			=> TimeAsDouble - _timeOffset + audioOffset;
+
+		public double SubtitleTime
+			=> TimeAsDouble - _timeOffset + subtitleOffset;
+
+		public bool IsPlaying { get; private set; }
+		public bool IsStream  { get; private set; }
+		public bool IsPaused  { get; private set; }
+
+		public bool IsStalled
+			=> false;
+		// => _timings?.IsVideoStalled == true || _timings?.IsAudioStalled == true;
+
+		private PlayState _currentPlayState = PlayState.Stopped;
+
+		public PlayState CurrentPlayState {
+			get => _currentPlayState;
+			private set {
+				if (_currentPlayState == value) return;
+				_currentPlayState = value;
+				OnPlayState.Invoke(value);
+			}
+		}
+
+		private bool _isLooping;
+
+		public bool IsLooping {
+			get => _isLooping;
+			set {
+				if (_isLooping == value) return;
+				_isLooping = value;
+				OnLooping.Invoke(value);
+			}
+		}
+
+		public bool HasVideo
+			=> _timings?.Has(MediaType.Video) ?? false;
+
+		public bool HasAudio
+			=> _timings?.Has(MediaType.Audio) ?? false;
+
+		public bool HasSubtitle
+			=> _timings?.Has(MediaType.Subtitle) ?? false;
+
+		/// <summary>
+		/// Exposes the internal timing system for debugging purposes.
+		/// </summary>
+		public IStreamTimings Timings
+			=> _timings;
+
+		#endregion
+
+
+		#region Playback Control
+
+		public void Play(Stream stream) {
 			IsPlaying = false;
 
 			StopThread();
-			OnDestroy();
+			DisposeTimings();
 
-			var vContext = new Context(streamV);
+			_timings = new MultiStreamTimings(new MediaSource(stream));
 
-			var aContext = streamA == null || streamV == streamA
-				? vContext
-				: new Context(streamA);
-
-			var sContext = streamS == null || streamS == streamV
-				? vContext
-				: streamS == streamA
-					? aContext
-					: new Context(streamS);
-
-			_videot = new Timings(vContext, AVMediaType.AVMEDIA_TYPE_VIDEO);
-			_audiot = new Timings(aContext, AVMediaType.AVMEDIA_TYPE_AUDIO);
-			_subtlt = new Timings(sContext, AVMediaType.AVMEDIA_TYPE_SUBTITLE);
-
-			Init();
+			Initialize();
 		}
 
-		public void Play(string urlV, string urlA = null, string urlS = null)
-		{
+		public void Play(string url) {
 			IsPlaying = false;
 
 			StopThread();
-			OnDestroy();
+			DisposeTimings();
 
-			var vContext = new Context(urlV);
-			var aContext = new Context(urlA);
-			var sContext = new Context(urlS);
+			_timings = new MultiStreamTimings(new MediaSource(url));
 
-			// var aContext = string.IsNullOrEmpty(urlA) || urlV == urlA
-			// 	? vContext
-			// 	: new Context(urlA);
-			//
-			// var sContext = string.IsNullOrEmpty(urlS) || urlS == urlV
-			// 	? vContext
-			// 	: urlS == urlA
-			// 		? aContext
-			// 		: new Context(urlS);
-
-			_videot = new Timings(vContext, AVMediaType.AVMEDIA_TYPE_VIDEO);
-			_audiot = new Timings(aContext, AVMediaType.AVMEDIA_TYPE_AUDIO);
-			_subtlt = new Timings(sContext, AVMediaType.AVMEDIA_TYPE_SUBTITLE);
-
-			Init();
+			Initialize();
 		}
 
-		private void Init()
-		{
+		/// <summary>
+		/// Plays media with separate sources for video, audio, and subtitles.
+		/// </summary>
+		public void Play(string videoUrl, string audioUrl, string subtitleUrl = null) {
+			IsPlaying = false;
+
+			StopThread();
+			DisposeTimings();
+
+			Debug.LogWarning("SeparateStreamTimings with URLs is not implemented.");
+			// _timings = new SeparateStreamTimings(videoUrl, audioUrl, subtitleUrl);
+			_timings = new MultiStreamTimings(new MediaSource(videoUrl));
+
+			Initialize();
+		}
+
+		/// <summary>
+		/// Plays media with separate streams for video, audio, and subtitles.
+		/// </summary>
+		public void Play(Stream videoStream, Stream audioStream, Stream subtitleStream = null) {
+			IsPlaying = false;
+
+			StopThread();
+			DisposeTimings();
+
+			Debug.LogWarning("SeparateStreamTimings with URLs is not implemented.");
+			// _timings = new SeparateStreamTimings(videoStream, audioStream, subtitleStream);
+			_timings = new MultiStreamTimings(new MediaSource(videoStream));
+
+			Initialize();
+		}
+
+		private void Initialize() {
 			OnPrepare.Invoke();
 
-			// Initialize audio player
-			if (_audiot is { IsInputValid: true })
-				audioWorker.Init(_audiot.Decoder.SampleRate, _audiot.Decoder.Channels, _audiot.Decoder.SampleFormat);
-
+			// Initialize audio worker
+			if (_timings.Has(MediaType.Audio) && audioWorker) {
+				var decoder = _timings.Get(MediaType.Audio);
+				audioWorker.Init(decoder.SampleRate, decoder.Channels, decoder.SampleFormat);
+			}
 
 			// Determine if stream or file
-			if (_videot is { IsInputValid: true })
-			{
-				_timeOffset = timeAsDouble - _videot.StartTime;
-				IsStream = Math.Abs(_videot.StartTime - ffmpeg.AV_NOPTS_VALUE) < float.Epsilon
-					|| Math.Abs(_videot.StartTime) > 5d;
-			}
-			else _timeOffset = timeAsDouble;
+			if (_timings.Has(MediaType.Video)) {
+				_timeOffset = TimeAsDouble - _timings.StartTime;
+				IsStream = Math.Abs(_timings.StartTime - ffmpeg.AV_NOPTS_VALUE) < float.Epsilon
+					|| Math.Abs(_timings.StartTime)                             > 5d;
+			} else _timeOffset = TimeAsDouble;
 
-			// Ensure at least one valid stream
-			if (!_videot.IsInputValid && !_audiot.IsInputValid)
-			{
-				IsPaused = true;
-				StopThread();
+			// Validate streams
+			if (!_timings.Has(MediaType.Video) && !_timings.Has(MediaType.Audio)) {
+				IsPaused  = true;
 				IsPlaying = false;
 				OnError.Invoke(new Exception("No valid audio or video stream found."));
 				return;
 			}
 
 			OnReady.Invoke();
-			foreach (var p in GetWorkers())
-			{
-				p.Seek();
-				p.Resume();
+
+			// Reset and start workers
+			foreach (var w in GetWorkers()) {
+				w?.Seek();
+				w?.Resume();
 			}
 
-			ResetStallDetection();
+			// _timings?.ResetStallDetection();
 			RunThread();
-			IsPlaying = true;
+			IsPlaying        = true;
+			CurrentPlayState = PlayState.Playing;
 		}
-
-		private void ResetStallDetection()
-		{
-			IsStalled = false;
-			_stallCheckTime = 0f;
-			_lastAudioPts = audioWorker != null ? audioWorker.pts : 0;
-			_lastVideoPts = videoWorker != null ? videoWorker.pts : 0;
-		}
-
-		public void Seek(double timestamp)
-		{
-			if (IsStream)
-				return;
-
-			StopThread();
-			_timeOffset = timeAsDouble - timestamp;
-			_pauseTime = timestamp;
-
-			_videot?.Seek(VideoTime);
-
-			_audiot?.Seek(AudioTime);
-
-			_subtlt?.Seek(SubtitleTime);
-
-			foreach (var p in GetWorkers())
-				p.Seek();
-
-			ResetStallDetection();
-			RunThread();
-		}
-
-		public double GetLength()
-			=> (from t in GetTimings()
-				where t is { IsInputValid: true }
-				select t.GetLength)
-				.FirstOrDefault();
 
 		[ContextMenu("Pause")]
-		public void Pause()
-		{
+		public void Pause() {
 			if (IsPaused) return;
+
 			_pauseTime = PlaybackTime;
-			foreach (var p in GetWorkers())
-				p.Pause();
+			foreach (var w in GetWorkers())
+				w?.Pause();
+
 			IsPaused = true;
 			StopThread();
-			IsPlaying = false;
+			IsPlaying        = false;
+			CurrentPlayState = PlayState.Paused;
+		}
+
+		[ContextMenu("Stop")]
+		public void Stop() {
+			Pause();
+			Seek(0);
+			_pauseTime       = 0d;
+			CurrentPlayState = PlayState.Stopped;
 		}
 
 		[ContextMenu("Resume")]
-		public void Resume()
-		{
-			if (!IsPaused)
-				return;
+		public void Resume() {
+			if (!IsPaused) return;
+
 			StopThread();
-			_timeOffset = timeAsDouble - _pauseTime;
-			foreach (var p in GetWorkers())
-				p.Resume();
+			_timeOffset = TimeAsDouble - _pauseTime;
+
+			foreach (var w in GetWorkers())
+				w?.Resume();
+
 			IsPaused = false;
-			ResetStallDetection();
+			// _timings?.ResetStallDetection();
 			RunThread();
-			IsPlaying = true;
+			IsPlaying        = true;
+			CurrentPlayState = PlayState.Playing;
 		}
 
-		private void Update()
-		{
-			if (IsPaused) return;
-			
-			// Check for end of file
-			foreach (var t in GetTimings())
-				if (t is { IsEndOfFile: true })
-				{
-					Pause();
-					OnEnded.Invoke();
-					return;
-				}
-			
-			// Stall detection
-			_stallCheckTime += Time.deltaTime;
-			if (_stallCheckTime >= StallCheckInterval)
-			{
-				_stallCheckTime = 0f;
-				CheckForStall();
-			}
-		}
+		public void Seek(double timestamp) {
+			if (IsStream || _timings == null) return;
 
-		private void CheckForStall()
-		{
-			var currentAudioPts = audioWorker != null ? audioWorker.pts : 0;
-			var currentVideoPts = videoWorker != null ? videoWorker.pts : 0;
-			
-			// Check if pts hasn't progressed (stalled)
-			var audioPtsStalled = _audiot is { IsInputValid: true } && currentAudioPts == _lastAudioPts;
-			var videoPtsStalled = _videot is { IsInputValid: true } && currentVideoPts == _lastVideoPts;
-			
-			// Consider stalled if active streams haven't progressed
-			var hasActiveAudio = _audiot is { IsInputValid: true, IsEndOfFile: false };
-			var hasActiveVideo = _videot is { IsInputValid: true, IsEndOfFile: false };
-			
-			var isCurrentlyStalled = false;
-			if (hasActiveAudio && hasActiveVideo)
-				isCurrentlyStalled = audioPtsStalled && videoPtsStalled;
-			else if (hasActiveAudio)
-				isCurrentlyStalled = audioPtsStalled;
-			else if (hasActiveVideo)
-				isCurrentlyStalled = videoPtsStalled;
-			
-			if (isCurrentlyStalled && !IsStalled)
-			{
-				IsStalled = true;
-				foreach (var p in GetWorkers())
-					p.Pause();
-				OnStalled.Invoke();
-			}
-			else if (!isCurrentlyStalled && IsStalled)
-			{
-				IsStalled = false;
-				foreach (var p in GetWorkers())
-					p.Resume();
-				OnUnstalled.Invoke();
-			}
-			
-			_lastAudioPts = currentAudioPts;
-			_lastVideoPts = currentVideoPts;
-		}
-
-		private void VideoThread()
-		{
-			while (!IsPaused)
-			{
-				Thread.Yield();
-
-				try
-				{
-					if (_videot == null) continue;
-					_videot.Update(VideoTime);
-					videoWorker.PlayPacket(_videot.GetFrame());
-				}
-				catch (Exception e)
-				{
-					Debug.LogException(e);
-					break;
-				}
-			}
-		}
-
-
-		private AVFrame[] _frames = new AVFrame[500];
-
-		private void AudioThread()
-		{
-			while (!IsPaused)
-			{
-				Thread.Yield();
-
-				try
-				{
-					if (_audiot == null) continue;
-					_audiot.Update(AudioTime);
-					var frameCount = _audiot.GetFramesNonAlloc(500, ref _frames);
-					audioWorker.PlayPackets(_frames, frameCount);
-				}
-				catch (Exception e)
-				{
-					Debug.LogException(e);
-					break;
-				}
-			}
-		}
-
-		private void SubtitleThread()
-		{
-			while (!IsPaused)
-			{
-				Thread.Yield();
-
-				try
-				{
-					if (_subtlt == null) continue;
-					_subtlt.Update(SubtitleTime);
-					subtitleWorker.PlayPacket(_subtlt, _subtlt.GetPacket());
-				}
-				catch (Exception e)
-				{
-					Debug.LogException(e);
-					break;
-				}
-			}
-		}
-
-
-		private void OnDestroy()
-		{
 			StopThread();
-			foreach (var t in GetTimings())
-				t?.Dispose();
-			_videot = null;
-			_audiot = null;
-			_subtlt = null;
+			_timeOffset = TimeAsDouble - timestamp;
+			_pauseTime  = timestamp;
+
+			_timings.Seek(timestamp);
+
+			foreach (var w in GetWorkers())
+				w?.Seek();
+
+			// _timings?.ResetStallDetection();
+			if (!IsPaused) RunThread();
+			OnSeeked.Invoke(timestamp);
 		}
 
-		private void RunThread()
-		{
-			lock (_threadLock)
-			{
-				if (_videoq is { IsAlive: true } || _audioq is { IsAlive: true } || _subtlq is { IsAlive: true })
-					throw new Exception("Threads are already running");
+		public double GetLength()
+			=> _timings?.Length ?? 0d;
+
+		public double GetCurrentTime()
+			=> PlaybackTime;
+
+		public string GetCurrentUrl()
+			=> null; // Not easily accessible with new architecture
+
+		#endregion
+
+		#region Thread Management
+
+		private void RunThread() {
+			lock (_threadLock) {
+				if (_demuxThread is { IsAlive: true })
+					throw new Exception("Thread is already running");
 
 				IsPaused = false;
 
-				_videoq = new Thread(VideoThread) { Name = nameof(VideoThread) };
-				_audioq = new Thread(AudioThread) { Name = nameof(AudioThread) };
-				_subtlq = new Thread(SubtitleThread) { Name = nameof(SubtitleThread) };
-
-				_videoq.Start();
-				_audioq.Start();
-				_subtlq.Start();
+				_demuxThread = new Thread(DemuxLoop) {
+					Name         = "PlayerV2_Demux",
+					IsBackground = true
+				};
+				_demuxThread.Start();
 			}
 		}
 
-		private void StopThread()
-		{
-			lock (_threadLock)
-			{
+		private void StopThread() {
+			lock (_threadLock) {
 				var paused = IsPaused;
 				IsPaused = true;
-				foreach (var t in GetThreads())
-					if (t is { IsAlive: true })
-						t.Join();
-				IsPaused = paused;
+
+				if (_demuxThread is { IsAlive: true })
+					_demuxThread.Join(1000);
+
+				_demuxThread = null;
+				IsPaused     = paused;
 			}
 		}
 
-		public void OnEnable()
-		{
-			lock (_threadLock)
-			{
-				_videoq = new Thread(VideoThread) { Name = nameof(VideoThread) };
-				_audioq = new Thread(AudioThread) { Name = nameof(AudioThread) };
-				_subtlq = new Thread(SubtitleThread) { Name = nameof(SubtitleThread) };
+		/// <summary>
+		/// Single thread that handles all stream types
+		/// </summary>
+		private void DemuxLoop() {
+			while (!IsPaused) {
+				try {
+					if (_timings == null) continue;
+
+					// Update timings with current playback positions
+					_timings.Update(MediaType.Video, VideoTime);
+					_timings.Update(MediaType.Audio, AudioTime);
+					_timings.Update(MediaType.Subtitle, SubtitleTime);
+
+					// Process video
+					if (videoWorker && _timings.Has(MediaType.Video)) {
+						var frame = _timings.GetFrame(MediaType.Video);
+						if (frame.format != -1) videoWorker.PlayPacket(frame);
+					}
+
+					// Process audio (batch for efficiency)
+					if (audioWorker && _timings.Has(MediaType.Audio)) {
+						var count = _timings.GetFrames(MediaType.Audio, ref _audioFrames);
+						if (count > 0) audioWorker.PlayPackets(_audioFrames, count);
+					}
+
+					// Process subtitles
+					// if (_timings.HasSubtitle && subtitleWorker != null) {
+					// 	var packet = _timings.GetSubtitlePacket();
+					// 	if (packet.size > 0)
+					// 		subtitleWorker.PlayPacket(null, packet); // Note: needs Timings compatibility
+					// }
+				} catch (Exception e) {
+					Debug.LogException(e);
+					break;
+				}
+
+				// Small sleep to prevent CPU spinning
+				Thread.Sleep(1);
 			}
 		}
 
-		public void OnDisable()
-		{
+		#endregion
+
+		#region Update & Stall Detection
+
+		private void Update() {
+			if (IsPaused) return;
+
+			// Update stall detection in timing system (must be called from main thread)
+			// _timings?.UpdateMainThread();
+
+			// Check for end of file
+			if (_timings is { IsEnd: true }) {
+				if (IsLooping && !IsStream) {
+					Seek(0);
+					OnEnded.Invoke();
+					return;
+				}
+
+				Pause();
+				CurrentPlayState = PlayState.Ended;
+				OnEnded.Invoke();
+				return;
+			}
+		}
+
+		#endregion
+
+		#region Helpers
+
+		private BaseWorker[] GetWorkers()
+			=> new BaseWorker[] { videoWorker, audioWorker, subtitleWorker };
+
+		private void DisposeTimings() {
+			_timings?.Dispose();
+			_timings = null;
+		}
+
+		#endregion
+
+		#region Lifecycle
+
+		private void OnEnable() {
+			// Thread will be started when Play is called
+		}
+
+		private void OnDisable() {
 			IsPaused = true;
-			OnDestroy();
+			DisposeTimings();
 		}
+
+		private void OnDestroy() {
+			StopThread();
+			DisposeTimings();
+		}
+
+		#endregion
 	}
 }

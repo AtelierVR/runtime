@@ -2,6 +2,7 @@ using System.Text;
 using FFmpeg.AutoGen;
 using FFmpeg.Unity;
 using FFmpeg.Unity.Helpers;
+using Hactazia.FFPlay.Core;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -20,14 +21,37 @@ namespace Hactazia.FFPlay {
 			onDisplay.Invoke(text);
 		}
 
-		public unsafe void PlayPacket(Timings timing, AVPacket frame) {
-			if (timing is not { IsInputValid: true } || timing.Decoder == null || timing.Decoder.Codec == null)
+		/// <summary>
+		/// Method for use with IStreamTimings from Core.
+		/// </summary>
+		public unsafe void PlayPacket(IStreamTimings timing, AVPacket frame) {
+			// if (timing is not { IsValid: true } || timing.SubtitleDecoder == null || !timing.SubtitleDecoder.IsValid)
+			// 	return;
+			//
+			// DecodeAndPlay(timing.SubtitleDecoder.Codec, frame, timing.StartTime);
+		}
+
+		/// <summary>
+		/// New method for use with StreamDecoder from Core.
+		/// </summary>
+		public unsafe void PlayPacket(StreamDecoder decoder, AVPacket frame, double startTime) {
+			if (decoder == null || !decoder.IsValid)
+				return;
+
+			DecodeAndPlay(decoder.Codec, frame, startTime);
+		}
+
+		/// <summary>
+		/// Direct decode method using codec context.
+		/// </summary>
+		public unsafe void DecodeAndPlay(AVCodecContext* codec, AVPacket frame, double startTime) {
+			if (codec == null)
 				return;
 
 			AVSubtitle sub;
 			var        got = 0;
 
-			var ret = ffmpeg.avcodec_decode_subtitle2(timing.Decoder.Codec, &sub, &got, &frame);
+			var ret = ffmpeg.avcodec_decode_subtitle2(codec, &sub, &got, &frame);
 			if (ret < 0 || got == 0)
 				return;
 
@@ -49,7 +73,7 @@ namespace Hactazia.FFPlay {
 			var startS = sub.start_display_time / 1000.0;
 			var endS   = sub.end_display_time   / 1000.0;
 
-			PlaySubtitle(text.Trim(), timing.StartTime + startS, timing.StartTime + endS);
+			PlaySubtitle(text.Trim(), startTime + startS, startTime + endS);
 		}
 	}
 }

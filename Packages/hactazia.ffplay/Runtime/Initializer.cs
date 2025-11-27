@@ -3,8 +3,31 @@ using System.IO;
 using System.Runtime.InteropServices;
 using FFmpeg.AutoGen;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Hactazia.FFPlay {
+	/// <summary>
+	/// Données d'événement FFmpeg incluant le contexte et le message
+	/// </summary>
+	[Serializable]
+	public unsafe class FFmpegLogEventArgs {
+		public void*  Context { get; }
+		public int    Level   { get; }
+		public string Message { get; }
+
+		public FFmpegLogEventArgs(void* ptr, int level, string line) {
+			Context = ptr;
+			Level   = level;
+			Message = line;
+		}
+	}
+
+	/// <summary>
+	/// UnityEvent pour les logs FFmpeg
+	/// </summary>
+	[Serializable]
+	public class FFmpegLogEvent : UnityEvent<FFmpegLogEventArgs> { }
+
 	/// <summary>
 	/// Handles FFmpeg bootstrap so native binaries are resolved once per domain.
 	/// </summary>
@@ -12,6 +35,11 @@ namespace Hactazia.FFPlay {
 		private static readonly object SyncRoot = new();
 		private static          bool   _initialized;
 		private static          string _rootPath;
+
+		/// <summary>
+		/// Event déclenché pour chaque log FFmpeg avec le contexte et le message
+		/// </summary>
+		public static readonly FFmpegLogEvent OnFFmpegLog = new();
 
 		public static int ThrowFFmpegException(this int error, string api = "ffmpeg") {
 			if (error >= 0)
@@ -38,7 +66,22 @@ namespace Hactazia.FFPlay {
 			ffmpeg.av_log_format_line(ptr, level, fmt, vl, lineBuffer, lineSize, &printPrefix);
 			var line = Marshal.PtrToStringAnsi((IntPtr)lineBuffer);
 
-			// Debug.Log($"[FFmpeg] {line}");
+			// Extraire le contexte (nom de la classe/fonction FFmpeg)
+			string context = "FFmpeg";
+			if (ptr != null) {
+				var avcl = (AVClass**)ptr;
+				if (*avcl != null) {
+					var className = Marshal.PtrToStringAnsi((IntPtr)(*avcl)->class_name);
+					if (!string.IsNullOrEmpty(className)) {
+						context = className;
+					}
+				}
+			}
+
+			Debug.Log($"[FFmpeg] {line}");
+
+			// Invoquer l'événement avec les données complètes
+			OnFFmpegLog?.Invoke(new FFmpegLogEventArgs(ptr, level, line ?? string.Empty));
 		}
 
 		public static void EnsureInitialized(string explicitRootPath = null) {

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Hactazia.FFPlay {
 	[RequireComponent(typeof(RawImage))]
-	public class VideoRawImage : MonoBehaviour {
+	public class VideoForRawImage : MonoBehaviour {
 		public VideoWorker worker;
 
 		private RawImage _image;

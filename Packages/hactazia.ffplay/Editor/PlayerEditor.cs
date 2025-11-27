@@ -1,51 +1,27 @@
+using Hactazia.FFPlay.Core;
 using UnityEditor;
 using UnityEngine;
 
 namespace Hactazia.FFPlay.Editor {
 	[CustomEditor(typeof(Player))]
 	public class PlayerEditor : UnityEditor.Editor {
-		private SerializedProperty videoPlayerProp;
-		private SerializedProperty audioPlayerProp;
-		private SerializedProperty subtitlePlayerProp;
-		private SerializedProperty videoOffsetProp;
-		private SerializedProperty audioOffsetProp;
-		private SerializedProperty subtitleOffsetProp;
-
-		private bool   showTimings   = true;
-		private bool   showDebugInfo = false;
-		private string seekTime      = "0";
-
-		private void OnEnable() {
-			videoPlayerProp    = serializedObject.FindProperty(nameof(Player.videoWorker));
-			audioPlayerProp    = serializedObject.FindProperty(nameof(Player.audioWorker));
-			subtitlePlayerProp = serializedObject.FindProperty(nameof(Player.subtitleWorker));
-			videoOffsetProp    = serializedObject.FindProperty(nameof(Player.videoOffset));
-			audioOffsetProp    = serializedObject.FindProperty(nameof(Player.audioOffset));
-			subtitleOffsetProp = serializedObject.FindProperty(nameof(Player.subtitleOffset));
-		}
+		private bool   showTimings       = true;
+		private bool   showDebugInfo     = false;
+		private bool   showStreamTimings = false;
+		private string seekTime          = "0";
 
 		public override void OnInspectorGUI() {
 			var player = (Player)target;
 			serializedObject.Update();
 
 			EditorGUILayout.Space(10);
-			EditorGUILayout.LabelField("FFPlay Unity Player", EditorStyles.boldLabel);
+			EditorGUILayout.LabelField("FFPlay Unity Player V2", EditorStyles.boldLabel);
 			EditorGUILayout.Space(5);
 
-			// Player references
-			EditorGUILayout.PropertyField(videoPlayerProp, new GUIContent("Video Player"));
-			EditorGUILayout.PropertyField(audioPlayerProp, new GUIContent("Audio Player"));
-			EditorGUILayout.PropertyField(subtitlePlayerProp, new GUIContent("Subtitle Player"));
-
+			// Worker references
+			base.OnInspectorGUI();
 			EditorGUILayout.Space(10);
 
-			// Sync offsets
-			EditorGUILayout.LabelField("Synchronization", EditorStyles.boldLabel);
-			EditorGUILayout.PropertyField(videoOffsetProp, new GUIContent("Video Offset (s)"));
-			EditorGUILayout.PropertyField(audioOffsetProp, new GUIContent("Audio Offset (s)"));
-			EditorGUILayout.PropertyField(subtitleOffsetProp, new GUIContent("Subtitle Offset (s)"));
-
-			EditorGUILayout.Space(10);
 
 			// Playback status
 			EditorGUILayout.LabelField("Playback Status", EditorStyles.boldLabel);
@@ -53,6 +29,9 @@ namespace Hactazia.FFPlay.Editor {
 			EditorGUILayout.Toggle("Is Playing", player.IsPlaying);
 			EditorGUILayout.Toggle("Is Paused", player.IsPaused);
 			EditorGUILayout.Toggle("Is Stream", player.IsStream);
+			EditorGUILayout.Toggle("Is Stalled", player.IsStalled);
+			EditorGUILayout.Toggle("Is Looping", player.IsLooping);
+			EditorGUILayout.EnumPopup("Play State", player.CurrentPlayState);
 			EditorGUI.EndDisabledGroup();
 
 			EditorGUILayout.Space(10);
@@ -69,7 +48,16 @@ namespace Hactazia.FFPlay.Editor {
 						player.Pause();
 				}
 
+				if (GUILayout.Button("Stop", GUILayout.Height(30))) {
+					player.Stop();
+				}
+
 				EditorGUILayout.EndHorizontal();
+
+				// Looping toggle
+				var newLooping = EditorGUILayout.Toggle("Loop", player.IsLooping);
+				if (newLooping != player.IsLooping)
+					player.IsLooping = newLooping;
 
 				if (!player.IsStream) {
 					EditorGUILayout.Space(5);
@@ -82,6 +70,17 @@ namespace Hactazia.FFPlay.Editor {
 					}
 
 					EditorGUILayout.EndHorizontal();
+
+					// Progress bar
+					var length = player.GetLength();
+					if (length > 0) {
+						var progress = (float)(player.PlaybackTime / length);
+						EditorGUILayout.Space(5);
+						var newProgress = EditorGUILayout.Slider("Progress", progress, 0f, 1f);
+						if (Mathf.Abs(newProgress - progress) > 0.01f) {
+							player.Seek(newProgress * length);
+						}
+					}
 				}
 
 				EditorGUILayout.Space(10);
@@ -100,25 +99,56 @@ namespace Hactazia.FFPlay.Editor {
 					EditorGUI.indentLevel--;
 				}
 
-				// Debug information
-				showDebugInfo = EditorGUILayout.Foldout(showDebugInfo, "Debug Information", true);
-				if (showDebugInfo) {
+				// IStreamTimings Debug Info
+				showStreamTimings = EditorGUILayout.Foldout(showStreamTimings, "Stream Timings Debug", true);
+				if (showStreamTimings && player.Timings != null) {
 					EditorGUI.indentLevel++;
 					EditorGUI.BeginDisabledGroup(true);
 
-					foreach (var timing in player.GetTimings()) {
-						if (timing == null) continue;
-						EditorGUILayout.LabelField(timing.GetType().Name, EditorStyles.boldLabel);
-						EditorGUILayout.Toggle("Is Input Valid", timing.IsInputValid);
-						EditorGUILayout.Toggle("End of File", timing.IsEndOfFile);
-						EditorGUILayout.DoubleField("Start Time", timing.StartTime);
-						EditorGUILayout.DoubleField("Time Base Seconds", timing.TimeBaseSeconds);
-						EditorGUILayout.DoubleField("Current PTS", timing.GetCurrentFrame().pts);
+					var timings = player.Timings;
+					EditorGUILayout.Toggle("Is Valid", timings.IsValid);
+					EditorGUILayout.Toggle("Is End", timings.IsEnd);
+					EditorGUILayout.DoubleField("Start Time", timings.StartTime);
+					EditorGUILayout.DoubleField("Length", timings.Length);
+
+					EditorGUILayout.Space(5);
+					EditorGUILayout.LabelField("Stream Status", EditorStyles.miniBoldLabel);
+					foreach (var mediaType in System.Enum.GetValues(typeof(MediaType))) {
+						var mt = (MediaType)mediaType;
+						EditorGUILayout.Toggle($"Has {mt}", timings.Has(mt));
+					}
+
+					EditorGUILayout.Space(5);
+
+					// Discontinuity info (if MultiStreamTimings)
+					if (timings is MultiStreamTimings multiTimings) {
 						EditorGUILayout.Space(5);
+						EditorGUILayout.LabelField("Discontinuity", EditorStyles.miniBoldLabel);
+						EditorGUILayout.Toggle("Correction Enabled", multiTimings.DiscontinuityCorrectionEnabled);
+						EditorGUILayout.DoubleField("Threshold", multiTimings.DiscontinuityThreshold);
+
+						foreach (var mediaType in System.Enum.GetValues(typeof(MediaType))) {
+							var mt = (MediaType)mediaType;
+							if (!timings.Has(mt)) continue;
+							EditorGUILayout.DoubleField($"{mt} Last Discontinuity", multiTimings.GetDiscontinuityOffset(mt));
+						}
+
+						EditorGUILayout.Space(5);
+						EditorGUILayout.LabelField("Decoders", EditorStyles.miniBoldLabel);
+
+						foreach (var mediaType in System.Enum.GetValues(typeof(MediaType))) {
+							var mt = (MediaType)mediaType;
+							if (!timings.Has(mt)) continue;
+							var decoder = timings.Get(mt);
+							EditorGUILayout.LabelField($"{mt} Decoder", $"Stream {decoder.StreamIndex}, TimeBase: {decoder.TimeBase:F6}");
+							EditorGUILayout.LabelField($"{mt} Pending", $"{timings.GetPendingSize(mt)}");
+						}
 					}
 
 					EditorGUI.EndDisabledGroup();
 					EditorGUI.indentLevel--;
+				} else if (showStreamTimings && player.Timings == null) {
+					EditorGUILayout.HelpBox("No timing system available", MessageType.Info);
 				}
 
 				// Auto-repaint during playback

@@ -3,7 +3,7 @@ using UnityEngine.Serialization;
 
 namespace Hactazia.FFPlay {
 	[RequireComponent(typeof(MeshRenderer))]
-	public class DisplayMeshRenderer : MonoBehaviour {
+	public class VideoForMeshRenderer : MonoBehaviour {
 		public VideoWorker worker;
 
 		private MeshRenderer          _render;

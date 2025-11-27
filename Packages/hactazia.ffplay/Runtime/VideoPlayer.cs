@@ -16,7 +16,7 @@ namespace Hactazia.FFPlay {
 		}
 
 		public void Play(string u)
-			=> player.Play(u, u, u);
+			=> player.Play(u);
 
 		[ContextMenu(nameof(Play))]
 		public void Play() {

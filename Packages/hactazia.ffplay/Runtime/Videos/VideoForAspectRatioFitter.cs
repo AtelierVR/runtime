@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Hactazia.FFPlay {
 	[RequireComponent(typeof(AspectRatioFitter))]
-	public class VideoAspectRatioFitter : MonoBehaviour {
+	public class VideoForAspectRatioFitter : MonoBehaviour {
 		public VideoWorker worker;
 
 		private AspectRatioFitter _fitter;

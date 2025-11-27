@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace Hactazia.FFPlay.Editor {
-	[CustomEditor(typeof(BufferAudioSource))]
+	[CustomEditor(typeof(AudioForAudioSource))]
 	public class BufferAudioSourceEditor : UnityEditor.Editor {
 		private SerializedProperty audiowProp;
 		private SerializedProperty audioSourceProp;
@@ -10,12 +10,12 @@ namespace Hactazia.FFPlay.Editor {
 		private bool showRuntimeInfo = true;
 
 		private void OnEnable() {
-			audiowProp      = serializedObject.FindProperty(nameof(BufferAudioSource.worker));
-			audioSourceProp = serializedObject.FindProperty(nameof(BufferAudioSource.audioSource));
+			audiowProp      = serializedObject.FindProperty(nameof(AudioForAudioSource.worker));
+			audioSourceProp = serializedObject.FindProperty(nameof(AudioForAudioSource.audioSource));
 		}
 
 		public override void OnInspectorGUI() {
-			var buffer = (BufferAudioSource)target;
+			var buffer = (AudioForAudioSource)target;
 			serializedObject.Update();
 
 			EditorGUILayout.Space(10);

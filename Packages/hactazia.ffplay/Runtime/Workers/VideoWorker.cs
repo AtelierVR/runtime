@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using FFmpeg.AutoGen;
 using FFmpeg.Unity.Helpers;
-using Hactazia.FFPlay.Helpers;
+using Hactazia.FFPlay.Core;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
@@ -104,7 +104,7 @@ namespace Hactazia.FFPlay {
 			if (frame.data[0] == null || frame.format == -1 || texture == null)
 				return false;
 
-			using var converter = new Converter(
+			using var converter = new FrameConverter(
 				new Size(frame.width, frame.height),
 				(AVPixelFormat)frame.format,
 				new Size(width, height),
