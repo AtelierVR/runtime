@@ -324,8 +324,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 459040205}
-  - component: {fileID: 459040204}
   - component: {fileID: 459040206}
+  - component: {fileID: 459040207}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -333,24 +333,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!114 &459040204
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 459040202}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb91949b94ee7de44a9894f670dddb9c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Hactazia.FFplay::FFmpeg.Unity.FFPlayUnity
-  videoOffset: 0
-  audioOffset: 0
-  subtitleOffset: 0
-  videoWorker: {fileID: 866852632}
-  audioWorker: {fileID: 25923406}
-  subtitleWorker: {fileID: 866852634}
 --- !u!4 &459040205
 Transform:
   m_ObjectHideFlags: 0
@@ -360,7 +342,7 @@ Transform:
   m_GameObject: {fileID: 459040202}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 2}
+  m_LocalPosition: {x: 0, y: 1.2, z: 2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -381,7 +363,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Nox.CCK.VideoPlayer.Hactazia::Nox.CCK.VideoPlayer.Hactazia.VideoPlayer
   playQuery: https://www.twitch.tv/lofigirl
-  player: {fileID: 459040204}
+  player: {fileID: 459040207}
+--- !u!114 &459040207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 459040202}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0aa9aefb6050fec4a9ed74c3c6f1e80b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Hactazia.FFplay::Hactazia.FFPlay.PlayerV2
+  videoOffset: 0
+  audioOffset: 0
+  subtitleOffset: 0
+  videoWorker: {fileID: 866852632}
+  audioWorker: {fileID: 25923406}
+  subtitleWorker: {fileID: 866852634}
+  timingMode: 1
 --- !u!1 &716362206
 GameObject:
   m_ObjectHideFlags: 0
