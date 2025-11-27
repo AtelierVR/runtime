@@ -1,9 +1,11 @@
 ﻿using api.nox.world.client;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Language;
 using Nox.CCK.Utils;
 using Nox.UI;
 using Nox.UI.Widgets;
 using Nox.Users;
+using Nox.Worlds;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,6 +19,8 @@ namespace api.nox.world.widget {
 		private AspectRatioFitter _ratio;
 		private GameObject        _container;
 		private GameObject        _content;
+		private Image             _icon;
+		private TextLanguage      _label;
 
 		private void OnClick()
 			=> Client.UiAPI?.SendGoto(_mid, WorldPage.GetStaticKey(), "identifier", GetHomeIdentifier());
@@ -25,7 +29,7 @@ namespace api.nox.world.widget {
 			=> GetDefaultKey();
 
 		public Vector2Int GetSize()
-			=> Vector2Int.one;
+			=> new(3, 2);
 
 		public int GetPriority()
 			=> 99;
@@ -37,6 +41,7 @@ namespace api.nox.world.widget {
 			var identifier = GetHomeIdentifier();
 			if (!(identifier?.IsValid() ?? false)) {
 				_container.SetActive(false);
+				_label.UpdateText("world.no_home");
 				return;
 			}
 
@@ -44,23 +49,43 @@ namespace api.nox.world.widget {
 				_container.SetActive(false);
 
 			var home = await Main.Instance.Network.Fetch(identifier);
-			if (home == null || string.IsNullOrEmpty(home.GetThumbnailUrl())) {
+			if (home == null) {
+				_container.SetActive(false);
+				_label.UpdateText("world.no_home");
+				return;
+			}
+
+			_label.UpdateText(
+				"value",
+				new[] {
+					home.GetTitle()
+					?? identifier.ToString()
+				}
+			);
+
+			await UpdateBanner(home);
+		}
+
+		private async UniTask UpdateBanner(IWorld home) {
+			var url = home.GetThumbnailUrl();
+
+			if (string.IsNullOrEmpty(url)) {
 				_container.SetActive(false);
 				return;
 			}
 
-			var thumbnail = await Main.Instance.NetworkAPI.FetchTexture(home.GetThumbnailUrl());
-			if (!thumbnail || thumbnail.height == 0) {
+			var banner = await Main.Instance.NetworkAPI.FetchTexture(url);
+			if (!banner || banner.height == 0) {
 				_container.SetActive(false);
 				return;
 			}
 
 			_image.sprite = Sprite.Create(
-				thumbnail,
-				new Rect(0, 0, thumbnail.width, thumbnail.height),
+				banner,
+				new Rect(0, 0, banner.width, banner.height),
 				new Vector2(0.5f, 0.5f)
 			);
-			_ratio.aspectRatio = (float)thumbnail.width / thumbnail.height;
+			_ratio.aspectRatio = (float)banner.width / banner.height;
 			_container.SetActive(true);
 		}
 
@@ -80,22 +105,22 @@ namespace api.nox.world.widget {
 			instance.name = $"[{component.GetKey()}_{instance.GetInstanceID()}]";
 			values        = (instance, component);
 
-			prefab               = Client.GetAsset<GameObject>("prefabs/widget_image.prefab", "ui");
+			prefab               = Client.GetAsset<GameObject>("prefabs/large_widget.prefab", "ui");
 			component._content   = Instantiate(prefab, Reference.GetComponent<RectTransform>("content", instance));
 			component._image     = Reference.GetComponent<Image>("image", component._content);
-			component._ratio     = Reference.GetComponent<AspectRatioFitter>("ratio", component._content);
+			component._ratio     = Reference.GetComponent<AspectRatioFitter>("image_ratio", component._content);
 			component._container = Reference.GetReference("image_container", component._content);
+			component._icon      = Reference.GetComponent<Image>("icon", component._content);
+			component._label     = Reference.GetComponent<TextLanguage>("label", component._content);
 
-			component.UpdateIcon().Forget();
 			component.UpdateContent().Forget();
+			component.UpdateIcon().Forget();
 
 			return true;
 		}
 
 		private async UniTask UpdateIcon() {
-			var icon      = await Client.GetAssetAsync<Sprite>("icons/home.png", "ui");
-			var labelIcon = Reference.GetComponent<Image>("icon", _content);
-			labelIcon.sprite = icon;
+			_icon.sprite = await Client.GetAssetAsync<Sprite>("icons/home.png", "ui");
 		}
 	}
 }

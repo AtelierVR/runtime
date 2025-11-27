@@ -23,7 +23,7 @@ namespace api.nox.server.widget {
 			=> Vector2Int.one;
 
 		public int GetPriority()
-			=> 99;
+			=> 70;
 
 		private static string GetAddress(ICurrentUser current = null)
 			=> (current ?? Client.UserAPI.GetCurrent())?.GetServerAddress();

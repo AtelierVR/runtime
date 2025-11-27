@@ -24,7 +24,7 @@ namespace api.nox.terminal.widget {
 			=> Vector2Int.one;
 
 		public int GetPriority()
-			=> 100;
+			=> 70;
 
 		public static bool TryMake(IMenu menu, RectTransform parent, out (GameObject, IWidget) values) {
 			var prefab    = Client.GetAsset<GameObject>("prefabs/grid_item.prefab", "ui");
