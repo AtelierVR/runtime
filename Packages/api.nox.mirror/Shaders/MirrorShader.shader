@@ -2,20 +2,165 @@ Shader "Nox/MirrorShader"
 {
     Properties
     {
-        _LeftEyeTexture ("Left Eye Texture", 2D) = "white" {}
-        _RightEyeTexture ("Right Eye Texture", 2D) = "white" {}
+        [HideInInspector] _LeftEyeTexture ("Left Eye Texture", 2D) = "white" {}
+        [HideInInspector] _RightEyeTexture ("Right Eye Texture", 2D) = "white" {}
+        _Color ("Tint Color", Color) = (1,1,1,1)
     }
     
     SubShader
     {
+        Tags 
+        { 
+            "RenderType" = "Opaque" 
+            "Queue" = "Geometry"
+            "RenderPipeline" = "UniversalPipeline"
+        }
+        LOD 100
+        
+        Pass
+        {
+            Name "ForwardLit"
+            Tags { "LightMode" = "UniversalForward" }
+            
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #pragma target 3.0
+            
+            // XR/Stereo rendering keywords
+            #pragma multi_compile_instancing
+            #pragma instancing_options renderinglayer
+            
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            
+            struct Attributes
+            {
+                float4 positionOS : POSITION;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
+            
+            struct Varyings
+            {
+                float4 positionCS : SV_POSITION;
+                float4 screenPos : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+                UNITY_VERTEX_OUTPUT_STEREO
+            };
+            
+            TEXTURE2D(_LeftEyeTexture);
+            SAMPLER(sampler_LeftEyeTexture);
+            TEXTURE2D(_RightEyeTexture);
+            SAMPLER(sampler_RightEyeTexture);
+            
+            CBUFFER_START(UnityPerMaterial)
+                half4 _Color;
+            CBUFFER_END
+            
+            Varyings vert(Attributes input)
+            {
+                Varyings output = (Varyings)0;
+                
+                UNITY_SETUP_INSTANCE_ID(input);
+                UNITY_TRANSFER_INSTANCE_ID(input, output);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+                
+                output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+                output.screenPos = ComputeScreenPos(output.positionCS);
+                
+                return output;
+            }
+            
+            half4 frag(Varyings input) : SV_Target
+            {
+                UNITY_SETUP_INSTANCE_ID(input);
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+                
+                // Calculate screen UV from screen position
+                float2 screenUV = input.screenPos.xy / input.screenPos.w;
+                
+                half4 reflectionColor;
+                
+                // Detect which eye we're rendering for using projection matrix
+                // Left eye has projection[0][2] <= 0, right eye has > 0
+                if (unity_CameraProjection[0][2] <= 0)
+                {
+                    reflectionColor = SAMPLE_TEXTURE2D(_LeftEyeTexture, sampler_LeftEyeTexture, screenUV);
+                }
+                else
+                {
+                    reflectionColor = SAMPLE_TEXTURE2D(_RightEyeTexture, sampler_RightEyeTexture, screenUV);
+                }
+                
+                // Apply tint color
+                reflectionColor *= _Color;
+                
+                return reflectionColor;
+            }
+            ENDHLSL
+        }
+        
+        // Depth only pass for shadows
+        Pass
+        {
+            Name "DepthOnly"
+            Tags { "LightMode" = "DepthOnly" }
+            
+            ZWrite On
+            ColorMask 0
+            
+            HLSLPROGRAM
+            #pragma vertex DepthOnlyVertex
+            #pragma fragment DepthOnlyFragment
+            
+            #pragma multi_compile_instancing
+            
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            
+            struct Attributes
+            {
+                float4 position : POSITION;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
+            
+            struct Varyings
+            {
+                float4 positionCS : SV_POSITION;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+                UNITY_VERTEX_OUTPUT_STEREO
+            };
+            
+            Varyings DepthOnlyVertex(Attributes input)
+            {
+                Varyings output = (Varyings)0;
+                UNITY_SETUP_INSTANCE_ID(input);
+                UNITY_TRANSFER_INSTANCE_ID(input, output);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
+                
+                output.positionCS = TransformObjectToHClip(input.position.xyz);
+                return output;
+            }
+            
+            half4 DepthOnlyFragment(Varyings input) : SV_TARGET
+            {
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+                return 0;
+            }
+            ENDHLSL
+        }
+    }
+    
+    // Fallback for built-in render pipeline
+    SubShader
+    {
         Tags { "RenderType"="Opaque" "Queue"="Geometry" }
-        LOD 200
+        LOD 100
         
         Pass
         {
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma target 3.0
             #pragma multi_compile_instancing
             
             #include "UnityCG.cginc"
@@ -23,22 +168,19 @@ Shader "Nox/MirrorShader"
             struct appdata
             {
                 float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
             
             struct v2f
             {
-                float2 uv : TEXCOORD0;
-                float4 vertex : SV_POSITION;
-                float4 screenPos : TEXCOORD1;
+                float4 pos : SV_POSITION;
+                float4 screenPos : TEXCOORD0;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
             
             sampler2D _LeftEyeTexture;
             sampler2D _RightEyeTexture;
-            float4 _LeftEyeTexture_ST;
-            float4 _RightEyeTexture_ST;
+            fixed4 _Color;
             
             v2f vert (appdata v)
             {
@@ -46,9 +188,8 @@ Shader "Nox/MirrorShader"
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _LeftEyeTexture);
-                o.screenPos = ComputeScreenPos(o.vertex);
+                o.pos = UnityObjectToClipPos(v.vertex);
+                o.screenPos = ComputeScreenPos(o.pos);
                 
                 return o;
             }
@@ -57,29 +198,22 @@ Shader "Nox/MirrorShader"
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
                 
-                // Flip UV horizontally for mirror effect
-                float2 mirrorUV = float2(1.0 - i.uv.x, i.uv.y);
+                // Calculate screen UV
+                float2 screenUV = i.screenPos.xy / i.screenPos.w;
                 
                 fixed4 col;
                 
-                // Check which eye we're rendering for
-                #if defined(UNITY_SINGLE_PASS_STEREO) || defined(UNITY_STEREO_INSTANCING_ENABLED)
-                    if (unity_StereoEyeIndex == 0)
-                    {
-                        // Left eye
-                        col = tex2D(_LeftEyeTexture, mirrorUV);
-                    }
-                    else
-                    {
-                        // Right eye
-                        col = tex2D(_RightEyeTexture, mirrorUV);
-                    }
-                #else
-                    // Non-VR fallback - use left eye texture
-                    col = tex2D(_LeftEyeTexture, mirrorUV);
-                #endif
+                // Detect eye using projection matrix (like MVRMirror)
+                if (unity_CameraProjection[0][2] <= 0)
+                {
+                    col = tex2D(_LeftEyeTexture, screenUV);
+                }
+                else
+                {
+                    col = tex2D(_RightEyeTexture, screenUV);
+                }
                 
-                return col;
+                return col * _Color;
             }
             ENDCG
         }
