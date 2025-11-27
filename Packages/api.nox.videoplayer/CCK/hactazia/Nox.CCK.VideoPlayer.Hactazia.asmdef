@@ -6,7 +6,7 @@
         "UniTask",
         "Nox.VideoPlayer",
         "Nox.CCK.VideoPlayer",
-        "Hactazia.VideoPlayer"
+        "Hactazia.FFplay"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -17,9 +17,9 @@
     "defineConstraints": [],
     "versionDefines": [
         {
-            "name": "fr.hactazia.videoplayer",
+            "name": "hactazia.ffplay",
             "expression": "",
-            "define": "HAS_HACTAZIA_VIDEOPLAYER"
+            "define": "HAS_HACTAZIA_FFPLAY"
         }
     ],
     "noEngineReferences": false

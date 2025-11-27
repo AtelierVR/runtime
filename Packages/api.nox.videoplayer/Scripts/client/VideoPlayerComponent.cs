@@ -72,8 +72,8 @@ namespace api.nox.videoplayer.client {
 			if (!_isUserSeeking)
 				seek.SetValueWithoutNotify((float)progress);
 			loaded.value = 0;
-			FormatTime(current, player.GetTime());
-			FormatTime(total, player.GetDuration());
+			FormatTime(current, player.Time);
+			FormatTime(total, player.Duration);
 		}
 
 		public void UpdatePlayStatus(IVideoPlayer player, bool isPlaying) {
@@ -102,7 +102,7 @@ namespace api.nox.videoplayer.client {
 		}
 
 		private void UpdateRender(IVideoPlayer player) {
-			var render = player?.GetRender();
+			var render = player is IVideoPlayerTexture tex ? tex.Texture : null;
 			if (!render) return;
 			video.material.mainTexture = render;
 			ratio.aspectRatio          = (float)render.width / render.height;
@@ -113,25 +113,17 @@ namespace api.nox.videoplayer.client {
 			var player = _page.GetSelectedPlayer();
 			if (player == null) return;
 			UpdateRender(player);
-			UpdatePlayStatus(player, player.IsPlaying());
-			UpdateProgress(player, (float)(player.GetTime() / player.GetDuration()));
+			UpdatePlayStatus(player, player.IsPlaying);
+			UpdateProgress(player, player.Progress);
 		}
 
 		private void OnSeekValueChanged(float value) {
-			// Ne rien faire si le seek est en cours par l'utilisateur
 			if (_isUserSeeking) return;
-
 			var player = _page.GetSelectedPlayer();
 			if (player == null) return;
-
-			// Calculer le nouveau temps de lecture basé sur la valeur du seek
-			var newSeek = player.GetDuration() * value;
-
-			// Mettre à jour le seek du player
-			player.SetSeek(newSeek);
-
-			// Sauvegarder l'état de lecture avant le seek
-			_wasPlayingBeforeSeek = player.IsPlaying();
+			var newSeek = player.Duration * value;
+			player.Time           = newSeek;
+			_wasPlayingBeforeSeek = player.IsPlaying;
 			if (_wasPlayingBeforeSeek) {
 				player.Pause();
 			}
@@ -145,7 +137,7 @@ namespace api.nox.videoplayer.client {
 			_isUserSeeking = false;
 			var player = _page.GetSelectedPlayer();
 			if (player == null) return;
-			player.SetSeek(seek.value * player.GetDuration());
+			player.Time = seek.value * player.Duration;
 			if (_wasPlayingBeforeSeek)
 				player.Resume();
 			UpdateProgress(player, seek.value);
@@ -154,7 +146,7 @@ namespace api.nox.videoplayer.client {
 		public void OnSeekDrag() {
 			var player = _page.GetSelectedPlayer();
 			if (player == null) return;
-			player.SetSeek(seek.value * player.GetDuration());
+			player.Time = seek.value * player.Duration;
 			UpdateProgress(player, seek.value);
 		}
 	}

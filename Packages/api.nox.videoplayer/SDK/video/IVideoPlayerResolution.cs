@@ -3,8 +3,14 @@ using UnityEngine.Events;
 
 namespace Nox.VideoPlayer {
 	public interface IVideoPlayerResolution {
-		public UnityEvent<IVideoPlayer, Vector2Int> OnResolutionChangedEvent();
+		/// <summary>
+		/// Event invoked when the resolution changes.
+		/// </summary>
+		public UnityEvent<IVideoPlayer, Vector2Int> OnResolution { get; }
 
-		public Vector2Int GetResolution();
+		/// <summary>
+		/// The current resolution of the video player.
+		/// </summary>
+		public Vector2Int Resolution { get; }
 	}
 }

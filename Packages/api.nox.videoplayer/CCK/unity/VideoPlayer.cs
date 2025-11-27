@@ -1,4 +1,4 @@
-#if HAS_UNITY_VIDEOPLAYER
+/*#if HAS_UNITY_VIDEOPLAYER
 using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
@@ -557,4 +557,4 @@ namespace Nox.CCK.VideoPlayer.Unity {
 		#endregion Metadata
 	}
 }
-#endif
+#endif*/

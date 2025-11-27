@@ -1,193 +1,85 @@
-#if HAS_HACTAZIA_VIDEOPLAYER
+#if HAS_HACTAZIA_FFPLAY
 using System;
 using System.Linq;
-using Cysharp.Threading.Tasks;
-using Hactazia.VideoPlayer.Components;
-using Hactazia.VideoPlayer.Core;
+using Hactazia.FFPlay;
 using Nox.VideoPlayer;
 using UnityEngine;
 using UnityEngine.Events;
 using Logger = Nox.CCK.Utils.Logger;
-using HactaziaVideoPlayer = Hactazia.VideoPlayer.Player;
+using PlayState = Hactazia.FFPlay.PlayState;
 
 namespace Nox.CCK.VideoPlayer.Hactazia {
-	public class VideoPlayer : MonoBehaviour, IVideoPlayer, IVideoPlayerResolver, IVideoPlayerDetails, IVideoPlayerResolution {
+	public class VideoPlayer : MonoBehaviour, IVideoPlayer, IVideoPlayerResolver, IVideoPlayerDetails, IVideoPlayerResolution, IVideoPlayerTexture {
 		#region Fields
 
-		public string              playQuery;
-		public HactaziaVideoPlayer videoPlayer;
-		public RenderTextureHandler renderTextureHandler;
-		public AudioSourceHandler  audioSourceHandler;
+		public string playQuery;
+		public Player player;
 
-		private       string   _currentUrl;
-		private       bool     _isReconnecting;
-		private       int      _reconnectAttempts;
-		private const int      MaxReconnectAttempts = 3;
-		private const float    ReconnectDelay       = 2;
-		private       double   _lastProgress        = -1;
-		private       bool     _lastPlayingStatus;
-		private       IResolve _currentPlaying;
+		private IResolve _currentPlaying;
 
 		#endregion Fields
 
 		#region Properties
 
-		public HactaziaVideoPlayer Player {
-			// ReSharper disable Unity.PerformanceCriticalCodeInvocation
-			get => videoPlayer ??= GetComponent<HactaziaVideoPlayer>() ?? GetComponentInChildren<HactaziaVideoPlayer>();
-			set => videoPlayer = value;
+		// ReSharper disable Unity.PerformanceCriticalCodeInvocation
+		public Player Player {
+			get => player ??= GetComponent<Player>() ?? GetComponentInChildren<Player>();
+			set => player = value;
 		}
 
-		public RenderTextureHandler RenderTextureHandler {
-			get => renderTextureHandler ??= GetComponent<RenderTextureHandler>() ?? GetComponentInChildren<RenderTextureHandler>();
-			set => renderTextureHandler = value;
+		public VideoWorker VideoWorker {
+			get => Player.videoWorker ??= Player.GetComponentInChildren<VideoWorker>();
+			set => Player.videoWorker = value;
 		}
 
-		public AudioSourceHandler AudioSourceHandler {
-			get => audioSourceHandler ??= GetComponent<AudioSourceHandler>() ?? GetComponentInChildren<AudioSourceHandler>();
-			set => audioSourceHandler = value;
+		public AudioWorker AudioWorker {
+			get => Player.audioWorker ??= Player.GetComponentInChildren<AudioWorker>();
+			set => Player.audioWorker = value;
 		}
 
 		#endregion Properties
 
-	#region Unity Lifecycle
+		#region Unity Lifecycle
 
-	private void Awake() {
-		// Ensure outputs are initialized
-		if (Player.videoOutput == null) Player.videoOutput = Player.GetComponentInChildren<VideoOutput>();
-		if (Player.audioOutput == null) Player.audioOutput = Player.GetComponentInChildren<AudioOutput>();
-
-		// Connect handlers to outputs
-		if (RenderTextureHandler != null && Player.videoOutput != null) {
-			RenderTextureHandler.SetVideoOutput(Player.videoOutput);
-		}
-		
-		if (AudioSourceHandler != null && Player.audioOutput != null) {
-			AudioSourceHandler.SetAudioOutput(Player.audioOutput);
-		}
-
-		Player.OnPrepareCompleted    += OnPrepareCompleted;
-		Player.OnStarted             += OnStarted;
-		Player.OnLoopPointReached    += OnLoopPointReached;
-		Player.OnErrorReceived       += OnErrorReceived;
-			Player.OnClockResyncOccurred += OnClockResyncOccurred;
-			Player.OnFrameDropped        += OnFrameDropped;
-			Player.OnFrameReady          += OnFrameReady;
-			Player.OnSeekCompleted       += OnSeekCompleted;
+		private void Awake() {
+			Initializer.EnsureInitialized();
+			VideoWorker ??= Player.GetComponentInChildren<VideoWorker>();
+			AudioWorker ??= Player.GetComponentInChildren<AudioWorker>();
+			Player?.OnSeeked.AddListener(HandleSeek);
+			Player?.OnLooping.AddListener(HandleLoop);
+			Player?.OnError.AddListener(HandleError);
+			// Player?.OnMessage.AddListener(HandleMessage);
+			Player?.OnPlayState.AddListener(HandleState);
+			VideoWorker?.OnDisplay.AddListener(HandleTexture);
+			VideoWorker?.OnResize.AddListener(HandleResolution);
+			AudioWorker?.OnVolumeChange.AddListener(HandleVolume);
 		}
 
+		[ContextMenu("Play")]
 		private void Start() {
 			if (!string.IsNullOrEmpty(playQuery))
 				Play(playQuery);
 		}
 
-		private void Update() {
-			// Vérification du statut de lecture
-			var isPlaying = Player.IsPlaying;
-			if (isPlaying != _lastPlayingStatus) {
-				_lastPlayingStatus = isPlaying;
-				onPlayStatusChanged.Invoke(this, isPlaying);
-			}
-
-			// Surveiller le progrès de la vidéo seulement si elle est en cours de lecture
-			if (isPlaying && Player.GetLength() > 0) {
-				var currentProgress = GetProgress();
-				// Déclencher l'événement seulement si le progrès a changé de manière significative (plus de 1%)
-				if (!(Math.Abs(currentProgress - _lastProgress) > float.Epsilon)) return;
-				_lastProgress = currentProgress;
-				onProgress.Invoke(this, currentProgress);
-			}
-		}
-
 		private void OnDestroy() {
-			Player.OnPrepareCompleted    -= OnPrepareCompleted;
-			Player.OnStarted             -= OnStarted;
-			Player.OnLoopPointReached    -= OnLoopPointReached;
-			Player.OnErrorReceived       -= OnErrorReceived;
-			Player.OnClockResyncOccurred -= OnClockResyncOccurred;
-			Player.OnFrameDropped        -= OnFrameDropped;
-			Player.OnFrameReady          -= OnFrameReady;
-			Player.OnSeekCompleted       -= OnSeekCompleted;
+			Player?.OnSeeked.RemoveListener(HandleSeek);
+			Player?.OnError.RemoveListener(HandleError);
+			// Player?.OnMessage.RemoveListener(HandleMessage);
+			Player?.OnPlayState.RemoveListener(HandleState);
+			Player?.OnLooping.RemoveListener(HandleLoop);
+			VideoWorker?.OnDisplay.RemoveListener(HandleTexture);
+			VideoWorker?.OnResize.RemoveListener(HandleResolution);
+			AudioWorker?.OnVolumeChange.RemoveListener(HandleVolume);
 		}
 
 		#endregion Unity Lifecycle
 
-		#region Events
-
-		public UnityEvent<IVideoPlayer>             onReady             = new(); // Événement pour la préparation terminée
-		public UnityEvent<IVideoPlayer>             onStart             = new(); // Événement pour le début de la lecture
-		public UnityEvent<IVideoPlayer>             onEnd               = new(); // Événement pour la fin de la lecture
-		public UnityEvent<IVideoPlayer, Exception>  onError             = new(); // Événement pour les erreurs
-		public UnityEvent<IVideoPlayer>             onConnectionLost    = new(); // Événement pour perte de connexion
-		public UnityEvent<IVideoPlayer>             onReconnecting      = new(); // Événement pour tentative de reconnexion
-		public UnityEvent<IVideoPlayer>             onReconnected       = new(); // Événement pour reconnexion réussie
-		public UnityEvent<IVideoPlayer>             onPlay              = new(); // Événement pour la lecture
-		public UnityEvent<IVideoPlayer>             onPause             = new(); // Événement pour la pause
-		public UnityEvent<IVideoPlayer>             onResume            = new(); // Événement pour la reprise
-		public UnityEvent<IVideoPlayer, double>     onProgress          = new(); // Événement pour la progression (0.0 à 1.0)
-		public UnityEvent<IVideoPlayer, double>     onSeek              = new(); // Événement pour le seek (temps en secondes)
-		public UnityEvent<IVideoPlayer, float>      onVolumeChanged     = new(); // Événement pour le changement de volume (0.0 à 1.0)
-		public UnityEvent<IVideoPlayer, bool>       onPlayStatusChanged = new(); // Événement pour le changement de statut de lecture
-		public UnityEvent<IVideoPlayer, Vector2Int> onResolutionChanged = new(); // Événement pour le changement de résolution
-
-		public UnityEvent<IVideoPlayer, IFetchOptions>            onResolving = new(); // Événement pour le début de la résolution
-		public UnityEvent<IVideoPlayer, IFetchOptions, IResult[]> onResolved  = new(); // Événement pour la résolution terminée
-
-		public UnityEvent<IVideoPlayer> OnReadyEvent()
-			=> onReady;
-
-		public UnityEvent<IVideoPlayer> OnConnectionLost()
-			=> onConnectionLost;
-
-		public UnityEvent<IVideoPlayer> OnReconnecting()
-			=> onReconnecting;
-
-		public UnityEvent<IVideoPlayer> OnReconnected()
-			=> onReconnected;
-
-		public UnityEvent<IVideoPlayer> OnPlayEvent()
-			=> onPlay;
-
-		public UnityEvent<IVideoPlayer> OnPauseEvent()
-			=> onPause;
-
-		public UnityEvent<IVideoPlayer> OnResumeEvent()
-			=> onResume;
-
-		public UnityEvent<IVideoPlayer, double> OnProgressEvent()
-			=> onProgress;
-
-		public UnityEvent<IVideoPlayer, double> OnSeekEvent()
-			=> onSeek;
-
-		public UnityEvent<IVideoPlayer, float> OnVolumeChangedEvent()
-			=> onVolumeChanged;
-
-		public UnityEvent<IVideoPlayer, bool> OnPlayStatusChangedEvent()
-			=> onPlayStatusChanged;
-
-		public UnityEvent<IVideoPlayer, Exception> OnErrorEvent()
-			=> onError;
-
-		public UnityEvent<IVideoPlayer> OnStartEvent()
-			=> onStart;
-
-		public UnityEvent<IVideoPlayer> OnEndEvent()
-			=> onEnd;
-
-		public UnityEvent<IVideoPlayer, IFetchOptions> OnResolvingEvent()
-			=> onResolving;
-
-		public UnityEvent<IVideoPlayer, IFetchOptions, IResult[]> OnResolvedEvent()
-			=> onResolved;
-
-
-		public UnityEvent<IVideoPlayer, Vector2Int> OnResolutionChangedEvent()
-			=> onResolutionChanged;
-
-		#endregion Events
 
 		#region Resolving
+
+		public UnityEvent<IVideoPlayer, IFetchOptions> OnResolving { get; } = new();
+
+		public UnityEvent<IVideoPlayer, IFetchOptions, IResult[]> OnResolved { get; } = new();
 
 		private IFetchOptions _currentFetchOptions;
 
@@ -196,7 +88,7 @@ namespace Nox.CCK.VideoPlayer.Hactazia {
 				_currentFetchOptions.GetCancellation().Cancel();
 			_currentFetchOptions = fetchOptions;
 			Logger.LogDebug($"Resolving {_currentFetchOptions?.ToString() ?? "null"}");
-			onResolving.Invoke(this, fetchOptions);
+			OnResolving.Invoke(this, fetchOptions);
 		}
 
 		public void OnResolve(IFetchOptions initial, IResult[] results) {
@@ -211,7 +103,7 @@ namespace Nox.CCK.VideoPlayer.Hactazia {
 
 			if (resolves.Length == 0) {
 				Logger.LogWarning($"No data found for {_currentFetchOptions?.ToString() ?? "null"}");
-				onError.Invoke(this, new Exception("No data found"));
+				OnError.Invoke(this, new Exception("No data found"));
 				return;
 			}
 
@@ -219,7 +111,7 @@ namespace Nox.CCK.VideoPlayer.Hactazia {
 
 			if (first == null) {
 				Logger.LogWarning($"No results found for {_currentFetchOptions?.ToString() ?? "null"}");
-				onError.Invoke(this, new Exception("No results found"));
+				OnError.Invoke(this, new Exception("No results found"));
 				return;
 			}
 
@@ -227,53 +119,45 @@ namespace Nox.CCK.VideoPlayer.Hactazia {
 
 			if (tuple.Item1 == null) {
 				Logger.LogWarning($"No compatible stream found for {_currentFetchOptions?.ToString() ?? "null"}");
-				onError.Invoke(this, new Exception("No compatible stream found"));
+				OnError.Invoke(this, new Exception("No compatible stream found"));
 				return;
 			}
 
-			onResolved.Invoke(this, initial, results);
+			OnResolved.Invoke(this, initial, results);
 			_currentPlaying = first;
 
-			Play(tuple, IsLooping());
+			Play(tuple);
 		}
 
 		#endregion Resolving
 
 		#region Playback
 
-		public void Play(string query)
-			=> Play(query, IsLooping());
-
-
-		public void Play(string query, bool loop) {
-			Logger.LogDebug($"Play called with query: {query}, loop: {loop}");
-			Resolve(new VideoFetchOptions { Query = query });
-			SetLooping(loop);
+		private void PlayUrl(string vUrl, string aUrl = null, string sUrl = null) {
+			try {
+				if (aUrl == null && sUrl == null)
+					Player.Play(vUrl);
+				else if (sUrl == null)
+					Player.Play(vUrl, aUrl);
+				else Player.Play(vUrl, aUrl, sUrl);
+			} catch (Exception e) {
+				// Error already handled by Player.OnError, just prevent propagation
+				Logger.LogError($"PlayUrl error: {e.Message}");
+			}
 		}
 
-		private void PlayUrl(string url, bool loop) {
-			_currentUrl        = url; // Stocker l'URL pour les reconnexions
-			_reconnectAttempts = 0;   // Réinitialiser le compteur de tentatives
-			_isReconnecting    = false;
-
-			Player.Play(url, loop);
-
-			Logger.LogDebug($"Playing URL {_currentUrl}");
-			onPlay.Invoke(this);
-		}
-
-		private void Play((IFormat, IFormat) tuple, bool loop) {
-			if (tuple.Item1 is IAudioVideo av) {
+		private void Play((IFormat, IFormat) formats) {
+			if (formats.Item1 is IAudioVideo av) {
 				Play(av);
 				return;
 			}
 
-			if (tuple is { Item1: IVideo v, Item2: IAudio a }) {
+			if (formats is { Item1: IVideo v, Item2: IAudio a }) {
 				Play(v, a);
 				return;
 			}
 
-			switch (tuple.Item1) {
+			switch (formats.Item1) {
 				case IVideo v2:
 					Play(v2);
 					break;
@@ -281,295 +165,231 @@ namespace Nox.CCK.VideoPlayer.Hactazia {
 					Play(a2);
 					break;
 				default:
-					Logger.LogError("Tuple contains unsupported format types");
+					Logger.LogError("Unsupported format type");
+					OnError.Invoke(this, new Exception("Unsupported format type"));
 					break;
 			}
 		}
 
-		private void Play(IAudioVideo audioVideo) {
-			if (audioVideo == null) {
+		private void Play(IAudioVideo format) {
+			if (format == null) {
 				Logger.LogError("AudioVideo format is null");
-				onError.Invoke(this, new ArgumentNullException(nameof(audioVideo)));
+				OnError.Invoke(this, new ArgumentNullException(nameof(format)));
 				return;
 			}
 
-			var url = audioVideo.GetUrl();
+			var url = format.GetUrl();
 			if (string.IsNullOrEmpty(url)) {
 				Logger.LogError("AudioVideo URL is null or empty");
-				onError.Invoke(this, new Exception("AudioVideo URL is null or empty"));
+				OnError.Invoke(this, new Exception("AudioVideo URL is null or empty"));
 				return;
 			}
 
-			Logger.LogDebug($"Playing AudioVideo format: {url} (Resolution: {audioVideo.GetResolution()}, Audio Channels: {audioVideo.GetAudioChannels()})");
-
-			// Configure le player pour audio et vidéo
-			// Player.audioOutputMode = UnityEngine.Video.VideoAudioOutputMode.AudioSource;
-			// Player.SetTargetAudioSource(0, AudioSource);
-
-			PlayUrl(url, IsLooping());
+			PlayUrl(url);
 		}
 
-		private void Play(IVideo video, IAudio audio) {
-			if (video == null || audio == null) {
-				Logger.LogError($"Video or Audio format is null - Video: {video != null}, Audio: {audio != null}");
-				onError.Invoke(this, new ArgumentNullException(video == null ? nameof(video) : nameof(audio)));
+		private void Play(IVideo vFormat, IAudio aFormat) {
+			if (vFormat == null || aFormat == null) {
+				Logger.LogError($"Video or Audio format is null - Video: {vFormat != null}, Audio: {aFormat != null}");
+				OnError.Invoke(this, new ArgumentNullException(vFormat == null ? nameof(vFormat) : nameof(aFormat)));
 				return;
 			}
 
-			var videoUrl = video.GetUrl();
-			var audioUrl = audio.GetUrl();
-
+			var videoUrl = vFormat.GetUrl();
+			var audioUrl = aFormat.GetUrl();
 			if (string.IsNullOrEmpty(videoUrl) || string.IsNullOrEmpty(audioUrl)) {
-				Logger.LogError($"Video or Audio URL is null or empty - Video URL: {!string.IsNullOrEmpty(videoUrl)}, Audio URL: {!string.IsNullOrEmpty(audioUrl)}");
-				onError.Invoke(this, new Exception("Video or Audio URL is null or empty"));
+				Logger.LogError("Video or Audio URL is null or empty");
+				OnError.Invoke(this, new Exception("Video or Audio URL is null or empty"));
 				return;
 			}
 
-			Logger.LogDebug($"Playing separate Video and Audio streams - Video: {videoUrl}, Audio: {audioUrl}");
-			Logger.LogDebug($"Video Resolution: {video.GetResolution()}, Audio Channels: {audio.GetAudioChannels()}");
-
-			// Pour des streams séparés, Unity VideoPlayer ne supporte pas nativement deux URLs
-			// On doit utiliser la vidéo comme source principale et gérer l'audio séparément
-			Logger.LogWarning("Separate video/audio streams detected. Using video stream only - audio stream will be ignored.");
-
-			Play(video);
+			try {
+				Player.Play(videoUrl, audioUrl);
+			} catch (Exception e) {
+				// Error already handled by Player.OnError, just prevent propagation
+				Logger.LogError($"Play(video, audio) error: {e.Message}");
+			}
 		}
 
-		private void Play(IVideo video) {
-			if (video == null) {
+		private void Play(IVideo vFormat) {
+			if (vFormat == null) {
 				Logger.LogError("Video format is null");
-				onError.Invoke(this, new ArgumentNullException(nameof(video)));
+				OnError.Invoke(this, new ArgumentNullException(nameof(vFormat)));
 				return;
 			}
 
-			var url = video.GetUrl();
+			var url = vFormat.GetUrl();
 			if (string.IsNullOrEmpty(url)) {
 				Logger.LogError("Video URL is null or empty");
-				onError.Invoke(this, new Exception("Video URL is null or empty"));
+				OnError.Invoke(this, new Exception("Video URL is null or empty"));
 				return;
 			}
 
-			Logger.LogDebug($"Playing Video format: {url} (Resolution: {video.GetResolution()}, Framerate: {video.GetFramerate()})");
-
-			// Configure le player pour vidéo seulement
-			// Player.audioOutputMode = UnityEngine.Video.VideoAudioOutputMode.None;
-
-			PlayUrl(url, IsLooping());
+			PlayUrl(url);
 		}
 
-		private void Play(IAudio audio) {
-			if (audio == null) {
+		private void Play(IAudio aFormat) {
+			if (aFormat == null) {
 				Logger.LogError("Audio format is null");
-				onError.Invoke(this, new ArgumentNullException(nameof(audio)));
+				OnError.Invoke(this, new ArgumentNullException(nameof(aFormat)));
 				return;
 			}
 
-			var url = audio.GetUrl();
+			var url = aFormat.GetUrl();
 			if (string.IsNullOrEmpty(url)) {
 				Logger.LogError("Audio URL is null or empty");
-				onError.Invoke(this, new Exception("Audio URL is null or empty"));
+				OnError.Invoke(this, new Exception("Audio URL is null or empty"));
 				return;
 			}
 
-			Logger.LogDebug($"Playing Audio format: {url} (Channels: {audio.GetAudioChannels()}, Bitrate: {audio.GetAudioBitrate()})");
-
-			// Configure le player pour audio seulement
-			// Player.audioOutputMode = UnityEngine.Video.VideoAudioOutputMode.AudioSource;
-			// Player.SetTargetAudioSource(0, AudioSource);
-
-			PlayUrl(url, IsLooping());
+			PlayUrl(url);
 		}
-
-		public void Stop() {
-			if (!Player.IsPlaying) return;
-			Player.Stop();
-		}
-
-		public void Pause() {
-			if (!Player.IsPlaying) return;
-			Player.Pause();
-			onPause.Invoke(this);
-		}
-
-		public void Resume() {
-			if (Player.IsPlaying) return;
-			Player.Resume();
-			onResume.Invoke(this);
-		}
-
-	public void SetVolume(float volume) {
-		var clampedVolume = Mathf.Clamp01(volume);
-		var audioSource = AudioSourceHandler?.GetComponent<AudioSource>();
-		if (audioSource != null) {
-			audioSource.volume = clampedVolume;
-		}
-		onVolumeChanged.Invoke(this, clampedVolume);
-	}		public void SetSeek(double time) {
-			var clampedTime = Math.Clamp(time, 0, Player.GetLength());
-			Player.Seek(clampedTime);
-			onSeek.Invoke(this, clampedTime);
-		}
-
-		public double GetTime()
-			=> Player.GetPlaybackTime();
-
-		public double GetProgress()
-			=> Player.GetLength() > 0 ? Player.GetPlaybackTime() / Player.GetLength() : 0;
-
-		public double GetDuration()
-			=> Player.GetLength();
-
-		public bool IsLooping()
-			=> Player.IsLooping();
-
-		public void SetLooping(bool loop)
-			=> Player.SetLoop(loop);
-
-	public RenderTexture GetRender()
-		=> RenderTextureHandler?.GetRenderTexture();	
-		
-		public float GetVolume()
-		=> AudioSourceHandler?.GetComponent<AudioSource>()?.volume ?? 0f;		
-		
-		public bool IsPlaying()
-			=> Player.IsPlaying;
 
 		#endregion Playback
 
-	#region Callbacks
+		#region Actions
 
-	private void OnPrepareCompleted(HactaziaVideoPlayer source) {
-		Logger.Log("Video prepared");
+		public UnityEvent<IVideoPlayer> OnPlay { get; } = new();
 
-		// Si c'était une reconnexion réussie
-		if (_isReconnecting) {
-				_isReconnecting    = false;
-				_reconnectAttempts = 0;
-				Logger.Log("Reconnexion réussie !");
-				onReconnected.Invoke(this);
-			}
+		public UnityEvent<IVideoPlayer> OnPause { get; } = new();
 
-			onReady.Invoke(this);
-		}
+		public UnityEvent<IVideoPlayer> OnResume { get; } = new();
 
-		private void OnStarted(HactaziaVideoPlayer source) {
-			Logger.Log($"Video started: {source.GetUrl()}");
-			onStart.Invoke(this);
-		}
+		public UnityEvent<IVideoPlayer> OnStop { get; } = new();
 
-		private void OnLoopPointReached(HactaziaVideoPlayer source) {
-			Logger.Log($"Video ended: {source.GetUrl()}");
-			onEnd.Invoke(this);
-		}
-
-		private void OnErrorReceived(HactaziaVideoPlayer source, string message) {
-			var exception = new Exception(message);
-			Logger.LogError($"Video error: {source.GetUrl()} - {message}");
-
-			// Vérifier si c'est un problème de connexion
-			if (IsConnectionError(message) && !string.IsNullOrEmpty(_currentUrl)) {
-				HandleConnectionError();
-			} else {
-				// Erreur non liée à la connexion, propager l'erreur
-				onError.Invoke(this, exception);
+		private void HandleState(PlayState state) {
+			switch (state) {
+				case PlayState.Playing:
+					OnPlay.Invoke(this);
+					break;
+				case PlayState.Paused:
+					OnPause.Invoke(this);
+					break;
+				case PlayState.Stopped:
+					OnStop.Invoke(this);
+					break;
+				case PlayState.Buffering:
+				case PlayState.Stalled:
+				case PlayState.Ended:
+					// Do nothing for now
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(state), state, null);
 			}
 		}
 
-		private void OnSeekCompleted(HactaziaVideoPlayer source) {
-			Logger.Log($"Seek completed on video: {source.GetUrl()}");
-		}
+		public bool IsPlaying
+			=> Player.IsPlaying;
 
-		private void OnClockResyncOccurred(HactaziaVideoPlayer source, double seconds) {
-			Logger.Log($"Clock resync occurred: {seconds}s");
-		}
+		public void Play(string query)
+			=> Resolve(new VideoFetchOptions { Query = query });
 
-		private void OnFrameDropped(HactaziaVideoPlayer source) {
-			Logger.LogWarning("Frame dropped");
-		}
+		public void Pause()
+			=> Player.Pause();
 
-		private void OnFrameReady(HactaziaVideoPlayer source, long frameIdx) {
-			// Frame ready - peut être utilisé pour des traitements spécifiques
-		}
+		public void Resume()
+			=> Player.Resume();
 
-		#endregion Callbacks
+		public void Stop()
+			=> Player.Stop();
 
-		#region Connection Handling
-
-		/// <summary>
-		/// Détermine si l'erreur est liée à un problème de connexion
-		/// </summary>
-		private static bool IsConnectionError(string errorMessage) {
-			var connectionErrors = new[] {
-				"network", "connection", "timeout", "unreachable",
-				"dns", "host", "failed to connect", "cannot connect",
-				"internet", "offline", "502", "503", "504"
-			};
-
-			return connectionErrors
-				.Any(error => errorMessage.ToLower().Contains(error));
-		}
-
-		/// <summary>
-		/// Gère les erreurs de connexion avec tentatives de reconnexion
-		/// </summary>
-		private void HandleConnectionError() {
-			if (!_isReconnecting) {
-				Logger.Log("Perte de connexion détectée");
-				onConnectionLost.Invoke(this);
-			}
-
-			if (_reconnectAttempts < MaxReconnectAttempts) {
-				_reconnectAttempts++;
-				_isReconnecting = true;
-
-				Logger.Log($"Tentative de reconnexion {_reconnectAttempts}/{MaxReconnectAttempts}");
-				onReconnecting.Invoke(this);
-
-				AttemptReconnectionAsync().Forget();
-			} else {
-				Logger.LogError("Échec de la reconnexion après plusieurs tentatives");
-				_isReconnecting = false;
-				onError.Invoke(this, new Exception($"Impossible de se reconnecter après {MaxReconnectAttempts} tentatives"));
-			}
-		}
-
-		/// <summary>
-		/// Tente la reconnexion avec délai en utilisant UniTask
-		/// </summary>
-		private async UniTaskVoid AttemptReconnectionAsync() {
-			await UniTask.Delay(TimeSpan.FromSeconds(ReconnectDelay), cancellationToken: this.GetCancellationTokenOnDestroy());
-
-			if (!string.IsNullOrEmpty(_currentUrl)) {
-				Logger.Log($"Reconnexion en cours vers: {_currentUrl}");
-				Player.Play(_currentUrl);
-			}
-		}
-
-		/// <summary>
-		/// Force une reconnexion manuelle
-		/// </summary>
-		public void ForceReconnect() {
-			if (string.IsNullOrEmpty(_currentUrl)) return;
-			_reconnectAttempts = 0;
-			_isReconnecting    = true;
-			onReconnecting.Invoke(this);
-			AttemptReconnectionAsync().Forget();
-		}
-
-		#endregion Connection Handling
+		#endregion Actions
 
 		#region Metadata
 
 		public string GetTitle()
 			=> _currentPlaying?.GetTile();
 
-	public string GetSubtitle()
-		=> _currentPlaying?.GetSubtitle();
+		public string GetSubtitle()
+			=> _currentPlaying?.GetSubtitle();
 
-	public Vector2Int GetResolution()
-		=> RenderTextureHandler?.GetResolution() ?? Vector2Int.zero;
+		#endregion Metadata
 
-	#endregion Metadata
+		#region Texture
+
+		public UnityEvent<IVideoPlayer, Texture2D> OnTexture { get; } = new();
+
+		private void HandleTexture(Texture2D texture)
+			=> OnTexture.Invoke(this, texture);
+
+		public Texture2D Texture
+			=> VideoWorker.image;
+
+		#endregion Texture
+
+		#region Resolution
+
+		public UnityEvent<IVideoPlayer, Vector2Int> OnResolution { get; } = new();
+
+		private void HandleResolution(Vector2Int resolution)
+			=> OnResolution.Invoke(this, resolution);
+
+		public Vector2Int Resolution
+			=> VideoWorker.dims;
+
+		#endregion Resolution
+
+		#region Volume
+
+		public UnityEvent<IVideoPlayer, float> OnVolume { get; } = new();
+
+		private void HandleVolume(float volume)
+			=> OnVolume.Invoke(this, volume);
+
+		public float Volume {
+			get => AudioWorker.GetVolume();
+			set => AudioWorker.SetVolume(value);
+		}
+
+		#endregion Volume
+
+		#region Time
+
+		public double Time {
+			get => Player.GetCurrentTime();
+			set => Player.Seek(value);
+		}
+
+		public double Duration
+			=> Player.GetLength();
+
+		public double Progress
+			=> Duration > 0 ? Time / Duration : 0;
+
+		private void HandleSeek(double time)
+			=> OnSeek.Invoke(this, time);
+
+		public UnityEvent<IVideoPlayer, double> OnSeek { get; } = new();
+
+		#endregion Time
+
+		#region Loop
+
+		public bool Loop {
+			get => Player.IsLooping;
+			set => Player.IsLooping = value;
+		}
+
+		private void HandleLoop(bool loop)
+			=> OnLoop.Invoke(this, loop);
+
+		public UnityEvent<IVideoPlayer, bool> OnLoop { get; } = new();
+
+		#endregion Loop
+
+		#region Debug
+
+		public UnityEvent<IVideoPlayer, string> OnMessage { get; } = new();
+
+		private void HandleMessage(string message)
+			=> OnMessage.Invoke(this, message);
+
+		public UnityEvent<IVideoPlayer, Exception> OnError { get; } = new();
+
+		private void HandleError(Exception exception)
+			=> OnError.Invoke(this, exception);
+
+		#endregion Debug
 	}
 }
 #endif

@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using Nox.UI;
 using Nox.UI.Widgets;
+using Nox.VideoPlayer;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +18,7 @@ namespace api.nox.videoplayer.widget {
 
 		private int               _mid;
 		private GameObject        _content;
-		private RawImage          _image;
+		private Image             _image;
 		private AspectRatioFitter _ratio;
 		private GameObject        _container;
 
@@ -28,7 +29,7 @@ namespace api.nox.videoplayer.widget {
 			=> Vector2Int.one;
 
 		public int GetPriority()
-			=> 100;
+			=> 90;
 
 		public static bool TryMake(IMenu menu, RectTransform parent, out (GameObject, IWidget) values) {
 			var prefab    = Client.GetAsset<GameObject>("prefabs/grid_item.prefab", "ui");
@@ -46,8 +47,7 @@ namespace api.nox.videoplayer.widget {
 
 
 			var image = Reference.GetComponent<Image>("image", component._content);
-			component._image = image.GetOrAddComponent<RawImage>();
-			image.Destroy();
+			component._image     = image;
 			component._ratio     = Reference.GetComponent<AspectRatioFitter>("ratio", component._content);
 			component._container = Reference.GetReference("image_container", component._content);
 
@@ -63,18 +63,26 @@ namespace api.nox.videoplayer.widget {
 				return;
 			}
 
-			var texture = videoplayer.GetRender();
+			var texture = videoplayer is IVideoPlayerTexture vpt
+				? vpt.Texture
+				: null;
+
 			if (!texture || texture.height == 0) {
 				_container.SetActive(false);
 				return;
 			}
 
-			if (_image.texture != texture)
-				_image.texture = texture;
+			if (!_image.sprite || _image.sprite.texture != texture) {
+				_image.sprite = Sprite.Create(
+					texture,
+					new Rect(0, 0, texture.width, texture.height),
+					new Vector2(0.5f, 0.5f)
+				);
+				var aspect = (float)texture.width / texture.height;
+				if (!Mathf.Approximately(_ratio.aspectRatio, aspect))
+					_ratio.aspectRatio = aspect;
+			}
 
-			var aspect = (float)texture.width / texture.height;
-			if (!Mathf.Approximately(_ratio.aspectRatio, aspect))
-				_ratio.aspectRatio = aspect;
 
 			_container.SetActive(true);
 		}

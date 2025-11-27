@@ -122,7 +122,7 @@ namespace api.nox.videoplayer.client {
 		public void TogglePlayPause() {
 			var player = GetSelectedPlayer();
 			if (player == null) return;
-			if (player.IsPlaying())
+			if (player.IsPlaying)
 				player.Pause();
 			else player.Resume();
 		}
@@ -135,21 +135,25 @@ namespace api.nox.videoplayer.client {
 		public UiPlayer(IVideoPlayer player, VideoPlayerPage page) {
 			Player = player;
 			Page   = page;
-			Player.OnProgressEvent().AddListener(OnProgress);
-			Player.OnPlayStatusChangedEvent().AddListener(OnPlayStatusChanged);
+			Player.OnPlay.AddListener(OnState);
+			Player.OnPause.AddListener(OnState);
+			Player.OnResume.AddListener(OnState);
+			Player.OnStop.AddListener(OnState);
 			Logger.Log($"[VideoPlayerPage] Player {player.GetId()} added to UI");
 		}
 
 		public void Dispose() {
-			Player.OnProgressEvent().RemoveListener(OnProgress);
-			Player.OnPlayStatusChangedEvent().RemoveListener(OnPlayStatusChanged);
+			Player.OnPlay.RemoveListener(OnState);
+			Player.OnPause.RemoveListener(OnState);
+			Player.OnResume.RemoveListener(OnState);
+			Player.OnStop.RemoveListener(OnState);
 			Logger.Log($"[VideoPlayerPage] Player {Player.GetId()} removed from UI");
 		}
 
+		public void OnState(IVideoPlayer _)
+			=> Page.OnPlayStatusChanged(Player, Player.IsPlaying);
+
 		public void OnProgress(IVideoPlayer _, double progress)
 			=> Page.OnProgress(Player, progress);
-
-		public void OnPlayStatusChanged(IVideoPlayer _, bool isPlaying)
-			=> Page.OnPlayStatusChanged(Player, isPlaying);
 	}
 }
