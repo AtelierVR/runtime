@@ -49,3 +49,6 @@ MonoBehaviour:
       value: "{0}"
     - key: user.identifier
       value: "{2}@{3}"
+    - key: auth.servers.title
+      value: "Serveurs"
+

@@ -60,6 +60,8 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Packages\api.nox.user\src\client\AuthLoginWidget.cs" />
+    <Compile Include="Packages\api.nox.user\src\client\AuthRegisterWidget.cs" />
     <Compile Include="Packages\api.nox.user\src\search\SearchWorker.cs" />
     <Compile Include="Packages\api.nox.user\src\client\widget\UserWidget.cs" />
     <Compile Include="Packages\api.nox.user\src\editor\AddressInput.cs" />
@@ -83,10 +85,12 @@
     <Compile Include="Packages\api.nox.user\src\network\search\SearchRequest.cs" />
     <Compile Include="Packages\api.nox.user\src\editor\ProfilePanel.cs" />
     <Compile Include="Packages\api.nox.user\src\network\Network.cs" />
+    <Compile Include="Packages\api.nox.user\src\client\AuthServerPage.cs" />
     <Compile Include="Packages\api.nox.user\src\editor\AuthentificationPanel.cs" />
     <Compile Include="Packages\api.nox.user\src\search\SearchData.cs" />
     <Compile Include="Packages\api.nox.user\src\network\login\ErrorResponseWithData.cs" />
     <Compile Include="Packages\api.nox.user\src\network\search\SearchResponse.cs" />
+    <Compile Include="Packages\api.nox.user\src\client\widget\AuthWidget.cs" />
     <Compile Include="Packages\api.nox.user\src\network\AuthToken.cs" />
     <Compile Include="Packages\api.nox.user\src\client\UserComponent.cs" />
     <Compile Include="Packages\api.nox.user\src\editor\LoginInput.cs" />

@@ -68,5 +68,6 @@
     },
     "dotnet.defaultSolution": "nox-runtime.sln",
     "cmake.sourceDirectory": "U:/Projets/nox/runtime/Packages/hactazia.videoplayer/Native",
-    "C_Cpp.errorSquiggles": "disabled"
+    "C_Cpp.errorSquiggles": "disabled",
+    "dotnet.preferCSharpExtension": true
 }

@@ -11,7 +11,7 @@ using Transform = UnityEngine.Transform;
 namespace api.nox.world.client {
 	public class InstanceComponent : MonoBehaviour {
 		public static (GameObject go, InstanceComponent comp) Generate(WorldComponent reference, Transform parent) {
-			var instance  = Instantiate(Client.GetAsset<GameObject>("prefabs/instance.prefab", "instance"), parent);
+			var instance  = Instantiate(Client.GetAsset<GameObject>("prefabs/instance_item.prefab", "instance"), parent);
 			var component = instance.AddComponent<InstanceComponent>();
 			component.reference = reference;
 			component.label     = Reference.GetComponent<TextLanguage>("label", instance);

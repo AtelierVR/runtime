@@ -50,6 +50,8 @@ namespace api.nox.user {
 			IPage page = null;
 			if (UserPage.GetStaticKey() == key)
 				page = UserPage.OnGotoAction(menu, context.Data[2..]);
+			if (AuthServerPage.GetStaticKey() == key)
+				page = AuthServerPage.OnGotoAction(menu, context.Data[2..]);
 			if (page == null) return;
 			Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.GetId(), page);
 		}
@@ -62,6 +64,8 @@ namespace api.nox.user {
 			List<(GameObject, IWidget)> widgets = new();
 			if (UserWidget.TryMake(menu, tr, out var widget))
 				widgets.Add(widget);
+			if (AuthWidget.TryMake(menu, tr, out var authWidget))
+				widgets.Add(authWidget);
 			foreach (var value in widgets)
 				context.Callback(value.Item2, value.Item1);
 		}
