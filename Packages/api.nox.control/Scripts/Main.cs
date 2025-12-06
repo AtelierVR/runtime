@@ -4,19 +4,24 @@ using System.Net;
 using System.Net.Sockets;
 using api.nox.control.handlers;
 using Nox.CCK.Mods.Cores;
+using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
 using Nox.SDK.Control;
+using EventHandler = api.nox.control.handlers.EventHandler;
 
 namespace api.nox.control {
 	public class Main : IMainModInitializer {
 		internal static WebSocketServer Server;
 		private         MainModCoreAPI  _api;
 
+		private EventSubscription[] _events = Array.Empty<EventSubscription>();
+
 		public void OnInitializeMain(MainModCoreAPI api) {
 			_api = api;
 			Reload();
 			LoggerHandler.Listen();
+			_events = new[] { api.EventAPI.Subscribe(null, EventHandler.OnEvent) };
 		}
 
 		private void Reload() {
@@ -88,6 +93,8 @@ namespace api.nox.control {
 
 		public void OnDisposeMain() {
 			try {
+				foreach (var sub in _events) 
+					_api.EventAPI.Unsubscribe(sub);
 				LoggerHandler.Dispose();
 				if (Server == null) return;
 				var port = Server.GetPort();
@@ -126,7 +133,7 @@ namespace api.nox.control {
 			} catch (Exception ex) {
 				Logger.LogError($"Failed to get free port: {ex.Message}");
 				// Return a high port number as last resort
-				return 8000 + new System.Random().Next(1000, 9999);
+				return 8000 + new Random().Next(1000, 9999);
 			}
 		}
 	}
