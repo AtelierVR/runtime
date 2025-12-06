@@ -460,12 +460,12 @@ namespace api.nox.desktop {
 					case "tracking/left_toes/active":
 						param.Set(false);
 						break;
-					case "rig/ik/upper_spine/position_weight":
-					case "rig/ik/upper_spine/hint_weight":
+					case "rig/ik/spine/position_weight":
+					case "rig/ik/spine/hint_weight":
 						param.Set(0f);
 						break;
 					case "tracking/head/active":
-					case "IsLocal" or "local":
+					case "IsLocal":
 						param.Set(true);
 						break;
 				}
