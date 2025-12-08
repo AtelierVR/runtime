@@ -12,12 +12,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.cck": {
-      "version": "file:nox.cck",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.control": {
       "version": "file:api.nox.control",
       "depth": 0,
@@ -760,11 +754,10 @@
       "dependencies": {}
     },
     "nox.cck": {
-      "version": "https://github.com/AtelierVR/nox.cck.git",
+      "version": "file:nox.cck",
       "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "f7d9ecf7dd26cd205370e59d7a69e109851b4098"
+      "source": "embedded",
+      "dependencies": {}
     },
     "nox.discord": {
       "version": "file:nox.discord",
@@ -773,13 +766,6 @@
       "dependencies": {}
     },
     "nox.loader": {
-      "version": "https://github.com/AtelierVR/nox.loader.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "1f06c35694ab773b07199248e325eab2793900ed"
-    },
-    "nox.mod_loader": {
       "version": "file:nox.loader",
       "depth": 0,
       "source": "embedded",

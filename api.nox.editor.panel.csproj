@@ -460,7 +460,7 @@
       <HintPath>U:\Projets\nox\runtime\Library\PackageCache\com.unity.visualscripting@b4d700247d4b\Editor\VisualScripting.Core\Dependencies\YamlDotNet\Unity.VisualScripting.YamlDotNet.dll</HintPath>
     </Reference>
     <Reference Include="BouncyCastle.Crypto">
-      <HintPath>U:\Projets\nox\runtime\Packages\api.nox.cck\Plugins\BouncyCastle.Crypto.dll</HintPath>
+      <HintPath>U:\Projets\nox\runtime\Packages\nox.cck\Plugins\BouncyCastle.Crypto.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Collections.LowLevel.ILSupport">
       <HintPath>U:\Projets\nox\runtime\Library\PackageCache\com.unity.collections@d49facba0036\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.dll</HintPath>
@@ -475,7 +475,7 @@
       <HintPath>U:\Projets\nox\runtime\Library\PackageCache\com.unity.testtools.codecoverage@205a02cbcb39\lib\ReportGenerator\ReportGeneratorMerged.dll</HintPath>
     </Reference>
     <Reference Include="Jint">
-      <HintPath>U:\Projets\nox\runtime\Packages\api.nox.cck\Packages\Jint.dll</HintPath>
+      <HintPath>U:\Projets\nox\runtime\Packages\nox.cck\Packages\Jint.dll</HintPath>
     </Reference>
     <Reference Include="System.Reflection.Metadata">
       <HintPath>U:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\System.Reflection.Metadata.9.0.8\lib\netstandard2.0\System.Reflection.Metadata.dll</HintPath>
