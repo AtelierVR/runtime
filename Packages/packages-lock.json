@@ -13,7 +13,7 @@
       "dependencies": {}
     },
     "api.nox.cck": {
-      "version": "file:api.nox.cck",
+      "version": "file:nox.cck",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
@@ -86,12 +86,6 @@
     },
     "api.nox.mirror": {
       "version": "file:api.nox.mirror",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.mod_loader": {
-      "version": "file:api.nox.mod_loader",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
@@ -765,12 +759,31 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "nox.discord": {
-      "version": "https://github.com/AtelierVR/nox.discord.git",
+    "nox.cck": {
+      "version": "https://github.com/AtelierVR/nox.cck.git",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "c3ce19be926b3b325a4aa51b744a9e2dbf348f37"
+      "hash": "f7d9ecf7dd26cd205370e59d7a69e109851b4098"
+    },
+    "nox.discord": {
+      "version": "file:nox.discord",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.loader": {
+      "version": "https://github.com/AtelierVR/nox.loader.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "1f06c35694ab773b07199248e325eab2793900ed"
+    },
+    "nox.mod_loader": {
+      "version": "file:nox.loader",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
     },
     "nuget-packages": {
       "version": "file:nuget-packages",
