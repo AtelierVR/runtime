@@ -1,3 +1,6 @@
 [submodule "Packages/nox.discord"]
 	path = Packages/nox.discord
 	url = https://github.com/AtelierVR/nox.discord.git
+[submodule "Packages/nox.cck"]
+	path = Packages/nox.cck
+	url = https://github.com/AtelierVR/nox.cck.git
