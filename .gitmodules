@@ -4,3 +4,6 @@
 [submodule "Packages/nox.cck"]
 	path = Packages/nox.cck
 	url = https://github.com/AtelierVR/nox.cck.git
+[submodule "Packages/nox.loader"]
+	path = Packages/nox.loader
+	url = https://github.com/AtelierVR/nox.loader.git
