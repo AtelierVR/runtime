@@ -3,7 +3,9 @@
     "nox.discord": "https://github.com/AtelierVR/nox.discord.git",
     "nox.cck": "https://github.com/AtelierVR/nox.cck.git",
     "nox.loader": "https://github.com/AtelierVR/nox.loader.git",
-    
+    "nox.avatars": "https://github.com/AtelierVR/nox.avatars.git",
+    "nox.avatars.modules": "https://github.com/AtelierVR/nox.avatars.git",
+
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.hecomi.ulipsync": "https://github.com/hecomi/uLipSync.git#upm",
     "com.jint.unity": "https://github.com/magicblock-labs/Jint-Unity.git",
