@@ -1,0 +1,25 @@
+{
+  "id": "com.example.helloworld",
+  "version": "1.0.0",
+  "name": "Hello World Example",
+  "description": "A simple example mod that prints Hello World during initialization",
+  "authors": [
+    {
+      "name": "Example Author",
+      "email": "author@example.com"
+    }
+  ],
+  "license": "MIT",
+  "sides": ["client"],
+  "references": [
+    {
+      "name": "HelloWorldMod",
+      "file": "HelloWorldMod.dll",
+      "engine": { "name": "mono", "version": ">=0.0.0" }
+    }
+  ],
+  "entrypoints": {
+    "main": ["HelloWorldMod.HelloWorldInitializer"]
+  },
+  "relations": []
+}

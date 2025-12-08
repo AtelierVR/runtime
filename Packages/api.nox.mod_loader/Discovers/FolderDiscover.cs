@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,99 +8,89 @@ using Nox.ModLoader.Typing;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
-namespace Nox.ModLoader.Discovers
-{
-    public class FolderDiscover : IDiscover
-    {
-        private static IDiscover _instance;
-        public static IDiscover Instance => _instance ?? new FolderDiscover();
+namespace Nox.ModLoader.Discovers {
+	public class FolderDiscover : IDiscover {
+		private static IDiscover _instance;
 
-        public FolderDiscover()
-        {
-            _instance = this;
-        }
+		public static IDiscover Instance
+			=> _instance ?? new FolderDiscover();
+
+		private FolderDiscover()
+			=> _instance = this;
 
 
-        public static bool UseGlobalPackages = true;
+		private const bool UseGlobalPackages = true;
 
-        private static string[] PackageFolders
-        {
-            get
-            {
-                List<string> folders = new();
+		private static string[] PackageFolders {
+			get {
+				List<string> folders = new();
 
-#if UNITY_EDITOR
-                folders.Add(Path.Combine(Application.dataPath, "..", "Library", "NoxMods"));
-                folders.Add(Path.Combine(Application.dataPath, "..", "NoxMods"));
-#endif
+				#if UNITY_EDITOR
+				folders.Add(Path.Combine(Application.dataPath, "..", "Library", "NoxMods"));
+				folders.Add(Path.Combine(Application.dataPath, "..", "NoxMods"));
+				#endif
 
-                if (UseGlobalPackages)
-                {
-                    folders.Add(Path.Combine(Constants.AppPath, "mods"));
-                    var config = Config.Load();
-                    if (config.Has("mod_folders"))
-                        folders.AddRange(config.Get<string[]>("mod_folders"));
-                }
+				if (UseGlobalPackages) {
+					folders.Add(Path.Combine(Constants.AppPath, "mods"));
+					var config = Config.Load();
+					if (config.Has("mod_folders"))
+						folders.AddRange(config.Get<string[]>("mod_folders"));
+				}
 
-                return folders.Where(Directory.Exists).ToArray();
-            }
-        }
+				return folders.Where(Directory.Exists).ToArray();
+			}
+		}
 
-        public ModMetadata[] FindAllPackages()
-        {
-            List<ModMetadata> packages = new();
-            
-            Logger.LogDebug($"Finding folder mods in {PackageFolders.Length} folder(s):");
-            foreach (var folder in PackageFolders)
-                Logger.LogDebug($" - {folder}");
-            
-            foreach (var packages_folder in PackageFolders)
-            {
-                var package_folders = Directory.GetDirectories(packages_folder);
-                foreach (var package_folder in package_folders)
-                {
-                    var noxmod = Directory.GetFiles(package_folder, "nox.mod.json*", SearchOption.TopDirectoryOnly).FirstOrDefault();
-                    if (noxmod == null) continue;
-                    var noxobj = ModMetadata.LoadFromPath(noxmod);
-                    if (noxobj == null) continue;
-                    noxobj.InternalData["folder"] = package_folder;
-                    noxobj.InternalDDiscover = this;
-                    packages.Add(noxobj);
-                }
-            }
-            
-            if (packages.Count == 0) return Array.Empty<ModMetadata>();
-            
-            Logger.LogDebug("Found " + packages.Count + " folder mod(s):");
-            foreach (var package in packages)
-                Logger.LogDebug(" - " + package.GetId());
-            
-            return packages.ToArray();
-        }
+		public ModMetadata[] FindAllPackages() {
+			List<ModMetadata> packages = new();
 
-        public ModMetadata FindPackage(string id)
-        {
-            foreach (var packages_folder in PackageFolders)
-            {
-                var package_folders = Directory.GetDirectories(packages_folder);
-                foreach (var package_folder in package_folders)
-                {
-                    var noxmod = Directory.GetFiles(package_folder, "nox.mod.json*", SearchOption.TopDirectoryOnly).FirstOrDefault();
-                    if (noxmod == null) continue;
-                    var noxobj = ModMetadata.LoadFromPath(noxmod);
-                    if (noxobj == null) continue;
-                    if (noxobj.GetId() == id)
-                    {
-                        noxobj.InternalData["folder"] = package_folder;
-                        noxobj.InternalDDiscover = this;
-                        return noxobj;
-                    }
-                }
-            }
-            return null;
-        }
+			Logger.LogDebug($"Finding folder mods in {PackageFolders.Length} folder(s):");
+			foreach (var folder in PackageFolders)
+				Logger.LogDebug($" - {folder}");
 
-        public Mod CreateMod(ModMetadata metadata)
-            => new FolderMod() { Metadata = metadata };
-    }
+			foreach (var psf in PackageFolders) {
+				// Find folder-based mods
+				var pfs = Directory.GetDirectories(psf);
+				foreach (var pf in pfs) {
+					var noxmod = Directory.GetFiles(pf, "nox.mod.json*", SearchOption.TopDirectoryOnly).FirstOrDefault();
+					if (noxmod == null) continue;
+					var noxobj = ModMetadata.LoadFromPath(noxmod);
+					if (noxobj == null) continue;
+					noxobj.InternalData["folder"] = pf;
+					noxobj.InternalDDiscover      = this;
+					packages.Add(noxobj);
+				}
+			}
+
+			if (packages.Count == 0) return Array.Empty<ModMetadata>();
+
+			Logger.LogDebug("Found " + packages.Count + " folder mod(s):");
+			foreach (var package in packages)
+				Logger.LogDebug($" - {package.GetId()}");
+
+			return packages.ToArray();
+		}
+
+		public ModMetadata FindPackage(string id) {
+			foreach (var psf in PackageFolders) {
+				// Search in folders
+				var pfs = Directory.GetDirectories(psf);
+				foreach (var pf in pfs) {
+					var noxmod = Directory.GetFiles(pf, "nox.mod.json*", SearchOption.TopDirectoryOnly).FirstOrDefault();
+					if (noxmod == null) continue;
+					var noxobj = ModMetadata.LoadFromPath(noxmod);
+					if (noxobj         == null) continue;
+					if (noxobj.GetId() != id) continue;
+					noxobj.InternalData["folder"] = pf;
+					noxobj.InternalDDiscover      = this;
+					return noxobj;
+				}
+			}
+
+			return null;
+		}
+
+		public Mod CreateMod(ModMetadata metadata)
+			=> new FolderMod { Metadata = metadata };
+	}
 }

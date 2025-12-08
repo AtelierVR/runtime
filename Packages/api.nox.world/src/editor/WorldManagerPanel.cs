@@ -39,11 +39,11 @@ namespace api.nox.world {
 		}
 
 		public void Dispose() {
-			Main.Instance.GroupManager.OnGroupAdded.RemoveListener(OnWorldAdded);
-			Main.Instance.GroupManager.OnGroupRemoved.RemoveListener(OnWorldRemoved);
-			_root.ClearBindings();
-			_root.Clear();
-			_root.RemoveFromHierarchy();
+			Main.Instance?.GroupManager?.OnGroupAdded?.RemoveListener(OnWorldAdded);
+			Main.Instance?.GroupManager?.OnGroupRemoved?.RemoveListener(OnWorldRemoved);
+			_root?.ClearBindings();
+			_root?.Clear();
+			_root?.RemoveFromHierarchy();
 		}
 
 		private void OnWorldAdded(RuntimeWorldGroup runtimeWorldGroup) {

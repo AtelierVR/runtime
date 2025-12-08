@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "nox.discord": "https://github.com/AtelierVR/nox.discord.git",
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.hecomi.ulipsync": "https://github.com/hecomi/uLipSync.git#upm",
     "com.jint.unity": "https://github.com/magicblock-labs/Jint-Unity.git",

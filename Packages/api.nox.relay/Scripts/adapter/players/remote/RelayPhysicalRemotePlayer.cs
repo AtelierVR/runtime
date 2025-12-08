@@ -133,11 +133,6 @@ namespace api.nox.relay {
 				.Distinct(new RelayParameterComparer())
 				.ToDictionary(p => p.GetKey(), p => p.GetValue());
 
-			for (var i = 0; i < oldProperties.Count; i++) {
-				var kvp = oldProperties.ElementAt(i);
-				Logger.LogDebug($"Old Property: {kvp.Key} = {kvp.Value}");
-			}
-
 			var oldParts = Reference.GetParts()
 				.Distinct(new RelayPartComparer())
 				.ToDictionary(p => p.GetId(), p => p);

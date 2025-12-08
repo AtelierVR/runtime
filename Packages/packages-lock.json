@@ -36,12 +36,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.discord": {
-      "version": "file:api.nox.discord",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.editor": {
       "version": "file:api.nox.editor",
       "depth": 0,
@@ -770,6 +764,13 @@
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
+    },
+    "nox.discord": {
+      "version": "https://github.com/AtelierVR/nox.discord.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "c3ce19be926b3b325a4aa51b744a9e2dbf348f37"
     },
     "nuget-packages": {
       "version": "file:nuget-packages",

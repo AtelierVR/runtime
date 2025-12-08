@@ -397,8 +397,6 @@ namespace dev.nox.development {
 				var container = item.Q<VisualElement>($"{sectionName}-entries");
 				var list      = item.Q<VisualElement>($"{sectionName}-list");
 
-				UnityEngine.Debug.Log($"[EntryPoint] Section: {sectionName}, Container: {container != null}, List: {list != null}, Entries: {entries?.Length ?? 0}");
-
 				if (container == null || list == null || entries == null || entries.Length == 0) {
 					if (container != null) {
 						container.style.display = DisplayStyle.None;

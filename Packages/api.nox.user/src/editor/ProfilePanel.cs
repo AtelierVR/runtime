@@ -12,7 +12,7 @@ namespace api.nox.user {
 			=> "User/Profile";
 
 		public bool IsHidden()
-			=> Main.Instance.Network.CurrentUser == null;
+			=> Main.Instance?.Network?.CurrentUser == null;
 
 		private readonly VisualElement _root = new();
 

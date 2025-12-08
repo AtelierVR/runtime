@@ -13,6 +13,7 @@ namespace Nox.CCK.Mods.Metadata
         public Version GetVersion();
         public SideFlags GetSide();
         public string[] GetPermissions();
+        public bool IsKernel();
         public Entries GetEntryPoints();
 
         public string GetName();

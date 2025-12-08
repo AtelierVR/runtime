@@ -35,6 +35,7 @@ ExportedObj/
 .consulo/
 *.csproj
 !api.nox.*.csproj
+!example_mods/*/*.csproj
 *.unityproj
 *.sln
 *.suo

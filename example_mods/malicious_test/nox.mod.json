@@ -1,0 +1,12 @@
+{
+    "id": "malicious_test",
+    "version": "1.0.0",
+    "name": "Malicious Test Mod",
+    "description": "A mod that attempts to use dangerous APIs. This mod SHOULD be blocked by the security validator.",
+    "references": [
+        {
+            "file": "MaliciousMod.dll",
+            "platforms": ["windows", "linux", "osx"]
+        }
+    ]
+}

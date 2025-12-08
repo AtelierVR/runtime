@@ -46,10 +46,16 @@ namespace Nox.ModLoader.Typing
         /// <returns></returns>
         public Platform GetPlatform() => _platform;
 
-        public bool IsCompatible() 
-            => (GetEngine().GetName() == CCK.Utils.Engine.None || EngineExtensions.CurrentEngine == GetEngine().GetName())
-                && GetEngine().GetVersion().Matches(EngineExtensions.CurrentVersion)
+        public bool IsCompatible()
+        {
+            var engine = GetEngine();
+            if (engine == null)
+                return GetPlatform() == Platform.None || GetPlatform() == PlatformExtensions.CurrentPlatform;
+            
+            return (engine.GetName() == CCK.Utils.Engine.None || EngineExtensions.CurrentEngine == engine.GetName())
+                && (engine.GetVersion()?.Matches(EngineExtensions.CurrentVersion) ?? true)
                 && (GetPlatform() == Platform.None || GetPlatform() == PlatformExtensions.CurrentPlatform);
+        }
         
         public JObject ToJson()
         {
@@ -57,7 +63,7 @@ namespace Nox.ModLoader.Typing
             {
                 {"name", _name},
                 {"file", _file},
-                {"engine", _engine.ToJson()},
+                {"engine", _engine?.ToJson()},
                 {"platform", _platform.ToString()}
             };
             return obj;

@@ -28,12 +28,6 @@ namespace api.nox.main {
 			_events = new[] {
 				api.EventAPI.Subscribe("exit", OnExitEvent)
 			};
-
-			var count = SceneManager.sceneCountInBuildSettings;
-			for (var i = 0; i < count; i++) {
-				var path = SceneUtility.GetScenePathByBuildIndex(i);
-				api.LoggerAPI.LogDebug($"Scene {i}: {path}");
-			}
 		}
 
 

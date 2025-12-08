@@ -182,7 +182,7 @@ namespace api.nox.videoplayer {
 			try {
 				var startInfo = new ProcessStartInfo {
 					FileName               = path,
-					Arguments              = $"--no-warnings -J \"{url}\"", // -J for JSON output
+					Arguments              = $"--no-warnings -J \"{url}\" --proxy socks5://127.0.0.1:9150", // -J for JSON output
 					UseShellExecute        = false,
 					RedirectStandardOutput = true,
 					RedirectStandardError  = true,

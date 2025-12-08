@@ -283,7 +283,11 @@ namespace Nox.CCK.Utils {
 			"UnityWebRequestAsyncOperationConfiguredSource.Continuation",
 			"AsyncOperation.InvokeCompletionEvent",
 			"AsyncOperation.InvokeCompletionEvent",
-			"PlayerLoopRunner.RunCore"
+			"PlayerLoopRunner.RunCore",
+			"ContinuationQueue.RunCore",
+			"ContinuationQueue.Update",
+			"ContinuationQueue.Run",
+			"PlayerLoopHelper.ForceEditorPlayerLoopUpdate"
 		};
 
 		// ReSharper disable Unity.PerformanceAnalysis

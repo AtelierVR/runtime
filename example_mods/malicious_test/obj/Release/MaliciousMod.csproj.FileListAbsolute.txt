@@ -1,0 +1,8 @@
+U:\Projets\nox\runtime\example_mods\malicious_test\build\malicious_test\MaliciousMod.deps.json
+U:\Projets\nox\runtime\example_mods\malicious_test\build\malicious_test\MaliciousMod.dll
+U:\Projets\nox\runtime\example_mods\malicious_test\obj\Release\MaliciousMod.csproj.AssemblyReference.cache
+U:\Projets\nox\runtime\example_mods\malicious_test\obj\Release\MaliciousMod.GeneratedMSBuildEditorConfig.editorconfig
+U:\Projets\nox\runtime\example_mods\malicious_test\obj\Release\MaliciousMod.AssemblyInfoInputs.cache
+U:\Projets\nox\runtime\example_mods\malicious_test\obj\Release\MaliciousMod.AssemblyInfo.cs
+U:\Projets\nox\runtime\example_mods\malicious_test\obj\Release\MaliciousMod.csproj.CoreCompileInputs.cache
+U:\Projets\nox\runtime\example_mods\malicious_test\obj\Release\MaliciousMod.dll

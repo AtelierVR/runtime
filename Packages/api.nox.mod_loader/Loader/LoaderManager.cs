@@ -162,7 +162,6 @@ namespace Nox.ModLoader.Loader {
 					Logger.LogError(result.Message);
 				else if (result.IsWarning)
 					Logger.LogWarning(result.Message);
-				else Logger.Log(result.Message);
 
 			Logger.ClearProgress();
 		}

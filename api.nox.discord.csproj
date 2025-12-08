@@ -60,12 +60,12 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.discord\Scripts\DiscordRpc.cs" />
-    <Compile Include="Packages\api.nox.discord\Scripts\Main.cs" />
-    <None Include="Packages\api.nox.discord\link.xml" />
-    <None Include="Packages\api.nox.discord\package.json" />
-    <None Include="Packages\api.nox.discord\api.nox.discord.asmdef" />
-    <None Include="Packages\api.nox.discord\nox.mod.json" />
+    <Compile Include="Packages\Nox.Discord\Scripts\DiscordRpc.cs" />
+    <Compile Include="Packages\Nox.Discord\Scripts\Main.cs" />
+    <None Include="Packages\Nox.Discord\link.xml" />
+    <None Include="Packages\Nox.Discord\package.json" />
+    <None Include="Packages\Nox.Discord\api.nox.discord.asmdef" />
+    <None Include="Packages\Nox.Discord\nox.mod.json" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -456,6 +456,9 @@
     <Reference Include="nunit.framework">
       <HintPath>U:\Projets\nox\runtime\Library\PackageCache\com.unity.ext.nunit@031a54704bff\net40\unity-custom\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="System.Drawing.Common">
+      <HintPath>U:\Projets\nox\runtime\Assets\Plugins\System.Drawing.Common.dll</HintPath>
+    </Reference>
     <Reference Include="ReportGeneratorMerged">
       <HintPath>U:\Projets\nox\runtime\Library\PackageCache\com.unity.testtools.codecoverage@205a02cbcb39\lib\ReportGenerator\ReportGeneratorMerged.dll</HintPath>
     </Reference>
@@ -524,9 +527,6 @@
     </Reference>
     <Reference Include="Esprima">
       <HintPath>U:\Projets\nox\runtime\Library\PackageCache\com.jint.unity@9b16e8d86afa\Packages\Esprima.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Drawing.Common">
-      <HintPath>U:\Projets\nox\runtime\Assets\Plugins\System.Drawing.Common.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Android.Types">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.2.7f2\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>

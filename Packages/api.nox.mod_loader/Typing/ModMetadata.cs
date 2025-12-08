@@ -28,6 +28,7 @@ namespace Nox.ModLoader.Typing {
 		private Entries     _entryPoints;
 		private string[]    _permissions;
 		private Reference[] _references;
+		private bool        _isKernel;
 
 		// Internal code
 
@@ -44,7 +45,7 @@ namespace Nox.ModLoader.Typing {
 			"customs", "platforms", "engines", "icon",
 			"references", "relations", "authors",
 			"contributors", "contact", "required",
-			"side", "provides", "entrypoints"
+			"side", "provides", "entrypoints", "kernel"
 		};
 
 		/// <summary>
@@ -89,6 +90,7 @@ namespace Nox.ModLoader.Typing {
 				obj._references = json.TryGetValue("references", out var references)
 					? references.ToArray().Select(r => Reference.LoadFromJson(r)).ToArray()
 					: new Reference[0];
+				obj._isKernel = json.TryGetValue("kernel", out var kernel) && kernel.Value<bool>();
 				obj._customs = new JObject();
 
 				foreach (var (key, value) in json)
@@ -320,6 +322,13 @@ namespace Nox.ModLoader.Typing {
 			=> _permissions;
 
 		/// <summary>
+		/// Check if this is a kernel mod (has full system access).
+		/// </summary>
+		/// <returns>True if the mod is marked as kernel</returns>
+		public bool IsKernel()
+			=> _isKernel;
+
+		/// <summary>
 		/// Get the entry points of the mod.
 		/// </summary>
 		/// <returns></returns>
@@ -430,14 +439,15 @@ namespace Nox.ModLoader.Typing {
 				["description"]  = GetDescription(),
 				["license"]      = GetLicense(),
 				["icon"]         = GetIcon(),
-				["contact"]      = GetInternalContact().ToJson(),
+				["contact"]      = GetInternalContact()?.ToJson(),
 				["authors"]      = new JArray(GetInternalAuthors().Select(a => a.ToJson())),
 				["contributors"] = new JArray(GetInternalContributors().Select(c => c.ToJson())),
 				["relations"]    = new JArray(GetInternalRelations().Select(r => r.ToJson())),
-				["entrypoints"]  = new JObject(GetInternalEntryPoints().ToJson()),
+				["entrypoints"]  = new JObject(GetInternalEntryPoints()?.ToJson()),
 				["references"]   = new JArray(GetInternalReferences().Select(r => r.ToJson())),
 				["sides"]        = new JArray(SideExtensions.GetSideTypeFromEnum(GetSide()).Select(s => s)),
-				["permissions"]  = new JArray(GetPermissions().Select(p => p))
+				["permissions"]  = new JArray(GetPermissions().Select(p => p)),
+				["kernel"]       = IsKernel()
 			};
 			foreach (var custom in GetCustoms())
 				json[custom.Key] = JToken.FromObject(custom.Value);

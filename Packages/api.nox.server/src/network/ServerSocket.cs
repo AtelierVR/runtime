@@ -223,12 +223,12 @@ namespace api.nox.server.network {
 
 		private async UniTask HandleDisconnection() {
 			_isListening = false;
-			OnDisconnected.Invoke();
+			OnDisconnected?.Invoke();
 
 			if (_autoReconnect && _reconcilable) {
 				Logger.LogDebug("Attempting to reconnect...");
 				await UniTask.Delay(TimeSpan.FromSeconds(5)); // Attendre 5 secondes avant de reconnecter
-				if (!_cts.Token.IsCancellationRequested)
+				if (_cts is { Token: { IsCancellationRequested: false } })
 					await AttemptReconnect();
 			}
 		}
@@ -236,7 +236,7 @@ namespace api.nox.server.network {
 		private async UniTask AttemptReconnect() {
 			var retryCount = 0;
 
-			while ((retryCount < _maxRetries || _maxRetries == 0) && _autoReconnect && !_cts.Token.IsCancellationRequested) {
+			while ((retryCount < _maxRetries || _maxRetries == 0) && _autoReconnect && (_cts == null || !_cts.Token.IsCancellationRequested)) {
 				try {
 					retryCount++;
 					Logger.LogDebug($"Reconnection attempt {retryCount}/{_maxRetries}");
@@ -247,7 +247,7 @@ namespace api.nox.server.network {
 					}
 				} catch (Exception ex) {
 					Logger.LogException(new Exception($"Error during reconnection attempt {retryCount}", ex));
-					OnError.Invoke(ex);
+					OnError?.Invoke(ex);
 				}
 
 				if (retryCount >= _maxRetries && _maxRetries != 0) continue;

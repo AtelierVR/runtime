@@ -1,0 +1,25 @@
+{
+  "id": "com.example.blacklist_test",
+  "version": "1.0.0",
+  "name": "Blacklist Test",
+  "description": "A test mod that attempts to use blacklisted assemblies to verify the security system",
+  "authors": [
+    {
+      "name": "Test Author",
+      "email": "test@example.com"
+    }
+  ],
+  "license": "MIT",
+  "sides": ["client"],
+  "references": [
+    {
+      "name": "BlacklistTestMod",
+      "file": "BlacklistTestMod.dll",
+      "engine": { "name": "mono", "version": ">=0.0.0" }
+    }
+  ],
+  "entrypoints": {
+    "main": ["BlacklistTestMod.BlacklistTestInitializer"]
+  },
+  "relations": []
+}

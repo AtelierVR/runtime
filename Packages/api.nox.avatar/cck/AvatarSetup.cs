@@ -4,10 +4,20 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Nox.Avatars;
 using Nox.CCK.Build;
-using Nox.CCK.Utils;
+using UnityEngine;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace Nox.CCK.Avatars {
 	public static class AvatarSetup {
+		private static readonly Type[] IncompatibleComponents = {
+			typeof(AudioListener),
+			typeof(Camera),
+			typeof(FlareLayer),
+			typeof(LightProbeGroup),
+			typeof(ReflectionProbe),
+			typeof(Terrain),
+		};
+
 		public static Func<IAvatarDescriptor, bool> OnCheckRequest;
 
 		public static async UniTask<bool> Prepare(IRuntimeAvatar avatar, Action<float> progress = null, CancellationToken token = default) {
@@ -29,6 +39,30 @@ namespace Nox.CCK.Avatars {
 				Logger.LogError("Avatar descriptor root GameObject is null.");
 				return false;
 			}
+			
+			// Disable ApplyRootMotion on the Animator to avoid unwanted movements
+			var animator = descriptor.GetAnimator();
+			if (!animator) {
+				Logger.LogError("Avatar descriptor Animator is null.");
+				return false;
+			}
+
+			animator.applyRootMotion = false;
+
+			// check is Humanoid and has Avatar
+			if (animator.isHuman && animator.avatar) {
+				// Ensure the avatar is valid
+				if (!animator.avatar.isValid) {
+					Logger.LogError("Animator avatar is not valid.");
+					return false;
+				}
+
+				// Ensure the avatar is properly configured
+				if (!animator.avatar.isHuman) {
+					Logger.LogError("Animator avatar is not configured as Humanoid.");
+					return false;
+				}
+			}
 
 			descriptor.FindModules();
 
@@ -47,6 +81,22 @@ namespace Nox.CCK.Avatars {
 				return false;
 
 			progress?.Invoke(0.1f);
+
+			// Disable incompatible components
+			foreach (var type in IncompatibleComponents) {
+				var components = gameObject.GetComponentsInChildren(type, true);
+				foreach (var comp in components) {
+					switch (comp) {
+						case Behaviour behaviour:
+							behaviour.enabled = false;
+							break;
+						case Renderer renderer:
+							renderer.enabled = false;
+							break;
+					}
+				}
+			}
+
 
 			var compilable = gameObject
 				.GetComponentsInChildren<ICompilable>(true)
