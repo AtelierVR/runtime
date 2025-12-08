@@ -7,3 +7,9 @@
 [submodule "Packages/nox.loader"]
 	path = Packages/nox.loader
 	url = https://github.com/AtelierVR/nox.loader.git
+[submodule "Packages/nox.avatars"]
+	path = Packages/nox.avatars
+	url = https://github.com/AtelierVR/nox.avatars.git
+[submodule "Packages/nox.avatars.modules"]
+	path = Packages/nox.avatars.modules
+	url = https://github.com/AtelierVR/nox.avatars.git

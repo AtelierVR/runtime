@@ -1067,6 +1067,10 @@
       <Project>{0970b8b2-a75c-7ef9-703c-c1e421066a92}</Project>
       <Name>Nox.Avatars.Rigging</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Avatars.csproj">
+      <Project>{2186926e-046f-8d8d-a515-4b317ca99ba3}</Project>
+      <Name>Nox.CCK.Avatars</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

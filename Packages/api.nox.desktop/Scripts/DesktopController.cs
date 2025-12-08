@@ -8,6 +8,7 @@ using Nox.Avatars.Camera;
 using Nox.Avatars.Controllers;
 using Nox.Avatars.Parameters;
 using Nox.Avatars.Players;
+using Nox.CCK.Avatars;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
@@ -141,7 +142,7 @@ namespace api.nox.desktop {
 		}
 
 		private void LoadAvatarFromUser(ICurrentUser user)
-			=> SetAvatar(Client.AvatarAPI.Make(user?.GetAvatarId())).Forget();
+			=> SetAvatar(AvatarIdentifier.From(user?.GetAvatarId())).Forget();
 
 		public async UniTask<IRuntimeAvatar> SetAvatar(IAvatarIdentifier identifier, Action<string, float> onProgress = null) {
 			var playerAvatar = _attachedPlayer as ILocalPlayerAvatar;

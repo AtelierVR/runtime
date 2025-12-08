@@ -10,6 +10,7 @@ using Nox.Avatars.Controllers;
 using Nox.Avatars.Parameters;
 using Nox.Avatars.Players;
 using Nox.Avatars.Rigging;
+using Nox.CCK.Avatars;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
@@ -416,7 +417,7 @@ namespace api.nox.xr {
 		}
 
 		private void LoadAvatarFromUser(ICurrentUser user)
-			=> SetAvatar(Client.AvatarAPI.Make(user?.GetAvatarId())).Forget();
+			=> SetAvatar(AvatarIdentifier.From(user?.GetAvatarId())).Forget();
 
 		private readonly Dictionary<string, object> _avatarParameters;
 

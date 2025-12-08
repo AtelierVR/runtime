@@ -14,7 +14,7 @@ namespace api.nox.relay.types.Avatar {
 			buffer.Write(InternalId);
 			buffer.Write(PlayerId);
 			buffer.Write(AvatarIdentifier.GetId());
-			buffer.Write(AvatarIdentifier.GetServerAddress());
+			buffer.Write(AvatarIdentifier.GetServer());
 			buffer.Write(AvatarIdentifier.GetVersion());
 			return buffer;
 		}

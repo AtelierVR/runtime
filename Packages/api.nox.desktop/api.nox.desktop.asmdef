@@ -14,7 +14,8 @@
         "Nox.Avatars.Parameters",
         "Nox.Avatars.Camera",
         "Nox.Users",
-        "Nox.Microphone"
+        "Nox.Microphone",
+        "Nox.CCK.Avatars"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

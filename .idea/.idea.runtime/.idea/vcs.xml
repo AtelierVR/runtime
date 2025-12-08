@@ -2,5 +2,9 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.avatars" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.cck" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.discord" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.loader" vcs="Git" />
   </component>
 </project>

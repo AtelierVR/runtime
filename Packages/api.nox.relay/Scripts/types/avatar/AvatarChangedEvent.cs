@@ -2,6 +2,7 @@ using System;
 using Nox.Avatars;
 using System.Collections.Generic;
 using api.nox.relay.types.Instance;
+using Nox.CCK.Avatars;
 using Nox.CCK.Utils;
 using Buffer = Nox.CCK.Utils.Buffer;
 
@@ -30,9 +31,8 @@ namespace api.nox.relay.types.Avatar {
 					var id      = buffer.ReadUInt();
 					var server  = buffer.ReadString();
 					var version = buffer.ReadUShort();
-					var meta    = new Dictionary<string, string[]>();
-					if (version != ushort.MaxValue) meta.Add("version", new[] { version.ToString() });
-					AvatarIdentifier = Main.AvatarAPI.Make(id, meta, server);
+					var meta    = new Dictionary<string, string[]> { { "v", new[] { version.ToString() } } };
+					AvatarIdentifier = new AvatarIdentifier(id, meta, server);
 					break;
 				}
 				case AvatarChangedResult.Unknown:

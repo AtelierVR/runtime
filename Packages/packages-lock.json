@@ -1,17 +1,5 @@
 {
   "dependencies": {
-    "api.nox.avatar": {
-      "version": "file:api.nox.avatar",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.avatar.modules": {
-      "version": "file:api.nox.avatar.modules",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.control": {
       "version": "file:api.nox.control",
       "depth": 0,
@@ -749,6 +737,18 @@
     },
     "hactazia.ffplay": {
       "version": "file:hactazia.ffplay",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.avatars": {
+      "version": "file:nox.avatars",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.avatars.modules": {
+      "version": "file:nox.avatars.modules",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

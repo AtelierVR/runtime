@@ -4,6 +4,7 @@
     "references": [
         "Nox.CCK",
         "UniTask",
+        "Nox.CCK.Avatars",
         "Nox.Controllers",
         "Unity.XR.Management",
         "AutoHandAssembly",

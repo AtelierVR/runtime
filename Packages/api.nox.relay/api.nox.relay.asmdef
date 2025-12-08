@@ -19,7 +19,8 @@
         "Nox.Avatars.Voice",
         "Nox.Microphone",
         "Nox.Instances",
-        "Nox.Avatars.Rigging"
+        "Nox.Avatars.Rigging",
+        "Nox.CCK.Avatars"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
