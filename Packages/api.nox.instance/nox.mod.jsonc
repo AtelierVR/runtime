@@ -59,9 +59,6 @@
     "main": [
       "api.nox.instance.Main"
     ],
-    "editor": [
-      "api.nox.instance.Editor"
-    ],
     "client": [
       "api.nox.instance.Client"
     ]

@@ -11,21 +11,24 @@ namespace api.nox.control.handlers {
 		public static void OnEvent(EventData context) {
 			var clients = Main.Server.GetClients();
 
-			var data = new List<JObject>();
+			var data = new List<JToken>();
 
 			foreach (var d in context.Data) {
 				switch (d) {
-					case JObject jObject:
-						data.Add(jObject);
+					case JToken jToken:
+						data.Add(jToken);
 						break;
 					case null:
-						data.Add(JObject.FromObject("null"));
+						data.Add(JValue.CreateNull());
 						break;
 					default:
 						try {
-							data.Add(JObject.FromObject(d));
+							data.Add(JToken.FromObject(d));
 						} catch (Exception e) {
-							data.Add(JObject.FromObject(e));
+							data.Add(new JObject {
+								["error"] = e.Message,
+								["type"] = e.GetType().Name
+							});
 						}
 
 						break;

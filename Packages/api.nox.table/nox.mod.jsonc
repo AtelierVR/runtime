@@ -43,12 +43,6 @@
   "entrypoints": {
     "main": [
       "api.nox.table.Main"
-    ],
-    "editor": [
-      "api.nox.table.Editor"
-    ],
-    "client": [
-      "api.nox.table.Client"
     ]
   },
   "references": [],

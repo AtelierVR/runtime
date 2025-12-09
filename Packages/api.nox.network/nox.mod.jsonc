@@ -34,12 +34,7 @@
   "entrypoints": {
     "main": [
       "api.nox.network.Main"
-    ],
-    "client": [],
-    "editor": [
-      "api.nox.network.Editor.NetworkEditor"
-    ],
-    "instance": []
+    ]
   },
   "references": [],
   "sides": [],

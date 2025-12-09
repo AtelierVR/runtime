@@ -264,6 +264,11 @@ namespace api.nox.desktop {
 				return;
 			}
 
+			if (Client.AvatarAPI == null) {
+				Logger.LogWarning("AvatarAPI not available yet, skipping avatar setup");
+				return;
+			}
+
 			Logger.LogDebug("Creating avatar");
 
 			var avatar = await Client.AvatarAPI.LoadLoading(_avatarParameters);
@@ -274,7 +279,7 @@ namespace api.nox.desktop {
 
 			await SetAvatar(avatar);
 
-			LoadAvatarFromUser(Client.UserAPI.GetCurrent());
+			LoadAvatarFromUser(Client.UserAPI?.GetCurrent());
 		}
 
 		[NoxPublic(NoxAccess.Method)]
