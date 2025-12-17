@@ -21,6 +21,9 @@ namespace api.nox.videoplayer {
 				_                => null
 			};
 
+		public static string GetConfigArguments()
+			=> Config.Load().Get("settings.ytdlp.arguments", "");
+
 		public static string GetPath()
 			=> Path.Combine(GetFolder(), GetExecutable());
 
@@ -180,9 +183,11 @@ namespace api.nox.videoplayer {
 			var error  = new StringBuilder();
 
 			try {
+				var arg = GetConfigArguments();
 				var startInfo = new ProcessStartInfo {
-					FileName               = path,
-					Arguments              = $"--no-warnings -J \"{url}\" --proxy socks5://127.0.0.1:9150", // -J for JSON output
+					FileName = path,
+					Arguments = (string.IsNullOrEmpty(arg) ? "" : $"{arg} ")
+						+ $"--no-warnings -J \"{url}\"", // -J for JSON output
 					UseShellExecute        = false,
 					RedirectStandardOutput = true,
 					RedirectStandardError  = true,
@@ -196,42 +201,44 @@ namespace api.nox.videoplayer {
 
 				// Read output and error streams asynchronously
 				UniTask.RunOnThreadPool(
-					async () => {
-						while (!process.HasExited) {
-							cancellationToken.ThrowIfCancellationRequested();
-							var line = await process.StandardOutput.ReadLineAsync();
-							if (line != null)
-								output.AppendLine(line);
-							else await UniTask.Delay(10, cancellationToken: cancellationToken);
-						}
+						async () => {
+							while (!process.HasExited) {
+								cancellationToken.ThrowIfCancellationRequested();
+								var line = await process.StandardOutput.ReadLineAsync();
+								if (line != null)
+									output.AppendLine(line);
+								else await UniTask.Delay(10, cancellationToken: cancellationToken);
+							}
 
-						// Read remaining output after process exits
-						while (!process.StandardOutput.EndOfStream) {
-							var line = await process.StandardOutput.ReadLineAsync();
-							if (line != null)
-								output.AppendLine(line);
-						}
-					}, cancellationToken: cancellationToken
-				).Forget();
+							// Read remaining output after process exits
+							while (!process.StandardOutput.EndOfStream) {
+								var line = await process.StandardOutput.ReadLineAsync();
+								if (line != null)
+									output.AppendLine(line);
+							}
+						}, cancellationToken: cancellationToken
+					)
+					.Forget();
 
 				UniTask.RunOnThreadPool(
-					async () => {
-						while (!process.HasExited) {
-							cancellationToken.ThrowIfCancellationRequested();
-							var line = await process.StandardError.ReadLineAsync();
-							if (line != null)
-								error.AppendLine(line);
-							else await UniTask.Delay(10, cancellationToken: cancellationToken);
-						}
+						async () => {
+							while (!process.HasExited) {
+								cancellationToken.ThrowIfCancellationRequested();
+								var line = await process.StandardError.ReadLineAsync();
+								if (line != null)
+									error.AppendLine(line);
+								else await UniTask.Delay(10, cancellationToken: cancellationToken);
+							}
 
-						// Read remaining error after process exits
-						while (!process.StandardError.EndOfStream) {
-							var line = await process.StandardError.ReadLineAsync();
-							if (line != null)
-								error.AppendLine(line);
-						}
-					}, cancellationToken: cancellationToken
-				).Forget();
+							// Read remaining error after process exits
+							while (!process.StandardError.EndOfStream) {
+								var line = await process.StandardError.ReadLineAsync();
+								if (line != null)
+									error.AppendLine(line);
+							}
+						}, cancellationToken: cancellationToken
+					)
+					.Forget();
 
 				// Wait for process to exit and for output/error reading to complete
 				while (!process.HasExited) {
@@ -287,8 +294,8 @@ namespace api.nox.videoplayer {
 				var error  = new StringBuilder();
 
 				// Capture streams to avoid capturing the process object
-				var stdout = process.StandardOutput;
-				var stderr = process.StandardError;
+				var stdout        = process.StandardOutput;
+				var stderr        = process.StandardError;
 				var processHandle = process;
 
 				// Read output and error streams asynchronously
@@ -300,8 +307,7 @@ namespace api.nox.videoplayer {
 							if (!string.IsNullOrEmpty(line)) {
 								Logger.LogDebug(line, tag: "yt-dlp");
 								output.AppendLine(line);
-							}
-							else await UniTask.Delay(10, cancellationToken: cancellationToken);
+							} else await UniTask.Delay(10, cancellationToken: cancellationToken);
 						}
 
 						// Read remaining output after process exits
@@ -316,15 +322,13 @@ namespace api.nox.videoplayer {
 
 				var errorTask = UniTask.RunOnThreadPool(
 					async () => {
-						
 						while (!processHandle.HasExited) {
 							cancellationToken.ThrowIfCancellationRequested();
 							var line = await stderr.ReadLineAsync();
 							if (!string.IsNullOrEmpty(line)) {
 								Logger.LogError(line, tag: "yt-dlp");
 								error.AppendLine(line);
-							}
-							else await UniTask.Delay(10, cancellationToken: cancellationToken);
+							} else await UniTask.Delay(10, cancellationToken: cancellationToken);
 						}
 
 						// Read remaining error after process exits

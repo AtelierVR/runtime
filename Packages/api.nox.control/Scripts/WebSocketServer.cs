@@ -49,6 +49,7 @@ namespace api.nox.control {
 			_isRunning = false;
 			
 			try {
+				var port = GetPort();
 				_cancellationTokenSource?.Cancel();
 				_cancellationTokenSource?.Dispose();
 				
@@ -59,7 +60,7 @@ namespace api.nox.control {
 				
 				// Stop the listener
 				_listener?.Stop();
-				Logger.Log($"WebSocket Server stopped on port {GetPort()}");
+				Logger.Log($"WebSocket Server stopped on port {port}");
 			}
 			catch (Exception ex) {
 				Logger.LogError($"Error stopping WebSocket server: {ex.Message}");
@@ -133,15 +134,22 @@ namespace api.nox.control {
 		private readonly WebSocketServer _server;
 		private readonly NetworkStream   _stream;
 		private          bool            _isHandshakeComplete;
+		private readonly List<byte>      _receiveBuffer = new();
+		private readonly EndPoint        _endPoint;
 
 		internal WebSocketClient(TcpClient tcpClient, WebSocketServer server) {
 			_tcpClient = tcpClient;
 			_server    = server;
 			_stream    = tcpClient.GetStream();
+			try {
+				_endPoint = tcpClient.Client.RemoteEndPoint;
+			} catch {
+				_endPoint = null;
+			}
 		}
 
 		public EndPoint GetEndPoint()
-			=> _tcpClient.Client.RemoteEndPoint;
+			=> _endPoint;
 
 		public bool IsConnected()
 			=> _tcpClient?.Connected ?? false;
@@ -213,81 +221,97 @@ namespace api.nox.control {
 
 		internal async UniTask<string> ReceiveMessageAsync(CancellationToken cancellationToken) {
 			try {
-				// Wait for data
-				while (!_stream.DataAvailable && IsConnected() && !cancellationToken.IsCancellationRequested) {
+				while (IsConnected() && !cancellationToken.IsCancellationRequested) {
+					// 1. Try to decode from buffer
+					if (_receiveBuffer.Count >= 2) {
+						var bytes  = _receiveBuffer;
+						// var fin    = (bytes[0] & 0b10000000) != 0;
+						var mask   = (bytes[1] & 0b10000000) != 0;
+						var opcode = bytes[0] & 0b00001111;
+
+						// Opcode 8 = connection close
+						if (opcode == 8)
+							return null;
+
+						// Opcode 1 = text message
+						if (opcode != 1) {
+							Logger.LogWarning($"Unsupported opcode: {opcode}");
+							return null;
+						}
+
+						ulong offset = 2;
+						var   msgLen = (ulong)(bytes[1] & 0b01111111);
+
+						if (msgLen == 126) {
+							if (_receiveBuffer.Count < 4) goto ReadMore;
+							msgLen = BitConverter.ToUInt16(new byte[] { bytes[3], bytes[2] }, 0);
+							offset = 4;
+						} else if (msgLen == 127) {
+							if (_receiveBuffer.Count < 10) goto ReadMore;
+							msgLen = BitConverter.ToUInt64(
+								new byte[] {
+									bytes[9], bytes[8], bytes[7], bytes[6],
+									bytes[5], bytes[4], bytes[3], bytes[2]
+								}, 0
+							);
+							offset = 10;
+						}
+
+						if (msgLen == 0) {
+							Logger.LogWarning("Message length is 0");
+							_receiveBuffer.RemoveRange(0, (int)offset);
+							continue;
+						}
+
+						if (!mask) {
+							Logger.LogWarning("Mask bit not set");
+							return null;
+						}
+
+						// Check if we have the full message
+						var totalLen = offset + 4 + msgLen;
+						if ((ulong)_receiveBuffer.Count < totalLen)
+							goto ReadMore;
+
+						// Decode message
+						var masks = new byte[] {
+							bytes[(int)offset],
+							bytes[(int)offset + 1],
+							bytes[(int)offset + 2],
+							bytes[(int)offset + 3]
+						};
+						offset += 4;
+
+						var decoded = new byte[msgLen];
+						for (ulong i = 0; i < msgLen; ++i)
+							decoded[i] = (byte)(bytes[(int)offset + (int)i] ^ masks[i % 4]);
+
+						var text = Encoding.UTF8.GetString(decoded);
+						_receiveBuffer.RemoveRange(0, (int)totalLen);
+						return text;
+					}
+
+					ReadMore:
+					if (_stream.DataAvailable) {
+						var available = _tcpClient.Available;
+						if (available > 0) {
+							var buffer    = new byte[available];
+							var bytesRead = await _stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
+							if (bytesRead > 0) {
+								_receiveBuffer.AddRange(buffer.Take(bytesRead));
+								continue;
+							}
+						}
+					}
+
 					await UniTask.Delay(10, cancellationToken: cancellationToken);
 				}
 
-				if (!IsConnected() || cancellationToken.IsCancellationRequested) {
-					return null;
-				}
-
-				var bytes     = new byte[_tcpClient.Available];
-				var bytesRead = await _stream.ReadAsync(bytes, 0, bytes.Length, cancellationToken);
-
-				if (bytesRead == 0)
-					return null;
-
-				// Decode WebSocket frame
-				var fin    = (bytes[0] & 0b10000000) != 0;
-				var mask   = (bytes[1] & 0b10000000) != 0;
-				var opcode = bytes[0] & 0b00001111;
-
-				// Opcode 8 = connection close
-				if (opcode == 8)
-					return null;
-
-				// Opcode 1 = text message
-				if (opcode != 1) {
-					Logger.LogWarning($"Unsupported opcode: {opcode}");
-					return null;
-				}
-
-				ulong offset = 2;
-				var   msgLen = (ulong)(bytes[1] & 0b01111111);
-
-				switch (msgLen) {
-					case 126:
-						msgLen = BitConverter.ToUInt16(new byte[] { bytes[3], bytes[2] }, 0);
-						offset = 4;
-						break;
-					case 127:
-						msgLen = BitConverter.ToUInt64(
-							new byte[] {
-								bytes[9], bytes[8], bytes[7], bytes[6],
-								bytes[5], bytes[4], bytes[3], bytes[2]
-							}, 0
-						);
-						offset = 10;
-						break;
-				}
-
-				if (msgLen == 0) {
-					Logger.LogWarning("Message length is 0");
-					return null;
-				}
-
-				if (!mask) {
-					Logger.LogWarning("Mask bit not set");
-					return null;
-				}
-
-				// Decode message
-				var decoded = new byte[msgLen];
-				var masks = new byte[] {
-					bytes[offset],
-					bytes[offset + 1],
-					bytes[offset + 2],
-					bytes[offset + 3]
-				};
-				offset += 4;
-
-				for (ulong i = 0; i < msgLen; ++i)
-					decoded[i] = (byte)(bytes[offset + i] ^ masks[i % 4]);
-
-				var text = Encoding.UTF8.GetString(decoded);
-				return text;
+				return null;
 			} catch (Exception ex) {
+				if (ex is System.IO.IOException || ex is SocketException || ex is ObjectDisposedException || ex is OperationCanceledException) {
+					return null;
+				}
 				Logger.LogError($"Error receiving message: {ex.Message}");
 				return null;
 			}
@@ -332,7 +356,12 @@ namespace api.nox.control {
 
 				await _stream.WriteAsync(frame, 0, frame.Length);
 			} catch (Exception ex) {
-				Logger.LogError($"Error sending message: {ex.Message}");
+				if (ex is System.IO.IOException || ex is SocketException) {
+					Logger.LogWarning($"Client disconnected during send: {ex.Message}");
+					Disconnect();
+				} else {
+					Logger.LogError($"Error sending message: {ex.Message}");
+				}
 			}
 		}
 	}

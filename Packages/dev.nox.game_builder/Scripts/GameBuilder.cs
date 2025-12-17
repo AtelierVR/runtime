@@ -234,7 +234,7 @@ namespace dev.nox.game_builder {
 		}
 
 		private static string GetPath(string path)
-			=> Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, path))
+			=> string.IsNullOrEmpty(path) ? null : Path.Combine("Assets", Path.GetRelativePath(Application.dataPath, path))
 				.Replace("\\", "/")
 				.ToLower()
 				.Replace("assets/../", "");

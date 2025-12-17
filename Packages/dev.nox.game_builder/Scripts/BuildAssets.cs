@@ -56,7 +56,7 @@ namespace dev.nox.game_builder {
 			var scene_assets = scenes.Select(s => "Assets/" + Path.GetRelativePath(Application.dataPath, s).Replace("\\", "/")).ToArray();
 
 			var assets = Directory.GetFiles(assetfolder, "*.*", SearchOption.AllDirectories)
-				.Where(f => !f.EndsWith(".meta") && !f.EndsWith(".unity"))
+				.Where(f => !f.EndsWith(".meta") && !f.EndsWith(".unity") && !f.EndsWith(".cs") && !f.EndsWith(".blend1") && !f.EndsWith(".cginc") && !f.EndsWith(".hlsl") && !f.EndsWith(".svg"))
 				.Select(f => "Assets/" + Path.GetRelativePath(Application.dataPath, f).Replace("\\", "/"))
 				.ToArray();
 
@@ -111,7 +111,7 @@ namespace dev.nox.game_builder {
 					.ToArray();
 
 				var assets = Directory.GetFiles(assetfolder, "*.*", SearchOption.AllDirectories)
-					.Where(f => !f.EndsWith(".meta") && !f.EndsWith(".unity") && !f.EndsWith(".asset") && !f.EndsWith(".cs"))
+					.Where(f => !f.EndsWith(".meta") && !f.EndsWith(".unity") && !f.EndsWith(".asset") && !f.EndsWith(".cs") && !f.EndsWith(".blend1") && !f.EndsWith(".cginc") && !f.EndsWith(".hlsl") && !f.EndsWith(".svg"))
 					.Select(f => GetAssetPath(f))
 					.Where(p => !string.IsNullOrEmpty(p))
 					.ToArray();

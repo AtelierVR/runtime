@@ -20,10 +20,12 @@ namespace api.nox.editor.panel {
 
 		private Dictionary<string, object> _panelData;
 
-		public IInstance GetActive()
-			=> _active ??= panelId != null && PanelManager.TryGetPanel(panelId, out var panel)
+		public IInstance GetActive() {
+			if (Editor.CoreAPI == null) return null;
+			return _active ??= panelId != null && PanelManager.TryGetPanel(panelId, out var panel)
 				? panel.Instantiate(this, _panelData)
 				: throw new InvalidOperationException($"No panel found for id '{panelId?.ToString() ?? "null"}'");
+		}
 
 		public static Window Create() {
 			var window = CreateInstance<Window>();
@@ -62,7 +64,7 @@ namespace api.nox.editor.panel {
 		}
 
 		public void OnFocus() {
-			GetActive().OnFocus();
+			GetActive()?.OnFocus();
 			UpdateMenu();
 			UpdateContent();
 		}
@@ -70,7 +72,7 @@ namespace api.nox.editor.panel {
 		public new void Show() {
 			Logger.LogDebug("Showing window", tag: nameof(Window), context: this);
 			base.Show();
-			GetActive().OnFocus();
+			GetActive()?.OnFocus();
 		}
 
 		private ToolbarMenu        _menu;
@@ -92,14 +94,21 @@ namespace api.nox.editor.panel {
 				var panels = PanelManager.GetPanels();
 				foreach (var panel in panels)
 					Menu.menu.AppendAction(panel.GetLabel(), OnMenuClick);
-				titleContent = new GUIContent($"{GetActive().GetTitle()} - {Application.productName}");
+				
+				var active = GetActive();
+				if (active != null)
+					titleContent = new GUIContent($"{active.GetTitle()} - {Application.productName}");
 			}
 
 			if (Breadcrumbs != null) {
 				while (Breadcrumbs.childCount > 0)
 					Breadcrumbs.PopItem();
-				foreach (var item in GetActive().GetPanel().GetLabel().Split('/'))
-					Breadcrumbs.PushItem(item);
+				
+				var active = GetActive();
+				if (active != null) {
+					foreach (var item in active.GetPanel().GetLabel().Split('/'))
+						Breadcrumbs.PushItem(item);
+				}
 			}
 
 			// other UI updates can go here
@@ -109,7 +118,9 @@ namespace api.nox.editor.panel {
 			if (Content == null)
 				return;
 			Content.Clear();
-			var content = GetActive().GetContent();
+			var active = GetActive();
+			if (active == null) return;
+			var content = active.GetContent();
 			content.style.flexGrow = 1;
 			Content.Add(content);
 		}
@@ -120,7 +131,8 @@ namespace api.nox.editor.panel {
 				if (panel.GetLabel() != action.name)
 					continue;
 
-				if (panel == GetActive().GetPanel()) {
+				var active = GetActive();
+				if (active != null && panel == active.GetPanel()) {
 					Logger.LogDebug($"Panel '{action.name}' is already active. Focusing window.", tag: nameof(Window), context: this);
 					Focus();
 					return;

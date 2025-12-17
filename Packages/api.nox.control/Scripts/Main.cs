@@ -13,18 +13,18 @@ using EventHandler = api.nox.control.handlers.EventHandler;
 namespace api.nox.control {
 	public class Main : IMainModInitializer {
 		internal static WebSocketServer Server;
-		private         MainModCoreAPI  _api;
+		internal static MainModCoreAPI  CoreAPI;
 
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
 
 		public void OnInitializeMain(MainModCoreAPI api) {
-			_api = api;
+			CoreAPI = api;
 			Reload();
 			LoggerHandler.Listen();
 			_events = new[] { api.EventAPI.Subscribe(null, EventHandler.OnEvent) };
 		}
 
-		private void Reload() {
+		private static void Reload() {
 			if (Server != null) {
 				Server.Stop();
 				Server = null;
@@ -42,14 +42,14 @@ namespace api.nox.control {
 
 			try {
 				Server.Start();
-				_api.LoggerAPI.Log($"Control Server started on port {Server.GetPort()}");
+				CoreAPI.LoggerAPI.Log($"Control Server started on port {Server.GetPort()}");
 			} catch (SocketException ex) {
-				_api.LoggerAPI.LogError($"Failed to start Control Server on port {port}: {ex.Message}");
+				CoreAPI.LoggerAPI.LogError($"Failed to start Control Server on port {port}: {ex.Message}");
 
 				// Try to get a different free port and retry
 				var freePort = GetFreePort();
 				if (freePort != port) {
-					_api.LoggerAPI.Log($"Retrying with alternative port {freePort}...");
+					CoreAPI.LoggerAPI.Log($"Retrying with alternative port {freePort}...");
 					Server = new WebSocketServer(address, freePort);
 					Server.OnClientConnected.AddListener(OnClientConnected);
 					Server.OnClientDisconnected.AddListener(OnClientDisconnected);
@@ -57,9 +57,9 @@ namespace api.nox.control {
 
 					try {
 						Server.Start();
-						_api.LoggerAPI.Log($"Control Server started on alternative port {Server.GetPort()}");
+						CoreAPI.LoggerAPI.Log($"Control Server started on alternative port {Server.GetPort()}");
 					} catch (SocketException retryEx) {
-						_api.LoggerAPI.LogError($"Failed to start Control Server on alternative port {freePort}: {retryEx.Message}");
+						CoreAPI.LoggerAPI.LogError($"Failed to start Control Server on alternative port {freePort}: {retryEx.Message}");
 						Server = null;
 						throw;
 					}
@@ -70,45 +70,50 @@ namespace api.nox.control {
 			}
 		}
 
-		private void OnDataReceived(IClient arg0, string arg1, params object[] arg2) {
+		private static void OnDataReceived(IClient arg0, string arg1, params object[] arg2) {
+			if (CoreAPI == null) return;
 			List<object> data = new() { arg0, arg1 };
 			data.AddRange(arg2);
-			_api.EventAPI.Emit("control:data", data.ToArray());
+			CoreAPI.EventAPI.Emit("control:data", data.ToArray());
 			ConfigHandler.Handle(arg0, arg1, arg2);
 			HierarchyHandler.Handle(arg0, arg1, arg2);
+			ModHandler.Handle(arg0, arg1, arg2);
+			LoggerHandler.Handle(arg0, arg1, arg2);
 			#if UNITY_EDITOR
 			EditorHandler.Handle(arg0, arg1, arg2);
 			#endif
 		}
 
-		private void OnClientDisconnected(IClient arg0) {
-			_api.LoggerAPI.Log($"Client disconnected: {arg0.GetEndPoint()}");
-			_api.EventAPI.Emit("control:disconnected", arg0);
+		private static void OnClientDisconnected(IClient arg0) {
+			if (CoreAPI == null) return;
+			CoreAPI.LoggerAPI.Log($"Client disconnected: {arg0.GetEndPoint()}");
+			CoreAPI.EventAPI.Emit("control:disconnected", arg0);
 		}
 
-		private void OnClientConnected(IClient arg0) {
-			_api.LoggerAPI.Log($"Client connected: {arg0.GetEndPoint()}");
-			_api.EventAPI.Emit("control:connected", arg0);
+		private static void OnClientConnected(IClient arg0) {
+			if (CoreAPI == null) return;
+			CoreAPI.LoggerAPI.Log($"Client connected: {arg0.GetEndPoint()}");
+			CoreAPI.EventAPI.Emit("control:connected", arg0);
 		}
 
 		public void OnDisposeMain() {
 			try {
-				foreach (var sub in _events) 
-					_api.EventAPI.Unsubscribe(sub);
+				foreach (var sub in _events)
+					CoreAPI.EventAPI.Unsubscribe(sub);
 				LoggerHandler.Dispose();
 				if (Server == null) return;
 				var port = Server.GetPort();
 				Server.Stop();
-				_api?.LoggerAPI.Log($"Control Server stopped on port {port}");
+				CoreAPI?.LoggerAPI.Log($"Control Server stopped on port {port}");
 				Server = null;
 			} catch (Exception ex) {
-				_api?.LoggerAPI.LogError($"Error disposing Control Server: {ex.Message}");
+				CoreAPI?.LoggerAPI.LogError($"Error disposing Control Server: {ex.Message}");
 			} finally {
-				_api = null;
+				CoreAPI = null;
 			}
 		}
 
-		public static int IsUsablePort(int port, int fallbackPort) {
+		private static int IsUsablePort(int port, int fallbackPort) {
 			try {
 				var listener = new TcpListener(IPAddress.Any, port);
 				listener.Start();
@@ -123,7 +128,7 @@ namespace api.nox.control {
 			}
 		}
 
-		public static int GetFreePort() {
+		private static int GetFreePort() {
 			try {
 				var listener = new TcpListener(IPAddress.Any, 0);
 				listener.Start();

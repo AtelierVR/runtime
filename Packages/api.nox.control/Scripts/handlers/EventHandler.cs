@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Nox.CCK.Mods.Events;
@@ -15,22 +16,20 @@ namespace api.nox.control.handlers {
 
 			foreach (var d in context.Data) {
 				switch (d) {
-					case JToken jToken:
-						data.Add(jToken);
-						break;
 					case null:
 						data.Add(JValue.CreateNull());
 						break;
-					default:
-						try {
-							data.Add(JToken.FromObject(d));
-						} catch (Exception e) {
-							data.Add(new JObject {
-								["error"] = e.Message,
-								["type"] = e.GetType().Name
-							});
-						}
 
+					case JToken jToken:
+						data.Add(jToken);
+						break;
+
+					case ISerializable serializable:
+						data.Add(JToken.FromObject(serializable));
+						break;
+
+					default:
+						data.Add(JToken.FromObject(d.ToString()));
 						break;
 				}
 			}
@@ -41,8 +40,7 @@ namespace api.nox.control.handlers {
 			where context.SourceChannel.HasFlag(flag)
 			select flag.ToString().ToSnakeCase()
 			).ToArray();
-
-
+			
 			foreach (var client in clients)
 				client.Send("event", context.EventName, context.Source.GetMetadata().GetId(), data.ToArray(), channels).Forget();
 		}

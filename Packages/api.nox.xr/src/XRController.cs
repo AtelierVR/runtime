@@ -301,7 +301,7 @@ namespace api.nox.xr {
 				return false;
 			}
 
-			root.name += " XR";
+			root.name += $" {runtimeAvatar.GetIdentifier()?.ToString() ?? "null"} XR";
 
 			if (old != null)
 				await old.Dispose();

@@ -35,6 +35,7 @@ namespace api.nox.main {
 			var world = await WorldAPI.LoadFromAssets(
 				_coreAPI.ModMetadata.GetId(),
 				"worlds/default/default.unity"
+				
 			);
 			var adapter = OfflineAPI.New();
 			adapter.SetDimension(world);

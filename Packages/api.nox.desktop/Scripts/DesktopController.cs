@@ -10,6 +10,7 @@ using Nox.Avatars.Parameters;
 using Nox.Avatars.Players;
 using Nox.CCK.Avatars;
 using Nox.CCK.Mods.Events;
+using Nox.CCK.Network;
 using Nox.CCK.Players;
 using Nox.CCK.Utils;
 using UnityEngine;
@@ -212,7 +213,7 @@ namespace api.nox.desktop {
 			var avatar = await Client.AvatarAPI.LoadFromCache(
 				asset.GetHash(),
 				_avatarParameters,
-				progress: p => onProgress?.Invoke($"Loading avatar{identifier.ToString()}", p),
+				progress: p => onProgress?.Invoke($"Loading avatar {identifier.ToString()}", p),
 				token: _avatarLoadingCts.Token
 			);
 			if (_avatarLoadingCts.IsCancellationRequested)
@@ -434,7 +435,7 @@ namespace api.nox.desktop {
 				return false;
 			}
 
-			root.name += " Desktop";
+			root.name += $" {runtimeAvatar.GetIdentifier()?.ToString() ?? "null"} Desktop";
 
 			if (old != null)
 				await old.Dispose();
@@ -451,6 +452,13 @@ namespace api.nox.desktop {
 			if (parameterModule == null) {
 				Logger.LogWarning("Avatar has no parameter module, cannot configure tracking parameters.");
 				return true;
+			}
+
+			// Attendre que l'Animator soit prêt avant de configurer les paramètres
+			var animator = _attachedRuntimeAvatar?.GetDescriptor()?.GetAnimator();
+			if (animator && !animator.runtimeAnimatorController) {
+				Logger.LogDebug("Waiting for Animator to be ready...");
+				await UniTask.WaitUntil(() => animator.runtimeAnimatorController);
 			}
 
 			var parameters = parameterModule.GetParameters();
@@ -502,6 +510,7 @@ namespace api.nox.desktop {
 			// Gérer le zoom avec la molette de la souris
 			var scrollInput = Input.GetAxis("Mouse ScrollWheel");
 			if (!(Mathf.Abs(scrollInput) > 0.01f)) return;
+			
 			// Calculer le nouveau zoom
 			_currentZoom -= scrollInput * zoomSpeed * 10f;
 			_currentZoom =  Mathf.Clamp(_currentZoom, minZoom, maxZoom);
@@ -537,14 +546,19 @@ namespace api.nox.desktop {
 			var parameterModule = _attachedRuntimeAvatar?.GetDescriptor()
 				?.GetModules<IParameterModule>()
 				.FirstOrDefault();
-			if (parameterModule == null) return;
+			
+			if (parameterModule == null) {
+				Logger.LogWarning("Avatar has no parameter module, cannot synchronize parameters.");
+				return;
+			}
+
 			var parameters = parameterModule.GetParameters();
 			foreach (var param in parameters) {
 				var n = param.GetName();
 				switch (n) {
 					case "Grounded": {
 						var grounded = player.IsGrounded();
-						var value    = (bool)param.Get();
+						var value    = param.Get().ToBool();
 						if (value == grounded) continue;
 						param.Set(grounded);
 						break;
@@ -552,7 +566,7 @@ namespace api.nox.desktop {
 					case "VelocityX": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
-						var value         = (float)param.Get();
+						var value         = param.Get().ToFloat();
 						if (Mathf.Approximately(value, localVelocity.x)) continue;
 						param.Set(localVelocity.x);
 						break;
@@ -560,7 +574,7 @@ namespace api.nox.desktop {
 					case "VelocityY": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
-						var value         = (float)param.Get();
+						var value         = param.Get().ToFloat();
 						if (Mathf.Approximately(value, localVelocity.y)) continue;
 						param.Set(localVelocity.y);
 						break;
@@ -568,7 +582,7 @@ namespace api.nox.desktop {
 					case "VelocityZ": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
-						var value         = (float)param.Get();
+						var value         = param.Get().ToFloat();
 						if (Mathf.Approximately(value, localVelocity.z)) continue;
 						param.Set(localVelocity.z);
 						break;
@@ -576,7 +590,7 @@ namespace api.nox.desktop {
 					case "Velocity": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
-						var value         = (Vector3)param.Get();
+						var value         = param.Get().ToVector3();
 						if (value == localVelocity) continue;
 						param.Set(localVelocity);
 						break;
@@ -584,14 +598,14 @@ namespace api.nox.desktop {
 					case "VelocityMagnitude": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var magnitude     = worldVelocity.magnitude;
-						var value         = (float)param.Get();
+						var value         = param.Get().ToFloat();
 						if (Mathf.Approximately(value, magnitude)) continue;
 						param.Set(magnitude);
 						break;
 					}
 					case "tracking/head/rotation": {
 						var cRot  = player.headCamera.transform.rotation;
-						var value = (Quaternion)param.Get();
+						var value = param.Get().ToQuaternion();
 						if (Quaternion.Angle(value, cRot) < 0.001f) continue;
 						param.Set(cRot);
 						break;

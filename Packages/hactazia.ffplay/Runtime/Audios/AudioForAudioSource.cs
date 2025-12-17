@@ -191,21 +191,21 @@ namespace Hactazia.FFPlay {
 
 		private void ApplyCrossfade(float[] samples) {
 			if (samples.Length == 0) return;
-			
+
 			// Fade in from last sample to avoid discontinuity
 			var fadeLength = Mathf.Min(FadeSamples, samples.Length);
 			for (var i = 0; i < fadeLength; i++) {
 				var t = (float)i / fadeLength;
 				samples[i] = Mathf.Lerp(_lastSample, samples[i], t);
 			}
-			
+
 			// Store last sample for next buffer
 			_lastSample = samples[samples.Length - 1];
 		}
 
 		private void UpdateAudioClip(float[] sampleArray, int sampleCount, int writePos) {
 			var clipSamples = _audioClip.samples;
-			
+
 			if (writePos + sampleCount <= clipSamples) {
 				_audioClip.SetData(sampleArray, writePos);
 			} else {
@@ -213,10 +213,10 @@ namespace Hactazia.FFPlay {
 				var firstPartLength = clipSamples - writePos;
 				var firstPart = new float[firstPartLength];
 				var secondPart = new float[sampleCount - firstPartLength];
-				
+
 				System.Array.Copy(sampleArray, 0, firstPart, 0, firstPartLength);
 				System.Array.Copy(sampleArray, firstPartLength, secondPart, 0, secondPart.Length);
-				
+
 				_audioClip.SetData(firstPart, writePos);
 				_audioClip.SetData(secondPart, 0);
 			}
