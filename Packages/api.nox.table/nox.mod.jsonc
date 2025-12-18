@@ -54,5 +54,5 @@
     "config",
     "config.global"
   ],
-  "kernel": true
+  "kernel": false
 }

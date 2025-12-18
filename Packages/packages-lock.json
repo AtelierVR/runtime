@@ -768,6 +768,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "nox.game.builder": {
+      "version": "file:nox.game.builder",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "nox.loader": {
       "version": "file:nox.loader",
       "depth": 0,

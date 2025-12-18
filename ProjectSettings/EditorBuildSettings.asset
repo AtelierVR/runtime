@@ -269,7 +269,7 @@ EditorBuildSettings:
       Basic Motions - Unity Demo Scene.unity
     guid: cc778ff8e7d7b874d9ef5cf06279e322
   - enabled: 1
-    path: Packages/dev.nox.game_builder/BuildScenes/main.unity
+    path: Packages/nox.game.builder/BuildScenes/main.unity
     guid: eaaaa443d7bb2384a99758427d41bfd8
   - enabled: 1
     path: Packages/api.nox.main/Assets/api.nox.main/worlds/default/default.unity

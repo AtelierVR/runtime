@@ -493,6 +493,9 @@
     <Reference Include="YantraJS.Core">
       <HintPath>U:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\YantraJS.Core.1.2.293\lib\netstandard2.1\YantraJS.Core.dll</HintPath>
     </Reference>
+    <Reference Include="websocket-sharp">
+      <HintPath>U:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\WebSocketSharp-netstandard.1.0.1\lib\netstandard2.0\websocket-sharp.dll</HintPath>
+    </Reference>
     <Reference Include="log4netPlastic">
       <HintPath>U:\Projets\nox\runtime\Library\PackageCache\com.unity.collab-proxy@ab839cc7d2ad\Lib\Editor\log4netPlastic.dll</HintPath>
     </Reference>

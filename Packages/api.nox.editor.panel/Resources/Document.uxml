@@ -10,7 +10,7 @@
         </ui:VisualElement>
     </uie:Toolbar>
     <ui:GroupBox name="container" class="container">
-        <ui:GroupBox name="content" style="align-self: stretch; flex-grow: 1;" />
+        <ui:GroupBox name="content" />
         <ui:VisualElement name="error" style="flex-grow: 1; display: none;" />
     </ui:GroupBox>
 </ui:UXML>

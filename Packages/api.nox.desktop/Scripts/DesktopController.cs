@@ -547,10 +547,8 @@ namespace api.nox.desktop {
 				?.GetModules<IParameterModule>()
 				.FirstOrDefault();
 			
-			if (parameterModule == null) {
-				Logger.LogWarning("Avatar has no parameter module, cannot synchronize parameters.");
+			if (parameterModule == null) 
 				return;
-			}
 
 			var parameters = parameterModule.GetParameters();
 			foreach (var param in parameters) {
