@@ -694,10 +694,7 @@
       "version": "file:nox.avatars",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {
-        "com.unity.animation.rigging": "1.3.1",
-        "com.unity.scriptablebuildpipeline": "2.4.3"
-      }
+      "dependencies": {}
     },
     "nox.avatars.modules": {
       "version": "file:nox.avatars.modules",

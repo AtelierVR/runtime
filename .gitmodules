@@ -25,9 +25,12 @@
 [submodule "Packages/nox.game.builder"]
 	path = Packages/nox.game.builder
 	url = https://github.com/AtelierVR/nox.game.builder.git
-[submodule "Packages/nox.autohand"]
+[submodule "Packages/com.earnestrobot.autohand"]
 	path = Packages/com.earnestrobot.autohand
 	url = https://github.com/AtelierVR/nox.autohand.git
+[submodule "Packages/rootmotion.finalik"]
+	path = Packages/rootmotion.finalik
+	url = https://github.com/AtelierVR/nox.finalik.git
 [submodule "Packages/nox.relay"]
 	path = Packages/nox.relay
 	url = https://github.com/AtelierVR/nox.relay.git

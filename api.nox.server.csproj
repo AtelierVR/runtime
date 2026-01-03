@@ -478,6 +478,9 @@
     <Reference Include="BouncyCastle.Crypto">
       <HintPath>D:\Projets\nox\runtime\Packages\nox.cck\Plugins\BouncyCastle.Crypto.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.nuget.mono-cecil@ecb9724e46ff\Mono.Cecil.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Collections.LowLevel.ILSupport">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.collections@aea9d3bd5e19\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.dll</HintPath>
     </Reference>
