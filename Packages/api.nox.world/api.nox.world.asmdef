@@ -16,7 +16,8 @@
         "Nox.Tables",
         "Nox.Offline",
         "Nox.Sessions",
-        "Nox.Worlds.Scenes"
+        "Nox.Worlds.Scenes",
+        "Nox.CCK.Sessions"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

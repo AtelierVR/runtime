@@ -3,14 +3,14 @@ using Nox.Avatars.Controllers;
 using Nox.Avatars.Rigging;
 using Nox.CCK.Network;
 using Nox.CCK.Players;
+using Nox.CCK.Utils;
 using Nox.Entities;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
-using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.relay {
 	public static class RelayExtensions {
-		public static void Move(this IMovingEntity entity, NoxTransform transform, DirtyBy by) {
+		public static void Move(this IMovingEntity entity, TransformObject transform, DirtyBy by) {
 			if (!transform.IsSamePosition(entity.GetPosition()))
 				entity.SetPosition(transform.GetPosition(), by);
 			if (!transform.IsSameRotation(entity.GetRotation()))
@@ -21,7 +21,7 @@ namespace api.nox.relay {
 				entity.SetAngularVelocity(transform.GetAngularVelocity(), by);
 		}
 
-		public static void Move(this IMultiPartEntity entity, ushort id, NoxTransform transform, DirtyBy by) {
+		public static void Move(this IMultiPartEntity entity, ushort id, TransformObject transform, DirtyBy by) {
 			if (!entity.TryGetPart(id, out var part)) {
 				if (id.ToPlayerRig() == PlayerRig.Base && entity is IMovingEntity moving) {
 					moving.Move(transform, by);
@@ -62,7 +62,7 @@ namespace api.nox.relay {
 		}
 
 		public static bool TryCurrentController(out IControllerAvatar controller) {
-			if (Main.ControllerAPI?.GetCurrent() is IControllerAvatar ca) {
+			if (Main.ControllerAPI?.Current() is IControllerAvatar ca) {
 				controller = ca;
 				return true;
 			}

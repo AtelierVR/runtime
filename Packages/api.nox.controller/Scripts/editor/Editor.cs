@@ -5,12 +5,12 @@ using Nox.CCK.Mods.Panels;
 
 namespace api.nox.controller {
 	public class Editor : IEditorModInitializer {
-		internal static EditorModCoreAPI CoreAPI;
+		internal static IEditorModCoreAPI CoreAPI;
 
 		private static IEditorPanel     _controllerPanel;
 		private        ControllerPanel _controller;
 
-		public void OnInitializeEditor(EditorModCoreAPI api) {
+		public void OnInitializeEditor(IEditorModCoreAPI api) {
 			CoreAPI          = api;
 			_controller      = new ControllerPanel();
 			_controllerPanel = api.PanelAPI.AddLocalPanel(_controller);

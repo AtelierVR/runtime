@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+/*#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -116,20 +116,20 @@ namespace api.nox.session {
 			public PlayerViewModel(IPlayer player)
 				=> Player = player;
 
-			public ushort GetId()
-				=> Player?.GetId() ?? ushort.MaxValue;
+			public int GetId()
+				=> Player?.Id ?? int.MaxValue;
 
 			public string GetIdDisplay()
 				=> $"#{GetId()}";
 
 			public string GetDisplayName()
-				=> Player?.GetDisplay() ?? "Unknown";
+				=> Player?.Display ?? "Unknown";
 
 			public bool IsMaster()
-				=> Player?.IsMaster() ?? false;
+				=> Player?.IsMaster ?? false;
 
 			public bool IsLocal()
-				=> Player?.IsLocal() ?? false;
+				=> Player?.IsLocal ?? false;
 
 			public string GetRoleDisplay() {
 				var roles = new List<string>();
@@ -290,7 +290,7 @@ namespace api.nox.session {
 			// Update view models
 			_playerItems.Clear();
 			var players = adapter.GetPlayers();
-			foreach (var player in players.OrderBy(p => p.GetId())) {
+			foreach (var player in players.OrderBy(p => p.Id)) {
 				_playerItems.Add(new PlayerViewModel(player));
 			}
 
@@ -1116,19 +1116,19 @@ namespace api.nox.session {
 			infoBox.Add(titleLabel);
 
 			// ID
-			var idRow = CreatePropertyRow("ID", $"#{_selectedPlayer.GetId()}");
+			var idRow = CreatePropertyRow("ID", $"#{_selectedPlayer.Id}");
 			infoBox.Add(idRow);
 
 			// Display Name
-			var nameRow = CreatePropertyRow("Display Name", _selectedPlayer.GetDisplay());
+			var nameRow = CreatePropertyRow("Display Name", _selectedPlayer.Display);
 			infoBox.Add(nameRow);
 
 			// Is Master
-			var masterRow = CreatePropertyRow("Is Master", _selectedPlayer.IsMaster() ? "Yes" : "No");
+			var masterRow = CreatePropertyRow("Is Master", _selectedPlayer.IsMaster ? "Yes" : "No");
 			infoBox.Add(masterRow);
 
 			// Is Local
-			var localRow = CreatePropertyRow("Is Local", _selectedPlayer.IsLocal() ? "Yes" : "No");
+			var localRow = CreatePropertyRow("Is Local", _selectedPlayer.IsLocal ? "Yes" : "No");
 			infoBox.Add(localRow);
 
 			_playerInfoContainer.Add(infoBox);
@@ -1137,7 +1137,7 @@ namespace api.nox.session {
 			_propertyItems.Clear();
 			var properties = _selectedPlayer.GetProperties();
 
-			Logger.Log($"Player {_selectedPlayer.GetId()} ({_selectedPlayer.GetDisplay()}) has {properties?.Length ?? 0} properties");
+			Logger.Log($"Player {_selectedPlayer.Id} ({_selectedPlayer.Display}) has {properties?.Length ?? 0} properties");
 
 			if (properties is { Length: > 0 }) {
 				foreach (var prop in properties) {
@@ -1371,7 +1371,7 @@ namespace api.nox.session {
 			}
 
 			try {
-				Logger.Log($"Kicking player {player.GetId()} from session");
+				Logger.Log($"Kicking player {player.Id} from session");
 				await UniTask.Yield();
 				throw new NotImplementedException("Kick player not implemented yet");
 			} catch (Exception ex) {
@@ -1409,17 +1409,17 @@ namespace api.nox.session {
 		}
 
 		private void OnPlayerJoined(IPlayer player) {
-			Logger.Log($"Player {player.GetId()} joined session");
+			Logger.Log($"Player {player.Id} joined session");
 			RefreshAll();
 		}
 
 		private void OnPlayerLeft(IPlayer player) {
-			Logger.Log($"Player {player.GetId()} left session");
+			Logger.Log($"Player {player.Id} left session");
 			RefreshAll();
 		}
 
 		private void OnAuthorityTransferred(IPlayer newMaster) {
-			Logger.Log($"Master changed from {newMaster.GetId()}");
+			Logger.Log($"Master changed from {newMaster.Id}");
 			RefreshAll();
 		}
 
@@ -1438,4 +1438,4 @@ namespace api.nox.session {
 		#endregion
 	}
 }
-#endif
+#endif*/

@@ -26,10 +26,10 @@ namespace api.nox.editor.panel {
 				.Concat(GetDirectPanels())
 				.ToArray();
 
-		public static bool TryGetPanel(ResourceIdentifier id, out IPanel panel)
-			=> id.HasGroup()
-				? TryGetPanelFromMod(Editor.CoreAPI?.ModAPI.GetMod(id.GetGroup()), id.GetPath(), out panel)
-				: TryGetPanelEverywhere(id.GetPath(), out panel);
+		public static bool TryGetPanel(ResourceIdentifier path, out IPanel panel)
+			=> path.HasNamespace()
+				? TryGetPanelFromMod(Editor.CoreAPI?.ModAPI.GetMod(path.Namespace), path.SplitPath, out panel)
+				: TryGetPanelEverywhere(path.SplitPath, out panel);
 
 		private static bool TryGetPanelFromMod(IMod mod, string[] path, out IPanel panel) {
 			if (mod == null) {

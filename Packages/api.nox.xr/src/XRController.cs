@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using Autohand;
@@ -24,7 +25,6 @@ using Nox.Users;
 using RootMotion.FinalIK;
 using UnityEngine.EventSystems;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
-using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.xr {
 	public class XRController : MonoBehaviour, IController, IControllerAvatar, INoxObject {
@@ -48,7 +48,7 @@ namespace api.nox.xr {
 		/// </summary>
 		/// <returns></returns>
 		private static bool IsBetterThanCurrent() {
-			var controller = ControllerAPI.GetCurrent();
+			var controller = ControllerAPI.Current;
 			return controller               == null
 				|| controller.GetPriority() < DefaultPriority
 				|| controller.GetId()       == DefaultId;
@@ -59,7 +59,7 @@ namespace api.nox.xr {
 		/// </summary>
 		/// <returns></returns>
 		private static bool IsCurrent() {
-			var controller = ControllerAPI.GetCurrent();
+			var controller = ControllerAPI.Current;
 			return controller         != null
 				&& controller.GetId() == DefaultId;
 		}
@@ -81,7 +81,7 @@ namespace api.nox.xr {
 			if (!IsBetterThanCurrent()) {
 				Logger.LogDebug(
 					"XR proxy is not better than current controller, skipping creation\n"
-					+ $"Current: {ControllerAPI.GetCurrent()?.GetId() ?? "null"} ({ControllerAPI.GetCurrent()?.GetPriority() ?? -1})\n"
+					+ $"Current: {ControllerAPI.Current?.GetId() ?? "null"} ({ControllerAPI.Current?.GetPriority() ?? -1})\n"
 					+ $"XR: {DefaultId} ({DefaultPriority})"
 					+ $" - {(Client.Instance.IsReady() ? "XR Ready" : "XR Not Ready")}"
 					+ $" - {(Client.Instance.HasHeadset() ? "Has Headset" : "No Headset")}"
@@ -115,9 +115,7 @@ namespace api.nox.xr {
 				return false;
 			}
 
-			Logger.LogDebug("Menu: " + Client.UiAPI);
-			xr.Menu = Client.UiAPI
-				?.Make(xr.menuContainer, xr.menuParent);
+			xr.Menu = await Client.UiAPI.Make(xr.menuContainer, xr.menuParent);
 
 			if (xr.Menu == null) {
 				Logger.LogError("Failed to create desktop proxy menu");
@@ -206,16 +204,20 @@ namespace api.nox.xr {
 					SetAvatar(identifier).Forget();
 			}
 
-			var p = controller.GetPlayer();
-			controller.SetPlayer(null);
-			SetPlayer(p);
-
 			return UniTask.CompletedTask;
 		}
 
-		public bool TryGetPart(ushort index, out Transform tr)
-			=> GetParts().TryGetValue(index, out tr);
+		public bool TryGetPart(ushort index, out TransformObject tr) {
+			var parts = GetParts();
+			if (parts.TryGetValue(index, out var t)) {
+				var rb = t.TryGetComponent<Rigidbody>(out var r) ? r : null;
+				tr = new TransformObject(t, rb);
+				return true;
+			}
 
+			tr = new TransformObject();
+			return false;
+		}
 
 		[NoxPublic(NoxAccess.Method)]
 		public Dictionary<string, object> GetAbilities()
@@ -254,21 +256,24 @@ namespace api.nox.xr {
 			}
 		}
 
-	[NoxPublic(NoxAccess.Method)]
-	public Dictionary<ushort, Transform> GetParts() {
-		var parts = new Dictionary<ushort, Transform> {
-			{ PlayerRig.Base.ToIndex(), player.transform },
-			{ PlayerRig.Head.ToIndex(), player.headCamera.transform }
-		};
-		
-		if (player.handLeft != null)
-			parts.Add(PlayerRig.LeftHand.ToIndex(), player.handLeft.transform);
-		
-		if (player.handRight != null)
-			parts.Add(PlayerRig.RightHand.ToIndex(), player.handRight.transform);
-		
-		return parts;
-	}
+		private Dictionary<ushort, Transform> GetParts() {
+			var parts = new Dictionary<ushort, Transform> {
+				{ PlayerRig.Base.ToIndex(), player.transform },
+				{ PlayerRig.Head.ToIndex(), player.headCamera.transform }
+			};
+
+			if (player.handLeft)
+				parts.Add(PlayerRig.LeftHand.ToIndex(), player.handLeft.transform);
+
+			if (player.handRight)
+				parts.Add(PlayerRig.RightHand.ToIndex(), player.handRight.transform);
+
+			return parts;
+		}
+
+		IReadOnlyDictionary<ushort, TransformObject> IController.GetParts()
+			=> GetParts().ToDictionary(kv => kv.Key, kv => new TransformObject(kv.Value, kv.Value.GetComponent<Rigidbody>()));
+
 		[NoxPublic(NoxAccess.Method)]
 		public void SetPlayer(IPlayer p) {
 			_attachedPlayer = p;
@@ -358,9 +363,10 @@ namespace api.nox.xr {
 					proxy.rightHand              = player.handRight;
 					proxy.rightTrackedController = player.handRight.transform;
 				}
+
 				if (player.handLeft != null) {
-					proxy.leftHand               = player.handLeft;
-					proxy.leftTrackedController  = player.handLeft.transform;
+					proxy.leftHand              = player.handLeft;
+					proxy.leftTrackedController = player.handLeft.transform;
 				}
 			}
 			#endif
@@ -404,7 +410,6 @@ namespace api.nox.xr {
 		}
 
 		private void Update() {
-			SynchronizePlayerFromController();
 			SynchronizeParametersAvatar();
 		}
 
@@ -671,32 +676,23 @@ namespace api.nox.xr {
 			}
 		}
 
-		// ReSharper disable Unity.PerformanceAnalysis
-		private void SynchronizePlayerFromController() {
-			if (_attachedPlayer == null) return;
-			foreach (var part in GetParts())
-				_attachedPlayer.MovePart(
-					part.Key,
-					new NoxTransform(part.Value, part.Value.GetComponent<Rigidbody>())
-				);
-		}
 
 		// ReSharper disable Unity.PerformanceAnalysis
-		public void SetPart(ushort index, NoxTransform tr) {
+		public void SetPart(ushort index, TransformObject tr) {
 			Rigidbody rb;
 
 			if (index == PlayerRig.Base.ToIndex()) {
 				if (!tr.IsSamePosition(player.transform.position))
 					player.SetPosition(tr.GetPosition());
-				
+
 				if (!tr.IsSameRotation(player.transform.rotation))
 					player.SetRotation(tr.GetRotation());
-				
+
 				rb = player.body;
-				
+
 				if (rb && !tr.IsSameVelocity(rb.linearVelocity))
 					rb.linearVelocity = tr.GetVelocity();
-				
+
 				if (rb && !tr.IsSameAngularVelocity(rb.angularVelocity))
 					rb.angularVelocity = tr.GetAngularVelocity();
 				return;
@@ -710,7 +706,7 @@ namespace api.nox.xr {
 
 			if (!tr.IsSamePosition(part.Value.position))
 				part.Value.position = tr.GetPosition();
-			
+
 			if (!tr.IsSameRotation(part.Value.rotation))
 				part.Value.rotation = tr.GetRotation();
 
@@ -718,16 +714,16 @@ namespace api.nox.xr {
 
 			if (rb && !tr.IsSameVelocity(rb.linearVelocity))
 				rb.linearVelocity = tr.GetVelocity();
-			
+
 			if (rb && !tr.IsSameAngularVelocity(rb.angularVelocity))
 				rb.angularVelocity = tr.GetAngularVelocity();
 		}
 
 		private void SynchronizeControllerFromPlayer() {
 			if (_attachedPlayer == null) return;
-			Logger.LogDebug($"Synchronizing controller from player at {_attachedPlayer.GetPosition()} with rotation {_attachedPlayer.GetRotation()}");
-			player.SetPosition(_attachedPlayer.GetPosition());
-			player.SetRotation(_attachedPlayer.GetRotation());
+			Logger.LogDebug($"Synchronizing controller from player at {_attachedPlayer.Position} with rotation {_attachedPlayer.Rotation}");
+			player.SetPosition(_attachedPlayer.Position);
+			player.SetRotation(_attachedPlayer.Rotation);
 		}
 	}
 }

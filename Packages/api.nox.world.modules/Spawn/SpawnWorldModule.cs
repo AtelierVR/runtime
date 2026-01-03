@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Build;
@@ -118,7 +117,7 @@ namespace Nox.CCK.Worlds.Spawns {
 
 			foreach (var spawn in spawns) {
 				var distance = occupied
-					.Select(point => Vector3.Distance(spawn.GetPosition(), point))
+					.Select(point => Vector3.Distance(spawn.Position, point))
 					.Prepend(float.MaxValue)
 					.Min();
 				if (!(distance > mDis)) continue;
@@ -160,8 +159,8 @@ namespace Nox.CCK.Worlds.Spawns {
 			Gizmos.color = Color.cyan;
 			foreach (var spawn in spawns ?? Array.Empty<ISpawn>()) {
 				if (spawn == null) continue;
-				var pos     = spawn.GetPosition();
-				var rot     = spawn.GetRotation();
+				var pos     = spawn.Position;
+				var rot     = spawn.Rotation;
 				var forward = rot * Vector3.forward;
 				Gizmos.DrawWireSphere(pos, 0.25f);
 				Gizmos.DrawLine(pos, pos + forward * 0.5f);

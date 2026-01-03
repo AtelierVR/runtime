@@ -62,7 +62,7 @@ namespace api.nox.relay {
 			SetAngularVelocity(rb.angularVelocity, DirtyBy.Force);
 		}
 
-		public void MovePart(ushort id, Nox.CCK.Utils.Transform transform, DirtyBy markDirty = DirtyBy.Local) {
+		public void MovePart(ushort id, Nox.CCK.Utils.TransformObject transform, DirtyBy markDirty = DirtyBy.Local) {
 			if (!TryGetPart(id, out var part)) return;
 
 			if (!part.TryGetPosition(out var position) || !transform.IsSamePosition(position))

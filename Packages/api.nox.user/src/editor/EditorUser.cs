@@ -4,13 +4,13 @@ using Nox.CCK.Mods.Panels;
 
 namespace api.nox.user {
 	public class EditorUser : IEditorModInitializer {
-		internal static EditorModCoreAPI      CoreAPI;
+		internal static IEditorModCoreAPI      CoreAPI;
 		public static   AuthentificationPanel Auth;
 		public static   ProfilePanel          Profile;
 		private static  IEditorPanel           _authPanel;
 		private static  IEditorPanel           _profilePanel;
 
-		public void OnInitializeEditor(EditorModCoreAPI api) {
+		public void OnInitializeEditor(IEditorModCoreAPI api) {
 			CoreAPI = api;
 
 			Auth    = new AuthentificationPanel();

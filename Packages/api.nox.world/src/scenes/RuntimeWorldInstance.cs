@@ -8,7 +8,7 @@ using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.world {
-	public class RuntimeWorldInstance : IRuntimeWorldInstance, INoxObject {
+	public class RuntimeWorldInstance : IRuntimeWorldDimension, INoxObject {
 		internal RuntimeWorldGroup   RuntimeWorldGroup;
 		internal Scene               Scene;
 		internal GameObject          Anchor;
@@ -33,7 +33,7 @@ namespace api.nox.world {
 			var container = await Object.InstantiateAsync(Prefab);
 			if (container.Length != 1) {
 				foreach (var go in container)
-					Object.Destroy(go);
+					go.Destroy();
 				return -1;
 			}
 
@@ -47,7 +47,7 @@ namespace api.nox.world {
 			container[0].name = $"{GetType().Name}_{instance.GetId()}]";
 
 			if (instance.Descriptor == null) {
-				Object.Destroy(container[0]);
+				container[0].Destroy();
 				return -1;
 			}
 

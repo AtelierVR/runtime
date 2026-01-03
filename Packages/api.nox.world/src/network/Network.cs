@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using api.nox.world.cache;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
+using Nox.CCK.Worlds;
 using Nox.Worlds;
 using UnityEngine;
 using UnityEngine.Events;
@@ -31,17 +32,18 @@ namespace api.nox.world.network {
 			if (Main.Instance.NetworkAPI == null)
 				return null;
 
-			var ide = WorldIdentifier.FromString(identifier);
-			if (ide.IsLocal())
-				ide.Server = from;
-			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.GetServerAddress();
+			var ide = WorldIdentifier.From(identifier);
+			if (ide.IsLocal)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, from);
+
+			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.Server;
 			if (string.IsNullOrEmpty(address)) {
-				Logger.LogError($"Cannot fetch user {identifier}: no server address provided.");
+				Logger.LogError($"Cannot fetch world {identifier}: no server address provided.");
 				return null;
 			}
 
-			if (address == ide.GetServerAddress())
-				ide.Server = "::"; // Use "::" to indicate local server in the identifier
+			if (address == ide.Server)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, WorldIdentifier.LocalServer);
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}");
@@ -121,17 +123,18 @@ namespace api.nox.world.network {
 			if (Main.Instance.NetworkAPI == null)
 				return null;
 
-			var ide = WorldIdentifier.FromString(identifier);
-			if (ide.IsLocal())
-				ide.Server = from;
-			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.GetServerAddress();
+			var ide = WorldIdentifier.From(identifier);
+			if (ide.IsLocal)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, from);
+
+			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.Server;
 			if (string.IsNullOrEmpty(address)) {
 				Logger.LogError($"Cannot fetch world {identifier}: no server address provided.");
 				return null;
 			}
 
-			if (address == ide.GetServerAddress())
-				ide.Server = "::"; // Use "::" to indicate local server in the identifier
+			if (address == ide.Server)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, WorldIdentifier.LocalServer);
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}");
@@ -159,17 +162,18 @@ namespace api.nox.world.network {
 			if (Main.Instance.NetworkAPI == null)
 				return false;
 
-			var ide = WorldIdentifier.FromString(identifier);
-			if (ide.IsLocal())
-				ide.Server = from;
-			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.GetServerAddress();
+			var ide = WorldIdentifier.From(identifier);
+			if (ide.IsLocal)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, from);
+
+			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.Server;
 			if (string.IsNullOrEmpty(address)) {
-				Logger.LogError($"Cannot delete world {identifier}: no server address provided.");
+				Logger.LogError($"Cannot fetch world {identifier}: no server address provided.");
 				return false;
 			}
 
-			if (address == ide.GetServerAddress())
-				ide.Server = "::"; // Use "::" to indicate local server in the identifier
+			if (address == ide.Server)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, WorldIdentifier.LocalServer);
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}");
@@ -191,17 +195,18 @@ namespace api.nox.world.network {
 			if (Main.Instance.NetworkAPI == null)
 				return null;
 
-			var ide = WorldIdentifier.FromString(identifier);
-			if (ide.IsLocal())
-				ide.Server = from;
-			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.GetServerAddress();
+			var ide = WorldIdentifier.From(identifier);
+			if (ide.IsLocal)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, from);
+
+			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.Server;
 			if (string.IsNullOrEmpty(address)) {
-				Logger.LogError($"Cannot get assets for world {identifier}: no server address provided.");
+				Logger.LogError($"Cannot fetch world {identifier}: no server address provided.");
 				return null;
 			}
 
-			if (address == ide.GetServerAddress())
-				ide.Server = "::"; // Use "::" to indicate local server in the identifier
+			if (address == ide.Server)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, WorldIdentifier.LocalServer);
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}/assets{data.ToParams()}");
@@ -221,17 +226,19 @@ namespace api.nox.world.network {
 		public async UniTask<WorldAsset> CreateAsset(string identifier, CreateAssetRequest data, string from = null) {
 			if (Main.Instance.NetworkAPI == null)
 				return null;
-			var ide = WorldIdentifier.FromString(identifier);
-			if (ide.IsLocal())
-				ide.Server = from;
-			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.GetServerAddress();
+
+			var ide = WorldIdentifier.From(identifier);
+			if (ide.IsLocal)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, from);
+
+			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.Server;
 			if (string.IsNullOrEmpty(address)) {
-				Logger.LogError($"Cannot create asset for world {identifier}: no server address provided.");
+				Logger.LogError($"Cannot fetch world {identifier}: no server address provided.");
 				return null;
 			}
 
-			if (address == ide.GetServerAddress())
-				ide.Server = "::"; // Use "::" to indicate local server in the identifier
+			if (address == ide.Server)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, WorldIdentifier.LocalServer);
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}/assets");
@@ -262,17 +269,19 @@ namespace api.nox.world.network {
 				return false;
 			}
 
-			var ide = WorldIdentifier.FromString(identifier);
-			if (ide.IsLocal())
-				ide.Server = from;
-			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.GetServerAddress();
+			var ide = WorldIdentifier.From(identifier);
+			if (ide.IsLocal)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, from);
+
+			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.Server;
 			if (string.IsNullOrEmpty(address)) {
-				Logger.LogError($"Cannot upload thumbnail for world {identifier}: no server address provided.");
+				Logger.LogError($"Cannot fetch world {identifier}: no server address provided.");
 				return false;
 			}
 
-			if (address == ide.GetServerAddress())
-				ide.Server = "::"; // Use "::" to indicate local server in the identifier
+			if (address == ide.Server)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, WorldIdentifier.LocalServer);
+
 			// Convert texture to PNG byte array
 			byte[] imageData;
 			string fileHash = null;
@@ -347,17 +356,19 @@ namespace api.nox.world.network {
 		public async UniTask<bool> UploadAssetFile(string identifier, uint assetId, byte[] fileData, string fileName, string fileHash = null, string from = null, System.Action<float> onProgress = null) {
 			if (Main.Instance.NetworkAPI == null)
 				return false;
-			var ide = WorldIdentifier.FromString(identifier);
-			if (ide.IsLocal())
-				ide.Server = from;
-			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.GetServerAddress();
+
+			var ide = WorldIdentifier.From(identifier);
+			if (ide.IsLocal)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, from);
+
+			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.Server;
 			if (string.IsNullOrEmpty(address)) {
-				Logger.LogError($"Cannot upload asset file for world {identifier}: no server address provided.");
+				Logger.LogError($"Cannot fetch world {identifier}: no server address provided.");
 				return false;
 			}
 
-			if (address == ide.GetServerAddress())
-				ide.Server = "::"; // Use "::" to indicate local server in the identifier
+			if (address == ide.Server)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, WorldIdentifier.LocalServer);
 
 			// Create multipart form data manually (same pattern as UploadThumbnail)
 			var boundary = "----formdata-nox-" + System.Guid.NewGuid().ToString();
@@ -412,19 +423,19 @@ namespace api.nox.world.network {
 				return null;
 
 			var output = Path.Join(Application.temporaryCachePath, string.IsNullOrEmpty(hash) ? $"{identifier}_{assetId}" : hash);
-			var ide    = WorldIdentifier.FromString(identifier);
 
-			if (ide.IsLocal())
-				ide.Server = from;
+			var ide = WorldIdentifier.From(identifier);
+			if (ide.IsLocal)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, from);
 
-			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.GetServerAddress();
+			var address = from ?? Main.Instance.UserAPI?.GetCurrent()?.GetServerAddress() ?? ide.Server;
 			if (string.IsNullOrEmpty(address)) {
-				Logger.LogError($"Cannot download asset file for world {identifier}: no server address provided.");
+				Logger.LogError($"Cannot fetch world {identifier}: no server address provided.");
 				return null;
 			}
 
-			if (address == ide.GetServerAddress())
-				ide.Server = "::"; // Use "::" to indicate local server in the identifier
+			if (address == ide.Server)
+				ide = new WorldIdentifier(ide.Id, ide.Metadata, WorldIdentifier.LocalServer);
 
 			var request = Main.Instance.NetworkAPI.MakeRequest();
 			await request.SetMasterUrl(address, $"/api/worlds/{ide.ToString()}/assets/{assetId}/file");
@@ -482,8 +493,8 @@ namespace api.nox.world.network {
 				return entry
 					.GetValue()
 					.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-					.Select(s => WorldIdentifier.FromString(s.Trim()))
-					.Where(i => i != null && i.IsValid())
+					.Select(s => WorldIdentifier.From(s.Trim()))
+					.Where(i => i.IsValid)
 					.Distinct()
 					.ToArray();
 
@@ -508,8 +519,8 @@ namespace api.nox.world.network {
 			var e = await FetchFavorites(from);
 
 			var newE = identifier
-				.Select(WorldIdentifier.FromString)
-				.Where(i => i != null && i.IsValid())
+				.Select(WorldIdentifier.From)
+				.Where(i => i.IsValid)
 				.Concat(e)
 				.Distinct()
 				.ToArray();

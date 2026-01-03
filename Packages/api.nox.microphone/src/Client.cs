@@ -3,7 +3,7 @@ using Nox.CCK.Mods.Initializers;
 
 namespace api.nox.microphone {
 	public class Client : IClientModInitializer {
-		public void OnInitializeClient(ClientModCoreAPI api)
+		public void OnInitializeClient(IClientModCoreAPI api)
 			=> Main.Instance?.Manager
 				.CurrentMicrophone
 				?.Start("current");

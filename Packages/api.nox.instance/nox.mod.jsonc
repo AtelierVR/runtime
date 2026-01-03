@@ -64,13 +64,12 @@
     ]
   },
   "references": [],
-  "sides": [],
+  
   "permissions": [
     "file",
     "file.read",
     "file.write",
     "config",
     "config.global"
-  ],
-  "kernel": false
+  ]
 }

@@ -36,7 +36,6 @@
     ]
   },
   "references": [],
-  "sides": [],
-  "permissions": [],
-  "kernel": false
+  
+  "permissions": []
 }

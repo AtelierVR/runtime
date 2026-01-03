@@ -42,25 +42,25 @@ namespace api.nox.ui.defaults {
 		public object[] GetContext()
 			=> _context;
 
-		public UniTask<GameObject> GetContentAsync(RectTransform parent)
-			=> UniTask.FromResult(GetContent(parent));
-
+		public GameObject GetContent(RectTransform parent)
+			=> GetContentAsync(parent).AsTask().Result;
+		
 		public IMenu GetMenu()
 			=> Client.Instance.Get<IMenu>(_mId);
 
-		public GameObject GetContent(RectTransform parent) {
+		public async UniTask<GameObject> GetContentAsync(RectTransform parent) {
 			if (_content) return _content;
-			_content      = Object.Instantiate(PageManager.GetAsset<GameObject>("prefabs/split.prefab"), parent);
+			_content      = Object.Instantiate(await PageManager.GetAssetAsync<GameObject>("prefabs/split.prefab"), parent);
 			_content.name = $"[{GetStaticKey()}_{_content.GetInstanceID()}]";
 			var splitContent     = Reference.GetComponent<RectTransform>("content", _content);
-			var containerAsset   = PageManager.GetAsset<GameObject>("prefabs/container.prefab");
-			var withTitleAsset   = PageManager.GetAsset<GameObject>("prefabs/with_title.prefab");
-			var iconAsset        = PageManager.GetAsset<GameObject>("prefabs/header_icon.prefab");
-			var labelAsset       = PageManager.GetAsset<GameObject>("prefabs/header_label.prefab");
-			var scrollAsset      = PageManager.GetAsset<GameObject>("prefabs/scroll.prefab");
-			var widgetGroupAsset = PageManager.GetAsset<GameObject>("prefabs/grid_group.prefab");
-			var boxAsset         = PageManager.GetAsset<GameObject>("prefabs/box.prefab");
-			_widgetPrefab = PageManager.GetAsset<GameObject>("prefabs/grid_item.prefab");
+			var containerAsset   = await PageManager.GetAssetAsync<GameObject>("prefabs/container.prefab");
+			var withTitleAsset   = await PageManager.GetAssetAsync<GameObject>("prefabs/with_title.prefab");
+			var iconAsset        = await PageManager.GetAssetAsync<GameObject>("prefabs/header_icon.prefab");
+			var labelAsset       = await PageManager.GetAssetAsync<GameObject>("prefabs/header_label.prefab");
+			var scrollAsset      = await PageManager.GetAssetAsync<GameObject>("prefabs/scroll.prefab");
+			var widgetGroupAsset = await PageManager.GetAssetAsync<GameObject>("prefabs/grid_group.prefab");
+			var boxAsset         = await PageManager.GetAssetAsync<GameObject>("prefabs/box.prefab");
+			_widgetPrefab = await PageManager.GetAssetAsync<GameObject>("prefabs/grid_item.prefab");
 
 			// generate background containers
 
@@ -71,18 +71,18 @@ namespace api.nox.ui.defaults {
 			var icon      = Object.Instantiate(iconAsset, Reference.GetComponent<RectTransform>("before", header));
 			var label     = Object.Instantiate(labelAsset, Reference.GetComponent<RectTransform>("content", header));
 
-			Reference.GetComponent<Image>("image", icon).sprite = PageManager.GetAsset<Sprite>("icons/notifications.png");
+			Reference.GetComponent<Image>("image", icon).sprite = await PageManager.GetAssetAsync<Sprite>("icons/notifications.png");
 			Reference.GetComponent<TextLanguage>("text", label).UpdateText("notifications.title");
 			_notificationContent = Reference.GetComponent<RectTransform>("content", withTitle);
 
 			// generate dashboard
-			container = Object.Instantiate(PageManager.GetAsset<GameObject>("prefabs/container_full.prefab"), splitContent);
+			container = Object.Instantiate(await PageManager.GetAssetAsync<GameObject>("prefabs/container_full.prefab"), splitContent);
 			withTitle = Object.Instantiate(withTitleAsset, Reference.GetComponent<RectTransform>("content", container));
 			header    = Reference.GetReference("header", withTitle);
 			icon      = Object.Instantiate(iconAsset, Reference.GetComponent<RectTransform>("before", header));
 			label     = Object.Instantiate(labelAsset, Reference.GetComponent<RectTransform>("content", header));
 
-			Reference.GetComponent<Image>("image", icon).sprite = PageManager.GetAsset<Sprite>("icons/dashboard.png");
+			Reference.GetComponent<Image>("image", icon).sprite = await PageManager.GetAssetAsync<Sprite>("icons/dashboard.png");
 			Reference.GetComponent<TextLanguage>("text", label).UpdateText("dashboard.title");
 
 			container         = Object.Instantiate(scrollAsset, Reference.GetComponent<RectTransform>("content", withTitle));
@@ -104,7 +104,7 @@ namespace api.nox.ui.defaults {
 			icon      = Object.Instantiate(iconAsset, Reference.GetComponent<RectTransform>("before", header));
 			label     = Object.Instantiate(labelAsset, Reference.GetComponent<RectTransform>("content", header));
 
-			Reference.GetComponent<Image>("image", icon).sprite = PageManager.GetAsset<Sprite>("icons/friend.png");
+			Reference.GetComponent<Image>("image", icon).sprite = await PageManager.GetAssetAsync<Sprite>("icons/friend.png");
 			Reference.GetComponent<TextLanguage>("text", label).UpdateText("friends.title");
 			_friendsContent = Reference.GetComponent<RectTransform>("content", withTitle);
 
@@ -129,11 +129,11 @@ namespace api.nox.ui.defaults {
 				Client.Instance.CoreAPI.EventAPI.Subscribe("widget_added", AddWidget),
 				Client.Instance.CoreAPI.EventAPI.Subscribe("widget_removed", RemoveWidget),
 			};
-			
+
 			RequestWidgets();
 		}
 
-		public void OnDisplay(IPage lastPage) 
+		public void OnDisplay(IPage lastPage)
 			=> UpdateLayout.UpdateImmediate(_content);
 
 		private void RemoveWidget(EventData data) {
@@ -193,7 +193,7 @@ namespace api.nox.ui.defaults {
 				item.size  = widget.GetSize();
 				item.index = i;
 			}
-			
+
 			UpdateLayout.UpdateImmediate(_content);
 			await UniTask.NextFrame();
 			UpdateLayout.UpdateImmediate(_content);

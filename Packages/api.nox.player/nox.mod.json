@@ -27,7 +27,6 @@
   "relations": [],
   "entrypoints": {},
   "references": [],
-  "sides": [],
-  "permissions": [],
-  "kernel": false
+  
+  "permissions": []
 }

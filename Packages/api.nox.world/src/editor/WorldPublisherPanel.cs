@@ -7,7 +7,6 @@ using api.nox.world.builder;
 using api.nox.world.network;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
-using Nox.CCK.Worlds;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -212,7 +211,7 @@ namespace api.nox.world {
 
 			// Check if user has selected a local texture first
 			var thumbnailField = _root.Q<ObjectField>("thumbnail-field");
-			if (thumbnailField != null && thumbnailField.value is Texture2D localTexture) {
+			if (thumbnailField is { value: Texture2D localTexture }) {
 				UpdateThumbnailPreviewWithTexture(localTexture);
 				return;
 			}
@@ -334,7 +333,7 @@ namespace api.nox.world {
 
 			var assignedIcon = _root.Q<Image>("assigned-icon");
 			if (assignedIcon != null)
-				assignedIcon.image = Editor.CoreAPI.AssetAPI.GetAsset<Texture2D>("ui", "icons/warning.png");
+				assignedIcon.image = Editor.CoreAPI.AssetAPI.GetAsset<Texture2D>("ui:icons/warning.png");
 
 			var descriptor    = WorldBuilderPanel.Descriptors.Length > 0 ? WorldBuilderPanel.Descriptors[0] : null;
 			var platformField = _root.Q<EnumField>("platform-field");
@@ -623,17 +622,16 @@ namespace api.nox.world {
 				thumbnailPreview.RemoveFromClassList("thumbnail-loading");
 				thumbnailPreview.AddToClassList("thumbnail-success");
 
-				thumbnailImage.style.display  = DisplayStyle.Flex;
-				thumbnailStatus.style.display = DisplayStyle.Flex;
+				thumbnailImage.style.display = DisplayStyle.Flex;
 			} else {
 				thumbnailStatus.text = "No thumbnail selected";
 				thumbnailPreview.RemoveFromClassList("thumbnail-error");
 				thumbnailPreview.RemoveFromClassList("thumbnail-warning");
 				thumbnailPreview.RemoveFromClassList("thumbnail-loading");
 				thumbnailPreview.RemoveFromClassList("thumbnail-success");
-
-				thumbnailStatus.style.display = DisplayStyle.Flex;
 			}
+
+			thumbnailStatus.style.display = DisplayStyle.Flex;
 		}
 
 		private void MakeTextureReadable(Texture2D texture) {

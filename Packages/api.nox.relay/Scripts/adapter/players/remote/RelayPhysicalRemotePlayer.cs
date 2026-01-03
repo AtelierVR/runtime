@@ -10,7 +10,6 @@ using Nox.Avatars.Voice;
 using Nox.CCK.Utils;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
-using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.relay {
 	public class RelayPhysicalRemotePlayer : RelayPhysicalPlayer {

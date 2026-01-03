@@ -62,7 +62,7 @@ namespace Nox.Users {
 		/// Gets the server address associated with this identifier.
 		/// </summary>
 		/// <returns></returns>
-		public string GetServerAddress();
+		public string GetServer();
 
 		/// <summary>
 		/// Checks if this identifier is equal to another identifier.

@@ -16,7 +16,7 @@ namespace api.nox.world {
 		internal IWorldIdentifier       WorldIdentifier;
 
 		internal Scene[] GetUnityScenes()
-			=> GetInstances()
+			=> GetDimensions()
 				.Select(e => e.GetScene())
 				.Where(s => s.IsValid())
 				.ToArray();
@@ -28,16 +28,16 @@ namespace api.nox.world {
 			=> WorldIdentifier = identifier;
 
 		[NoxPublic(NoxAccess.Method)]
-		public IRuntimeWorldInstance[] GetInstances()
-			=> Instances.Cast<IRuntimeWorldInstance>().ToArray();
+		public IRuntimeWorldDimension[] GetDimensions()
+			=> Instances.Cast<IRuntimeWorldDimension>().ToArray();
 
 		[NoxPublic(NoxAccess.Method)]
-		public IRuntimeWorldInstance GetInstance(int index)
+		public IRuntimeWorldDimension GetDimension(int index)
 			=> index >= 0 && index < Instances.Length
 				? Instances[index]
 				: null;
 
-		public int GetInstanceCount()
+		public int GetDimensionCount()
 			=> Instances.Length;
 
 		[NoxPublic(NoxAccess.Method)]
@@ -64,17 +64,17 @@ namespace api.nox.world {
 				return;
 			}
 			
-			var active = GetInstance(Active);
+			var active = GetDimension(Active);
 			if (active == null) {
 				Logger.LogWarning($"Active instance {Active} not found, falling back to first instance");
-				active = GetInstances().FirstOrDefault() as RuntimeWorldInstance;
+				active = GetDimensions().FirstOrDefault() as RuntimeWorldInstance;
 				if (active == null) {
 					Logger.LogError($"No valid instances found for world {Id}");
 					return;
 				}
 			}
 			
-			foreach (var scene in GetInstances()) {
+			foreach (var scene in GetDimensions()) {
 				if (scene == null) {
 					Logger.LogWarning($"Skipping null scene in world {Id}");
 					continue;
@@ -112,7 +112,7 @@ namespace api.nox.world {
 				return;
 			}
 			
-			foreach (var scene in GetInstances()) {
+			foreach (var scene in GetDimensions()) {
 				if (scene == null) {
 					Logger.LogWarning($"Skipping null scene in world {Id}");
 					continue;

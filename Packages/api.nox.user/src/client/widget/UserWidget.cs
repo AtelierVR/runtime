@@ -1,6 +1,7 @@
 ﻿using api.nox.user.client;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
+using Nox.CCK.Users;
 using Nox.CCK.Utils;
 using Nox.UI;
 using Nox.UI.Widgets;
@@ -32,7 +33,7 @@ namespace api.nox.user.widget {
 			);
 
 		private static UserIdentifier GetUserIdentifier()
-			=> Main.Instance.Network.CurrentUser?.ToInternalIdentifier();
+			=> Main.Instance.Network.CurrentUser?.ToInternalIdentifier() ?? UserIdentifier.Invalid;
 
 		public Vector2Int GetSize()
 			=> new(3, 2);
@@ -41,12 +42,12 @@ namespace api.nox.user.widget {
 			=> 100;
 
 		public static bool TryMake(IMenu menu, RectTransform parent, out (GameObject, IWidget) values) {
-			if (!(GetUserIdentifier()?.IsValid() ?? false)) {
+			if (!GetUserIdentifier().IsValid()) {
 				values = (null, null);
 				return false;
 			}
 
-			var prefab    = Client.GetAsset<GameObject>("prefabs/grid_item.prefab", "ui");
+			var prefab    = Client.GetAsset<GameObject>("ui:prefabs/grid_item.prefab");
 			var instance  = Instantiate(prefab, parent);
 			var component = instance.AddComponent<UserWidget>();
 			component._mid = menu.GetId();
@@ -56,7 +57,7 @@ namespace api.nox.user.widget {
 			instance.name = $"[{component.GetKey()}_{instance.GetInstanceID()}]";
 			values        = (instance, component);
 
-			prefab               = Client.GetAsset<GameObject>("prefabs/large_widget.prefab", "ui");
+			prefab               = Client.GetAsset<GameObject>("ui:prefabs/large_widget.prefab");
 			component._content   = Instantiate(prefab, Reference.GetComponent<RectTransform>("content", instance));
 			component._image     = Reference.GetComponent<Image>("image", component._content);
 			component._ratio     = Reference.GetComponent<AspectRatioFitter>("image_ratio", component._content);
@@ -71,7 +72,7 @@ namespace api.nox.user.widget {
 
 		private async UniTask UpdateContent() {
 			var identifier = GetUserIdentifier();
-			if (!(identifier?.IsValid() ?? false)) {
+			if (!identifier.IsValid()) {
 				_container.SetActive(false);
 				await UpdateIcon();
 				_label.UpdateText("user.not_logged_in");
@@ -82,7 +83,7 @@ namespace api.nox.user.widget {
 				_container.SetActive(false);
 			await UpdateIcon();
 
-			if (Main.Instance.Network.CurrentUser is not IUser user || !user.ToIdentifier().Equals(identifier))
+			if (Main.Instance.Network.CurrentUser is not IUser user || !user.ToIdentifier().Equals((IUserIdentifier)identifier))
 				user = await Main.Instance.Network.Fetch(identifier);
 
 			if (user == null) {
@@ -155,7 +156,7 @@ namespace api.nox.user.widget {
 
 
 		private async UniTask UpdateIcon(Sprite icon = null) {
-			icon         ??= await Client.GetAssetAsync<Sprite>("icons/person.png", "ui");
+			icon         ??= await Client.GetAssetAsync<Sprite>("ui:icons/person.png");
 			_icon.sprite =   icon;
 		}
 	}

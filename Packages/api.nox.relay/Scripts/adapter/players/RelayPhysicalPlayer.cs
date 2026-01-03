@@ -6,7 +6,6 @@ using Nox.CCK.Development;
 using Nox.CCK.Players;
 using UnityEngine;
 using Gizmos = Nox.CCK.Development.Gizmos;
-using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.relay {
 	/// <summary>

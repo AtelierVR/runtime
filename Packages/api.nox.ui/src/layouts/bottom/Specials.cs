@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Linq;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using Nox.UI;
 using UnityEngine;
@@ -11,40 +11,39 @@ namespace api.nox.ui.layouts {
 		public override string GetKey()
 			=> "specials";
 
-		public override GameObject GetPrefab()
-			=> PageManager.GetAsset<GameObject>("buttons/special.prefab");
+		public override UniTask<GameObject> GetPrefab()
+			=> PageManager.GetAssetAsync<GameObject>("buttons/special.prefab");
 
-		private GameObject GetBack()
-			=> PageManager.GetAsset<GameObject>("buttons/special_back.prefab");
+		private static UniTask<GameObject> GetBack()
+			=> PageManager.GetAssetAsync<GameObject>("buttons/special_back.prefab");
 
-		public override void AddElement(NavigationData element, GameObject pefab = null)
+		public override UniTask AddElement(NavigationData element, GameObject pefab = null)
 			=> AddElementBack(element, pefab, true);
 
-		public void AddElementBack(NavigationData element, GameObject pefab = null, bool updateBacks = true) {
-			base.AddElement(element, pefab);
-			if (updateBacks) UpdateBacks();
+		private async UniTask AddElementBack(NavigationData element, GameObject pefab = null, bool updateBacks = true) {
+			await base.AddElement(element, pefab);
+			if (updateBacks) await UpdateBacks();
 		}
 
-		public override void AddElements(NavigationData[] elements) {
-			var prefab = GetPrefab();
-			foreach (var data in elements)
-				AddElementBack(data, prefab, false);
-			UpdateBacks();
+		public override async UniTask AddElements(NavigationData[] elements) {
+			var prefab = await GetPrefab();
+			await UniTask.WhenAll(elements.Select(element => AddElementBack(element, prefab, false)));
+			await UpdateBacks();
 		}
 
 		public override void RemoveElement(string key) {
 			base.RemoveElement(key);
-			UpdateBacks();
+			UpdateBacks().Forget();
 		}
 
-		private void UpdateBacks() {
+		private async UniTask UpdateBacks() {
 			// present backs
 			var present = GetChildren();
 			var keys    = new HashSet<int>();
 
 			foreach (var entry in present)
 				keys.Add(entry.GetInstanceID());
-			var prefab = GetBack();
+			var prefab = await GetBack();
 
 			// add backs for each present element
 			foreach (var entry in present) {

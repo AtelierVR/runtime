@@ -6,9 +6,9 @@ using Nox.Editor.Panel;
 
 namespace api.nox.editor.panel {
 	public class Editor : IEditorModInitializer, IPanelAPI {
-		internal static EditorModCoreAPI CoreAPI;
+		internal static IEditorModCoreAPI CoreAPI;
 
-		public void OnInitializeEditor(EditorModCoreAPI api)
+		public void OnInitializeEditor(IEditorModCoreAPI api)
 			=> CoreAPI = api;
 
 		public void OnPostInitializeEditor() {

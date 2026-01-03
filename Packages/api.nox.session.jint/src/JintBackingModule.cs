@@ -88,9 +88,9 @@ namespace api.nox.session.jint {
 				backing.OnAuthorityTransferred(@new);
 		}
 
-		public void OnEventTriggered(string @event, byte[] raw, IPlayer sender) {
+		public void OnEventTriggered(string @event, byte[] payload, IPlayer sender) {
 			foreach (var backing in backings)
-				backing.OnEventTriggered(@event, raw, sender);
+				backing.OnEventTriggered(@event, payload, sender);
 		}
 	}
 }

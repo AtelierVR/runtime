@@ -30,7 +30,7 @@ using Logger = Nox.CCK.Utils.Logger;
 namespace api.nox.relay {
 	public class RelayAdapter : IAdapter, IInstanceAdapter, INoxObject, INetworkedAdapter {
 		private          RelayDimension    _dimension;
-		private readonly IEntityManager    _entities;
+		private readonly IEntities    _entities;
 		private          ISession          _session;
 		private          RelayState        _state = new(true);
 		internal         Connection        Connection;
@@ -271,7 +271,7 @@ namespace api.nox.relay {
 				return;
 			}
 
-			_session.OnEventTriggered(ev.Name, ev.Payload, player);
+			_session.OnEventReceived(ev.Name, ev.Payload, player);
 		}
 
 		private async UniTask OnTravelingFailed(TravelingEvent _, string reason)
@@ -529,5 +529,10 @@ namespace api.nox.relay {
 
 		public double GetThreshold()
 			=> Threshold;
-	}
-}
+
+		public async UniTask<bool> Reconnect() {
+			if (IsConnected()) return true;
+			if (Connection == null) return false;
+			// TODO: Implement reconnection logic
+			return false;
+		}

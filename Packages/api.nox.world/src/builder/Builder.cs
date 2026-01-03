@@ -380,33 +380,20 @@ namespace api.nox.world.builder {
 		/// Compiles all ICompilable scripts in the loaded scenes
 		/// </summary>
 		private static async UniTask<BuildResult> CompileScripts(List<Scene> loadedScenes, SceneSetup[] rollback) {
-			var compilableScripts = loadedScenes
+			var scripts = loadedScenes
 				.SelectMany(scene => scene.GetRootGameObjects())
 				.SelectMany(rootObject => rootObject.GetComponentsInChildren<ICompilable>(true))
-				.OrderBy(script => script.CompileOrder)
 				.ToList();
-			if (compilableScripts.Count == 0)
+			
+			if (scripts.Count == 0)
 				Logger.Log("No compilable scripts found in the loaded scenes.");
 
-			var compilationFailed = false;
-			foreach (var script in compilableScripts)
-				try {
-					Logger.Log($"Compiling script: {script.GetType().Name} (Order: {script.CompileOrder})");
-					script.Compile();
-					await script.CompileAsync();
-				} catch (Exception e) {
-					Logger.LogError($"Failed to compile script {script.GetType().Name}: {e.Message}");
-					compilationFailed = true;
-					break;
-				}
-
-			if (compilationFailed) {
+			if (await new Compiler(scripts).Compile()) 
 				return new BuildResult {
 					Type    = BuildResultType.Failed,
 					Message = "Script compilation failed. Original scenes have been restored from backup."
 				};
-			}
-
+			
 			if (!EditorSceneManager.SaveOpenScenes()) {
 				Logger.LogError("Failed to save scenes after compilation. Restoring backups...");
 				return new BuildResult {

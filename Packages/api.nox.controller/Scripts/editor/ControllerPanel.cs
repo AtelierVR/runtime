@@ -26,7 +26,7 @@ namespace api.nox.controller {
 			_lastUpdate = DateTime.UtcNow;
 
 			var api = Main.Instance as IControllerAPI;
-			var currentController = api?.GetCurrent();
+			var currentController = api?.Current;
 
 			if (_lastController != currentController) {
 				_lastController = currentController;

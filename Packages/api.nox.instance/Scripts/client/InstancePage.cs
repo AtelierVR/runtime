@@ -1,6 +1,7 @@
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
+using Nox.CCK.Worlds;
 using Nox.Instances;
 using Nox.UI;
 using Nox.Worlds;
@@ -76,9 +77,7 @@ namespace api.nox.instance.client {
 				Instance    = instance,
 				World       = world,
 				Asset       = asset,
-				Version = Main.WorldAPI
-					.Make(instance.GetWorldId())
-					.GetVersion()
+				Version     = WorldIdentifier.From(instance.GetWorldId()).Version
 			};
 			if (page.World == null)
 				page.FetchWorld(true, true).Forget();

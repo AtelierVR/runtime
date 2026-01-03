@@ -212,9 +212,22 @@ namespace Nox.GameBuilder {
 			}
 
 			_scenesList.Clear();
-			var scenes = Builder.GetScenesToBuild(mods);
+			var scenes        = Builder.GetScenesToBuild(mods);
+			var sceneTemplate = _panel.API.AssetAPI.GetAsset<VisualTreeAsset>("panels/scene_item.uxml");
+
 			foreach (var scene in scenes) {
-				_scenesList.Add(new Label($"• {Path.GetFileNameWithoutExtension(scene)}"));
+				var container = sceneTemplate.CloneTree();
+				var asset     = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(scene);
+				var icon = AssetPreview.GetAssetPreview(asset)
+					?? AssetPreview.GetMiniThumbnail(asset);
+
+				var image = container.Q<Image>("icon");
+				image.image = icon;
+				if (icon != null) image.style.backgroundColor = StyleKeyword.Null;
+
+				container.Q<Label>("name").text = Path.GetFileNameWithoutExtension(scene);
+				container.Q<Label>("path").text = scene;
+				_scenesList.Add(container);
 			}
 		}
 	}

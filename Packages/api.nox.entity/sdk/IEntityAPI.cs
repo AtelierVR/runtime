@@ -7,6 +7,6 @@ namespace Nox.Entities {
 		/// Create a new entity manager.
 		/// </summary>
 		/// <returns></returns>
-		public IEntityManager New();
+		public IEntities New();
 	}
 }

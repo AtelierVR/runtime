@@ -6,12 +6,12 @@ using Nox.CCK.Mods.Panels;
 
 namespace api.nox.microphone {
 	public class Editor : IEditorModInitializer {
-		internal static EditorModCoreAPI CoreAPI;
+		internal static IEditorModCoreAPI CoreAPI;
 
 		private static IEditorPanel     _listPanel;
 		private        MicrophonePanel _list;
 
-		public void OnInitializeEditor(EditorModCoreAPI api) {
+		public void OnInitializeEditor(IEditorModCoreAPI api) {
 			CoreAPI    = api;
 			_list      = new MicrophonePanel();
 			_listPanel = api.PanelAPI.AddLocalPanel(_list);

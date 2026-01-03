@@ -2,11 +2,16 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/com.earnestrobot.autohand" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.avatars" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.avatars.modules" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.cck" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.control" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.discord" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.game.builder" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.loader" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.offline" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.relay" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.sessions" vcs="Git" />
   </component>
 </project>

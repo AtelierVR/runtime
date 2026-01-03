@@ -9,12 +9,11 @@ using Nox.CCK.Utils;
 using Nox.UI;
 using Nox.UI.modals;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Logger = Nox.CCK.Utils.Logger;
 using Object = UnityEngine.Object;
 
 namespace api.nox.ui.menus {
-	public class Menu : MonoBehaviour, INoxObject, IMenu, IModalMenu {
+	public class Menu : MonoBehaviour, INoxObject, IModalMenu {
 		[Header("Menu Settings")]
 		public string defaultKey = HomePage.GetStaticKey();
 
@@ -40,55 +39,55 @@ namespace api.nox.ui.menus {
 						new() {
 							key = "home",
 							// text               = "home",
-							iconPath           = "icons/home.png",
+							iconPath           = "ui:icons/home.png",
 							execution          = "home",
 							flags              = NavigationFlags.Button,
-							executionArguments = new object[] { },
+							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto,
 						},
 						new() {
 							key = "applications",
 							// text               = "applications",
-							iconPath           = "icons/apps.png",
+							iconPath           = "ui:icons/apps.png",
 							execution          = "applications",
 							flags              = NavigationFlags.Button,
-							executionArguments = new object[] { },
+							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto
 						},
 						new() {
 							key = "inventory",
 							// text               = "inventory",
-							iconPath           = "icons/inventory.png",
+							iconPath           = "ui:icons/inventory.png",
 							execution          = "inventory",
 							flags              = NavigationFlags.Button,
-							executionArguments = new object[] { },
+							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto
 						},
 						new() {
 							key = "friends",
 							// text               = "friends",
-							iconPath           = "icons/friend.png",
+							iconPath           = "ui:icons/friend.png",
 							execution          = "friends",
 							flags              = NavigationFlags.Button,
-							executionArguments = new object[] { },
+							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto
 						},
 						new() {
 							key = "search",
 							// text               = "search",
-							iconPath           = "icons/explore.png",
+							iconPath           = "ui:icons/explore.png",
 							execution          = "search",
 							flags              = NavigationFlags.Button,
-							executionArguments = new object[] { },
+							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto
 						},
 						new() {
 							key = "settings",
 							// text               = "settings",
-							iconPath           = "icons/settings.png",
+							iconPath           = "ui:icons/settings.png",
 							execution          = "settings",
 							flags              = NavigationFlags.Button,
-							executionArguments = new object[] { },
+							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto
 						}
 					}
@@ -98,28 +97,28 @@ namespace api.nox.ui.menus {
 						new() {
 							key = "help",
 							// text               = "help",
-							iconPath           = "icons/question.png",
+							iconPath           = "ui:icons/question.png",
 							execution          = "help",
 							flags              = NavigationFlags.Button,
-							executionArguments = new object[] { "ui/how-to-use-menu" },
+							ExecutionArguments = new object[] { "ui/how-to-use-menu" },
 							executionType      = NavigationExecution.Goto,
 						},
 						new() {
 							key = "mute",
 							// text               = "mute",
-							iconPath           = "icons/unmute.png",
+							iconPath           = "ui:icons/unmute.png",
 							execution          = "mute",
 							flags              = NavigationFlags.Button,
-							executionArguments = new object[] { },
+							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Event
 						},
 						new() {
 							key = "session",
 							// text               = "sessions",
-							iconPath           = "icons/group.png",
+							iconPath           = "ui:icons/group.png",
 							execution          = "session",
 							flags              = NavigationFlags.Button,
-							executionArguments = new object[] { },
+							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto
 						}
 					}
@@ -129,26 +128,26 @@ namespace api.nox.ui.menus {
 						new() {
 							key = "notifications",
 							// text               = "notifications",
-							iconPath           = "icons/notifications.png",
+							iconPath           = "api.nox.ui:icons/notifications.png",
 							execution          = "notifications",
 							flags              = NavigationFlags.Button,
-							executionArguments = new object[] { },
+							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto,
 						},
 						new() {
 							key              = "time",
 							text             = "time",
 							flags            = NavigationFlags.Enable,
-							getCustomContent = tr => Instantiate(PageManager.GetAsset<GameObject>("prefabs/time.prefab"), tr),
+							GetCustomContent = async tr => Instantiate(await PageManager.GetAssetAsync<GameObject>("prefabs/time.prefab"), tr),
 							executionType    = NavigationExecution.None,
 						},
 						new() {
 							key = "exit",
 							// text = "exit",
-							iconPath           = "icons/power.png",
+							iconPath           = "api.nox.ui:icons/power.png",
 							execution          = "exit",
 							flags              = NavigationFlags.Button,
-							executionArguments = new object[] { },
+							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Event,
 						}
 					}
@@ -158,28 +157,28 @@ namespace api.nox.ui.menus {
 						new() {
 							key = "back",
 							// text               = "back",
-							iconPath           = "icons/left.png",
+							iconPath           = "ui:icons/left.png",
 							execution          = "back",
 							flags              = NavigationFlags.Button,
-							executionArguments = new object[] { },
+							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Action,
 						},
 						new() {
 							key = "forward",
 							// text               = "forward",
-							iconPath           = "icons/right.png",
+							iconPath           = "ui:icons/right.png",
 							execution          = "forward",
 							flags              = NavigationFlags.Button,
-							executionArguments = new object[] { },
+							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Action,
 						},
 						new() {
 							key = "refresh",
 							// text               = "refresh",
-							iconPath           = "icons/refresh.png",
+							iconPath           = "ui:icons/refresh.png",
 							execution          = "refresh",
 							flags              = NavigationFlags.Button,
-							executionArguments = new object[] { },
+							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Action,
 						}
 					}
@@ -206,11 +205,12 @@ namespace api.nox.ui.menus {
 				p.menu = this;
 			}
 
-			foreach (var data in GetDefaultData()) {
-				var part = GetPart(data.Key);
-				part.AddElements(data.Value.ToArray());
-				await UniTask.Yield();
-			}
+			var tasks = (from data
+					in GetDefaultData()
+				let part = GetPart(data.Key)
+				select part.AddElements(data.Value.ToArray()));
+
+			await UniTask.WhenAll(tasks);
 
 			foreach (var o in GetInternalOrbiters())
 			foreach (var p in o.GetInternalParts())

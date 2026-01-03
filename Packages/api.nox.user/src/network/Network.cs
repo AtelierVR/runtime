@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Nox.CCK.Users;
 using Nox.CCK.Utils;
 using UnityEngine.Events;
 
@@ -78,10 +79,10 @@ namespace api.nox.user.network {
 		public async UniTask<User> Fetch(string identifier, string from = null) {
 			if (Main.NetworkAPI == null)
 				return null;
-			var ide = UserIdentifier.FromString(identifier);
+			var ide = UserIdentifier.From(identifier);
 			if (ide.IsLocal())
-				ide.Server = from;
-			var address = from ?? CurrentUser?.GetServerAddress() ?? ServerAddress ?? ide.GetServerAddress();
+				ide = new UserIdentifier(ide.GetId(), from);
+			var address = from ?? CurrentUser?.GetServerAddress() ?? ServerAddress ?? ide.GetServer();
 			if (string.IsNullOrEmpty(address)) {
 				Logger.LogError($"Cannot fetch user {identifier}: no server address provided.");
 				return null;

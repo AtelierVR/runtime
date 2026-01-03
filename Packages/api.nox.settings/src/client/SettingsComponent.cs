@@ -22,14 +22,14 @@ namespace api.nox.settings.client {
 		public SettingsPage Page;
 
 		public static (GameObject, SettingsComponent) Generate(SettingsPage settingsPage, RectTransform parent) {
-			var iconAsset      = Client.GetAsset<GameObject>("prefabs/header_icon.prefab", "ui");
-			var labelAsset     = Client.GetAsset<GameObject>("prefabs/header_label.prefab", "ui");
-			var withTitleAsset = Client.GetAsset<GameObject>("prefabs/with_title.prefab", "ui");
-			var listAsset      = Client.GetAsset<GameObject>("prefabs/list.prefab", "ui");
-			var scrollAsset    = Client.GetAsset<GameObject>("prefabs/scroll.prefab", "ui");
-			var containerAsset = Client.GetAsset<GameObject>("prefabs/container.prefab", "ui");
+			var iconAsset      = Client.GetAsset<GameObject>("ui:prefabs/header_icon.prefab");
+			var labelAsset     = Client.GetAsset<GameObject>("ui:prefabs/header_label.prefab");
+			var withTitleAsset = Client.GetAsset<GameObject>("ui:prefabs/with_title.prefab");
+			var listAsset      = Client.GetAsset<GameObject>("ui:prefabs/list.prefab");
+			var scrollAsset    = Client.GetAsset<GameObject>("ui:prefabs/scroll.prefab");
+			var containerAsset = Client.GetAsset<GameObject>("ui:prefabs/container.prefab");
 
-			var content = Instantiate(Client.GetAsset<GameObject>("prefabs/split.prefab", "ui"), parent);
+			var content = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/split.prefab"), parent);
 
 			var component = content.AddComponent<SettingsComponent>();
 			component.Page = settingsPage;
@@ -54,7 +54,7 @@ namespace api.nox.settings.client {
 			);
 
 			// container
-			var container = Instantiate(Client.GetAsset<GameObject>("prefabs/container_full.prefab", "ui"), splitContent);
+			var container = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/container_full.prefab"), splitContent);
 			var withTitle = Instantiate(withTitleAsset, Reference.GetComponent<RectTransform>("content", container));
 
 			component.header = Reference.GetReference("header", withTitle);
@@ -63,7 +63,7 @@ namespace api.nox.settings.client {
 
 			component.labelIcon        = Reference.GetComponent<Image>("image", icon);
 			component.title            = Reference.GetComponent<TextLanguage>("text", title);
-			component.labelIcon.sprite = Client.GetAsset<Sprite>("icons/globe.png", "ui");
+			component.labelIcon.sprite = Client.GetAsset<Sprite>("ui:icons/globe.png");
 
 			var contentDash = Reference.GetComponent<RectTransform>("content", withTitle);
 			// setup scroll + list
@@ -91,7 +91,7 @@ namespace api.nox.settings.client {
 
 			var texture = settings != null
 				? await settings.GetIcon()
-				: await Client.GetAssetAsync<Texture2D>("icons/settings.png", "ui");
+				: await Client.GetAssetAsync<Texture2D>("ui:icons/settings.png");
 
 			labelIcon.sprite = texture
 				? Sprite.Create(
@@ -103,7 +103,7 @@ namespace api.nox.settings.client {
 		}
 
 		public async UniTask UpdateNavigation() {
-			var btn = await Client.GetAssetAsync<GameObject>("prefabs/btn_icon.prefab", "ui");
+			var btn = await Client.GetAssetAsync<GameObject>("ui:prefabs/btn_icon.prefab");
 
 			var page = Main.Handlers
 				.Select(hand => hand.GetPath().FirstOrDefault())
@@ -148,8 +148,8 @@ namespace api.nox.settings.client {
 		}
 
 		internal async UniTask UpdateContent() {
-			var box  = Client.GetAsset<GameObject>("prefabs/box.prefab", "ui");
-			var list = Client.GetAsset<GameObject>("prefabs/list.prefab", "ui");
+			var box  = Client.GetAsset<GameObject>("ui:prefabs/box.prefab");
+			var list = Client.GetAsset<GameObject>("ui:prefabs/list.prefab");
 
 			foreach (Transform tf in content)
 				Destroy(tf.gameObject);

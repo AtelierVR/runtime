@@ -10,7 +10,7 @@ namespace api.nox.microphone.settings {
 			=> new[] { "audio", "microphone", "current" };
 
 		protected override GameObject GetPrefab()
-			=> Main.CoreAPI.AssetAPI.GetAsset<GameObject>("settings", "prefabs/dropdown.prefab");
+			=> Main.CoreAPI.AssetAPI.GetAsset<GameObject>("settings:prefabs/dropdown.prefab");
 
 		protected override IModalBuilder GetModalBuilder(IMenu menu)
 			=> Main.UiAPI.MakeModal(menu);

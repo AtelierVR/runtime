@@ -1,20 +1,20 @@
 {
-    "name": "api.nox.search",
-    "rootNamespace": "",
-    "references": [
-        "Nox.CCK",
-        "UniTask",
-        "Unity.TextMeshPro",
-        "Nox.Search",
-        "Nox.UI"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "api.nox.search",
+  "rootNamespace": "",
+  "references": [
+    "Nox.CCK",
+    "UniTask",
+    "Unity.TextMeshPro",
+    "Nox.Search",
+    "Nox.UI"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace api.nox.ui.layouts {
@@ -5,7 +6,7 @@ namespace api.nox.ui.layouts {
 		public override string GetKey()
 			=> "histories";
 
-		public override GameObject GetPrefab()
-			=> PageManager.GetAsset<GameObject>("buttons/history.prefab");
+		public override UniTask<GameObject> GetPrefab()
+			=> PageManager.GetAssetAsync<GameObject>("buttons/history.prefab");
 	}
 }

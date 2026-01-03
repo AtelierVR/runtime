@@ -1,4 +1,5 @@
 ﻿using api.nox.ui.modals;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
@@ -10,10 +11,10 @@ namespace api.nox.ui {
 	public class Client : IUiAPI, IClientModInitializer {
 		internal        MenuManager      Manager;
 		private         PageManager      _pages;
-		public          ClientModCoreAPI CoreAPI;
+		public          IClientModCoreAPI CoreAPI;
 		internal static Client           Instance;
 
-		public void OnInitializeClient(ClientModCoreAPI api) {
+		public void OnInitializeClient(IClientModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
 			Manager  = new MenuManager(this);
@@ -39,8 +40,8 @@ namespace api.nox.ui {
 		public void Remove(int id)
 			=> Manager.Remove(id);
 
-		public IMenu Make(RectTransform container, GameObject parent = null)
-			=> Manager.Make(container, parent);
+		public async UniTask<IMenu> Make(RectTransform container, GameObject parent = null)
+			=> await Manager.Make(container, parent);
 
 		public void SendGoto(int menuId, string key, params object[] args)
 			=> PageManager.SendGoto(menuId, key, args);

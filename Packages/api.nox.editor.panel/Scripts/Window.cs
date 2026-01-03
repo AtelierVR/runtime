@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Nox.CCK.Utils;
 using Nox.Editor.Panel;
 using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 using IPanel = Nox.Editor.Panel.IPanel;
 using Logger = Nox.CCK.Utils.Logger;
@@ -22,9 +20,9 @@ namespace api.nox.editor.panel {
 
 		public IInstance GetActive() {
 			if (Editor.CoreAPI == null) return null;
-			return _active ??= panelId != null && PanelManager.TryGetPanel(panelId, out var panel)
+			return _active ??= PanelManager.TryGetPanel(panelId, out var panel)
 				? panel.Instantiate(this, _panelData)
-				: throw new InvalidOperationException($"No panel found for id '{panelId?.ToString() ?? "null"}'");
+				: throw new InvalidOperationException($"No panel found for id '{panelId.ToString() ?? "null"}'");
 		}
 
 		public static Window Create() {

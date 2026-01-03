@@ -16,3 +16,18 @@
 [submodule "Packages/nox.control"]
 	path = Packages/nox.control
 	url = https://github.com/AtelierVR/nox.control.git
+[submodule "Packages/nox.offline"]
+	path = Packages/nox.offline
+	url = https://github.com/AtelierVR/nox.offline.git
+[submodule "Packages/nox.sessions"]
+	path = Packages/nox.sessions
+	url = https://github.com/AtelierVR/nox.sessions.git
+[submodule "Packages/nox.game.builder"]
+	path = Packages/nox.game.builder
+	url = https://github.com/AtelierVR/nox.game.builder.git
+[submodule "Packages/nox.autohand"]
+	path = Packages/com.earnestrobot.autohand
+	url = https://github.com/AtelierVR/nox.autohand.git
+[submodule "Packages/nox.relay"]
+	path = Packages/nox.relay
+	url = https://github.com/AtelierVR/nox.relay.git

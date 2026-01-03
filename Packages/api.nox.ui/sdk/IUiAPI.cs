@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using Nox.UI.modals;
 using UnityEngine;
 
@@ -39,7 +40,7 @@ namespace Nox.UI {
 		/// <param name="container"></param>
 		/// <param name="parent"></param>
 		/// <returns></returns>
-		public IMenu Make(RectTransform container, GameObject parent = null);
+		public UniTask<IMenu> Make(RectTransform container, GameObject parent = null);
 
 		/// <summary>
 		/// Sends a goto event to the menu with the specified ID and key.

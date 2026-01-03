@@ -10,7 +10,7 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.keybinding {
 	public class KeyBindingSystem : IKeyBindingManager, IMainModInitializer {
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
 		}
@@ -22,7 +22,7 @@ namespace api.nox.keybinding {
 			Instance = null;
 		}
 
-		internal static          MainModCoreAPI         CoreAPI;
+		internal static          IMainModCoreAPI         CoreAPI;
 		internal static          KeyBindingSystem       Instance;
 		internal readonly        List<KeyBinding>       Bindings            = new();
 		internal static readonly UnityEvent<KeyBinding> OnKeyBindingAdded   = new();

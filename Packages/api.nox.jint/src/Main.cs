@@ -21,7 +21,7 @@ namespace api.nox.jint {
 			return folder;
 		}
 
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
 			Manager  = new Manager();

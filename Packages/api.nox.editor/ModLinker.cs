@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using Nox.ModLoader;
+using UnityEditor;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 
@@ -18,7 +19,9 @@ namespace Nox.Editor {
 
 	public static class ModLinkerHelper {
 		private const string LinkXmlName = "link.xml";
+		
 
+		[InitializeOnLoadMethod, MenuItem("Nox/Tools/Update Linker Files")]
 		public static void EnsureLinkerClassExists() {
 			var li = new List<string>();
 

@@ -1,62 +1,42 @@
-using Nox.CCK.Network;
 using Nox.Entities;
 using Nox.Users;
 using UnityEngine;
-using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace Nox.Players {
-	public interface IPlayer : ILivingEntity, IMovingEntity, IMultiPartEntity {
+	public interface IPlayer : IPlayer<IPart> { }
+
+	public interface IPlayer<TPart> : IEntity, ILivingEntity, IMovingEntity, IMultiPartEntity<TPart>
+		where TPart : IPart {
 		/// <summary>
 		/// Get the display name of the player.
 		/// </summary>
 		/// <returns></returns>
-		public string GetDisplay();
+		public string Display { get; set; }
 
 		/// <summary>
 		/// Get the player Identifier (ID).
 		/// </summary>
 		/// <returns></returns>
-		public IUserIdentifier ToIdentifier();
+		public IUserIdentifier Identifier { get; }
 
 		/// <summary>
 		/// Check if the player is the master player.
 		/// </summary>
 		/// <returns></returns>
-		public bool IsMaster();
+		public bool IsMaster { get; }
 
 		/// <summary>
 		/// Check if the player is a local player.
 		/// </summary>
 		/// <returns></returns>
-		public bool IsLocal();
+		public bool IsLocal { get; }
 
 		/// <summary>
-		/// Set the display name of the player.
-		/// </summary>
-		/// <param name="display"></param>
-		public void SetDisplay(string display);
-
-		/// <summary>
-		/// Teleport the player to a specific position and rotation.
+		/// Teleport the player to a specific position and rotation (immediately).
 		/// </summary>
 		/// <param name="position">Target position</param>
 		/// <param name="rotation">Target rotation</param>
 		public void Teleport(Vector3 position, Quaternion rotation);
-
-		/// <summary>
-		/// Teleport the player to a transform's position and rotation.
-		/// </summary>
-		/// <param name="transform">Target transform</param>
-		/// <param name="rigidbody"></param>
-		public void Teleport(Transform transform, Rigidbody rigidbody = null);
-
-		/// <summary>
-		/// Move a specific part of the player to a new transform.
-		/// </summary>
-		/// <param name="part"></param>
-		/// <param name="transform"></param>
-		/// <param name="markDirty"></param>
-		public void MovePart(ushort part, NoxTransform transform, DirtyBy markDirty = DirtyBy.Local);
 
 		/// <summary>
 		/// Teleport the player to a spawn point.

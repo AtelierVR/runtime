@@ -16,7 +16,7 @@ using Logger = Nox.CCK.Utils.Logger;
 namespace api.nox.xr {
 	public class Client : IClientModInitializer {
 		internal static Client           Instance;
-		internal static ClientModCoreAPI CoreAPI;
+		internal static IClientModCoreAPI CoreAPI;
 
 		internal static IUiAPI UiAPI
 			=> CoreAPI.ModAPI.GetMod("ui")
@@ -69,7 +69,7 @@ namespace api.nox.xr {
 		public bool IsReady()
 			=> IsXRInitialized() && HasHeadset();
 
-		public async UniTask OnInitializeClientAsync(ClientModCoreAPI api) {
+		public async UniTask OnInitializeClientAsync(IClientModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
 
@@ -160,6 +160,12 @@ namespace api.nox.xr {
 
 			if (!loader.Initialize()) {
 				Logger.LogError("XR loader failed to initialize.");
+				var err = loader.GetLoadedSubsystem<XRDisplaySubsystem>() == null
+					? "Display subsystem is null."
+					: loader.GetLoadedSubsystem<XRInputSubsystem>() == null
+						? "Input subsystem is null."
+						: "Unknown error.";
+				Logger.LogError($"XR loader error: {err}");
 				return;
 			}
 

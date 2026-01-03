@@ -11,7 +11,7 @@ namespace Nox.Editor.Worlds.FellInVoidWorld {
 
 		public override void OnInspectorGUI() {
 			DrawDefaultInspector();
-			var pos = Module.LocalPlayer?.GetPosition();
+			var pos = Module.LocalPlayer?.Position;
 			GUILayout.Label($"Local Player Position: {pos}");
 			Repaint();
 		}

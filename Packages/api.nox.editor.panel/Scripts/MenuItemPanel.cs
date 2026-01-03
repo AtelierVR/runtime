@@ -10,7 +10,7 @@ namespace api.nox.editor.panel {
 	public class MenuItemPanel : IPanelRegister {
 		private MenuItemMethodPanel[] _panels = Array.Empty<MenuItemMethodPanel>();
 
-		public void OnInitializeEditor(EditorModCoreAPI api) {
+		public void OnInitializeEditor(IEditorModCoreAPI api) {
 			_panels = AppDomain.CurrentDomain.GetAssemblies()
 				.SelectMany(assembly => assembly.GetTypes())
 				.SelectMany(type => type.GetMethods(BindingFlags.Static | BindingFlags.Public))

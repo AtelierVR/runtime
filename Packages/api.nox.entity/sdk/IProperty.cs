@@ -11,35 +11,30 @@ namespace Nox.Entities {
 		/// Is normally CRC32 hash of the name.
 		/// </summary>
 		/// <returns></returns>
-		public int GetKey();
-		
+		public int Key { get; }
+
 		/// <summary>
 		/// Get the last updated time of the property.
 		/// </summary>
 		/// <returns></returns>
-		public DateTime GetUpdated();
-		
+		public DateTime UpdatedAt { get; }
+
 		/// <summary>
 		/// Get the name of the property.
 		/// (optional, may be null)
 		/// </summary>
 		/// <returns></returns>
-		public string GetName();
+		public string Name { get; }
 
 		/// <summary>
 		/// Get the value of the property.
 		/// </summary>
 		/// <returns></returns>
-		public object GetValue();
-
-		public PropertyFlags GetFlags();
+		public object Value { get; set; }
 
 		/// <summary>
-		/// Set the value of the property.
-		/// You can be sure that the type of the value matches the type of the property.
+		/// Get the flags of the property.
 		/// </summary>
-		/// <param name="value"></param>
-		/// <param name="by"></param>
-		public void SetValue(object value, DirtyBy by);
+		public PropertyFlags Flags { get; }
 	}
 }

@@ -5,10 +5,10 @@ using Nox.CCK.Mods.Initializers;
 namespace api.nox.ui {
 	public class Main : IMainModInitializer {
 		private       LanguagePack   _lang;
-		public        MainModCoreAPI CoreAPI;
+		public        IMainModCoreAPI CoreAPI;
 		public static Main           Instance;
 
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
 			_lang    = api.AssetAPI.GetAsset<LanguagePack>("lang.asset");

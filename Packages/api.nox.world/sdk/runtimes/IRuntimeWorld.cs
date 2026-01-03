@@ -22,20 +22,20 @@ namespace Nox.Worlds {
 		/// Returns all loaded scenes in the world.
 		/// </summary>
 		/// <returns></returns>
-		public IRuntimeWorldInstance[] GetInstances();
+		public IRuntimeWorldDimension[] GetDimensions();
 		
 		/// <summary>
 		/// Returns the scene at the given index.
 		/// </summary>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		public IRuntimeWorldInstance GetInstance(int index);
+		public IRuntimeWorldDimension GetDimension(int index);
 
 		/// <summary>
 		/// Returns the number of scenes in the world.
 		/// </summary>
 		/// <returns></returns>
-		public int GetInstanceCount();
+		public int GetDimensionCount();
 
 		/// <summary>
 		/// Makes the world current.

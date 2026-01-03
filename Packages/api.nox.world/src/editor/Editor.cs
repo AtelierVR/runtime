@@ -16,9 +16,9 @@ namespace api.nox.world {
 
 		private         WorldPublisherPanel _publisher;
 		internal static WorldBuilderPanel   Builder;
-		internal static EditorModCoreAPI    CoreAPI;
+		internal static IEditorModCoreAPI    CoreAPI;
 
-		public void OnInitializeEditor(EditorModCoreAPI api) {
+		public void OnInitializeEditor(IEditorModCoreAPI api) {
 			CoreAPI    = api;
 			_loader    = new WorldLoaderPanel();
 			Builder    = new WorldBuilderPanel();

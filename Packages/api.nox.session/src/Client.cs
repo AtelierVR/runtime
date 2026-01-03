@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Collections.Generic;
 using System.Linq;
 using api.nox.session.client;
@@ -34,9 +34,9 @@ namespace api.nox.session {
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
 
 		internal static Client           Instance;
-		internal        ClientModCoreAPI CoreAPI;
+		internal        IClientModCoreAPI CoreAPI;
 
-		public void OnInitializeClient(ClientModCoreAPI api) {
+		public void OnInitializeClient(IClientModCoreAPI api) {
 			Instance = this;
 			CoreAPI  = api;
 			_events = new[] {
@@ -89,4 +89,4 @@ namespace api.nox.session {
 			Instance = null;
 		}
 	}
-}
+}*/

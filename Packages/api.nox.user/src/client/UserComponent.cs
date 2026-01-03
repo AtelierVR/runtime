@@ -120,14 +120,14 @@ namespace api.nox.user.client {
 		}
 
 		public static (GameObject, UserComponent) Generate(UserPage userPage, RectTransform parent) {
-			var content = Instantiate(Client.GetAsset<GameObject>("prefabs/split.prefab", "ui"), parent);
+			var content = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/split.prefab"), parent);
 
 			var component = content.AddComponent<UserComponent>();
 			component.Page = userPage;
 			content.name   = $"[{userPage.GetKey()}_{content.GetInstanceID()}]";
 
 			var splitContent   = Reference.GetComponent<RectTransform>("content", content);
-			var containerAsset = Client.GetAsset<GameObject>("prefabs/container.prefab", "ui");
+			var containerAsset = Client.GetAsset<GameObject>("ui:prefabs/container.prefab");
 
 			// generate profile
 			var container = Instantiate(containerAsset, splitContent);
@@ -144,12 +144,12 @@ namespace api.nox.user.client {
 			component.fitter        = Reference.GetComponent<AspectRatioFitter>("banner_aspect", profile);
 
 			// generate dashboard
-			container = Instantiate(Client.GetAsset<GameObject>("prefabs/container_full.prefab", "ui"), splitContent);
+			container = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/container_full.prefab"), splitContent);
 
-			var withTitleAsset = Client.GetAsset<GameObject>("prefabs/with_title.prefab", "ui");
-			var scrollAsset    = Client.GetAsset<GameObject>("prefabs/scroll.prefab", "ui");
-			var listAsset      = Client.GetAsset<GameObject>("prefabs/list.prefab", "ui");
-			var boxAsset       = Client.GetAsset<GameObject>("prefabs/box.prefab", "ui");
+			var withTitleAsset = Client.GetAsset<GameObject>("ui:prefabs/with_title.prefab");
+			var scrollAsset    = Client.GetAsset<GameObject>("ui:prefabs/scroll.prefab");
+			var listAsset      = Client.GetAsset<GameObject>("ui:prefabs/list.prefab");
+			var boxAsset       = Client.GetAsset<GameObject>("ui:prefabs/box.prefab");
 
 			var withTitle = Instantiate(
 				withTitleAsset,
@@ -167,7 +167,7 @@ namespace api.nox.user.client {
 			Reference.GetComponent<TextLanguage>("text", component.bioContainer).UpdateText("user.about.bio");
 			component.bioText = Reference.GetComponent<TextLanguage>(
 				"text", Instantiate(
-					Client.GetAsset<GameObject>("prefabs/text.prefab", "ui"),
+					Client.GetAsset<GameObject>("ui:prefabs/text.prefab"),
 					Reference.GetComponent<RectTransform>("content", component.bioContainer)
 				)
 			);

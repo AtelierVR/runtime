@@ -17,7 +17,7 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace dev.nox.development {
 	public class Performances : IEditorModInitializer {
-		internal static EditorModCoreAPI    CoreAPI;
+		internal static IEditorModCoreAPI    CoreAPI;
 		private         IEditorPanel         _buildPanel;
 		private         EventSubscription[] _events = Array.Empty<EventSubscription>();
 		private         PerformancePanel    _panel;
@@ -25,7 +25,7 @@ namespace dev.nox.development {
 		internal static UnityEvent<IMod> ModLoadedEvent   = new();
 		internal static UnityEvent<IMod> ModUnloadedEvent = new();
 
-		public void OnInitializeEditor(EditorModCoreAPI api) {
+		public void OnInitializeEditor(IEditorModCoreAPI api) {
 			CoreAPI = api;
 
 			_events = new[] {

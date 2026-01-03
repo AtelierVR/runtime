@@ -147,15 +147,15 @@ namespace api.nox.user.client {
 		}
 
 		public static (GameObject, AuthServerComponent) Generate(AuthServerPage page, RectTransform parent) {
-			var content              = Instantiate(Client.GetAsset<GameObject>("prefabs/split.prefab", "ui"), parent);
-			var iconAsset            = Client.GetAsset<GameObject>("prefabs/header_icon.prefab", "ui");
-			var labelAsset           = Client.GetAsset<GameObject>("prefabs/header_label.prefab", "ui");
-			var withTitleAsset       = Client.GetAsset<GameObject>("prefabs/with_title.prefab", "ui");
-			var listAsset            = Client.GetAsset<GameObject>("prefabs/list.prefab", "ui");
-			var scrollAsset          = Client.GetAsset<GameObject>("prefabs/scroll.prefab", "ui");
-			var containerAsset       = Client.GetAsset<GameObject>("prefabs/container.prefab", "ui");
-			var containerFullAsset   = Client.GetAsset<GameObject>("prefabs/container_full.prefab", "ui");
-			var headerButtonAsset    = Client.GetAsset<GameObject>("prefabs/header_button.prefab", "ui");
+			var content              = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/split.prefab"), parent);
+			var iconAsset            = Client.GetAsset<GameObject>("ui:prefabs/header_icon.prefab");
+			var labelAsset           = Client.GetAsset<GameObject>("ui:prefabs/header_label.prefab");
+			var withTitleAsset       = Client.GetAsset<GameObject>("ui:prefabs/with_title.prefab");
+			var listAsset            = Client.GetAsset<GameObject>("ui:prefabs/list.prefab");
+			var scrollAsset          = Client.GetAsset<GameObject>("ui:prefabs/scroll.prefab");
+			var containerAsset       = Client.GetAsset<GameObject>("ui:prefabs/container.prefab");
+			var containerFullAsset   = Client.GetAsset<GameObject>("ui:prefabs/container_full.prefab");
+			var headerButtonAsset    = Client.GetAsset<GameObject>("ui:prefabs/header_button.prefab");
 
 			var component = content.AddComponent<AuthServerComponent>();
 			component.Page = page;
@@ -180,7 +180,7 @@ namespace api.nox.user.client {
 			var icon   = Instantiate(iconAsset, Reference.GetComponent<RectTransform>("before", header));
 			var label  = Instantiate(labelAsset, Reference.GetComponent<RectTransform>("content", header));
 
-			Reference.GetComponent<Image>("image", icon).sprite = Client.GetAsset<Sprite>("icons/host.png", "ui");
+			Reference.GetComponent<Image>("image", icon).sprite = Client.GetAsset<Sprite>("ui:icons/host.png");
 			Reference.GetComponent<TextLanguage>("text", label).UpdateText("auth.servers.title");
 
 			// Bouton refresh dans le header
@@ -188,11 +188,11 @@ namespace api.nox.user.client {
 			var refreshButton = Instantiate(headerButtonAsset, after);
 			Reference.GetComponent<Button>("button", refreshButton)
 				.onClick.AddListener(component.OnRefreshServersClicked);
-			Reference.GetComponent<Image>("image", refreshButton).sprite = Client.GetAsset<Sprite>("icons/refresh.png", "ui");
+			Reference.GetComponent<Image>("image", refreshButton).sprite = Client.GetAsset<Sprite>("ui:icons/refresh.png");
 
 			// Contenu avec scroll et liste
 			var contentIn = Reference.GetComponent<RectTransform>("content", withTitle);
-			component.serverInfobox = Instantiate(Client.GetAsset<GameObject>("prefabs/infobox.prefab", "ui"), contentIn);
+			component.serverInfobox = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/infobox.prefab"), contentIn);
 			Reference.GetComponent<TextLanguage>("text", component.serverInfobox).UpdateText("auth.no_servers");
 			
 			component.serverListContainer = Instantiate(scrollAsset, contentIn);
@@ -212,7 +212,7 @@ namespace api.nox.user.client {
 
 	public class ServerItemComponent : MonoBehaviour {
 		public static (GameObject, ServerItemComponent) Generate(AuthServerComponent reference, RectTransform parent) {
-			var serverItem = Instantiate(Client.GetAsset<GameObject>("prefabs/server_item.prefab", "server"), parent);
+			var serverItem = Instantiate(Client.GetAsset<GameObject>("server:prefabs/server_item.prefab"), parent);
 			var component  = serverItem.AddComponent<ServerItemComponent>();
 			component.reference = reference;
 			component.label     = Reference.GetComponent<TextLanguage>("label", serverItem);

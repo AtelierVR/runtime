@@ -15,10 +15,10 @@ using UnityEngine.UIElements;
 
 namespace dev.nox.development {
 	public class ModDetails : IEditorModInitializer {
-		internal static EditorModCoreAPI CoreAPI;
+		internal static IEditorModCoreAPI CoreAPI;
 		private         IEditorPanel      _buildPanel;
 
-		public void OnInitializeEditor(EditorModCoreAPI api) {
+		public void OnInitializeEditor(IEditorModCoreAPI api) {
 			CoreAPI = api;
 			var panel = new ModDetailsPanel();
 			_buildPanel = api.PanelAPI.AddLocalPanel(panel);
@@ -303,7 +303,7 @@ namespace dev.nox.development {
 			}
 		}
 
-		private void SetupProvidesList(VisualElement item, ModMetadata meta) {
+		private void SetupProvidesList(VisualElement item, IModMetadata meta) {
 			var providesList = item.Q<VisualElement>("provides-list");
 			var provides     = meta.GetProvides();
 

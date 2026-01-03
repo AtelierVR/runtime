@@ -27,7 +27,7 @@ namespace api.nox.terminal.widget {
 			=> 70;
 
 		public static bool TryMake(IMenu menu, RectTransform parent, out (GameObject, IWidget) values) {
-			var prefab    = Client.GetAsset<GameObject>("prefabs/grid_item.prefab", "ui");
+			var prefab    = Client.GetAsset<GameObject>("ui:prefabs/grid_item.prefab");
 			var instance  = Instantiate(prefab, parent);
 			var component = instance.AddComponent<TerminalWidget>();
 			component._mid = menu.GetId();
@@ -37,7 +37,7 @@ namespace api.nox.terminal.widget {
 			instance.name = $"[{component.GetKey()}_{instance.GetInstanceID()}]";
 			values        = (instance, component);
 
-			prefab             = Client.GetAsset<GameObject>("prefabs/widget.prefab", "ui");
+			prefab             = Client.GetAsset<GameObject>("ui:prefabs/widget.prefab");
 			component._content = Instantiate(prefab, Reference.GetComponent<RectTransform>("content", instance));
 
 			component.UpdateIcon().Forget();
@@ -46,7 +46,7 @@ namespace api.nox.terminal.widget {
 		}
 
 		private async UniTask UpdateIcon() {
-			var icon      = await Client.GetAssetAsync<Sprite>("icons/terminal.png", "ui");
+			var icon      = await Client.GetAssetAsync<Sprite>("ui:icons/terminal.png");
 			var labelIcon = Reference.GetComponent<Image>("icon", _content);
 			labelIcon.sprite = icon;
 		}

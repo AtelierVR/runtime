@@ -1,4 +1,4 @@
-using System.Linq;
+/*using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using Nox.Sessions;
@@ -98,4 +98,4 @@ namespace api.nox.session.client {
 		private void OnSessionChanged(ISession newSession, ISession oldSession)
 			=> Refresh(false);
 	}
-}
+}*/

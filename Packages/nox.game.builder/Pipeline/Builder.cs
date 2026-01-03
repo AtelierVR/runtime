@@ -104,7 +104,7 @@ namespace Nox.GameBuilder.Pipeline {
 					);
 
 				data.ProgressCallback(0.1f, "Preparing build...");
-				await UniTask.Delay(100); // Give UI time to update
+				await UniTask.Yield();
 
 				if (File.Exists(data.OutputPath))
 					File.Delete(data.OutputPath);
@@ -114,8 +114,6 @@ namespace Nox.GameBuilder.Pipeline {
 
 				var scenes = GetScenesToBuild(data.Mods);
 
-				data.ProgressCallback(0.2f, $"Building {scenes.Length} scenes...");
-
 				var buildPlayerOptions = new BuildPlayerOptions {
 					scenes           = scenes,
 					locationPathName = Path.Combine(data.OutputPath, data.BuildName + (data.Target == Platform.Windows ? ".exe" : "")),
@@ -123,9 +121,8 @@ namespace Nox.GameBuilder.Pipeline {
 					target           = data.Target.GetBuildTarget()
 				};
 
-				// We can't really get progress from BuildPipeline.BuildPlayer as it is blocking in main thread usually, 
-				// but we can wrap it in a task to at least not freeze the UI completely if it was async (it's not really async in Editor API)
-				// However, since we are in Editor, we have to run it on main thread.
+				data.ProgressCallback(0.3f, "Starting Unity build...");
+				await UniTask.Yield();
 
 				var report  = BuildPipeline.BuildPlayer(buildPlayerOptions);
 				var summary = report.summary;
@@ -139,8 +136,9 @@ namespace Nox.GameBuilder.Pipeline {
 					);
 
 				// Build Mods and Game Data
-				if (data.Mods != null && data.Mods.Length > 0) {
+				if (data.Mods is { Length: > 0 }) {
 					data.ProgressCallback(0.5f, "Building mods...");
+					await UniTask.Delay(100);
 
 					var outputData = Path.Combine(data.OutputPath, data.BuildName + "_Data", "Nox");
 					var gameData   = Path.Combine(outputData, "game_data.json");
@@ -158,34 +156,36 @@ namespace Nox.GameBuilder.Pipeline {
 							}
 						);
 
-					var metadatas = new JArray();
+					var m = new JArray();
 
 					for (var i = 0; i < data.Mods.Length; i++) {
 						var mod  = data.Mods[i];
 						var meta = mod.GetMetadata();
 
-						data.ProgressCallback(0.5f + (0.4f * ((float)i / data.Mods.Length)), $"Processing mod {meta.GetId()}...");
+						data.ProgressCallback(0.5f + 0.4f * ((float)i / data.Mods.Length), $"Processing mod {meta.GetId()}...");
+						await UniTask.Yield();
 
 						var obj = meta.ToObject();
 
-						obj["kernel"] = new JObject() {
-							["active"]      = meta.GetCustom("kernel", false),
+						obj["kernel"] = new JObject {
+							["active"]      = meta.GetCustom("kernel", mod.GetModType() == "kernel"),
 							["base_path"]   = GetPath(mod.GetData<string>("folder")),
 							["assets_path"] = GetPath(mod.GetData<string>("assets")),
 							["definition"]  = GetPath(mod.GetData<string>("definition")),
 							["manifest"]    = GetPath(mod.GetData<string>("manifest"))
 						};
 
-						var assetResult = resultAssets.FirstOrDefault(r => r.mod.GetMetadata().Match(meta.GetId()));
+						var assetResult = resultAssets
+							.FirstOrDefault(r => r.mod.GetMetadata().Match(meta.GetId()));
 
 						JArray assetObj = new();
 						if (assetResult != null)
 							foreach (var asset in assetResult.outputs)
 								if (File.Exists(asset)) {
 									var bundle = AssetBundle.LoadFromFile(asset);
-									if (bundle == null) continue;
+									if (!bundle) continue;
 									assetObj.Add(
-										new JObject() {
+										new JObject {
 											["name"] = Path.GetFileName(asset),
 											["file"] = Path.Combine(Path.GetRelativePath(outputData, asset))
 												.Replace("\\", "/")
@@ -199,14 +199,15 @@ namespace Nox.GameBuilder.Pipeline {
 
 						obj["kernel"]["assets"] = assetObj;
 
-						metadatas.Add(obj);
+						m.Add(obj);
 					}
 
 					data.ProgressCallback(0.95f, "Saving game data...");
+					await UniTask.Yield();
 
 					await File.WriteAllTextAsync(
 						gameData, new JObject {
-							["mods"] = metadatas,
+							["mods"] = m,
 							["engine"] = new JObject {
 								["name"]    = EngineExtensions.CurrentEngine.ToString(),
 								["version"] = EngineExtensions.CurrentVersion.ToString()
@@ -247,13 +248,12 @@ namespace Nox.GameBuilder.Pipeline {
 						if (string.IsNullOrEmpty(path)) continue;
 						var t = Path.Combine(path, "buildscenes");
 						if (!Directory.Exists(t)) continue;
+						Logger.LogDebug($"Searching for scenes: {t}");
 						var files = Directory.GetFiles(t, "*.unity", SearchOption.AllDirectories)
-							.Select(
-								s => "Assets/"
-									+ Path.GetRelativePath(Application.dataPath, s)
-										.Replace("\\", "/")
-							)
+							.Select(GetPath)
+							.Where(f => !string.IsNullOrEmpty(f))
 							.ToArray();
+						Logger.LogDebug($"Found {string.Join(", ", files)}");
 						list.AddRange(files);
 					}
 				}
@@ -263,12 +263,12 @@ namespace Nox.GameBuilder.Pipeline {
 				Logger.LogWarning(new Exception("Error getting build scenes from mods", ex));
 			}
 
-			return Array.Empty<string>();
+			return list.ToArray();
 		}
 
 		public static IMod[] GetKernelMods(IMod[] mods)
 			=> mods
-				.Where(m => m.GetMetadata().IsKernel())
+				.Where(m => m.GetModType() == "kernel")
 				.ToArray();
 
 		private static string GetPath(string path)

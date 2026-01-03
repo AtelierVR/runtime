@@ -58,17 +58,17 @@ namespace api.nox.world {
 		}
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<AssetRuntimeWorldGroup> LoadWorldFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default) {
-			var existingWorld = GetWorld(AssetRuntimeWorldGroup.ParseId(ns, path));
+		public async UniTask<AssetRuntimeWorldGroup> LoadWorldFromAssets(ResourceIdentifier path, Action<float> progress = null, CancellationToken token = default) {
+			var existingWorld = GetWorld(AssetRuntimeWorldGroup.ParseId(path));
 			if (existingWorld != null) {
-				Logger.LogWarning($"World {ns}:{path} is already loaded.");
+				Logger.LogWarning($"World {path} is already loaded.");
 				return existingWorld as AssetRuntimeWorldGroup;
 			}
 
-			var world = await AssetRuntimeWorldGroup.Load(ns, path, progress, token);
+			var world = await AssetRuntimeWorldGroup.Load( path, progress, token);
 
 			if (world == null) {
-				Logger.LogError($"Failed to load world from assets: {ns}:{path}");
+				Logger.LogError($"Failed to load world from assets: {path}");
 				return null;
 			}
 

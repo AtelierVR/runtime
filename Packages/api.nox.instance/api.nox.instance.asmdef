@@ -12,7 +12,8 @@
         "Nox.Network",
         "Nox.Sessions",
         "Nox.Players",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Nox.CCK.Worlds"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

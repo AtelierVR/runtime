@@ -5,6 +5,7 @@ using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
 using Nox.Controllers;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using Logger = Nox.CCK.Utils.Logger;
 
@@ -12,10 +13,11 @@ namespace api.nox.controller {
 	public class Main : IControllerAPI, IMainModInitializer {
 		public static Main Instance { get; private set; }
 
-		private IController    _current;
-		private MainModCoreAPI _coreAPI;
+		private IController     _current;
+		private IMainModCoreAPI _coreAPI;
+		private IController     _current1;
 
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			Instance = this;
 			_coreAPI = api;
 			_current = null;
@@ -27,20 +29,18 @@ namespace api.nox.controller {
 			Instance = null;
 		}
 
-		public IController GetCurrent()
+		public IController Current
 			=> _current;
 
+
+		public UnityEvent<IController> OnCurrentChanged { get; } = new();
+
+		private void NotifyCurrentChanged(IController controller) {
+			_coreAPI?.EventAPI.Emit("controller_changed", null);
+			OnCurrentChanged?.Invoke(controller);
+		}
+
 		public async UniTask<bool> SetCurrent(IController controller) {
-			if (controller == null) {
-				if (_current == null)
-					return true;
-
-				_current.Dispose();
-				_current = null;
-				_coreAPI.EventAPI.Emit("controller_changed", null);
-				return true;
-			}
-
 			if (_current == controller)
 				return true;
 
@@ -49,6 +49,16 @@ namespace api.nox.controller {
 			if (!canChange) {
 				Logger.LogWarning("Controller change request was denied");
 				return false;
+			}
+
+			if (controller == null) {
+				if (_current == null)
+					return true;
+
+				_current.Dispose();
+				_current = null;
+				NotifyCurrentChanged(null);
+				return true;
 			}
 
 			if (_current != null) {
@@ -68,9 +78,10 @@ namespace api.nox.controller {
 			var eventSystem = _current.GetEventSystem();
 			EventSystem.current = eventSystem;
 			foreach (var es in ComponentExtension.GetComponentsInChildren<EventSystem>())
-				if (es != eventSystem) es.gameObject.SetActive(false);
+				if (es != eventSystem)
+					es.gameObject.SetActive(false);
 
-			_coreAPI.EventAPI.Emit("controller_changed", _current);
+			NotifyCurrentChanged(_current);
 			return true;
 
 			void OnRequest(object[] args) {

@@ -69,7 +69,7 @@ namespace api.nox.instance.client {
 				"instance.identifier", new[] {
 					instance.ToIdentifier().ToString(),
 					instance.GetId().ToString(),
-					instance.GetServerAddress()
+					instance.GetServer()
 				}
 			);
 
@@ -113,39 +113,35 @@ namespace api.nox.instance.client {
 		}
 
 		private void OnJoinClicked()
-			=> Main.SessionAPI.MakeSession(
-				"external:"
-				+ Page.Instance
-					.GetConnectionData()
-					.GetMethod(),
+			=> Main.SessionAPI.TryMake(
+				"external:" + Page.Instance.GetConnectionData().GetMethod(),
 				new Dictionary<string, object> {
 					{ "set_current", true },
-					{ "server", Page.Instance.GetServerAddress() },
-					{ "instance", Page.Instance.GetId() },
+					{ "instance", Page.Instance.ToIdentifier() },
 					{ "name", Page.Instance.GetTitle() },
 					{ "short_name", Page.Instance.GetName() },
 					{ "thumbnail", Main.NetworkAPI.FetchTexture(Page.Instance.GetThumbnailUrl()) },
 					{ "data", Page.Instance.GetConnectionData().GetData<JObject>() }
-				}
+				}, out var _
 			);
 
 		public static (GameObject, InstanceComponent) Generate(InstancePage instancePage, RectTransform parent) {
-			var content              = Instantiate(Client.GetAsset<GameObject>("prefabs/split.prefab", "ui"), parent);
-			var iconAsset            = Client.GetAsset<GameObject>("prefabs/header_icon.prefab", "ui");
-			var labelAsset           = Client.GetAsset<GameObject>("prefabs/header_label.prefab", "ui");
-			var withTitleAsset       = Client.GetAsset<GameObject>("prefabs/with_title.prefab", "ui");
-			var listAsset            = Client.GetAsset<GameObject>("prefabs/list.prefab", "ui");
-			var scrollAsset          = Client.GetAsset<GameObject>("prefabs/scroll.prefab", "ui");
-			var boxAsset             = Client.GetAsset<GameObject>("prefabs/box.prefab", "ui");
-			var actionButtonAsset    = Client.GetAsset<GameObject>("prefabs/action_button.prefab", "ui");
-			var actionContainerAsset = Client.GetAsset<GameObject>("prefabs/action_container.prefab", "ui");
+			var content              = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/split.prefab"), parent);
+			var iconAsset            = Client.GetAsset<GameObject>("ui:prefabs/header_icon.prefab");
+			var labelAsset           = Client.GetAsset<GameObject>("ui:prefabs/header_label.prefab");
+			var withTitleAsset       = Client.GetAsset<GameObject>("ui:prefabs/with_title.prefab");
+			var listAsset            = Client.GetAsset<GameObject>("ui:prefabs/list.prefab");
+			var scrollAsset          = Client.GetAsset<GameObject>("ui:prefabs/scroll.prefab");
+			var boxAsset             = Client.GetAsset<GameObject>("ui:prefabs/box.prefab");
+			var actionButtonAsset    = Client.GetAsset<GameObject>("ui:prefabs/action_button.prefab");
+			var actionContainerAsset = Client.GetAsset<GameObject>("ui:prefabs/action_container.prefab");
 
 			var component = content.AddComponent<InstanceComponent>();
 			component.Page = instancePage;
 			content.name   = $"[{instancePage.GetKey()}_{content.GetInstanceID()}]";
 
 			var splitContent   = Reference.GetComponent<RectTransform>("content", content);
-			var containerAsset = Client.GetAsset<GameObject>("prefabs/container.prefab", "ui");
+			var containerAsset = Client.GetAsset<GameObject>("ui:prefabs/container.prefab");
 
 			// generate profile
 			var container = Instantiate(containerAsset, splitContent);
@@ -160,7 +156,7 @@ namespace api.nox.instance.client {
 			component.withoutThumbnail = Reference.GetReference("without_thumbnail", profile);
 
 			// generate dashboard
-			container = Instantiate(Client.GetAsset<GameObject>("prefabs/container_full.prefab", "ui"), splitContent);
+			container = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/container_full.prefab"), splitContent);
 			var withTitle = Instantiate(
 				withTitleAsset,
 				Reference.GetComponent<RectTransform>("content", container)
@@ -172,7 +168,7 @@ namespace api.nox.instance.client {
 
 			component.labelIcon        = Reference.GetComponent<Image>("image", icon);
 			component.label            = Reference.GetComponent<TextLanguage>("text", label);
-			component.labelIcon.sprite = Client.GetAsset<Sprite>("icons/location.png", "ui");
+			component.labelIcon.sprite = Client.GetAsset<Sprite>("ui:icons/location.png");
 
 			var contentDash = Reference.GetComponent<RectTransform>("content", withTitle);
 			// setup scroll + list
@@ -191,7 +187,7 @@ namespace api.nox.instance.client {
 			component.joinButton      = Reference.GetComponent<Button>("button", join);
 			component.joinIcon        = Reference.GetComponent<Image>("image", join);
 			component.joinLabel       = Reference.GetComponent<TextLanguage>("text", join);
-			component.joinIcon.sprite = Client.GetAsset<Sprite>("icons/globe.png", "ui");
+			component.joinIcon.sprite = Client.GetAsset<Sprite>("ui:icons/globe.png");
 			component.joinLabel.UpdateText("instance.join");
 			SetupEvents(
 				joinEventTrigger,
@@ -205,7 +201,7 @@ namespace api.nox.instance.client {
 			Reference.GetComponent<TextLanguage>("text", component.descriptionContainer).UpdateText("instance.about.description");
 			component.descriptionText = Reference.GetComponent<TextLanguage>(
 				"text", Instantiate(
-					Client.GetAsset<GameObject>("prefabs/text.prefab", "ui"),
+					Client.GetAsset<GameObject>("ui:prefabs/text.prefab"),
 					Reference.GetComponent<RectTransform>("content", component.descriptionContainer)
 				)
 			);
@@ -219,11 +215,11 @@ namespace api.nox.instance.client {
 			icon   = Instantiate(iconAsset, Reference.GetComponent<RectTransform>("before", header));
 			label  = Instantiate(labelAsset, Reference.GetComponent<RectTransform>("content", header));
 
-			Reference.GetComponent<Image>("image", icon).sprite = Client.GetAsset<Sprite>("icons/group.png", "ui");
+			Reference.GetComponent<Image>("image", icon).sprite = Client.GetAsset<Sprite>("ui:icons/group.png");
 			Reference.GetComponent<TextLanguage>("text", label).UpdateText("instance.players.title");
 
 			var contentIn = Reference.GetComponent<RectTransform>("content", withTitle);
-			component.playerInfobox = Instantiate(Client.GetAsset<GameObject>("prefabs/infobox.prefab", "ui"), contentIn);
+			component.playerInfobox = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/infobox.prefab"), contentIn);
 			Reference.GetComponent<TextLanguage>("text", component.playerInfobox).UpdateText("instance.no_players");
 			component.playerListContainer = Instantiate(scrollAsset, contentIn);
 			list                          = Instantiate(listAsset, Reference.GetComponent<RectTransform>("content", component.playerListContainer));
@@ -265,7 +261,7 @@ namespace api.nox.instance.client {
 
 			var players = instance.GetPlayers();
 			var playersByServer = players
-				.GroupBy(p => p.GetIdentifier().GetServerAddress())
+				.GroupBy(p => p.GetIdentifier().GetServer())
 				.ToDictionary(g => g.Key, g => g.ToArray());
 
 			var isEmpty = true;

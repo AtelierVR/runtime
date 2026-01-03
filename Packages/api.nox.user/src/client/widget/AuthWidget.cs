@@ -37,7 +37,7 @@ namespace api.nox.user.widget {
 				return false;
 			}
 
-			var prefab    = Client.GetAsset<GameObject>("prefabs/grid_item.prefab", "ui");
+			var prefab    = Client.GetAsset<GameObject>("ui:prefabs/grid_item.prefab");
 			var instance  = Object.Instantiate(prefab, parent);
 			var component = instance.AddComponent<AuthWidget>();
 			component._mid = menu.GetId();
@@ -47,7 +47,7 @@ namespace api.nox.user.widget {
 			instance.name = $"[{component.GetKey()}_{instance.GetInstanceID()}]";
 			values        = (instance, component);
 
-			prefab = Client.GetAsset<GameObject>("prefabs/widget.prefab", "ui");
+			prefab = Client.GetAsset<GameObject>("ui:prefabs/widget.prefab");
 			var content = Object.Instantiate(prefab, Reference.GetComponent<RectTransform>("content", instance));
 			component._icon = Reference.GetComponent<Image>("icon", content);
 
@@ -57,6 +57,6 @@ namespace api.nox.user.widget {
 		}
 
 		private async UniTask UpdateContent()
-			=> _icon.sprite = await Client.GetAssetAsync<Sprite>("icons/login.png", "ui");
+			=> _icon.sprite = await Client.GetAssetAsync<Sprite>("ui:icons/login.png");
 	}
 }

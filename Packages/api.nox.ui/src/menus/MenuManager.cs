@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using api.nox.ui.layouts;
 using api.nox.ui.menus;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.UI;
 using UnityEngine;
@@ -57,8 +58,8 @@ namespace api.nox.ui {
 			_menus.Clear();
 		}
 
-		public Menu Make(RectTransform container, GameObject parent = null) {
-			var prefab = PageManager.GetAsset<GameObject>("prefabs/menu.prefab");
+		public async UniTask<Menu> Make(RectTransform container, GameObject parent = null) {
+			var prefab = await PageManager.GetAssetAsync<GameObject>("prefabs/menu.prefab");
 
 			Logger.LogDebug($"Instantiating menu {prefab?.name ?? "null"} into {container?.name ?? "null"}");
 

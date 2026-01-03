@@ -1,4 +1,4 @@
-using Cysharp.Threading.Tasks;
+/*using Cysharp.Threading.Tasks;
 using Nox.Entities;
 using Nox.Players;
 using Nox.Worlds;
@@ -98,7 +98,7 @@ namespace Nox.Sessions {
 		/// <param name="event"></param>
 		/// <param name="raw"></param>
 		/// <param name="sender"></param>
-		void OnEventTriggered(string @event, byte[] raw, IPlayer sender);
+		void OnEvent(string @event, byte[] raw, IPlayer sender);
 
 		/// <summary>
 		/// Check if the session matches a specific world identifier.
@@ -156,4 +156,4 @@ namespace Nox.Sessions {
 		/// <returns></returns>
 		public IDimension GetDimension();
 	}
-}
+}*/

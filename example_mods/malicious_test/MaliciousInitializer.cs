@@ -25,7 +25,7 @@ namespace MaliciousMod
             UnityEngine.Debug.LogError("The security validator is NOT working!");
         }
 
-        public void OnInitializeMain(MainModCoreAPI api)
+        public void OnInitializeMain(IMainModCoreAPI api)
         {
             // This code should NEVER run
             // The security validator should block this mod at load time

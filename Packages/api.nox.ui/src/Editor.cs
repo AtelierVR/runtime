@@ -8,9 +8,9 @@ using UnityEngine;
 
 namespace api.nox.ui {
 	public class Editor : IEditorModInitializer {
-		internal static EditorModCoreAPI CoreAPI;
+		internal static IEditorModCoreAPI CoreAPI;
 
-		public void OnInitializeEditor(EditorModCoreAPI api) {
+		public void OnInitializeEditor(IEditorModCoreAPI api) {
 			CoreAPI                            =  api;
 			EditorApplication.hierarchyChanged += OnHierarchyChanged;
 			OnHierarchyChanged();

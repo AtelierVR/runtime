@@ -1,14 +1,20 @@
 using api.nox.ui.menus;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
+using Nox.CCK.Utils;
 using Nox.UI;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 using UnityEngine.UI;
+using Transform = UnityEngine.Transform;
 
 namespace api.nox.ui.layouts {
 	public class Element : MonoBehaviour {
-		[SerializeField] public NavigationData data;
-		[SerializeField] public Menu           menu;
+		[SerializeField]
+		public NavigationData data;
+
+		[SerializeField]
+		public Menu menu;
 
 		public TextLanguage text;
 		public GameObject   textContainer;
@@ -24,43 +30,38 @@ namespace api.nox.ui.layouts {
 
 		private void OnClick() {
 			if (data.executionType == NavigationExecution.Event)
-				PageManager.GetCoreAPI().EventAPI.Emit(data.execution, data.executionArguments);
+				PageManager.GetCoreAPI().EventAPI.Emit(data.execution, data.ExecutionArguments);
 			else if (data.executionType == NavigationExecution.Goto)
-				PageManager.SendGoto(menu.GetId(), data.execution, data.executionArguments);
+				PageManager.SendGoto(menu.GetId(), data.execution, data.ExecutionArguments);
 			else if (data.executionType == NavigationExecution.Action)
 				PageManager.SendAction(menu.GetId(), data.execution);
 		}
 
 		private void Start()
-			=> SetData(menu, data);
+			=> SetData(menu, data).Forget();
 
-		public void SetData(Menu menu, NavigationData data) {
-			this.data = data;
-			this.menu = menu;
-			if (data == null) {
-				Logger.LogWarning($"Element.SetData: data is null for {gameObject.name}", gameObject);
+		public async UniTask SetData(Menu m, NavigationData d) {
+			data = d;
+			menu = m;
+
+			if (d == null) {
+				Logger.LogWarning($"Data is null for {gameObject.name}", gameObject);
 				return;
 			}
 
-			if (!menu) {
-				Logger.LogWarning($"Element.SetData: menu is null for {gameObject.name}", gameObject);
+			if (!m) {
+				Logger.LogWarning($"Menu is null for {gameObject.name}", gameObject);
 				return;
 			}
 
 
 			// clear content of customContainer
 			if (customContainer)
-				foreach (Transform child in customContainer.transform) {
-					#if UNITY_EDITOR
-					if (Application.isPlaying) Destroy(child.gameObject);
-					else UnityEditor.EditorApplication.delayCall += () => DestroyImmediate(child.gameObject);
-					#else
-						Destroy(child.gameObject);
-					#endif
-				}
+				foreach (Transform child in customContainer.transform)
+					child.gameObject.Destroy();
 
-			var custom = customContainer
-				? data.getCustomContent?.Invoke(customContainer.transform)
+			var custom = customContainer && d.GetCustomContent != null
+				? await d.GetCustomContent.Invoke(customContainer.transform)
 				: null;
 
 			if (custom && customContainer) {
@@ -70,27 +71,9 @@ namespace api.nox.ui.layouts {
 				customContainer?.SetActive(true);
 				contentContainer?.SetActive(false);
 			} else {
-				text?.UpdateText(data.text, data.textArguments);
-				textContainer?.SetActive(!string.IsNullOrEmpty(data.text));
-
-				if (icon) {
-					var texture = data.icon;
-					if (!texture && !string.IsNullOrEmpty(data.iconPath)) {
-						var splitPath = data.iconPath.Split(':');
-						texture = splitPath.Length == 2
-							? PageManager.GetAsset<Texture2D>(splitPath[1], splitPath[0])
-							: PageManager.GetAsset<Texture2D>(data.iconPath);
-					}
-
-					icon.sprite = texture
-						? Sprite.Create(
-							texture,
-							new Rect(0, 0, texture.width, texture.height),
-							Vector2.zero
-						)
-						: null;
-				}
-
+				text?.UpdateText(d.text, d.textArguments);
+				textContainer?.SetActive(!string.IsNullOrEmpty(d.text));
+				if (icon) UpdateTexture(icon, d).Forget();
 				iconContainer?.SetActive(icon?.sprite);
 				if (customContainer) customContainer.SetActive(false);
 				contentContainer?.SetActive(true);
@@ -98,10 +81,31 @@ namespace api.nox.ui.layouts {
 
 			if (button) {
 				button.onClick.RemoveListener(OnClick);
-				button.interactable = data.flags.HasFlag(NavigationFlags.Interactive);
+				button.interactable = d.flags.HasFlag(NavigationFlags.Interactive);
 				if (button.interactable)
 					button.onClick.AddListener(OnClick);
 			}
+		}
+
+		private async UniTaskVoid UpdateTexture(Image image, NavigationData d) {
+			var texture = d.icon;
+			if (texture) {
+				image.sprite = Sprite.Create(
+					texture,
+					new Rect(0, 0, texture.width, texture.height),
+					new Vector2(0.5f, 0.5f)
+				);
+				image.gameObject.SetActive(image.sprite);
+				return;
+			}
+
+			if (!texture && d.iconPath.IsValid()) {
+				image.sprite = await PageManager.GetAssetAsync<Sprite>(d.iconPath);
+				image.gameObject.SetActive(image.sprite);
+				if (image.sprite) return;
+			}
+
+			Logger.LogWarning($"Failed to load icon for navigation element: {d.text}", gameObject);
 		}
 	}
 }

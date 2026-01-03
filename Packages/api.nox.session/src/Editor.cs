@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+/*#if UNITY_EDITOR
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Mods.Panels;
@@ -7,9 +7,9 @@ namespace api.nox.session {
 	public class Editor : IEditorModInitializer {
 		private         SessionsPanel    _sessionsPanel;
 		private static  IEditorPanel      _sessionsPanelInstance;
-		internal static EditorModCoreAPI CoreAPI;
+		internal static IEditorModCoreAPI CoreAPI;
 
-		public void OnInitializeEditor(EditorModCoreAPI api) {
+		public void OnInitializeEditor(IEditorModCoreAPI api) {
 			CoreAPI                = api;
 			_sessionsPanel         = new SessionsPanel();
 			_sessionsPanelInstance = api.PanelAPI.AddLocalPanel(_sessionsPanel);
@@ -32,4 +32,4 @@ namespace api.nox.session {
 			=> _sessionsPanelInstance?.IsActive() ?? false;
 	}
 }
-#endif
+#endif*/

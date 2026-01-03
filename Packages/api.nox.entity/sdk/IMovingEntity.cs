@@ -1,6 +1,5 @@
 using Nox.CCK.Network;
 using UnityEngine;
-using Transform = Nox.CCK.Utils.Transform;
 
 namespace Nox.Entities {
 	/// <summary>
@@ -8,55 +7,29 @@ namespace Nox.Entities {
 	/// </summary>
 	public interface IMovingEntity : IEntity {
 		/// <summary>
-		/// Get the position of the entity.
+		/// Indicates whether the entity has been modified since the last sync.
 		/// </summary>
-		/// <returns></returns>
-		public Vector3 GetPosition();
-
+		public Vector3 Position { get; set; }
+		
 		/// <summary>
-		/// Set the position of the entity.
+		/// Gets or sets the rotation of the entity.
 		/// </summary>
-		/// <param name="position"></param>
-		/// <param name="markDirty"></param>
-		public void SetPosition(Vector3 position, DirtyBy markDirty);
-
+		public Quaternion Rotation { get; set; }
+		
 		/// <summary>
-		/// Get the velocity of the entity.
+		/// Gets or sets the scale of the entity.
 		/// </summary>
-		/// <returns></returns>
-		public Vector3 GetVelocity();
-
+		public Vector3 Scale { get; set; }
+		
 		/// <summary>
-		/// Set the velocity of the entity.
+		/// Gets or sets the velocity of the entity.
 		/// </summary>
-		/// <param name="velocity"></param>
-		/// <param name="markDirty"></param>
-		public void SetVelocity(Vector3 velocity, DirtyBy markDirty);
-
+		public Vector3 Velocity { get; set; }
+		
 		/// <summary>
-		/// Get the rotation of the entity.
+		/// Gets or sets the angular velocity of the entity.
 		/// </summary>
-		/// <returns></returns>
-		public Quaternion GetRotation();
-
-		/// <summary>
-		/// Set the rotation of the entity.
-		/// </summary>
-		/// <param name="rotation"></param>
-		/// <param name="markDirty"></param>
-		public void SetRotation(Quaternion rotation, DirtyBy markDirty);
-
-		/// <summary>
-		/// Get the angular velocity of the entity.
-		/// </summary>
-		/// <returns></returns>
-		public Vector3 GetAngularVelocity();
-
-		/// <summary>
-		/// Set the angular velocity of the entity.
-		/// </summary>
-		/// <param name="angularVelocity"></param>
-		/// <param name="markDirty"></param>
-		public void SetAngularVelocity(Vector3 angularVelocity, DirtyBy markDirty);
+		public Vector3 Angular { get; set; }
+		
 	}
 }

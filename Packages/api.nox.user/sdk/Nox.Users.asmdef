@@ -1,17 +1,17 @@
 {
-    "name": "Nox.Users",
-    "rootNamespace": "",
-    "references": [
-        "UniTask",
-        "Nox.Servers"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": true,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "Nox.Users",
+  "rootNamespace": "",
+  "references": [
+    "UniTask",
+    "Nox.Servers"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
+using Nox.CCK.Worlds;
 using Nox.Worlds;
 
 namespace api.nox.world.network {
@@ -59,10 +60,10 @@ namespace api.nox.world.network {
 			=> HasNext()
 				? await Main.Instance.Network.Search(
 					new SearchRequest {
-						query  = query,
-						ids    = ids,
-						offset = offset + limit,
-						limit  = limit
+						Query  = query,
+						Ids    = ids,
+						Offset = offset + limit,
+						Limit  = limit
 					}
 				)
 				: null;
@@ -72,10 +73,10 @@ namespace api.nox.world.network {
 			=> HasPrevious()
 				? await Main.Instance.Network.Search(
 					new SearchRequest {
-						query  = query,
-						ids    = ids,
-						offset = offset - limit,
-						limit  = limit
+						Query  = query,
+						Ids    = ids,
+						Offset = offset - limit,
+						Limit  = limit
 					}
 				)
 				: null;

@@ -12,9 +12,9 @@ using Logger = Nox.CCK.Utils.Logger;
 namespace api.nox.statistics {
 	public class Main : IMainModInitializer {
 		private       PlayTimeTracker _playTimeTracker;
-		public static MainModCoreAPI  CoreAPI;
+		public static IMainModCoreAPI  CoreAPI;
 
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			CoreAPI          = api;
 			_playTimeTracker = new PlayTimeTracker();
 			_playTimeTracker.Initialize();

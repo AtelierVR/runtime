@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 
 namespace Nox.Sessions {
 	/// <summary>
@@ -53,4 +53,4 @@ namespace Nox.Sessions {
 		/// <returns></returns>
 		public ISession GetCurrent();
 	}
-}
+}*/

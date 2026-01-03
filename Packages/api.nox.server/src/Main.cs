@@ -14,7 +14,7 @@ using UnityEngine.Events;
 
 namespace api.nox.server {
 	public class Main : IMainModInitializer, IServerAPI {
-		internal        MainModCoreAPI CoreAPI;
+		internal        IMainModCoreAPI CoreAPI;
 		internal static Main           Instance;
 
 		internal Network                         Network;
@@ -38,7 +38,7 @@ namespace api.nox.server {
 
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
 
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
 			_lang    = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");

@@ -32,7 +32,7 @@ namespace api.nox.videoplayer.widget {
 			=> 90;
 
 		public static bool TryMake(IMenu menu, RectTransform parent, out (GameObject, IWidget) values) {
-			var prefab    = Client.GetAsset<GameObject>("prefabs/grid_item.prefab", "ui");
+			var prefab    = Client.GetAsset<GameObject>("ui:prefabs/grid_item.prefab");
 			var instance  = Instantiate(prefab, parent);
 			var component = instance.AddComponent<VideoPlayerWidget>();
 			component._mid = menu.GetId();
@@ -42,7 +42,7 @@ namespace api.nox.videoplayer.widget {
 			instance.name = $"[{component.GetKey()}_{instance.GetInstanceID()}]";
 			values        = (instance, component);
 
-			prefab             = Client.GetAsset<GameObject>("prefabs/widget_image.prefab", "ui");
+			prefab             = Client.GetAsset<GameObject>("ui:prefabs/widget_image.prefab");
 			component._content = Instantiate(prefab, Reference.GetComponent<RectTransform>("content", instance));
 
 
@@ -88,7 +88,7 @@ namespace api.nox.videoplayer.widget {
 		}
 
 		private async UniTask UpdateIcon() {
-			var icon      = await Client.GetAssetAsync<Sprite>("icons/play_arrow.png", "ui");
+			var icon      = await Client.GetAssetAsync<Sprite>("ui:icons/play_arrow.png");
 			var labelIcon = Reference.GetComponent<Image>("icon", _content);
 			labelIcon.sprite = icon;
 		}

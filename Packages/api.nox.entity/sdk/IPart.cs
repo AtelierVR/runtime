@@ -10,71 +10,31 @@ namespace Nox.Entities {
 		/// Gets the unique ID of this part within its parent entity.
 		/// </summary>
 		/// <returns></returns>
-		public ushort GetId();
+		public ushort Id { get; }
 
 		/// <summary>
-		/// Get the position of this part in world space.
+		/// Gets or sets the position of this part relative to its parent entity.
 		/// </summary>
-		/// <returns></returns>
-		public bool TryGetPosition(out Vector3 position);
+		public Vector3 Position { get; set; }
 
 		/// <summary>
-		/// Get the rotation of this part in world space.
+		/// Gets or sets the rotation of this part relative to its parent entity.
 		/// </summary>
-		/// <returns></returns>
-		public bool TryGetRotation(out Quaternion rotation);
+		public Quaternion Rotation { get; set; }
 
 		/// <summary>
-		/// Get the scale of this part in world space.
+		/// Gets or sets the scale of this part.
 		/// </summary>
-		/// <returns></returns>
-		public bool TryGetScale(out Vector3 scale);
+		public Vector3 Scale { get; set; }
 
 		/// <summary>
-		/// Get the angular velocity of this part in world space.
+		/// Gets or sets the velocity of this part.
 		/// </summary>
-		/// <returns></returns>
-		public bool TryGetAngularVelocity(out Vector3 angularVelocity);
+		public Vector3 Velocity { get; set; }
 
 		/// <summary>
-		/// Get the velocity of this part in world space.
+		/// Gets or sets the angular velocity of this part.
 		/// </summary>
-		/// <returns></returns>
-		public bool TryGetVelocity(out Vector3 transform);
-
-		/// <summary>
-		/// Set the position of this part in world space.
-		/// </summary>
-		/// <param name="position"></param>
-		/// <param name="markDirty"></param>
-		public void SetPosition(Vector3 position, DirtyBy markDirty);
-
-		/// <summary>
-		/// Set the rotation of this part in world space.
-		/// </summary>
-		/// <param name="rotation"></param>
-		/// <param name="markDirty"></param>
-		public void SetRotation(Quaternion rotation, DirtyBy markDirty);
-
-		/// <summary>
-		/// Set the scale of this part in world space.
-		/// </summary>
-		/// <param name="scale"></param>
-		/// <param name="markDirty"></param>
-		public void SetScale(Vector3 scale, DirtyBy markDirty);
-
-		/// <summary>
-		/// Set the velocity of this part in world space.
-		/// </summary>
-		/// <param name="velocity"></param>
-		/// <param name="markDirty"></param>
-		public void SetVelocity(Vector3 velocity, DirtyBy markDirty);
-
-		/// <summary>
-		/// Set the angular velocity of this part in world space.
-		/// </summary>
-		/// <param name="angularVelocity"></param>
-		/// <param name="markDirty"></param>
-		public void SetAngularVelocity(Vector3 angularVelocity, DirtyBy markDirty);
+		public Vector3 Angular { get; set; }
 	}
 }

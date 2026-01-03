@@ -12,7 +12,7 @@ namespace api.nox.settings {
 	public class Main : IMainModInitializer, ISettingAPI {
 		internal static readonly List<IHandler> Handlers = new();
 		public static            Main           Instance;
-		public                   MainModCoreAPI CoreAPI;
+		public                   IMainModCoreAPI CoreAPI;
 		private                  LanguagePack   _lang;
 
 		public static IControllerAPI ControllerAPI
@@ -77,7 +77,7 @@ namespace api.nox.settings {
 
 		private IHandler[] _handlers = Array.Empty<IHandler>();
 
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			Instance = this;
 			CoreAPI  = api;
 			_lang    = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");

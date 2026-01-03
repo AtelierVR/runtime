@@ -3,6 +3,7 @@ using api.nox.search.client;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Utils;
 using Nox.UI;
 
 namespace api.nox.search {
@@ -12,14 +13,13 @@ namespace api.nox.search {
 				.GetMod("ui")
 				?.GetInstance<IUiAPI>();
 
-		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object
-			=> string.IsNullOrEmpty(ns)
-				? Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(path)
-				: Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(ns, path);
+		public static T GetAsset<T>(ResourceIdentifier path) where T : UnityEngine.Object
+			=> Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(path);
 
 		private EventSubscription[] _events;
 
-		public void OnInitializeClient(ClientModCoreAPI api) {
+		public void OnInitializeClient(IClientModCoreAPI api) {
+			Logger.Log("OnInitializeClient");
 			_events = new[] {
 				Main.Instance.CoreAPI.EventAPI.Subscribe("menu_goto", OnGoto)
 			};
@@ -36,6 +36,7 @@ namespace api.nox.search {
 			if (page == null) return;
 			Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.GetId(), page);
 		}
+
 		public void OnDisposeClient() {
 			foreach (var subscription in _events)
 				Main.Instance.CoreAPI.EventAPI.Unsubscribe(subscription);

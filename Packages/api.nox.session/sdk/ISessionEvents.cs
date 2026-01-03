@@ -1,4 +1,4 @@
-using Nox.Entities;
+/*using Nox.Entities;
 using Nox.Players;
 using UnityEngine.Events;
 
@@ -40,4 +40,4 @@ namespace Nox.Sessions {
 		/// <returns></returns>
 		public UnityEvent<IEntity> OnEntityUnregisteredEvent();
 	}
-}
+}*/

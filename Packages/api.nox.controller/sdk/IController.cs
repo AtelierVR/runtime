@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Players;
+using Nox.CCK.Utils;
 using Nox.Players;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace Nox.Controllers {
 	/// <summary>
@@ -64,14 +64,14 @@ namespace Nox.Controllers {
 		/// You can use <see cref="HumanBone"/> or <see cref="PlayerRig"/> as ushort index for the parts.
 		/// </summary>
 		/// <returns></returns>
-		public Dictionary<ushort, Transform> GetParts();
+		public IReadOnlyDictionary<ushort, TransformObject> GetParts();
 
 		/// <summary>
 		/// Set a transformation for a part of the controller.
 		/// </summary>
 		/// <param name="index"></param>
 		/// <param name="transform"></param>
-		public void SetPart(ushort index, NoxTransform transform);
+		public void SetPart(ushort index, TransformObject transform);
 
 		/// <summary>
 		/// Get a part of the controller by index.
@@ -79,7 +79,7 @@ namespace Nox.Controllers {
 		/// <param name="index"></param>
 		/// <param name="tr"></param>
 		/// <returns></returns>
-		public bool TryGetPart(ushort index, out Transform tr);
+		public bool TryGetPart(ushort index, out TransformObject tr);
 
 		/// <summary>
 		/// Get the abilities of the controller.
@@ -94,17 +94,5 @@ namespace Nox.Controllers {
 		/// <param name="key"></param>
 		/// <param name="value"></param>
 		public void SetAbilities(string key, object value);
-
-		/// <summary>
-		/// Get the current player associated with the controller.
-		/// </summary>
-		/// <returns></returns>
-		public IPlayer GetPlayer();
-
-		/// <summary>
-		/// Set the player currently associated with the controller.
-		/// </summary>
-		/// <param name="player"></param>
-		public void SetPlayer(IPlayer player);
 	}
 }

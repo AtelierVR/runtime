@@ -5,12 +5,12 @@ using Nox.CCK.Mods.Panels;
 
 namespace api.nox.relay.editor {
 	public class RelayEditor : IEditorModInitializer {
-		internal static EditorModCoreAPI CoreAPI;
+		internal static IEditorModCoreAPI CoreAPI;
 
 		private static IEditorPanel         _listPanel;
 		private        ListConnectionPanel _list;
 
-		public void OnInitializeEditor(EditorModCoreAPI api) {
+		public void OnInitializeEditor(IEditorModCoreAPI api) {
 			CoreAPI    = api;
 			_list      = new ListConnectionPanel();
 			_listPanel = api.PanelAPI.AddLocalPanel(_list);

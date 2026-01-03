@@ -16,7 +16,7 @@ namespace api.nox.microphone.settings {
 		}
 
 		public override GameObject GetPrefab()
-			=> Main.CoreAPI.AssetAPI.GetAsset<GameObject>("settings", "prefabs/range.prefab");
+			=> Main.CoreAPI.AssetAPI.GetAsset<GameObject>("settings:prefabs/range.prefab");
 
 		public override void OnValueChanged(float value)
 			=> Main.Instance.Manager.ConfigVolume = value;

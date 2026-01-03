@@ -3,6 +3,7 @@ using api.nox.instance.client;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Utils;
 using Nox.UI;
 
 namespace api.nox.instance {
@@ -12,14 +13,12 @@ namespace api.nox.instance {
 				.GetMod("ui")
 				.GetInstance<IUiAPI>();
 
-		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object
-			=> string.IsNullOrEmpty(ns)
-				? Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(path)
-				: Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(ns, path);
+		public static T GetAsset<T>(ResourceIdentifier path) where T : UnityEngine.Object
+			=> Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(path);
 
 		private EventSubscription _event;
 
-		public void OnInitializeClient(ClientModCoreAPI api) {
+		public void OnInitializeClient(IClientModCoreAPI api) {
 			_event = Main.Instance.CoreAPI.EventAPI.Subscribe("menu_goto", OnGoto);
 		}
 

@@ -12,7 +12,8 @@
         "Nox.Search",
         "Nox.UI",
         "Nox.ModLoader",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Nox.CCK.Users"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

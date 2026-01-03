@@ -1,30 +1,26 @@
-using System.Linq;
+using System.Collections.Generic;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Sessions;
 using Nox.CCK.Utils;
 using Nox.Worlds;
-using Nox.Offline;
 using Nox.Sessions;
-using UnityEngine.Scripting;
+using UnityEngine;
 
 namespace api.nox.main {
-	[Preserve]
 	public class Client : IClientModInitializer {
-		private static ClientModCoreAPI _coreAPI;
+		private static IClientModCoreAPI _coreAPI;
 
-		public void OnInitializeClient(ClientModCoreAPI api) 
-			=> _coreAPI = api;
+		public void OnInitializeClient(IClientModCoreAPI api) {
+			Physics.simulationMode = SimulationMode.Script;
+			_coreAPI               = api;
+		}
 
 		private static IWorldAPI WorldAPI
 			=> _coreAPI.ModAPI
 				.GetMod("world")
 				?.GetInstance<IWorldAPI>();
-
-		private static IOfflineAPI OfflineAPI
-			=> _coreAPI.ModAPI
-				.GetMod("offline")
-				?.GetInstance<IOfflineAPI>();
 
 		private static ISessionAPI SessionAPI
 			=> _coreAPI.ModAPI
@@ -32,15 +28,26 @@ namespace api.nox.main {
 				?.GetInstance<ISessionAPI>();
 
 		public async UniTask OnPostInitializeClientAsync() {
-			var world = await WorldAPI.LoadFromAssets(
-				_coreAPI.ModMetadata.GetId(),
-				"worlds/default/default.unity"
-				
-			);
-			var adapter = OfflineAPI.New();
-			adapter.SetDimension(world);
-			var session = SessionAPI.New(adapter);
-			await session.SetCurrent();
+			if (!SessionAPI.TryMake(
+				    "offline",
+				    new Dictionary<string, object> {
+					    ["world"]       = new ResourceIdentifier(_coreAPI.ModMetadata.GetId(), "worlds/default/default.unity"),
+					    ["set_current"] = true
+				    },
+				    out var session
+			    )) {
+				_coreAPI.LoggerAPI.LogError("Failed to create offline session in client mod initializer.");
+				return;
+			}
+
+			var ready = await session.WhenFinished();
+			if (!ready) {
+				_coreAPI.LoggerAPI.LogError("Offline session failed to become ready in client mod initializer.");
+				return;
+			}
+
+			_coreAPI.LoggerAPI.Log("Offline session is ready in client mod initializer.");
+			Physics.simulationMode = SimulationMode.Update;
 		}
 	}
 }

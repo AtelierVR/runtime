@@ -1,4 +1,4 @@
-using Nox.Worlds;
+/*using Nox.Worlds;
 
 namespace Nox.Sessions {
 	public interface IDimension: ISimplifiedDimension {
@@ -21,4 +21,4 @@ namespace Nox.Sessions {
 		/// <returns></returns>
 		public bool IsActive();
 	}
-}
+}*/

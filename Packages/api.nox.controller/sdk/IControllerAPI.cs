@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using UnityEngine.Events;
 
 namespace Nox.Controllers {
 	public interface IControllerAPI {
@@ -6,7 +7,12 @@ namespace Nox.Controllers {
 		/// Gets the current controller.
 		/// </summary>
 		/// <returns></returns>
-		public IController GetCurrent();
+		public IController Current { get; }
+
+		/// <summary>
+		/// Invoked when the current controller changes.
+		/// </summary>
+		public UnityEvent<IController> OnCurrentChanged { get; }
 
 		/// <summary>
 		/// Sets the current controller.

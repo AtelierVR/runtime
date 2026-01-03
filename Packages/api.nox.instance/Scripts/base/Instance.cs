@@ -24,7 +24,7 @@ namespace api.nox.instance {
 		public uint GetId()
 			=> id;
 
-		public string GetServerAddress()
+		public string GetServer()
 			=> server;
 
 		public string GetName()

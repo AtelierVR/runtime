@@ -8,7 +8,8 @@
     "Nox.Worlds",
     "api.nox.jint",
     "Nox.Jint",
-    "Nox.Players"
+    "Nox.Players",
+    "Nox.Entities"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

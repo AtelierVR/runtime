@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Nox.CCK.Language;
 using Nox.CCK.Utils;
+using Nox.CCK.Worlds;
 using Nox.Instances;
 using Nox.Worlds;
 using UnityEngine;
@@ -213,11 +214,8 @@ namespace api.nox.world.client {
 		public  TextLanguage favoriteLabel;
 
 		private void HoverFavorite(bool isHover) {
-			_isFavoriteHover = isHover;
-			favoriteIcon.sprite = Client.GetAsset<Sprite>(
-				$"icons/{(isHover ? _isFavorite ? "bookmark_remove" : "bookmark_add" : _isFavorite ? "bookmark_star" : "bookmark")}.png",
-				"ui"
-			);
+			_isFavoriteHover    = isHover;
+			favoriteIcon.sprite = Client.GetAsset<Sprite>($"ui:icons/{(isHover ? _isFavorite ? "bookmark_remove" : "bookmark_add" : _isFavorite ? "bookmark_star" : "bookmark")}.png");
 			favoriteLabel.UpdateText(
 				isHover
 					? _isFavorite
@@ -284,11 +282,8 @@ namespace api.nox.world.client {
 			// 6 - | 1 | 1 | 0 | re-downloading (not hovered, re-downloading) (set to 2)
 			// 7 - | 1 | 1 | 1 | cancel re-download (hovered, re-downloading) (set to 3)
 
-			if (_lastTextureCaching != $"icons/cache{texture}.png")
-				cacheIcon.sprite = Client.GetAsset<Sprite>(
-					_lastTextureCaching = $"icons/cache{texture}.png",
-					"ui"
-				);
+			if (_lastTextureCaching != $"ui:icons/cache{texture}.png")
+				cacheIcon.sprite = Client.GetAsset<Sprite>(_lastTextureCaching = $"ui:icons/cache{texture}.png");
 
 			cacheLabel.UpdateText(
 				"world.cache."
@@ -327,12 +322,25 @@ namespace api.nox.world.client {
 
 		private void OnJoinOffline() {
 			var world = Page.World.ToIdentifier();
-			world.SetVersion(Page.Version);
-			Main.Instance.SessionAPI.MakeSession(
+			
+			var meta = world.Metadata.ToDictionary(
+				kvp => kvp.Key,
+				kvp => kvp.Value.ToArray()
+			);
+			
+			meta.Add(WorldIdentifier.VersionKey, new []{ Page.Version.ToString() });
+			
+			world = new WorldIdentifier(
+				world.Id,
+				meta,
+				world.Server
+			);
+			
+			Main.Instance.SessionAPI.TryMake(
 				"offline", new Dictionary<string, object> {
 					{ "world", world },
 					{ "set_current", true }
-				}
+				}, out _
 			);
 		}
 
@@ -361,11 +369,8 @@ namespace api.nox.world.client {
 		}
 
 		private void HoverHome(bool isHover) {
-			_isHomeHover = isHover;
-			homeIcon.sprite = Client.GetAsset<Sprite>(
-				$"icons/{(isHover ? _isHome ? "home_remove" : "home_add" : _isHome ? "home_star" : "home")}.png",
-				"ui"
-			);
+			_isHomeHover    = isHover;
+			homeIcon.sprite = Client.GetAsset<Sprite>($"ui:icons/{(isHover ? _isHome ? "home_remove" : "home_add" : _isHome ? "home_star" : "home")}.png");
 			homeLabel.UpdateText(
 				isHover
 					? _isHome
@@ -400,27 +405,27 @@ namespace api.nox.world.client {
 		#endregion
 
 		public static (GameObject, WorldComponent) Generate(WorldPage worldPage, RectTransform parent) {
-			var content              = Instantiate(Client.GetAsset<GameObject>("prefabs/split.prefab", "ui"), parent);
-			var iconAsset            = Client.GetAsset<GameObject>("prefabs/header_icon.prefab", "ui");
-			var labelAsset           = Client.GetAsset<GameObject>("prefabs/header_label.prefab", "ui");
-			var withTitleAsset       = Client.GetAsset<GameObject>("prefabs/with_title.prefab", "ui");
-			var listAsset            = Client.GetAsset<GameObject>("prefabs/list.prefab", "ui");
-			var scrollAsset          = Client.GetAsset<GameObject>("prefabs/scroll.prefab", "ui");
-			var boxAsset             = Client.GetAsset<GameObject>("prefabs/box.prefab", "ui");
-			var actionButtonAsset    = Client.GetAsset<GameObject>("prefabs/action_button.prefab", "ui");
-			var actionContainerAsset = Client.GetAsset<GameObject>("prefabs/action_container.prefab", "ui");
+			var content              = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/split.prefab"), parent);
+			var iconAsset            = Client.GetAsset<GameObject>("ui:prefabs/header_icon.prefab");
+			var labelAsset           = Client.GetAsset<GameObject>("ui:prefabs/header_label.prefab");
+			var withTitleAsset       = Client.GetAsset<GameObject>("ui:prefabs/with_title.prefab");
+			var listAsset            = Client.GetAsset<GameObject>("ui:prefabs/list.prefab");
+			var scrollAsset          = Client.GetAsset<GameObject>("ui:prefabs/scroll.prefab");
+			var boxAsset             = Client.GetAsset<GameObject>("ui:prefabs/box.prefab");
+			var actionButtonAsset    = Client.GetAsset<GameObject>("ui:prefabs/action_button.prefab");
+			var actionContainerAsset = Client.GetAsset<GameObject>("ui:prefabs/action_container.prefab");
 
 			var component = content.AddComponent<WorldComponent>();
 			component.Page = worldPage;
 			content.name   = $"[{worldPage.GetKey()}_{content.GetInstanceID()}]";
 
 			var splitContent   = Reference.GetComponent<RectTransform>("content", content);
-			var containerAsset = Client.GetAsset<GameObject>("prefabs/container.prefab", "ui");
+			var containerAsset = Client.GetAsset<GameObject>("ui:prefabs/container.prefab");
 
 			// generate profile
 			var container = Instantiate(containerAsset, splitContent);
 			var profile = Instantiate(
-				Client.GetAsset<GameObject>("prefabs/profile.prefab", "ui"),
+				Client.GetAsset<GameObject>("ui:prefabs/profile.prefab"),
 				Reference.GetComponent<RectTransform>("content", container)
 			);
 			component.identifier       = Reference.GetComponent<TextLanguage>("identifier", profile);
@@ -430,7 +435,7 @@ namespace api.nox.world.client {
 			component.withoutThumbnail = Reference.GetReference("without_thumbnail", profile);
 
 			// generate dashboard
-			container = Instantiate(Client.GetAsset<GameObject>("prefabs/container_full.prefab", "ui"), splitContent);
+			container = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/container_full.prefab"), splitContent);
 			var withTitle = Instantiate(
 				withTitleAsset,
 				Reference.GetComponent<RectTransform>("content", container)
@@ -442,7 +447,7 @@ namespace api.nox.world.client {
 
 			component.labelIcon        = Reference.GetComponent<Image>("image", icon);
 			component.label            = Reference.GetComponent<TextLanguage>("text", label);
-			component.labelIcon.sprite = Client.GetAsset<Sprite>("icons/globe.png", "ui");
+			component.labelIcon.sprite = Client.GetAsset<Sprite>("ui:icons/globe.png");
 
 			var contentDash = Reference.GetComponent<RectTransform>("content", withTitle);
 			// setup scroll + list
@@ -461,7 +466,7 @@ namespace api.nox.world.client {
 			var offlineEventTrigger = Reference.GetComponent<EventTrigger>("button", offline);
 			component.offlineIcon        = Reference.GetComponent<Image>("image", offline);
 			component.offlineLabel       = Reference.GetComponent<TextLanguage>("text", offline);
-			component.offlineIcon.sprite = Client.GetAsset<Sprite>("icons/distance.png", "ui");
+			component.offlineIcon.sprite = Client.GetAsset<Sprite>("ui:icons/distance.png");
 			component.offlineLabel.UpdateText("world.offline.join");
 			SetupEvents(
 				offlineEventTrigger,
@@ -478,7 +483,7 @@ namespace api.nox.world.client {
 			var makeInstanceEventTrigger = Reference.GetComponent<EventTrigger>("button", makeInstance);
 			var makeInstanceIcon         = Reference.GetComponent<Image>("image", makeInstance);
 			var makeInstanceLabel        = Reference.GetComponent<TextLanguage>("text", makeInstance);
-			makeInstanceIcon.sprite = Client.GetAsset<Sprite>("icons/edit_location.png", "ui");
+			makeInstanceIcon.sprite = Client.GetAsset<Sprite>("ui:icons/edit_location.png");
 			makeInstanceLabel.UpdateText("world.instance.make");
 			SetupEvents(
 				makeInstanceEventTrigger,
@@ -498,7 +503,7 @@ namespace api.nox.world.client {
 			component.cacheLabel    = Reference.GetComponent<TextLanguage>("text", cache);
 			component.cacheProgress = Reference.GetComponent<Slider>("progress", cache);
 			component.cacheLabel.UpdateText("world.cache.none");
-			component.cacheIcon.sprite = Client.GetAsset<Sprite>("icons/cache0.png", "ui");
+			component.cacheIcon.sprite = Client.GetAsset<Sprite>("ui:icons/cache0.png");
 			SetupEvents(
 				cacheEventTrigger,
 				() => component.OnCacheClickedAsync(),
@@ -516,7 +521,7 @@ namespace api.nox.world.client {
 			component.favoriteIcon   = Reference.GetComponent<Image>("image", favorite);
 			component.favoriteLabel  = Reference.GetComponent<TextLanguage>("text", favorite);
 			component.favoriteLabel.UpdateText("world.favorite.none");
-			component.favoriteIcon.sprite = Client.GetAsset<Sprite>("icons/bookmark.png", "ui");
+			component.favoriteIcon.sprite = Client.GetAsset<Sprite>("ui:icons/bookmark.png");
 			SetupEvents(
 				favoriteEventTrigger,
 				() => component.OnFavoriteClickedAsync().Forget(),
@@ -534,7 +539,7 @@ namespace api.nox.world.client {
 			component.homeIcon   = Reference.GetComponent<Image>("image", homeButton);
 			component.homeLabel  = Reference.GetComponent<TextLanguage>("text", homeButton);
 			component.homeLabel.UpdateText("world.home.none");
-			component.homeIcon.sprite = Client.GetAsset<Sprite>("icons/home.png", "ui");
+			component.homeIcon.sprite = Client.GetAsset<Sprite>("ui:icons/home.png");
 			SetupEvents(
 				homeEventTrigger,
 				() => component.OnHomeClickedAsync().Forget(),
@@ -549,7 +554,7 @@ namespace api.nox.world.client {
 			Reference.GetComponent<TextLanguage>("text", component.descriptionContainer).UpdateText("world.about.description");
 			component.descriptionText = Reference.GetComponent<TextLanguage>(
 				"text", Instantiate(
-					Client.GetAsset<GameObject>("prefabs/text.prefab", "ui"),
+					Client.GetAsset<GameObject>("ui:prefabs/text.prefab"),
 					Reference.GetComponent<RectTransform>("content", component.descriptionContainer)
 				)
 			);
@@ -562,21 +567,21 @@ namespace api.nox.world.client {
 			icon   = Instantiate(iconAsset, Reference.GetComponent<RectTransform>("before", header));
 			label  = Instantiate(labelAsset, Reference.GetComponent<RectTransform>("content", header));
 
-			Reference.GetComponent<Image>("image", icon).sprite = Client.GetAsset<Sprite>("icons/location.png", "ui");
+			Reference.GetComponent<Image>("image", icon).sprite = Client.GetAsset<Sprite>("ui:icons/location.png");
 			Reference.GetComponent<TextLanguage>("text", label).UpdateText("world.instances.title");
 
-			var headerButtonAsset = Client.GetAsset<GameObject>("prefabs/header_button.prefab", "ui");
+			var headerButtonAsset = Client.GetAsset<GameObject>("ui:prefabs/header_button.prefab");
 			var before            = Reference.GetComponent<RectTransform>("after", header);
 			var refreshButton     = Instantiate(headerButtonAsset, before);
 			Reference.GetComponent<Button>("button", refreshButton)
 				.onClick.AddListener(component.OnRefreshInstancesClicked);
 
-			Reference.GetComponent<Image>("image", refreshButton).sprite = Client.GetAsset<Sprite>("icons/refresh.png", "ui");
+			Reference.GetComponent<Image>("image", refreshButton).sprite = Client.GetAsset<Sprite>("ui:icons/refresh.png");
 			var searchButton = Instantiate(headerButtonAsset, before);
-			Reference.GetComponent<Image>("image", searchButton).sprite = Client.GetAsset<Sprite>("icons/search.png", "ui");
+			Reference.GetComponent<Image>("image", searchButton).sprite = Client.GetAsset<Sprite>("ui:icons/search.png");
 
 			var contentIn = Reference.GetComponent<RectTransform>("content", withTitle);
-			component.instanceInfobox = Instantiate(Client.GetAsset<GameObject>("prefabs/infobox.prefab", "ui"), contentIn);
+			component.instanceInfobox = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/infobox.prefab"), contentIn);
 			Reference.GetComponent<TextLanguage>("text", component.instanceInfobox).UpdateText("world.no_instances");
 			component.instanceListContainer = Instantiate(scrollAsset, contentIn);
 			list                            = Instantiate(listAsset, Reference.GetComponent<RectTransform>("content", component.instanceListContainer));

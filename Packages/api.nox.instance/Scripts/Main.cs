@@ -18,7 +18,7 @@ using ISearchResponse = Nox.Instances.ISearchResponse;
 namespace api.nox.instance {
 	public class Main : IMainModInitializer, IInstanceAPI {
 		internal static Main           Instance;
-		internal        MainModCoreAPI CoreAPI;
+		internal        IMainModCoreAPI CoreAPI;
 		internal        Network        Network;
 		private         LanguagePack   _language;
 		private         Search         _search;
@@ -69,7 +69,7 @@ namespace api.nox.instance {
 		public ISearchRequest MakeSearchRequest()
 			=> new SearchRequest();
 
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			CoreAPI   = api;
 			Instance  = this;
 			_language = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");

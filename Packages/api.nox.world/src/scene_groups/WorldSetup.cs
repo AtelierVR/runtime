@@ -76,39 +76,21 @@ namespace api.nox.world {
 				};
 
 			progress?.Invoke(0.1f);
-
-			var compilable = gameObject
-				.GetComponentsInChildren<ICompilable>(true)
-				.OrderBy(c => c.CompileOrder)
-				.ToArray();
-
-			// Compilation des composants avec progression
-			for (var i = 0; i < compilable.Length; i++) {
-				if (token.IsCancellationRequested)
-					return new PrepareResult<T> {
-						Success = false,
-						Error   = "Operation cancelled."
-					};
-
-				var c = compilable[i];
-				if (c == null) {
-					Logger.LogWarning($"Compilable component at index {i} is null, skipping.");
-					continue;
-				}
-
-				Logger.LogDebug($"Compiling {c.GetType().Name} ({i + 1}/{compilable.Length})...");
-				c.Compile();
-				await c.CompileAsync();
-
-				// Rapporter la progression (10% à 70% pour la compilation)
-				var compileProgress = 0.2f + 0.5f * (i + 1) / compilable.Length;
-				progress?.Invoke(compileProgress);
-			}
+			
+			// Compilation des éléments avec progression
+			var result = await new Compiler(gameObject.GetComponentsInChildren<ICompilable>(true))
+				.Compile(cancellationToken: token);
 
 			if (token.IsCancellationRequested)
 				return new PrepareResult<T> {
 					Success = false,
 					Error   = "Operation cancelled."
+				};
+
+			if (!result)
+				return new PrepareResult<T> {
+					Success = false,
+					Error   = "Compilation failed."
 				};
 
 			progress?.Invoke(0.8f);
@@ -145,7 +127,7 @@ namespace api.nox.world {
 			foreach (var camera in prefab.GetComponentsInChildren<Camera>(true))
 				if (camera.CompareTag("MainCamera"))
 					camera.tag = "Untagged";
-			
+
 			foreach (var eventSystem in prefab.GetComponentsInChildren<EventSystem>(true))
 				eventSystem.enabled = false;
 

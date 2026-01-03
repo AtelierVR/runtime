@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using api.nox.ui.pages;
+using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Utils;
@@ -24,10 +25,8 @@ namespace api.nox.ui {
 			};
 		}
 
-		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object
-			=> string.IsNullOrEmpty(ns)
-				? GetCoreAPI().AssetAPI.GetAsset<T>(path)
-				: GetCoreAPI().AssetAPI.GetAsset<T>(ns, path);
+		public static async UniTask<T> GetAssetAsync<T>(ResourceIdentifier path) where T : UnityEngine.Object
+			=> await GetCoreAPI().AssetAPI.GetAssetAsync<T>(path);
 
 		public static IModCoreAPI GetCoreAPI()
 			#if UNITY_EDITOR

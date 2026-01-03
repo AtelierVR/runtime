@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
+using Nox.CCK.Worlds;
 using Nox.Instances;
 using ISearchResponse = Nox.Instances.ISearchResponse;
 
@@ -67,7 +68,7 @@ namespace api.nox.instance.network {
 					new SearchRequest {
 						Query = query,
 						World = !string.IsNullOrEmpty(world)
-							? Main.WorldAPI.Make(world)
+							? WorldIdentifier.From(world)
 							: null,
 						Owner = !string.IsNullOrEmpty(owner)
 							? Main.UserAPI.Make(owner)
@@ -84,7 +85,7 @@ namespace api.nox.instance.network {
 					new SearchRequest {
 						Query = query,
 						World = !string.IsNullOrEmpty(world)
-							? Main.WorldAPI.Make(world)
+							? WorldIdentifier.From(world)
 							: null,
 						Owner = !string.IsNullOrEmpty(owner)
 							? Main.UserAPI.Make(owner)

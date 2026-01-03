@@ -27,8 +27,9 @@ namespace Nox.Editor {
 			foreach (var asset in movedAssets)
 				if (asset.EndsWith(".unity") && !asset.StartsWith("Packages/")) {
 					Logger.Log("Scene moved: " + asset);
-					scenes.RemoveAll(s => s.path == asset);
-					scenes.Add(new EditorBuildSettingsScene(asset, true));
+					var oldScene = scenes.FirstOrDefault(s => s.path == asset);
+					if (oldScene != null) scenes.Remove(oldScene);
+					scenes.Add(new EditorBuildSettingsScene(asset, oldScene?.enabled ?? true));
 				}
 
 			foreach (var asset in movedFromAssetPaths)

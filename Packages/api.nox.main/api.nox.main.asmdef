@@ -6,7 +6,8 @@
         "UniTask",
         "Nox.Worlds",
         "Nox.Sessions",
-        "Nox.Offline"
+        "Nox.Offline",
+        "Nox.CCK.Sessions"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

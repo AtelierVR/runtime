@@ -5,7 +5,9 @@ using api.nox.world.cache;
 using api.nox.world.network;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Events;
+using Nox.CCK.Sessions;
 using Nox.CCK.Utils;
+using Nox.CCK.Worlds;
 using Nox.Instances;
 using Nox.Sessions;
 using Nox.UI;
@@ -49,9 +51,8 @@ namespace api.nox.world.client {
 		}
 
 		internal bool IsHome(ICurrentUser current = null)
-			=> WorldIdentifier.FromString((current ?? Main.Instance.UserAPI.GetCurrent())?.GetHomeId())
-					?.Equals(World?.ToIdentifier())
-				?? false;
+			=> WorldIdentifier.From((current ?? Main.Instance.UserAPI.GetCurrent())?.GetHomeId())
+				.Equals(World?.ToIdentifier());
 
 		internal static IPage OnGotoAction(IMenu menu, object[] context) {
 			if (!T(context, 0, out string type)) return null;
@@ -59,9 +60,9 @@ namespace api.nox.world.client {
 				case "id_server" when T(context, 1, out uint id0) && T(context, 2, out string ser0):
 					return OnPageByIdentifier(menu, context, new WorldIdentifier(id0, null, ser0));
 				case "identifier" when T(context, 1, out string id2):
-					return OnPageByIdentifier(menu, context, WorldIdentifier.FromString(id2));
+					return OnPageByIdentifier(menu, context, WorldIdentifier.From(id2));
 				case "identifier" when T(context, 1, out IWorldIdentifier wi0):
-					return OnPageByIdentifier(menu, context, WorldIdentifier.FromBase(wi0));
+					return OnPageByIdentifier(menu, context, WorldIdentifier.From(wi0));
 				case "world" when T(context, 1, out IWorld w0):
 					var a0 = T(context, 2, out IWorldAsset asset) ? asset : null;
 					return OnPageByWorld(menu, context, w0, a0);
@@ -77,7 +78,7 @@ namespace api.nox.world.client {
 				_identifier = identifier,
 				World       = null,
 				Asset       = null,
-				Version     = identifier.GetVersion()
+				Version     = identifier.Version
 			};
 			page.Refresh(true).Forget();
 			return page;
@@ -90,7 +91,7 @@ namespace api.nox.world.client {
 				_identifier = world.ToIdentifier(),
 				World       = world,
 				Asset       = asset,
-				Version     = world.ToIdentifier().GetVersion()
+				Version     = world.ToIdentifier().Version
 			};
 			if (page.Asset == null)
 				page.FetchAsset(true).Forget();

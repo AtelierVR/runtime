@@ -1,4 +1,4 @@
-using Nox.CCK.Language;
+/*using Nox.CCK.Language;
 using UnityEngine;
 
 namespace api.nox.session.client.handlers {
@@ -12,4 +12,4 @@ namespace api.nox.session.client.handlers {
 		public static Texture2D GetIcon()
 			=> Main.Instance.CoreAPI.AssetAPI.GetAsset<Texture2D>("icons/dashboard.png", "ui");
 	}
-}
+}*/

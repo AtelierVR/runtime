@@ -7,14 +7,14 @@ using Nox.Editor.Panel;
 
 namespace Nox.GameBuilder {
 	public class BuilderPanel : IEditorModInitializer, IPanel {
-		internal EditorModCoreAPI API;
+		internal IEditorModCoreAPI API;
 
 		private static readonly string[] PanelPath = {
 			"game",
 			"builder"
 		};
 
-		public void OnInitializeEditor(EditorModCoreAPI api)
+		public void OnInitializeEditor(IEditorModCoreAPI api)
 			=> API = api;
 
 		public void OnDisposeEditor()

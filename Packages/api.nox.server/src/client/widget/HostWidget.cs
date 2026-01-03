@@ -33,7 +33,7 @@ namespace api.nox.server.widget {
 				values = (null, null);
 				return false;
 			}
-			var prefab    = Client.GetAsset<GameObject>("prefabs/grid_item.prefab", "ui");
+			var prefab    = Client.GetAsset<GameObject>("ui:prefabs/grid_item.prefab");
 			var instance  = Instantiate(prefab, parent);
 			var component = instance.AddComponent<HostWidget>();
 			component._mid = menu.GetId();

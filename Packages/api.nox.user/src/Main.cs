@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Users;
 using Nox.CCK.Utils;
 using Nox.Network;
 using Nox.Search;
@@ -14,7 +15,7 @@ using Nox.Users;
 namespace api.nox.user {
 	public class Main : IMainModInitializer, IUserAPI {
 		internal static Main           Instance;
-		internal        MainModCoreAPI CoreAPI;
+		internal        IMainModCoreAPI CoreAPI;
 		internal        Network        Network;
 		private         LanguagePack   _language;
 		private         Search         _search;
@@ -34,7 +35,7 @@ namespace api.nox.user {
 				.GetMod("search")
 				?.GetInstance<ISearchAPI>();
 
-		public async UniTask OnInitializeMainAsync(MainModCoreAPI api) {
+		public async UniTask OnInitializeMainAsync(IMainModCoreAPI api) {
 			CoreAPI   = api;
 			Instance  = this;
 			Network   = new Network();
@@ -80,7 +81,7 @@ namespace api.nox.user {
 			=> await Network.Fetch(identifier, from);
 
 		public IUserIdentifier Make(string identifier)
-			=> UserIdentifier.FromString(identifier);
+			=> UserIdentifier.From(identifier);
 
 		public IUserIdentifier Make(uint id, string server = "::")
 			=> new UserIdentifier(id, server);

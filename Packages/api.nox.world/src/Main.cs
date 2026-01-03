@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using api.nox.world.network;
 using api.nox.world.search;
@@ -8,8 +9,8 @@ using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
+using Nox.CCK.Worlds;
 using Nox.Network;
-using Nox.Offline;
 using Nox.Search;
 using Nox.Sessions;
 using Nox.Tables;
@@ -55,11 +56,6 @@ namespace api.nox.world {
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("table")
 				?.GetInstance<ITableAPI>();
-
-		internal IOfflineAPI OfflineAPI
-			=> Instance.CoreAPI.ModAPI
-				.GetMod("offline")
-				?.GetInstance<IOfflineAPI>();
 
 		internal ISessionAPI SessionAPI
 			=> Instance.CoreAPI.ModAPI
@@ -118,8 +114,8 @@ namespace api.nox.world {
 			=> await GroupManager.LoadWorldFromPath(path, progress, token);
 
 		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<IRuntimeWorld> LoadFromAssets(string modId, string path, Action<float> progress = null, CancellationToken token = default)
-			=> await GroupManager.LoadWorldFromAssets(modId, path, progress, token);
+		public async UniTask<IRuntimeWorld> LoadFromAssets(ResourceIdentifier path, Action<float> progress = null, CancellationToken token = default)
+			=> await GroupManager.LoadWorldFromAssets(path, progress, token);
 
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask<IRuntimeWorld> LoadFromCache(string hash, Action<float> progress = null, CancellationToken token = default)
@@ -136,10 +132,6 @@ namespace api.nox.world {
 		public bool HasSceneInCache(string hash)
 			=> Cache.Has(hash);
 
-		[NoxPublic(NoxAccess.Method)]
-		public IWorldIdentifier Make(string identifier)
-			=> WorldIdentifier.FromString(identifier);
-
 		public IWorldIdentifier Make(uint id,
 			Dictionary<string, string[]>  meta   = null,
 			string                        server = "::")
@@ -147,19 +139,15 @@ namespace api.nox.world {
 
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask<IWorldIdentifier[]> AddFavorite(string identifier, string from = null)
-			=> await Network.AddFavorite(identifier, from);
+			=> (await Network.AddFavorite(identifier, from)).Cast<IWorldIdentifier>().ToArray();
 
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask<IWorldIdentifier[]> RemoveFavorite(string identifier, string from = null)
-			=> await Network.RemoveFavorite(identifier, from);
+			=> (await Network.RemoveFavorite(identifier, from)).Cast<IWorldIdentifier>().ToArray();
 
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask<IWorldIdentifier[]> GetFavorites(string from = null)
-			=> await Network.FetchFavorites(from);
-
-		[NoxPublic(NoxAccess.Method)]
-		public ISearchRequest MakeSearchRequest()
-			=> new SearchRequest();
+			=> (await Network.FetchFavorites(from)).Cast<IWorldIdentifier>().ToArray();
 
 		[NoxPublic(NoxAccess.Method)]
 		public IAssetSearchRequest MakeAssetSearchRequest()
@@ -167,7 +155,7 @@ namespace api.nox.world {
 
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask<ISearchResponse> Search(ISearchRequest data, string from = null)
-			=> await Network.Search(SearchRequest.FromBase(data), from);
+			=> await Network.Search(SearchRequest.From(data), from);
 
 		[NoxPublic(NoxAccess.Method)]
 		public async UniTask<IWorld> Create(ICreateWorldRequest data, string server)

@@ -25,7 +25,7 @@ namespace api.nox.instance.search {
 
 		public Texture2D GetIcon()
 			=> Main.Instance.CoreAPI.AssetAPI
-				.GetAsset<Texture2D>("ui", "icons/location.png");
+				.GetAsset<Texture2D>("ui:icons/location.png");
 
 		public string GetDescriptionKey()
 			=> "instance.search.description";

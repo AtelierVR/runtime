@@ -145,24 +145,6 @@ namespace api.nox.relay {
 				_                                                           => null
 			};
 
-		private static async UniTask<(string, IPEndPoint)> ParseIPEndPoint(string address) {
-			var uri     = new Uri(address);
-			var uriType = Uri.CheckHostName(uri.Host);
-
-			switch (uriType) {
-				case UriHostNameType.IPv4 or UriHostNameType.IPv6:
-					return (uri.Scheme, new IPEndPoint(IPAddress.Parse(uri.Host), uri.Port));
-				case UriHostNameType.Dns: {
-					var ip = await Dns.GetHostAddressesAsync(uri.Host);
-					if (ip.Length > 0)
-						return (uri.Scheme, new IPEndPoint(ip[0], uri.Port));
-					break;
-				}
-			}
-
-			return (null, null);
-		}
-
 		private static async UniTask PrepareAsync(ISession session, RelayAdapter adapter, string[] connections, string address, string server, uint instance, bool setCurrent) {
 			adapter.SetState(false, "Fetching token...", 0.05f);
 			var token = await Main.UserAPI.GetToken(server);

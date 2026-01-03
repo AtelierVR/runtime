@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
+using Nox.CCK.Worlds;
 using Nox.Worlds;
 
 namespace api.nox.world {
@@ -51,8 +52,8 @@ namespace api.nox.world {
 
 		public async UniTask<World> InternalRefresh()
 			=> await Main.Instance.Network.Fetch(ToInternalIdentifier(), server);
-		
+
 		public WorldIdentifier ToInternalIdentifier()
-			=> new(server: server, id: id);
+			=> new(id, null, server);
 	}
 }

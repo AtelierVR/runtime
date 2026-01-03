@@ -7,6 +7,7 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Utils;
 using Nox.Instances;
 using Nox.UI;
 using Nox.UI.Widgets;
@@ -16,35 +17,33 @@ namespace api.nox.world {
 	public class Client : IClientModInitializer {
 		internal static IUiAPI UiAPI
 			=> Main.Instance?.CoreAPI?.ModAPI?
-				.GetMod("ui")?
+				.GetMod("ui")
+				?
 				.GetInstance<IUiAPI>();
 
 		internal static IInstanceAPI InstanceAPI
 			=> Main.Instance?.CoreAPI?.ModAPI?
-				.GetMod("instance")?
+				.GetMod("instance")
+				?
 				.GetInstance<IInstanceAPI>();
 
-		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object {
-		if (Main.Instance?.CoreAPI?.AssetAPI == null) return null;
-		return string.IsNullOrEmpty(ns)
-			? Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(path)
-			: Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(ns, path);
-	}
+		public static T GetAsset<T>(ResourceIdentifier path) where T : UnityEngine.Object
+			=> Main.Instance?.CoreAPI?.AssetAPI != null
+				? Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(path)
+				: null;
 
-	public static UniTask<T> GetAssetAsync<T>(string path, string ns = null) where T : UnityEngine.Object {
-		if (Main.Instance?.CoreAPI?.AssetAPI == null) 
-			return UniTask.FromResult<T>(null);
-		return string.IsNullOrEmpty(ns)
-			? Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(path)
-			: Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(ns, path);
-	}
+
+		public static UniTask<T> GetAssetAsync<T>(ResourceIdentifier path) where T : UnityEngine.Object
+			=> Main.Instance?.CoreAPI?.AssetAPI != null
+				? Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(path)
+				: UniTask.FromResult<T>(null);
 
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
 
-		internal static Client           Instance;
-		internal        ClientModCoreAPI CoreAPI;
+		internal static Client            Instance;
+		internal        IClientModCoreAPI CoreAPI;
 
-		public void OnInitializeClient(ClientModCoreAPI api) {
+		public void OnInitializeClient(IClientModCoreAPI api) {
 			Instance = this;
 			CoreAPI  = api;
 			_events = new[] {

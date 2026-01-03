@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using api.nox.relay.types.Instance;
 using Nox.CCK.Utils;
+using Nox.CCK.Worlds;
 using Nox.Worlds;
 using Buffer = Nox.CCK.Utils.Buffer;
 
@@ -17,7 +18,7 @@ namespace api.nox.relay.types.Traveling {
 
 		public bool UseMaster
 			=> Results.HasFlag(TravelingResults.UseMaster);
-		
+
 		public bool IsSuccess
 			=> IsReady || UseUrl || UseMaster;
 
@@ -53,7 +54,7 @@ namespace api.nox.relay.types.Traveling {
 				var version = buffer.ReadUShort();
 				var meta    = new Dictionary<string, string[]>();
 				if (version != ushort.MaxValue) meta.Add("version", new[] { version.ToString() });
-				WorldIdentifier = Main.WorldAPI.Make(id, meta, server);
+				WorldIdentifier = new WorldIdentifier(id, meta, server);
 			}
 
 			return true;

@@ -7,10 +7,10 @@ namespace Nox.CCK.Worlds.Spawns {
 		public Vector3    position = Vector3.zero;
 		public Quaternion rotation = Quaternion.identity;
 
-		public override Vector3 GetPosition()
+		public override Vector3 Position
 			=> position;
 
-		public override Quaternion GetRotation()
+		public override Quaternion Rotation
 			=> rotation;
 	}
 }

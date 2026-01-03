@@ -107,7 +107,7 @@ namespace api.nox.terminal.client {
 
 
 		public static (GameObject, TerminalComponent) Generate(TerminalPage page, RectTransform parent) {
-			var content = Instantiate(Client.GetAsset<GameObject>("prefabs/split.prefab", "ui"), parent);
+			var content = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/split.prefab"), parent);
 
 			var component = content.AddComponent<TerminalComponent>();
 			component._page = page;
@@ -115,26 +115,26 @@ namespace api.nox.terminal.client {
 			var splitContent = Reference.GetComponent<RectTransform>("content", content);
 
 			// generate dashboard
-			var container = Instantiate(Client.GetAsset<GameObject>("prefabs/container_full.prefab", "ui"), splitContent);
+			var container = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/container_full.prefab"), splitContent);
 			var withTitle = Instantiate(
-				Client.GetAsset<GameObject>("prefabs/with_title.prefab", "ui"),
+				Client.GetAsset<GameObject>("ui:prefabs/with_title.prefab"),
 				Reference.GetComponent<RectTransform>("content", container)
 			);
 
 			var header = Reference.GetReference("header", withTitle);
 			var icon = Instantiate(
-				Client.GetAsset<GameObject>("prefabs/header_icon.prefab", "ui"),
+				Client.GetAsset<GameObject>("ui:prefabs/header_icon.prefab"),
 				Reference.GetComponent<RectTransform>("before", header)
 			);
 
 			var label = Instantiate(
-				Client.GetAsset<GameObject>("prefabs/header_label.prefab", "ui"),
+				Client.GetAsset<GameObject>("ui:prefabs/header_label.prefab"),
 				Reference.GetComponent<RectTransform>("content", header)
 			);
 
 			component.labelIcon        = Reference.GetComponent<Image>("image", icon);
 			component.label            = Reference.GetComponent<TextLanguage>("text", label);
-			component.labelIcon.sprite = Client.GetAsset<Sprite>("icons/terminal.png", "ui");
+			component.labelIcon.sprite = Client.GetAsset<Sprite>("ui:icons/terminal.png");
 			component.label.UpdateText(
 				"terminal.page.title",
 				new[] { LanguageManager.Get("terminal.page.title.default") }
@@ -151,7 +151,7 @@ namespace api.nox.terminal.client {
 			component.viewport = Reference.GetComponent<RectTransform>("viewport", terminal);
 
 			// generate profile
-			component._navigation = Instantiate(Client.GetAsset<GameObject>("prefabs/container.prefab", "ui"), splitContent);
+			component._navigation = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/container.prefab"), splitContent);
 
 			component.input.onSubmit.AddListener(component.OnSubmit);
 			component.input.onValueChanged.AddListener(component.OnValueChanged);

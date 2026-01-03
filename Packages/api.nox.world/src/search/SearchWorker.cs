@@ -1,5 +1,6 @@
 using api.nox.world.network;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Worlds;
 using Nox.Search;
 
 namespace api.nox.world.search {
@@ -21,9 +22,9 @@ namespace api.nox.world.search {
 				return new SearchResult { Error = "Invalid server address." };
 			var data = await Main.Instance.Network.Search(
 				new SearchRequest {
-					query  = options.GetQuery(),
-					offset = options.GetPage() * options.GetLimit(),
-					limit  = options.GetLimit(),
+					Query  = options.GetQuery(),
+					Offset = options.GetPage() * options.GetLimit(),
+					Limit  = options.GetLimit(),
 				}, ServerAddress
 			);
 			if (data == null) return new SearchResult { Error = "Error fetching users." };

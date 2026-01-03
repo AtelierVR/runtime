@@ -104,29 +104,29 @@ namespace api.nox.search.client {
 
 		public GameObject GetContent(RectTransform parent) {
 			if (_content) return _content;
-			_content      = Object.Instantiate(Client.GetAsset<GameObject>("prefabs/split.prefab", "ui"), parent);
+			_content      = Object.Instantiate(Client.GetAsset<GameObject>("ui:prefabs/split.prefab"), parent);
 			_content.name = $"[{GetStaticKey()}_{_content.GetInstanceID()}]";
 			var splitContent   = Reference.GetComponent<RectTransform>("content", _content);
-			var containerAsset = Client.GetAsset<GameObject>("prefabs/container.prefab", "ui");
-			var iconAsset      = Client.GetAsset<GameObject>("prefabs/header_icon.prefab", "ui");
-			var labelAsset     = Client.GetAsset<GameObject>("prefabs/header_label.prefab", "ui");
-			var scrollAsset    = Client.GetAsset<GameObject>("prefabs/scroll.prefab", "ui");
-			var infoAsset      = Client.GetAsset<GameObject>("prefabs/infobox.prefab", "ui");
-			var listAsset      = Client.GetAsset<GameObject>("prefabs/list.prefab", "ui");
+			var containerAsset = Client.GetAsset<GameObject>("ui:prefabs/container.prefab");
+			var iconAsset      = Client.GetAsset<GameObject>("ui:prefabs/header_icon.prefab");
+			var labelAsset     = Client.GetAsset<GameObject>("ui:prefabs/header_label.prefab");
+			var scrollAsset    = Client.GetAsset<GameObject>("ui:prefabs/scroll.prefab");
+			var infoAsset      = Client.GetAsset<GameObject>("ui:prefabs/infobox.prefab");
+			var listAsset      = Client.GetAsset<GameObject>("ui:prefabs/list.prefab");
 
 			// generate background containers
 
 			// generate notification
 			var container = Object.Instantiate(containerAsset, splitContent);
 			var withTitle = Object.Instantiate(
-				Client.GetAsset<GameObject>("prefabs/with_title.prefab", "ui"),
+				Client.GetAsset<GameObject>("ui:prefabs/with_title.prefab"),
 				Reference.GetComponent<RectTransform>("content", container)
 			);
 			var header = Reference.GetReference("header", withTitle);
 			var icon   = Object.Instantiate(iconAsset, Reference.GetComponent<RectTransform>("before", header));
 			var label  = Object.Instantiate(labelAsset, Reference.GetComponent<RectTransform>("content", header));
 
-			Reference.GetComponent<Image>("image", icon).sprite = Client.GetAsset<Sprite>("icons/search.png", "ui");
+			Reference.GetComponent<Image>("image", icon).sprite = Client.GetAsset<Sprite>("ui:icons/search.png");
 			Reference.GetComponent<TextLanguage>("text", label).UpdateText("search.title");
 
 			var handlers = Object.Instantiate(
@@ -142,7 +142,7 @@ namespace api.nox.search.client {
 					)
 				)
 			);
-			var box = Object.Instantiate(Client.GetAsset<GameObject>("prefabs/tips.prefab", "ui"), listsHandler);
+			var box = Object.Instantiate(Client.GetAsset<GameObject>("ui:prefabs/tips.prefab"), listsHandler);
 			Reference.GetComponent<TextLanguage>("title", box).UpdateText("search.info.title");
 			var handleInfo = Object.Instantiate(
 				infoAsset,
@@ -151,9 +151,9 @@ namespace api.nox.search.client {
 
 
 			// generate dashboard
-			container = Object.Instantiate(Client.GetAsset<GameObject>("prefabs/container_full.prefab", "ui"), splitContent);
+			container = Object.Instantiate(Client.GetAsset<GameObject>("ui:prefabs/container_full.prefab"), splitContent);
 			withTitle = Object.Instantiate(
-				Client.GetAsset<GameObject>("prefabs/with_search.prefab", "ui"),
+				Client.GetAsset<GameObject>("ui:prefabs/with_search.prefab"),
 				Reference.GetComponent<RectTransform>("content", container)
 			);
 			header = Reference.GetReference("header", withTitle);
@@ -181,8 +181,7 @@ namespace api.nox.search.client {
 			);
 			component.Page = this;
 
-			Reference.GetComponent<Image>("image", component.resultContainer).sprite = Client.GetAsset<Sprite>("icons/help.png", "ui");
-			Reference.GetComponent<Image>("image", component.resultContainer).sprite = Client.GetAsset<Sprite>("icons/help.png", "ui");
+			Reference.GetComponent<Image>("image", component.resultContainer).sprite = Client.GetAsset<Sprite>("ui:icons/help.png");
 
 			return _content;
 		}

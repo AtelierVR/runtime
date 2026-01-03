@@ -121,11 +121,10 @@ namespace api.nox.search.client {
 		private void UpdateSearchButtons() {
 			var texture = Client.GetAsset<Texture2D>(
 				Page.IsFetching
-					? "icons/cancel.png"
+					? "ui:icons/cancel.png"
 					: Page.IsNewQuery
-						? "icons/search.png"
-						: "icons/refresh.png",
-				"ui"
+						? "ui:icons/search.png"
+						: "ui:icons/refresh.png"
 			);
 			if (!texture) return;
 			imageButton.sprite = Sprite.Create(
@@ -204,7 +203,7 @@ namespace api.nox.search.client {
 			}
 
 			// Add new handlers
-			var btn = Client.GetAsset<GameObject>("prefabs/btn_icon.prefab", "ui");
+			var btn = Client.GetAsset<GameObject>("ui:prefabs/btn_icon.prefab");
 			foreach (var handler in handlers) {
 				if (string.IsNullOrEmpty(handler.GetId())) continue;
 				if (ids.Contains(handler.GetId())) continue;

@@ -1,21 +1,21 @@
 {
-    "name": "api.nox.terminal",
-    "rootNamespace": "api.nox.terminal",
-    "references": [
-        "Nox.CCK",
-        "UniTask",
-        "Nox.Terminals",
-        "Nox.KeyBindings",
-        "Nox.UI",
-        "Unity.TextMeshPro"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "api.nox.terminal",
+  "rootNamespace": "api.nox.terminal",
+  "references": [
+    "Nox.CCK",
+    "UniTask",
+    "Nox.Terminals",
+    "Nox.KeyBindings",
+    "Nox.UI",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

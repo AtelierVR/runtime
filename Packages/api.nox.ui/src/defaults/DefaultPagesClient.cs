@@ -5,10 +5,10 @@ using Nox.UI;
 
 namespace api.nox.ui.defaults {
 	public class DefaultPagesClient : IClientModInitializer {
-		private ClientModCoreAPI  _coreAPI;
+		private IClientModCoreAPI  _coreAPI;
 		private EventSubscription _event;
 
-		public void OnInitializeClient(ClientModCoreAPI api) {
+		public void OnInitializeClient(IClientModCoreAPI api) {
 			_coreAPI = api;
 			_event   = _coreAPI.EventAPI.Subscribe(PageManager.GotoEvent, OnGoto);
 		}

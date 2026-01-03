@@ -5,12 +5,12 @@ using Nox.CCK.Mods.Panels;
 
 namespace api.nox.keybinding {
 	public class KeyBindingEditor : IEditorModInitializer {
-		internal static EditorModCoreAPI CoreAPI;
+		internal static IEditorModCoreAPI CoreAPI;
 
 		private static IEditorPanel     _kbPanel;
 		private        KeyBindingPanel _kb;
 
-		public void OnInitializeEditor(EditorModCoreAPI api) {
+		public void OnInitializeEditor(IEditorModCoreAPI api) {
 			CoreAPI  = api;
 			_kb      = new KeyBindingPanel();
 			_kbPanel = api.PanelAPI.AddLocalPanel(_kb);

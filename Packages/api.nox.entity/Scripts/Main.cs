@@ -6,7 +6,7 @@ namespace api.nox.entity {
 	public class Main : IEntityAPI, IMainModInitializer {
 		
 		[NoxPublic(NoxAccess.Method)]
-		public IEntityManager New()
-			=> new EntityManager();
+		public IEntities New()
+			=> new Entities();
 	}
 }

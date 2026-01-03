@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Users;
 using Nox.CCK.Utils;
 using Nox.Servers;
 using Nox.Users;

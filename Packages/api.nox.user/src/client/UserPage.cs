@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
+using Nox.CCK.Users;
 using Nox.CCK.Utils;
 using Nox.UI;
 using Nox.Users;
@@ -43,7 +44,7 @@ namespace api.nox.user.client {
 				case "id_server" when T(context, 1, out uint id0) && T(context, 2, out string ser0):
 					return OnPageByIdentifier(menu, context, new UserIdentifier(id0, ser0));
 				case "identifier" when T(context, 1, out string id2):
-					return OnPageByIdentifier(menu, context, UserIdentifier.FromString(id2));
+					return OnPageByIdentifier(menu, context, UserIdentifier.From(id2));
 				case "identifier" when T(context, 1, out IUserIdentifier ui0):
 					return OnPageByIdentifier(menu, context, UserIdentifier.FromBase(ui0));
 				case "user" when T(context, 1, out IUser usr3):

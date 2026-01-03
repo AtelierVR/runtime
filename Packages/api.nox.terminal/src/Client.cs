@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Utils;
 using Nox.UI;
 using Nox.UI.Widgets;
 using UnityEngine;
@@ -17,21 +18,17 @@ namespace api.nox.terminal {
 				.GetMod("ui")
 				.GetInstance<IUiAPI>();
 
-		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object
-			=> string.IsNullOrEmpty(ns)
-				? Instance.CoreAPI.AssetAPI.GetAsset<T>(path)
-				: Instance.CoreAPI.AssetAPI.GetAsset<T>(ns, path);
+		public static T GetAsset<T>(ResourceIdentifier path) where T : UnityEngine.Object
+			=> Instance.CoreAPI.AssetAPI.GetAsset<T>(path);
 
-		public static UniTask<T> GetAssetAsync<T>(string path, string ns = null) where T : UnityEngine.Object
-			=> string.IsNullOrEmpty(ns)
-				? Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(path)
-				: Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(ns, path);
+		public static UniTask<T> GetAssetAsync<T>(ResourceIdentifier path) where T : UnityEngine.Object
+			=> Main.Instance.CoreAPI.AssetAPI.GetAssetAsync<T>(path);
 
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
 		internal static Client           Instance;
-		internal        ClientModCoreAPI CoreAPI;
+		internal        IClientModCoreAPI CoreAPI;
 
-		public void OnInitializeClient(ClientModCoreAPI api) {
+		public void OnInitializeClient(IClientModCoreAPI api) {
 			Instance = this;
 			CoreAPI  = api;
 			_events = new[] {

@@ -34,22 +34,21 @@ namespace Nox.CCK.Worlds.FellInVoid {
 
 		public float fallThreshold = -100f;
 
-		public  IPlayer  LocalPlayer;
+		public IPlayer LocalPlayer;
 
 		public void OnPlayerJoined(IPlayer player) {
-			if (!player.IsLocal()) return;
+			if (!player.IsLocal) return;
 			LocalPlayer = player;
 		}
 
 		public void OnPlayerLeft(IPlayer player) {
-			if (!player.IsLocal()) return;
+			if (!player.IsLocal) return;
 			LocalPlayer = null;
 		}
 
 		public void FixedUpdate() {
 			if (LocalPlayer == null) return;
-			var pos = LocalPlayer.GetPosition();
-			if (pos.y < fallThreshold)
+			if (LocalPlayer.Position.y < fallThreshold)
 				LocalPlayer.Respawn();
 		}
 	}

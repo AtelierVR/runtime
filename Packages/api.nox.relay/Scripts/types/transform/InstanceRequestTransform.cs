@@ -8,7 +8,7 @@ using Buffer = Nox.CCK.Utils.Buffer;
 namespace api.nox.relay.types.Transform {
 	public class InstanceRequestTransform : RelayInstanceRequest {
 		public TransformType           Type;
-		public Nox.CCK.Utils.Transform Transform;
+		public Nox.CCK.Utils.TransformObject Transform;
 
 		// Type == Player
 		public ushort EntityId;
@@ -58,8 +58,8 @@ namespace api.nox.relay.types.Transform {
 				Transform = ToTransform(part)
 			};
 
-		private static Nox.CCK.Utils.Transform ToTransform(IPart part) {
-			var transform = new Nox.CCK.Utils.Transform();
+		private static Nox.CCK.Utils.TransformObject ToTransform(IPart part) {
+			var transform = new Nox.CCK.Utils.TransformObject();
 			if (part.TryGetPosition(out var position))
 				transform.SetPosition(position);
 			if (part.TryGetRotation(out var rotation))
@@ -73,14 +73,14 @@ namespace api.nox.relay.types.Transform {
 			return transform;
 		}
 
-		public static InstanceRequestTransform CreateByPath(string path, Nox.CCK.Utils.Transform transform)
+		public static InstanceRequestTransform CreateByPath(string path, Nox.CCK.Utils.TransformObject transform)
 			=> new() {
 				Type      = TransformType.ByPath,
 				Path      = path,
 				Transform = transform
 			};
 
-		public static InstanceRequestTransform CreateEntity(ushort entityId, ushort rig, Nox.CCK.Utils.Transform transform)
+		public static InstanceRequestTransform CreateEntity(ushort entityId, ushort rig, Nox.CCK.Utils.TransformObject transform)
 			=> new() {
 				Type      = TransformType.EntityPart,
 				PartRig   = rig,
@@ -88,7 +88,7 @@ namespace api.nox.relay.types.Transform {
 				Transform = transform
 			};
 
-		public static InstanceRequestTransform CreateEntity(ushort entityId, Nox.CCK.Utils.Transform transform)
+		public static InstanceRequestTransform CreateEntity(ushort entityId, Nox.CCK.Utils.TransformObject transform)
 			=> CreateEntity(entityId, PlayerRig.Base.ToIndex(), transform);
 	}
 }

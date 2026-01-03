@@ -1,4 +1,4 @@
-using Nox.Entities;
+/*using Nox.Entities;
 using Nox.Players;
 using Nox.Worlds;
 using UnityEngine;
@@ -25,6 +25,6 @@ namespace Nox.Sessions {
 
 		public void OnEntityUnregistered(IEntity entity) { }
 
-		public void OnEventTriggered(string @event, byte[] raw, IPlayer sender) { }
+		public void OnEvent(string @event, byte[] raw, IPlayer sender) { }
 	}
-}
+}*/

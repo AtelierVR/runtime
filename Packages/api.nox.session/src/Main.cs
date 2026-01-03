@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Collections.Generic;
 using System.Linq;
 using api.nox.session.commands;
@@ -16,7 +16,7 @@ using Logger = Nox.CCK.Utils.Logger;
 namespace api.nox.session {
 	public class Main : IMainModInitializer, ISessionAPI {
 		private readonly List<ISession> _sessions = new();
-		internal         MainModCoreAPI CoreAPI;
+		internal         IMainModCoreAPI CoreAPI;
 		internal static  Main           Instance;
 		private          ushort         _nextId   = ushort.MinValue + 1;
 		internal         ushort         CurrentId = ushort.MinValue;
@@ -32,7 +32,7 @@ namespace api.nox.session {
 			=> CoreAPI.ModAPI.GetMod("controller")
 				?.GetInstance<IControllerAPI>();
 
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
 			_lang    = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
@@ -93,7 +93,7 @@ namespace api.nox.session {
 			CurrentId = id;
 
 			var local = nSession?.GetAdapter()?.GetLocalPlayer();
-			ControllerAPI.GetCurrent()?.SetPlayer(local);
+			ControllerAPI.Current()?.SetPlayer(local);
 
 			if (nSession != null)
 				await nSession.OnSelect(oSession);
@@ -164,4 +164,4 @@ namespace api.nox.session {
 			}
 		}
 	}
-}
+}*/

@@ -12,6 +12,7 @@ using Nox.CCK.Avatars;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Network;
 using Nox.CCK.Players;
+using Nox.CCK.Properties;
 using Nox.CCK.Utils;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
@@ -20,7 +21,6 @@ using Nox.Controllers;
 using Nox.Players;
 using Nox.Users;
 using UnityEngine.EventSystems;
-using NoxTransform = Nox.CCK.Utils.Transform;
 
 namespace api.nox.desktop {
 	public class DesktopController : MonoBehaviour, IController, IControllerAvatar, INoxObject {
@@ -63,7 +63,7 @@ namespace api.nox.desktop {
 		/// </summary>
 		/// <returns></returns>
 		private static bool IsBetterThanCurrent() {
-			var controller = ControllerAPI.GetCurrent();
+			var controller = ControllerAPI.Current;
 			return controller               == null
 				|| controller.GetPriority() < DefaultPriority
 				|| controller.GetId()       == DefaultId;
@@ -74,7 +74,7 @@ namespace api.nox.desktop {
 		/// </summary>
 		/// <returns></returns>
 		private static bool IsCurrent() {
-			var controller = ControllerAPI.GetCurrent();
+			var controller = ControllerAPI.Current;
 			return controller         != null
 				&& controller.GetId() == DefaultId;
 		}
@@ -109,9 +109,7 @@ namespace api.nox.desktop {
 				return false;
 			}
 
-			Logger.LogDebug("Menu: " + Client.UiAPI);
-			desktop.player.menu = Client.UiAPI
-				?.Make(desktop.player.menuContainer);
+			desktop.player.menu = await Client.UiAPI.Make(desktop.player.menuContainer);
 
 			if (desktop.player.menu == null) {
 				Logger.LogError("Failed to create desktop proxy menu");
@@ -146,24 +144,27 @@ namespace api.nox.desktop {
 			=> SetAvatar(AvatarIdentifier.From(user?.GetAvatarId())).Forget();
 
 		public async UniTask<IRuntimeAvatar> SetAvatar(IAvatarIdentifier identifier, Action<string, float> onProgress = null) {
-			var playerAvatar = _attachedPlayer as ILocalPlayerAvatar;
+			var localPlayer = Client.SessionAPI.TryGet(Client.SessionAPI.Current, out var session)
+				? session.LocalPlayer
+				: null;
+			var playerAvatar = localPlayer as ILocalPlayerAvatar;
+			
+			Logger.LogDebug($"Loading avatar for identifier {identifier?.ToString() ?? "null"}");
 
-			if (identifier.Equals(_attachedPlayer?.ToIdentifier())) {
-				Logger.LogDebug("Avatar identifier matches player identifier, no need to load.");
-				if (playerAvatar != null)
-					await playerAvatar.OnAvatarReady();
-				return _attachedRuntimeAvatar;
-			}
-
-			Logger.LogDebug($"Loading avatar for identifier {identifier.ToString() ?? "null"}");
-
-			if (!identifier.IsValid()) {
+			if (identifier == null || !identifier.IsValid()) {
 				Logger.LogWarning($"Invalid avatar identifier: {identifier?.ToString() ?? "null"}");
 				if (playerAvatar != null)
 					await playerAvatar.OnAvatarFailed("Invalid avatar identifier.");
 				return null;
 			}
-
+			
+			if (identifier.Equals(localPlayer?.Identifier)) {
+				Logger.LogDebug("Avatar identifier matches player identifier, no need to load.");
+				if (playerAvatar != null)
+					await playerAvatar.OnAvatarReady();
+				return _attachedRuntimeAvatar;
+			}
+			
 			if (identifier.Equals(_attachedRuntimeAvatar?.GetIdentifier())) {
 				Logger.LogDebug("Avatar identifier matches current avatar, no need to load.");
 				if (playerAvatar != null)
@@ -307,8 +308,19 @@ namespace api.nox.desktop {
 			return UniTask.CompletedTask;
 		}
 
-		public bool TryGetPart(ushort index, out Transform tr)
-			=> GetParts().TryGetValue(index, out tr);
+		public bool TryGetPart(ushort index, out TransformObject tr) {
+			if (!Parts.TryGetValue(index, out var part)) {
+				tr = new TransformObject();
+				return false;
+			}
+
+			var rb = part.TryGetComponent<Rigidbody>(out var rigid)
+				? rigid
+				: null;
+			tr = new TransformObject(part, rb);
+
+			return true;
+		}
 
 		[NoxPublic(NoxAccess.Method)]
 		public Dictionary<string, object> GetAbilities()
@@ -368,48 +380,45 @@ namespace api.nox.desktop {
 			}
 		}
 
-		[NoxPublic(NoxAccess.Method)]
-		public Dictionary<ushort, Transform> GetParts()
+		private Dictionary<ushort, Transform> Parts
 			=> new() {
 				{ PlayerRig.Base.ToIndex(), transform },
 				{ PlayerRig.Head.ToIndex(), player.headCamera.transform }
 			};
 
+		IReadOnlyDictionary<ushort, TransformObject> IController.GetParts()
+			=> Parts
+				.ToDictionary(
+					p => p.Key,
+					p => {
+						var rb = p.Value.GetComponent<Rigidbody>();
+						return new TransformObject(p.Value, rb);
+					}
+				);
+
 		// ReSharper disable Unity.PerformanceAnalysis
-		public void SetPart(ushort index, NoxTransform tr) {
-			var part = GetParts()
-				.FirstOrDefault(p => p.Key == index);
+		public void SetPart(ushort index, TransformObject tr) {
+			if (!Parts.TryGetValue(index, out var part))
+				return;
 
-			if (index == PlayerRig.Base.ToIndex()) {
-				if (!tr.IsSamePosition(player.transform.position))
-					player.SetPosition(tr.GetPosition());
-			} else {
-				if (!tr.IsSamePosition(part.Value.position))
-					part.Value.position = tr.GetPosition();
-				if (!tr.IsSameRotation(part.Value.rotation))
-					part.Value.rotation = tr.GetRotation();
+			Logger.LogDebug($"Set part {index}");
+			if (!tr.IsSamePosition(part.position))
+				part.position = tr.GetPosition();
+			if (!tr.IsSameRotation(part.rotation))
+				part.rotation = tr.GetRotation();
 
-				var rb = part.Value.GetComponent<Rigidbody>();
+			if (!part.TryGetComponent<Rigidbody>(out var rb))
+				return;
 
-				if (rb && !tr.IsSameVelocity(rb.linearVelocity))
-					rb.linearVelocity = tr.GetVelocity();
-				if (rb && !tr.IsSameAngularVelocity(rb.angularVelocity))
-					rb.angularVelocity = tr.GetAngularVelocity();
-			}
+			if (rb && !tr.IsSameVelocity(rb.linearVelocity))
+				rb.linearVelocity = tr.GetVelocity();
+			if (rb && !tr.IsSameAngularVelocity(rb.angularVelocity))
+				rb.angularVelocity = tr.GetAngularVelocity();
 		}
 
-		private IPlayer                 _attachedPlayer;
 		private IRuntimeAvatar          _attachedRuntimeAvatar;
 		private CancellationTokenSource _avatarLoadingCts;
 		private EventSubscription       _onUserUpdate;
-
-		[NoxPublic(NoxAccess.Method)]
-		public void SetPlayer(IPlayer p) {
-			_attachedPlayer = p;
-			Client.CoreAPI.EventAPI.Emit("controller_set_player", this, _attachedPlayer);
-			if (p == null) return;
-			SynchronizeControllerFromPlayer();
-		}
 
 		public IRuntimeAvatar GetAvatar()
 			=> _attachedRuntimeAvatar;
@@ -492,13 +501,8 @@ namespace api.nox.desktop {
 			return true;
 		}
 
-		[NoxPublic(NoxAccess.Method)]
-		public IPlayer GetPlayer()
-			=> _attachedPlayer;
-
 		private void Update() {
 			HandleZoomInput();
-			SynchronizePlayerFromController();
 			SynchronizeParametersAvatar();
 		}
 
@@ -510,7 +514,7 @@ namespace api.nox.desktop {
 			// Gérer le zoom avec la molette de la souris
 			var scrollInput = Input.GetAxis("Mouse ScrollWheel");
 			if (!(Mathf.Abs(scrollInput) > 0.01f)) return;
-			
+
 			// Calculer le nouveau zoom
 			_currentZoom -= scrollInput * zoomSpeed * 10f;
 			_currentZoom =  Mathf.Clamp(_currentZoom, minZoom, maxZoom);
@@ -523,31 +527,14 @@ namespace api.nox.desktop {
 		private void LateUpdate()
 			=> UpdateCamera();
 
-		// ReSharper disable Unity.PerformanceAnalysis
-		private void SynchronizePlayerFromController() {
-			if (_attachedPlayer == null) return;
-			foreach (var part in GetParts())
-				_attachedPlayer.MovePart(
-					part.Key,
-					new NoxTransform(part.Value, part.Value.GetComponent<Rigidbody>())
-				);
-		}
-
-		private void SynchronizeControllerFromPlayer() {
-			if (_attachedPlayer == null) return;
-			Logger.LogDebug($"Synchronizing controller from player at {_attachedPlayer.GetPosition()} with rotation {_attachedPlayer.GetRotation()}");
-			var part = GetParts().FirstOrDefault(p => p.Key == PlayerRig.Base.ToIndex());
-			player.SetPosition(_attachedPlayer.GetPosition());
-			part.Value.rotation = _attachedPlayer.GetRotation();
-		}
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		private void SynchronizeParametersAvatar() {
 			var parameterModule = _attachedRuntimeAvatar?.GetDescriptor()
 				?.GetModules<IParameterModule>()
 				.FirstOrDefault();
-			
-			if (parameterModule == null) 
+
+			if (parameterModule == null)
 				return;
 
 			var parameters = parameterModule.GetParameters();

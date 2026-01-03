@@ -78,20 +78,20 @@ namespace api.nox.server.client {
 		}
 
 		public static (GameObject, ServerComponent) Generate(ServerPage worldPage, RectTransform parent) {
-			var content        = Instantiate(Client.GetAsset<GameObject>("prefabs/split.prefab", "ui"), parent);
-			var iconAsset      = Client.GetAsset<GameObject>("prefabs/header_icon.prefab", "ui");
-			var labelAsset     = Client.GetAsset<GameObject>("prefabs/header_label.prefab", "ui");
-			var withTitleAsset = Client.GetAsset<GameObject>("prefabs/with_title.prefab", "ui");
-			var listAsset      = Client.GetAsset<GameObject>("prefabs/list.prefab", "ui");
-			var scrollAsset    = Client.GetAsset<GameObject>("prefabs/scroll.prefab", "ui");
-			var boxAsset       = Client.GetAsset<GameObject>("prefabs/box.prefab", "ui");
+			var content        = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/split.prefab"), parent);
+			var iconAsset      = Client.GetAsset<GameObject>("ui:prefabs/header_icon.prefab");
+			var labelAsset     = Client.GetAsset<GameObject>("ui:prefabs/header_label.prefab");
+			var withTitleAsset = Client.GetAsset<GameObject>("ui:prefabs/with_title.prefab");
+			var listAsset      = Client.GetAsset<GameObject>("ui:prefabs/list.prefab");
+			var scrollAsset    = Client.GetAsset<GameObject>("ui:prefabs/scroll.prefab");
+			var boxAsset       = Client.GetAsset<GameObject>("ui:prefabs/box.prefab");
 
 			var component = content.AddComponent<ServerComponent>();
 			component.Page = worldPage;
 			content.name   = $"[{worldPage.GetKey()}_{content.GetInstanceID()}]";
 
 			var splitContent   = Reference.GetComponent<RectTransform>("content", content);
-			var containerAsset = Client.GetAsset<GameObject>("prefabs/container.prefab", "ui");
+			var containerAsset = Client.GetAsset<GameObject>("ui:prefabs/container.prefab");
 
 			// generate profile
 			var container = Instantiate(containerAsset, splitContent);
@@ -104,7 +104,7 @@ namespace api.nox.server.client {
 			component.icon       = Reference.GetComponent<Image>("icon", profile);
 
 			// generate dashboard
-			container = Instantiate(Client.GetAsset<GameObject>("prefabs/container_full.prefab", "ui"), splitContent);
+			container = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/container_full.prefab"), splitContent);
 			var withTitle = Instantiate(
 				withTitleAsset,
 				Reference.GetComponent<RectTransform>("content", container)
@@ -116,7 +116,7 @@ namespace api.nox.server.client {
 
 			component.labelIcon        = Reference.GetComponent<Image>("image", icon);
 			component.label            = Reference.GetComponent<TextLanguage>("text", label);
-			component.labelIcon.sprite = Client.GetAsset<Sprite>("icons/globe.png", "ui");
+			component.labelIcon.sprite = Client.GetAsset<Sprite>("ui:icons/globe.png");
 
 			var contentDash = Reference.GetComponent<RectTransform>("content", withTitle);
 			// setup scroll + list
@@ -129,7 +129,7 @@ namespace api.nox.server.client {
 			Reference.GetComponent<TextLanguage>("text", component.descriptionContainer).UpdateText("server.about.description");
 			component.descriptionText = Reference.GetComponent<TextLanguage>(
 				"text", Instantiate(
-					Client.GetAsset<GameObject>("prefabs/text.prefab", "ui"),
+					Client.GetAsset<GameObject>("ui:prefabs/text.prefab"),
 					Reference.GetComponent<RectTransform>("content", component.descriptionContainer)
 				)
 			);

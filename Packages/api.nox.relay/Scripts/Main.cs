@@ -24,7 +24,7 @@ namespace api.nox.relay {
 	public class Main : IMainModInitializer {
 		public readonly List<Connection>    Connections = new();
 		public static   Main                Instance;
-		internal        MainModCoreAPI      CoreAPI;
+		internal        IMainModCoreAPI      CoreAPI;
 		private         EventSubscription[] _events = Array.Empty<EventSubscription>();
 
 		internal static IEntityAPI EntityAPI
@@ -76,7 +76,7 @@ namespace api.nox.relay {
 		public static UnityEvent<Connection> OnConnectionRemoved = new();
 
 
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			Instance = this;
 			CoreAPI  = api;
 			_events = new[] {

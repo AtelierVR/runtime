@@ -1,7 +1,7 @@
 namespace Nox.Instances {
 	public interface IInstance {
 		public uint        GetId();
-		public string      GetServerAddress();
+		public string      GetServer();
 		public string      GetName();
 		public string      GetTitle();
 		public string      GetDescription();

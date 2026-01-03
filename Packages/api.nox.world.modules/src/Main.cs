@@ -9,10 +9,10 @@ using Nox.CCK.Worlds.Spawns;
 
 namespace api.nox.world.modules {
 	public class Main : IMainModInitializer {
-		internal static MainModCoreAPI      CoreAPI;
+		internal static IMainModCoreAPI      CoreAPI;
 		private         EventSubscription[] _events;
 
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			CoreAPI = api;
 			_events = new[] {
 				api.EventAPI.Subscribe("world_check_request", OnCheckRequest),

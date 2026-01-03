@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
@@ -74,7 +74,7 @@ namespace api.nox.session {
 			Logger.LogDebug($"OnPlayerJoined: {player}");
 
 			// Si c'est un joueur local, vérifier s'il faut le téléporter au spawn
-			if (player.IsLocal())
+			if (player.IsLocal)
 				player.Respawn();
 
 			Main.Instance.CoreAPI.EventAPI.Emit("session_player_joined", this, player);
@@ -129,15 +129,15 @@ namespace api.nox.session {
 				module.OnEntityUnregistered(entity);
 		}
 
-		public void OnEventTriggered(string @event, byte[] raw, IPlayer sender) {
-			Logger.LogDebug($"OnEventTriggered: {@event} by {sender}");
+		public void OnEvent(string @event, byte[] raw, IPlayer sender) {
+			Logger.LogDebug($"OnEvent: {@event} by {sender}");
 
 			Main.Instance.CoreAPI.EventAPI.Emit("session_event_triggered", this, @event, raw, sender);
 			OnEventTriggeredListener.Invoke(@event, raw, sender);
 
 			foreach (var descriptor in GetDescriptors().Where(e => e != null))
 			foreach (var module in descriptor.GetModules<ISessionModule>())
-				module.OnEventTriggered(@event, raw, sender);
+				module.OnEvent(@event, raw, sender);
 		}
 
 		public IWorldDescriptor[] GetDescriptors() {
@@ -273,4 +273,4 @@ namespace api.nox.session {
 		public UnityEvent<IPlayer> OnAuthorityTransferredEvent()
 			=> OnAuthorityTransferredListener;
 	}
-}
+}*/

@@ -11,7 +11,7 @@ using Nox.UI;
 namespace api.nox.microphone {
 	public class Main : IMainModInitializer, IMicrophoneAPI {
 		internal static Main              Instance;
-		internal static MainModCoreAPI    CoreAPI;
+		internal static IMainModCoreAPI    CoreAPI;
 		internal        MicrophoneManager Manager;
 		internal        IHandler[]        Settings;
 		private         LanguagePack      _lang;
@@ -26,7 +26,7 @@ namespace api.nox.microphone {
 				.GetMod("ui")
 				.GetInstance<IUiAPI>();
 
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
 			Manager  = new MicrophoneManager();

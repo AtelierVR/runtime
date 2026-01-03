@@ -11,6 +11,7 @@ using Jint.Native.Array;
 using Jint.Native.Function;
 using Jint.Runtime;
 using Jint.Runtime.Modules;
+using Nox.CCK.Utils;
 using Nox.Jint;
 using Nox.Players;
 using Nox.Sessions;
@@ -76,26 +77,51 @@ namespace api.nox.session.jint {
 
 				_engine.AddModule(
 					"players", builder => builder
-						.ExportFunction("getLocal", () => module.Session.GetAdapter().GetLocalPlayer())
-						.ExportFunction("getMaster", () => module.Session.GetAdapter().GetMasterPlayer())
-						.ExportFunction("getAll", () => module.Session.GetAdapter().GetPlayers())
-						.ExportFunction("getCount", () => module.Session.GetAdapter().GetPlayerCount())
-						.ExportFunction("getAt", args => new ObjectWrapper(_engine, module.Session.GetAdapter().GetPlayer((int)args.At(0).AsNumber())))
+						.ExportFunction(
+							"getLocal", () => {
+								var player = module.Session.LocalPlayer;
+								return player != null
+									? new ObjectWrapper(_engine, player)
+									: JsValue.Null;
+							}
+						)
+						.ExportFunction(
+							"getMaster", () => {
+								var player = module.Session.MasterPlayer;
+								return player != null
+									? new ObjectWrapper(_engine, player)
+									: JsValue.Null;
+							}
+						)
+						.ExportFunction("getAll", () => module.Session.Entities.GetEntities<IPlayer>())
+						.ExportFunction("getCount", () => module.Session.Entities.GetCount<IPlayer>())
+						.ExportFunction(
+							"getAt", args => {
+								var players = module.Session.Entities.GetEntities<IPlayer>();
+								var index   = players.ElementAtOrDefault((int)args.At(0).AsNumber());
+								return index != null
+									? new ObjectWrapper(_engine, index)
+									: JsValue.Null;
+							}
+						)
 				);
 
-				var netAdapter = module.Session.GetAdapter() as INetworkedAdapter;
+				var netSession = module.Session as INetSession;
 				_engine.AddModule(
 					"network", builder => builder
-						.ExportFunction("getTime", () => JsValue.FromObject(_engine, netAdapter?.GetTime() ?? DateTime.Now))
-						.ExportFunction("isConnected", () => netAdapter?.IsConnected() ?? false)
+						.ExportFunction("getTime", () => JsValue.FromObject(_engine, netSession?.Time ?? DateTime.UtcNow))
+						.ExportFunction("isConnected", () => netSession?.IsConnected ?? false)
+						.ExportFunction("eventToHash", args => JsValue.FromObject(_engine, Hash.CRC64(args.At(0).AsString())))
 						.ExportFunction(
 							"emitEvent", args => {
-								if (netAdapter == null) {
+								if (netSession == null) {
 									Logger.LogWarning("Network adapter is null", this);
 									return false;
 								}
 
-								var    @event = args.At(0).AsString();
+								var @event = args.At(0).IsNumber()
+									? (long)args.At(0).AsNumber()
+									: Hash.CRC64(args.At(0).AsString());
 								byte[] raw;
 
 								var dataArg = args.At(1);
@@ -121,13 +147,14 @@ namespace api.nox.session.jint {
 									}
 								}
 
-								var emitting = netAdapter.EmitEvent(@event, raw).AsTask();
+								var emitting = netSession.EmitEvent(@event, raw).AsTask();
 								if (emitting.IsCompletedSuccessfully)
 									return JsValue.FromObject(_engine, emitting.Result);
 								if (emitting.IsFaulted) {
 									Logger.LogError($"Error emitting event '{@event}': {emitting.Exception}", this);
 									return false;
 								}
+
 								if (emitting.IsCanceled) {
 									Logger.LogWarning($"Emitting event '{@event}' was canceled", this);
 									return false;

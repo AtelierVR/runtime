@@ -10,7 +10,7 @@ using Nox.Worlds;
 
 namespace api.nox.session.jint {
 	public class Main : IMainModInitializer {
-		internal static MainModCoreAPI      CoreAPI;
+		internal static IMainModCoreAPI      CoreAPI;
 		private         EventSubscription[] _events = Array.Empty<EventSubscription>();
 
 		internal static IWorldAPI WorldAPI
@@ -23,7 +23,7 @@ namespace api.nox.session.jint {
 				.GetMod("jint")
 				.GetInstance<IJintAPI>();
 
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			CoreAPI  = api;
 			_events = new[] {
 				api.EventAPI.Subscribe("world_check_request", OnCheckRequest),

@@ -7,18 +7,12 @@ namespace Nox.CCK.Worlds.Spawns {
 			: this(transform.position, transform.rotation) { }
 
 		public StructSpawn(Vector3 position, Quaternion rotation) {
-			_position = position;
-			_rotation = rotation;
+			Position = position;
+			Rotation = rotation;
 		}
+		
+		public Vector3 Position { get; }
 
-		private readonly Vector3    _position;
-		private readonly Quaternion _rotation;
-
-
-		public Vector3 GetPosition()
-			=> _position;
-
-		public Quaternion GetRotation()
-			=> _rotation;
+		public Quaternion Rotation { get; }
 	}
 }

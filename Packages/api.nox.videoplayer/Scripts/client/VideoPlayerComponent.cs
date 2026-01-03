@@ -26,7 +26,7 @@ namespace api.nox.videoplayer.client {
 		private bool _wasPlayingBeforeSeek;
 
 		public static (GameObject, VideoPlayerComponent) Generate(VideoPlayerPage page, RectTransform parent) {
-			var content = Instantiate(Client.GetAsset<GameObject>("prefabs/split.prefab", "ui"), parent);
+			var content = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/split.prefab"), parent);
 
 			var component = content.AddComponent<VideoPlayerComponent>();
 			component._page = page;
@@ -34,14 +34,14 @@ namespace api.nox.videoplayer.client {
 			var splitContent = Reference.GetComponent<RectTransform>("content", content);
 
 			// generate dashboard
-			var container = Instantiate(Client.GetAsset<GameObject>("prefabs/container_full.prefab", "ui"), splitContent);
+			var container = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/container_full.prefab"), splitContent);
 			var videoPlayer = Instantiate(
-				Client.GetAsset<GameObject>("prefabs/video_player.prefab", "ui"),
+				Client.GetAsset<GameObject>("ui:prefabs/video_player.prefab"),
 				Reference.GetComponent<RectTransform>("content", container)
 			);
 			component.video          = Reference.GetComponent<Image>("video", videoPlayer);
 			component.ratio          = Reference.GetComponent<AspectRatioFitter>("ratio", videoPlayer);
-			component.video.material = Instantiate(Client.GetAsset<Material>("materials/video_texture.mat", "ui"));
+			component.video.material = Instantiate(Client.GetAsset<Material>("ui:materials/video_texture.mat"));
 
 			component.seek                = Reference.GetComponent<Slider>("seek", container);
 			component.current             = Reference.GetComponent<TextLanguage>("current", container);
@@ -78,8 +78,8 @@ namespace api.nox.videoplayer.client {
 
 		public void UpdatePlayStatus(IVideoPlayer player, bool isPlaying) {
 			if (player == null) return;
-			var iconName = isPlaying ? "icons/pause.png" : "icons/play_arrow.png";
-			var icon     = Client.GetAsset<Sprite>(iconName, "ui");
+			var iconName = isPlaying ? "ui:icons/pause.png" : "ui:icons/play_arrow.png";
+			var icon     = Client.GetAsset<Sprite>(iconName);
 			if (icon)
 				centerIcon.sprite = icon;
 		}

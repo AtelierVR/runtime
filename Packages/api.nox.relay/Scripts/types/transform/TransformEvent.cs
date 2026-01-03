@@ -5,7 +5,7 @@ namespace api.nox.relay.types.Transform {
 	public class TransformEvent : RelayInstanceResponse {
 		public TransformType Type;
 
-		public Nox.CCK.Utils.Transform Transform;
+		public Nox.CCK.Utils.TransformObject Transform;
 
 		// Type == Player
 		public ushort EntityId;
@@ -33,7 +33,7 @@ namespace api.nox.relay.types.Transform {
 					return false;
 			}
 
-			Transform = new Nox.CCK.Utils.Transform();
+			Transform = new Nox.CCK.Utils.TransformObject();
 			var flags = buffer.ReadEnum<TransformFlags>();
 			if (flags.HasFlag(TransformFlags.Position))
 				Transform.SetPosition(buffer.ReadVector3());

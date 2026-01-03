@@ -8,14 +8,14 @@ using Nox.Terminals;
 
 namespace api.nox.terminal {
 	public class Main : IMainModInitializer, ITerminalAPI {
-		internal        MainModCoreAPI CoreAPI;
+		internal        IMainModCoreAPI CoreAPI;
 		internal static Main           Instance;
 		private         CommandManager _manager;
 		private         LanguagePack   _lang;
 
 		private (uint, ICommand)[] _defaultCommands = Array.Empty<(uint, ICommand)>();
 
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			CoreAPI  = api;
 			Instance = this;
 			_manager = new CommandManager();

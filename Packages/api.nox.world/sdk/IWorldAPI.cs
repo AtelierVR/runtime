@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Utils;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -24,12 +25,11 @@ namespace Nox.Worlds {
 		/// Loads a world from the given path in the assets.
 		/// Return null if the world is not found in the assets.
 		/// </summary>
-		/// <param name="ns">Namespace of the mod that contains the world.</param>
-		/// <param name="path">Path to the world file in the assets.</param>
+		/// <param name="path">Path to the world asset.</param>
 		/// <param name="progress">Progress callback to report loading progress.</param>
 		/// <param name="token">Cancellation token to cancel the loading operation.</param>
 		/// <returns>Returns a <see cref="IRuntimeWorld"/> instance representing the loaded world.</returns>
-		public UniTask<IRuntimeWorld> LoadFromAssets(string ns, string path, Action<float> progress = null, CancellationToken token = default);
+		public UniTask<IRuntimeWorld> LoadFromAssets(ResourceIdentifier path, Action<float> progress = null, CancellationToken token = default);
 
 		/// <summary>
 		/// Loads a world from the cache using its hash.
@@ -63,12 +63,6 @@ namespace Nox.Worlds {
 		/// <param name="from">Where is the world fetched from, if null it will use the current server.</param>
 		/// <returns></returns>
 		public UniTask<IWorld> Fetch(string identifier, string from = null);
-
-		/// <summary>
-		/// Creates a new search request for worlds.
-		/// </summary>
-		/// <returns></returns>
-		public ISearchRequest MakeSearchRequest();
 
 		/// <summary>
 		/// Creates a new search request for asset worlds.
@@ -173,22 +167,6 @@ namespace Nox.Worlds {
 		/// <param name="hash"></param>
 		/// <returns></returns>
 		public bool HasSceneInCache(string hash);
-
-		/// <summary>
-		/// Creates a world identifier from a string.
-		/// </summary>
-		/// <param name="identifier"></param>
-		/// <returns></returns>
-		public IWorldIdentifier Make(string identifier);
-
-		/// <summary>
-		/// Creates a world identifier.
-		/// </summary>
-		/// <param name="id"></param>
-		/// <param name="meta">Optional metadata associated with the world.</param>
-		/// <param name="server"></param>
-		/// <returns></returns>
-		public IWorldIdentifier Make(uint id, Dictionary<string, string[]> meta = null, string server = "::");
 
 		/// <summary>
 		/// Adds a world to the favorites list.

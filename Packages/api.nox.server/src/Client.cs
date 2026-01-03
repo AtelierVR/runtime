@@ -6,6 +6,7 @@ using api.nox.server.widget;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Utils;
 using Nox.Network;
 using Nox.UI;
 using Nox.UI.Widgets;
@@ -29,17 +30,15 @@ namespace api.nox.server {
 				.GetMod("network")
 				.GetInstance<INetworkAPI>();
 
-		public static T GetAsset<T>(string path, string ns = null) where T : UnityEngine.Object
-			=> string.IsNullOrEmpty(ns)
-				? Instance.CoreAPI.AssetAPI.GetAsset<T>(path)
-				: Instance.CoreAPI.AssetAPI.GetAsset<T>(ns, path);
+		public static T GetAsset<T>(ResourceIdentifier path) where T : UnityEngine.Object
+			=> Instance.CoreAPI.AssetAPI.GetAsset<T>(path);
 
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
 
 		internal static Client           Instance;
-		internal        ClientModCoreAPI CoreAPI;
+		internal        IClientModCoreAPI CoreAPI;
 
-		public void OnInitializeClient(ClientModCoreAPI api) {
+		public void OnInitializeClient(IClientModCoreAPI api) {
 			Instance = this;
 			CoreAPI  = api;
 			_events = new[] {

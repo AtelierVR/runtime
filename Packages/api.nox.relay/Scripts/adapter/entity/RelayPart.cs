@@ -4,14 +4,13 @@ using Nox.CCK.Utils;
 using Nox.Entities;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
-using Transform = Nox.CCK.Utils.Transform;
 using UTransform = UnityEngine.Transform;
 
 namespace api.nox.relay {
 	/// <summary>
 	/// Represents a part of a <see cref="RelayEntity"/>.
 	/// </summary>
-	public abstract class RelayPart : Transform, IPart {
+	public abstract class RelayPart : TransformObject, IPart {
 		protected readonly RelayEntity Entity;
 		private            DirtyBy     _dirty;
 

@@ -66,11 +66,12 @@ namespace api.nox.search {
 			=> Handlers.Exists(b => b.GetId() == id);
 
 
-		public void OnInitializeMain(MainModCoreAPI api) {
+		public void OnInitializeMain(IMainModCoreAPI api) {
 			CoreAPI       = api;
 			Instance      = this;
 			_languagePack = api.AssetAPI.GetAsset<LanguagePack>("lang.asset");
 			LanguageManager.AddPack(_languagePack);
+			Logger.Log("Search API initialized");
 		}
 
 		public void OnDisposeMain() {

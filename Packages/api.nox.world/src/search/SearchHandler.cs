@@ -25,7 +25,7 @@ namespace api.nox.world.search {
 
 		public Texture2D GetIcon()
 			=> Main.Instance.CoreAPI.AssetAPI
-				.GetAsset<Texture2D>("ui", "icons/globe.png");
+				.GetAsset<Texture2D>("ui:icons/globe.png");
 
 		public string GetDescriptionKey()
 			=> "world.search.description";

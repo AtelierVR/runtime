@@ -73,8 +73,7 @@ namespace Nox.CCK.VideoPlayer.Hactazia {
 		}
 
 		#endregion Unity Lifecycle
-
-
+		
 		#region Resolving
 
 		public UnityEvent<IVideoPlayer, IFetchOptions> OnResolving { get; } = new();
@@ -388,6 +387,9 @@ namespace Nox.CCK.VideoPlayer.Hactazia {
 
 		private void HandleError(Exception exception)
 			=> OnError.Invoke(this, exception);
+
+		public override string ToString()
+			=> $"{GetType().Name}[Playing={IsPlaying}, Time={Time}/{Duration} ({Progress:P2}), Resolution={Resolution.x}x{Resolution.y}, Volume={Volume:P2}, Loop={Loop}]";
 
 		#endregion Debug
 	}

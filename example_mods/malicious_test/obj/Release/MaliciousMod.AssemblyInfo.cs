@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MaliciousMod")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c60d156299779e6b394fc8dfdd7e7f8c3c3eb027")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+619349e4f3eb34b64c69c5d5f8b29da6025c0885")]
 [assembly: System.Reflection.AssemblyProductAttribute("MaliciousMod")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MaliciousMod")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

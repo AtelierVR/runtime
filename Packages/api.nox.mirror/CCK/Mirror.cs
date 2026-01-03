@@ -37,6 +37,10 @@ namespace Nox.CCK.Mirror
         private Material _mirrorMaterial;
         private MaterialPropertyBlock _propertyBlock;
         
+        private bool _texturesAssigned;
+        private int _lastTextureWidth;
+        private int _lastTextureHeight;
+        
         private static readonly int LeftEyeTextureId = Shader.PropertyToID("_LeftEyeTexture");
         private static readonly int RightEyeTextureId = Shader.PropertyToID("_RightEyeTexture");
         
@@ -82,7 +86,6 @@ namespace Nox.CCK.Mirror
             };
             
             _renderer.sharedMaterial = _mirrorMaterial;
-            Debug.Log("[Mirror] Material created");
         }
 
         private void EnsureMirrorCamera()
@@ -100,8 +103,6 @@ namespace Nox.CCK.Mirror
             urpData.renderShadows = false;
             urpData.requiresColorOption = CameraOverrideOption.Off;
             urpData.requiresDepthOption = CameraOverrideOption.Off;
-            
-            Debug.Log("[Mirror] Camera created");
         }
 
         private void EnsureRenderTextures(Camera cam)
@@ -109,7 +110,10 @@ namespace Nox.CCK.Mirror
             int w = Mathf.Clamp((int)(cam.pixelWidth * _resolutionScale), 64, _maxResolution);
             int h = Mathf.Clamp((int)(cam.pixelHeight * _resolutionScale), 64, _maxResolution);
             
-            if (_reflectionTextureLeft == null || _reflectionTextureLeft.width != w || _reflectionTextureLeft.height != h)
+            // Check if we need to update textures
+            bool sizeChanged = (_lastTextureWidth != w || _lastTextureHeight != h);
+            
+            if (_reflectionTextureLeft == null || sizeChanged)
             {
                 if (_reflectionTextureLeft != null)
                 {
@@ -122,12 +126,15 @@ namespace Nox.CCK.Mirror
                     name = "Mirror Left",
                     hideFlags = HideFlags.DontSave
                 };
-                Debug.Log($"[Mirror] Created RT Left {w}x{h}");
+                
+                _texturesAssigned = false;
+                _lastTextureWidth = w;
+                _lastTextureHeight = h;
             }
             
             if (cam.stereoEnabled)
             {
-                if (_reflectionTextureRight == null || _reflectionTextureRight.width != w || _reflectionTextureRight.height != h)
+                if (_reflectionTextureRight == null || sizeChanged)
                 {
                     if (_reflectionTextureRight != null)
                     {
@@ -140,6 +147,8 @@ namespace Nox.CCK.Mirror
                         name = "Mirror Right",
                         hideFlags = HideFlags.DontSave
                     };
+                    
+                    _texturesAssigned = false;
                 }
             }
         }
@@ -199,19 +208,27 @@ namespace Nox.CCK.Mirror
                     RenderEye(context, cam, Camera.StereoscopicEye.Left, _reflectionTextureLeft);
                     RenderEye(context, cam, Camera.StereoscopicEye.Right, _reflectionTextureRight);
                     
-                    _propertyBlock.SetTexture(LeftEyeTextureId, _reflectionTextureLeft);
-                    _propertyBlock.SetTexture(RightEyeTextureId, _reflectionTextureRight);
+                    if (!_texturesAssigned)
+                    {
+                        _propertyBlock.SetTexture(LeftEyeTextureId, _reflectionTextureLeft);
+                        _propertyBlock.SetTexture(RightEyeTextureId, _reflectionTextureRight);
+                        _renderer.SetPropertyBlock(_propertyBlock);
+                        _texturesAssigned = true;
+                    }
                 }
                 else
                 {
                     // Non-VR mode
                     RenderEye(context, cam, Camera.StereoscopicEye.Left, _reflectionTextureLeft);
                     
-                    _propertyBlock.SetTexture(LeftEyeTextureId, _reflectionTextureLeft);
-                    _propertyBlock.SetTexture(RightEyeTextureId, _reflectionTextureLeft);
+                    if (!_texturesAssigned)
+                    {
+                        _propertyBlock.SetTexture(LeftEyeTextureId, _reflectionTextureLeft);
+                        _propertyBlock.SetTexture(RightEyeTextureId, _reflectionTextureLeft);
+                        _renderer.SetPropertyBlock(_propertyBlock);
+                        _texturesAssigned = true;
+                    }
                 }
-                
-                _renderer.SetPropertyBlock(_propertyBlock);
             }
             finally
             {

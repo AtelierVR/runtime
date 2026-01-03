@@ -5,17 +5,23 @@ using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.Controllers;
 using Nox.Microphone;
+using Nox.Sessions;
 using Nox.UI;
 using Nox.Users;
 
 namespace api.nox.desktop {
 	public class Client : IClientModInitializer {
-		internal static ClientModCoreAPI CoreAPI;
+		internal static IClientModCoreAPI CoreAPI;
 
 		internal static IControllerAPI ControllerAPI
 			=> CoreAPI.ModAPI
 				.GetMod("controller")
 				.GetInstance<IControllerAPI>();
+
+		internal static ISessionAPI SessionAPI
+			=> CoreAPI.ModAPI
+				.GetMod("session")
+				.GetInstance<ISessionAPI>();
 
 		internal static IUiAPI UiAPI
 			=> CoreAPI.ModAPI
@@ -37,14 +43,14 @@ namespace api.nox.desktop {
 				.GetMod("microphone")
 				.GetInstance<IMicrophoneAPI>();
 
-		public async UniTask OnInitializeClientAsync(ClientModCoreAPI api) {
+		public async UniTask OnInitializeClientAsync(IClientModCoreAPI api) {
 			CoreAPI = api;
 			Keybindings.Rebind();
 			await DesktopController.Make();
 		}
 
 		public async UniTask OnDisposeClientAsync() {
-			if (ControllerAPI.GetCurrent() is DesktopController)
+			if (ControllerAPI.Current is DesktopController)
 				await ControllerAPI.SetCurrent(null);
 			Keybindings.Clear();
 			CoreAPI = null;

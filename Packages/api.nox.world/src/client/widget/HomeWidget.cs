@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
 using Nox.CCK.Utils;
+using Nox.CCK.Worlds;
 using Nox.UI;
 using Nox.UI.Widgets;
 using Nox.Users;
@@ -35,11 +36,11 @@ namespace api.nox.world.widget {
 			=> 99;
 
 		internal static WorldIdentifier GetHomeIdentifier(ICurrentUser current = null)
-			=> WorldIdentifier.FromString((current ?? Main.Instance.UserAPI.GetCurrent())?.GetHomeId());
+			=> WorldIdentifier.From((current ?? Main.Instance.UserAPI.GetCurrent())?.GetHomeId());
 
 		public async UniTask UpdateContent() {
 			var identifier = GetHomeIdentifier();
-			if (!(identifier?.IsValid() ?? false)) {
+			if (!identifier.IsValid) {
 				_container.SetActive(false);
 				_label.UpdateText("world.no_home");
 				return;
@@ -90,12 +91,12 @@ namespace api.nox.world.widget {
 		}
 
 		public static bool TryMake(IMenu menu, RectTransform parent, out (GameObject, IWidget) values) {
-			if (!(GetHomeIdentifier()?.IsValid() ?? false)) {
+			if (!GetHomeIdentifier().IsValid) {
 				values = (null, null);
 				return false;
 			}
 
-			var prefab    = Client.GetAsset<GameObject>("prefabs/grid_item.prefab", "ui");
+			var prefab    = Client.GetAsset<GameObject>("ui:prefabs/grid_item.prefab");
 			var instance  = Instantiate(prefab, parent);
 			var component = instance.AddComponent<HomeWidget>();
 			component._mid = menu.GetId();
@@ -105,7 +106,7 @@ namespace api.nox.world.widget {
 			instance.name = $"[{component.GetKey()}_{instance.GetInstanceID()}]";
 			values        = (instance, component);
 
-			prefab               = Client.GetAsset<GameObject>("prefabs/large_widget.prefab", "ui");
+			prefab               = Client.GetAsset<GameObject>("ui:prefabs/large_widget.prefab");
 			component._content   = Instantiate(prefab, Reference.GetComponent<RectTransform>("content", instance));
 			component._image     = Reference.GetComponent<Image>("image", component._content);
 			component._ratio     = Reference.GetComponent<AspectRatioFitter>("image_ratio", component._content);
@@ -120,7 +121,7 @@ namespace api.nox.world.widget {
 		}
 
 		private async UniTask UpdateIcon() {
-			_icon.sprite = await Client.GetAssetAsync<Sprite>("icons/home.png", "ui");
+			_icon.sprite = await Client.GetAssetAsync<Sprite>("ui:icons/home.png");
 		}
 	}
 }
