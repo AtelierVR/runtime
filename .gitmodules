@@ -34,3 +34,6 @@
 [submodule "Packages/nox.relay"]
 	path = Packages/nox.relay
 	url = https://github.com/AtelierVR/nox.relay.git
+[submodule "Packages/nox.network"]
+	path = Packages/nox.network
+	url = https://github.com/AtelierVR/nox.network.git
