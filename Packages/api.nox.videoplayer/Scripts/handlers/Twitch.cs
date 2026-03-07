@@ -60,7 +60,7 @@ namespace api.nox.videoplayer.handlers {
 					)
 				};
 			} catch (Exception e) {
-				Logger.LogException(e);
+				Logger.LogError(e);
 				return new IResult[] { Result.FromError(e.Message) };
 			}
 		}
@@ -109,7 +109,7 @@ namespace api.nox.videoplayer.handlers {
 				if (int.TryParse(dimensions[0], out var width) && int.TryParse(dimensions[1], out var height))
 					return new Vector2Int(width, height);
 			} catch (Exception e) {
-				Logger.LogException(e);
+				Logger.LogError(e);
 			}
 
 			return new Vector2Int(-1, -1);

@@ -16,17 +16,17 @@ namespace api.nox.videoplayer.widget {
 		public string GetKey()
 			=> GetDefaultKey();
 
-		private int               _mid;
-		private GameObject        _content;
-		private Image             _image;
+		private int _mid;
+		private GameObject _content;
+		private Image _image;
 		private AspectRatioFitter _ratio;
-		private GameObject        _container;
+		private GameObject _container;
 
 		private void OnClick()
 			=> Client.UiAPI?.SendGoto(_mid, VideoPlayerPage.GetStaticKey());
 
 		public Vector2Int GetSize()
-			=> Vector2Int.one;
+			=> new(2, 2);
 
 		public int GetPriority()
 			=> 90;
@@ -57,7 +57,7 @@ namespace api.nox.videoplayer.widget {
 		}
 
 		public void Update() {
-			var videoplayer = VideoPlayerManager.VideoPlayers.FirstOrDefault();
+			var videoplayer = VideoPlayerManager.ActiveVideoPlayers.FirstOrDefault();
 			if (videoplayer == null) {
 				_container.SetActive(false);
 				return;

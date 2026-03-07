@@ -1,3 +1,4 @@
+using System;
 using Nox.CCK.Network;
 using UnityEngine;
 
@@ -36,5 +37,10 @@ namespace Nox.Entities {
 		/// Gets or sets the angular velocity of this part.
 		/// </summary>
 		public Vector3 Angular { get; set; }
+
+		/// <summary>
+		/// Gets the timestamp of the last update to this part.
+		/// </summary>
+		public DateTime Updated { get; }
 	}
 }

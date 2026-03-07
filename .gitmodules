@@ -37,3 +37,30 @@
 [submodule "Packages/nox.network"]
 	path = Packages/nox.network
 	url = https://github.com/AtelierVR/nox.network.git
+[submodule "Packages/nox.worlds"]
+	path = Packages/nox.worlds
+	url = https://github.com/AtelierVR/nox.worlds.git
+[submodule "Packages/nox.assetbundles"]
+	path = Packages/nox.assetbundles
+	url = https://github.com/AtelierVR/nox.assetbundles.git
+[submodule "Packages/nox.terminal"]
+	path = Packages/nox.terminal
+	url = https://github.com/AtelierVR/nox.terminal.git
+[submodule "Packages/nox.settings"]
+	path = Packages/nox.settings
+	url = https://github.com/AtelierVR/nox.settings.git
+[submodule "Packages/ffmpeg.unity"]
+	path = Packages/ffmpeg.unity
+	url = https://github.com/hactazia/FFmpeg.Unity.git
+[submodule "Packages/nox.xr"]
+	path = Packages/nox.xr
+	url = https://github.com/AtelierVR/nox.xr.git
+[submodule "Packages/nox.mirror"]
+	path = Packages/nox.mirror
+	url = https://github.com/AtelierVR/nox.mirror.git
+[submodule "Packages/nox.editor.panel"]
+	path = Packages/nox.editor.panel
+	url = https://github.com/AtelierVR/nox.editor.panel.git
+[submodule "Packages/nox.ffmpeg"]
+	path = Packages/nox.ffmpeg
+	url = https://github.com/AtelierVR/nox.ffmpeg.git

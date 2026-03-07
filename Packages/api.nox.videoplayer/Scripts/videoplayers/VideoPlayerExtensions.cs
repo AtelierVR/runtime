@@ -8,8 +8,5 @@ namespace api.nox.videoplayer {
 
 		public static int GetId(this IVideoPlayer self)
 			=> self.GetGameObject().GetInstanceID();
-		
-		public static IVideoPlayerResolver GetResolver(this IVideoPlayer self)
-			=> self as IVideoPlayerResolver;
 	}
 }

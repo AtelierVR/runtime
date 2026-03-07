@@ -30,6 +30,12 @@
       "version": ">=1.0.0"
     }
   ],
+  "constraints": [
+    {
+      "type": "after",
+      "id": "ui"
+    }
+  ],
   "entrypoints": {
     "client": [
       "api.nox.search.Client"

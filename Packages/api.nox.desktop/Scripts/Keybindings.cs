@@ -13,7 +13,7 @@ namespace api.nox.desktop {
 		/// <summary>
 		/// A collection of key bindings used by the player system.
 		/// </summary>
-		internal static readonly (string, string, string, Action<float>, float)[] Keys = {
+		private static readonly (string, string, string, Action<float>, float)[] Keys = {
 			("nox.movement", "forward", "<Keyboard>/w", value => SetValue("forward", value), 0f),
 			("nox.movement", "backward", "<Keyboard>/s", value => SetValue("backward", value), 0f),
 			("nox.movement", "left", "<Keyboard>/a", value => SetValue("left", value), 0f),
@@ -24,7 +24,7 @@ namespace api.nox.desktop {
 			("nox.ui", "main", "<Keyboard>/tab", value => SetValue("main", value), 0f)
 		};
 
-		internal static readonly UnityEvent<string, float, float> KeyEvent = new();
+		static readonly internal UnityEvent<string, float, float> KeyEvent = new();
 
 		/// <summary>
 		/// Gets the current movement vector based on the key bindings.

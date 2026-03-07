@@ -9,11 +9,11 @@ using Transform = UnityEngine.Transform;
 
 namespace api.nox.search.client {
 	public class WorkerComponent : MonoBehaviour {
-		public   TextLanguage    title;
-		public   TextLanguage    message;
-		internal WorkerTask      Task;
-		public   SearchComponent search;
-		public   RectTransform   resultContainer;
+		public TextLanguage title;
+		public TextLanguage message;
+		internal WorkerTask Task;
+		public SearchComponent search;
+		public RectTransform resultContainer;
 
 		public GridFitter fitter;
 
@@ -36,14 +36,14 @@ namespace api.nox.search.client {
 				return;
 			}
 
-			Logger.LogDebug($"WorkerComponent: UpdateData {Task.Worker.GetTitleKey()} {Task.Status}");
+			Logger.LogDebug($"WorkerComponent: UpdateData {Task.Worker.TitleKey} {Task.Status}");
 
-			title.UpdateText(Task.Worker.GetTitleKey(), Task.Worker.GetTitleArguments() ?? Array.Empty<string>());
+			title.UpdateText(Task.Worker.TitleKey, Task.Worker.TitleArguments ?? Array.Empty<string>());
 			message.UpdateText(Task.MessageKey, Task.MessageArgs);
 			if (Task.Status == WorkerTaskStatus.Completed) {
 				var ids = new List<int>();
-				var ds  = Task.Result?.GetData() ?? Array.Empty<IResultData>();
-				fitter.ratio = Task.Worker.GetRatio();
+				var ds = Task.Result?.Data ?? Array.Empty<IResultData>();
+				fitter.ratio = Task.Worker.Ratio;
 				foreach (Transform tf in resultContainer) {
 					var result = tf.GetComponent<ResultComponent>();
 					if (!result) {
@@ -51,32 +51,32 @@ namespace api.nox.search.client {
 						continue;
 					}
 
-					var id   = result.Data.GetId();
-					var data = Array.Find(ds, d => d.GetId() == id);
+					var data = Array.Find(ds, d => d.Id == result.Data.Id);
 					if (data == null) {
 						Destroy(tf.gameObject);
 						continue;
 					}
 
-					ids.Add(id);
+					ids.Add(result.Data.Id);
 					result.UpdateData(data);
 				}
 
 				// add missing results
 				var asset = Client.GetAsset<GameObject>("prefabs/result.prefab");
 				foreach (var data in ds) {
-					if (ids.Contains(data.GetId())) continue;
-					var content   = Instantiate(asset, resultContainer);
+					if (ids.Contains(data.Id)) continue;
+					var content = Instantiate(asset, resultContainer);
 					var component = content.GetComponent<ResultComponent>();
 					component.Initiate(this, data);
-					content.name = $"[result_{data.GetId()}]";
+					content.name = $"[result_{data.Id}]";
 					content.SetActive(true);
-					ids.Add(data.GetId());
+					ids.Add(data.Id);
 				}
 
 				resultContainer.gameObject.SetActive(true);
 				message.gameObject.SetActive(false);
-			} else {
+			}
+			else {
 				resultContainer.gameObject.SetActive(false);
 				message.gameObject.SetActive(true);
 			}

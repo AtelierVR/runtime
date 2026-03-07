@@ -74,7 +74,7 @@ namespace api.nox.videoplayer.handlers {
 					)
 				};
 			} catch (System.Exception e) {
-				Logger.LogException(e);
+				Logger.LogError(e);
 				return new IResult[] { Result.FromError(e.Message) };
 			}
 		}

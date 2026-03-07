@@ -6,19 +6,22 @@ using Jint.Native.Object;
 using Jint.Runtime.Interop;
 using Nox.CCK.Build;
 using Nox.CCK.Jint;
+using Nox.CCK.Network;
+using Nox.CCK.Utils;
 using Nox.Jint;
 using UnityEngine;
 using Engine = Jint.Engine;
+using LogType = UnityEngine.LogType;
 using Transform = UnityEngine.Transform;
 using NoxLogger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.jint {
 	[RequireComponent(typeof(JintScript))]
 	public class JintBacking : MonoBehaviour, IJintBacking, ICompilable {
-		public Engine         Engine;
-		public JintScript     script;
+		public Engine Engine;
+		public JintScript script;
 		public ObjectInstance ExecutionContext;
-		public Logger         Logger;
+		public Logger Logger;
 
 		public void Compile()
 			=> DestroyImmediate(this);
@@ -53,7 +56,8 @@ namespace api.nox.jint {
 
 			NoxLogger.Log("Prepare");
 			Engine = new Engine(
-				ctx => {
+				ctx =>
+				{
 					ctx.LimitMemory(4_194_304);
 					ctx.LimitRecursion(1024);
 				}
@@ -84,6 +88,15 @@ namespace api.nox.jint {
 					.ExportObject("transform", new ObjectWrapper(Engine, transform))
 					.ExportObject("gameObject", new ObjectWrapper(Engine, gameObject))
 			);
+
+			// add Buffer of nodejs
+			Engine.AddModule("buffer", builder => builder.ExportType<NodeBuffer>("Buffer"));
+			Engine.SetValue("Buffer", TypeReference.CreateTypeReference(Engine, typeof(NodeBufferImpl)));
+			
+			// add Hash of nodejs
+			Engine.AddModule("hash", builder => builder.ExportType<NodeHash>("Hash"));
+			Engine.SetValue("Hash", TypeReference.CreateTypeReference(Engine, typeof(NodeHashImpl)));
+
 			try {
 				NoxLogger.LogDebug($"script: {script}");
 				NoxLogger.LogDebug($"script.asset: {script.asset}");
@@ -95,8 +108,8 @@ namespace api.nox.jint {
 				Invoke("onPrepare");
 			} catch (Exception e) {
 				NoxLogger.LogError($"Error executing onPrepare function: {e.Message}", this);
-				NoxLogger.LogException(e, this);
-				Engine           = null;
+				NoxLogger.LogError(e, this);
+				Engine = null;
 				ExecutionContext = null;
 			}
 		}
@@ -110,7 +123,7 @@ namespace api.nox.jint {
 			}
 
 			Engine.Dispose();
-			Engine           = null;
+			Engine = null;
 			ExecutionContext = null;
 		}
 
@@ -153,5 +166,64 @@ namespace api.nox.jint {
 				return default;
 			}
 		}
+	}
+	public interface NodeBuffer {
+		byte[] from(string data);
+		byte[] from(string data, string encoding);
+		string toString();
+		string toString(string encoding);
+	}
+
+	public interface NodeHash {
+		int crc32(byte[] data);
+		int crc32(string data);
+		long crc64(byte[] data);
+		long crc64(string data);
+	}
+
+	public static class NodeBufferImpl {
+		public static byte[] from(string data)
+			=> from(data, "utf8");
+
+		public static byte[] from(string data, string encoding) {
+			return encoding.ToLower() switch {
+				"utf8"    => System.Text.Encoding.UTF8.GetBytes(data),
+				"ascii"   => System.Text.Encoding.ASCII.GetBytes(data),
+				"unicode" => System.Text.Encoding.Unicode.GetBytes(data),
+				"base64"  => Convert.FromBase64String(data),
+				"hex" => Enumerable.Range(0, data.Length / 2)
+					.Select(x => Convert.ToByte(data.Substring(x * 2, 2), 16))
+					.ToArray(),
+				_ => throw new NotSupportedException($"Encoding '{encoding}' is not supported"),
+			};
+		}
+
+		public static string toString(byte[] buffer)
+			=> toString(buffer, "utf8");
+
+		public static string toString(byte[] buffer, string encoding) {
+			return encoding.ToLower() switch {
+				"utf8"    => System.Text.Encoding.UTF8.GetString(buffer),
+				"ascii"   => System.Text.Encoding.ASCII.GetString(buffer),
+				"unicode" => System.Text.Encoding.Unicode.GetString(buffer),
+				"base64"  => Convert.ToBase64String(buffer),
+				"hex"     => BitConverter.ToString(buffer).Replace("-", "").ToLower(),
+				_         => throw new NotSupportedException($"Encoding '{encoding}' is not supported"),
+			};
+		}
+	}
+
+	public static class NodeHashImpl {
+		public static int crc32(byte[] data)
+			=> Hash.CRC32(data);
+
+		public static int crc32(string data)
+			=> Hash.CRC32(data);
+
+		public static long crc64(byte[] data)
+			=> Hash.CRC64(data);
+
+		public static long crc64(string data)
+			=> Hash.CRC64(data);
 	}
 }

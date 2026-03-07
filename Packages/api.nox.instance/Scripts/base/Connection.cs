@@ -24,7 +24,7 @@ namespace api.nox.instance {
 					return JObject.Parse(json) as T;
 				return JsonConvert.DeserializeObject<T>(json);
 			} catch (Exception e) {
-				Logger.LogException(e);
+				Logger.LogError(e);
 				return null;
 			}
 		}

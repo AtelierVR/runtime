@@ -46,20 +46,12 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.2f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.network\src\Gateway.cs" />
-    <Compile Include="Packages\api.nox.network\src\cache\Cache.cs" />
-    <Compile Include="Packages\api.nox.network\src\Discover.cs" />
     <Compile Include="Packages\api.nox.network\NetEventContext.cs" />
-    <Compile Include="Packages\api.nox.network\src\Request.cs" />
-    <Compile Include="Packages\api.nox.network\src\cache\CacheManager.cs" />
-    <Compile Include="Packages\api.nox.network\src\Response.cs" />
-    <Compile Include="Packages\api.nox.network\src\Error.cs" />
-    <Compile Include="Packages\api.nox.network\src\Main.cs" />
-    <None Include="Packages\api.nox.network\assets\api.nox.network\cache.uxml" />
+    <None Include="Packages\api.nox.network\Assets\api.nox.network\cache.uxml" />
     <None Include="Packages\api.nox.network\link.xml" />
     <None Include="Packages\api.nox.network\package.json" />
-    <None Include="Packages\api.nox.network\assets\api.nox.network\relay.uxml" />
-    <None Include="Packages\api.nox.network\api.nox.network.asmdef" />
+    <None Include="Packages\api.nox.network\Assets\api.nox.network\relay.uxml" />
+    <None Include="Packages\api.nox.network\Nox.Mods.Network.asmdef" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.3.2f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -471,17 +463,14 @@
     <Reference Include="UnityEditor.WindowsStandalone.Extensions">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.3.2f1\Editor\Data\PlaybackEngines\WindowsStandaloneSupport\UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil.Pdb">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\Mono.Cecil.0.11.6\lib\netstandard2.0\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.VisualScripting.YamlDotNet">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.visualscripting@191c0d7e3b69\Editor\VisualScripting.Core\Dependencies\YamlDotNet\Unity.VisualScripting.YamlDotNet.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Posix">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.spoiledcat.git@5eb312ed44ac\Mono.Posix\Mono.Posix.dll</HintPath>
-    </Reference>
-    <Reference Include="BouncyCastle.Crypto">
-      <HintPath>D:\Projets\nox\runtime\Packages\nox.cck\Plugins\BouncyCastle.Crypto.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil">
-      <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.nuget.mono-cecil@ecb9724e46ff\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Collections.LowLevel.ILSupport">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.collections@aea9d3bd5e19\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.dll</HintPath>
@@ -501,11 +490,20 @@
     <Reference Include="sfw.net">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.spoiledcat.git@5eb312ed44ac\sfw\sfw.net.dll</HintPath>
     </Reference>
+    <Reference Include="BouncyCastle.Cryptography">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\BouncyCastle.Cryptography.2.6.2\lib\netstandard2.0\BouncyCastle.Cryptography.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Plastic.Antlr3.Runtime">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.collab-proxy@3351acaba9c9\Lib\Editor\Unity.Plastic.Antlr3.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="SimpleBase">
       <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\SimpleBase.1.3.1\lib\netstandard1.3\SimpleBase.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\Mono.Cecil.0.11.6\lib\netstandard2.0\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\Mono.Cecil.0.11.6\lib\netstandard2.0\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Plastic.Newtonsoft.Json">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.collab-proxy@3351acaba9c9\Lib\Editor\Unity.Plastic.Newtonsoft.Json.dll</HintPath>
@@ -536,6 +534,9 @@
     </Reference>
     <Reference Include="NuGetForUnity.PluginAPI">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.github-glitchenzo.nugetforunity@b8a65750503c\Editor\PluginAPI\NuGetForUnity.PluginAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\Mono.Cecil.0.11.6\lib\netstandard2.0\Mono.Cecil.Rocks.dll</HintPath>
     </Reference>
     <Reference Include="System.Reflection.TypeExtensions">
       <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\System.Reflection.TypeExtensions.4.1.0\lib\netstandard1.5\System.Reflection.TypeExtensions.dll</HintPath>

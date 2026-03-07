@@ -13,7 +13,8 @@
     "Unity.ScriptableBuildPipeline.Editor",
     "Unity.ScriptableBuildPipeline",
     "Nox.Instances",
-    "Nox.Tables"
+    "Nox.Tables",
+    "Nox.CCK.Network"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

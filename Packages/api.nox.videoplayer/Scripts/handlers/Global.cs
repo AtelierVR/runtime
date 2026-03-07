@@ -39,8 +39,7 @@ namespace api.nox.videoplayer.handlers {
 		}
 
 		private static bool IsUrl(string query)
-			=> query.StartsWith("https://")
-				|| query.StartsWith("http://");
+			=> (query.StartsWith("https://") || query.StartsWith("http://"));
 
 		private static string FormatUrl(string original)
 			=> original;
@@ -63,7 +62,7 @@ namespace api.nox.videoplayer.handlers {
 					)
 				};
 			} catch (System.Exception e) {
-				Logger.LogException(e);
+				Logger.LogError(e);
 				return new IResult[] { Result.FromError(e.Message) };
 			}
 		}

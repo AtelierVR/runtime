@@ -58,8 +58,8 @@ namespace api.nox.instance.client {
 		private void OnClick() {
 			Logger.LogDebug($"{_user} ({reference.Page.World}) clicked");
 			if (_user.Item1 == null)
-				Client.UiAPI?.SendGoto(reference.Page.MId, "user", "identifier", _user.Item2.GetIdentifier());
-			else Client.UiAPI?.SendGoto(reference.Page.MId, "user", "user", _user.Item1);
+				Client.UiAPI?.SendGoto(reference.Page.MId, "users", "identifier", _user.Item2.GetIdentifier());
+			else Client.UiAPI?.SendGoto(reference.Page.MId, "users", "user", _user.Item1);
 		}
 
 		private async UniTask UpdateBanner((IUser, IPlayer) user) {

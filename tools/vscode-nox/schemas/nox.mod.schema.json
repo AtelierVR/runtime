@@ -1,0 +1,193 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "nox.mod.schema.json",
+  "title": "Nox Mod Manifest",
+  "description": "Fichier de définition d'un mod Nox (nox.mod.json / nox.mod.jsonc)",
+  "type": "object",
+  "required": ["id"],
+  "additionalProperties": true,
+  "properties": {
+    "type": {
+      "type": "string",
+      "description": "Type de paquet — toujours \"mod\" (informatif, non lu par le loader)",
+      "enum": ["mod"],
+      "default": "mod"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9._-]+$",
+      "description": "Identifiant unique du mod (ex: nox.discord, api.nox.instance)"
+    },
+    "provides": {
+      "type": "array",
+      "description": "Alias que ce mod fournit (ex: [\"instance\", \"fr.hactazia.instance\"]). Utilisés comme IDs alternatifs lors de la résolution des dépendances.",
+      "items": { "type": "string", "pattern": "^[a-z0-9._-]+$" },
+      "uniqueItems": true,
+      "default": []
+    },
+    "name": {
+      "type": "string",
+      "description": "Nom humain du mod"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+",
+      "description": "Version SemVer du mod (ex: 1.0.0). Défaut : 0.0.0 si absent."
+    },
+    "description": {
+      "type": "string",
+      "description": "Description longue du mod"
+    },
+    "license": {
+      "type": "string",
+      "description": "Identifiant SPDX de la licence (ex: GPL-3.0, MIT)"
+    },
+    "icon": {
+      "type": ["string", "null"],
+      "description": "Chemin vers l'icône du mod"
+    },
+    "contact": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "email":   { "type": "string" },
+        "source":  { "type": "string" },
+        "website": { "type": "string" },
+        "issues":  { "type": "string" }
+      }
+    },
+    "authors": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/person" },
+      "default": []
+    },
+    "contributors": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/person" },
+      "default": []
+    },
+    "relations": {
+      "type": "array",
+      "description": "Dépendances, recommandations et conflits avec d'autres mods. Peut être une string (= depends >=0.0.0) ou un objet complet.",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "description": "Shorthand : équivalent à { id: \"xxx\", type: \"depends\", version: \">=0.0.0\" }"
+          },
+          { "$ref": "#/definitions/relation" }
+        ]
+      },
+      "default": []
+    },
+    "constraints": {
+      "type": "array",
+      "description": "Contraintes d'ordre de chargement (before, after, first, last)",
+      "items": { "$ref": "#/definitions/constraint" },
+      "default": []
+    },
+    "entrypoints": {
+      "type": "object",
+      "description": "Points d'entrée par contexte d'exécution. Les classes doivent implémenter IModInitializer.",
+      "properties": {
+        "main":   { "type": "array", "items": { "type": "string" } },
+        "client": { "type": "array", "items": { "type": "string" } },
+        "server": { "type": "array", "items": { "type": "string" } },
+        "editor": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "default": {}
+    },
+    "references": {
+      "type": "array",
+      "description": "Assemblies externes référencées par ce mod",
+      "items": { "$ref": "#/definitions/reference" },
+      "default": []
+    },
+    "permissions": {
+      "type": "array",
+      "description": "Permissions requises par le mod (ex: file, file.read, config)",
+      "items": { "type": "string" },
+      "default": []
+    }
+  },
+  "definitions": {
+    "person": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name":    { "type": "string" },
+        "email":   { "type": "string" },
+        "website": { "type": "string" }
+      }
+    },
+    "relation": {
+      "type": "object",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID ou alias du mod cible"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["depends", "recommends", "suggests", "breaks", "conflicts"],
+          "description": "Nature de la relation. \"depends\" bloque le chargement si absent. \"breaks\" bloque si présent. \"conflicts\" autorise mais avertit.",
+          "default": "depends"
+        },
+        "version": {
+          "type": "string",
+          "description": "Contrainte de version SemVer (ex: >=1.0.0, ^2.0.0). Défaut : >=0.0.0",
+          "default": ">=0.0.0"
+        }
+      }
+    },
+    "constraint": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["before", "after", "first", "last"],
+          "description": "\"before\"/\"after\" nécessitent un champ \"id\". \"first\"/\"last\" n'en ont pas besoin."
+        },
+        "id": {
+          "type": "string",
+          "description": "ID du mod cible (requis pour before/after, ignoré pour first/last)"
+        }
+      }
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Namespace de l'assembly"
+        },
+        "file": {
+          "type": "string",
+          "description": "Chemin relatif vers le .dll"
+        },
+        "engine": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name":    { "type": "string", "description": "Moteur cible (ex: unity)" },
+            "version": { "type": "string", "description": "Contrainte de version du moteur" }
+          }
+        },
+        "platform": {
+          "type": "string",
+          "description": "Plateforme cible (ex: windows, linux, android)"
+        }
+      }
+    }
+  }
+}

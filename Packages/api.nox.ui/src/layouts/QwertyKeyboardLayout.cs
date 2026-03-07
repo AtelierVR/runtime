@@ -218,7 +218,7 @@ namespace api.nox.ui {
 				return keyObj;
 			} catch (System.Exception e) {
 				Logger.LogError($"Failed to create key '{keyValue}'");
-				Logger.LogException(e);
+				Logger.LogError(e);
 				return null;
 			}
 		}

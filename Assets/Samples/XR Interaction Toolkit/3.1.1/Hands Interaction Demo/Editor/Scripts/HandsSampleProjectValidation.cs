@@ -123,7 +123,11 @@ namespace UnityEditor.XR.Interaction.Toolkit.Samples.Hands.Editor
             }
 
             // Delay evaluating conditions for issues to give time for Package Manager and UPM cache to fully initialize.
-            EditorApplication.delayCall += ShowWindowIfIssuesExist;
+            // Check if auto-validation is disabled (NOX modification)
+            if (!EditorPrefs.GetBool("Nox.DisableAutoValidation", false))
+            {
+                EditorApplication.delayCall += ShowWindowIfIssuesExist;
+            }
         }
 
         static void ShowWindowIfIssuesExist()

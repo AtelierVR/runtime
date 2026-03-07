@@ -1,7 +1,4 @@
 .mod-item {
-    border-color: var(--default-border);
-    background-color: var(--default-background);
-    color: var(--default-text);
     border-width: var(--border-width);
     border-radius: var(--boder-radius);
     padding: var(--padding-medium);
@@ -12,7 +9,6 @@
 .mod-item .icon {
     width: 24px;
     height: 24px;
-    background-color: var(--default-border);
     margin-right: var(--margin-medium);
     border-radius: var(--boder-radius);
 }
@@ -28,3 +24,5 @@
 .mod-item .icon-container {
     justify-content: center;
 }
+
+

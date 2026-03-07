@@ -18,12 +18,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.editor.panel": {
-      "version": "file:api.nox.editor.panel",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.entity": {
       "version": "file:api.nox.entity",
       "depth": 0,
@@ -56,18 +50,6 @@
     },
     "api.nox.microphone": {
       "version": "file:api.nox.microphone",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.mirror": {
-      "version": "file:api.nox.mirror",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.network": {
-      "version": "file:api.nox.network",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
@@ -108,12 +90,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.settings": {
-      "version": "file:api.nox.settings",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.statistics": {
       "version": "file:api.nox.statistics",
       "depth": 0,
@@ -122,12 +98,6 @@
     },
     "api.nox.table": {
       "version": "file:api.nox.table",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.terminal": {
-      "version": "file:api.nox.terminal",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
@@ -150,23 +120,20 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.world": {
-      "version": "file:api.nox.world",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.world.modules": {
       "version": "file:api.nox.world.modules",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.xr": {
-      "version": "file:api.nox.xr",
+    "com.coplaydev.unity-mcp": {
+      "version": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
       "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
+      "source": "git",
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "3.0.2"
+      },
+      "hash": "ac1e34c8b43a2256bde0ed73c515e59a0f52171a"
     },
     "com.cysharp.unitask": {
       "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
@@ -203,13 +170,6 @@
         "com.unity.mathematics": "1.2.5"
       },
       "hash": "ece3272762f2148dd8d3e658ec04fcbd79d4d97e"
-    },
-    "com.jint.unity": {
-      "version": "https://github.com/magicblock-labs/Jint-Unity.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "9b16e8d86afaffb7fba80ec91894534781719c02"
     },
     "com.keviniglesias.basicmotions": {
       "version": "file:com.keviniglesias.basicmotions",
@@ -371,7 +331,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.memoryprofiler": {
-      "version": "1.1.9",
+      "version": "1.1.11",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -402,7 +362,7 @@
     },
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.6",
-      "depth": 0,
+      "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
@@ -678,14 +638,24 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.valvesoftware.unity.openvr": {
+      "version": "file:../Assets/SteamVR/OpenVRUnityXRPackage/Editor/com.valvesoftware.unity.openvr-1.2.1.tgz",
+      "depth": 0,
+      "source": "local-tarball",
+      "dependencies": {
+        "com.unity.xr.management": "3.2.13",
+        "com.unity.ugui": "1.0.0",
+        "com.unity.xr.legacyinputhelpers": "2.1.4"
+      }
+    },
     "dev.nox.development": {
       "version": "file:dev.nox.development",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
     },
-    "hactazia.ffplay": {
-      "version": "file:hactazia.ffplay",
+    "nox.assetbundles": {
+      "version": "file:nox.assetbundles",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
@@ -720,6 +690,18 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "nox.editor.panel": {
+      "version": "file:nox.editor.panel",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.ffmpeg": {
+      "version": "file:nox.ffmpeg",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "nox.game.builder": {
       "version": "file:nox.game.builder",
       "depth": 0,
@@ -728,6 +710,18 @@
     },
     "nox.loader": {
       "version": "file:nox.loader",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.mirror": {
+      "version": "file:nox.mirror",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.network": {
+      "version": "file:nox.network",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
@@ -746,6 +740,30 @@
     },
     "nox.sessions": {
       "version": "file:nox.sessions",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.settings": {
+      "version": "file:nox.settings",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.terminal": {
+      "version": "file:nox.terminal",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.worlds": {
+      "version": "file:nox.worlds",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.xr": {
+      "version": "file:nox.xr",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

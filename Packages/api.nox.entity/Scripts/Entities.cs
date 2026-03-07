@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Nox.CCK.Utils;
 using Nox.Entities;
+using UnityEngine.Events;
 
 namespace api.nox.entity {
 	public class Entities : IEntities, INoxObject {
@@ -25,6 +26,9 @@ namespace api.nox.entity {
 		public int GetCount<T>() where T : IEntity
 			=> _entities.Count(entity => entity is T);
 
+		public UnityEvent<IEntity> OnEntityAdded { get; } = new();
+		public UnityEvent<IEntity> OnEntityRemoved { get; } = new();
+
 		public void RegisterEntity(IEntity entity) {
 			if (entity == null) {
 				Logger.LogError("Cannot register a null entity.");
@@ -37,6 +41,8 @@ namespace api.nox.entity {
 			}
 
 			_entities.Add(entity);
+			OnEntityAdded.Invoke(entity);
+			Logger.Log($"Registered entity with ID {entity.Id}.");
 		}
 
 		public void UnregisterEntity(IEntity entity) {
@@ -51,6 +57,8 @@ namespace api.nox.entity {
 			}
 
 			_entities.Remove(entity);
+			OnEntityRemoved.Invoke(entity);
+			Logger.Log($"Unregistered entity with ID {entity.Id}.");
 		}
 
 		public IEntity GetEntity(int id)

@@ -8,10 +8,10 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.videoplayer.client {
 	public class VideoPlayerPage : IPage {
-		internal List<UiPlayer> Players = new();
+		readonly internal List<UiPlayer> Players = new();
 
 
-		internal static string GetStaticKey()
+		static internal string GetStaticKey()
 			=> "video_player";
 
 		public string GetKey()
@@ -27,7 +27,7 @@ namespace api.nox.videoplayer.client {
 			return false;
 		}
 
-		internal static IPage OnGotoAction(IMenu menu, object[] context)
+		static internal IPage OnGotoAction(IMenu menu, object[] context)
 			=> new VideoPlayerPage {
 				_mId      = menu.GetId(),
 				_context  = context,
@@ -70,7 +70,7 @@ namespace api.nox.videoplayer.client {
 		public IVideoPlayer GetSelectedPlayer() {
 			var player = VideoPlayerManager.VideoPlayers.FirstOrDefault(p => p.GetId() == _selected);
 			if (player != null || VideoPlayerManager.VideoPlayers.Count <= 0) return player;
-			player    = VideoPlayerManager.VideoPlayers.FirstOrDefault();
+			player    = VideoPlayerManager.ActiveVideoPlayers.FirstOrDefault();
 			_selected = player?.GetId() ?? 0;
 			return player;
 		}
@@ -78,7 +78,7 @@ namespace api.nox.videoplayer.client {
 		private void OnUnRegistered(IVideoPlayer player) {
 			Remove(player);
 			if (player == null || player.GetId() != _selected) return;
-			var next = VideoPlayerManager.VideoPlayers.FirstOrDefault();
+			var next = VideoPlayerManager.ActiveVideoPlayers.FirstOrDefault();
 			_selected = next?.GetId() ?? 0;
 			OnUpdate();
 		}
@@ -92,7 +92,7 @@ namespace api.nox.videoplayer.client {
 		public void OnDisplay(IPage lastPage)
 			=> OnUpdate();
 
-		private void OnUpdate()
+		internal void OnUpdate()
 			=> _component?.UpdateUI();
 
 

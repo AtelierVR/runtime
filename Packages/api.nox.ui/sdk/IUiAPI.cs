@@ -38,9 +38,8 @@ namespace Nox.UI {
 		/// Create a main default menu.
 		/// </summary>
 		/// <param name="container"></param>
-		/// <param name="parent"></param>
 		/// <returns></returns>
-		public UniTask<IMenu> Make(RectTransform container, GameObject parent = null);
+		public UniTask<IMenu> Make(IMenuProvider container);
 
 		/// <summary>
 		/// Sends a goto event to the menu with the specified ID and key.

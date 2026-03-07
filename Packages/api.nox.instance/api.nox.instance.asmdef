@@ -13,7 +13,10 @@
         "Nox.Sessions",
         "Nox.Players",
         "Unity.TextMeshPro",
-        "Nox.CCK.Worlds"
+        "Nox.CCK.Worlds",
+        "Nox.CCK.Network",
+        "Nox.CCK.Sessions",
+        "Nox.Entities"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

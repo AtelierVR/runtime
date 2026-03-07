@@ -46,64 +46,6 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.3.2f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.world\src\obsolete\client\WorldClient.cs" />
-    <Compile Include="Packages\api.nox.world\src\scene_groups\AssetBundleRuntimeWorldGroup.cs" />
-    <Compile Include="Packages\api.nox.world\src\scene_groups\RuntimeWorldGroup.cs" />
-    <Compile Include="Packages\api.nox.world\src\search\SearchData.cs" />
-    <Compile Include="Packages\api.nox.world\src\client\WorldPage.cs" />
-    <Compile Include="Packages\api.nox.world\src\Client.cs" />
-    <Compile Include="Packages\api.nox.world\src\scene_groups\SceneGroupManager.cs" />
-    <Compile Include="Packages\api.nox.world\src\obsolete\client\WorldComportment.cs" />
-    <Compile Include="Packages\api.nox.world\src\base\WorldAsset.cs" />
-    <Compile Include="Packages\api.nox.world\src\network\update\UpdateWorldRequest.cs" />
-    <Compile Include="Packages\api.nox.world\src\obsolete\WorldCache.cs" />
-    <Compile Include="Packages\api.nox.world\src\network\search\AssetSearchResponse.cs" />
-    <Compile Include="Packages\api.nox.world\src\editor\WorldBuilderPanel.cs" />
-    <Compile Include="Packages\api.nox.world\src\network\Network.cs" />
-    <Compile Include="Packages\api.nox.world\src\network\create\CreateAssetRequest.cs" />
-    <Compile Include="Packages\api.nox.world\src\client\widget\HomeWidget.cs" />
-    <Compile Include="Packages\api.nox.world\src\search\Search.cs" />
-    <Compile Include="Packages\api.nox.world\src\client\WorldComponent.cs" />
-    <Compile Include="Packages\api.nox.world\src\scene_groups\WorldSetup.cs" />
-    <Compile Include="Packages\api.nox.world\src\editor\Notification.cs" />
-    <Compile Include="Packages\api.nox.world\src\obsolete\client\HomeWidgetComportment.cs" />
-    <Compile Include="Packages\api.nox.world\src\Main.cs" />
-    <Compile Include="Packages\api.nox.world\src\builder\BuildResultType.cs" />
-    <Compile Include="Packages\api.nox.world\src\search\SearchHandler.cs" />
-    <Compile Include="Packages\api.nox.world\src\builder\Builder.cs" />
-    <Compile Include="Packages\api.nox.world\src\editor\WorldManagerPanel.cs" />
-    <Compile Include="Packages\api.nox.world\src\client\InstanceComponent.cs" />
-    <Compile Include="Packages\api.nox.world\src\obsolete\SceneManager.cs" />
-    <Compile Include="Packages\api.nox.world\src\obsolete\WorldLoader.cs" />
-    <Compile Include="Packages\api.nox.world\src\search\SearchWorker.cs" />
-    <Compile Include="Packages\api.nox.world\src\network\search\SearchResponse.cs" />
-    <Compile Include="Packages\api.nox.world\src\search\SearchResult.cs" />
-    <Compile Include="Packages\api.nox.world\src\cache\Cache.cs" />
-    <Compile Include="Packages\api.nox.world\src\editor\WorldLoaderPanel.cs" />
-    <Compile Include="Packages\api.nox.world\src\editor\WorldDescriptorEditor.cs" />
-    <Compile Include="Packages\api.nox.world\src\scenes\RuntimeWorldInstance.cs" />
-    <Compile Include="Packages\api.nox.world\src\scene_groups\AssetRuntimeWorldGroup.cs" />
-    <Compile Include="Packages\api.nox.world\src\editor\Editor.cs" />
-    <Compile Include="Packages\api.nox.world\src\scenes\InstanceScene.cs" />
-    <Compile Include="Packages\api.nox.world\src\cache\Caching.cs" />
-    <Compile Include="Packages\api.nox.world\src\obsolete\client\WorldPage.cs" />
-    <Compile Include="Packages\api.nox.world\src\network\create\CreateWorldRequest.cs" />
-    <Compile Include="Packages\api.nox.world\src\obsolete\client\HomeWidget.cs" />
-    <Compile Include="Packages\api.nox.world\src\network\search\AssetSearchRequest.cs" />
-    <Compile Include="Packages\api.nox.world\src\base\World.cs" />
-    <Compile Include="Packages\api.nox.world\src\builder\BuildResult.cs" />
-    <Compile Include="Packages\api.nox.world\src\editor\WorldPublisherPanel.cs" />
-    <Compile Include="Packages\api.nox.world\src\builder\BuildData.cs" />
-    <None Include="Packages\api.nox.world\assets\api.nox.world\loader-styles.uss" />
-    <None Include="Packages\api.nox.world\assets\api.nox.world\world.uxml" />
-    <None Include="Packages\api.nox.world\assets\api.nox.world\manager.uxml" />
-    <None Include="Packages\api.nox.world\link.xml" />
-    <None Include="Packages\api.nox.world\assets\api.nox.world\builder.uxml" />
-    <None Include="Packages\api.nox.world\api.nox.world.asmdef" />
-    <None Include="Packages\api.nox.world\assets\api.nox.world\loader.uxml" />
-    <None Include="Packages\api.nox.world\assets\api.nox.world\notification.uxml" />
-    <None Include="Packages\api.nox.world\package.json" />
-    <None Include="Packages\api.nox.world\assets\api.nox.world\publisher.uxml" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.3.2f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -515,17 +457,14 @@
     <Reference Include="UnityEditor.WindowsStandalone.Extensions">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.3.2f1\Editor\Data\PlaybackEngines\WindowsStandaloneSupport\UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil.Pdb">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\Mono.Cecil.0.11.6\lib\netstandard2.0\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.VisualScripting.YamlDotNet">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.visualscripting@191c0d7e3b69\Editor\VisualScripting.Core\Dependencies\YamlDotNet\Unity.VisualScripting.YamlDotNet.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Posix">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.spoiledcat.git@5eb312ed44ac\Mono.Posix\Mono.Posix.dll</HintPath>
-    </Reference>
-    <Reference Include="BouncyCastle.Crypto">
-      <HintPath>D:\Projets\nox\runtime\Packages\nox.cck\Plugins\BouncyCastle.Crypto.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil">
-      <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.nuget.mono-cecil@ecb9724e46ff\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Collections.LowLevel.ILSupport">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.collections@aea9d3bd5e19\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.dll</HintPath>
@@ -545,11 +484,20 @@
     <Reference Include="sfw.net">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.spoiledcat.git@5eb312ed44ac\sfw\sfw.net.dll</HintPath>
     </Reference>
+    <Reference Include="BouncyCastle.Cryptography">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\BouncyCastle.Cryptography.2.6.2\lib\netstandard2.0\BouncyCastle.Cryptography.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Plastic.Antlr3.Runtime">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.collab-proxy@3351acaba9c9\Lib\Editor\Unity.Plastic.Antlr3.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="SimpleBase">
       <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\SimpleBase.1.3.1\lib\netstandard1.3\SimpleBase.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\Mono.Cecil.0.11.6\lib\netstandard2.0\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\Mono.Cecil.0.11.6\lib\netstandard2.0\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Plastic.Newtonsoft.Json">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.collab-proxy@3351acaba9c9\Lib\Editor\Unity.Plastic.Newtonsoft.Json.dll</HintPath>
@@ -580,6 +528,9 @@
     </Reference>
     <Reference Include="NuGetForUnity.PluginAPI">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.github-glitchenzo.nugetforunity@b8a65750503c\Editor\PluginAPI\NuGetForUnity.PluginAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\Mono.Cecil.0.11.6\lib\netstandard2.0\Mono.Cecil.Rocks.dll</HintPath>
     </Reference>
     <Reference Include="System.Reflection.TypeExtensions">
       <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\System.Reflection.TypeExtensions.4.1.0\lib\netstandard1.5\System.Reflection.TypeExtensions.dll</HintPath>
@@ -1030,6 +981,13 @@
       <Project>{2655a136-687c-f80b-0a11-f37c61d97a19}</Project>
       <Name>Nox.CCK.Sessions</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Network.csproj">
+      <Project>{bca56c8d-40b6-af13-a4c1-b2489c8358d5}</Project>
+      <Name>Nox.CCK.Network</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Packages\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

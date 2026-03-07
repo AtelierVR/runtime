@@ -536,3 +536,5 @@ namespace api.nox.relay {
 			// TODO: Implement reconnection logic
 			return false;
 		}
+	}
+}

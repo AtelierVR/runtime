@@ -10,7 +10,7 @@ namespace api.nox.user.network {
 		internal string FactorCode;
 		internal string PublicKey;
 
-		public string ToJson() {
+		public JObject ToJson() {
 			var obj = new JObject {
 				["identifier"] = Identifier,
 				["password"]   = Password,
@@ -22,7 +22,7 @@ namespace api.nox.user.network {
 			if (!string.IsNullOrEmpty(FactorCode))
 				obj["factor_code"] = FactorCode;
 
-			return obj.ToString();
+			return obj;
 		}
 
 		public override string ToString()

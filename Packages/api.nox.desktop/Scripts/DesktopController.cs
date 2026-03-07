@@ -8,17 +8,16 @@ using Nox.Avatars.Camera;
 using Nox.Avatars.Controllers;
 using Nox.Avatars.Parameters;
 using Nox.Avatars.Players;
+using Nox.Avatars.Runtime.Network;
 using Nox.CCK.Avatars;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Network;
 using Nox.CCK.Players;
-using Nox.CCK.Properties;
 using Nox.CCK.Utils;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
 using Nox.Controllers;
-using Nox.Players;
 using Nox.Users;
 using UnityEngine.EventSystems;
 
@@ -41,11 +40,13 @@ namespace api.nox.desktop {
 
 		private float _currentZoom = 60f;
 
+		public DesktopMenuProvider Menu;
+
 		private DesktopController()
 			=> _avatarParameters = new Dictionary<string, object> {
-				["source"]  = this,
+				["source"] = this,
 				["desktop"] = true,
-				["local"]   = true
+				["local"] = true
 			};
 
 		private readonly Dictionary<string, object> _avatarParameters;
@@ -64,9 +65,9 @@ namespace api.nox.desktop {
 		/// <returns></returns>
 		private static bool IsBetterThanCurrent() {
 			var controller = ControllerAPI.Current;
-			return controller               == null
+			return controller == null
 				|| controller.GetPriority() < DefaultPriority
-				|| controller.GetId()       == DefaultId;
+				|| controller.GetId() == DefaultId;
 		}
 
 		/// <summary>
@@ -75,14 +76,14 @@ namespace api.nox.desktop {
 		/// <returns></returns>
 		private static bool IsCurrent() {
 			var controller = ControllerAPI.Current;
-			return controller         != null
+			return controller != null
 				&& controller.GetId() == DefaultId;
 		}
 
 		/// <summary>
 		/// Remove the current proxy if it is the Desktop proxy.
 		/// </summary>
-		internal static async UniTask<bool> Remove() {
+		static async internal UniTask<bool> Remove() {
 			if (!IsCurrent()) return false;
 			return await ControllerAPI.SetCurrent(null);
 		}
@@ -91,7 +92,7 @@ namespace api.nox.desktop {
 		/// Create the Desktop proxy if it is not already created.
 		/// </summary>
 		/// <returns></returns>
-		internal static async UniTask<bool> Make() {
+		static async internal UniTask<bool> Make() {
 			if (!IsBetterThanCurrent()) return false;
 
 			var prefab = Client.CoreAPI.AssetAPI.GetAsset<GameObject>("desktop_proxy.prefab");
@@ -101,27 +102,19 @@ namespace api.nox.desktop {
 			}
 
 			var instance = Instantiate(prefab);
-			var desktop  = instance.GetComponent<DesktopController>();
+			var desktop = instance.GetComponent<DesktopController>();
 
 			if (!desktop) {
 				Logger.LogError("Failed to get desktop proxy component");
-				Destroy(instance);
+				instance.Destroy();
 				return false;
 			}
-
-			desktop.player.menu = await Client.UiAPI.Make(desktop.player.menuContainer);
-
-			if (desktop.player.menu == null) {
-				Logger.LogError("Failed to create desktop proxy menu");
-				Destroy(instance);
-				return false;
-			}
-
-			desktop.player.menu.SetActive(false);
-
+			
+			await desktop.Menu.Generate();
+			
 			if (!await ControllerAPI.SetCurrent(desktop)) {
 				Logger.LogError("Failed to set Desktop proxy as current");
-				Destroy(instance);
+				instance.Destroy();
 				return false;
 			}
 
@@ -148,23 +141,23 @@ namespace api.nox.desktop {
 				? session.LocalPlayer
 				: null;
 			var playerAvatar = localPlayer as ILocalPlayerAvatar;
-			
+
 			Logger.LogDebug($"Loading avatar for identifier {identifier?.ToString() ?? "null"}");
 
 			if (identifier == null || !identifier.IsValid()) {
 				Logger.LogWarning($"Invalid avatar identifier: {identifier?.ToString() ?? "null"}");
 				if (playerAvatar != null)
-					await playerAvatar.OnAvatarFailed("Invalid avatar identifier.");
+					await playerAvatar.OnAvatarFailed(new NullReferenceException("Invalid avatar identifier"));
 				return null;
 			}
-			
+
 			if (identifier.Equals(localPlayer?.Identifier)) {
 				Logger.LogDebug("Avatar identifier matches player identifier, no need to load.");
 				if (playerAvatar != null)
 					await playerAvatar.OnAvatarReady();
 				return _attachedRuntimeAvatar;
 			}
-			
+
 			if (identifier.Equals(_attachedRuntimeAvatar?.GetIdentifier())) {
 				Logger.LogDebug("Avatar identifier matches current avatar, no need to load.");
 				if (playerAvatar != null)
@@ -175,15 +168,16 @@ namespace api.nox.desktop {
 			_avatarLoadingCts?.Cancel();
 			_avatarLoadingCts = new CancellationTokenSource();
 
-			var asset = (await Client.AvatarAPI.SearchAssets(
-						identifier.ToString(),
-						Client.AvatarAPI.MakeAssetSearchRequest()
-							.SetEngines(new[] { EngineExtensions.CurrentEngine.GetEngineName() })
-							.SetPlatforms(new[] { PlatformExtensions.CurrentPlatform.GetPlatformName() })
-							.SetLimit(1)
-							.SetVersions(new[] { identifier.GetVersion() })
-					)
-					.AttachExternalCancellation(_avatarLoadingCts.Token)).GetAssets()
+			var req = new AssetSearchRequest {
+				Engines = new[] { EngineExtensions.CurrentEngine.GetEngineName() },
+				Platforms = new[] { PlatformExtensions.CurrentPlatform.GetPlatformName() },
+				Versions = new[] { identifier.GetVersion() },
+				Limit = 1
+			};
+
+			var asset = (await Client.AvatarAPI.SearchAssets(identifier, req)
+					.AttachExternalCancellation(_avatarLoadingCts.Token))
+				.GetAssets()
 				.FirstOrDefault();
 
 			if (_avatarLoadingCts.IsCancellationRequested)
@@ -195,7 +189,7 @@ namespace api.nox.desktop {
 				err.SetIdentifier(identifier);
 				await SetAvatar(err);
 				if (playerAvatar != null)
-					await playerAvatar.OnAvatarFailed("Avatar asset not found.");
+					await playerAvatar.OnAvatarFailed(new NullReferenceException("Avatar asset not found"));
 				return null;
 			}
 
@@ -226,7 +220,7 @@ namespace api.nox.desktop {
 				err.SetIdentifier(identifier);
 				await SetAvatar(err);
 				if (playerAvatar != null)
-					await playerAvatar.OnAvatarFailed("Failed to load avatar from cache.");
+					await playerAvatar.OnAvatarFailed(new Exception("Failed to load avatar from cache"));
 				return null;
 			}
 
@@ -247,10 +241,11 @@ namespace api.nox.desktop {
 			=> DefaultPriority;
 
 		public DesktopPlayer player;
-		public EventSystem   eventSystem;
+		public EventSystem eventSystem;
 
 		public void Dispose() {
 			Client.CoreAPI.EventAPI.Unsubscribe(_onUserUpdate);
+			Menu.Dispose();
 			_onUserUpdate = null;
 			_avatarLoadingCts?.Cancel();
 			_avatarLoadingCts?.Dispose();
@@ -390,7 +385,8 @@ namespace api.nox.desktop {
 			=> Parts
 				.ToDictionary(
 					p => p.Key,
-					p => {
+					p =>
+					{
 						var rb = p.Value.GetComponent<Rigidbody>();
 						return new TransformObject(p.Value, rb);
 					}
@@ -412,13 +408,13 @@ namespace api.nox.desktop {
 
 			if (rb && !tr.IsSameVelocity(rb.linearVelocity))
 				rb.linearVelocity = tr.GetVelocity();
-			if (rb && !tr.IsSameAngularVelocity(rb.angularVelocity))
-				rb.angularVelocity = tr.GetAngularVelocity();
+			if (rb && !tr.IsSameAngular(rb.angularVelocity))
+				rb.angularVelocity = tr.GetAngular();
 		}
 
-		private IRuntimeAvatar          _attachedRuntimeAvatar;
+		private IRuntimeAvatar _attachedRuntimeAvatar;
 		private CancellationTokenSource _avatarLoadingCts;
-		private EventSubscription       _onUserUpdate;
+		private EventSubscription _onUserUpdate;
 
 		public IRuntimeAvatar GetAvatar()
 			=> _attachedRuntimeAvatar;
@@ -517,7 +513,7 @@ namespace api.nox.desktop {
 
 			// Calculer le nouveau zoom
 			_currentZoom -= scrollInput * zoomSpeed * 10f;
-			_currentZoom =  Mathf.Clamp(_currentZoom, minZoom, maxZoom);
+			_currentZoom = Mathf.Clamp(_currentZoom, minZoom, maxZoom);
 
 			// Appliquer le zoom à la caméra
 			if (player?.headCamera)
@@ -543,7 +539,7 @@ namespace api.nox.desktop {
 				switch (n) {
 					case "Grounded": {
 						var grounded = player.IsGrounded();
-						var value    = param.Get().ToBool();
+						var value = param.Get().ToBool();
 						if (value == grounded) continue;
 						param.Set(grounded);
 						break;
@@ -551,7 +547,7 @@ namespace api.nox.desktop {
 					case "VelocityX": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
-						var value         = param.Get().ToFloat();
+						var value = param.Get().ToFloat();
 						if (Mathf.Approximately(value, localVelocity.x)) continue;
 						param.Set(localVelocity.x);
 						break;
@@ -559,7 +555,7 @@ namespace api.nox.desktop {
 					case "VelocityY": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
-						var value         = param.Get().ToFloat();
+						var value = param.Get().ToFloat();
 						if (Mathf.Approximately(value, localVelocity.y)) continue;
 						param.Set(localVelocity.y);
 						break;
@@ -567,7 +563,7 @@ namespace api.nox.desktop {
 					case "VelocityZ": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
-						var value         = param.Get().ToFloat();
+						var value = param.Get().ToFloat();
 						if (Mathf.Approximately(value, localVelocity.z)) continue;
 						param.Set(localVelocity.z);
 						break;
@@ -575,21 +571,21 @@ namespace api.nox.desktop {
 					case "Velocity": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
 						var localVelocity = transform.InverseTransformDirection(worldVelocity);
-						var value         = param.Get().ToVector3();
+						var value = param.Get().ToVector3();
 						if (value == localVelocity) continue;
 						param.Set(localVelocity);
 						break;
 					}
 					case "VelocityMagnitude": {
 						var worldVelocity = player.body?.linearVelocity ?? Vector3.zero;
-						var magnitude     = worldVelocity.magnitude;
-						var value         = param.Get().ToFloat();
+						var magnitude = worldVelocity.magnitude;
+						var value = param.Get().ToFloat();
 						if (Mathf.Approximately(value, magnitude)) continue;
 						param.Set(magnitude);
 						break;
 					}
 					case "tracking/head/rotation": {
-						var cRot  = player.headCamera.transform.rotation;
+						var cRot = player.headCamera.transform.rotation;
 						var value = param.Get().ToQuaternion();
 						if (Quaternion.Angle(value, cRot) < 0.001f) continue;
 						param.Set(cRot);

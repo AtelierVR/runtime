@@ -119,7 +119,7 @@ namespace api.nox.user.client {
 				callback?.Invoke(server);
 				return server;
 			} catch (Exception e) {
-				Nox.CCK.Utils.Logger.LogException(new Exception($"Failed to fetch server at {address}", e), this, tag: "AuthServerComponent");
+				Nox.CCK.Utils.Logger.LogError(new Exception($"Failed to fetch server at {address}", e), this, tag: "AuthServerComponent");
 				return null;
 			}
 		}

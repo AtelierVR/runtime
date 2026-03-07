@@ -36,6 +36,16 @@
       "version": ">=1.0.0"
     }
   ],
+  "constraints": [
+    {
+      "type": "after",
+      "id": "settings"
+    },
+    {
+      "type": "after",
+      "id": "ui"
+    }
+  ],
   "entrypoints": {
     "main": [
       "api.nox.microphone.Main"

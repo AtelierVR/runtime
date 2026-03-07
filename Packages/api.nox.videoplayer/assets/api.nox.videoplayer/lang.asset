@@ -19,4 +19,11 @@ MonoBehaviour:
       value: "{1}:{2}"
     - key: video_player.progress.hours
       value: "{0}:{1}:{2}"
-
+    - key: video_player.title
+      value: "{0}"
+    - key: video_player.subtitle
+      value: "{0}"
+    - key: video_player.no_title
+      value: ""
+    - key: video_player.no_subtitle
+      value: ""

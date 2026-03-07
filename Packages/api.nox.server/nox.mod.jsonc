@@ -36,7 +36,7 @@
       "version": ">=1.0.0"
     },
     {
-      "id": "user",
+      "id": "users",
       "type": "recommends",
       "version": ">=1.0.0"
     }

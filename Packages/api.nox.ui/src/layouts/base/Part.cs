@@ -29,7 +29,7 @@ namespace api.nox.ui.layouts {
 
 		public virtual void RemoveElement(string key) {
 			foreach (var el in GetChildren()) {
-				if (el.GetData().key != key) continue;
+				if (el.GetData().Key != key) continue;
 				#if UNITY_EDITOR
 				if (Application.isPlaying) Destroy(el.gameObject);
 				else UnityEditor.EditorApplication.delayCall += () => DestroyImmediate(el.gameObject);
@@ -43,7 +43,7 @@ namespace api.nox.ui.layouts {
 			=> AddElement(element, null);
 
 		public virtual async UniTask AddElement(NavigationData data, GameObject prefab = null) {
-			var elementComponent = GetChildren().FirstOrDefault(e => e.GetData().key == data.key);
+			var elementComponent = GetChildren().FirstOrDefault(e => e.GetData().Key == data.Key);
 
 			if (!elementComponent) {
 				prefab = await GetPrefab();

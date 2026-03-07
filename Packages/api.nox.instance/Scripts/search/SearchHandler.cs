@@ -43,7 +43,7 @@ namespace api.nox.instance.search {
 				var features = value["features"]?.Values<string>().ToArray() ?? Array.Empty<string>();
 				var search   = value["search"]?.ToObject<bool>()             ?? false;
 				if (!(search && features.Contains("instance"))) continue;
-				x2.Add(new SearchWorker { Title = title, ServerAddress = address });
+				x2.Add(new SearchWorker { Title = title, Server = address });
 			}
 
 			return x2.ToArray();

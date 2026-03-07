@@ -30,7 +30,7 @@ namespace api.nox.instance {
 
 		internal static IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
-				.GetMod("user")
+				.GetMod("users")
 				?.GetInstance<IUserAPI>();
 
 		internal static IWorldAPI WorldAPI
@@ -38,12 +38,12 @@ namespace api.nox.instance {
 				.GetMod("world")
 				?.GetInstance<IWorldAPI>();
 
-		internal static ISearchAPI SearchAPI
+		static internal ISearchAPI SearchAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("search")
 				?.GetInstance<ISearchAPI>();
 
-		internal static ISessionAPI SessionAPI
+		static internal ISessionAPI SessionAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("session")
 				?.GetInstance<ISessionAPI>();

@@ -114,7 +114,7 @@ namespace api.nox.user.network {
 		public string[] GetTags()
 			=> _tags ?? Array.Empty<string>();
 
-		public string ToJson() {
+		public JObject ToJson() {
 			var obj = new JObject();
 
 			if (_username is { Length: > 0 })
@@ -169,7 +169,7 @@ namespace api.nox.user.network {
 			if (_tags is { Length: > 0 })
 				obj["tags"] = new JArray(_tags.ToArray<object>());
 
-			return obj.ToString();
+			return obj;
 		}
 
 		public static UpdateCurrentUserRequest FromBase(IUpdateCurrentUserRequest request)

@@ -46,7 +46,7 @@
       "version": ">=1.0.0"
     },
     {
-      "id": "user",
+      "id": "users",
       "type": "depends",
       "version": ">=1.0.0"
     },
@@ -54,6 +54,25 @@
       "id": "keybinding",
       "type": "depends",
       "version": ">=1.0.0"
+    },
+    {
+      "id": "session",
+      "type": "depends",
+      "version": ">=1.0.0"
+    }
+  ],
+  "constraints": [
+    {
+      "type": "after",
+      "id": "ui"
+    },
+    {
+      "type": "after",
+      "id": "avatar"
+    },
+    {
+      "type": "after",
+      "id": "users"
     }
   ],
   "entrypoints": {

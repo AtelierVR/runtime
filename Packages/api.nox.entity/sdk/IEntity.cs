@@ -5,7 +5,7 @@ namespace Nox.Entities {
 		/// </summary>
 		/// <returns></returns>
 		public int Id { get; }
-
+		
 		/// <summary>
 		/// Get all properties of the entity.
 		/// </summary>

@@ -75,7 +75,7 @@ namespace api.nox.search.client {
 					try {
 						await result;
 					} catch (Exception ex) {
-						Logger.LogException(ex);
+						Logger.LogError(ex);
 						Status      = WorkerTaskStatus.Faulted;
 						MessageKey  = "search.worker.error";
 						MessageArgs = new[] { ex.Message };
@@ -108,15 +108,15 @@ namespace api.nox.search.client {
 				return;
 			}
 
-			if (Result.IsError()) {
+			if (Result.IsError) {
 				Status      = WorkerTaskStatus.Faulted;
 				MessageKey  = "search.worker.error";
-				MessageArgs = new[] { Result.GetError() };
+				MessageArgs = new[] { Result.Error };
 				page.OnWorkerTaskUpdate.Invoke(this);
 				return;
 			}
 
-			var data = Result.GetData();
+			var data = Result.Data;
 			if (data == null || data.Length == 0) {
 				Status      = WorkerTaskStatus.CompletedWithoutResult;
 				MessageKey  = "search.worker.empty";

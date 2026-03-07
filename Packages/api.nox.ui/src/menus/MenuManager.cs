@@ -13,7 +13,7 @@ using Object = UnityEngine.Object;
 namespace api.nox.ui {
 	public class MenuManager {
 		private readonly List<IMenu> _menus = new();
-		private readonly Client      _client;
+		private readonly Client _client;
 
 		public MenuManager(Client client)
 			=> _client = client;
@@ -25,14 +25,16 @@ namespace api.nox.ui {
 			=> (T)_menus.Find(m => m.GetId() == id && m is T);
 
 		public void Add(IMenu menu) {
-			if (Has(menu.GetId())) return;
+			if (Has(menu.GetId()))
+				return;
 			_menus.Add(menu);
 			_client.CoreAPI.EventAPI.Emit("menu_added", menu);
 		}
 
 		public void Remove(int id) {
 			var menu = Get<IMenu>(id);
-			if (menu == null) return;
+			if (menu == null)
+				return;
 
 			var canRemove = true;
 			_client.CoreAPI.EventAPI.Emit("menu_request_remove", menu, new Action<object[]>(OnMenuRequestRemove));
@@ -58,14 +60,17 @@ namespace api.nox.ui {
 			_menus.Clear();
 		}
 
-		public async UniTask<Menu> Make(RectTransform container, GameObject parent = null) {
+		public async UniTask<Menu> Make(IMenuProvider container) {
+			if (container == null) {
+				Logger.LogError("Container is null");
+				return null;
+			}
+
 			var prefab = await PageManager.GetAssetAsync<GameObject>("prefabs/menu.prefab");
-
-			Logger.LogDebug($"Instantiating menu {prefab?.name ?? "null"} into {container?.name ?? "null"}");
-
-			var instance = Object.Instantiate(prefab, container);
+			var instance = Object.Instantiate(prefab, container.Container);
 			var menu     = instance?.GetComponent<Menu>();
-			if (menu == null) {
+			
+			if (!menu) {
 				Logger.LogError("Failed to get menu component from prefab");
 				Object.Destroy(instance);
 				return null;
@@ -73,7 +78,8 @@ namespace api.nox.ui {
 
 			menu.Client          = _client;
 			menu.gameObject.name = $"[{menu.GetType().Name}_{menu.GetInstanceID()}]";
-			menu.parent          = parent ?? menu.gameObject;
+			menu.Provider          = container;
+			
 			Add(menu);
 			return menu;
 		}

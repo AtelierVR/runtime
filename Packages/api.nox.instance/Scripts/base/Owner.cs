@@ -9,7 +9,7 @@ namespace api.nox.instance {
 		
 
 		public string GetCategory()
-			=> "user";
+			=> "users";
 
 		public string GetId()
 			=> _id;

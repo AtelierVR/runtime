@@ -11,7 +11,7 @@ using Object = UnityEngine.Object;
 namespace api.nox.user.client {
 	public class UserPage : IPage {
 		internal static string GetStaticKey()
-			=> "user";
+			=> "users";
 
 		public string GetKey()
 			=> GetStaticKey();

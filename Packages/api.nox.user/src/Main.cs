@@ -1,24 +1,27 @@
 using System.IO;
+using System.Threading;
 using api.nox.user.network;
 using api.nox.user.search;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Network;
 using Nox.CCK.Users;
 using Nox.CCK.Utils;
 using Nox.Network;
 using Nox.Search;
 using Nox.Servers;
 using Nox.Users;
+using UnityEngine.Networking;
 
 namespace api.nox.user {
 	public class Main : IMainModInitializer, IUserAPI {
-		internal static Main           Instance;
-		internal        IMainModCoreAPI CoreAPI;
-		internal        Network        Network;
-		private         LanguagePack   _language;
-		private         Search         _search;
+		internal static Main Instance;
+		internal IMainModCoreAPI CoreAPI;
+		internal Network Network;
+		private LanguagePack _language;
+		private Search _search;
 
 		public static IServerAPI ServerAPI
 			=> Instance.CoreAPI.ModAPI
@@ -36,9 +39,10 @@ namespace api.nox.user {
 				?.GetInstance<ISearchAPI>();
 
 		public async UniTask OnInitializeMainAsync(IMainModCoreAPI api) {
-			CoreAPI   = api;
-			Instance  = this;
-			Network   = new Network();
+			CoreAPI = api;
+			Instance = this;
+			RequestNode.OnCreated.AddListener(OnBeforeRequest);
+			Network = new Network();
 			_language = api.AssetAPI.GetAsset<LanguagePack>("lang.asset");
 			LanguageManager.AddPack(_language);
 
@@ -52,17 +56,28 @@ namespace api.nox.user {
 			else Logger.LogDebug("User found: " + user.GetUsername());
 		}
 
+		private async UniTask OnBeforeRequest(string address, UnityWebRequest request) {
+			var token = await GetToken(address);
+			if (token != null)
+				request.SetRequestHeader("Authorization", token.ToHeader());
+
+			var uid = GetCurrent()?.ToIdentifier()?.ToString();
+			if (!string.IsNullOrEmpty(uid))
+				request.SetRequestHeader("X-Nox-User", uid);
+		}
+
 		public void OnPostInitializeMain() { }
 
 		public void OnDisposeMain() {
+			RequestNode.OnCreated.RemoveListener(OnBeforeRequest);
 			_search.Dispose();
-			_search = null;
 			Network.Dispose();
-			Network = null;
 			LanguageManager.RemovePack(_language);
+			_search = null;
+			Network = null;
 			_language = null;
-			CoreAPI   = null;
-			Instance  = null;
+			CoreAPI = null;
+			Instance = null;
 		}
 
 		public ICurrentUser GetCurrent()

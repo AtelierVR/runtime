@@ -30,11 +30,11 @@ namespace api.nox.ui.layouts {
 
 		private void OnClick() {
 			if (data.executionType == NavigationExecution.Event)
-				PageManager.GetCoreAPI().EventAPI.Emit(data.execution, data.ExecutionArguments);
+				PageManager.GetCoreAPI().EventAPI.Emit(data.Action, data.ExecutionArguments);
 			else if (data.executionType == NavigationExecution.Goto)
-				PageManager.SendGoto(menu.GetId(), data.execution, data.ExecutionArguments);
+				PageManager.SendGoto(menu.GetId(), data.Action, data.ExecutionArguments);
 			else if (data.executionType == NavigationExecution.Action)
-				PageManager.SendAction(menu.GetId(), data.execution);
+				PageManager.SendAction(menu.GetId(), data.Action);
 		}
 
 		private void Start()
@@ -81,7 +81,7 @@ namespace api.nox.ui.layouts {
 
 			if (button) {
 				button.onClick.RemoveListener(OnClick);
-				button.interactable = d.flags.HasFlag(NavigationFlags.Interactive);
+				button.interactable = d.Flags.HasFlag(NavigationFlags.Interactive);
 				if (button.interactable)
 					button.onClick.AddListener(OnClick);
 			}
@@ -99,8 +99,8 @@ namespace api.nox.ui.layouts {
 				return;
 			}
 
-			if (!texture && d.iconPath.IsValid()) {
-				image.sprite = await PageManager.GetAssetAsync<Sprite>(d.iconPath);
+			if (!texture && d.Icon.IsValid()) {
+				image.sprite = await PageManager.GetAssetAsync<Sprite>(d.Icon);
 				image.gameObject.SetActive(image.sprite);
 				if (image.sprite) return;
 			}

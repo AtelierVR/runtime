@@ -22,7 +22,7 @@ namespace api.nox.server {
 
 		internal static IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
-				.GetMod("user")
+				.GetMod("users")
 				.GetInstance<IUserAPI>();
 
 		internal static INetworkAPI NetworkAPI

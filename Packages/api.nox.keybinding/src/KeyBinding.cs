@@ -72,7 +72,7 @@ namespace api.nox.keybinding
 					catch (Exception e)
 					{
 						Logger.LogError($"Error invoking action {action.Method.Name}: {e.Message}");
-						Logger.LogException(e);
+						Logger.LogError(e);
 					}
 				}
 			);

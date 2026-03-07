@@ -59,7 +59,7 @@ namespace Nox.CCK.Worlds.Scenes {
 
 			var module = modules.Length switch {
 				1 => modules.FirstOrDefault(),
-				0 => descriptor.GetAnchor().AddComponent<ScenesWorldModule>(),
+				0 => descriptor.Anchor.AddComponent<ScenesWorldModule>(),
 				_ => null
 			};
 

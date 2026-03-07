@@ -24,7 +24,7 @@ namespace api.nox.table {
 
 		internal static IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
-				.GetMod("user")
+				.GetMod("users")
 				?.GetInstance<IUserAPI>();
 
 		internal Network Network;

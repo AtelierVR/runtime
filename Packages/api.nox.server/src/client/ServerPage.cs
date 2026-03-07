@@ -1,4 +1,5 @@
 using System;
+using api.nox.server.network;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Events;
 using Nox.Servers;
@@ -76,7 +77,7 @@ namespace api.nox.server.client {
 		private async UniTask Refresh(bool load) {
 			if (_isLoading) return;
 			_isLoading = true;
-			Server     = await Main.Instance.Network.Fetch(_address);
+			Server     = await Network.Fetch(_address);
 			_isLoading = false;
 			if (load) _component.UpdateContent(Server);
 		}

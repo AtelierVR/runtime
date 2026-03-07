@@ -5,8 +5,10 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Nox.CCK.Language;
+using Nox.CCK.Sessions;
 using Nox.CCK.Utils;
 using Nox.Instances;
+using Nox.Sessions;
 using Nox.Users;
 using Nox.Worlds;
 using UnityEngine;
@@ -17,26 +19,34 @@ using Transform = UnityEngine.Transform;
 
 namespace api.nox.instance.client {
 	public class InstanceComponent : MonoBehaviour {
-		public  GameObject              withThumbnail;
-		public  GameObject              withoutThumbnail;
-		public  Image                   thumbnail;
-		public  TextLanguage            title;
-		public  TextLanguage            identifier;
-		public  TextLanguage            label;
-		public  Image                   labelIcon;
-		public  RectTransform           content;
-		public  InstancePage            Page;
+		public GameObject withThumbnail;
+		public GameObject withoutThumbnail;
+		public Image thumbnail;
+		public TextLanguage title;
+		public TextLanguage identifier;
+		public TextLanguage label;
+		public Image labelIcon;
+		public RectTransform content;
+		public InstancePage Page;
 		private CancellationTokenSource _thumbnailTokenSource;
 		private CancellationTokenSource _playerListTokenSource;
-		public  RectTransform           playerList;
-		public  GameObject              playerInfobox;
-		public  GameObject              playerListContainer;
-		public  GameObject              descriptionContainer;
-		public  TextLanguage            descriptionText;
-		public  RectTransform           actions;
-		public  Image                   joinIcon;
-		public  TextLanguage            joinLabel;
-		public  Button                  joinButton;
+		public RectTransform playerList;
+		public GameObject playerInfobox;
+		public GameObject playerListContainer;
+		public GameObject descriptionContainer;
+		public TextLanguage descriptionText;
+		public RectTransform actions;
+		public Image joinIcon;
+		public TextLanguage joinLabel;
+		public Button joinButton;
+
+		// Cache Logic
+		private bool _isCachedHover;
+		private string _lastTextureCaching = "icons/0.png";
+		public Image cacheIcon;
+		public Button cacheButton;
+		public Slider cacheProgress;
+		public TextLanguage cacheLabel;
 
 		public void UpdateError(string error) {
 			title.UpdateText("instance.error");
@@ -61,10 +71,11 @@ namespace api.nox.instance.client {
 		}
 
 		public void UpdateContent(IInstance instance, IWorld world, IWorldAsset asset) {
-			if (instance == null) return;
+			if (instance == null)
+				return;
 
-			title.UpdateText("instance.title", new[] { instance.GetTitle() });
-			label.UpdateText("instance.about.title", new[] { instance.GetTitle() ?? instance.ToIdentifier().ToString() });
+			title.UpdateText("instance.title", new[] { instance.GetTitle() ?? world?.Title ?? instance.ToIdentifier().ToString() });
+			label.UpdateText("instance.about.title", new[] { instance.GetTitle() ?? world?.Title ?? instance.ToIdentifier().ToString() });
 			identifier.UpdateText(
 				"instance.identifier", new[] {
 					instance.ToIdentifier().ToString(),
@@ -73,26 +84,37 @@ namespace api.nox.instance.client {
 				}
 			);
 
-			if (!string.IsNullOrEmpty(instance.GetDescription())) {
-				descriptionText.SetMarkdown(instance.GetDescription());
+			var description = instance.GetDescription();
+			if (string.IsNullOrEmpty(description) && world != null)
+				description = world.Description;
+
+			if (!string.IsNullOrEmpty(description)) {
+				descriptionText.SetMarkdown(description);
 				descriptionContainer.SetActive(true);
-			} else descriptionContainer.SetActive(false);
+			} else
+				descriptionContainer.SetActive(false);
 
 
-			UpdateThumbnail(instance).Forget();
+			UpdateThumbnail(instance, world).Forget();
 			UpdatePlayerList(instance).Forget();
+			UpdateJoinButton(instance);
+			HoverCache(_isCachedHover);
 		}
 
-		private async UniTask UpdateThumbnail(IInstance instance) {
+		private async UniTask UpdateThumbnail(IInstance instance, IWorld world) {
 			if (_thumbnailTokenSource != null) {
 				_thumbnailTokenSource?.Cancel();
 				_thumbnailTokenSource?.Dispose();
 			}
 
 			_thumbnailTokenSource = new CancellationTokenSource();
-			if (!string.IsNullOrEmpty(instance?.GetThumbnailUrl())) {
+			var url = instance?.GetThumbnailUrl();
+			if (string.IsNullOrEmpty(url) && world != null)
+				url = world.Thumbnail;
+
+			if (!string.IsNullOrEmpty(url)) {
 				var texture = await Main.NetworkAPI
-					.FetchTexture(instance.GetThumbnailUrl())
+					.FetchTexture(url)
 					.AttachExternalCancellation(_thumbnailTokenSource.Token);
 				if (texture) {
 					thumbnail.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
@@ -112,18 +134,160 @@ namespace api.nox.instance.client {
 			_thumbnailTokenSource = null;
 		}
 
-		private void OnJoinClicked()
-			=> Main.SessionAPI.TryMake(
-				"external:" + Page.Instance.GetConnectionData().GetMethod(),
+		#region Cache Logic
+
+		public void UpdateDownloading((bool, float) download) {
+			if (download.Item1) {
+				cacheProgress.value = download.Item2;
+			} else
+				cacheProgress.value = 0;
+
+			HoverCache(_isCachedHover);
+		}
+
+		private void HoverCache(bool isHover) {
+			_isCachedHover = isHover;
+			var texture = ((Page.InCache() ? 1 : 0) << 2)
+				| ((Page.IsDownloading().Item1 ? 1 : 0) << 1)
+				| ((_isCachedHover ? 1 : 0) << 0);
+			if (texture > 5)
+				texture -= 4;
+			if (!Page.IsDownloading().Item1)
+				cacheProgress.value = 0;
+
+			// 0 - | 0 | 0 | 0 | neutral (not hovered, not downloaded)
+			// 1 - | 0 | 0 | 1 | can be downloaded (hovered, not downloaded)
+			// 2 - | 0 | 1 | 0 | downloading (not hovered, downloading)
+			// 3 - | 0 | 1 | 1 | cancel download (hovered, downloading)
+			// 4 - | 1 | 0 | 0 | downloaded (not hovered, downloaded)
+			// 5 - | 1 | 0 | 1 | remove from cache (hovered, downloaded)
+			// 6 - | 1 | 1 | 0 | re-downloading (not hovered, re-downloading) (set to 2)
+			// 7 - | 1 | 1 | 1 | cancel re-download (hovered, re-downloading) (set to 3)
+
+			if (_lastTextureCaching != $"ui:icons/cache{texture}.png")
+				cacheIcon.sprite = Client.GetAsset<Sprite>(_lastTextureCaching = $"ui:icons/cache{texture}.png");
+
+			cacheLabel.UpdateText(
+				"instance.cache."
+				+ new[] {
+					"none",
+					"add",
+					"downloading",
+					"cancel",
+					"downloaded",
+					"remove"
+				}[texture]
+			);
+		}
+
+		private void OnCacheClickedAsync() {
+			if (Page.IsDownloading().Item1) {
+				Page.CancelDownload();
+				return;
+			}
+
+			if (Page.InCache()) {
+				Page.RemoveDownload();
+				return;
+			}
+
+			Page.DownloadAsset();
+			HoverCache(_isCachedHover);
+		}
+
+		#endregion
+
+		public void UpdateJoinButton(IInstance instance) {
+			if (instance == null) {
+				joinButton.interactable = false;
+				joinLabel.UpdateText("instance.join.error");
+				return;
+			}
+
+			// Vérifier si on a des données de connexion
+			var connectionData = instance.GetConnectionData();
+			if (connectionData == null) {
+				joinButton.interactable = false;
+				joinLabel.UpdateText("instance.join.not_joinable");
+				return;
+			}
+
+			// Vérifier si on est déjà connecté à cette instance
+			ISession session = null;
+			foreach (var s in Main.SessionAPI?.GetSessions() ?? Array.Empty<ISession>()) {
+				if (!s.GetInstance()?.Equals(instance.ToIdentifier()) ?? true)
+					continue;
+				session = s;
+				break;
+			}
+
+			if (session == null) {
+				joinButton.interactable = true;
+				joinLabel.UpdateText("instance.join");
+				return;
+			}
+
+			if (session.State.IsReady()) {
+				joinButton.interactable = false;
+				joinLabel.UpdateText("instance.join.already_connected");
+			} else if (!session.State.IsFinished()) {
+				joinButton.interactable = false;
+				joinLabel.UpdateText("instance.join.connecting");
+			} else {
+				joinButton.interactable = true;
+				joinLabel.UpdateText("instance.join");
+			}
+		}
+
+		private void OnJoinClicked() {
+			if (Page.Instance == null)
+				return;
+
+			// Vérifier si on a des données de connexion
+			var connectionData = Page.Instance.GetConnectionData();
+			if (connectionData == null) {
+				Logger.LogWarning("Cannot join instance: no connection data available");
+				return;
+			}
+
+			// Vérifier si on est déjà connecté à cette instance
+			var sessions = Main.SessionAPI?.GetSessions();
+			if (sessions != null) {
+				foreach (var session in sessions) {
+					var sessionInstance = session.GetInstance();
+					if (sessionInstance != null && sessionInstance.Equals(Page.Instance.ToIdentifier())) {
+						Logger.LogWarning("Cannot join instance: already connected to this instance");
+						return;
+					}
+				}
+			}
+
+			var th = Page.Instance.GetThumbnailUrl();
+			if (string.IsNullOrEmpty(th) && Page.World != null)
+				th = Page.World.Thumbnail;
+
+			// Tout est OK, on peut joindre
+			Main.SessionAPI?.TryMake(
+				"external:" + connectionData.GetMethod(),
 				new Dictionary<string, object> {
 					{ "set_current", true },
-					{ "instance", Page.Instance.ToIdentifier() },
-					{ "name", Page.Instance.GetTitle() },
-					{ "short_name", Page.Instance.GetName() },
-					{ "thumbnail", Main.NetworkAPI.FetchTexture(Page.Instance.GetThumbnailUrl()) },
-					{ "data", Page.Instance.GetConnectionData().GetData<JObject>() }
+					{ "instance", Page.Instance.ToIdentifier() }, {
+						"title",
+						Page.Instance.GetTitle()
+						?? Page.World?.Title
+						?? Page.Instance.ToIdentifier().ToString()
+					}, {
+						"short_name",
+						Page.Instance.GetName()
+						?? Page.Instance.ToIdentifier().ToString()
+					}, {
+						"thumbnail",
+						Main.NetworkAPI.FetchTexture(th)
+					},
+					{ "data", connectionData.GetData<JObject>() }
 				}, out var _
 			);
+		}
 
 		public static (GameObject, InstanceComponent) Generate(InstancePage instancePage, RectTransform parent) {
 			var content              = Instantiate(Client.GetAsset<GameObject>("ui:prefabs/split.prefab"), parent);
@@ -187,13 +351,29 @@ namespace api.nox.instance.client {
 			component.joinButton      = Reference.GetComponent<Button>("button", join);
 			component.joinIcon        = Reference.GetComponent<Image>("image", join);
 			component.joinLabel       = Reference.GetComponent<TextLanguage>("text", join);
-			component.joinIcon.sprite = Client.GetAsset<Sprite>("ui:icons/globe.png");
+			component.joinIcon.sprite = Client.GetAsset<Sprite>("ui:icons/distance.png");
 			component.joinLabel.UpdateText("instance.join");
 			SetupEvents(
 				joinEventTrigger,
 				() => component.OnJoinClicked(),
 				() => { }, // Pas d'effet hover pour l'instant
 				() => { }
+			);
+
+			// Bouton Cache
+			var cache             = Instantiate(actionButtonAsset, component.actions);
+			var cacheEventTrigger = Reference.GetComponent<EventTrigger>("button", cache);
+			component.cacheButton   = Reference.GetComponent<Button>("button", cache);
+			component.cacheIcon     = Reference.GetComponent<Image>("image", cache);
+			component.cacheLabel    = Reference.GetComponent<TextLanguage>("text", cache);
+			component.cacheProgress = Reference.GetComponent<Slider>("progress", cache);
+			component.cacheLabel.UpdateText("instance.cache.none");
+			component.cacheIcon.sprite = Client.GetAsset<Sprite>("ui:icons/cache0.png");
+			SetupEvents(
+				cacheEventTrigger,
+				() => component.OnCacheClickedAsync(),
+				() => component.HoverCache(true),
+				() => component.HoverCache(false)
 			);
 
 			// add box description
@@ -230,7 +410,8 @@ namespace api.nox.instance.client {
 
 		// ReSharper disable Unity.PerformanceAnalysis
 		private static void SetupEvents(EventTrigger eventTrigger, Action click, Action enter, Action exit) {
-			if (!eventTrigger) return;
+			if (!eventTrigger)
+				return;
 			var entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerClick };
 			entry.callback.AddListener(_ => click());
 			eventTrigger.triggers.Add(entry);
@@ -293,7 +474,8 @@ namespace api.nox.instance.client {
 					return;
 				}
 
-				if (users.Length == 0) continue;
+				if (users.Length == 0)
+					continue;
 				tasks.Add(SearchPlayers(users, server, _playerListTokenSource.Token, action));
 			}
 
@@ -301,7 +483,8 @@ namespace api.nox.instance.client {
 			if (isEmpty) {
 				playerInfobox.SetActive(true);
 				playerListContainer.SetActive(false);
-			} else UpdateLayout.UpdateImmediate(playerList);
+			} else
+				UpdateLayout.UpdateImmediate(playerList);
 		}
 
 		private async UniTask<(IUser, IPlayer)[]> SearchPlayers(IPlayer[] users, string server, CancellationToken token, Action<(IUser, IPlayer)[]> callback = null) {
@@ -334,13 +517,15 @@ namespace api.nox.instance.client {
 
 		public string[] GetSearchableServers() {
 			var x0 = Config.Load().Get("servers");
-			if (x0 == null) return Array.Empty<string>();
+			if (x0 == null)
+				return Array.Empty<string>();
 			var x1 = x0.ToObject<Dictionary<string, JObject>>();
 			var x2 = new List<string>();
 			foreach (var (address, value) in x1) {
 				var features = value["features"]?.Values<string>().ToArray() ?? Array.Empty<string>();
-				var search   = value["search"]?.ToObject<bool>()             ?? false;
-				if (!(search && features.Contains("users"))) continue;
+				var search   = value["search"]?.ToObject<bool>() ?? false;
+				if (!(search && features.Contains("users")))
+					continue;
 				x2.Add(address);
 			}
 

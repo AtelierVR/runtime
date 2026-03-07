@@ -45,7 +45,7 @@ namespace api.nox.ui.components {
 					size.y * (gridder.dimensions.y == 0 ? cellSize.x : cellSize.y) + (size.y - 1) * gridder.spacing
 				);
 			} catch (Exception e) {
-				Logger.LogException(e, this);
+				Logger.LogError(e, this);
 			}
 		}
 	}

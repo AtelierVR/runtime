@@ -11,13 +11,13 @@ using UnityEngine.Events;
 
 namespace api.nox.videoplayer {
 	public class Main : IMainModInitializer, IVideoPlayerAPI {
-		internal static readonly List<IHandler>     Handlers = new();
+		static readonly internal List<IHandler>     Handlers = new();
 		public static            Main               Instance;
 		public                   IMainModCoreAPI     CoreAPI;
 		private                  LanguagePack       _lang;
 
-		internal static readonly UnityEvent<IHandler> OnHandlerAdded   = new();
-		internal static readonly UnityEvent<IHandler> OnHandlerRemoved = new();
+		static readonly internal UnityEvent<IHandler> OnHandlerAdded   = new();
+		static readonly internal UnityEvent<IHandler> OnHandlerRemoved = new();
 
 		private void InvokeHandlerAdded(IHandler handler) {
 			OnHandlerAdded.Invoke(handler);
@@ -77,7 +77,11 @@ namespace api.nox.videoplayer {
 			VideoPlayerManager.Listen();
 			VideoPlayerResolver.Listen();
 			PrepareAsync().Forget();
-			_handlers = new IHandler[] { new Youtube(), new Twitch(), new Global() };
+			_handlers = new IHandler[] {
+				new Youtube(), 
+				new Twitch(), 
+				new Global()
+			};
 			foreach (var handler in _handlers)
 				Add(handler);
 		}

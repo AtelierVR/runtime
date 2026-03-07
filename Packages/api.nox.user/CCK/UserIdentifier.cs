@@ -5,23 +5,23 @@ namespace Nox.CCK.Users {
 		public static UserIdentifier Invalid
 			=> new(InvalidId);
 
-		private const uint   InvalidId   = 0;
+		private const uint InvalidId = 0;
 		private const string LocalServer = "::";
 
 		private readonly string _username;
-		private readonly uint   _id;
+		private readonly uint _id;
 		private readonly string _server;
 
 		public UserIdentifier(uint id, string server = LocalServer) {
-			_id       = id;
-			_server   = server;
+			_id = id;
+			_server = server;
 			_username = null;
 		}
 
 		public UserIdentifier(string username, string server = LocalServer) {
 			_username = username;
-			_server   = server;
-			_id       = InvalidId;
+			_server = server;
+			_id = InvalidId;
 		}
 
 		public bool IsValid()
@@ -71,7 +71,7 @@ namespace Nox.CCK.Users {
 
 		public bool Equals(IUserIdentifier other) {
 			var sameServer = other.IsLocal() && IsLocal()
-				|| !other.IsLocal()          && !IsLocal() && other.GetServer() == GetServer();
+				|| !other.IsLocal() && !IsLocal() && other.GetServer() == GetServer();
 			if (!sameServer) return false;
 			if (IsId() && other.IsId())
 				return GetId() == other.GetId();

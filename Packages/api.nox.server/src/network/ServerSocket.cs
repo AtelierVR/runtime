@@ -17,17 +17,17 @@ namespace api.nox.server.network {
 		public static readonly List<ServerSocket> Connections = new();
 
 		// Événements
-		public readonly UnityEvent            OnConnected       = new();
-		public readonly UnityEvent            OnDisconnected    = new();
-		public readonly UnityEvent<string>    OnMessageReceived = new();
-		public readonly UnityEvent<Exception> OnError           = new();
+		public readonly UnityEvent OnConnected = new();
+		public readonly UnityEvent OnDisconnected = new();
+		public readonly UnityEvent<string> OnMessageReceived = new();
+		public readonly UnityEvent<Exception> OnError = new();
 
-		private          bool   _autoReconnect = true;
-		private          bool   _reconcilable;
-		private          bool   _isListening;
+		private bool _autoReconnect = true;
+		private bool _reconcilable;
+		private bool _isListening;
 		private readonly string _address;
-		private readonly Uri    _url;
-		private          int    _maxRetries = 0;
+		private readonly Uri _url;
+		private int _maxRetries = 0;
 
 		private readonly Dictionary<string, string> _headers = new() {
 			{
@@ -60,7 +60,7 @@ namespace api.nox.server.network {
 			}
 		};
 
-		private ClientWebSocket         _webSocket;
+		private ClientWebSocket _webSocket;
 		private CancellationTokenSource _cts;
 
 
@@ -71,7 +71,7 @@ namespace api.nox.server.network {
 					_headers[header.Key] = header.Value;
 			if (authToken != null)
 				_headers.Add("Authorization", authToken.ToHeader());
-			_url          = new Uri(uri);
+			_url = new Uri(uri);
 			_reconcilable = false;
 			Connections.Add(this);
 		}
@@ -104,19 +104,19 @@ namespace api.nox.server.network {
 				await Close();
 
 			_webSocket = new ClientWebSocket();
-			_cts       = new CancellationTokenSource();
+			_cts = new CancellationTokenSource();
 
 			foreach (var header in _headers)
 				try {
 					_webSocket.Options.SetRequestHeader(header.Key, header.Value);
 				} catch (Exception ex) {
-					Logger.LogException(new Exception($"Error setting WebSocket header {header.Key}", ex));
+					Logger.LogError(new Exception($"Error setting WebSocket header {header.Key}", ex));
 				}
 
 			try {
 				await _webSocket.ConnectAsync(_url, _cts.Token);
 			} catch (Exception ex) {
-				Logger.LogException(new Exception($"Error while connecting to WebSocket at {_url}", ex));
+				Logger.LogError(new Exception($"Error while connecting to WebSocket at {_url}", ex));
 				_reconcilable = false;
 				OnError?.Invoke(ex);
 				return false;
@@ -143,7 +143,7 @@ namespace api.nox.server.network {
 			try {
 				await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing connection", CancellationToken.None);
 			} catch (Exception ex) {
-				Logger.LogException(new Exception("Error while closing WebSocket connection", ex));
+				Logger.LogError(new Exception("Error while closing WebSocket connection", ex));
 				OnError?.Invoke(ex);
 			}
 
@@ -197,7 +197,8 @@ namespace api.nox.server.network {
 					if (result.MessageType == WebSocketMessageType.Text) {
 						var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
 						OnMessageReceived.Invoke(message);
-					} else if (result.MessageType == WebSocketMessageType.Close) {
+					}
+					else if (result.MessageType == WebSocketMessageType.Close) {
 						Logger.LogDebug("WebSocket connection closed by server.");
 						await HandleDisconnection();
 						break;
@@ -206,12 +207,12 @@ namespace api.nox.server.network {
 					// Connexion fermée normalement
 					break;
 				} catch (WebSocketException ex) {
-					Logger.LogException(new Exception("WebSocket error in listening loop", ex));
+					Logger.LogError(new Exception("WebSocket error in listening loop", ex));
 					OnError.Invoke(ex);
 					await HandleDisconnection();
 					break;
 				} catch (Exception ex) {
-					Logger.LogException(new Exception("Unexpected error in WebSocket listening loop", ex));
+					Logger.LogError(new Exception("Unexpected error in WebSocket listening loop", ex));
 					if (OnError != null) OnError.Invoke(ex);
 					await HandleDisconnection();
 					break;
@@ -246,7 +247,7 @@ namespace api.nox.server.network {
 						return;
 					}
 				} catch (Exception ex) {
-					Logger.LogException(new Exception($"Error during reconnection attempt {retryCount}", ex));
+					Logger.LogError(new Exception($"Error during reconnection attempt {retryCount}", ex));
 					OnError?.Invoke(ex);
 				}
 
@@ -269,7 +270,7 @@ namespace api.nox.server.network {
 				await _webSocket.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, _cts.Token);
 				return true;
 			} catch (Exception ex) {
-				Logger.LogException(new Exception("Unexpected error in sending message", ex));
+				Logger.LogError(new Exception("Unexpected error in sending message", ex));
 				OnError.Invoke(ex);
 				return false;
 			}

@@ -99,7 +99,7 @@ namespace Nox.Editor {
 				doc.Save(writer);
 			} catch (Exception e) {
 				Logger.LogError($"Failed to update link.xml at {path}: {e}");
-				Logger.LogException(e);
+				Logger.LogError(e);
 			}
 		}
 	}

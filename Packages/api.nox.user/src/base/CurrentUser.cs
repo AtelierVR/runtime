@@ -23,5 +23,8 @@ namespace api.nox.user {
 
 		public string GetAvatarId()
 			=> avatar;
+
+		public override string ToString()
+			=> $"{GetType().Name}[id={ToIdentifier().ToString(server)}, username={GetUsername()}]";
 	}
 }

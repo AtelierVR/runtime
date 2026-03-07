@@ -3,7 +3,6 @@
         "**/.DS_Store": true,
         "**/.git": true,
         "**/.vs": true,
-        "**/.gitmodules": true,
         "**/.vsconfig": true,
         "**/*.booproj": true,
         "**/*.pidb": true,
@@ -67,8 +66,5 @@
         "*.sln": "*.csproj",
     },
     "dotnet.defaultSolution": "nox-runtime.sln",
-    "cmake.sourceDirectory": "U:/Projets/nox/runtime/Packages/hactazia.videoplayer/Native",
-    "C_Cpp.errorSquiggles": "disabled",
-    "dotnet.preferCSharpExtension": true,
-    "cmake.ignoreCMakeListsMissing": true
+    "dotnet.preferCSharpExtension": true
 }

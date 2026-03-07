@@ -13,7 +13,8 @@
         "Nox.UI",
         "Nox.ModLoader",
         "Unity.TextMeshPro",
-        "Nox.CCK.Users"
+        "Nox.CCK.Users",
+        "Nox.CCK.Network"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

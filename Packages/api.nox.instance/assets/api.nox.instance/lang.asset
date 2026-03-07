@@ -47,3 +47,23 @@ MonoBehaviour:
       value: "No players found."
     - key: instance.session.label
       value: "#{0} - {1}"
+    - key: instance.join
+      value: "Join Instance"
+    - key: instance.join.already_connected
+      value: "Connected"
+    - key: instance.join.not_joinable
+      value: "Not Joinable"
+    - key: instance.join.error
+      value: "Error"
+    - key: instance.cache.none
+      value: "Download"
+    - key: instance.cache.add
+      value: "Download"
+    - key: instance.cache.downloading
+      value: "Downloading"
+    - key: instance.cache.cancel
+      value: "Cancel Dl."
+    - key: instance.cache.downloaded
+      value: "Downloaded"
+    - key: instance.cache.remove
+      value: "Remove Dl."

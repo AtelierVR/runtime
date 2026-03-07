@@ -61,11 +61,6 @@ namespace api.nox.desktop {
 		private bool       isGroundedWhileFlying = false;
 		private RaycastHit lastFlyingGroundHit;
 
-		[Header("Menu")]
-		public IMenu menu;
-
-		public RectTransform menuContainer;
-
 		public virtual void Awake() {
 			body = GetComponent<Rigidbody>();
 			if (body.collisionDetectionMode == CollisionDetectionMode.Discrete)

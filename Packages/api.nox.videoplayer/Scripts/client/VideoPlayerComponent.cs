@@ -11,13 +11,15 @@ namespace api.nox.videoplayer.client {
 		private VideoPlayerPage _page;
 
 		public AspectRatioFitter ratio;
-		public Image             video;
-		public Slider            seek;
-		public Slider            loaded;
-		public TextLanguage      current;
-		public TextLanguage      total;
-		public Button            center;
-		public Image             centerIcon;
+		public Image video;
+		public Slider seek;
+		public Slider loaded;
+		public TextLanguage current;
+		public TextLanguage total;
+		public Button center;
+		public Image centerIcon;
+		public TextLanguage title;
+		public TextLanguage subtitle;
 
 		private float _targetSeekValue;
 
@@ -64,11 +66,15 @@ namespace api.nox.videoplayer.client {
 			trigger.triggers.Add(dragEntry);
 			component.center.onClick.AddListener(page.TogglePlayPause);
 
+			component.title    = Reference.GetComponent<TextLanguage>("title", container);
+			component.subtitle = Reference.GetComponent<TextLanguage>("subtitle", container);
+
 			return (content, component);
 		}
 
 		public void UpdateProgress(IVideoPlayer player, double progress) {
-			if (player == null) return;
+			if (player == null)
+				return;
 			if (!_isUserSeeking)
 				seek.SetValueWithoutNotify((float)progress);
 			loaded.value = 0;
@@ -77,7 +83,8 @@ namespace api.nox.videoplayer.client {
 		}
 
 		public void UpdatePlayStatus(IVideoPlayer player, bool isPlaying) {
-			if (player == null) return;
+			if (player == null)
+				return;
 			var iconName = isPlaying ? "ui:icons/pause.png" : "ui:icons/play_arrow.png";
 			var icon     = Client.GetAsset<Sprite>(iconName);
 			if (icon)
@@ -101,26 +108,52 @@ namespace api.nox.videoplayer.client {
 			);
 		}
 
+		private void Update()
+			=> _page.OnUpdate();
+
 		private void UpdateRender(IVideoPlayer player) {
 			var render = player is IVideoPlayerTexture tex ? tex.Texture : null;
-			if (!render) return;
+			if (!render)
+				return;
 			video.material.mainTexture = render;
 			ratio.aspectRatio          = (float)render.width / render.height;
 		}
 
 		public void UpdateUI() {
-			if (!gameObject.activeInHierarchy) return;
+			if (!gameObject.activeInHierarchy)
+				return;
 			var player = _page.GetSelectedPlayer();
-			if (player == null) return;
+			if (player == null)
+				return;
 			UpdateRender(player);
 			UpdatePlayStatus(player, player.IsPlaying);
 			UpdateProgress(player, player.Progress);
+			UpdateTitle(player);
+		}
+		private void UpdateTitle(IVideoPlayer player) {
+			if (player == null)
+				return;
+			var details = player is IVideoPlayerDetails det ? det : null;
+
+			var t = details?.GetTitle();
+			if (string.IsNullOrEmpty(t))
+				title.UpdateText("video_player.no_title");
+			else
+				title.UpdateText("video_player.title", new[] { t });
+
+			var s = details?.GetSubtitle();
+			if (string.IsNullOrEmpty(s))
+				subtitle.UpdateText("video_player.no_subtitle");
+			else
+				subtitle.UpdateText("video_player.subtitle", new[] { s });
 		}
 
 		private void OnSeekValueChanged(float value) {
-			if (_isUserSeeking) return;
+			if (_isUserSeeking)
+				return;
 			var player = _page.GetSelectedPlayer();
-			if (player == null) return;
+			if (player == null)
+				return;
 			var newSeek = player.Duration * value;
 			player.Time           = newSeek;
 			_wasPlayingBeforeSeek = player.IsPlaying;
@@ -136,7 +169,8 @@ namespace api.nox.videoplayer.client {
 		public void OnSeekEnd() {
 			_isUserSeeking = false;
 			var player = _page.GetSelectedPlayer();
-			if (player == null) return;
+			if (player == null)
+				return;
 			player.Time = seek.value * player.Duration;
 			if (_wasPlayingBeforeSeek)
 				player.Resume();
@@ -145,7 +179,8 @@ namespace api.nox.videoplayer.client {
 
 		public void OnSeekDrag() {
 			var player = _page.GetSelectedPlayer();
-			if (player == null) return;
+			if (player == null)
+				return;
 			player.Time = seek.value * player.Duration;
 			UpdateProgress(player, seek.value);
 		}

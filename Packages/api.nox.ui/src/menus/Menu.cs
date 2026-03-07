@@ -17,76 +17,76 @@ namespace api.nox.ui.menus {
 		[Header("Menu Settings")]
 		public string defaultKey = HomePage.GetStaticKey();
 
-		public object[] defaultArguments = Array.Empty<object>();
+		public readonly object[] defaultArguments = Array.Empty<object>();
 
 		[Header("References")]
 		public BottomOrbiter bottomOrbiter;
 
-		public TopOrbiter    topOrbiter;
+		public TopOrbiter topOrbiter;
 		public RectTransform contentContainer;
 		public RectTransform modalContainer;
-		public GameObject    parent;
+		public IMenuProvider Provider;
 
 		internal HistoryList History;
-		internal Client      Client;
+		internal Client Client;
 
 
-		public Dictionary<string, List<NavigationData>> GetDefaultData()
+		public static Dictionary<string, List<NavigationData>> GetDefaultData()
 			=> new() {
 				{
 					"applications",
 					new List<NavigationData> {
 						new() {
-							key = "home",
+							Key = "home",
 							// text               = "home",
-							iconPath           = "ui:icons/home.png",
-							execution          = "home",
-							flags              = NavigationFlags.Button,
+							Icon               = "ui:icons/home.png",
+							Action             = "home",
+							Flags              = NavigationFlags.Button,
 							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto,
 						},
 						new() {
-							key = "applications",
+							Key = "applications",
 							// text               = "applications",
-							iconPath           = "ui:icons/apps.png",
-							execution          = "applications",
-							flags              = NavigationFlags.Button,
+							Icon               = "ui:icons/apps.png",
+							Action             = "applications",
+							Flags              = NavigationFlags.Button,
 							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto
 						},
 						new() {
-							key = "inventory",
+							Key = "inventory",
 							// text               = "inventory",
-							iconPath           = "ui:icons/inventory.png",
-							execution          = "inventory",
-							flags              = NavigationFlags.Button,
+							Icon               = "ui:icons/inventory.png",
+							Action             = "inventory",
+							Flags              = NavigationFlags.Button,
 							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto
 						},
 						new() {
-							key = "friends",
+							Key = "friends",
 							// text               = "friends",
-							iconPath           = "ui:icons/friend.png",
-							execution          = "friends",
-							flags              = NavigationFlags.Button,
+							Icon               = "ui:icons/friend.png",
+							Action             = "friends",
+							Flags              = NavigationFlags.Button,
 							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto
 						},
 						new() {
-							key = "search",
+							Key = "search",
 							// text               = "search",
-							iconPath           = "ui:icons/explore.png",
-							execution          = "search",
-							flags              = NavigationFlags.Button,
+							Icon               = "ui:icons/explore.png",
+							Action             = "search",
+							Flags              = NavigationFlags.Button,
 							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto
 						},
 						new() {
-							key = "settings",
+							Key = "settings",
 							// text               = "settings",
-							iconPath           = "ui:icons/settings.png",
-							execution          = "settings",
-							flags              = NavigationFlags.Button,
+							Icon               = "ui:icons/settings.png",
+							Action             = "settings",
+							Flags              = NavigationFlags.Button,
 							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto
 						}
@@ -95,29 +95,29 @@ namespace api.nox.ui.menus {
 					"specials",
 					new List<NavigationData> {
 						new() {
-							key = "help",
+							Key = "help",
 							// text               = "help",
-							iconPath           = "ui:icons/question.png",
-							execution          = "help",
-							flags              = NavigationFlags.Button,
+							Icon               = "ui:icons/question.png",
+							Action             = "help",
+							Flags              = NavigationFlags.Button,
 							ExecutionArguments = new object[] { "ui/how-to-use-menu" },
 							executionType      = NavigationExecution.Goto,
 						},
 						new() {
-							key = "mute",
+							Key = "mute",
 							// text               = "mute",
-							iconPath           = "ui:icons/unmute.png",
-							execution          = "mute",
-							flags              = NavigationFlags.Button,
+							Icon               = "ui:icons/unmute.png",
+							Action             = "mute",
+							Flags              = NavigationFlags.Button,
 							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Event
 						},
 						new() {
-							key = "session",
+							Key = "session",
 							// text               = "sessions",
-							iconPath           = "ui:icons/group.png",
-							execution          = "session",
-							flags              = NavigationFlags.Button,
+							Icon               = "ui:icons/group.png",
+							Action             = "session",
+							Flags              = NavigationFlags.Button,
 							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto
 						}
@@ -126,27 +126,27 @@ namespace api.nox.ui.menus {
 					"actions",
 					new List<NavigationData> {
 						new() {
-							key = "notifications",
+							Key = "notifications",
 							// text               = "notifications",
-							iconPath           = "api.nox.ui:icons/notifications.png",
-							execution          = "notifications",
-							flags              = NavigationFlags.Button,
+							Icon               = "api.nox.ui:icons/notifications.png",
+							Action             = "notifications",
+							Flags              = NavigationFlags.Button,
 							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Goto,
 						},
 						new() {
-							key              = "time",
+							Key              = "time",
 							text             = "time",
-							flags            = NavigationFlags.Enable,
+							Flags            = NavigationFlags.Enable,
 							GetCustomContent = async tr => Instantiate(await PageManager.GetAssetAsync<GameObject>("prefabs/time.prefab"), tr),
 							executionType    = NavigationExecution.None,
 						},
 						new() {
-							key = "exit",
+							Key = "exit",
 							// text = "exit",
-							iconPath           = "api.nox.ui:icons/power.png",
-							execution          = "exit",
-							flags              = NavigationFlags.Button,
+							Icon               = "api.nox.ui:icons/power.png",
+							Action             = "exit",
+							Flags              = NavigationFlags.Button,
 							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Event,
 						}
@@ -155,29 +155,29 @@ namespace api.nox.ui.menus {
 					"histories",
 					new List<NavigationData> {
 						new() {
-							key = "back",
+							Key = "back",
 							// text               = "back",
-							iconPath           = "ui:icons/left.png",
-							execution          = "back",
-							flags              = NavigationFlags.Button,
+							Icon               = "ui:icons/left.png",
+							Action             = "back",
+							Flags              = NavigationFlags.Button,
 							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Action,
 						},
 						new() {
-							key = "forward",
+							Key = "forward",
 							// text               = "forward",
-							iconPath           = "ui:icons/right.png",
-							execution          = "forward",
-							flags              = NavigationFlags.Button,
+							Icon               = "ui:icons/right.png",
+							Action             = "forward",
+							Flags              = NavigationFlags.Button,
 							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Action,
 						},
 						new() {
-							key = "refresh",
+							Key = "refresh",
 							// text               = "refresh",
-							iconPath           = "ui:icons/refresh.png",
-							execution          = "refresh",
-							flags              = NavigationFlags.Button,
+							Icon               = "ui:icons/refresh.png",
+							Action             = "refresh",
+							Flags              = NavigationFlags.Button,
 							ExecutionArguments = new object[] { },
 							executionType      = NavigationExecution.Action,
 						}
@@ -187,10 +187,6 @@ namespace api.nox.ui.menus {
 
 		public Menu() {
 			History = new HistoryList(this);
-		}
-
-		private void Awake() {
-			parent ??= gameObject;
 		}
 
 		private void Start() {
@@ -224,10 +220,10 @@ namespace api.nox.ui.menus {
 			=> GetInstanceID();
 
 		public bool GetActive()
-			=> parent.activeSelf;
+			=> Provider.Active;
 
 		public void SetActive(bool active)
-			=> parent.SetActive(active);
+			=> Provider.Active = active;
 
 		public IOrbiter[] GetOrbiters()
 			=> GetInternalOrbiters().Cast<IOrbiter>().ToArray();
@@ -244,7 +240,7 @@ namespace api.nox.ui.menus {
 		public void Dispose() {
 			SetActive(false);
 			History.Clear();
-			foreach (UnityEngine.Transform child in contentContainer)
+			foreach (Transform child in contentContainer)
 				Destroy(child.gameObject);
 			History = null;
 		}
@@ -278,7 +274,7 @@ namespace api.nox.ui.menus {
 					rect.pivot     = new Vector2(0.5f, 0.5f);
 				}
 
-				foreach (UnityEngine.Transform child in contentContainer)
+				foreach (Transform child in contentContainer)
 					if (child.gameObject.activeSelf && child.gameObject != content)
 						child.gameObject.SetActive(false);
 
@@ -296,11 +292,11 @@ namespace api.nox.ui.menus {
 
 				UpdateLayout.UpdateImmediate(content);
 			} catch (Exception e) {
-				Logger.LogException(e);
+				Logger.LogError(e);
 			}
 		}
 
-		public bool     activeForeground;
+		public bool activeForeground;
 		public IModal[] Modals = Array.Empty<IModal>();
 
 		public RectTransform GetModalContainer()
@@ -326,7 +322,8 @@ namespace api.nox.ui.menus {
 			=> Modals;
 
 		public void RegisterModal(IModal modal) {
-			if (modal == null) return;
+			if (modal == null)
+				return;
 			Client.CoreAPI.LoggerAPI.LogDebug($"Registering modal '{modal}' to menu '{GetId()}'", modal is Object o ? o : modal.GetContent());
 			var list = Modals.ToList();
 			if (!list.Contains(modal))
@@ -335,7 +332,8 @@ namespace api.nox.ui.menus {
 		}
 
 		public void UnregisterModal(IModal modal) {
-			if (modal == null) return;
+			if (modal == null)
+				return;
 			Client.CoreAPI.LoggerAPI.LogDebug($"Unregistering modal '{modal}' from menu '{GetId()}'", modal is Object o ? o : modal.GetContent());
 			var list = Modals.ToList();
 			if (list.Contains(modal))

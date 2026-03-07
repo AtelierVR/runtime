@@ -116,7 +116,11 @@ namespace UnityEditor.XR.Interaction.Toolkit.Samples
                 BuildValidator.AddRules(buildTargetGroup, s_BuildValidationRules);
             }
 
-            ShowWindowIfIssuesExist();
+            // Check if auto-validation is disabled (NOX modification)
+            if (!EditorPrefs.GetBool("Nox.DisableAutoValidation", false))
+            {
+                ShowWindowIfIssuesExist();
+            }
         }
 
         static void ShowWindowIfIssuesExist()

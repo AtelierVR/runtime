@@ -1,15 +1,19 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Nox.CCK.Network;
 using Nox.CCK.Users;
 using Nox.CCK.Utils;
+using UnityEngine;
 using UnityEngine.Events;
+using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.user.network {
 	public class Network {
 		public CurrentUser CurrentUser;
 
-		public string ServerAddress {
+		public static string ServerAddress {
 			get => Config.Load().Get<string>("server");
 			set {
 				var config = Config.Load();
@@ -18,33 +22,36 @@ namespace api.nox.user.network {
 			}
 		}
 
-		public async UniTask<CurrentUser> FetchCurrent() {
-			if (Main.NetworkAPI == null)
-				return null;
+		public async UniTask<CurrentUser> FetchCurrent(CancellationToken cancellationToken = default) {
 			var address = ServerAddress;
 			if (string.IsNullOrEmpty(address)) {
 				Logger.LogError("Cannot fetch current user: no server address provided.");
 				return null;
 			}
 
-			var request = Main.NetworkAPI.MakeRequest();
-			await request.SetMasterUrl(address, "/api/users/@me");
-			await request.Send();
-			var response = request.GetMasterResponse<CurrentUser>();
-			if (response.HasError()) {
-				Logger.LogError($"Failed to fetch current user from {address}: {response.GetError().GetMessage()}");
+			var request = await RequestNode.To(address, "/api/users/@me");
+			if (request == null) {
+				Logger.LogError($"Failed to create request for current user");
 				return null;
 			}
 
-			CurrentUser = response.GetData();
+			await request.Send(cancellationToken);
+
+			var response = await request.Node<CurrentUser>(cancellationToken);
+			if (response.HasError() || !response.HasData()) {
+				Logger.LogError($"Failed to fetch current user from {address}: {response.Error?.Message ?? "No data returned"}");
+				return null;
+			}
+
+			CurrentUser = response.Data;
 			InvokeUpdate(CurrentUser);
 			return CurrentUser;
 		}
 
-		private readonly UnityEvent<User>        _fetchEvent  = new();
+		private readonly UnityEvent<User> _fetchEvent = new();
 		private readonly UnityEvent<CurrentUser> _updateEvent = new();
 		private readonly UnityEvent<CurrentUser> _logoutEvent = new();
-		private readonly UnityEvent<CurrentUser> _loginEvent  = new();
+		private readonly UnityEvent<CurrentUser> _loginEvent = new();
 
 		private void InvokeFetch(User user) {
 			if (user == null) return;
@@ -70,15 +77,13 @@ namespace api.nox.user.network {
 			InvokeUpdate(user);
 		}
 
-		public UniTask<User> Fetch(UserIdentifier identifier, string from = null)
-			=> Fetch(identifier.ToString(), from);
+		public UniTask<User> Fetch(UserIdentifier identifier, string from = null, CancellationToken cancellationToken = default)
+			=> Fetch(identifier.ToString(), from, cancellationToken);
 
-		public UniTask<User> Fetch(uint id, string from = null)
-			=> Fetch(id.ToString(), from);
+		public UniTask<User> Fetch(uint id, string from = null, CancellationToken cancellationToken = default)
+			=> Fetch(id.ToString(), from, cancellationToken);
 
-		public async UniTask<User> Fetch(string identifier, string from = null) {
-			if (Main.NetworkAPI == null)
-				return null;
+		public async UniTask<User> Fetch(string identifier, string from = null, CancellationToken cancellationToken = default) {
 			var ide = UserIdentifier.From(identifier);
 			if (ide.IsLocal())
 				ide = new UserIdentifier(ide.GetId(), from);
@@ -88,39 +93,45 @@ namespace api.nox.user.network {
 				return null;
 			}
 
-			var request = Main.NetworkAPI.MakeRequest();
-			await request.SetMasterUrl(address, $"/api/users/{ide.ToString()}");
-			await request.Send();
-			var response = request.GetMasterResponse<User>();
-			if (response.HasError()) {
-				Logger.LogError($"Failed to fetch user {identifier} from {address}: {response.GetError().GetMessage()}");
+			var request = await RequestNode.To(address, $"/api/users/{ide.ToString()}");
+			if (request == null) {
+				Logger.LogError($"Failed to create request for user {identifier}");
 				return null;
 			}
 
-			var user = response.GetData();
+			await request.Send(cancellationToken);
+			var response = await request.Node<User>(cancellationToken);
+			if (response.HasError()) {
+				Logger.LogError($"Failed to fetch user {identifier} from {address}: {response.Error.Message}");
+				return null;
+			}
+
+			var user = response.Data;
 			InvokeFetch(user);
 			return user;
 		}
 
-		public async UniTask<SearchResponse> Search(SearchRequest data, string from = null) {
-			if (Main.NetworkAPI == null)
-				return null;
+		public async UniTask<SearchResponse> Search(SearchRequest data, string from = null, CancellationToken cancellationToken = default) {
 			var address = from ?? CurrentUser?.GetServerAddress() ?? ServerAddress;
 			if (string.IsNullOrEmpty(address)) {
 				Logger.LogError("Cannot search users: no server address provided.");
 				return null;
 			}
 
-			var request = Main.NetworkAPI.MakeRequest();
-			await request.SetMasterUrl(address, $"/api/users?{data.ToParams()}");
-			await request.Send();
-			var response = request.GetMasterResponse<SearchResponse>();
-			if (response.HasError()) {
-				Logger.LogError($"Failed to search users from {address}: {response.GetError().GetMessage()}");
+			var request = await RequestNode.To(address, $"/api/users?{data.ToParams()}");
+			if (request == null) {
+				Logger.LogError($"Failed to create request for user search");
 				return null;
 			}
 
-			var users = response.GetData();
+			await request.Send(cancellationToken);
+			var response = await request.Node<SearchResponse>(cancellationToken);
+			if (response.HasError()) {
+				Logger.LogError($"Failed to search users from {address}: {response.Error.Message}");
+				return null;
+			}
+
+			var users = response.Data;
 
 			foreach (var user in users.users)
 				InvokeFetch(user);
@@ -128,7 +139,7 @@ namespace api.nox.user.network {
 			return users;
 		}
 
-		public async UniTask<bool> Logout() {
+		public async UniTask<bool> Logout(CancellationToken cancellationToken = default) {
 			if (Main.NetworkAPI == null)
 				return false;
 
@@ -138,17 +149,20 @@ namespace api.nox.user.network {
 				return false;
 			}
 
-			var request = Main.NetworkAPI.MakeRequest();
-			await request.SetMasterUrl(address, "/api/auth/logout");
-			await request.Send();
-
-			var response = request.GetMasterResponse<LogoutResponse>();
-			if (response.HasError()) {
-				Logger.LogError($"Failed to logout from {address}: {response.GetError().GetMessage()}");
+			var request = await RequestNode.To(address, "/api/auth/logout");
+			if (request == null) {
+				Logger.LogError($"Failed to create request for logout");
 				return false;
 			}
 
-			CurrentUser   = null;
+			await request.Send(cancellationToken);
+			var response = await request.Node<LogoutResponse>(cancellationToken);
+			if (response.HasError()) {
+				Logger.LogError($"Failed to logout from {address}: {response.Error.Message}");
+				return false;
+			}
+
+			CurrentUser = null;
 			ServerAddress = null;
 			var config = Config.Load();
 			config.Remove(new[] { "server", address, "token" });
@@ -169,38 +183,40 @@ namespace api.nox.user.network {
 			public bool success;
 		}
 
-		public async UniTask<LoginResponse> Login(LoginRequest form, string address) {
-			if (Main.NetworkAPI == null)
-				return new LoginResponse { Error = "Network API is not initialized." };
+		public async UniTask<LoginResponse> Login(LoginRequest form, string address, CancellationToken cancellationToken = default) {
 			if (string.IsNullOrEmpty(address)) {
-				Logger.LogError("Cannot logout: no server address provided.");
+				Logger.LogError("Cannot login: no server address provided.");
 				return new LoginResponse { Error = "No server address provided." };
 			}
 
-			var request = Main.NetworkAPI.MakeRequest();
-			await request.SetMasterUrl(address, "/api/auth/login");
-			request.SetBody(form.ToJson(), "application/json");
-			request.SetMethod("POST");
-			await request.Send();
+			var request = await RequestNode.To(address, "/api/auth/login");
+			if (request == null) {
+				Logger.LogError($"Failed to create request for login");
+				return new LoginResponse { Error = "Failed to create request" };
+			}
 
-			var response = request.GetMasterResponse<LoginResponse>();
-			var login    = response.GetData();
+			request.SetBody(form.ToJson());
+			request.method = RequestExtension.Method.POST;
+			await request.Send(cancellationToken);
 
-			Logger.LogDebug($"Login response: {response.HasError()} {response.GetError()}");
+			var response = await request.Node<LoginResponse>(cancellationToken);
+			var login = response.Data;
+
+			Logger.LogDebug($"Login response: {response.HasError()} {response.Error} {form.ToJson()}");
 			if (response.HasError()) {
-				var errorInfo = response.GetError();
+				var errorInfo = response.Error;
 				return new LoginResponse {
-					Error = errorInfo.GetMessage(),
+					Error = errorInfo.Message,
 					Verification = new VerificationRequired {
-						Required = errorInfo.GetCode() == 20,
-						Methods  = login?.methods ?? Array.Empty<VerificationMethod>()
+						Required = errorInfo.Code == 20,
+						Methods = login?.methods ?? Array.Empty<VerificationMethod>()
 					}
 				};
 			}
 
 
 			// Successful login - set current user and save config
-			CurrentUser   = login.user;
+			CurrentUser = login.user;
 			ServerAddress = login.user.server;
 			var config = Config.Load();
 			config.Set(new[] { "servers", login.user.server, "token" }, login.token);
@@ -212,32 +228,32 @@ namespace api.nox.user.network {
 			return login;
 		}
 
-		public async UniTask<IntegrityResponse> CreateIntegrity(string server) {
-			if (Main.NetworkAPI == null)
-				return new IntegrityResponse { Error = "Network API is not initialized." };
+		[Obsolete("use your own node server to interact with others servers")]
+		public async UniTask<IntegrityResponse> CreateIntegrity(string server, CancellationToken cancellationToken = default) {
 			var address = ServerAddress;
 			if (string.IsNullOrEmpty(address)) {
-				Logger.LogError("Cannot logout: no server address provided.");
+				Logger.LogError("Cannot create integrity: no server address provided.");
 				return new IntegrityResponse { Error = "No server address provided." };
 			}
 
-			var request = Main.NetworkAPI.MakeRequest();
-			await request.SetMasterUrl(address, "/api/users/@me/integrity");
-			request.SetBody(
-				new JObject {
-					["address"] = server,
-				}.ToString(),
-				"application/json"
-			);
-			request.SetMethod("PUT");
-			await request.Send();
-			var response = request.GetMasterResponse<IntegrityResponse>();
-			if (response.HasError()) {
-				Logger.LogError($"Failed to create integrity from {address} for {server}: {response.GetError().GetMessage()}");
-				return new IntegrityResponse { Error = response.GetError().GetMessage() };
+			var request = await RequestNode.To(address, "/api/users/@me/integrity");
+			if (request == null) {
+				Logger.LogError($"Failed to create request for integrity");
+				return new IntegrityResponse { Error = "Failed to create request" };
 			}
 
-			var integrity = response.GetData();
+			request.SetBody(new JObject {
+				["address"] = server,
+			});
+			request.method = RequestExtension.Method.PUT;
+			await request.Send(cancellationToken);
+			var response = await request.Node<IntegrityResponse>(cancellationToken);
+			if (response.HasError()) {
+				Logger.LogError($"Failed to create integrity from {address} for {server}: {response.Error.Message}");
+				return new IntegrityResponse { Error = response.Error.Message };
+			}
+
+			var integrity = response.Data;
 			if (integrity.IsError()) {
 				Logger.LogError($"Integrity creation error from {address} for {server}: {integrity.Error}");
 				return integrity;
@@ -251,8 +267,6 @@ namespace api.nox.user.network {
 		}
 
 		public async UniTask<AuthToken> GetToken(string server) {
-			if (Main.NetworkAPI == null)
-				return null;
 
 			if (string.IsNullOrEmpty(server)) {
 				Logger.LogError("Cannot get token: no server provided.");
@@ -272,17 +286,19 @@ namespace api.nox.user.network {
 				var expires = config.Get(new[] { "servers", address, "expires" }, long.MinValue);
 				if (expires > DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
 					return new AuthToken {
-						Token     = config.Get<string>(new[] { "servers", address, "token" }),
+						Token = config.Get<string>(new[] { "servers", address, "token" }),
 						Integrity = false
 					};
 				return null;
 			}
 
+			return null;
+
 			if (config.Has(new[] { "servers", address, "integrity", server, "token" })) {
 				var expires = config.Get(new[] { "servers", address, "integrity", server, "expires" }, long.MinValue);
 				if (expires > DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
 					return new AuthToken {
-						Token     = config.Get<string>(new[] { "servers", address, "integrity", server, "token" }),
+						Token = config.Get<string>(new[] { "servers", address, "integrity", server, "token" }),
 						Integrity = true
 					};
 			}
@@ -293,7 +309,7 @@ namespace api.nox.user.network {
 				config.Set(new[] { "servers", address, "integrity", server, "expires" }, result.expires);
 				config.Save();
 				return new AuthToken {
-					Token     = result.token,
+					Token = result.token,
 					Integrity = true
 				};
 			}
@@ -301,9 +317,7 @@ namespace api.nox.user.network {
 			return null;
 		}
 
-		public async UniTask<SendVerificationCodeResponse> SendVerificationCode(string type, string from = null) {
-			if (Main.NetworkAPI == null)
-				return new SendVerificationCodeResponse { success = false, message = "Network API is not initialized." };
+		public async UniTask<SendVerificationCodeResponse> SendVerificationCode(string type, string from = null, CancellationToken cancellationToken = default) {
 
 			var address = from ?? CurrentUser?.GetServerAddress() ?? ServerAddress;
 			if (string.IsNullOrEmpty(address)) {
@@ -311,23 +325,25 @@ namespace api.nox.user.network {
 				return new SendVerificationCodeResponse { success = false, message = "No server address provided." };
 			}
 
-			var request = Main.NetworkAPI.MakeRequest();
-			await request.SetMasterUrl(address, $"/api/auth/{type}/send");
-			await request.Send();
-			var response = request.GetMasterResponse<SendVerificationCodeResponse>();
-			if (response.HasError()) {
-				Logger.LogError($"Failed to send verification code from {address}: {response.GetError().GetMessage()}");
-				return new SendVerificationCodeResponse { success = false, message = response.GetError().GetMessage() };
+			var request = await RequestNode.To(address, $"/api/auth/{type}/send");
+			if (request == null) {
+				Logger.LogError($"Failed to create request for verification code");
+				return new SendVerificationCodeResponse { success = false, message = "Failed to create request" };
 			}
 
-			var verificationResponse = response.GetData();
+			await request.Send(cancellationToken);
+			var response = await request.Node<SendVerificationCodeResponse>(cancellationToken);
+			if (response.HasError()) {
+				Logger.LogError($"Failed to send verification code from {address}: {response.Error.Message}");
+				return new SendVerificationCodeResponse { success = false, message = response.Error.Message };
+			}
+
+			var verificationResponse = response.Data;
 			Logger.LogDebug($"Verification code send result: {verificationResponse}");
 			return verificationResponse;
 		}
 
-		public async UniTask<CurrentUser> UpdateCurrentUser(UpdateCurrentUserRequest data, string from = null) {
-			if (Main.NetworkAPI == null)
-				return null;
+		public async UniTask<CurrentUser> UpdateCurrentUser(UpdateCurrentUserRequest data, string from = null, CancellationToken cancellationToken = default) {
 
 			var address = from ?? CurrentUser?.GetServerAddress() ?? ServerAddress;
 			if (string.IsNullOrEmpty(address)) {
@@ -335,17 +351,23 @@ namespace api.nox.user.network {
 				return null;
 			}
 
-			var request = Main.NetworkAPI.MakeRequest();
-			await request.SetMasterUrl(address, "/api/users/@me");
-			request.SetBody(data.ToJson(), "application/json");
-			request.SetMethod("POST");
-			await request.Send();
-
-			var response = request.GetMasterResponse<CurrentUser>();
-			if (response.HasError())
+			var request = await RequestNode.To(address, "/api/users/@me");
+			if (request == null) {
+				Logger.LogError($"Failed to create request for update current user");
 				return null;
+			}
 
-			var updateResult = response.GetData();
+			request.SetBody(data.ToJson());
+			request.method = RequestExtension.Method.POST;
+			await request.Send(cancellationToken);
+
+			var response = await request.Node<CurrentUser>(cancellationToken);
+			if (response.HasError()) {
+				Logger.LogError($"Failed to update current user: {response.Error.Message}");
+				return null;
+			}
+
+			var updateResult = response.Data;
 			if (updateResult == null) {
 				Logger.LogError("Failed to update current user: no data returned.");
 				return null;

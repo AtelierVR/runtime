@@ -3,7 +3,7 @@
   "id": "api.nox.user",
   "provides": [
     "fr.hactazia.sdk.user",
-    "user"
+    "users"
   ],
   "name": "Test Module",
   "version": "1.0.0",
@@ -23,13 +23,7 @@
       "website": "https://hactazia.fr/"
     }
   ],
-  "contributors": [],
   "relations": [
-    {
-      "id": "network",
-      "type": "depends",
-      "version": ">=1.0.0"
-    },
     {
       "id": "server",
       "type": "depends",
@@ -44,22 +38,28 @@
       "id": "search",
       "type": "depends",
       "version": ">=1.0.0"
+    },
+    {
+      "id": "network",
+      "type": "depends",
+      "version": ">=1.0.0"
+    }
+  ],
+  "constraints": [
+    {
+      "type": "after",
+      "id": "search"
     }
   ],
   "entrypoints": {
     "main": [
-      "api.nox.user.Main",
-      "api.nox.user.Network"
+      "api.nox.user.Main"
     ],
     "client": [
       "api.nox.user.Client"
     ],
     "editor": [
       "api.nox.user.EditorUser"
-    ],
-    "instance": []
-  },
-  "references": [],
-  
-  "permissions": []
+    ]
+  }
 }

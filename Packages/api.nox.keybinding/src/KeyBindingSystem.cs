@@ -22,11 +22,11 @@ namespace api.nox.keybinding {
 			Instance = null;
 		}
 
-		internal static          IMainModCoreAPI         CoreAPI;
-		internal static          KeyBindingSystem       Instance;
-		internal readonly        List<KeyBinding>       Bindings            = new();
-		internal static readonly UnityEvent<KeyBinding> OnKeyBindingAdded   = new();
-		internal static readonly UnityEvent<KeyBinding> OnKeyBindingRemoved = new();
+		static internal          IMainModCoreAPI         CoreAPI;
+		static internal          KeyBindingSystem       Instance;
+		readonly internal        List<KeyBinding>       Bindings            = new();
+		static readonly internal UnityEvent<KeyBinding> OnKeyBindingAdded   = new();
+		static readonly internal UnityEvent<KeyBinding> OnKeyBindingRemoved = new();
 
 		[NoxPublic(NoxAccess.Method)]
 		public IKeyBinding AddKeyBinding(string id, string binding, string category = null) {

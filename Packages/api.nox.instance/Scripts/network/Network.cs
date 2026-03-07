@@ -1,4 +1,6 @@
+using System.Threading;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Network;
 using Nox.CCK.Utils;
 using Nox.Instances;
 using UnityEngine.Events;
@@ -13,19 +15,19 @@ namespace api.nox.instance.network {
 			Main.Instance.CoreAPI.EventAPI.Emit("instance_fetch", instance);
 		}
 
-		public async UniTask<Instance> Fetch(string identifier, string from = null)
-			=> await Fetch(InstanceIdentifier.FromString(identifier), from);
+		public async UniTask<Instance> Fetch(string identifier, string from = null, CancellationToken cancellationToken = default)
+			=> await Fetch(InstanceIdentifier.FromString(identifier), from, cancellationToken);
 
-		public async UniTask<Instance> Fetch(IInstanceIdentifier identifier, string from = null)
-			=> await Fetch(InstanceIdentifier.FromBase(identifier), from);
+		public async UniTask<Instance> Fetch(IInstanceIdentifier identifier, string from = null, CancellationToken cancellationToken = default)
+			=> await Fetch(InstanceIdentifier.FromBase(identifier), from, cancellationToken);
 
-		public UniTask<Instance> Fetch(uint id, string from = null)
-			=> Fetch(id.ToString(), from);
-		
-		private async UniTask<Instance> Fetch(InstanceIdentifier identifier, string from = null) {
+		public UniTask<Instance> Fetch(uint id, string from = null, CancellationToken cancellationToken = default)
+			=> Fetch(id.ToString(), from, cancellationToken);
+
+		private async UniTask<Instance> Fetch(InstanceIdentifier identifier, string from = null, CancellationToken cancellationToken = default) {
 			if (Main.NetworkAPI == null)
 				return null;
-			
+
 			if (identifier == null) {
 				Logger.LogError("Cannot fetch instance: identifier is null.");
 				return null;
@@ -35,51 +37,58 @@ namespace api.nox.instance.network {
 				identifier.Server = from;
 			var address = from ?? Main.UserAPI?.GetCurrent()?.GetServerAddress() ?? identifier.GetServerAddress();
 			if (string.IsNullOrEmpty(address)) {
-				Logger.LogError($"Cannot fetch user for {identifier}: no server address provided.");
+				Logger.LogError($"Cannot fetch instance for {identifier}: no server address provided.");
 				return null;
 			}
 
 			if (address == identifier.GetServerAddress())
 				identifier.Server = "::"; // Use "::" to indicate local server in the identifier
 
-			var request = Main.NetworkAPI.MakeRequest();
-			await request.SetMasterUrl(address, $"/api/instances/{identifier.ToString()}");
-			await request.Send();
-			var response = request.GetMasterResponse<Instance>();
-			if (response.HasError()) {
-				Logger.LogError($"Failed to fetch instance {identifier} from {address}: {response.GetError().GetMessage()}");
+			var request = await RequestNode.To(address, $"/api/instances/{identifier.ToString()}");
+			if (request == null) {
+				Logger.LogError($"Failed to create request for instance {identifier}");
 				return null;
 			}
 
-			var world = response.GetData();
-			InvokeFetch(world);
-			return world;
+			await request.Send(cancellationToken);
+			var response = await request.Node<Instance>(cancellationToken);
+			if (response.HasError()) {
+				Logger.LogError($"Failed to fetch instance {identifier} from {address}: {response.Error.Message}");
+				return null;
+			}
+
+			var instance = response.Data;
+			InvokeFetch(instance);
+			return instance;
 		}
 
-		public async UniTask<SearchResponse> Search(SearchRequest data, string from = null) {
+		public async UniTask<SearchResponse> Search(SearchRequest data, string from = null, CancellationToken cancellationToken = default) {
 			if (Main.NetworkAPI == null)
 				return null;
 
 			var address = from ?? Main.UserAPI?.GetCurrent()?.GetServerAddress();
 			if (string.IsNullOrEmpty(address)) {
-				Logger.LogError("Cannot search users: no server address provided.");
+				Logger.LogError("Cannot search instances: no server address provided.");
 				return null;
 			}
 
-			var request = Main.NetworkAPI.MakeRequest();
-			await request.SetMasterUrl(address, $"/api/instances?{data.ToParams()}");
-			await request.Send();
-			var response = request.GetMasterResponse<SearchResponse>();
-			Logger.LogDebug(request.GetResponse<string>());
+			var request = await RequestNode.To(address, $"/api/instances?{data.ToParams()}");
+			if (request == null) {
+				Logger.LogError($"Failed to create request for instance search");
+				return null;
+			}
+
+			await request.Send(cancellationToken);
+			var response = await request.Node<SearchResponse>(cancellationToken);
 			if (response.HasError()) {
-				Logger.LogError($"Failed to search instances from {address}: {response.GetError().GetMessage()}");
+				Logger.LogError($"Failed to search instances from {address}: {response.Error.Message}");
 				return null;
 			}
 
-			var instances = response.GetData();
+			var instances = response.Data;
 
-			foreach (var user in instances.instances)
-				InvokeFetch(user);
+			foreach (var instance in instances.instances)
+				InvokeFetch(instance);
 
 			return instances;
 		}

@@ -34,7 +34,7 @@ namespace api.nox.videoplayer {
 			CoreAPI  = api;
 			_events = new[] {
 				CoreAPI.EventAPI.Subscribe("menu_goto", OnGoto),
-				CoreAPI.EventAPI.Subscribe("widget_request", OnWidgetRequest)
+				CoreAPI.EventAPI.Subscribe("widget_request", OnWidgetRequest),
 			};
 		}
 

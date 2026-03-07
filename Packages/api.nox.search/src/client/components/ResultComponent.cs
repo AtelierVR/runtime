@@ -43,7 +43,7 @@ namespace api.nox.search.client {
 				return;
 			}
 
-			text.UpdateText(Data.GetTitleKey(), Data.GetTitleArguments() ?? Array.Empty<string>());
+			text.UpdateText(Data.TitleKey, Data.TitleArguments ?? Array.Empty<string>());
 			UpdateImage(Data).Forget();
 		}
 
@@ -54,7 +54,7 @@ namespace api.nox.search.client {
 			_imageLoading = true;
 
 			try {
-				var texture = await data.GetImage();
+				var texture = await data.Image;
 				if (texture) {
 					icon.texture = texture;
 					icon.gameObject.SetActive(true);

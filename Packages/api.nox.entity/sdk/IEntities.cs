@@ -1,3 +1,4 @@
+using UnityEngine.Events;
 namespace Nox.Entities {
 	public interface IEntities : IEntities<IEntity> { }
 
@@ -59,5 +60,15 @@ namespace Nox.Entities {
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		public int GetCount<T>() where T : TEntity;
+		
+		/// <summary>
+		/// Invoked when an entity is added to the manager.
+		/// </summary>
+		UnityEvent<TEntity> OnEntityAdded { get; }
+		
+		/// <summary>
+		/// Invoked when an entity is removed from the manager.
+		/// </summary>
+		UnityEvent<TEntity> OnEntityRemoved { get; }
 	}
 }

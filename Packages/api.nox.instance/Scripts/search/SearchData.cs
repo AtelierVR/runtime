@@ -7,17 +7,14 @@ namespace api.nox.instance.search {
 	public class SearchData : IResultData {
 		public Instance Reference;
 
-		public int GetId()
+		public int Id
 			=> Reference.ToIdentifier().ToString().GetHashCode();
 
-		public string GetTitleKey()
-			=> "instance.search.data.title";
-
-		public string[] GetTitleArguments()
+		public string[] TitleArguments
 			=> new[] { Reference.GetTitle() ?? Reference.GetId().ToString() };
 
-		public async UniTask<Texture2D> GetImage()
-			=> await Main.NetworkAPI.FetchTexture(Reference.GetThumbnailUrl());
+		public UniTask<Texture2D> Image
+			=> Main.NetworkAPI.FetchTexture(Reference.GetThumbnailUrl());
 
 		public void OnClick(int menuId)
 			=> Client.UiAPI?.SendGoto(menuId, InstancePage.GetStaticKey(), "instance", Reference);

@@ -15,7 +15,7 @@ namespace Nox.CCK.Worlds.FellInVoid {
 
 			var module = modules.Length switch {
 				1 => modules.FirstOrDefault(),
-				0 => descriptor.GetAnchor().AddComponent<FellInVoidWorldModule>(),
+				0 => descriptor.Anchor.AddComponent<FellInVoidWorldModule>(),
 				_ => null
 			};
 

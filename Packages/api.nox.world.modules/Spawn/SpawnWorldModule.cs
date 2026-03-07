@@ -136,7 +136,7 @@ namespace Nox.CCK.Worlds.Spawns {
 
 			var module = modules.Length switch {
 				1 => modules.FirstOrDefault(),
-				0 => descriptor.GetAnchor().AddComponent<SpawnsWorldModule>(),
+				0 => descriptor.Anchor.AddComponent<SpawnsWorldModule>(),
 				_ => null
 			};
 

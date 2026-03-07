@@ -40,8 +40,8 @@ namespace api.nox.ui {
 		public void Remove(int id)
 			=> Manager.Remove(id);
 
-		public async UniTask<IMenu> Make(RectTransform container, GameObject parent = null)
-			=> await Manager.Make(container, parent);
+		public async UniTask<IMenu> Make(IMenuProvider container)
+			=> await Manager.Make(container);
 
 		public void SendGoto(int menuId, string key, params object[] args)
 			=> PageManager.SendGoto(menuId, key, args);

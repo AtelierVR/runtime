@@ -18,7 +18,7 @@ namespace api.nox.session.jint {
 
 			var module = modules.Length switch {
 				1 => modules.FirstOrDefault(),
-				0 => descriptor.GetAnchor().AddComponent<JintBackingModule>(),
+				0 => descriptor.Anchor.AddComponent<JintBackingModule>(),
 				_ => null
 			};
 
@@ -88,9 +88,9 @@ namespace api.nox.session.jint {
 				backing.OnAuthorityTransferred(@new);
 		}
 
-		public void OnEventTriggered(string @event, byte[] payload, IPlayer sender) {
+		public void OnEvent(long @event, byte[] payload, IPlayer sender) {
 			foreach (var backing in backings)
-				backing.OnEventTriggered(@event, payload, sender);
+				backing.OnEvent(@event, payload, sender);
 		}
 	}
 }

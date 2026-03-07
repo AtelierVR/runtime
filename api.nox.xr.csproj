@@ -464,17 +464,14 @@
     <Reference Include="UnityEditor.WindowsStandalone.Extensions">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.3.2f1\Editor\Data\PlaybackEngines\WindowsStandaloneSupport\UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil.Pdb">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\Mono.Cecil.0.11.6\lib\netstandard2.0\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.VisualScripting.YamlDotNet">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.visualscripting@191c0d7e3b69\Editor\VisualScripting.Core\Dependencies\YamlDotNet\Unity.VisualScripting.YamlDotNet.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Posix">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.spoiledcat.git@5eb312ed44ac\Mono.Posix\Mono.Posix.dll</HintPath>
-    </Reference>
-    <Reference Include="BouncyCastle.Crypto">
-      <HintPath>D:\Projets\nox\runtime\Packages\nox.cck\Plugins\BouncyCastle.Crypto.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil">
-      <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.nuget.mono-cecil@ecb9724e46ff\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Collections.LowLevel.ILSupport">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.collections@aea9d3bd5e19\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.dll</HintPath>
@@ -494,11 +491,20 @@
     <Reference Include="sfw.net">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.spoiledcat.git@5eb312ed44ac\sfw\sfw.net.dll</HintPath>
     </Reference>
+    <Reference Include="BouncyCastle.Cryptography">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\BouncyCastle.Cryptography.2.6.2\lib\netstandard2.0\BouncyCastle.Cryptography.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Plastic.Antlr3.Runtime">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.collab-proxy@3351acaba9c9\Lib\Editor\Unity.Plastic.Antlr3.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="SimpleBase">
       <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\SimpleBase.1.3.1\lib\netstandard1.3\SimpleBase.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\Mono.Cecil.0.11.6\lib\netstandard2.0\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\Mono.Cecil.0.11.6\lib\netstandard2.0\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Plastic.Newtonsoft.Json">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.collab-proxy@3351acaba9c9\Lib\Editor\Unity.Plastic.Newtonsoft.Json.dll</HintPath>
@@ -530,6 +536,9 @@
     <Reference Include="NuGetForUnity.PluginAPI">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.github-glitchenzo.nugetforunity@b8a65750503c\Editor\PluginAPI\NuGetForUnity.PluginAPI.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\Mono.Cecil.0.11.6\lib\netstandard2.0\Mono.Cecil.Rocks.dll</HintPath>
+    </Reference>
     <Reference Include="System.Reflection.TypeExtensions">
       <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\System.Reflection.TypeExtensions.4.1.0\lib\netstandard1.5\System.Reflection.TypeExtensions.dll</HintPath>
     </Reference>
@@ -543,7 +552,7 @@
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.collections@aea9d3bd5e19\Unity.Collections.Tests\System.Runtime.CompilerServices.Unsafe\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="Esprima">
-      <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.jint.unity@9b16e8d86afa\Packages\Esprima.dll</HintPath>
+      <HintPath>D:\Projets\nox\runtime\Packages\nox.cck\Packages\Esprima.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.3.2f1\Editor\Data\NetStandard\ref\2.1.0\netstandard.dll</HintPath>
@@ -990,6 +999,14 @@
     <ProjectReference Include="RootMotion.csproj">
       <Project>{4defe665-1130-4cc1-c8bb-b7b81ecb715c}</Project>
       <Name>RootMotion</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Worlds.csproj">
+      <Project>{e3f3b769-9bd6-c46f-3578-54823274209d}</Project>
+      <Name>Nox.CCK.Worlds</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.Avatars.Runtime.csproj">
+      <Project>{45d1d2cc-20a6-bfc2-f4e5-fe84dc7749a0}</Project>
+      <Name>Nox.Avatars.Runtime</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

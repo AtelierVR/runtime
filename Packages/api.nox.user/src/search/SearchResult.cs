@@ -6,20 +6,17 @@ using Nox.Search;
 namespace api.nox.user.search {
 
 	public class SearchResult : IResult {
-		public string         Error;
+		public string Error { get; internal set; }
 		public SearchResponse Response;
-		public string         ServerAddress;
+		public string ServerAddress;
 
-		public bool IsError()
+		public bool IsError
 			=> !string.IsNullOrEmpty(Error);
 
-		public string GetError()
-			=> Error;
-
 		public bool HasNext()
-			=> !IsError() && Response.HasNext();
+			=> !IsError && Response.HasNext();
 
-		public IResultData[] GetData()
+		public IResultData[] Data
 			=> Response != null
 				? Response.users
 					.Select(x => new SearchData { Reference = x })

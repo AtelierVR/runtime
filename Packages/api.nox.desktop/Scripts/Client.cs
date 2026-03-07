@@ -35,7 +35,7 @@ namespace api.nox.desktop {
 
 		internal static IUserAPI UserAPI
 			=> CoreAPI.ModAPI
-				.GetMod("user")
+				.GetMod("users")
 				.GetInstance<IUserAPI>();
 
 		internal static IMicrophoneAPI MicrophoneAPI

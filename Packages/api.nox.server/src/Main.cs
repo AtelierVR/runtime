@@ -17,9 +17,10 @@ namespace api.nox.server {
 		internal        IMainModCoreAPI CoreAPI;
 		internal static Main           Instance;
 
-		internal Network                         Network;
 		private  LanguagePack                    _lang;
 		internal (IUserIdentifier, ServerSocket) Socket = (null, null);
+		private readonly object _socketLock = new object();
+		private bool _isConnecting;
 
 		internal static INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
@@ -28,7 +29,7 @@ namespace api.nox.server {
 
 		internal static IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
-				.GetMod("user")
+				.GetMod("users")
 				?.GetInstance<IUserAPI>();
 
 		internal readonly UnityEvent<INoxObject> OnServerUpdated      = new();
@@ -43,7 +44,7 @@ namespace api.nox.server {
 			Instance = this;
 			_lang    = CoreAPI.AssetAPI.GetAsset<LanguagePack>("lang.asset");
 			LanguageManager.AddPack(_lang);
-			Network = new Network();
+			
 			_events = new[] {
 				CoreAPI.EventAPI.Subscribe(
 					"server_update",
@@ -92,8 +93,18 @@ namespace api.nox.server {
 			await StartCurrentSocket(user);
 		}
 
-		private async UniTask StartCurrentSocket(IUser user) {
-			if (Socket.Item2 != null && Socket.Item1.Equals(user.ToIdentifier())) {
+	private async UniTask StartCurrentSocket(IUser user) {
+		// Prévenir les connexions concurrentes
+		lock (_socketLock) {
+			if (_isConnecting) {
+				Logger.LogDebug("Socket connection already in progress, skipping.");
+				return;
+			}
+			_isConnecting = true;
+		}
+
+		try {
+			if (Socket.Item2 != null && Socket.Item1 != null && Socket.Item1.Equals(user?.ToIdentifier())) {
 				Logger.LogDebug("Already connected to server for current user.");
 				return;
 			}
@@ -109,7 +120,7 @@ namespace api.nox.server {
 
 			Socket = (user.ToIdentifier(), null);
 
-			var address = user?.GetServerAddress();
+			var address = user.GetServerAddress();
 			if (address == null) {
 				Logger.LogWarning("Current user has no server address set, cannot connect to server.");
 				return;
@@ -131,16 +142,23 @@ namespace api.nox.server {
 			socket.OnDisconnected.AddListener(() => Logger.LogDebug("Disconnected from server"));
 
 			await Socket.Item2.Connect();
+		} finally {
+			lock (_socketLock) {
+				_isConnecting = false;
+			}
 		}
+	}
 
 		public async UniTask OnDisposeMainAsync() {
 			foreach (var ev in _events.Where(e => e != null))
 				CoreAPI.EventAPI.Unsubscribe(ev);
 			LanguageManager.RemovePack(_lang);
+			
 			if (Socket.Item2 != null)
 				await Socket.Item2.Dispose();
+			
 			Socket   = (null, null);
-			Network  = null;
+			
 			CoreAPI  = null;
 			Instance = null;
 		}

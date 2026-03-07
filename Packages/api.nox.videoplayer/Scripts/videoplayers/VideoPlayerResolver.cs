@@ -1,53 +1,40 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using Nox.VideoPlayer;
+using CCKResolver = Nox.CCK.VideoPlayer.VideoPlayerResolver;
 
 namespace api.nox.videoplayer {
-	public class VideoPlayerResolver {
+	public static class VideoPlayerResolver {
 		public static void Listen() {
-			VideoPlayerManager.OnRegistered.AddListener(OnRegistered);
-			VideoPlayerManager.OnUnRegistered.AddListener(OnUnRegistered);
-			foreach (var player in VideoPlayerManager.VideoPlayers)
-				OnRegistered(player);
+			CCKResolver.OnResolve.AddListener(OnResolvingAsync);
+			CCKResolver.OnIsMedia.AddListener(OnIsMedia);
 		}
+
 
 		public static void UnListen() {
-			VideoPlayerManager.OnRegistered.RemoveListener(OnRegistered);
-			VideoPlayerManager.OnUnRegistered.RemoveListener(OnUnRegistered);
-			foreach (var player in VideoPlayerManager.VideoPlayers)
-				OnUnRegistered(player);
+			CCKResolver.OnResolve.RemoveListener(OnResolvingAsync);
+			CCKResolver.OnIsMedia.RemoveListener(OnIsMedia);
+		}
+		public static readonly List<Regex> MediaRegexes = new() {
+			new Regex(@"^https?://.*\.(mp4|webm|ogg|mp3|wav|flac|aac|m4a|opus|avi|mkv|mpeg|mpg|mov|flv|swf|3gp|3g2|ogg|opus|oga|spx|opus)(\?.*)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+		};
+
+		private static void OnIsMedia(IVideoPlayer player, string url, Action<string, bool> callback) {
+			var isMedia = MediaRegexes.Any(r => r.IsMatch(url));
+			callback(url, isMedia);
 		}
 
-		private static void OnUnRegistered(IVideoPlayer arg0) {
-			var player = arg0.GetResolver();
-			if (player == null) return;
-			Logger.LogDebug($"Unregistered video player {arg0} from resolving");
-			player.OnResolving.RemoveListener(OnResolving);
-		}
+		private static async UniTask OnResolvingAsync(IVideoPlayer player, IFetchOptions options, Action<IFetchOptions, IResult[]> callback) {
+			await UniTask.SwitchToThreadPool();
 
-		private static void OnRegistered(IVideoPlayer arg0) {
-			var player = arg0.GetResolver();
-			if (player == null) return;
-			Logger.LogDebug($"Registered video player {arg0} for resolving");
-			player.OnResolving.AddListener(OnResolving);
-		}
-
-		private static void OnResolving(IVideoPlayer arg0, IFetchOptions arg1)
-			=> OnResolvingAsync(arg0, arg1).Forget();
-
-		private static async UniTask OnResolvingAsync(IVideoPlayer arg0, IFetchOptions arg1) {
-			var player = arg0.GetResolver();
-			if (player == null) {
-				Logger.LogWarning($"Video player {arg0} does not implement IVideoPlayerResolver");
-				return;
-			}
-
-			Logger.LogDebug($"Resolving video for player {arg0} with options {arg1}");
+			Logger.LogDebug($"Resolving video for player {player} with options {options}");
 
 			var handlers = Main.Handlers
-				.Select(e => (e.EstimatePriority(arg1), e))
+				.Select(e => (e.EstimatePriority(options), e))
 				.Where(e => e.Item1 >= 0)
 				.OrderByDescending(e => e.Item1)
 				.Select(e => e.e)
@@ -58,13 +45,14 @@ namespace api.nox.videoplayer {
 			await UniTask.SwitchToMainThread();
 			await UniTask.WhenAll(Enumerable.Select(handlers, Resolver));
 
-			player.OnResolve(arg1, results.ToArray());
+			callback(options, results.ToArray());
 
 			return;
 
 			async UniTask Resolver(IHandler handler) {
-				var res = await handler.Fetch(arg1);
-				if (res == null || res.Length == 0) return;
+				var res = await handler.Fetch(options);
+				if (res == null || res.Length == 0)
+					return;
 				results.AddRange(res);
 			}
 		}
