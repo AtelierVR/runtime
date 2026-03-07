@@ -1,5 +1,4 @@
 
 
 -r:System.Drawing.dll
--r:System.Drawing.Common.dll
 -define:SYSTEM_DRAWING
