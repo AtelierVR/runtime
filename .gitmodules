@@ -12,7 +12,7 @@
 	url = https://github.com/AtelierVR/nox.avatars.git
 [submodule "Packages/nox.avatars.modules"]
 	path = Packages/nox.avatars.modules
-	url = https://github.com/AtelierVR/nox.avatars.git
+	url = https://github.com/AtelierVR/nox.avatars.modules.git
 [submodule "Packages/nox.control"]
 	path = Packages/nox.control
 	url = https://github.com/AtelierVR/nox.control.git
