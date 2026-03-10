@@ -64,3 +64,6 @@
 [submodule "Packages/nox.ffmpeg"]
 	path = Packages/nox.ffmpeg
 	url = https://github.com/AtelierVR/nox.ffmpeg.git
+[submodule "Packages/com.keviniglesias.basicmotions"]
+	path = Packages/com.keviniglesias.basicmotions
+	url = https://github.com/AtelierVR/nox.animations.git
