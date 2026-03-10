@@ -6,7 +6,7 @@ namespace api.nox.ui.layouts {
 		public override string GetKey()
 			=> "actions";
 
-		public override UniTask<GameObject> GetPrefab()
+		override protected UniTask<GameObject> GetPrefab()
 			=> PageManager.GetAssetAsync<GameObject>("buttons/action.prefab");
 	}
 }

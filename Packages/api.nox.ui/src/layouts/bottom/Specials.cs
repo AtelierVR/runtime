@@ -11,7 +11,7 @@ namespace api.nox.ui.layouts {
 		public override string GetKey()
 			=> "specials";
 
-		public override UniTask<GameObject> GetPrefab()
+		override protected UniTask<GameObject> GetPrefab()
 			=> PageManager.GetAssetAsync<GameObject>("buttons/special.prefab");
 
 		private static UniTask<GameObject> GetBack()

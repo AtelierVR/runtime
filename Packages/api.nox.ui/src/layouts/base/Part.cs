@@ -7,10 +7,10 @@ using UnityEngine;
 
 namespace api.nox.ui.layouts {
 	public abstract class Part : MonoBehaviour, IPart {
-		public abstract string              GetKey();
-		public abstract UniTask<GameObject> GetPrefab();
-		public          RectTransform       container;
-		public          Menu                menu;
+		public abstract string GetKey();
+		abstract protected UniTask<GameObject> GetPrefab();
+		public RectTransform container;
+		public Menu menu;
 
 
 		public bool GetActive()
@@ -29,10 +29,13 @@ namespace api.nox.ui.layouts {
 
 		public virtual void RemoveElement(string key) {
 			foreach (var el in GetChildren()) {
-				if (el.GetData().Key != key) continue;
+				if (el.GetData().Key != key)
+					continue;
 				#if UNITY_EDITOR
-				if (Application.isPlaying) Destroy(el.gameObject);
-				else UnityEditor.EditorApplication.delayCall += () => DestroyImmediate(el.gameObject);
+				if (Application.isPlaying)
+					Destroy(el.gameObject);
+				else
+					UnityEditor.EditorApplication.delayCall += () => DestroyImmediate(el.gameObject);
 				#else
 				Destroy(el.gameObject);
 				#endif
