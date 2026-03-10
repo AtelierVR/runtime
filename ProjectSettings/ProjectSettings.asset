@@ -144,7 +144,9 @@ PlayerSettings:
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
   bundleVersion: 0.0.9
-  preloadedAssets: []
+  preloadedAssets:
+  - {fileID: -7417897948689831231, guid: 5d61e6746cebe294ebf72b9a3da2145c, type: 2}
+  - {fileID: 5836236757421091142, guid: 0f6a1efefe42da842a7b187413f14da7, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -921,8 +923,8 @@ PlayerSettings:
   gcIncremental: 1
   gcWBarrierValidation: 0
   apiCompatibilityLevelPerPlatform:
-    Standalone: 3
-  editorAssembliesCompatibilityLevel: 2
+    Standalone: 6
+  editorAssembliesCompatibilityLevel: 3
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: AtelierVR-0.0.9
