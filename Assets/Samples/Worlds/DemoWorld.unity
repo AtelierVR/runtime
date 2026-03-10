@@ -749,7 +749,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4790591625252672599, guid: 43e504877ce996b418d212928850ae91, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -823,7 +823,7 @@ MonoBehaviour:
   target: 0
   publishId: 24
   publishServer: hactazia.fr
-  publishVersion: 27
+  publishVersion: 28
   isCompiled: 0
 --- !u!114 &497432693
 MonoBehaviour:
