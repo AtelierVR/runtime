@@ -165,7 +165,7 @@ namespace api.nox.user.network {
 			CurrentUser = null;
 			ServerAddress = null;
 			var config = Config.Load();
-			config.Remove(new[] { "server", address, "token" });
+			config.Remove(new[] { "server", address, "_token" });
 			config.Remove(new[] { "server", address, "expires" });
 			config.Remove(new[] { "server", address, "user_id" });
 			config.Remove(new[] { "server", address, "integrity" });
@@ -219,7 +219,7 @@ namespace api.nox.user.network {
 			CurrentUser = login.user;
 			ServerAddress = login.user.server;
 			var config = Config.Load();
-			config.Set(new[] { "servers", login.user.server, "token" }, login.token);
+			config.Set(new[] { "servers", login.user.server, "_token" }, login.token);
 			config.Set(new[] { "servers", login.user.server, "expires" }, login.expires);
 			config.Set(new[] { "servers", login.user.server, "user_id" }, login.user.id);
 			config.Remove(new[] { "servers", login.user.server, "integrity" });
@@ -260,7 +260,7 @@ namespace api.nox.user.network {
 			}
 
 			var config = Config.Load();
-			config.Set(new[] { "servers", address, "integrity", server, "token" }, integrity.token);
+			config.Set(new[] { "servers", address, "integrity", server, "_token" }, integrity.token);
 			config.Set(new[] { "servers", address, "integrity", server, "expires" }, integrity.expires);
 			config.Save();
 			return integrity;
@@ -282,11 +282,11 @@ namespace api.nox.user.network {
 			var config = Config.Load();
 
 			if (server == address) {
-				if (!config.Has(new[] { "servers", address, "token" })) return null;
+				if (!config.Has(new[] { "servers", address, "_token" })) return null;
 				var expires = config.Get(new[] { "servers", address, "expires" }, long.MinValue);
 				if (expires > DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
 					return new AuthToken {
-						Token = config.Get<string>(new[] { "servers", address, "token" }),
+						Token = config.Get<string>(new[] { "servers", address, "_token" }),
 						Integrity = false
 					};
 				return null;
@@ -294,18 +294,18 @@ namespace api.nox.user.network {
 
 			return null;
 
-			if (config.Has(new[] { "servers", address, "integrity", server, "token" })) {
+			if (config.Has(new[] { "servers", address, "integrity", server, "_token" })) {
 				var expires = config.Get(new[] { "servers", address, "integrity", server, "expires" }, long.MinValue);
 				if (expires > DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
 					return new AuthToken {
-						Token = config.Get<string>(new[] { "servers", address, "integrity", server, "token" }),
+						Token = config.Get<string>(new[] { "servers", address, "integrity", server, "_token" }),
 						Integrity = true
 					};
 			}
 
 			var result = await CreateIntegrity(server);
 			if (result != null && !result.IsExpired()) {
-				config.Set(new[] { "servers", address, "integrity", server, "token" }, result.token);
+				config.Set(new[] { "servers", address, "integrity", server, "_token" }, result.token);
 				config.Set(new[] { "servers", address, "integrity", server, "expires" }, result.expires);
 				config.Save();
 				return new AuthToken {
