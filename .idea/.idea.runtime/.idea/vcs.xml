@@ -3,6 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/com.earnestrobot.autohand" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/com.keviniglesias.basicmotions" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.assetbundles" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.avatars" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.avatars.modules" vcs="Git" />
