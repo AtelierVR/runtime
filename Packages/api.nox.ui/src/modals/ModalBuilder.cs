@@ -24,7 +24,7 @@ namespace api.nox.ui.modals {
 
 		public IModal Build() {
 			var asset    = Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/modal.prefab");
-			var instance = Object.Instantiate(asset, Menu.GetModalContainer());
+			var instance = asset.Instantiate(Menu.GetModalContainer());
 			var modal    = instance.GetOrAddComponent<BaseModal>();
 			modal.Attach(Menu);
 			instance.name = $"[Modal] {modal.GetInstanceID()}";
@@ -46,7 +46,7 @@ namespace api.nox.ui.modals {
 						: "prefabs/message_modal.prefab"
 			);
 
-			modal.content = Object.Instantiate(asset, container);
+			modal.content = asset.Instantiate(container);
 			var close = Reference.GetComponent<Button>("close", modal.content);
 			close?.onClick.AddListener(modal.OnCloseClicked);
 			var title = Reference.GetComponent<TextLanguage>("title", modal.content);
@@ -58,7 +58,7 @@ namespace api.nox.ui.modals {
 				var optionsContainer   = Reference.GetComponent<RectTransform>("options", modal.content);
 				var optionButtonPrefab = Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/btn_icon.prefab");
 				foreach (var option in Options) {
-					var optionInstance = Object.Instantiate(optionButtonPrefab, optionsContainer);
+					var optionInstance = optionButtonPrefab.Instantiate(optionsContainer);
 					Reference.GetReference("image_container", optionInstance)
 						?.SetActive(false);
 					Reference.GetComponent<TextLanguage>("text", optionInstance)

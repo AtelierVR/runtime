@@ -50,9 +50,10 @@ namespace api.nox.ui.defaults {
 
 		public async UniTask<GameObject> GetContentAsync(RectTransform parent) {
 			if (_content) return _content;
-			_content      = Object.Instantiate(await PageManager.GetAssetAsync<GameObject>("prefabs/split.prefab"), parent);
+			_content      = (await PageManager.GetAssetAsync<GameObject>("prefabs/split.prefab")).Instantiate(parent);
 			_content.name = $"[{GetStaticKey()}_{_content.GetInstanceID()}]";
 			var splitContent     = Reference.GetComponent<RectTransform>("content", _content);
+			splitContent.sizeDelta = Vector2.zero;
 			var containerAsset   = await PageManager.GetAssetAsync<GameObject>("prefabs/container.prefab");
 			var withTitleAsset   = await PageManager.GetAssetAsync<GameObject>("prefabs/with_title.prefab");
 			var iconAsset        = await PageManager.GetAssetAsync<GameObject>("prefabs/header_icon.prefab");
@@ -65,44 +66,46 @@ namespace api.nox.ui.defaults {
 			// generate background containers
 
 			// generate notification
-			var container = Object.Instantiate(containerAsset, splitContent);
-			var withTitle = Object.Instantiate(withTitleAsset, Reference.GetComponent<RectTransform>("content", container));
+			var container = containerAsset.Instantiate(splitContent);
+			var withTitle = withTitleAsset.Instantiate(Reference.GetComponent<RectTransform>("content", container));
 			var header    = Reference.GetReference("header", withTitle);
-			var icon      = Object.Instantiate(iconAsset, Reference.GetComponent<RectTransform>("before", header));
-			var label     = Object.Instantiate(labelAsset, Reference.GetComponent<RectTransform>("content", header));
+			var icon      = iconAsset.Instantiate(Reference.GetComponent<RectTransform>("before", header));
+			var label     = labelAsset.Instantiate(Reference.GetComponent<RectTransform>("content", header));
 
-			Reference.GetComponent<Image>("image", icon).sprite = await PageManager.GetAssetAsync<Sprite>("icons/notifications.png");
+			Reference.GetComponent<Image>("image", icon)
+				.sprite = await PageManager.GetAssetAsync<Sprite>("icons/notifications.png");
+			
 			Reference.GetComponent<TextLanguage>("text", label).UpdateText("notifications.title");
 			_notificationContent = Reference.GetComponent<RectTransform>("content", withTitle);
 
 			// generate dashboard
-			container = Object.Instantiate(await PageManager.GetAssetAsync<GameObject>("prefabs/container_full.prefab"), splitContent);
-			withTitle = Object.Instantiate(withTitleAsset, Reference.GetComponent<RectTransform>("content", container));
+			container = await PageManager.GetAssetAsync<GameObject>("prefabs/container_full.prefab").InstantiateAsync(splitContent);
+			withTitle = withTitleAsset.Instantiate(Reference.GetComponent<RectTransform>("content", container));
 			header    = Reference.GetReference("header", withTitle);
-			icon      = Object.Instantiate(iconAsset, Reference.GetComponent<RectTransform>("before", header));
-			label     = Object.Instantiate(labelAsset, Reference.GetComponent<RectTransform>("content", header));
+			icon      = iconAsset.Instantiate(Reference.GetComponent<RectTransform>("before", header));
+			label     = labelAsset.Instantiate(Reference.GetComponent<RectTransform>("content", header));
 
 			Reference.GetComponent<Image>("image", icon).sprite = await PageManager.GetAssetAsync<Sprite>("icons/dashboard.png");
 			Reference.GetComponent<TextLanguage>("text", label).UpdateText("dashboard.title");
 
-			container         = Object.Instantiate(scrollAsset, Reference.GetComponent<RectTransform>("content", withTitle));
+			container         = scrollAsset.Instantiate(Reference.GetComponent<RectTransform>("content", withTitle));
 			_dashboardContent = Reference.GetComponent<RectTransform>("content", container);
 
 			// generate dashboard content
 
 			// wigets
 			// box > widget_group > widget_item[]
-			var box   = Object.Instantiate(boxAsset, _dashboardContent);
-			var group = Object.Instantiate(widgetGroupAsset, Reference.GetComponent<RectTransform>("content", box));
+			var box   = boxAsset.Instantiate(_dashboardContent);
+			var group = widgetGroupAsset.Instantiate(Reference.GetComponent<RectTransform>("content", box));
 			_widgetContent = Reference.GetComponent<RectTransform>("content", group);
 			Reference.GetComponent<TextLanguage>("text", box).UpdateText("widgets.title");
 
 			// generate friends
-			container = Object.Instantiate(containerAsset, splitContent);
-			withTitle = Object.Instantiate(withTitleAsset, Reference.GetComponent<RectTransform>("content", container));
+			container = containerAsset.Instantiate(splitContent);
+			withTitle = withTitleAsset.Instantiate(Reference.GetComponent<RectTransform>("content", container));
 			header    = Reference.GetReference("header", withTitle);
-			icon      = Object.Instantiate(iconAsset, Reference.GetComponent<RectTransform>("before", header));
-			label     = Object.Instantiate(labelAsset, Reference.GetComponent<RectTransform>("content", header));
+			icon      = iconAsset.Instantiate(Reference.GetComponent<RectTransform>("before", header));
+			label     = labelAsset.Instantiate(Reference.GetComponent<RectTransform>("content", header));
 
 			Reference.GetComponent<Image>("image", icon).sprite = await PageManager.GetAssetAsync<Sprite>("icons/friend.png");
 			Reference.GetComponent<TextLanguage>("text", label).UpdateText("friends.title");

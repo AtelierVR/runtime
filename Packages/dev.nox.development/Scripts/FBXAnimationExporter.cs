@@ -175,7 +175,7 @@ public class FBXAnimationExporter : EditorWindow
         try
         {
             // Créer une copie du clip d'animation
-            AnimationClip newClip = Object.Instantiate(sourceClip);
+            var newClip = Instantiate(sourceClip);
             newClip.name = sourceClip.name;
 
             // Appliquer les options

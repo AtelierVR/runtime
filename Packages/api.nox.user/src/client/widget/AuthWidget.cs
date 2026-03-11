@@ -38,7 +38,7 @@ namespace api.nox.user.widget {
 			}
 
 			var prefab    = Client.GetAsset<GameObject>("ui:prefabs/grid_item.prefab");
-			var instance  = Object.Instantiate(prefab, parent);
+			var instance  = prefab.Instantiate(parent);
 			var component = instance.AddComponent<AuthWidget>();
 			component._mid = menu.GetId();
 

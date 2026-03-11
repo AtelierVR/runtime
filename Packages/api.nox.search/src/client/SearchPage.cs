@@ -21,9 +21,9 @@ namespace api.nox.search.client {
 		public string GetKey()
 			=> GetStaticKey();
 
-		private readonly int        _mId;
-		private readonly object[]   _context;
-		private          GameObject _content;
+		private readonly int _mId;
+		private readonly object[] _context;
+		private GameObject _content;
 
 		private static bool T<T>(object[] o, int index, out T value) {
 			if (o.Length > index && o[index] is T t) {
@@ -50,7 +50,8 @@ namespace api.nox.search.client {
 			HandlerId = handler;
 			Query     = query ?? string.Empty;
 			LastQuery = (query ?? string.Empty) + " ";
-			if (auto) Submit().Forget();
+			if (auto)
+				Submit().Forget();
 		}
 
 		public object[] GetContext()
@@ -69,12 +70,12 @@ namespace api.nox.search.client {
 			}
 		}
 
-		private           string                   _handlerId;
-		internal          string                   Query;
-		internal          string                   LastQuery;
-		internal readonly UnityEvent<WorkerTask>   OnWorkerTaskUpdate = new();
-		internal readonly UnityEvent<WorkerTask[]> OnWorkerTaskStart  = new();
-		internal readonly UnityEvent<IHandler[]>   OnHandlerUpdate    = new();
+		private string _handlerId;
+		internal string Query;
+		internal string LastQuery;
+		internal readonly UnityEvent<WorkerTask> OnWorkerTaskUpdate = new();
+		internal readonly UnityEvent<WorkerTask[]> OnWorkerTaskStart = new();
+		internal readonly UnityEvent<IHandler[]> OnHandlerUpdate = new();
 
 		internal bool IsEmptyQuery
 			=> string.IsNullOrEmpty(Query);
@@ -103,8 +104,9 @@ namespace api.nox.search.client {
 		private readonly List<WorkerTask> _tasks = new();
 
 		public GameObject GetContent(RectTransform parent) {
-			if (_content) return _content;
-			_content      = Object.Instantiate(Client.GetAsset<GameObject>("ui:prefabs/split.prefab"), parent);
+			if (_content)
+				return _content;
+			_content      = Client.GetAsset<GameObject>("ui:prefabs/split.prefab").Instantiate(parent);
 			_content.name = $"[{GetStaticKey()}_{_content.GetInstanceID()}]";
 			var splitContent   = Reference.GetComponent<RectTransform>("content", _content);
 			var containerAsset = Client.GetAsset<GameObject>("ui:prefabs/container.prefab");
@@ -117,54 +119,38 @@ namespace api.nox.search.client {
 			// generate background containers
 
 			// generate notification
-			var container = Object.Instantiate(containerAsset, splitContent);
-			var withTitle = Object.Instantiate(
-				Client.GetAsset<GameObject>("ui:prefabs/with_title.prefab"),
-				Reference.GetComponent<RectTransform>("content", container)
-			);
+			var container = containerAsset.Instantiate(splitContent);
+			var withTitle = Client.GetAsset<GameObject>("ui:prefabs/with_title.prefab")
+				.Instantiate(Reference.GetComponent<RectTransform>("content", container));
 			var header = Reference.GetReference("header", withTitle);
-			var icon   = Object.Instantiate(iconAsset, Reference.GetComponent<RectTransform>("before", header));
-			var label  = Object.Instantiate(labelAsset, Reference.GetComponent<RectTransform>("content", header));
+			var icon   = iconAsset.Instantiate(Reference.GetComponent<RectTransform>("before", header));
+			var label  = labelAsset.Instantiate(Reference.GetComponent<RectTransform>("content", header));
 
 			Reference.GetComponent<Image>("image", icon).sprite = Client.GetAsset<Sprite>("ui:icons/search.png");
 			Reference.GetComponent<TextLanguage>("text", label).UpdateText("search.title");
 
-			var handlers = Object.Instantiate(
-				scrollAsset,
-				Reference.GetComponent<RectTransform>("content", withTitle)
-			);
+			var handlers = scrollAsset.Instantiate(Reference.GetComponent<RectTransform>("content", withTitle));
 			var listsHandler = Reference.GetComponent<RectTransform>(
 				"content",
-				Object.Instantiate(
-					listAsset,
-					Reference.GetComponent<RectTransform>(
-						"content", handlers
-					)
-				)
+				listAsset.Instantiate(Reference.GetComponent<RectTransform>("content", handlers))
 			);
-			var box = Object.Instantiate(Client.GetAsset<GameObject>("ui:prefabs/tips.prefab"), listsHandler);
+			var box = Client.GetAsset<GameObject>("ui:prefabs/tips.prefab").Instantiate(listsHandler);
 			Reference.GetComponent<TextLanguage>("title", box).UpdateText("search.info.title");
-			var handleInfo = Object.Instantiate(
-				infoAsset,
-				Reference.GetComponent<RectTransform>("content", withTitle)
-			);
-
+			var handleInfo = infoAsset.Instantiate(Reference.GetComponent<RectTransform>("content", withTitle));
 
 			// generate dashboard
-			container = Object.Instantiate(Client.GetAsset<GameObject>("ui:prefabs/container_full.prefab"), splitContent);
-			withTitle = Object.Instantiate(
-				Client.GetAsset<GameObject>("ui:prefabs/with_search.prefab"),
-				Reference.GetComponent<RectTransform>("content", container)
-			);
+			container = Client.GetAsset<GameObject>("ui:prefabs/container_full.prefab").Instantiate(splitContent);
+			withTitle = Client.GetAsset<GameObject>("ui:prefabs/with_search.prefab")
+				.Instantiate(Reference.GetComponent<RectTransform>("content", container));
 			header = Reference.GetReference("header", withTitle);
 			var content   = Reference.GetComponent<RectTransform>("content", withTitle);
 			var component = _content.AddComponent<SearchComponent>();
 			component.submitButton         = Reference.GetComponent<Button>("submit", header);
 			component.inputField           = Reference.GetComponent<TMPro.TMP_InputField>("input", header);
 			component.imageButton          = Reference.GetComponent<Image>("image", component.submitButton.gameObject);
-			component.workersContainer     = Object.Instantiate(scrollAsset, content);
+			component.workersContainer     = scrollAsset.Instantiate(content);
 			component.workerListContainer  = Reference.GetComponent<RectTransform>("content", component.workersContainer);
-			component.resultContainer      = Object.Instantiate(infoAsset, content);
+			component.resultContainer      = infoAsset.Instantiate(content);
 			component.resultText           = Reference.GetComponent<TextLanguage>("text", component.resultContainer);
 			component.inputImage           = Reference.GetComponent<Image>("image", component.inputField.gameObject);
 			component.inputImageContainer  = Reference.GetReference("image_container", component.inputField.gameObject);
@@ -174,14 +160,13 @@ namespace api.nox.search.client {
 			component.infoHandlerText      = Reference.GetComponent<TextLanguage>("text", component.infoHandlerContainer);
 			component.handlerContainer     = handlers;
 			component.handlerListContainer = Reference.GetComponent<RectTransform>(
-				"content", Object.Instantiate(
-					listAsset,
-					listsHandler
-				)
+				"content", 
+				listAsset.Instantiate(listsHandler)
 			);
 			component.Page = this;
 
-			Reference.GetComponent<Image>("image", component.resultContainer).sprite = Client.GetAsset<Sprite>("ui:icons/help.png");
+			Reference.GetComponent<Image>("image", component.resultContainer)
+				.sprite = Client.GetAsset<Sprite>("ui:icons/help.png");
 
 			return _content;
 		}
@@ -192,8 +177,9 @@ namespace api.nox.search.client {
 			_tasks.Clear();
 		}
 
-		internal async UniTask Submit() {
-			if (IsFetching) return;
+		async internal UniTask Submit() {
+			if (IsFetching)
+				return;
 			LastQuery = Query;
 
 			var handler = Handler;

@@ -5,6 +5,7 @@ using api.nox.ui.layouts;
 using api.nox.ui.menus;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
+using Nox.CCK.Utils;
 using Nox.UI;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
@@ -66,20 +67,13 @@ namespace api.nox.ui {
 				return null;
 			}
 
-			var prefab = await PageManager.GetAssetAsync<GameObject>("prefabs/menu.prefab");
-			var instance = Object.Instantiate(prefab, container.Container);
-			var menu     = instance?.GetComponent<Menu>();
-			
-			if (!menu) {
-				Logger.LogError("Failed to get menu component from prefab");
-				Object.Destroy(instance);
-				return null;
-			}
+			var prefab   = await PageManager.GetAssetAsync<GameObject>("prefabs/menu.prefab");
+			var menu = prefab.Instantiate<Menu>(container.Container);
 
 			menu.Client          = _client;
 			menu.gameObject.name = $"[{menu.GetType().Name}_{menu.GetInstanceID()}]";
-			menu.Provider          = container;
-			
+			menu.Provider        = container;
+
 			Add(menu);
 			return menu;
 		}
