@@ -43,11 +43,12 @@ namespace api.nox.instance.client {
 
 		public void UpdateContent((IUser, IPlayer) user) {
 			_user = user;
+			Logger.Log($"{user.Item2.GetDisplay()} {user.Item1?.GetDisplay()}");
 			text.UpdateText(
 				"world.instance.text", new[] {
 					user.Item2.GetDisplay()
 					?? user.Item1?.GetDisplay()
-					?? user.Item2.GetIdentifier().ToString()
+					?? "Unknown Player"
 				}
 			);
 

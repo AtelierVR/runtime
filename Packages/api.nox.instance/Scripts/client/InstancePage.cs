@@ -27,6 +27,7 @@ namespace api.nox.instance.client {
 		public IWorldAsset Asset;
 		public IWorld World;
 		private bool _isLoading;
+		private bool _isRefreshing;
 		public ushort Version = ushort.MaxValue;
 
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
@@ -95,35 +96,59 @@ namespace api.nox.instance.client {
 			if (_isLoading)
 				return;
 			_isLoading = true;
+			try { await FetchAssetCore(); }
+			finally { _isLoading = false; }
+			if (update)
+				_component.UpdateContent(Instance, World, Asset);
+		}
+
+		private async UniTask Refresh(bool load) {
+			if (_isRefreshing)
+				return;
+			_isRefreshing = true;
+			try {
+				await FetchInstanceCore();
+				await FetchWorldCore();
+				await FetchAssetCore();
+			} finally {
+				_isRefreshing = false;
+			}
+			if (!load)
+				_component.UpdatePlayerList(Instance).Forget();
+			_component.UpdateContent(Instance, World, Asset);
+		}
+
+		// Core helpers – contain only the raw async work, no _isLoading guard.
+		// Called from Refresh (which holds _isRefreshing) or from the guarded
+		// public Fetch* methods below.
+		private async UniTask FetchInstanceCore() {
+			Instance = await Main.Instance.Network.Fetch(_identifier);
+		}
+
+		private async UniTask FetchWorldCore() {
+			if (Instance == null)
+				return;
+			World = await Main.WorldAPI.Fetch(WorldIdentifier.From(Instance.GetWorldId()));
+		}
+
+		private async UniTask FetchAssetCore() {
+			if (Instance == null)
+				return;
 			var req = new AssetSearchRequest {
 				Engines   = new[] { EngineExtensions.CurrentEngine.GetEngineName() },
 				Platforms = new[] { PlatformExtensions.CurrentPlatform.GetPlatformName() },
 				Versions  = new[] { Version },
 				Limit     = 1
 			};
-			Asset      = (await Main.WorldAPI.SearchAssets(WorldIdentifier.From(Instance.GetWorldId()), req)).Assets.FirstOrDefault();
-			_isLoading = false;
-			if (update)
-				_component.UpdateContent(Instance, World, Asset);
-		}
-
-		private async UniTask Refresh(bool load) {
-			if (_isLoading)
-				return;
-			await FetchInstance();
-			await FetchWorld();
-			await FetchAsset();
-			if (!load)
-				_component.UpdatePlayerList(Instance).Forget();
-			_component.UpdateContent(Instance, World, Asset);
+			Asset = (await Main.WorldAPI.SearchAssets(WorldIdentifier.From(Instance.GetWorldId()), req)).Assets.FirstOrDefault();
 		}
 
 		private async UniTask FetchInstance(bool update = false) {
 			if (_isLoading)
 				return;
 			_isLoading = true;
-			Instance   = await Main.Instance.Network.Fetch(_identifier);
-			_isLoading = false;
+			try { await FetchInstanceCore(); }
+			finally { _isLoading = false; }
 			if (update)
 				_component.UpdateContent(Instance, World, Asset);
 		}
@@ -132,8 +157,8 @@ namespace api.nox.instance.client {
 			if (_isLoading || Instance == null)
 				return;
 			_isLoading = true;
-			World      = await Main.WorldAPI.Fetch(WorldIdentifier.From(Instance.GetWorldId()));
-			_isLoading = false;
+			try { await FetchWorldCore(); }
+			finally { _isLoading = false; }
 			if (updateAsset)
 				await FetchAsset(false);
 			if (update)

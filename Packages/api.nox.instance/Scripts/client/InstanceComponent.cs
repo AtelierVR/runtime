@@ -476,7 +476,11 @@ namespace api.nox.instance.client {
 
 				if (users.Length == 0)
 					continue;
-				tasks.Add(SearchPlayers(users, server, _playerListTokenSource.Token, action));
+
+				if (server == "::") {
+					action(users.Select(u => ((IUser)null, u)).ToArray());
+				} else
+					tasks.Add(SearchPlayers(users, server, _playerListTokenSource.Token, action));
 			}
 
 			await UniTask.WhenAll(tasks);

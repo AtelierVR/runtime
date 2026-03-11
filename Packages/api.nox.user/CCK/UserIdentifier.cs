@@ -97,12 +97,12 @@ namespace Nox.CCK.Users {
 
 		public static UserIdentifier From(string identifier) {
 			if (string.IsNullOrEmpty(identifier))
-				return null;
+				return Invalid;
 
 			var parts = identifier.Split('@');
 			switch (parts.Length) {
 				case > 2:
-					return null;
+					return Invalid;
 				case 1:
 					parts = new[] { parts[0], null };
 					break;
@@ -115,7 +115,7 @@ namespace Nox.CCK.Users {
 				return new UserIdentifier(id, parts[1]);
 			return !string.IsNullOrEmpty(parts[0])
 				? new UserIdentifier(parts[0], parts[1])
-				: null;
+				: Invalid;
 		}
 
 		/// <summary>
