@@ -7,7 +7,7 @@ namespace api.nox.desktop {
 	public class DesktopMenuProvider : MonoBehaviour, IMenuProvider, IDisposable {
 		public RectTransform Container;
 		public IMenu Menu;
-		public DesktopPlayer Player;
+		public DesktopPlayerControllerLink ControllerLink;
 
 		RectTransform IMenuProvider.Container
 			=> Container;
@@ -58,12 +58,12 @@ namespace api.nox.desktop {
 				// Menu is being opened
 				Cursor.lockState   = CursorLockMode.None;
 				Cursor.visible     = true;
-				Player.useMovement = false; // Block movement inputs
+				ControllerLink.canInput = false; // Block movement inputs
 			} else {
 				// Menu is being closed
 				Cursor.lockState   = CursorLockMode.Locked;
 				Cursor.visible     = false;
-				Player.useMovement = true; // Re-enable movement inputs
+				ControllerLink.canInput = true; // Re-enable movement inputs
 			}
 
 			Menu.SetActive(!isMenuVisible);

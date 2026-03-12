@@ -30,8 +30,12 @@ namespace api.nox.desktop {
 		/// Gets the current movement vector based on the key bindings.
 		/// </summary>
 		/// <returns></returns>
-		public static Vector2 GetMovement()
-			=> new(GetValue("right") - GetValue("left"), GetValue("forward") - GetValue("backward"));
+		public static Vector3 GetMovement()
+			=> new(
+				GetValue("right") - GetValue("left"),
+				GetValue("jump") - GetValue("crouch"),
+				GetValue("forward") - GetValue("backward")
+			);
 
 		/// <summary>
 		/// Gets the value of a specific key binding.

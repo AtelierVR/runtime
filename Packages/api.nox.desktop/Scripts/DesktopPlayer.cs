@@ -176,7 +176,7 @@ namespace api.nox.desktop {
 				body.linearVelocity = newVel;
 			} else {
 				// Ground movement - exactly
-				if (move != Vector3.zero && CanInputMove()) {
+				if (move != Vector3.zero) {
 					// Calculate current move speed with sprint modifier
 					float currentMaxSpeed = maxMoveSpeed;
 					if (isSprinting && !crouching) {
@@ -204,10 +204,6 @@ namespace api.nox.desktop {
 			if (Mathf.Abs(turningAxis) > 0.001f) {
 				transform.Rotate(0, turningAxis * 90f * Time.fixedDeltaTime, 0);
 			}
-		}
-
-		protected virtual bool CanInputMove() {
-			return useMovement && (!crouching || isSprinting);
 		}
 
 		protected virtual void UpdateDrag() {

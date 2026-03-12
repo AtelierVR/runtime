@@ -171,6 +171,7 @@ MonoBehaviour:
   autoJumpDelay: 0.3
   doubleJumpWindow: 0.3
   enableDoubleJumpToFly: 1
+  canInput: 1
 --- !u!114 &1277791529871333016
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -567,15 +568,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4176749210758014426, guid: c6e954dcb82fcbf43833dd84cbe39430, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.35677084
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4176749210758014426, guid: c6e954dcb82fcbf43833dd84cbe39430, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.35677084
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4176749210758014426, guid: c6e954dcb82fcbf43833dd84cbe39430, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.35677084
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5479599693753372345, guid: c6e954dcb82fcbf43833dd84cbe39430, type: 3}
       propertyPath: m_AnchorMax.x
@@ -634,7 +635,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: api.nox.desktop::api.nox.desktop.DesktopMenuProvider
   Container: {fileID: 6777837100936130096}
-  Player: {fileID: 5595254506500728190}
+  ControllerLink: {fileID: 592085171815288062}
   Parent: {fileID: 7731422090172783712}
 --- !u!224 &6777837100936130096 stripped
 RectTransform:

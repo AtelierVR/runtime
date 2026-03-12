@@ -53,6 +53,8 @@ namespace api.nox.desktop {
 		private float lastJumpTime;
 		private int   jumpCount;
 
+		public bool canInput = true;
+
 		private void Start() {
 			if (!player) {
 				player = GetComponent<DesktopPlayer>();
@@ -67,10 +69,6 @@ namespace api.nox.desktop {
 		private void Update() {
 			if (!player) return;
 
-			// Handle movement in Update like XRHandPlayerControllerLink
-			var moveInput = GetMovementInput();
-			player.Move(moveInput, true, true);
-
 			HandleMouseLook();
 			HandleJumpInput();
 			HandleCrouchInput();
@@ -82,37 +80,28 @@ namespace api.nox.desktop {
 
 			// Also apply movement in FixedUpdate for physics consistency like XRHandPlayerControllerLink
 			var moveInput = GetMovementInput();
-			player.Move(moveInput, true, true);
+			player.Move(new Vector2(moveInput.x, moveInput.z), true, true);
 
 			// Handle flying direction if flying
-			if (player.IsFlying()) {
-				var flyDir = Vector3.zero;
-				if (Keybindings.IsPressed("jump"))
-					flyDir.y = 1f;
-				else if (Keybindings.IsPressed("crouch"))
-					flyDir.y = -1f;
-
-				player.Fly(flyDir);
-			}
+			if (player.IsFlying()) player.Fly(new Vector3(0, moveInput.y, 0));
 		}
 
-		private Vector2 GetMovementInput() {
-			// Block movement if menu is open
-			if (!player.useMovement) return Vector2.zero;
+		private Vector3 GetMovementInput() {
+			if (!canInput) return Vector3.zero;
 
 			// Use the existing Keybindings.GetMovement() method
 			var input = Keybindings.GetMovement();
 
 			// Apply deadzone
 			if (input.magnitude < movementDeadzone)
-				input = Vector2.zero;
+				input = Vector3.zero;
 
 			return input;
 		}
 
 		private void HandleMouseLook() {
 			// Block mouse look if menu is open
-			if (!player.useMovement) return;
+			if (!canInput) return;
 
 			// Get mouse input using new Input System
 			var mouse = InputSystem.GetDevice<Mouse>();
@@ -145,7 +134,7 @@ namespace api.nox.desktop {
 
 		private void HandleJumpInput() {
 			// Block jump input if menu is open
-			if (!player.useMovement) return;
+			if (!canInput) return;
 
 			var jumpCurrentlyPressed = Keybindings.IsPressed("jump");
 			var isGrounded           = player.IsGrounded(); // Assuming this method exists
@@ -221,7 +210,7 @@ namespace api.nox.desktop {
 
 		private void HandleCrouchInput() {
 			// Block crouch input if menu is open
-			if (!player.useMovement) return;
+			if (!canInput) return;
 
 			var crouchPressed = Keybindings.IsPressed("crouch");
 			// Only crouch if not flying
@@ -231,7 +220,7 @@ namespace api.nox.desktop {
 
 		private void HandleSprintInput() {
 			// Block sprint input if menu is open
-			if (!player.useMovement) return;
+			if (!canInput) return;
 
 			var sprintCurrentlyPressed = Keybindings.IsPressed("sprint");
 			player.SetSprinting(sprintCurrentlyPressed);
@@ -265,7 +254,7 @@ namespace api.nox.desktop {
 
 		private void OnApplicationFocus(bool hasFocus) {
 			// Re-lock cursor when application gains focus, but only if menu is not open
-			if (hasFocus && player.useMovement)
+			if (hasFocus && canInput)
 				Cursor.lockState = CursorLockMode.Locked;
 		}
 	}
