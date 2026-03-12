@@ -19,8 +19,8 @@ namespace api.nox.desktop {
 			("nox.movement", "left", "<Keyboard>/a", value => SetValue("left", value), 0f),
 			("nox.movement", "right", "<Keyboard>/d", value => SetValue("right", value), 0f),
 			("nox.movement", "jump", "<Keyboard>/space", value => SetValue("jump", value), 0f),
-			("nox.movement", "crouch", "<Keyboard>/leftCtrl", value => SetValue("crouch", value), 0f),
-			("nox.movement", "sprint", "<Keyboard>/leftShift", value => SetValue("sprint", value), 0f),
+			("nox.movement", "crouch", "<Keyboard>/leftShift", value => SetValue("crouch", value), 0f),
+			("nox.movement", "sprint", "<Keyboard>/leftCtrl", value => SetValue("sprint", value), 0f),
 			("nox.ui", "main", "<Keyboard>/tab", value => SetValue("main", value), 0f)
 		};
 
