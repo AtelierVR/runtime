@@ -31,7 +31,7 @@ namespace api.nox.ui.menus {
 		internal Client Client;
 
 
-		public static Dictionary<string, List<NavigationData>> GetDefaultData()
+		public static Dictionary<string, List<NavigationData>> GetDefaultData(GameObject timePrefab)
 			=> new() {
 				{
 					"applications",
@@ -138,7 +138,7 @@ namespace api.nox.ui.menus {
 							Key              = "time",
 							text             = "time",
 							Flags            = NavigationFlags.Enable,
-							GetCustomContent = async tr => Instantiate(await PageManager.GetAssetAsync<GameObject>("prefabs/time.prefab"), tr),
+							GetCustomContent = async tr => Instantiate(timePrefab, tr),
 							executionType    = NavigationExecution.None,
 						},
 						new() {
@@ -201,8 +201,10 @@ namespace api.nox.ui.menus {
 				p.menu = this;
 			}
 
+			GameObject timePrefab = await PageManager.GetAssetAsync<GameObject>("prefabs/time.prefab");
+
 			var tasks = (from data
-					in GetDefaultData()
+					in GetDefaultData(timePrefab)
 				let part = GetPart(data.Key)
 				select part.AddElements(data.Value.ToArray()));
 
