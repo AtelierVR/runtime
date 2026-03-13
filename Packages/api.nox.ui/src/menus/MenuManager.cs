@@ -67,8 +67,9 @@ namespace api.nox.ui {
 				return null;
 			}
 
-			var prefab   = await PageManager.GetAssetAsync<GameObject>("prefabs/menu.prefab");
-			var menu = prefab.Instantiate<Menu>(container.Container);
+			var menu = await PageManager
+				.GetAssetAsync<GameObject>("prefabs/menu.prefab")
+				.InstantiateAsync<Menu>(container.Container);
 
 			menu.Client          = _client;
 			menu.gameObject.name = $"[{menu.GetType().Name}_{menu.GetInstanceID()}]";

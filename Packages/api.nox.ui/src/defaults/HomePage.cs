@@ -17,15 +17,15 @@ namespace api.nox.ui.defaults {
 		public static string GetStaticKey()
 			=> "home";
 
-		private readonly int        _mId;
-		private readonly object[]   _context;
-		private          GameObject _content;
+		private readonly int _mId;
+		private readonly object[] _context;
+		private GameObject _content;
 
-		private RectTransform       _notificationContent;
-		private RectTransform       _dashboardContent;
-		private RectTransform       _friendsContent;
-		private RectTransform       _widgetContent;
-		private GameObject          _widgetPrefab;
+		private RectTransform _notificationContent;
+		private RectTransform _dashboardContent;
+		private RectTransform _friendsContent;
+		private RectTransform _widgetContent;
+		private GameObject _widgetPrefab;
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
 
 		public static IPage OnGotoAction(IMenu menu, object[] o)
@@ -44,16 +44,16 @@ namespace api.nox.ui.defaults {
 
 		public GameObject GetContent(RectTransform parent)
 			=> GetContentAsync(parent).AsTask().Result;
-		
+
 		public IMenu GetMenu()
 			=> Client.Instance.Get<IMenu>(_mId);
 
 		public async UniTask<GameObject> GetContentAsync(RectTransform parent) {
-			if (_content) return _content;
+			if (_content)
+				return _content;
 			_content      = (await PageManager.GetAssetAsync<GameObject>("prefabs/split.prefab")).Instantiate(parent);
 			_content.name = $"[{GetStaticKey()}_{_content.GetInstanceID()}]";
-			var splitContent     = Reference.GetComponent<RectTransform>("content", _content);
-			splitContent.sizeDelta = Vector2.zero;
+			var splitContent = Reference.GetComponent<RectTransform>("content", _content);
 			var containerAsset   = await PageManager.GetAssetAsync<GameObject>("prefabs/container.prefab");
 			var withTitleAsset   = await PageManager.GetAssetAsync<GameObject>("prefabs/with_title.prefab");
 			var iconAsset        = await PageManager.GetAssetAsync<GameObject>("prefabs/header_icon.prefab");
@@ -66,7 +66,7 @@ namespace api.nox.ui.defaults {
 			// generate background containers
 
 			// generate notification
-			var container = containerAsset.Instantiate(splitContent);
+			var container = await containerAsset.InstantiateAsync(splitContent);
 			var withTitle = withTitleAsset.Instantiate(Reference.GetComponent<RectTransform>("content", container));
 			var header    = Reference.GetReference("header", withTitle);
 			var icon      = iconAsset.Instantiate(Reference.GetComponent<RectTransform>("before", header));
@@ -74,13 +74,14 @@ namespace api.nox.ui.defaults {
 
 			Reference.GetComponent<Image>("image", icon)
 				.sprite = await PageManager.GetAssetAsync<Sprite>("icons/notifications.png");
-			
+
 			Reference.GetComponent<TextLanguage>("text", label).UpdateText("notifications.title");
 			_notificationContent = Reference.GetComponent<RectTransform>("content", withTitle);
 
 			// generate dashboard
 			container = await PageManager.GetAssetAsync<GameObject>("prefabs/container_full.prefab").InstantiateAsync(splitContent);
-			withTitle = withTitleAsset.Instantiate(Reference.GetComponent<RectTransform>("content", container));
+
+			withTitle = withTitleAsset.Instantiate(Reference.GetComponent<RectTransform>("content", container.gameObject));
 			header    = Reference.GetReference("header", withTitle);
 			icon      = iconAsset.Instantiate(Reference.GetComponent<RectTransform>("before", header));
 			label     = labelAsset.Instantiate(Reference.GetComponent<RectTransform>("content", header));
@@ -88,8 +89,9 @@ namespace api.nox.ui.defaults {
 			Reference.GetComponent<Image>("image", icon).sprite = await PageManager.GetAssetAsync<Sprite>("icons/dashboard.png");
 			Reference.GetComponent<TextLanguage>("text", label).UpdateText("dashboard.title");
 
-			container         = scrollAsset.Instantiate(Reference.GetComponent<RectTransform>("content", withTitle));
-			_dashboardContent = Reference.GetComponent<RectTransform>("content", container);
+			container = await scrollAsset.InstantiateAsync(Reference.GetComponent<RectTransform>("content", withTitle));
+
+			_dashboardContent = Reference.GetComponent<RectTransform>("content", container.gameObject);
 
 			// generate dashboard content
 
@@ -102,7 +104,8 @@ namespace api.nox.ui.defaults {
 
 			// generate friends
 			container = containerAsset.Instantiate(splitContent);
-			withTitle = withTitleAsset.Instantiate(Reference.GetComponent<RectTransform>("content", container));
+
+			withTitle = withTitleAsset.Instantiate(Reference.GetComponent<RectTransform>("content", container.gameObject));
 			header    = Reference.GetReference("header", withTitle);
 			icon      = iconAsset.Instantiate(Reference.GetComponent<RectTransform>("before", header));
 			label     = labelAsset.Instantiate(Reference.GetComponent<RectTransform>("content", header));
@@ -140,8 +143,10 @@ namespace api.nox.ui.defaults {
 			=> UpdateLayout.UpdateImmediate(_content);
 
 		private void RemoveWidget(EventData data) {
-			if (!_widgetContent || !_widgetPrefab) return;
-			if (!data.TryGet(0, out string key)) return;
+			if (!_widgetContent || !_widgetPrefab)
+				return;
+			if (!data.TryGet(0, out string key))
+				return;
 			var widgets = _widgetContent.GetComponentsInChildren<IWidget>(true)
 				.Where(w => w.GetKey() == key)
 				.ToArray();
@@ -152,7 +157,8 @@ namespace api.nox.ui.defaults {
 		}
 
 		private void RequestWidgets() {
-			if (!_widgetContent || !_widgetPrefab) return;
+			if (!_widgetContent || !_widgetPrefab)
+				return;
 
 			List<IWidget> widgets = new();
 
@@ -180,7 +186,8 @@ namespace api.nox.ui.defaults {
 		}
 
 		private void AddWidget(EventData data) {
-			if (!data.TryGet(0, out IWidget widget)) return;
+			if (!data.TryGet(0, out IWidget widget))
+				return;
 			AddWidget(widget);
 			UpdateGridder().Forget();
 		}
@@ -203,20 +210,23 @@ namespace api.nox.ui.defaults {
 		}
 
 		private void AddWidget(IWidget widget) {
-			if (!_widgetContent || !_widgetPrefab) return;
-			if (string.IsNullOrEmpty(widget.GetKey())) return;
+			if (!_widgetContent || !_widgetPrefab)
+				return;
+			if (string.IsNullOrEmpty(widget.GetKey()))
+				return;
 			var listExisting = _widgetContent
 				.GetComponentsInChildren<IWidget>(true)
 				.Where(
 					widget1 => widget1.GetKey() == widget.GetKey()
 						&& (widget is Object widgeto && widget1 is Object wo
 							? wo.GetInstanceID() != widgeto.GetInstanceID()
-							: widget1            != widget)
+							: widget1 != widget)
 				);
 			foreach (var existing in listExisting)
 				if (existing is Object o)
 					Object.Destroy(o);
-			if (widget is not MonoBehaviour w) return;
+			if (widget is not MonoBehaviour w)
+				return;
 			var item = w.GetComponent<WidgetGridItem>();
 			item.size = widget.GetSize();
 		}

@@ -15,10 +15,10 @@ namespace api.nox.microphone.settings {
 			SetValueKey("settings.range.value.percent");
 		}
 
-		public override GameObject GetPrefab()
+		override protected GameObject GetPrefab()
 			=> Main.CoreAPI.AssetAPI.GetAsset<GameObject>("settings:prefabs/range.prefab");
 
-		public override void OnValueChanged(float value)
+		override protected void OnValueChanged(float value)
 			=> Main.Instance.Manager.ConfigVolume = value;
 	}
 }

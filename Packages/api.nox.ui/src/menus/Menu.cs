@@ -31,7 +31,7 @@ namespace api.nox.ui.menus {
 		internal Client Client;
 
 
-		public static Dictionary<string, List<NavigationData>> GetDefaultData(GameObject timePrefab)
+		public static Dictionary<string, List<NavigationData>> GetDefaultData()
 			=> new() {
 				{
 					"applications",
@@ -138,7 +138,7 @@ namespace api.nox.ui.menus {
 							Key              = "time",
 							text             = "time",
 							Flags            = NavigationFlags.Enable,
-							GetCustomContent = async tr => Instantiate(timePrefab, tr),
+							GetCustomContent = async tr => await PageManager.GetAssetAsync<GameObject>("prefabs/time.prefab").InstantiateAsync(tr),
 							executionType    = NavigationExecution.None,
 						},
 						new() {
@@ -201,10 +201,8 @@ namespace api.nox.ui.menus {
 				p.menu = this;
 			}
 
-			GameObject timePrefab = await PageManager.GetAssetAsync<GameObject>("prefabs/time.prefab");
-
 			var tasks = (from data
-					in GetDefaultData(timePrefab)
+					in GetDefaultData()
 				let part = GetPart(data.Key)
 				select part.AddElements(data.Value.ToArray()));
 
@@ -212,9 +210,14 @@ namespace api.nox.ui.menus {
 
 			foreach (var o in GetInternalOrbiters())
 			foreach (var p in o.GetInternalParts())
-				if (p.GetChildren().Length > 0)
+				if (p.GetChildren().Length > 0) {
 					p.SetActive(true);
+					UpdateLayout.UpdateImmediate(p.container);
+				}
 
+			await UniTask.NextFrame();
+			UpdateLayout.UpdateImmediate(gameObject);
+			await UniTask.NextFrame();
 			UpdateLayout.UpdateImmediate(gameObject);
 		}
 
