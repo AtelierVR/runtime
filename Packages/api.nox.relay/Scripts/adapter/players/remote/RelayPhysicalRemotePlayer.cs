@@ -170,7 +170,7 @@ namespace api.nox.relay {
 			var parameters = parameterModule.GetParameters();
 
 			foreach (var param in parameters) {
-				if (param.GetFlags().HasFlag(ParameterFlags.LocalEditable)) continue;
+				if (param.GetFlags().HasFlag(ParameterFlags.OwnerEditable)) continue;
 				var n = param.GetName();
 				switch (n) {
 					case "tracking/head/active":

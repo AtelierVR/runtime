@@ -20,8 +20,8 @@ namespace api.nox.relay {
 			_name      = _reference.GetName();
 			_key       = _reference.GetKey();
 			_flags = PropertyFlags.None
-				| (_reference.GetFlags().HasFlag(ParameterFlags.RemoteEditableByLocal) ? PropertyFlags.LocalEmit : PropertyFlags.None)
-				| (_reference.GetFlags().HasFlag(ParameterFlags.LocalEditableByRemote) ? PropertyFlags.RemoteEmit : PropertyFlags.None);
+				| (_reference.GetFlags().HasFlag(ParameterFlags.OwnerSyncsToViewers) ? PropertyFlags.LocalEmit : PropertyFlags.None)
+				| (_reference.GetFlags().HasFlag(ParameterFlags.ViewerSyncsToOwner) ? PropertyFlags.RemoteEmit : PropertyFlags.None);
 			_updated = DateTime.UtcNow;
 		}
 
