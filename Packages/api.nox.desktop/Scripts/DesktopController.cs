@@ -375,8 +375,10 @@ namespace api.nox.desktop {
 			}
 		}
 
+		private Dictionary<ushort, Transform> _parts;
+
 		private Dictionary<ushort, Transform> Parts
-			=> new() {
+			=> _parts ??= new Dictionary<ushort, Transform> {
 				{ PlayerRig.Base.ToIndex(), transform },
 				{ PlayerRig.Head.ToIndex(), player.headCamera.transform }
 			};

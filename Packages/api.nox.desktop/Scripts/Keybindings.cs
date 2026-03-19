@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Nox.KeyBindings;
 using UnityEngine;
 using UnityEngine.Events;
@@ -43,8 +42,9 @@ namespace api.nox.desktop {
 		/// <param name="key"></param>
 		/// <returns></returns>
 		private static float GetValue(string key) {
-			var index = Array.FindIndex(Keys, k => k.Item2 == key);
-			return index == -1 ? 0f : Keys[index].Item5;
+			for (var i = 0; i < Keys.Length; i++)
+				if (Keys[i].Item2 == key) return Keys[i].Item5;
+			return 0f;
 		}
 
 		/// <summary>
@@ -92,7 +92,15 @@ namespace api.nox.desktop {
 		/// </summary>
 		/// <param name="id"></param>
 		private static void Rebind(string id) {
-			var key        = Keys.FirstOrDefault(k => k.Item2 == id);
+			var found = false;
+			(string, string, string, Action<float>, float) key = default;
+			for (var i = 0; i < Keys.Length; i++) {
+				if (Keys[i].Item2 != id) continue;
+				key   = Keys[i];
+				found = true;
+				break;
+			}
+			if (!found) return;
 			var keybinding = Keybinding.AddKeyBinding(key.Item2, key.Item3, key.Item1);
 			if (keybinding == null) {
 				Logger.LogError($"Failed to add or get key binding for {id}");

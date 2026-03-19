@@ -92,8 +92,8 @@ namespace api.nox.desktop {
 			// Use the existing Keybindings.GetMovement() method
 			var input = Keybindings.GetMovement();
 
-			// Apply deadzone
-			if (input.magnitude < movementDeadzone)
+			// Apply deadzone (sqrMagnitude avoids sqrt)
+			if (input.sqrMagnitude < movementDeadzone * movementDeadzone)
 				input = Vector3.zero;
 
 			return input;
