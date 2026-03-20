@@ -33,7 +33,7 @@ namespace api.nox.instance {
 		else if (InstanceCreationPage.GetStaticKey() == key)
 			page = InstanceCreationPage.OnGotoAction(menu, context.Data[2..]);
 		if (page == null) return;
-		Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.GetId(), page);
+		Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.Id, page);
 	}
 
 		public void OnDisposeClient() {

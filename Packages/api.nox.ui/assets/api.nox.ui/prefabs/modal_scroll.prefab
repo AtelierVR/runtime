@@ -38,7 +38,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3843106011686377514, guid: c576dbc53dcecac40b25ba674e644ef0, type: 3}
       propertyPath: m_Name
-      value: modal_scroll Variant
+      value: modal_scroll
       objectReference: {fileID: 0}
     - target: {fileID: 5515715369535526023, guid: c576dbc53dcecac40b25ba674e644ef0, type: 3}
       propertyPath: m_IsActive

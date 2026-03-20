@@ -12,12 +12,12 @@ using Object = UnityEngine.Object;
 namespace api.nox.ui.modals {
 	public class ModalBuilder : IModalBuilder {
 		public Func<RectTransform, GameObject> Generator;
-		public string[]                        Title    = { "modal.title" };
-		public string[]                        Content  = { "modal.content" };
-		public bool                            Closable = true;
-		public Dictionary<string, string[]>    Options  = new();
-		public Action<string>                  OnValueChanged;
-		public IModalMenu                      Menu;
+		public string[] Title = { "modal.title" };
+		public string[] Content = { "modal.content" };
+		public bool Closable = true;
+		public Dictionary<string, string[]> Options = new();
+		public Action<string> OnValueChanged;
+		public IModalMenu Menu;
 
 		public ModalBuilder(IModalMenu menu)
 			=> Menu = menu;
@@ -26,8 +26,13 @@ namespace api.nox.ui.modals {
 			var asset    = Main.Instance.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/modal.prefab");
 			var instance = asset.Instantiate(Menu.GetModalContainer());
 			var modal    = instance.GetOrAddComponent<BaseModal>();
+
+			var lp = instance.transform.localPosition;
+			lp.z                             = -15;
+			instance.transform.localPosition = lp;
+
 			modal.Attach(Menu);
-			instance.name = $"[Modal] {modal.GetInstanceID()}";
+			instance.name = $"[Modal] {modal.GetEntityId().GetHashCode()}";
 			var container = Reference.GetComponent<RectTransform>("content", instance);
 
 			if (Generator != null)
@@ -47,6 +52,11 @@ namespace api.nox.ui.modals {
 			);
 
 			modal.content = asset.Instantiate(container);
+
+			lp                                    = modal.content.transform.localPosition;
+			lp.z                                  = 0;
+			modal.content.transform.localPosition = lp;
+
 			var close = Reference.GetComponent<Button>("close", modal.content);
 			close?.onClick.AddListener(modal.OnCloseClicked);
 			var title = Reference.GetComponent<TextLanguage>("title", modal.content);
@@ -82,7 +92,7 @@ namespace api.nox.ui.modals {
 
 		public void SetClosable(bool closable)
 			=> Closable = closable;
-		
+
 		public bool IsClosable()
 			=> Closable;
 
@@ -92,7 +102,8 @@ namespace api.nox.ui.modals {
 		public void SetOptions(Action<string> onValue, Dictionary<string, string[]> options) {
 			Options = options ?? new Dictionary<string, string[]>();
 			foreach (var key in Options.Keys.ToArray()) {
-				if (Options[key] != null && Options[key].Length > 0) continue;
+				if (Options[key] != null && Options[key].Length > 0)
+					continue;
 				Options[key] = new[] { "modal.option." + key };
 			}
 

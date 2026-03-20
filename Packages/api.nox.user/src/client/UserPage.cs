@@ -56,7 +56,7 @@ namespace api.nox.user.client {
 
 		private static UserPage OnPageByIdentifier(IMenu menu, object[] context, UserIdentifier identifier) {
 			var page = new UserPage {
-				_mId        = menu.GetId(),
+				_mId        = menu.Id,
 				_context    = context,
 				_identifier = identifier,
 				_user       = null
@@ -67,7 +67,7 @@ namespace api.nox.user.client {
 
 		private static UserPage OnPageByUser(IMenu menu, object[] context, IUser user) {
 			return new UserPage {
-				_mId        = menu.GetId(),
+				_mId        = menu.Id,
 				_context    = context,
 				_identifier = user.ToIdentifier(),
 				_user       = user

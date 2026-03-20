@@ -23,7 +23,7 @@ namespace api.nox.user.client {
 
 		internal static IPage OnGotoAction(IMenu menu, object[] context) {
 			var page = new AuthLoginWidget {
-				_mId     = menu.GetId(),
+				_mId     = menu.Id,
 				_context = context
 			};
 			return page;

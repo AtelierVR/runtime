@@ -20,13 +20,13 @@ namespace api.nox.ui {
 			=> _client = client;
 
 		public bool Has(int id)
-			=> _menus.Any(m => m.GetId() == id);
+			=> _menus.Any(m => m.Id == id);
 
 		public T Get<T>(int id) where T : IMenu
-			=> (T)_menus.Find(m => m.GetId() == id && m is T);
+			=> (T)_menus.Find(m => m.Id == id && m is T);
 
 		public void Add(IMenu menu) {
-			if (Has(menu.GetId()))
+			if (Has(menu.Id))
 				return;
 			_menus.Add(menu);
 			_client.CoreAPI.EventAPI.Emit("menu_added", menu);
@@ -40,7 +40,7 @@ namespace api.nox.ui {
 			var canRemove = true;
 			_client.CoreAPI.EventAPI.Emit("menu_request_remove", menu, new Action<object[]>(OnMenuRequestRemove));
 			if (!canRemove) {
-				Logger.LogDebug($"Canceling removing menu {menu.GetId()}");
+				Logger.LogDebug($"Canceling removing menu {menu.Id}");
 				return;
 			}
 

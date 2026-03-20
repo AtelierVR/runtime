@@ -38,7 +38,7 @@ namespace api.nox.instance.client {
 
 		private static InstanceCreationPage OnPageByWorldForCreation(IMenu menu, object[] context, IWorld world, IWorldAsset asset) {
 			var page = new InstanceCreationPage {
-				_mId     = menu.GetId(),
+				_mId     = menu.Id,
 				_context = context,
 				World    = world,
 				Asset    = asset

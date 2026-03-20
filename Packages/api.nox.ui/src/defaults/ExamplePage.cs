@@ -12,7 +12,7 @@ namespace api.nox.ui.defaults {
 		private          GameObject _content;
 
 		public static IPage OnGotoAction(IMenu menu, object[] o)
-			=> new ExamplePage(menu.GetId(), o);
+			=> new ExamplePage(menu.Id, o);
 
 		private ExamplePage(int mId, object[] context) {
 			_mId     = mId;

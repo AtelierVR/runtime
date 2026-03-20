@@ -49,8 +49,10 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\BCLExtensions\TargetingPacks\netstandard2.1\analyzers\dotnet\roslyn4.0\cs\System.Text.Json.SourceGeneration.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Packages\api.nox.ui\src\audio\AudioPlay.cs" />
     <Compile Include="Packages\api.nox.ui\src\layouts\QwertyKeyboardLayout.cs" />
     <Compile Include="Packages\api.nox.ui\src\elements\MenuGridder.cs" />
+    <Compile Include="Packages\api.nox.ui\src\menus\ExternalAudioMenu.cs" />
     <Compile Include="Packages\api.nox.ui\Assets\api.nox.ui\Scripts\BackdropBlurExample.cs" />
     <Compile Include="Packages\api.nox.ui\src\defaults\DefaultPagesClient.cs" />
     <Compile Include="Packages\api.nox.ui\src\colors\ThemeSetter.cs" />

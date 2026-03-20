@@ -29,7 +29,7 @@ namespace api.nox.videoplayer.client {
 
 		static internal IPage OnGotoAction(IMenu menu, object[] context)
 			=> new VideoPlayerPage {
-				_mId      = menu.GetId(),
+				_mId      = menu.Id,
 				_context  = context,
 				_selected = T(context, 0, out int id) ? id : 0
 			};

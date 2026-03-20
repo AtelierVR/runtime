@@ -24,7 +24,7 @@ namespace api.nox.ui.defaults {
 			else if (ExamplePage.GetStaticKey() == key)
 				page = ExamplePage.OnGotoAction(menu, context.Data[2..]);
 			if (page == null) return;
-			_coreAPI.EventAPI.Emit(PageManager.DisplayEvent, menu.GetId(), page);
+			_coreAPI.EventAPI.Emit(PageManager.DisplayEvent, menu.Id, page);
 		}
 
 		public void OnDisposeClient() {

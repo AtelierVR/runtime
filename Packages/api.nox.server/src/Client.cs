@@ -56,7 +56,7 @@ namespace api.nox.server {
 			if (ServerPage.GetStaticKey() == key)
 				page = ServerPage.OnGotoAction(menu, context.Data[2..]);
 			if (page == null) return;
-			Instance.CoreAPI.EventAPI.Emit("menu_display", menu.GetId(), page);
+			Instance.CoreAPI.EventAPI.Emit("menu_display", menu.Id, page);
 		}
 
 		private void OnWidgetRequest(EventData context) {

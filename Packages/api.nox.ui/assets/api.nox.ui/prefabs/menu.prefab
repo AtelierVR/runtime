@@ -224,6 +224,7 @@ RectTransform:
   - {fileID: 5026390547498854207}
   - {fileID: 197343293883887764}
   - {fileID: 2475241834308051378}
+  - {fileID: 6869761527559497584}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -248,7 +249,7 @@ MonoBehaviour:
   topOrbiter: {fileID: 3382820730129018597}
   contentContainer: {fileID: 7917443197296718781}
   modalContainer: {fileID: 1321807025556447313}
-  parent: {fileID: 5006334064418370153}
+  audioMenu: {fileID: 6333040106422151239}
   activeForeground: 0
 --- !u!114 &5501667286747193935
 MonoBehaviour:
@@ -276,6 +277,180 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!1 &569484995541087288
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6869761527559497584}
+  - component: {fileID: 806704928445013361}
+  - component: {fileID: 6333040106422151239}
+  - component: {fileID: 5135188564769483078}
+  m_Layer: 5
+  m_Name: audio
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &6869761527559497584
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 569484995541087288}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8144968405458655730}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &806704928445013361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 569484995541087288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.LayoutElement
+  m_IgnoreLayout: 1
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
+--- !u!114 &6333040106422151239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 569484995541087288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c45e75082e3653e4ab4f12973603a6b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: api.nox.ui::api.nox.ui.menus.ExternalAudioMenu
+  defaultSource: {fileID: 5135188564769483078}
+  clickSound: {fileID: 8300000, guid: eeeda5dce5e1d344f8e2f6195f16cb38, type: 3}
+  hoverSound: {fileID: 8300000, guid: 9a6d738025ed59f4fb946bb59c20e774, type: 3}
+  showSound: {fileID: 8300000, guid: 6bcdd220f3e1e054aa012a28ebbef1f5, type: 3}
+  hideSound: {fileID: 8300000, guid: b48991a1a69ffcd4c87a93e4a8feb2c1, type: 3}
+  errorSound: {fileID: 8300000, guid: 7d1b4c3cebd0e954bb3880a4a67e2ea1, type: 3}
+  successSound: {fileID: 8300000, guid: ef62bfff314ae17458fcea9f6da78876, type: 3}
+--- !u!82 &5135188564769483078
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 569484995541087288}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 5
+  MaxDistance: 50
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &592261013480272558
 GameObject:
   m_ObjectHideFlags: 0
@@ -616,8 +791,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 8, y: -32.066868}
-  m_SizeDelta: {x: 16, y: 64.133736}
+  m_AnchoredPosition: {x: 8, y: -32.071857}
+  m_SizeDelta: {x: 0, y: 64.143715}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &8695195437391492112
 MonoBehaviour:
@@ -831,8 +1006,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 8, y: -32.066868}
-  m_SizeDelta: {x: 16, y: 64.133736}
+  m_AnchoredPosition: {x: 8, y: -32.071857}
+  m_SizeDelta: {x: 0, y: 64.143715}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &6498140405491056305
 MonoBehaviour:
@@ -1019,8 +1194,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: -49.066868}
-  m_SizeDelta: {x: 0, y: 98.133736}
+  m_AnchoredPosition: {x: 0, y: -49.071857}
+  m_SizeDelta: {x: 0, y: 98.143715}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &8167457015912100203
 MonoBehaviour:
@@ -1615,8 +1790,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 8, y: -49.066868}
-  m_SizeDelta: {x: 16, y: 98.133736}
+  m_AnchoredPosition: {x: 8, y: -49.071857}
+  m_SizeDelta: {x: 0, y: 98.143715}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &814044929165003193
 MonoBehaviour:

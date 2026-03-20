@@ -37,7 +37,7 @@ namespace api.nox.search.client {
 
 
 		internal static IPage OnGotoAction(IMenu menu, object[] o)
-			=> new SearchPage(menu.GetId(), o);
+			=> new SearchPage(menu.Id, o);
 
 		private SearchPage(int mId, object[] context) {
 			_mId     = mId;

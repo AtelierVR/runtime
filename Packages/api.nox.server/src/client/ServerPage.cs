@@ -55,7 +55,7 @@ namespace api.nox.server.client {
 
 		private static ServerPage OnPageByAddress(IMenu menu, object[] context, string address) {
 			var page = new ServerPage {
-				MId      = menu.GetId(),
+				MId      = menu.Id,
 				_context = context,
 				_address = address,
 				Server   = null,
@@ -66,7 +66,7 @@ namespace api.nox.server.client {
 
 		private static ServerPage OnPageByServer(IMenu menu, object[] context, IServer server) {
 			var page = new ServerPage {
-				MId      = menu.GetId(),
+				MId      = menu.Id,
 				_context = context,
 				_address = server.GetAddress(),
 				Server   = server,

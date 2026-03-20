@@ -34,7 +34,7 @@ namespace api.nox.search {
 			if (SearchPage.GetStaticKey() == key)
 				page = SearchPage.OnGotoAction(menu, context.Data[2..]);
 			if (page == null) return;
-			Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.GetId(), page);
+			Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.Id, page);
 		}
 
 		public void OnDisposeClient() {

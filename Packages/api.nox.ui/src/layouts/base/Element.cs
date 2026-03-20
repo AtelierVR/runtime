@@ -32,9 +32,9 @@ namespace api.nox.ui.layouts {
 			if (data.executionType == NavigationExecution.Event)
 				PageManager.GetCoreAPI().EventAPI.Emit(data.Action, data.ExecutionArguments);
 			else if (data.executionType == NavigationExecution.Goto)
-				PageManager.SendGoto(menu.GetId(), data.Action, data.ExecutionArguments);
+				PageManager.SendGoto(menu.Id, data.Action, data.ExecutionArguments);
 			else if (data.executionType == NavigationExecution.Action)
-				PageManager.SendAction(menu.GetId(), data.Action);
+				PageManager.SendAction(menu.Id, data.Action);
 		}
 
 		private void Start()

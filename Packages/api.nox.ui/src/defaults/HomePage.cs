@@ -29,7 +29,7 @@ namespace api.nox.ui.defaults {
 		private EventSubscription[] _events = Array.Empty<EventSubscription>();
 
 		public static IPage OnGotoAction(IMenu menu, object[] o)
-			=> new HomePage(menu.GetId(), o);
+			=> new HomePage(menu.Id, o);
 
 		private HomePage(int mId, object[] context) {
 			_mId     = mId;

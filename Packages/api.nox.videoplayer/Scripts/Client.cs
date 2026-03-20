@@ -47,7 +47,7 @@ namespace api.nox.videoplayer {
 			if (VideoPlayerPage.GetStaticKey() == key)
 				page = VideoPlayerPage.OnGotoAction(menu, context.Data[2..]);
 			if (page == null) return;
-			Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.GetId(), page);
+			Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.Id, page);
 		}
 
 		private static void OnWidgetRequest(EventData context) {

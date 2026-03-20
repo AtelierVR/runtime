@@ -27,7 +27,7 @@ namespace api.nox.desktop {
 				return false;
 			}
 
-			Menu.SetActive(false);
+			Menu.Active = false;
 
 			Keybindings.KeyEvent.AddListener(OnKey);
 
@@ -52,7 +52,7 @@ namespace api.nox.desktop {
 			if (Menu == null)
 				return;
 
-			var isMenuVisible = Menu.GetActive();
+			var isMenuVisible = Menu.Active;
 
 			if (!isMenuVisible) {
 				// Menu is being opened
@@ -66,7 +66,7 @@ namespace api.nox.desktop {
 				ControllerLink.canInput = true; // Re-enable movement inputs
 			}
 
-			Menu.SetActive(!isMenuVisible);
+			Menu.Active = !isMenuVisible;
 		}
 	}
 }

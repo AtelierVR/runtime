@@ -7,13 +7,15 @@ using api.nox.ui.layouts;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Utils;
 using Nox.UI;
+using Nox.UI.audio;
 using Nox.UI.modals;
+using api.nox.ui.audio;
 using UnityEngine;
 using Logger = Nox.CCK.Utils.Logger;
 using Object = UnityEngine.Object;
 
 namespace api.nox.ui.menus {
-	public class Menu : MonoBehaviour, INoxObject, IModalMenu {
+	public class Menu : MonoBehaviour, IMenu, INoxObject, IModalMenu, IAudioMenu {
 		[Header("Menu Settings")]
 		public string defaultKey = HomePage.GetStaticKey();
 
@@ -25,6 +27,7 @@ namespace api.nox.ui.menus {
 		public TopOrbiter topOrbiter;
 		public RectTransform contentContainer;
 		public RectTransform modalContainer;
+		public ExternalAudioMenu audioMenu;
 		public IMenuProvider Provider;
 
 		internal HistoryList History;
@@ -191,7 +194,7 @@ namespace api.nox.ui.menus {
 
 		private void Start() {
 			StartAsync().Forget();
-			Client.SendGoto(GetId(), defaultKey, defaultArguments);
+			Client.SendGoto(Id, defaultKey, defaultArguments);
 		}
 
 		private async UniTask StartAsync() {
@@ -221,14 +224,18 @@ namespace api.nox.ui.menus {
 			UpdateLayout.UpdateImmediate(gameObject);
 		}
 
-		public int GetId()
-			=> GetInstanceID();
+		public int Id
+			=> GetEntityId().GetHashCode();
 
-		public bool GetActive()
-			=> Provider.Active;
-
-		public void SetActive(bool active)
-			=> Provider.Active = active;
+		public bool Active {
+			get => Provider.Active;
+			set {
+				if (Provider.Active == value)
+					return;
+				Provider.Active = value;
+				Play(value ? MenuSound.Show : MenuSound.Hide);
+			}
+		}
 
 		public IOrbiter[] GetOrbiters()
 			=> GetInternalOrbiters().Cast<IOrbiter>().ToArray();
@@ -241,9 +248,8 @@ namespace api.nox.ui.menus {
 				.SelectMany(o => o.GetParts())
 				.FirstOrDefault(p => p.GetKey() == key);
 
-
 		public void Dispose() {
-			SetActive(false);
+			Active = false;
 			History.Clear();
 			foreach (Transform child in contentContainer)
 				Destroy(child.gameObject);
@@ -329,7 +335,7 @@ namespace api.nox.ui.menus {
 		public void RegisterModal(IModal modal) {
 			if (modal == null)
 				return;
-			Client.CoreAPI.LoggerAPI.LogDebug($"Registering modal '{modal}' to menu '{GetId()}'", modal is Object o ? o : modal.GetContent());
+			Client.CoreAPI.LoggerAPI.LogDebug($"Registering modal '{modal}' to menu '{Id}'", modal is Object o ? o : modal.GetContent());
 			var list = Modals.ToList();
 			if (!list.Contains(modal))
 				list.Add(modal);
@@ -339,11 +345,20 @@ namespace api.nox.ui.menus {
 		public void UnregisterModal(IModal modal) {
 			if (modal == null)
 				return;
-			Client.CoreAPI.LoggerAPI.LogDebug($"Unregistering modal '{modal}' from menu '{GetId()}'", modal is Object o ? o : modal.GetContent());
+			Client.CoreAPI.LoggerAPI.LogDebug($"Unregistering modal '{modal}' from menu '{Id}'", modal is Object o ? o : modal.GetContent());
 			var list = Modals.ToList();
 			if (list.Contains(modal))
 				list.Remove(modal);
 			Modals = list.ToArray();
 		}
+
+		public IAudioPlay Play(ResourceIdentifier sound, AudioSource source = null, float delay = 0f)
+			=> audioMenu ? audioMenu.Play(sound, source, delay) : (IAudioPlay)new NullAudioPlay();
+
+		public IAudioPlay Play(MenuSound sound, AudioSource source = null, float delay = 0f)
+			=> audioMenu ? audioMenu.Play(sound, source, delay) : (IAudioPlay)new NullAudioPlay();
+
+		public IAudioPlay Play(AudioClip clip, AudioSource source = null, float delay = 0f)
+			=> audioMenu ? audioMenu.Play(clip, source, delay) : (IAudioPlay)new NullAudioPlay();
 	}
 }

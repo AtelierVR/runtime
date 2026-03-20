@@ -65,7 +65,7 @@ namespace api.nox.instance.client {
 
 		private static InstancePage OnPageByIdentifier(IMenu menu, object[] context, InstanceIdentifier identifier) {
 			var page = new InstancePage {
-				MId         = menu.GetId(),
+				MId         = menu.Id,
 				_context    = context,
 				_identifier = identifier,
 				Instance    = null,
@@ -77,7 +77,7 @@ namespace api.nox.instance.client {
 
 		private static InstancePage OnPageByInstance(IMenu menu, object[] context, IInstance instance, IWorld world, IWorldAsset asset) {
 			var page = new InstancePage {
-				MId         = menu.GetId(),
+				MId         = menu.Id,
 				_context    = context,
 				_identifier = instance.ToIdentifier(),
 				Instance    = instance,

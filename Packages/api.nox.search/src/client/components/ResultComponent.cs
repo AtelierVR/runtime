@@ -34,7 +34,7 @@ namespace api.nox.search.client {
 		}
 
 		private void OnClick()
-			=> Data.OnClick(workerComponent.search.Page.GetMenu().GetId());
+			=> Data.OnClick(workerComponent.search.Page.GetMenu().Id);
 
 		public void UpdateData(IResultData data) {
 			Data = data;

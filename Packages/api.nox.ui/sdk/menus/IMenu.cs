@@ -9,20 +9,14 @@ namespace Nox.UI {
 		/// Get the unique identifier of the menu.
 		/// </summary>
 		/// <returns></returns>
-		public int GetId();
-
+		public int Id { get; }
+		
 		/// <summary>
 		/// Get if the menu is displayed or not.
 		/// </summary>
 		/// <returns></returns>
-		public bool GetActive();
-
-		/// <summary>
-		/// Set if the menu is displayed or not.
-		/// </summary>
-		/// <param name="active"></param>
-		public void SetActive(bool active);
-
+		public bool Active { get; set;  }
+		
 		/// <summary>
 		/// Get all orbiters in the menu.
 		/// </summary>
