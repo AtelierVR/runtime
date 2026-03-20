@@ -67,3 +67,6 @@
 [submodule "Packages/com.keviniglesias.basicmotions"]
 	path = Packages/com.keviniglesias.basicmotions
 	url = https://github.com/AtelierVR/nox.animations.git
+[submodule "Packages/nox.notifications"]
+	path = Packages/nox.notifications
+	url = https://github.com/AtelierVR/nox.notifications.git

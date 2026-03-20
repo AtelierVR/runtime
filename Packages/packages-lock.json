@@ -736,6 +736,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "nox.notifications": {
+      "version": "file:nox.notifications",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "nox.offline": {
       "version": "file:nox.offline",
       "depth": 0,
