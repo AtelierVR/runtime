@@ -66,12 +66,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.ui": {
-      "version": "file:api.nox.ui",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.user": {
       "version": "file:api.nox.user",
       "depth": 0,
@@ -768,6 +762,12 @@
     },
     "nox.terminal": {
       "version": "file:nox.terminal",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.ui": {
+      "version": "file:nox.ui",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

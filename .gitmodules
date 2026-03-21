@@ -88,11 +88,6 @@
 [submodule "Packages/nox.controllers"]
 	path = Packages/nox.controllers
 	url = https://github.com/AtelierVR/nox.controllers.git
-
-
-
-
-
-
-
-
+[submodule "Packages/nox.ui"]
+	path = Packages/nox.ui
+	url = https://github.com/AtelierVR/nox.ui.git

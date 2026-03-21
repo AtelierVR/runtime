@@ -9,6 +9,7 @@
     <mapping directory="$PROJECT_DIR$/Packages/nox.avatars.modules" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.cck" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.control" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.controllers" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.desktop" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.discord" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.editor.panel" vcs="Git" />
@@ -27,6 +28,7 @@
     <mapping directory="$PROJECT_DIR$/Packages/nox.settings" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.table" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.terminal" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.ui" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.worlds" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.xr" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/rootmotion.finalik" vcs="Git" />
