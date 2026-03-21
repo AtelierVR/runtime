@@ -76,6 +76,10 @@
 [submodule "Packages/nox.keybinding"]
 	path = Packages/nox.keybinding
 	url = https://github.com/AtelierVR/nox.keybinding.git
+[submodule "Packages/nox.microphone"]
+	path = Packages/nox.microphone
+	url = https://github.com/AtelierVR/nox.microphone.git
+
 
 
 
