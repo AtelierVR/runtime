@@ -1,9 +1,0 @@
-{
-  "name": "Nox.Controllers",
-  "references": [
-    "Nox.CCK",
-    "Nox.Players",
-    "Nox.Avatars",
-    "UniTask"
-  ]
-}

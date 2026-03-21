@@ -1,11 +1,5 @@
 {
   "dependencies": {
-    "api.nox.controller": {
-      "version": "file:api.nox.controller",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.editor": {
       "version": "file:api.nox.editor",
       "depth": 0,
@@ -660,6 +654,12 @@
     },
     "nox.control": {
       "version": "file:nox.control",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.controllers": {
+      "version": "file:nox.controllers",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

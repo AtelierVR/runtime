@@ -85,6 +85,10 @@
 [submodule "Packages/nox.entities"]
 	path = Packages/nox.entities
 	url = https://github.com/AtelierVR/nox.entities.git
+[submodule "Packages/nox.controllers"]
+	path = Packages/nox.controllers
+	url = https://github.com/AtelierVR/nox.controllers.git
+
 
 
 
