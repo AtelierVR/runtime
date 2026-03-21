@@ -1060,10 +1060,6 @@
       <Project>{0e499f4c-db68-9841-61eb-59e5a4ed821c}</Project>
       <Name>Nox.Players</Name>
     </ProjectReference>
-    <ProjectReference Include="Nox.Entities.csproj">
-      <Project>{57446f06-06b0-94aa-6dd3-4195fbeb0f71}</Project>
-      <Name>Nox.Entities</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

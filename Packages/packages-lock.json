@@ -12,12 +12,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.entity": {
-      "version": "file:api.nox.entity",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.instance": {
       "version": "file:api.nox.instance",
       "depth": 0,
@@ -684,6 +678,12 @@
     },
     "nox.editor.panel": {
       "version": "file:nox.editor.panel",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.entities": {
+      "version": "file:nox.entities",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

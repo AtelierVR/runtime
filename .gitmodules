@@ -82,6 +82,9 @@
 [submodule "Packages/nox.table"]
 	path = Packages/nox.table
 	url = https://github.com/AtelierVR/nox.table.git
+[submodule "Packages/nox.entities"]
+	path = Packages/nox.entities
+	url = https://github.com/AtelierVR/nox.entities.git
 
 
 
