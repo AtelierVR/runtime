@@ -30,20 +30,8 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.keybinding": {
-      "version": "file:api.nox.keybinding",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.main": {
       "version": "file:api.nox.main",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.microphone": {
-      "version": "file:api.nox.microphone",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
@@ -718,8 +706,20 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "nox.keybinding": {
+      "version": "file:nox.keybinding",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "nox.loader": {
       "version": "file:nox.loader",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.microphone": {
+      "version": "file:nox.microphone",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

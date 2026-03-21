@@ -79,6 +79,12 @@
 [submodule "Packages/nox.microphone"]
 	path = Packages/nox.microphone
 	url = https://github.com/AtelierVR/nox.microphone.git
+[submodule "Packages/nox.table"]
+	path = Packages/nox.table
+	url = https://github.com/AtelierVR/nox.table.git
+
+
+
 
 
 
