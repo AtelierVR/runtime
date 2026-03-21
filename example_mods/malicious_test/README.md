@@ -1,46 +1,61 @@
 # Malicious Test Mod
 
-**⚠️ WARNING: This mod is intentionally malicious for testing purposes!**
+> **⚠️ WARNING — This mod is intentionally malicious.**
+> It exists solely to verify that the security system blocks it. If it ever loads successfully, the security system has failed.
 
 ## Purpose
 
-This mod is designed to test the assembly security validator. It contains direct compile-time references to blacklisted types:
+This mod contains direct compile-time references to `System.Diagnostics.Process`, which is on the security blacklist. The IL scanner must detect these references and **block the mod before it is loaded** — `OnInitialize` should never execute.
 
-- `System.Diagnostics.Process`
-- `System.Diagnostics.ProcessStartInfo`
+## What It References (Intentionally)
+
+| Symbol | Why It Is Blocked |
+|--------|-------------------|
+| `System.Diagnostics.Process` | Can launch arbitrary OS processes |
+| `System.Diagnostics.ProcessStartInfo` | Configures process execution |
 
 ## Expected Behavior
 
-When you try to install and load this mod:
+When the loader encounters this mod, you should see:
 
-1. The `AssemblySecurityValidator` should scan the DLL using Mono.Cecil
-2. It should detect the references to `System.Diagnostics.Process`
-3. The mod should be **BLOCKED** from loading
-4. You should see log messages like:
-   ```
-   [Mono/Security] Assembly 'MaliciousMod.dll' BLOCKED due to security violations:
-     - [BlacklistedTypeReference] System.Diagnostics.Process (pattern: ^System\.Diagnostics\.Process(StartInfo)?$)
-     - [BlacklistedMethodCall] System.Diagnostics.Process.Start (pattern: ^System\.Diagnostics\.Process(StartInfo)?$)
-   ```
+```
+[Mono/Security] Assembly 'MaliciousMod.dll' BLOCKED due to security violations:
+  - [BlacklistedTypeReference] System.Diagnostics.Process
+      (pattern: ^System\.Diagnostics\.Process(StartInfo)?$)
+  - [BlacklistedMethodCall] System.Diagnostics.Process.Start
+      (pattern: ^System\.Diagnostics\.Process(StartInfo)?$)
+```
 
-## If This Mod Loads Successfully
+The entry point `MaliciousInitializer.OnInitialize` should **never execute**.
 
-**THE SECURITY SYSTEM HAS FAILED!**
+## Failure Indicator
 
-If you see messages from `MaliciousInitializer.OnInitialize`, it means:
-- The IL security scanner is not working
-- Mods can execute arbitrary processes
-- The application is not secure
+If you see any of the following in the console, the security system has failed:
+
+```
+!!! SECURITY BREACH !!!
+MaliciousMod was allowed to load!
+```
 
 ## Building
 
 ```powershell
 cd example_mods/malicious_test
-.\build.ps1 -Install
+dotnet build -c Release -o build/malicious_test
 ```
+
+> **Note:** The C# build will succeed — the compiler is unaware of IL-level restrictions. The block happens at **load time**, not compile time.
 
 ## Testing
 
-After installing, reload mods and check the console:
-- **PASS**: You see "BLOCKED due to security violations"
-- **FAIL**: You see "SECURITY BREACH" messages
+After installing the mod and reloading, check the console:
+
+| Result | Expected Message |
+|--------|-----------------|
+| **PASS** | `BLOCKED due to security violations` |
+| **FAIL** | `SECURITY BREACH` |
+
+## Further Reading
+
+- [Security guide](../../docs/guide/security.md)
+- [Blacklist test mod](../blacklist_test/) — validates the validator itself

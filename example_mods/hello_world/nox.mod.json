@@ -1,15 +1,21 @@
 {
+  "type": "mod",
   "id": "com.example.helloworld",
   "version": "1.0.0",
   "name": "Hello World Example",
-  "description": "A simple example mod that prints Hello World during initialization",
+  "description": "A simple example mod that prints 'Hello World!' during initialization.",
+  "license": "MIT",
+  "icon": null,
+  "contact": {
+    "email": "author@example.com"
+  },
   "authors": [
     {
       "name": "Example Author",
       "email": "author@example.com"
     }
   ],
-  "license": "MIT",
+  "contributors": [],
   "references": [
     {
       "name": "HelloWorldMod",
@@ -20,5 +26,6 @@
   "entrypoints": {
     "main": ["HelloWorldMod.HelloWorldInitializer"]
   },
-  "relations": []
+  "relations": [],
+  "constraints": []
 }

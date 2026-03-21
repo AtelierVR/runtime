@@ -1,12 +1,27 @@
 {
-    "id": "malicious_test",
-    "version": "1.0.0",
-    "name": "Malicious Test Mod",
-    "description": "A mod that attempts to use dangerous APIs. This mod SHOULD be blocked by the security validator.",
-    "references": [
-        {
-            "file": "MaliciousMod.dll",
-            "platforms": ["windows", "linux", "osx"]
-        }
-    ]
+  "type": "mod",
+  "id": "com.example.malicious_test",
+  "version": "1.0.0",
+  "name": "Malicious Test Mod",
+  "description": "A mod that intentionally references blacklisted APIs (System.Diagnostics.Process). This mod MUST be blocked by the IL security validator before it ever loads.",
+  "license": "MIT",
+  "icon": null,
+  "authors": [
+    {
+      "name": "Test Author",
+      "email": "test@example.com"
+    }
+  ],
+  "contributors": [],
+  "references": [
+    {
+      "file": "MaliciousMod.dll",
+      "platforms": ["windows", "linux", "osx"]
+    }
+  ],
+  "entrypoints": {
+    "main": ["MaliciousMod.MaliciousInitializer"]
+  },
+  "relations": [],
+  "constraints": []
 }

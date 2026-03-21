@@ -1,54 +1,69 @@
 # Blacklist Test Mod
 
-This is a **security test mod** that attempts to use various blacklisted assemblies to verify that the mod loader's security system is working correctly.
+A security test mod that verifies the assembly blacklist system correctly recognizes dangerous types **before any mod is loaded**. This mod loads successfully — it tests the *validator* itself, not the blocked types directly.
 
-## Purpose
+## How It Works
 
-This mod tests the assembly blacklist system by attempting to:
+The mod uses reflection to locate `AssemblySecurityValidator` and calls its `IsTypeBlacklisted` method for a list of known-dangerous types. It does **not** directly reference any blacklisted type, so it passes the IL scan and loads normally.
 
-1. **Process Access** - Try to use `System.Diagnostics.Process` to start external processes
-2. **Socket Access** - Try to use `System.Net.Sockets` for raw network access
-3. **Reflection.Emit** - Try to dynamically generate code at runtime
-4. **C# Compiler** - Try to compile and execute C# code dynamically
-5. **Security Access** - Try to access `System.Security` internals
-6. **Registry Access** - Try to access Windows Registry via `Microsoft.Win32`
+## What It Tests
 
-## Expected Results
+The following dangerous types must be recognized by the blacklist:
 
-All tests should **PASS** (meaning the blacklist blocked the access):
+| Type | Category |
+|------|----------|
+| `System.Diagnostics.Process` | Process execution |
+| `System.Diagnostics.ProcessStartInfo` | Process configuration |
+| `System.Net.Sockets.Socket` | Raw socket access |
+| `System.Net.Sockets.TcpClient` | TCP networking |
+| `System.Reflection.Emit.AssemblyBuilder` | Dynamic assembly creation |
+| `System.Reflection.Emit.TypeBuilder` | Dynamic type definition |
+| `System.Reflection.Emit.ILGenerator` | IL code generation |
+| `System.Reflection.Emit.DynamicMethod` | Dynamic methods |
+| `Microsoft.CSharp.CSharpCodeProvider` | Runtime C# compilation |
+| `System.Security.SecurityManager` | Security manipulation |
+| `Microsoft.Win32.Registry` | Windows Registry |
+| `Microsoft.Win32.RegistryKey` | Registry key access |
+| `System.AppDomain` | AppDomain access |
+
+## Expected Output
 
 ```
-[BlacklistTest] Test 1 PASSED: Process type not accessible
-[BlacklistTest] Test 2 PASSED: Socket type not accessible
-[BlacklistTest] Test 3 PASSED: AssemblyBuilder not accessible
-[BlacklistTest] Test 4 PASSED: CSharpCodeProvider not accessible
-[BlacklistTest] Test 5 PASSED: SecurityManager not accessible
-[BlacklistTest] Test 6 PASSED: Registry not accessible
+  ✓ System.Diagnostics.Process
+      (Process execution) - Pattern: ^System\.Diagnostics\.Process(StartInfo)?$
+  ✓ System.Net.Sockets.Socket
+      ...
+Type Blacklist Results: 15/15 dangerous types recognized
+>>> TYPE BLACKLIST TEST PASSED <<<
 ```
 
-If any test shows `SECURITY ISSUE`, it means the blacklist is not working correctly for that assembly.
+If the `AssemblySecurityValidator` is not found (e.g., running in IL2CPP), the mod falls back to legacy runtime reflection tests.
 
 ## Building
 
 ```powershell
 cd example_mods/blacklist_test
-.\build.ps1
-```
-
-Or manually:
-
-```powershell
-dotnet build -c Release
+dotnet build -c Release -o build/blacklist_test
 ```
 
 ## Installation
 
-After building, copy the following files to your Mods folder:
-- `bin/BlacklistTestMod.dll`
-- `nox.mod.json`
+Copy the build output to your mods directory:
 
-The build script does this automatically.
+```
+%APPDATA%\.nox\mods\blacklist_test\
+```
 
-## Note
+## How the Security System Works
 
-This mod is for **testing purposes only**. It intentionally tries to access dangerous system APIs to verify they are properly blocked by the security system.
+1. When a mod folder is discovered, the loader calls `AssemblySecurityValidator` **before** loading any DLL.
+2. The validator uses **Mono.Cecil** to scan IL bytecode for references to forbidden types.
+3. If a violation is found, the mod is blocked and an error is logged — `OnInitialize` is never called.
+4. The blacklist is regex-based and permission-aware: a mod that declares the required permission is allowed to use that type.
+
+To test that a malicious mod is blocked, see [`example_mods/malicious_test`](../malicious_test/).
+
+## Further Reading
+
+- [Security guide](../../docs/guide/security.md)
+- [Permissions guide](../../docs/guide/permissions.md)

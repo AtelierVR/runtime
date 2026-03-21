@@ -1,15 +1,21 @@
 {
+  "type": "mod",
   "id": "com.example.blacklist_test",
   "version": "1.0.0",
   "name": "Blacklist Test",
-  "description": "A test mod that attempts to use blacklisted assemblies to verify the security system",
+  "description": "A test mod that verifies the security validator correctly identifies dangerous types in the assembly blacklist.",
+  "license": "MIT",
+  "icon": null,
+  "contact": {
+    "email": "test@example.com"
+  },
   "authors": [
     {
       "name": "Test Author",
       "email": "test@example.com"
     }
   ],
-  "license": "MIT",
+  "contributors": [],
   "references": [
     {
       "name": "BlacklistTestMod",
@@ -20,5 +26,6 @@
   "entrypoints": {
     "main": ["BlacklistTestMod.BlacklistTestInitializer"]
   },
-  "relations": []
+  "relations": [],
+  "constraints": []
 }

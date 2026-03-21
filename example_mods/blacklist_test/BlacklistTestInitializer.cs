@@ -32,9 +32,9 @@ namespace BlacklistTestMod
             Debug.Log("[BlacklistTest] OnInitialize - Starting security validation tests...");
         }
 
-        public void OnInitializeMain(MainModCoreAPI api)
+        public void OnInitializeMain(IMainModCoreAPI api)
         {
-            Debug.Log("===========================================");
+            Debug.Log("==========================================");
             Debug.Log("   Assembly Security Validator Test Mod");
             Debug.Log("===========================================");
             Debug.Log("");

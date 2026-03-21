@@ -26,9 +26,9 @@ namespace HelloWorldMod
         /// This is where we print our Hello World message!
         /// </summary>
         /// <param name="api">The main core API.</param>
-        public void OnInitializeMain(MainModCoreAPI api)
+        public void OnInitializeMain(IMainModCoreAPI api)
         {
-            Debug.Log("===========================================");
+            Debug.Log("==========================================");
             Debug.Log("          Hello World!");
             Debug.Log("   From HelloWorldMod example mod");
             Debug.Log("===========================================");
