@@ -73,4 +73,9 @@
 [submodule "Packages/nox.desktop"]
 	path = Packages/nox.desktop
 	url = https://github.com/AtelierVR/nox.desktop.git
+[submodule "Packages/nox.keybinding"]
+	path = Packages/nox.keybinding
+	url = https://github.com/AtelierVR/nox.keybinding.git
+
+
 
