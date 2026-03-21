@@ -78,12 +78,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.table": {
-      "version": "file:api.nox.table",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.ui": {
       "version": "file:api.nox.ui",
       "depth": 0,
@@ -762,6 +756,12 @@
     },
     "nox.settings": {
       "version": "file:nox.settings",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.table": {
+      "version": "file:nox.table",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

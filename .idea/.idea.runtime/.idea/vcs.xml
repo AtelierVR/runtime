@@ -9,17 +9,22 @@
     <mapping directory="$PROJECT_DIR$/Packages/nox.avatars.modules" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.cck" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.control" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.desktop" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.discord" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.editor.panel" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.ffmpeg" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.game.builder" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.keybinding" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.loader" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.microphone" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.mirror" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.network" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.notifications" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.offline" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.relay" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.sessions" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.settings" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.table" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.terminal" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.worlds" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.xr" vcs="Git" />
