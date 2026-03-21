@@ -6,12 +6,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.desktop": {
-      "version": "file:api.nox.desktop",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.editor": {
       "version": "file:api.nox.editor",
       "depth": 0,
@@ -690,6 +684,12 @@
     },
     "nox.control": {
       "version": "file:nox.control",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.desktop": {
+      "version": "file:nox.desktop",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

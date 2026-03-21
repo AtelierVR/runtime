@@ -70,3 +70,7 @@
 [submodule "Packages/nox.notifications"]
 	path = Packages/nox.notifications
 	url = https://github.com/AtelierVR/nox.notifications.git
+[submodule "Packages/nox.desktop"]
+	path = Packages/nox.desktop
+	url = https://github.com/AtelierVR/nox.desktop.git
+
