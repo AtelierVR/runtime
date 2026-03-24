@@ -59,12 +59,14 @@
         "*.asset": "yaml",
         "*.meta": "yaml",
         "*.prefab": "yaml",
-        "*.unity": "yaml",
+        "*.unity": "yaml"
     },
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.patterns": {
-        "*.sln": "*.csproj",
+        "*.sln": "*.csproj"
     },
-    "dotnet.defaultSolution": "nox-runtime.sln",
-    "dotnet.preferCSharpExtension": true
+    "dotnet.defaultSolution": "runtime.slnx",
+    "dotnet.preferCSharpExtension": true,
+    "git.repositoryScanMaxDepth": 2,
+    "git.openRepositoryInParentFolders": "always"
 }

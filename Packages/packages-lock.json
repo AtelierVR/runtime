@@ -78,12 +78,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.world.modules": {
-      "version": "file:api.nox.world.modules",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "com.cysharp.unitask": {
       "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
       "depth": 0,
@@ -373,6 +367,15 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.unity.sdk.linux-x86_64": {
+      "version": "1.0.2",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.sysroot.base": "1.0.2"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.searcher": {
       "version": "4.9.4",
       "depth": 2,
@@ -405,6 +408,13 @@
         "com.unity.modules.imgui": "1.0.0",
         "com.unity.settings-manager": "1.0.3"
       },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.sysroot.base": {
+      "version": "1.0.2",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.template.vr": {
@@ -467,6 +477,15 @@
         "com.unity.modules.director": "1.0.0",
         "com.unity.modules.animation": "1.0.0",
         "com.unity.modules.particlesystem": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.toolchain.linux-x86_64-linux": {
+      "version": "1.0.2",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.sysroot.base": "1.0.2"
       },
       "url": "https://packages.unity.com"
     },
@@ -774,6 +793,12 @@
     },
     "nox.worlds": {
       "version": "file:nox.worlds",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.worlds.modules": {
+      "version": "file:nox.worlds.modules",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
