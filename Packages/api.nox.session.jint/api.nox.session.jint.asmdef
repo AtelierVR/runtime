@@ -9,7 +9,8 @@
     "api.nox.jint",
     "Nox.Jint",
     "Nox.Players",
-    "Nox.Entities"
+    "Nox.Entities",
+    "Nox.Tables"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

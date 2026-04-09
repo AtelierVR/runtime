@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using Newtonsoft.Json;
+using Nox.CCK.Convertors;
 using Nox.CCK.Utils;
 using Nox.Instances;
 
@@ -16,7 +18,6 @@ namespace api.nox.instance {
 		public ushort           capacity;
 		public string           owner;
 		public string[]         tags;
-		public string           world;
 		public Connection       connection;
 		public ushort           client_count;
 		public InstancePlayer[] players;
@@ -45,8 +46,8 @@ namespace api.nox.instance {
 		public string[] GetTags()
 			=> tags;
 
-		public string GetWorldId()
-			=> world;
+		[JsonProperty("world"), JsonConverter(typeof(StringToIdentifierConverter))]
+		public Identifier World { get; private set; }
 
 		public IConnection GetConnectionData()
 			=> connection;
@@ -57,8 +58,8 @@ namespace api.nox.instance {
 		public ushort GetCapacity()
 			=> capacity;
 
-		public IPlayer[] GetPlayers()
-			=> players.Cast<IPlayer>().ToArray();
+		public IInstancePlayer[] GetPlayers()
+			=> players.Cast<IInstancePlayer>().ToArray();
 
 		public IInstanceIdentifier ToIdentifier()
 			=> new InstanceIdentifier(id, null, server);

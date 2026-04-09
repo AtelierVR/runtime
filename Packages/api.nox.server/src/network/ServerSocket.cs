@@ -43,7 +43,7 @@ namespace api.nox.server.network {
 				SystemInfo.deviceUniqueIdentifier
 			}, {
 				"X-Nox-User",
-				Main.UserAPI?.GetCurrent()?.ToIdentifier().ToString()
+				Main.UserAPI?.Current?.Identifier.ToString()
 				?? string.Empty
 			}, {
 				"X-Nox-Mods",
@@ -88,7 +88,7 @@ namespace api.nox.server.network {
 				return null;
 			}
 
-			var uri = server.GetGateways().GetWs();
+			var uri = server.Gateway?.Ws;
 			if (string.IsNullOrEmpty(uri)) {
 				Logger.LogError($"Cannot connect socket {address}: no WebSocket URI found.");
 				return null;

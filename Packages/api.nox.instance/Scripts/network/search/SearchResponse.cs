@@ -1,98 +1,79 @@
 using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Newtonsoft.Json;
+using Nox.CCK.Convertors;
 using Nox.CCK.Utils;
-using Nox.CCK.Worlds;
 using Nox.Instances;
 using ISearchResponse = Nox.Instances.ISearchResponse;
 
 namespace api.nox.instance.network {
 	[Serializable]
 	public class SearchResponse : ISearchResponse, INoxObject {
-		internal string     query;
-		internal string     world;
-		internal string     owner;
-		public   Instance[] instances;
-		public   uint       total;
-		public   uint       limit;
-		public   uint       offset;
+		internal SearchRequest Request;
+		internal string Server;
 
-		[NoxPublic(NoxAccess.Method)]
-		public string GetQuery()
-			=> query;
+		[JsonProperty("query")]
+		public string Query { get; private set; }
 
-		[NoxPublic(NoxAccess.Method)]
-		public string GetOwnerId()
-			=> owner;
+		[JsonProperty("owner"), JsonConverter(typeof(StringToIdentifierConverter))]
+		public Identifier Owner { get; private set; }
 
-		[NoxPublic(NoxAccess.Method)]
-		public string GetWorldId()
-			=> world;
+		[JsonProperty("world"), JsonConverter(typeof(StringToIdentifierConverter))]
+		public Identifier World { get; private set; }
 
-		[NoxPublic(NoxAccess.Method)]
-		public IInstance[] GetInstances()
-			=> instances.Cast<IInstance>()
-				.ToArray();
+		[JsonProperty("items")]
+		public Instance[] Items { get; private set; }
 
-		[NoxPublic(NoxAccess.Method)]
-		public uint GetTotal()
-			=> total;
+		IInstance[] ISearchResponse.Items
+			=> Items.ToArray<IInstance>();
 
-		[NoxPublic(NoxAccess.Method)]
-		public uint GetLimit()
-			=> limit;
+		[JsonProperty("total")]
+		public uint Total { get; private set; }
 
-		[NoxPublic(NoxAccess.Method)]
-		public uint GetOffset()
-			=> offset;
+		[JsonProperty("limit")]
+		public uint Limit { get; private set; }
 
-		[NoxPublic(NoxAccess.Method)]
+		[JsonProperty("offset")]
+		public uint Offset { get; private set; }
+
 		public bool HasNext()
-			=> offset + limit < total;
+			=> Offset + Limit < Total;
 
-		[NoxPublic(NoxAccess.Method)]
 		public bool HasPrevious()
-			=> offset > 0;
+			=> Offset > 0;
 
-		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<ISearchResponse> Next()
-			=> await Internal_Next();
+		async UniTask<ISearchResponse> ISearchResponse.Next()
+			=> await Next();
 
-		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<ISearchResponse> Previous()
-			=> await Internal_Previous();
+		async UniTask<ISearchResponse> ISearchResponse.Previous()
+			=> await Previous();
 
-		public async UniTask<SearchResponse> Internal_Next()
+		public async UniTask<SearchResponse> Next()
 			=> HasNext()
 				? await Main.Instance.Network.Search(
 					new SearchRequest {
-						Query = query,
-						World = !string.IsNullOrEmpty(world)
-							? WorldIdentifier.From(world)
-							: null,
-						Owner = !string.IsNullOrEmpty(owner)
-							? Main.UserAPI.Make(owner)
-							: null,
-						Limit = limit
-					}
+						Query  = Request.Query,
+						World  = Request.World,
+						Owner  = Request.Owner,
+						Offset = Offset + Limit,
+						Limit  = Limit
+					},
+					Server
 				)
 				: null;
 
-		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<SearchResponse> Internal_Previous()
+		public async UniTask<SearchResponse> Previous()
 			=> HasPrevious()
 				? await Main.Instance.Network.Search(
 					new SearchRequest {
-						Query = query,
-						World = !string.IsNullOrEmpty(world)
-							? WorldIdentifier.From(world)
-							: null,
-						Owner = !string.IsNullOrEmpty(owner)
-							? Main.UserAPI.Make(owner)
-							: null,
-						Offset = offset - limit,
-						Limit  = limit
-					}
+						Query  = Request.Query,
+						World  = Request.World,
+						Owner  = Request.Owner,
+						Offset = Offset - Limit,
+						Limit  = Limit
+					},
+					Server
 				)
 				: null;
 	}

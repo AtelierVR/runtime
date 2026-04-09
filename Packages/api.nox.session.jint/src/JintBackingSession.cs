@@ -5,12 +5,14 @@ using Jint.Runtime.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Jint.Native;
 using Jint.Native.Array;
 using Jint.Native.Function;
 using Jint.Runtime;
 using Jint.Runtime.Modules;
+using Nox.CCK.Network;
 using Nox.CCK.Utils;
 using Nox.Jint;
 using Nox.Players;
@@ -35,7 +37,7 @@ namespace api.nox.session.jint {
 				return (byte[])value.ToObject();
 
 			var length = (int)arrayInstance.Length;
-			var buffer = new byte[length];
+			var buffer = new byte[ length ];
 
 			for (var i = 0; i < length; i++) {
 				var element = arrayInstance[(uint)i];
@@ -53,19 +55,19 @@ namespace api.nox.session.jint {
 			};
 
 		private static JsValue[] ConvertObjects(JintEngine engine, params object[] args) {
-			var jsArgs = new JsValue[args.Length];
+			var jsArgs = new JsValue[ args.Length ];
 			for (var i = 0; i < args.Length; i++)
 				jsArgs[i] = ConvertObject(engine, args[i]);
 			return jsArgs;
 		}
 
 		public void Initialize() {
-			if (_engine != null) return;
+			if (_engine != null)
+				return;
 
 			try {
 				_engine = new JintEngine(
-					ctx =>
-					{
+					ctx => {
 						ctx.LimitMemory(4_194_304);
 						ctx.LimitRecursion(1024);
 						ctx.EnableModules(new DefaultModuleLoader(Main.JintAPI.GetModulesPath()));
@@ -80,15 +82,13 @@ namespace api.nox.session.jint {
 
 				// add Buffer of nodejs
 				_engine.AddModule("buffer", builder => builder
-					.ExportFunction("from", args =>
-					{
-						var data = args.At(0).AsString();
+					.ExportFunction("from", args => {
+						var data     = args.At(0).AsString();
 						var encoding = args.Length > 1 ? args.At(1).AsString() : "utf8";
 						return JsValue.FromObject(_engine, NodeBufferImpl.from(data, encoding));
 					})
-					.ExportFunction("toString", args =>
-					{
-						var buffer = JsValueToByteArray(args.At(0));
+					.ExportFunction("toString", args => {
+						var buffer   = JsValueToByteArray(args.At(0));
 						var encoding = args.Length > 1 ? args.At(1).AsString() : "utf8";
 						return JsValue.FromObject(_engine, NodeBufferImpl.toString(buffer, encoding));
 					})
@@ -101,21 +101,21 @@ namespace api.nox.session.jint {
 							"log", objets => Logger.Log(
 								string.Join(" ", objets.Select(e => e.ToString())),
 								this,
-								$"{GetType().Name}_{GetInstanceID()}"
+								$"{GetType().Name}_{GetEntityId().GetHashCode()}"
 							)
 						)
 						.ExportFunction(
 							"warn", objets => Logger.LogWarning(
 								string.Join(" ", objets.Select(e => e.ToString())),
 								this,
-								$"{GetType().Name}_{GetInstanceID()}"
+								$"{GetType().Name}_{GetEntityId().GetHashCode()}"
 							)
 						)
 						.ExportFunction(
 							"error", objets => Logger.LogError(
 								string.Join(" ", objets.Select(e => e.ToString())),
 								this,
-								$"{GetType().Name}_{GetInstanceID()}"
+								$"{GetType().Name}_{GetEntityId().GetHashCode()}"
 							)
 						)
 				);
@@ -125,14 +125,23 @@ namespace api.nox.session.jint {
 						.ExportObject("gameObject", gameObject)
 						.ExportObject("transform", gameObject.transform)
 						.ExportObject("rigidbody", gameObject.GetComponent<Rigidbody>())
-						.ExportObject("id", GetInstanceID())
+						.ExportObject("id", GetEntityId().GetHashCode())
+				);
+
+				_engine.AddModule(
+					"tables", builder => builder
+						.ExportFunction("getPrivate", () => ToPromise(GetTable(false).AsTask()))
+						.ExportFunction("getPublic", () => ToPromise(GetTable(true).AsTask()))
+						.ExportFunction("setPrivate", args => ToPromise(SetTable(false, args).AsTask()))
+						.ExportFunction("setPublic", args => ToPromise(SetTable(true, args).AsTask()))
+						.ExportFunction("delPrivate", () => ToPromise(DeleteTable(false).AsTask()))
+						.ExportFunction("delPublic", () => ToPromise(DeleteTable(true).AsTask()))
 				);
 
 				_engine.AddModule(
 					"players", builder => builder
 						.ExportFunction(
-							"getLocal", () =>
-							{
+							"getLocal", () => {
 								var player = module.Session.LocalPlayer;
 								return player != null
 									? new ObjectWrapper(_engine, player)
@@ -140,8 +149,7 @@ namespace api.nox.session.jint {
 							}
 						)
 						.ExportFunction(
-							"getMaster", () =>
-							{
+							"getMaster", () => {
 								var player = module.Session.MasterPlayer;
 								return player != null
 									? new ObjectWrapper(_engine, player)
@@ -151,10 +159,9 @@ namespace api.nox.session.jint {
 						.ExportFunction("getAll", () => module.Session.Entities.GetEntities<IPlayer>())
 						.ExportFunction("getCount", () => module.Session.Entities.GetCount<IPlayer>())
 						.ExportFunction(
-							"getAt", args =>
-							{
+							"getAt", args => {
 								var players = module.Session.Entities.GetEntities<IPlayer>();
-								var index = players.ElementAtOrDefault((int)args.At(0).AsNumber());
+								var index   = players.ElementAtOrDefault((int)args.At(0).AsNumber());
 								return index != null
 									? new ObjectWrapper(_engine, index)
 									: JsValue.Null;
@@ -169,8 +176,7 @@ namespace api.nox.session.jint {
 						.ExportFunction("isConnected", () => netSession?.IsConnected ?? false)
 						.ExportFunction("eventToHash", args => JsValue.FromObject(_engine, Hash.CRC64(args.At(0).AsString())))
 						.ExportFunction(
-							"emitEvent", args =>
-							{
+							"emitEvent", args => {
 								if (netSession == null) {
 									Logger.LogWarning("Network adapter is null", this);
 									return false;
@@ -187,8 +193,7 @@ namespace api.nox.session.jint {
 								else if (!dataArg.IsObject()) {
 									Logger.LogWarning($"data argument is not an object (type: {dataArg.Type})", this);
 									return false;
-								}
-								else {
+								} else {
 									var obj = dataArg.AsObject();
 									if (obj is not ArrayInstance arrayInstance) {
 										Logger.LogWarning("data argument is not an array", this);
@@ -196,20 +201,20 @@ namespace api.nox.session.jint {
 									}
 
 									var length = (int)arrayInstance.Length;
-									raw = new byte[length];
+									raw = new byte[ length ];
 									for (var i = 0; i < length; i++) {
 										var element = arrayInstance[(uint)i];
 										if (element.IsNumber()) {
 											var num = element.AsNumber();
 											raw[i] = (byte)(num % 256); // Ensure it's within byte range
-										}
-										else if (element.IsString()) {
+										} else if (element.IsString()) {
 											// Try to parse string as number
 											if (double.TryParse(element.AsString(), out var parsed))
 												raw[i] = (byte)(parsed % 256);
-											else raw[i] = 0;
-										}
-										else raw[i] = 0;
+											else
+												raw[i] = 0;
+										} else
+											raw[i] = 0;
 
 									}
 								}
@@ -238,16 +243,15 @@ namespace api.nox.session.jint {
 
 								var promise = promiseFactory.Get("promise");
 								var resolve = promiseFactory.Get("resolve") as FunctionInstance;
-								var reject = promiseFactory.Get("reject") as FunctionInstance;
+								var reject  = promiseFactory.Get("reject") as FunctionInstance;
 
 								emitting.ContinueWith(
-									t =>
-									{
+									t => {
 										if (t.IsFaulted || t.IsCanceled) {
 											Logger.LogError($"Error emitting event '{@event}': {t.Exception}", this);
 											_engine.Invoke(reject!, false);
-										}
-										else _engine.Invoke(resolve!, JsValue.FromObject(_engine, t.Result));
+										} else
+											_engine.Invoke(resolve!, JsValue.FromObject(_engine, t.Result));
 									}
 								);
 
@@ -274,9 +278,72 @@ namespace api.nox.session.jint {
 			}
 		}
 
+		private bool TryTableKey(bool isPublic, out string key) {
+			var id = module.Session.Dimensions.Identifier;
+			if (!id.IsValid()) {
+				key = null;
+				return false;
+			}
+			key = $"{(isPublic ? "public." : "")}worlds.{Uri.EscapeDataString(id.ToShortString(true))}";
+			return true;
+		}
+
+		private async UniTask<JsValue> GetTable(bool isPublic) {
+			var id = module.Session.Dimensions.Identifier;
+			if (!TryTableKey(isPublic, out var key))
+				return JsValue.Null;
+			var entry = await Main.TableAPI.Get(key);
+			return new ObjectWrapper(_engine, entry == null ? JsValue.Null : entry.AsBytes);
+		}
+
+		private async UniTask<JsValue> SetTable(bool isPublic, JsValue[] args) {
+			var id = module.Session.Dimensions.Identifier;
+			if (args.Length == 0 || !TryTableKey(isPublic, out var key))
+				return JsValue.Null;
+			var entry = await Main.TableAPI.Set(key, JsValueToByteArray(args[0]), "application/octet-stream+world");
+			return new ObjectWrapper(_engine, entry == null ? JsValue.Null : entry.AsBytes);
+		}
+
+		private async UniTask<JsValue> DeleteTable(bool isPublic) {
+			var id = module.Session.Dimensions.Identifier;
+			if (!TryTableKey(isPublic, out var key))
+				return JsBoolean.False;
+			return await Main.TableAPI.Delete(key)
+				? JsBoolean.True
+				: JsBoolean.False;
+		}
+
+		private JsValue CreatePromise(out FunctionInstance resolve, out FunctionInstance reject) {
+			var promiseFactory = _engine.Evaluate(
+					@"(function() {
+							var resolve, reject;
+							var p = new Promise(function(res, rej) { resolve = res; reject = rej; });
+							return { promise: p, resolve: resolve, reject: reject };
+					})"
+				)
+				.AsObject();
+			resolve = promiseFactory.Get("resolve") as FunctionInstance;
+			reject  = promiseFactory.Get("reject") as FunctionInstance;
+			return promiseFactory.Get("promise");
+		}
+
+		private JsValue ToPromise<T>(Task<T> task) {
+			var promise = CreatePromise(out var resolve, out var reject);
+			task.ContinueWith(t => {
+				if (t.IsFaulted || t.IsCanceled) {
+					Logger.LogError($"Error in task: {t.Exception}", this);
+					_engine.Invoke(reject!, false);
+					return;
+				}
+				_engine.Invoke(resolve!, JsValue.FromObject(_engine, t.Result));
+			});
+			return promise;
+		}
+
 		private void SetExports(string property, object value) {
 			try {
-				if (_engine == null || Context == null) return;
+				if (_engine == null || Context == null)
+					return;
 				var export = Context.Get("exports");
 				if (export.IsUndefined())
 					export = new ObjectWrapper(_engine, new Dictionary<string, object>());
@@ -297,7 +364,8 @@ namespace api.nox.session.jint {
 				}
 
 				var methodRef = Context.Get(method);
-				if (methodRef.IsUndefined()) return;
+				if (methodRef.IsUndefined())
+					return;
 
 				_engine.Invoke(methodRef, args);
 			} catch (Exception e) {
@@ -317,7 +385,7 @@ namespace api.nox.session.jint {
 					return null;
 
 				// Convert arguments to JsValue to avoid InvalidCastException
-				var jsArgs = new JsValue[args.Length];
+				var jsArgs = new JsValue[ args.Length ];
 				for (var i = 0; i < args.Length; i++) {
 					if (args[i] is byte[] bytes) {
 						var jsArray = _engine.Realm.Intrinsics.Array.Construct(bytes.Length);
@@ -325,11 +393,9 @@ namespace api.nox.session.jint {
 							jsArray[(uint)j] = JsValue.FromObject(_engine, bytes[j]);
 						}
 						jsArgs[i] = jsArray;
-					}
-					else if (args[i] is IPlayer player) {
+					} else if (args[i] is IPlayer player) {
 						jsArgs[i] = new ObjectWrapper(_engine, player);
-					}
-					else {
+					} else {
 						jsArgs[i] = JsValue.FromObject(_engine, args[i]);
 					}
 				}
@@ -349,10 +415,11 @@ namespace api.nox.session.jint {
 				}
 
 				var methodRef = Context.Get(method);
-				if (methodRef.IsUndefined()) return default;
+				if (methodRef.IsUndefined())
+					return default;
 
 				// Convert arguments to JsValue to avoid InvalidCastException
-				var jsArgs = new JsValue[args.Length];
+				var jsArgs = new JsValue[ args.Length ];
 				for (var i = 0; i < args.Length; i++) {
 					if (args[i] is byte[] bytes) {
 						var jsArray = _engine.Realm.Intrinsics.Array.Construct(bytes.Length);
@@ -360,11 +427,9 @@ namespace api.nox.session.jint {
 							jsArray[(uint)j] = JsValue.FromObject(_engine, bytes[j]);
 						}
 						jsArgs[i] = jsArray;
-					}
-					else if (args[i] is IPlayer player) {
+					} else if (args[i] is IPlayer player) {
 						jsArgs[i] = new ObjectWrapper(_engine, player);
-					}
-					else {
+					} else {
 						jsArgs[i] = JsValue.FromObject(_engine, args[i]);
 					}
 				}
@@ -378,7 +443,8 @@ namespace api.nox.session.jint {
 		}
 
 		private void OnDestroy() {
-			if (_engine == null) return;
+			if (_engine == null)
+				return;
 			Main.CoreAPI.EventAPI.Emit("jint_engine_destroyed", this, _engine);
 			_engine.Dispose();
 			_engine = null;
@@ -412,8 +478,8 @@ namespace api.nox.session.jint {
 	}
 
 	public interface NodeHash {
-		int crc32(byte[] data);
-		int crc32(string data);
+		int crc32(byte[]  data);
+		int crc32(string  data);
 		long crc64(byte[] data);
 		long crc64(string data);
 	}

@@ -438,17 +438,17 @@ namespace api.nox.instance.client {
 
 
 			_playerListTokenSource = new CancellationTokenSource();
-			var tasks = new List<UniTask<(IUser, IPlayer)[]>>();
+			var tasks = new List<UniTask<(IUser, IInstancePlayer)[]>>();
 
 			var players = instance.GetPlayers();
 			var playersByServer = players
-				.GroupBy(p => p.GetIdentifier().GetServer())
+				.GroupBy(p => p.Identifier.Server)
 				.ToDictionary(g => g.Key, g => g.ToArray());
 
 			var isEmpty = true;
 			var isFirst = true;
 			var prefab  = PlayerComponent.PlayerPrefab;
-			var action = new Action<(IUser, IPlayer)[]>(
+			var action = new Action<(IUser, IInstancePlayer)[]>(
 				users => {
 					Logger.LogDebug($"Found {users.Length} instances for world {instance.GetTitle()} ({instance.ToIdentifier()})");
 					if (isFirst)
@@ -491,27 +491,27 @@ namespace api.nox.instance.client {
 				UpdateLayout.UpdateImmediate(playerList);
 		}
 
-		private async UniTask<(IUser, IPlayer)[]> SearchPlayers(IPlayer[] users, string server, CancellationToken token, Action<(IUser, IPlayer)[]> callback = null) {
+		private async UniTask<(IUser, IInstancePlayer)[]> SearchPlayers(IInstancePlayer[] users, string server, CancellationToken token, Action<(IUser, IInstancePlayer)[]> callback = null) {
 			if (token.IsCancellationRequested)
-				return Array.Empty<(IUser, IPlayer)>();
+				return Array.Empty<(IUser, IInstancePlayer)>();
 
 			var request = Main.UserAPI
 				.MakeSearchRequest()
-				.SetIds(users.Select(p => p.GetIdentifier().GetId()).ToArray());
+				.SetIds(users.Select(p => p.Identifier).ToArray());
 
 			var response = await Main.UserAPI.Search(request, server)
 				.AttachExternalCancellation(token);
 			if (token.IsCancellationRequested)
-				return Array.Empty<(IUser, IPlayer)>();
+				return Array.Empty<(IUser, IInstancePlayer)>();
 			var ress = response == null
 				? Array.Empty<IUser>()
-				: response.GetUsers();
+				: response.Items;
 			if (ress.Length == 0)
-				return Array.Empty<(IUser, IPlayer)>();
+				return Array.Empty<(IUser, IInstancePlayer)>();
 
-			var res = new List<(IUser, IPlayer)>();
+			var res = new List<(IUser, IInstancePlayer)>();
 			foreach (var user in ress) {
-				var matchingPlayers = users.Where(p => p.GetIdentifier().Equals(user.ToIdentifier()));
+				var matchingPlayers = users.Where(p => p.Identifier.Equals(user.Identifier));
 				res.AddRange(matchingPlayers.Select(player => (user, player)));
 			}
 

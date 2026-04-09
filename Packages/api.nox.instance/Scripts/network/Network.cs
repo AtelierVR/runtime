@@ -10,7 +10,8 @@ namespace api.nox.instance.network {
 		private readonly UnityEvent<Instance> _fetchEvent = new();
 
 		private void InvokeFetch(Instance instance) {
-			if (instance == null) return;
+			if (instance == null)
+				return;
 			_fetchEvent.Invoke(instance);
 			Main.Instance.CoreAPI.EventAPI.Emit("instance_fetch", instance);
 		}
@@ -35,7 +36,7 @@ namespace api.nox.instance.network {
 
 			if (identifier.IsLocal())
 				identifier.Server = from;
-			var address = from ?? Main.UserAPI?.GetCurrent()?.GetServerAddress() ?? identifier.GetServerAddress();
+			var address = from ?? Main.UserAPI?.Current?.Server ?? identifier.GetServerAddress();
 			if (string.IsNullOrEmpty(address)) {
 				Logger.LogError($"Cannot fetch instance for {identifier}: no server address provided.");
 				return null;
@@ -44,7 +45,7 @@ namespace api.nox.instance.network {
 			if (address == identifier.GetServerAddress())
 				identifier.Server = "::"; // Use "::" to indicate local server in the identifier
 
-			var request = await RequestNode.To(address, $"/api/instances/{identifier.ToString()}");
+			var request = await RequestNode.To(address, $"/instances/{identifier.ToString()}");
 			if (request == null) {
 				Logger.LogError($"Failed to create request for instance {identifier}");
 				return null;
@@ -66,13 +67,13 @@ namespace api.nox.instance.network {
 			if (Main.NetworkAPI == null)
 				return null;
 
-			var address = from ?? Main.UserAPI?.GetCurrent()?.GetServerAddress();
+			var address = from ?? Main.UserAPI?.Current?.Server;
 			if (string.IsNullOrEmpty(address)) {
 				Logger.LogError("Cannot search instances: no server address provided.");
 				return null;
 			}
 
-			var request = await RequestNode.To(address, $"/api/instances?{data.ToParams()}");
+			var request = await RequestNode.To(address, $"/instances?{data.ToParams()}");
 			if (request == null) {
 				Logger.LogError($"Failed to create request for instance search");
 				return null;
@@ -86,8 +87,10 @@ namespace api.nox.instance.network {
 			}
 
 			var instances = response.Data;
+			instances.Request = data;
+			instances.Server  = address;
 
-			foreach (var instance in instances.instances)
+			foreach (var instance in instances.Items)
 				InvokeFetch(instance);
 
 			return instances;

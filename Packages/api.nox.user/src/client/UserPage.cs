@@ -1,16 +1,12 @@
 using Cysharp.Threading.Tasks;
-using Nox.CCK.Language;
-using Nox.CCK.Users;
 using Nox.CCK.Utils;
 using Nox.UI;
 using Nox.Users;
 using UnityEngine;
-using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace api.nox.user.client {
 	public class UserPage : IPage {
-		internal static string GetStaticKey()
+		static internal string GetStaticKey()
 			=> "users";
 
 		public string GetKey()
@@ -20,7 +16,7 @@ namespace api.nox.user.client {
 		private object[]       _context;
 		private GameObject     _content;
 		private UserComponent  _component;
-		private IUserIdentifier _identifier;
+		private Identifier _identifier;
 		private IUser           _user;
 		private bool           _isLoading;
 
@@ -42,11 +38,11 @@ namespace api.nox.user.client {
 			if (!T(context, 0, out string type)) return null;
 			switch (type) {
 				case "id_server" when T(context, 1, out uint id0) && T(context, 2, out string ser0):
-					return OnPageByIdentifier(menu, context, new UserIdentifier(id0, ser0));
+					return OnPageByIdentifier(menu, context, new Identifier("u", id0, null,ser0));
 				case "identifier" when T(context, 1, out string id2):
-					return OnPageByIdentifier(menu, context, UserIdentifier.From(id2));
-				case "identifier" when T(context, 1, out IUserIdentifier ui0):
-					return OnPageByIdentifier(menu, context, UserIdentifier.FromBase(ui0));
+					return OnPageByIdentifier(menu, context, Identifier.Parse(id2));
+				case "identifier" when T(context, 1, out Identifier ui0):
+					return OnPageByIdentifier(menu, context, ui0);
 				case "user" when T(context, 1, out IUser usr3):
 					return OnPageByUser(menu, context, usr3);
 			}
@@ -54,7 +50,7 @@ namespace api.nox.user.client {
 			return null;
 		}
 
-		private static UserPage OnPageByIdentifier(IMenu menu, object[] context, UserIdentifier identifier) {
+		private static UserPage OnPageByIdentifier(IMenu menu, object[] context, Identifier identifier) {
 			var page = new UserPage {
 				_mId        = menu.Id,
 				_context    = context,
@@ -69,7 +65,7 @@ namespace api.nox.user.client {
 			return new UserPage {
 				_mId        = menu.Id,
 				_context    = context,
-				_identifier = user.ToIdentifier(),
+				_identifier = user.Identifier,
 				_user       = user
 			};
 		}

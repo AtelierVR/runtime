@@ -2,64 +2,46 @@ using System;
 
 namespace Nox.Servers {
 	public interface IServer {
-		/// <summary>
-		/// Identifier to distinguish the sub-server for an address.
-		/// </summary>
-		/// <returns></returns>
-		public string GetId();
+		/// <summary>Unique node identifier within a cluster.</summary>
+		public string Id { get; }
 
-		/// <summary>
-		/// Get the title.
-		/// </summary>
-		/// <returns></returns>
-		public string GetTitle();
-		
-		/// <summary>
-		/// Get the address of the server.
-		/// </summary>
-		/// <returns></returns>
-		public string GetAddress();
+		/// <summary>Public domain address of the server.</summary>
+		public string Address { get; }
 
-		/// <summary>
-		/// Get the description.
-		/// </summary>
-		/// <returns></returns>
-		public string GetDescription();
+		/// <summary>Gateway URLs keyed by name (web, ws, api).</summary>
+		public IServerGateway Gateway { get; }
 
-		/// <summary>
-		/// Get list of useful urls.
-		/// </summary>
-		/// <returns></returns>
-		public IGateways GetGateways();
+		/// <summary>Instance metadata (title, description, icon, contact).</summary>
+		public IServerMetadata Metadata { get; }
 
-		/// <summary>
-		/// List of features supported by the server.
-		/// </summary>
-		/// <returns></returns>
-		public string[] GetFeatures();
+		/// <summary>Runtime versions keyed by name (e.g. "node").</summary>
+		public IServerVersions Versions { get; }
 
-		/// <summary>
-		/// Get the version.
-		/// </summary>
-		/// <returns></returns>
-		public Version GetVersion();
+		/// <summary>Protocol endpoint URLs (well-known, webfinger, nodeinfo).</summary>
+		public IServerEndpoints Endpoints { get; }
 
-		/// <summary>
-		/// Get the time when the server is ready to requests.
-		/// </summary>
-		/// <returns></returns>
-		public DateTime GetReadyAt();
+		/// <summary>Supported feature flags.</summary>
+		public string[] Features { get; }
 
-		/// <summary>
-		/// Get the icon URL.
-		/// </summary>
-		/// <returns></returns>
-		public string GetIconUrl();
+		/// <summary>Supported capability flags.</summary>
+		public string[] Capabilities { get; }
 
-		/// <summary>
-		/// Get the rsa certificate.
-		/// </summary>
-		/// <returns></returns>
-		public string GetCertificate();
+		/// <summary>Software identifier.</summary>
+		public IServerSoftware Software { get; }
+
+		/// <summary>When this node started.</summary>
+		public DateTime ReadyAt { get; }
+
+		/// <summary>Ed25519 public key (base64 SPKI DER).</summary>
+		public string PublicKey { get; }
+
+		/// <summary>Listening port.</summary>
+		public int Port { get; }
+
+		/// <summary>Operational status: "online", "maintenance" or "degraded".</summary>
+		public string Status { get; }
+
+		/// <summary>Maintenance message displayed to users, or null.</summary>
+		public string Maintenance { get; }
 	}
 }

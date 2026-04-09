@@ -41,7 +41,7 @@ namespace api.nox.session.jint {
 			var scripts = anchor.GetComponentsInChildren<IJintScript>(true);
 			foreach (var script in scripts) {
 				var mono = script as MonoBehaviour;
-				if (backings.Any(b => b.GetInstanceID() == mono!.GetInstanceID())) continue;
+				if (backings.Any(b => b.GetEntityId() == mono!.GetEntityId())) continue;
 				var backing = mono!.gameObject.GetOrAddComponent<JintBackingSession>();
 				backing.module = this;
 				backing.Script = script;

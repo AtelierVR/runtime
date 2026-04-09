@@ -1,82 +1,66 @@
 using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Newtonsoft.Json;
 using Nox.CCK.Utils;
 using Nox.Users;
 
 namespace api.nox.user.network {
 	[Serializable]
 	public class SearchResponse : ISearchResponse, INoxObject {
-		internal string query;
-		internal uint[] ids;
-		public   User[] users;
-		public   uint   total;
-		public   uint   limit;
-		public   uint   offset;
+		internal SearchRequest Request;
+		internal string Server;
 
-		[NoxPublic(NoxAccess.Method)]
-		public string GetQuery()
-			=> query;
+		[JsonProperty("items")]
+		public User[] Items { get; private set; }
 
-		[NoxPublic(NoxAccess.Method)]
-		public uint[] GetIds()
-			=> ids;
+		IUser[] ISearchResponse.Items
+			=> Items.ToArray<IUser>();
 
-		[NoxPublic(NoxAccess.Method)]
-		public IUser[] GetUsers()
-			=> users.Cast<IUser>()
-				.ToArray();
+		[JsonProperty("total")]
+		public uint Total { get; }
 
-		[NoxPublic(NoxAccess.Method)]
-		public uint GetTotal()
-			=> total;
+		[JsonProperty("limit")]
+		public uint Limit { get; }
 
-		[NoxPublic(NoxAccess.Method)]
-		public uint GetLimit()
-			=> limit;
+		[JsonProperty("offset")]
+		public uint Offset { get; }
 
-		[NoxPublic(NoxAccess.Method)]
-		public uint GetOffset()
-			=> offset;
-
-		[NoxPublic(NoxAccess.Method)]
 		public bool HasNext()
-			=> offset + limit < total;
+			=> Offset + Limit < Total;
 
-		[NoxPublic(NoxAccess.Method)]
 		public bool HasPrevious()
-			=> offset > 0;
+			=> Offset > 0;
 
-		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<ISearchResponse> Next()
-			=> await Internal_Next();
+		async UniTask<ISearchResponse> ISearchResponse.Next()
+			=> await Next();
 
-		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<ISearchResponse> Previous()
-			=> await Internal_Previous();
+		async UniTask<ISearchResponse> ISearchResponse.Previous()
+			=> await Previous();
 
-		public async UniTask<SearchResponse> Internal_Next()
+		public async UniTask<SearchResponse> Next()
 			=> HasNext()
 				? await Main.Instance.Network.Search(
 					new SearchRequest {
-						query  = query,
-						ids    = ids,
-						offset = offset + limit,
-						limit  = limit
-					}
+						query  = Request.GetQuery(),
+						ids    = Request.GetIds(),
+						offset = Offset + Limit,
+						limit  = Limit
+					},
+					Server
 				)
 				: null;
 
-		[NoxPublic(NoxAccess.Method)]
-		public async UniTask<SearchResponse> Internal_Previous()
+		public async UniTask<SearchResponse> Previous()
 			=> HasPrevious()
 				? await Main.Instance.Network.Search(
 					new SearchRequest {
-						query  = query,
-						ids    = ids,
-						offset = offset - limit,
-						limit  = limit
-					}
+						query  = Request.GetQuery(),
+						ids    = Request.GetIds(),
+						offset = Offset - Limit,
+						limit  = Limit
+					},
+					Server
 				)
 				: null;
 	}

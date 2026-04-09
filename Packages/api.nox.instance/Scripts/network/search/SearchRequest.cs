@@ -6,20 +6,24 @@ using ISearchRequest = Nox.Instances.ISearchRequest;
 
 namespace api.nox.instance.network {
 	public class SearchRequest : ISearchRequest, INoxObject {
-		internal string           Query;
-		internal IWorldIdentifier World;
-		internal IUserIdentifier  Owner;
-		internal uint             Offset;
-		internal uint             Limit;
+		internal string Query;
+		internal Identifier World = Identifier.Invalid;
+		internal Identifier Owner = Identifier.Invalid;
+		internal uint Offset;
+		internal uint Limit;
 
 		public string ToParams() {
 			var text = "";
 			if (!string.IsNullOrEmpty(Query))
 				text += (text.Length > 0 ? "&" : "") + $"query={Query}";
-			if (World  != null) text += (text.Length > 0 ? "&" : "") + $"world={World.ToString()}";
-			if (Owner  != null) text += (text.Length > 0 ? "&" : "") + $"owner={Owner.ToString()}";
-			if (Offset > 0) text     += (text.Length > 0 ? "&" : "") + $"offset={Offset}";
-			if (Limit  > 0) text     += (text.Length > 0 ? "&" : "") + $"limit={Limit}";
+			if (World.IsValid())
+				text += (text.Length > 0 ? "&" : "") + $"world={World.ToString()}";
+			if (Owner.IsValid())
+				text += (text.Length > 0 ? "&" : "") + $"owner={Owner.ToString()}";
+			if (Offset > 0)
+				text += (text.Length > 0 ? "&" : "") + $"offset={Offset}";
+			if (Limit > 0)
+				text += (text.Length > 0 ? "&" : "") + $"limit={Limit}";
 			return text;
 		}
 
@@ -27,9 +31,9 @@ namespace api.nox.instance.network {
 			var req = new SearchRequest();
 			if (data.TryGetValue("query", out var query) && query is string q)
 				req.Query = q;
-			if (data.TryGetValue("owner", out var owners) && owners is IUserIdentifier n)
+			if (data.TryGetValue("owner", out var owners) && owners is Identifier n)
 				req.Owner = n;
-			if (data.TryGetValue("world", out var worlds) && worlds is IWorldIdentifier w)
+			if (data.TryGetValue("world", out var worlds) && worlds is Identifier w)
 				req.World = w;
 			if (data.TryGetValue("offset", out var offset) && offset is uint o)
 				req.Offset = o;
@@ -43,12 +47,12 @@ namespace api.nox.instance.network {
 			return this;
 		}
 
-		public ISearchRequest SetOwner(IUserIdentifier owner) {
+		public ISearchRequest SetOwner(Identifier owner) {
 			Owner = owner;
 			return this;
 		}
 
-		public ISearchRequest SetWorld(IWorldIdentifier world) {
+		public ISearchRequest SetWorld(Identifier world) {
 			World = world;
 			return this;
 		}
@@ -67,10 +71,10 @@ namespace api.nox.instance.network {
 		public string GetQuery()
 			=> Query;
 
-		public IUserIdentifier GetOwner()
+		public Identifier GetOwner()
 			=> Owner;
 
-		public IWorldIdentifier GetWorld()
+		public Identifier GetWorld()
 			=> World;
 
 		public uint GetOffset()
@@ -80,7 +84,8 @@ namespace api.nox.instance.network {
 			=> Limit;
 
 		public static SearchRequest FromBase(ISearchRequest request) {
-			if (request is SearchRequest sr) return sr;
+			if (request is SearchRequest sr)
+				return sr;
 			return new SearchRequest {
 				Query  = request.GetQuery(),
 				World  = request.GetWorld(),

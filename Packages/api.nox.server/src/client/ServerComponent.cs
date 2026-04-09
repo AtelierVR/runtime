@@ -45,12 +45,12 @@ namespace api.nox.server.client {
 		public void UpdateContent(IServer server) {
 			if (server == null) return;
 
-			title.UpdateText("server.title", new[] { server.GetTitle() });
-			label.UpdateText("server.about.title", new[] { server.GetTitle() ?? server.GetAddress() });
-			identifier.UpdateText("server.identifier", new[] { server.GetAddress() });
+			title.UpdateText("server.title", new[] { server.Metadata?.Title });
+			label.UpdateText("server.about.title", new[] { server.Metadata?.Title ?? server.Address });
+			identifier.UpdateText("server.identifier", new[] { server.Address });
 
-			if (!string.IsNullOrEmpty(server.GetDescription())) {
-				descriptionText.SetMarkdown(server.GetDescription());
+			if (!string.IsNullOrEmpty(server.Metadata?.Description)) {
+				descriptionText.SetMarkdown(server.Metadata?.Description);
 				descriptionContainer.SetActive(true);
 			} else descriptionContainer.SetActive(false);
 
@@ -67,8 +67,8 @@ namespace api.nox.server.client {
 
 			_thumbnailTokenSource = new CancellationTokenSource();
 
-			if (world?.GetIconUrl() != null) {
-				var texture = await Client.NetworkAPI.FetchTexture(world.GetIconUrl(), token: _thumbnailTokenSource.Token);
+			if (world?.Metadata?.Icon != null) {
+				var texture = await Client.NetworkAPI.FetchTexture(world.Metadata.Icon, token: _thumbnailTokenSource.Token);
 				icon.sprite = texture
 					? Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero)
 					: null;

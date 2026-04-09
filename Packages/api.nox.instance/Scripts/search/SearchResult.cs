@@ -18,7 +18,7 @@ namespace api.nox.instance.search {
 
 		public IResultData[] Data
 			=> Response != null
-				? Response.instances
+				? Response.Items
 					.Select(x => new SearchData { Reference = x })
 					.Cast<IResultData>()
 					.ToArray()

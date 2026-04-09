@@ -1,0 +1,758 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 776389e82c640c44086d3baf10dd1c7b, type: 3}
+  m_Name: langpack
+  m_EditorClassIdentifier: 
+  languages:
+  - IETF: fr-FR
+    entries:
+    - key: language
+      value: "Fran\xE7ais"
+    - key: game.ui.menu.home
+      value: "Accueil"
+    - key: game.ui.menu.world
+      value: "Me. Monde"
+    - key: game.ui.menu.navigation
+      value: "Navigation"
+    - key: game.ui.menu.inventory
+      value: "Inventaire"
+    - key: game.ui.menu.application
+      value: "Application"
+    - key: game.ui.menu.settings
+      value: "Param\xE8tres"
+    - key: game.ui.menu.guide
+      value: "Guide"
+    - key: game.ui.menu.muted
+      value: "Mut\xE9"
+    - key: game.ui.menu.unmuted
+      value: "D\xE9mut\xE9"
+    - key: game.ui.notification.test
+      value: "Notification Test"
+    - key: game.ui.notification.friend_request
+      value: "Demande d'ami"
+    - key: dashboard.main.messages.title
+      value: "Messages"
+    - key: dashboard.main.widgets.title
+      value: "Widgets"
+    - key: time
+      value: '{1}:{2}'
+    - key: dashboard.main.friends.title
+      value: "Amis"
+    - key: dashboard.user.title
+      value: "À propos de {0}"
+    - key: dashboard.user.display
+      value: "{0}"
+    - key: dashboard.user.badges
+      value: "Badges ({0})"
+    - key: dashboard.user.links
+      value: "Liens ({0})"
+    - key: dashboard.user.languages
+      value: "Langues ({0})"
+    - key: api.nox.game.widget.userme.title
+      value: "Moi"
+    - key: api.nox.game.widget.userme.display
+      value: "{0}"
+    - key: api.nox.game.widget.serverme.title
+      value: "Mon Serveur"
+    - key: api.nox.game.widget.serverme.display
+      value: "{0}"
+    - key: dashboard.server.title
+      value: "À propos de {0}"
+    - key: dashboard.server.display
+      value: "{0}"
+    - key: dashboard.server.address
+      value: "{0}"
+    - key: dashboard.navigation.title
+      value: "Navigation"
+    - key: dashboard.navigation.inputfield
+      value: "Rechercher..."
+    - key: dashboard.navigation.user
+      value: "Utilisateurs"
+    - key: dashboard.navigation.user.title
+      value: "Navigation par Utilisateur"
+    - key: dashboard.navigation.world
+      value: "Mondes"
+    - key: dashboard.navigation.world.title
+      value: "Navigation par Monde"
+    - key: dashboard.navigation.server
+      value: "Serveurs"
+    - key: dashboard.navigation.server.title
+      value: "Navigation par Serveur"
+    - key: dashboard.navigation.instance
+      value: "Instances"
+    - key: dashboard.navigation.instance.title
+      value: "Navigation par Instance"
+    - key: dashboard.navigation.error.unknown
+      value: "Une erreur inconnue s'est produite."
+    - key: dashboard.navigation.error.timeout
+      value: "Le serveur a mis trop de temps à répondre."
+    - key: dashboard.navigation.error
+      value: "Erreur: {0}"
+    - key: dashboard.navigation.empty
+      value: "Aucun résultat."
+    - key: dashboard.navigation.container.title
+      value: "{0}"
+    - key: dashboard.navigation.item.title
+      value: "{0}"
+    - key: dashboard.navigation.loading
+      value: "Chargement..."
+    - key: dashboard.world.title
+      value: "À propos de {0}"
+    - key: dashboard.world.display
+      value: "{0}"
+    - key: dashboard.world.description.title
+      value: "Description"
+    - key: dashboard.world.description
+      value: "{0}"
+    - key: dashboard.world.actions.title
+      value: "Actions"
+    - key: dashboard.world.actions.reset_home
+      value: "Retirer le Home"
+    - key: dashboard.world.actions.set_home
+      value: "Définir le Home"
+    - key: dashboard.world.actions.remove_favorites
+      value: "Retirer des Fav."
+    - key: dashboard.world.actions.add_favorites
+      value: "Ajouter aux Fav."
+    - key: dashboard.world.actions.download
+      value: "Télécharger"
+    - key: dashboard.world.actions.make_instance
+      value: "Nouvelle inst."
+    - key: dashboard.world.actions.teleport
+      value: "Rejoindre en off."
+    - key: dashboard.world.instances.title
+      value: "Instances"
+    - key: dashboard.world.actions.downloading
+      value: "Annuler..."
+    - key: dashboard.world.actions.downloading.progress
+      value: "{0}%"
+    - key: dashboard.world.actions.downloaded
+      value: "Téléchargé"
+    - key: dashboard.instance.make.title
+      value: "Créer une instance"
+    - key: dashboard.instance.make.exposition
+      value: "Exposition"
+    - key: dashboard.instance.make.capacity
+      value: "Capacité"
+    - key: dashboard.instance.make.capacity.range
+      value: "{0} - {1}"
+    - key: dashboard.instance.make.capacity.value
+      value: "{0}"
+    - key: dashboard.instance.make.global
+      value: "Général"
+    - key: dashboard.instance.make.where
+      value: "Où"
+    - key: dashboard.instance.make.where.server
+      value: "Serveur"
+    - key: dashboard.instance.make.where.server.value
+      value: "{0}"
+    - key: dashboard.instance.make.where.world
+      value: "Monde"
+    - key: dashboard.instance.make.where.world.value
+      value: "{0}"
+    - key: dashboard.instance.make.create
+      value: "Créer"
+    - key: dashboard.instance.make.password
+      value: "Protégé par mot de passe"
+    - key: dashboard.instance.make.password.value
+      value: "Mot de passe"
+    - key: dashboard.instance.make.advanced
+      value: "Paramètres avancés"
+    - key: dashboard.instance.make.world.version
+      value: "Version du monde"
+    - key: dashboard.instance.make.world.version.value
+      value: "{0}"
+    - key: dashboard.instance.make.notice
+      value: "Notes"
+    - key: dashboard.world.instances.entry.title
+      value: "#{0} • {1}"
+    - key: dashboard.world.instances.entry.description
+      value: "{0}"
+    - key: dashboard.instance.title
+      value: "À propos de {0}"
+    - key: dashboard.instance.display
+      value: "{0}"
+    - key: dashboard.instance.players.title
+      value: "Joueurs ({0})"
+    - key: dashboard.instance.actions.title
+      value: Actions
+    - key: dashboard.instance.actions.join
+      value: Rejoindre
+    - key: dashboard.instance.actions.downloading
+      value: "Téléchargement..."
+    - key: dashboard.instance.actions.downloading.progress
+      value: "{0}%"
+    - key: dashboard.instance.actions.downloaded
+      value: "Téléchargé"
+    - key: dashboard.instance.actions.download
+      value: "Télécharger"
+    - key: dashboard.instance.players.entry.title
+      value: "{0}"
+    - key: dashboard.instance.players.entry.description
+      value: "{0}"
+    - key: dashboard.instance.advanced_informations
+      value: "Informations avancées"
+    - key: dashboard.instance.advanced_informations.id
+      value: "ID: {0}"
+    - key: dashboard.instance.advanced_informations.address
+      value: "Adresse: {0}"
+    - key: dashboard.instance.advanced_informations.relay_address
+      value: "Relai: {0}"
+    - key: dashboard.world.actions.no_disponible
+      value: "Indisponible"
+    - key: dashboard.settings.title
+      value: "Paramètres"
+    - key: dashboard.settings.subtitle
+      value: "Exemple de paramètres"
+    - key: setting.range.value
+      value: "{0}"
+    - key: setting.range.value.float
+      value: "{1}"
+    - key: setting.range.value.percent
+      value: "{2}%"
+    - key: setting.range.value.percent.float
+      value: "{3}%"
+    - key: setting.range.value.binary
+      value: "0b{4}"
+    - key: setting.range.value.hex
+      value: "0x{5}"
+    - key: setting.volume.value
+      value: "{0}%"
+    - key: setting.graphic.text
+      value: "Graphismes"
+    - key: setting.graphic.title
+      value: "Paramètres graphiques"
+    - key: setting.graphic.basic.title
+      value: "Général"
+    - key: setting.graphic.quality.title
+      value: "Qualité"
+    - key: setting.graphic.anti_aliasing.title
+      value: "Anti-aliasing"
+    - key: setting.graphic.shadow.title
+      value: "Ombres"
+    - key: setting.graphic.shadow_distance.title
+      value: "Distance des ombres"
+    - key: setting.range.value.distance.value
+      value: "{1} m"
+    - key: setting.graphic.shadow_quality.title
+      value: "Qualité des ombres"
+    - key: setting.graphic.shadow_projection.title
+      value: "Projection des ombres"
+    - key: setting.graphic.shadow_cascades.title
+      value: "Cascades des ombres"
+    - key: setting.graphic.advanced.title
+      value: "Avancé"
+    - key: setting.graphic.lodbias.title
+      value: "Niveau de détail"
+    - key: setting.graphic.particule_raycast_budget.title
+      value: "Budget de raycast des particules"
+    - key: setting.graphic.pixel_light_count.title
+      value: "Nombre de lumières par pixel"
+    - key: setting.graphic.anisotropic_filtering.title
+      value: "Filtrage anisotrope"
+    - key: setting.graphic.global_texture_mipmap_limit.title
+      value: "Limite de mipmaps des textures"
+    - key: setting.audio.text
+      value: "Audio"
+    - key: setting.audio.title
+      value: "Paramètres audio"
+    - key: setting.audio.volume.title
+      value: "Volumes"
+    - key: audio.master
+      value: "Principal"
+    - key: audio.music
+      value: "Musique"
+    - key: audio.effects
+      value: "Effets"
+    - key: audio.voice
+      value: "Voix"
+    - key: audio.ambient
+      value: "Ambiance"
+    - key: audio.sfx
+      value: "SFX"
+    - key: audio.ui
+      value: "UI"
+    - key: audio.player
+      value: "Joueur"
+    - key: audio.world
+      value: "Monde"
+    - key: setting.audio.microphone.title
+      value: "Microphone"
+    - key: setting.audio.microphone.volume.title
+      value: "Volume de sortie"
+    - key: setting.audio.microphone.current_device.title
+      value: "Périphérique actuel"
+    - key: setting.audio.microphone.noise_suppression.title
+      value: "Suppression de bruit"
+    - key: game.ui.menu.session
+      value: "Session"
+    - key: dashboard.session.main_online.leave
+      value: "Quitter"
+    - key: dashboard.session.main_online.goto_offline
+      value: "Aller en off."
+    - key: dashboard.session.description.title
+      value: "Description"
+    - key: dashboard.session.description
+      value: "{0}"
+    - key: session.main_online
+      value: "Informations"
+    - key: api.nox.cck.panel.title
+      value: "Nox CCK"
+    - key: api.nox.cck.panel.menu.title
+      value: "Menu"
+    - key: api.nox.cck.panel.error
+      value: "Erreur"
+    - key: setting.graphic.fps.title
+        value: "FPS"
+    - key: setting.graphic.fps.capped
+        value: "Personnalisé"
+    - key: setting.graphic.fps.vsync
+        value: "VSync"
+    - key: setting.graphic.fps.unlimited
+        value: "Illimité"
+    - key: setting.graphic.fps.capped.value
+        value: "{0}"
+    - key: setting.graphic.fps.preview
+        value: "{0} FPS"
+    - key: setting.graphic.fps.vsync.max
+        value: "Max: {0} FPS"
+    - key: dashboard.instance.advanced_informations.capacity
+        value: "Capacité: {0}"
+    - key: dashboard.instance.advanced_informations.capacity.unlimited
+        value: "Capacité: Illimitée"
+    - key: setting.control.text
+        value: "Contrôles"
+    - key: setting.control.title
+        value: "Paramètres de contrôles"
+    - key: setting.control.general.title
+        value: "Général"
+    - key: setting.control.general.invert_mouse
+        value: "Inverser la souris"
+    - key: setting.control.general.mouse_sensitivity
+        value: "Sensibilité de la souris"
+    - key: setting.control.general.mouse_sensitivity.value
+        value: "{2}"
+    - key: setting.graphic.quality.very_low
+        value: "Très basse"
+    - key: setting.graphic.quality.low
+        value: "Basse"
+    - key: setting.graphic.quality.medium
+        value: "Moyenne"
+    - key: setting.graphic.quality.high
+        value: "Haute"
+    - key: setting.graphic.quality.very_high
+        value: "Très haute"
+    - key: setting.graphic.quality.ultra
+        value: "Ultra"
+    - key: setting.graphic.shadow_quality.disable
+        value: "Désactivé"
+    - key: setting.graphic.shadow_quality.hardonly
+        value: "Dureté uniquement"
+    - key: setting.graphic.shadow_quality.all
+        value: "Tout"
+    - key: setting.graphic.shadow_projection.closefit
+        value: "Ajustement proche"
+    - key: setting.graphic.shadow_projection.stablefit
+        value: "Ajustement stable"
+    - key: setting.graphic.anisotropic_filtering.disable
+        value: "Désactivé"
+    - key: setting.graphic.anisotropic_filtering.enable
+        value: "Activé"
+    - key: setting.graphic.anisotropic_filtering.forceenable
+        value: "Forcer l'activation"
+    - key: setting.graphic.anti_aliasing.off
+        value: "Désactivé"
+    - key: setting.graphic.anti_aliasing.2x
+        value: "2x"
+    - key: setting.graphic.anti_aliasing.4x
+        value: "4x"
+    - key: setting.graphic.anti_aliasing.8x
+        value: "8x"
+    - key: setting.accessibility.text
+        value: "Accessibilité"
+    - key: setting.accessibility.title
+        value: "Paramètres d'accessibilité"
+    - key: setting.accessibility.interface.title
+        value: "Interface"
+    - key: setting.accessibility.interface.language.title
+        value: "Langue"
+    - key: setting.accessibility.visual.title
+        value: "Visuel"
+    - key: setting.accessibility.visual.brightness.title
+        value: "Luminosité"
+    - key: setting.accessibility.visual.bloom_intensity.title
+        value: "Intensité du bloom"
+    - key: setting.performance.text
+        value: "Performances"
+    - key: setting.performance.title
+        value: "Paramètres de performances"
+    - key: setting.performance.session.title
+        value: "Session"
+    - key: setting.performance.session.showing_distance
+        value: "Distance d'affichage des objets"
+  - IETF: en-US
+    entries:
+    - key: language
+      value: "English"
+    - key: game.ui.menu.home
+      value: "Home"
+    - key: game.ui.menu.world
+      value: "Wrl. Menu"
+    - key: game.ui.menu.navigation
+      value: "Navigation"
+    - key: game.ui.menu.inventory
+      value: "Inventory"
+    - key: game.ui.menu.application
+      value: "Application"
+    - key: game.ui.menu.settings
+      value: "Settings"
+    - key: game.ui.menu.guide
+      value: "Guide"
+    - key: game.ui.menu.muted
+      value: "Muted"
+    - key: game.ui.menu.unmuted
+      value: "Unmuted"
+    - key: game.ui.notification.test
+      value: "Notification test"
+    - key: game.ui.notification.friend_request
+      value: "Friend request"
+    - key: dashboard.main.messages.title
+      value: "Messages"
+    - key: dashboard.main.widgets.title
+      value: "Widgets"
+    - key: dashboard.main.time
+      value: '{0}:{2} {5}'
+    - key: dashboard.main.friends.title
+      value: "Friends"
+    - key: dashboard.user.title
+      value: "About {0}"
+    - key: dashboard.user.display
+      value: "{0}"
+    - key: dashboard.user.badges
+      value: "Badges ({0})"
+    - key: dashboard.user.tags
+      value: "Tags ({0})"
+    - key: dashboard.user.links
+      value: "Links ({0})"
+    - key: dashboard.user.languages
+      value: "Languages ({0})"
+    - key: api.nox.game.widget.userme.title
+      value: "Me"
+    - key: api.nox.game.widget.userme.display
+      value: "{0}"
+    - key: api.nox.game.widget.serverme.title
+      value: "My Server"
+    - key: api.nox.game.widget.serverme.display
+      value: "{0}"
+    - key: dashboard.server.title
+      value: "About {0}"
+    - key: dashboard.server.display
+      value: "{0}"
+    - key: dashboard.server.address
+      value: "{0}"
+    - key: dashboard.navigation.title
+      value: "Navigation"
+    - key: dashboard.navigation.inputfield
+      value: "Search..."
+    - key: dashboard.navigation.user
+      value: "Users"
+    - key: dashboard.navigation.user.title
+      value: "Navigation by User"
+    - key: dashboard.navigation.world
+      value: "Worlds"
+    - key: dashboard.navigation.world.title
+      value: "Navigation by World"
+    - key: dashboard.navigation.server  
+      value: "Servers"
+    - key: dashboard.navigation.server.title
+      value: "Navigation by Server"
+    - key: dashboard.navigation.instance
+      value: "Instances"
+    - key: dashboard.navigation.instance.title
+      value: "Navigation by Instance"
+    - key: dashboard.navigation.error.unknown
+      value: "An unknown error occurred."
+    - key: dashboard.navigation.error.timeout
+      value: "The server took too long to respond."
+    - key: dashboard.navigation.error
+      value: "Error: {0}"
+    - key: dashboard.navigation.empty
+      value: "No results."
+    - key: dashboard.navigation.container.title
+      value: "{0}"
+    - key: dashboard.navigation.item.title
+      value: "{0}"
+    - key: dashboard.navigation.loading
+      value: "Loading..."
+    - key: dashboard.world.title
+      value: "About {0}"
+    - key: dashboard.world.display
+      value: "{0}"
+    - key: dashboard.world.description.title
+      value: "Description"
+    - key: dashboard.world.description
+      value: "{0}"
+    - key: dashboard.world.actions.title
+      value: "Actions"
+    - key: dashboard.world.actions.reset_home
+      value: "Reset Home"
+    - key: dashboard.world.actions.set_home
+      value: "Set Home"
+    - key: dashboard.world.actions.remove_favorites
+      value: "Remove from Favorites"
+    - key: dashboard.world.actions.add_favorites
+      value: "Add to Favorites"
+    - key: dashboard.world.actions.download
+      value: "Download World"
+    - key: dashboard.world.actions.make_instance
+      value: "Make Instance"
+    - key: dashboard.world.actions.teleport
+      value: "Offline teleport"
+    - key: dashboard.world.instances.title
+      value: "Instances"
+    - key: dashboard.world.actions.downloading
+      value: "Downloading..."
+    - key: dashboard.world.actions.downloading.progress
+      value: "{0}%"
+    - key: dashboard.world.actions.downloaded
+      value: "Downloaded"
+    - key: dashboard.instance.make.title
+      value: "Create Instance"
+    - key: dashboard.instance.make.exposition
+      value: "Exposition"
+    - key: dashboard.instance.make.capacity
+      value: "Capacity"
+    - key: dashboard.instance.make.capacity.range
+      value: "{0} - {1}"
+    - key: dashboard.instance.make.capacity.value
+      value: "{0}"
+    - key: dashboard.instance.make.global
+      value: "General"
+    - key: dashboard.instance.make.where
+      value: "Where"
+    - key: dashboard.instance.make.where.server
+      value: "Server"
+    - key: dashboard.instance.make.where.world
+      value: "World"
+    - key: dashboard.instance.make.create
+      value: "Create"
+    - key: dashboard.instance.make.password
+      value: "Password Protected"
+    - key: dashboard.instance.make.password.value
+      value: "Password"
+    - key: dashboard.instance.make.advanced
+      value: "Advanced Settings"
+    - key: dashboard.instance.make.world.version
+      value: "World Version"
+      value: "{0}"
+    - key: dashboard.instance.make.world.version.value
+      value: "{0}"
+    - key: dashboard.instance.make.where.server.value
+      value: "{0}"
+    - key: dashboard.instance.make.where.world.value
+      value: "{0}"
+    - key: dashboard.instance.make.notice
+      value: "Notes"
+    - key: dashboard.world.instances.entry.title
+      value: "#{0} • {1}"
+    - key: dashboard.world.instances.entry.description
+      value: "{0}"
+    - key: dashboard.instance.advanced_informations
+      value: "Advanced Informations"
+    - key: dashboard.world.actions.no_disponible
+      value: "Unavailable"
+    - key: dashboard.settings.title
+      value: "Settings"
+    - key: dashboard.settings.subtitle
+      value: "Example settings"
+    - key: setting.range.value
+      value: "{0}"
+    - key: setting.range.value.float
+      value: "{1}"
+    - key: setting.range.value.percent
+      value: "{2}%"
+    - key: setting.range.value.percent.float
+      value: "{3}%"
+    - key: setting.range.value.binary
+      value: "0b{4}"
+    - key: setting.range.value.hex
+      value: "0x{5}"
+    - key: setting.range.value.distance.value
+      value: "{1}m"
+    - key: setting.volume.value
+      value: "{0}%"
+    - key: setting.graphic.text
+      value: "Graphics"
+    - key: setting.graphic.title
+      value: "Graphics settings"
+    - key: setting.graphic.basic.title
+      value: "General"
+    - key: setting.graphic.quality.title
+      value: "Quality"
+    - key: setting.graphic.anti_aliasing.title
+      value: "Anti-aliasing"
+    - key: setting.graphic.shadow.title
+      value: "Shadows"
+    - key: setting.graphic.shadow_distance.title
+      value: "Shadow distance"
+    - key: setting.graphic.shadow_quality.title
+      value: "Shadow quality"
+    - key: setting.graphic.shadow_projection.title
+      value: "Shadow projection"
+    - key: setting.graphic.shadow_cascades.title
+      value: "Shadow cascades"
+    - key: setting.graphic.advanced.title
+      value: "Advanced"
+    - key: setting.graphic.lodbias.title
+      value: "Level of detail"
+    - key: setting.graphic.particule_raycast_budget.title
+      value: "Particle raycast budget"
+    - key: setting.graphic.pixel_light_count.title
+      value: "Pixel light count"
+    - key: setting.graphic.anisotropic_filtering.title
+      value: "Anisotropic filtering"
+    - key: setting.graphic.global_texture_mipmap_limit.title
+      value: "Texture mipmap limit"
+    - key: setting.audio.text
+      value: "Audio"
+    - key: setting.audio.title  
+      value: "Audio settings"
+    - key: setting.audio.volume.title
+      value: "Volumes"
+    - key: audio.master
+      value: "Master"
+    - key: audio.music
+      value: "Music"
+    - key: audio.effects
+      value: "Effects"
+    - key: audio.voice
+      value: "Voice"
+    - key: audio.ambient
+      value: "Ambient"
+    - key: audio.sfx
+      value: "SFX"
+    - key: audio.ui
+      value: "UI"
+    - key: audio.player
+      value: "Player"
+    - key: audio.world
+      value: "World"
+    - key: setting.audio.microphone.title
+      value: "Microphone"
+    - key: setting.audio.microphone.volume.title
+      value: "Output volume"
+    - key: setting.audio.microphone.current_device.title
+      value: "Current device"
+    - key: setting.audio.microphone.noise_suppression.title
+      value: "Noise suppression"
+    - key: game.ui.menu.session
+      value: "Session"
+    - key: dashboard.session.main_online.leave
+      value: "Leave"
+    - key: dashboard.session.main_online.goto_offline
+      value: "Go offline"
+    - key: dashboard.session.description.title
+      value: "Description"
+    - key: dashboard.session.description
+      value: "{0}"
+    - key: session.main_online
+      value: "Informations"
+    - key: api.nox.cck.panel.title
+      value: "Nox CCK"
+    - key: api.nox.cck.panel.menu.title
+      value: "Menu"
+    - key: api.nox.cck.panel.error
+      value: "Error"
+    - key: setting.graphic.fps.title
+      value: "FPS"
+    - key: setting.graphic.fps.capped
+        value: "Custom"
+    - key: setting.graphic.fps.vsync
+        value: "VSync"
+    - key: setting.graphic.fps.unlimited
+        value: "Unlimited"
+    - key: setting.graphic.fps.capped.value
+        value: "{0}"
+    - key: dashboard.instance.advanced_informations.capacity
+        value: "Capacity: {0}"
+    - key: dashboard.instance.advanced_informations.capacity.unlimited
+        value: "Capacity: Unlimited"
+    - key: setting.control.text
+        value: "Controls"
+    - key: setting.control.title
+        value: "Controls settings"
+    - key: setting.control.general.title
+        value: "General"
+    - key: setting.control.general.invert_mouse
+        value: "Invert mouse"
+    - key: setting.control.general.mouse_sensitivity
+        value: "Mouse sensitivity"
+    - key: setting.control.general.mouse_sensitivity.value
+        value: "{2}"
+    - key: setting.graphic.quality.very_low
+        value: "Very low"
+    - key: setting.graphic.quality.low
+        value: "Low"
+    - key: setting.graphic.quality.medium
+        value: "Medium"
+    - key: setting.graphic.quality.high
+        value: "High"
+    - key: setting.graphic.quality.very_high
+        value: "Very high"
+    - key: setting.graphic.quality.ultra
+        value: "Ultra"
+    - key: setting.graphic.shadow_quality.disable
+        value: "Disabled"
+    - key: setting.graphic.shadow_quality.hardonly
+        value: "Hardness only"
+    - key: setting.graphic.shadow_quality.all
+        value: "All"
+    - key: setting.graphic.shadow_projection.closefit
+        value: "Close fit"
+    - key: setting.graphic.shadow_projection.stablefit
+        value: "Stable fit"
+    - key: setting.graphic.anisotropic_filtering.disable
+        value: "Disabled"
+    - key: setting.graphic.anisotropic_filtering.enable
+        value: "Enabled"
+    - key: setting.graphic.anisotropic_filtering.forceenable
+        value: "Force enable"
+    - key: setting.graphic.anti_aliasing.off
+        value: "Off"
+    - key: setting.graphic.anti_aliasing.2x
+        value: "2x"
+    - key: setting.graphic.anti_aliasing.4x
+        value: "4x"
+    - key: setting.graphic.anti_aliasing.8x
+        value: "8x"
+    - key: setting.accessibility.text
+        value: "Accessibility"
+    - key: setting.accessibility.title
+        value: "Accessibility settings"
+    - key: setting.accessibility.interface.title
+        value: "Interface"
+    - key: setting.accessibility.interface.language.title
+        value: "Language"
+    - key: setting.accessibility.visual.title
+        value: "Visual"
+    - key: setting.accessibility.visual.brightness.title
+        value: "Brightness"
+    - key: setting.accessibility.visual.bloom_intensity.title
+        value: "Bloom intensity"
+    - key: setting.performance.text
+        value: "Performance"
+    - key: setting.performance.title
+        value: "Performance settings"
+    - key: setting.performance.session.title
+        value: "Session"
+    - key: setting.performance.session.showing_distance
+        value: "Object display distance"

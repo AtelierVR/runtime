@@ -18,7 +18,7 @@ namespace api.nox.user.search {
 
 		public IResultData[] Data
 			=> Response != null
-				? Response.users
+				? Response.Items
 					.Select(x => new SearchData { Reference = x })
 					.Cast<IResultData>()
 					.ToArray()

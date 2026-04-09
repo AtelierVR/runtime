@@ -1,7 +1,6 @@
 ﻿using api.nox.user.client;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
-using Nox.CCK.Users;
 using Nox.CCK.Utils;
 using Nox.UI;
 using Nox.UI.Widgets;
@@ -32,8 +31,8 @@ namespace api.nox.user.widget {
 				"user", Main.Instance.Network.CurrentUser
 			);
 
-		private static UserIdentifier GetUserIdentifier()
-			=> Main.Instance.Network.CurrentUser?.ToInternalIdentifier() ?? UserIdentifier.Invalid;
+		private static Identifier GetIdentifier()
+			=> Main.Instance.Network.CurrentUser?.Identifier ?? Identifier.Invalid;
 
 		public Vector2Int GetSize()
 			=> new(3, 2);
@@ -42,7 +41,7 @@ namespace api.nox.user.widget {
 			=> 100;
 
 		public static bool TryMake(IMenu menu, RectTransform parent, out (GameObject, IWidget) values) {
-			if (!GetUserIdentifier().IsValid()) {
+			if (!GetIdentifier().IsValid()) {
 				values = (null, null);
 				return false;
 			}
@@ -71,7 +70,7 @@ namespace api.nox.user.widget {
 		}
 
 		private async UniTask UpdateContent() {
-			var identifier = GetUserIdentifier();
+			var identifier = GetIdentifier();
 			if (!identifier.IsValid()) {
 				_container.SetActive(false);
 				await UpdateIcon();
@@ -83,7 +82,7 @@ namespace api.nox.user.widget {
 				_container.SetActive(false);
 			await UpdateIcon();
 
-			if (Main.Instance.Network.CurrentUser is not IUser user || !user.ToIdentifier().Equals((IUserIdentifier)identifier))
+			if (Main.Instance.Network.CurrentUser is not IUser user || !user.Identifier.Equals((Identifier)identifier))
 				user = await Main.Instance.Network.Fetch(identifier);
 
 			if (user == null) {
@@ -96,8 +95,8 @@ namespace api.nox.user.widget {
 			_label.UpdateText(
 				"value",
 				new[] {
-					user.GetDisplay()
-					?? user.GetUsername()
+					user.Display
+					?? user.Username
 					?? identifier.ToString()
 				}
 			);
@@ -109,7 +108,7 @@ namespace api.nox.user.widget {
 		}
 
 		private async UniTask UpdateBanner(IUser user) {
-			var url = user.GetBannerUrl();
+			var url = user.Banner;
 
 			if (string.IsNullOrEmpty(url)) {
 				_container.SetActive(false);
@@ -132,7 +131,7 @@ namespace api.nox.user.widget {
 		}
 
 		private async UniTask UpdateThumbnail(IUser user) {
-			var url = user.GetThumbnailUrl();
+			var url = user.Thumbnail;
 
 			if (string.IsNullOrEmpty(url)) {
 				await UpdateIcon();

@@ -30,6 +30,7 @@
     <mapping directory="$PROJECT_DIR$/Packages/nox.terminal" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.ui" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.worlds" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.worlds.modules" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.xr" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/rootmotion.finalik" vcs="Git" />
   </component>

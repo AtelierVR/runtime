@@ -3,7 +3,8 @@
   "rootNamespace": "",
   "references": [
     "UniTask",
-    "Nox.Users"
+    "Nox.Users",
+    "Nox.CCK"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

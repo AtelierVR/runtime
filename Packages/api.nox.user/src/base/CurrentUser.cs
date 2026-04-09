@@ -1,30 +1,25 @@
 using System;
-using Cysharp.Threading.Tasks;
+using Newtonsoft.Json;
+using Nox.CCK.Convertors;
+using Nox.CCK.Utils;
 using Nox.Users;
-using Nox.Worlds;
 
 namespace api.nox.user {
 	[Serializable]
 	public class CurrentUser : User, ICurrentUser {
-		public string email;
-		public long   created_at;
-		public string home;
-		public string avatar;
+		[JsonProperty("email")]
+		public string Email { get; private set; }
 
-		public string GetEmail()
-			=> email;
+		[JsonProperty("email_verified")]
+		public bool IsEmailVerified { get; private set; }
 
-		public DateTime GetCreatedAt()
-			=> DateTimeOffset.FromUnixTimeMilliseconds(created_at)
-				.UtcDateTime;
+		[JsonProperty("home"), JsonConverter(typeof(StringToIdentifierConverter))]
+		public Identifier Home { get; private set; }
 
-		public string GetHomeId()
-			=> home;
+		[JsonProperty("avatar"), JsonConverter(typeof(StringToIdentifierConverter))]
+		public Identifier Avatar { get; private set; }
 
-		public string GetAvatarId()
-			=> avatar;
-
-		public override string ToString()
-			=> $"{GetType().Name}[id={ToIdentifier().ToString(server)}, username={GetUsername()}]";
+		[JsonProperty("twofa_enabled")]
+		public bool Is2FAEnabled { get; private set; }
 	}
 }

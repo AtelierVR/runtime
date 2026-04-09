@@ -83,7 +83,7 @@ namespace api.nox.instance.client {
 				Instance    = instance,
 				World       = world,
 				Asset       = asset,
-				Version     = WorldIdentifier.From(instance.GetWorldId()).Version
+				Version     = instance.World.GetVersion()
 			};
 			if (page.World == null)
 				page.FetchWorld(true, true).Forget();
@@ -128,7 +128,7 @@ namespace api.nox.instance.client {
 		private async UniTask FetchWorldCore() {
 			if (Instance == null)
 				return;
-			World = await Main.WorldAPI.Fetch(WorldIdentifier.From(Instance.GetWorldId()));
+			World = await Main.WorldAPI.Fetch(Instance.World);
 		}
 
 		private async UniTask FetchAssetCore() {
@@ -140,7 +140,7 @@ namespace api.nox.instance.client {
 				Versions  = new[] { Version },
 				Limit     = 1
 			};
-			Asset = (await Main.WorldAPI.SearchAssets(WorldIdentifier.From(Instance.GetWorldId()), req)).Assets.FirstOrDefault();
+			Asset = (await Main.WorldAPI.SearchAssets(Instance.World, req)).Items.FirstOrDefault();
 		}
 
 		private async UniTask FetchInstance(bool update = false) {

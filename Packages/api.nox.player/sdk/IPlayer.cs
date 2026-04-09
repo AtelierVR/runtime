@@ -1,3 +1,4 @@
+using Nox.CCK.Utils;
 using Nox.Entities;
 using Nox.Users;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace Nox.Players {
 		/// Get the player Identifier (ID).
 		/// </summary>
 		/// <returns></returns>
-		public IUserIdentifier Identifier { get; }
+		public Identifier Identifier { get; }
 
 		/// <summary>
 		/// Check if the player is the master player.

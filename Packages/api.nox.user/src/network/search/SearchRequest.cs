@@ -6,7 +6,7 @@ using Nox.Users;
 namespace api.nox.user.network {
 	public class SearchRequest : ISearchRequest, INoxObject {
 		internal string query;
-		internal uint[] ids;
+		internal Identifier[] ids;
 		internal uint   offset;
 		internal uint   limit;
 
@@ -14,7 +14,7 @@ namespace api.nox.user.network {
 			var text = "";
 			if (!string.IsNullOrEmpty(query))
 				text += (text.Length > 0 ? "&" : "") + $"query={query}";
-			foreach (var u in ids?.Distinct() ?? Enumerable.Empty<uint>())
+			foreach (var u in ids?.Distinct() ?? Enumerable.Empty<Identifier>())
 				text += (text.Length > 0 ? "&" : "") + $"id={u}";
 			if (offset > 0) text += (text.Length > 0 ? "&" : "") + $"offset={offset}";
 			if (limit  > 0) text += (text.Length > 0 ? "&" : "") + $"limit={limit}";
@@ -25,7 +25,7 @@ namespace api.nox.user.network {
 			var req = new SearchRequest();
 			if (data.TryGetValue("query", out var query) && query is string q)
 				req.query = q;
-			if (data.TryGetValue("ids", out var userIds) && userIds is uint[] u)
+			if (data.TryGetValue("ids", out var userIds) && userIds is Identifier[] u)
 				req.ids = u?.Distinct().ToArray();
 			if (data.TryGetValue("offset", out var offset) && offset is uint o)
 				req.offset = o;
@@ -39,7 +39,7 @@ namespace api.nox.user.network {
 			return this;
 		}
 
-		public ISearchRequest SetIds(uint[] userIds) {
+		public ISearchRequest SetIds(Identifier[] userIds) {
 			ids = userIds;
 			return this;
 		}
@@ -57,7 +57,7 @@ namespace api.nox.user.network {
 		public string GetQuery()
 			=> query;
 
-		public uint[] GetIds()
+		public Identifier[] GetIds()
 			=> ids;
 
 		public uint GetOffset()

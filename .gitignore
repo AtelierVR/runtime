@@ -84,6 +84,12 @@ PackageExports/
 !/[Pp]ackages/manifest.json
 !/[Pp]ackages/nuget-packages/
 /[Pp]ackages/nuget-packages/InstalledPackages
+!/[Pp]ackages/*nox.*/
+!/[Pp]ackages/hactazia.*/
+/[Pp]ackages/*nox.*/link.xml
+/[Pp]ackages/*nox.*/link.xml.meta
+/[Pp]ackages/*hactazia.*/link.xml
+/[Pp]ackages/*hactazia.*/link.xml.meta
 /[Aa]ssets/[Tt]emp/
 /[Aa]ssets/[Aa]uto[Hh]and/
 /[Aa]ssets/[Pp]olygonmaker/

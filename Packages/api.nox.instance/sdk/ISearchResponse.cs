@@ -1,20 +1,32 @@
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Utils;
 
 namespace Nox.Instances {
+	/// <summary>
+	/// Represents the response from a search query for instances.
+	/// </summary>
 	public interface ISearchResponse {
-		public string GetQuery();
+		
+		/// <summary>
+		/// The original query string that was used to perform the search.
+		/// </summary>
+		public string Query { get; }
 
-		public string GetOwnerId();
+		/// <summary>
+		/// The identifier of the owner of the instances in the search results.
+		/// </summary>
+		public Identifier Owner { get; }
+		
+		
+		public Identifier World { get; }
 
-		public string GetWorldId();
+		public IInstance[] Items { get; }
 
-		public IInstance[] GetInstances();
+		public uint Total { get; }
 
-		public uint GetTotal();
+		public uint Limit { get; }
 
-		public uint GetLimit();
-
-		public uint GetOffset();
+		public uint Offset { get; }
 
 		public bool HasNext();
 

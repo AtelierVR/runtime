@@ -1,66 +1,63 @@
 using System;
+using Nox.CCK.Network;
 using Nox.Servers;
 
-namespace api.nox.server {
+namespace api.nox.server
+{
 	// ReSharper disable InconsistentNaming
 	[Serializable]
-	public class Server : IServer {
-		public string   id;
-		public string   title;
-		public string   description;
-		public string   address;
-		public Gateways gateways;
-		public string[] features;
-		public string   icon;
-		public string   version;
-		public ulong    ready_at;
-		public string   certificate;
+	public class Server : IServer
+	{
+		public static Server From(NoxWellKnown wk)
+			=> wk == null ? null : new Server { reference = wk };
 
-		public string GetId()
-			=> id;
+		public NoxWellKnown reference;
 
-		public string GetTitle()
-			=> title;
+		public string Id
+			=> reference.id;
 
-		public string GetDescription()
-			=> description;
+		public string Address
+			=> reference.address;
 
-		public string GetAddress()
-			=> address;
+		public string Status
+			=> reference.status;
 
-		public IGateways GetGateways()
-			=> gateways;
+		public int Port
+			=> reference.port;
 
-		public string[] GetFeatures()
-			=> features;
+		public IServerSoftware Software
+			=> ServerSoftware.From(reference.software);
 
-		public string GetIconUrl()
-			=> icon;
+		public string PublicKey
+			=> reference.publicKey;
 
-		public Version GetVersion()
-			=> Version.Parse(version);
+		public string Maintenance
+			=> reference.maintenance;
 
-		public DateTime GetReadyAt()
-			=> DateTimeOffset.FromUnixTimeSeconds((long)ready_at).UtcDateTime;
+		public string[] Features
+			=> reference.features;
 
-		public string GetCertificate() {
-			if (string.IsNullOrEmpty(certificate)) return null;
-			if (certificate.StartsWith("-----BEGIN CERTIFICATE-----\n"))
-				return certificate;
+		public string[] Capabilities
+			=> reference.capabilities;
 
-			var lines = new string[certificate.Length / 64 + 1];
-			for (var i = 0; i < lines.Length; i++) {
-				var start  = i * 64;
-				var length = Math.Min(64, certificate.Length - start);
-				lines[i] = certificate.Substring(start, length);
-			}
+		public IServerVersions Versions
+			=> ServerVersions.From(reference.versions);
 
-			return "-----BEGIN CERTIFICATE-----\n"
-				+ string.Join("\n", lines)
-				+ "\n-----END CERTIFICATE-----";
-		}
+		public IServerGateway Gateway
+			=> ServerGateway.From(reference.gateway);
+
+		public IServerMetadata Metadata
+			=> ServerMetadata.From(reference.metadata);
+
+		public IServerEndpoints Endpoints
+			=> ServerEndpoints.From(reference.endpoints);
+
+		public DateTime ReadyAt
+			=> reference.started > 0 
+				? DateTimeOffset.FromUnixTimeMilliseconds((long)reference.started).UtcDateTime 
+				: default;
 
 		public override string ToString()
-			=> $"{GetType().Name}[id={id}, title={title}, address={address}, version={version}]";
+			=> $"{GetType().Name}[id={Id}, address={Address}, title={Metadata?.Title}]";
 	}
 }

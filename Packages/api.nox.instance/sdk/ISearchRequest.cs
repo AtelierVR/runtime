@@ -1,23 +1,22 @@
-using Nox.Users;
-using Nox.Worlds;
+using Nox.CCK.Utils;
 
 namespace Nox.Instances {
 	public interface ISearchRequest {
 		public string GetQuery();
-		
-		public IUserIdentifier GetOwner();
 
-		public IWorldIdentifier GetWorld();
+		public Identifier GetOwner();
+
+		public Identifier GetWorld();
 
 		public uint GetOffset();
 
 		public uint GetLimit();
 
 		public ISearchRequest SetQuery(string query);
-		
-		public ISearchRequest SetOwner(IUserIdentifier owner);
 
-		public ISearchRequest SetWorld(IWorldIdentifier world);
+		public ISearchRequest SetOwner(Identifier owner);
+
+		public ISearchRequest SetWorld(Identifier world);
 
 		public ISearchRequest SetOffset(uint offset);
 

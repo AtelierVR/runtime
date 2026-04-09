@@ -786,7 +786,6 @@ GameObject:
   m_Component:
   - component: {fileID: 497432691}
   - component: {fileID: 497432692}
-  - component: {fileID: 497432693}
   m_Layer: 0
   m_Name: World Descriptor
   m_TagString: Untagged
@@ -821,26 +820,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c09e8a494922ca846b0ed9ef00d3e2f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Nox.CCK.Worlds::Nox.CCK.Worlds.WorldDescriptor
-  target: 0
-  publishId: 24
+  target: 2
+  publishId: 1
   publishServer: hactazia.fr
-  publishVersion: 29
+  publishVersion: 1
   isCompiled: 0
---- !u!114 &497432693
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 497432689}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63b5850aacf6453a81962d2b6020127c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Nox.CCK.Worlds.Scenes::Nox.CCK.Worlds.Scenes.ScenesWorldModule
-  scenes: []
-  sceneAssets:
-  - {fileID: 102900000, guid: b8ce853cf9a3b2b478f94ddd668c4528, type: 3}
 --- !u!1 &538460256
 GameObject:
   m_ObjectHideFlags: 0
@@ -2811,7 +2795,7 @@ MonoBehaviour:
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 0
-  m_Antialiasing: 0
+  m_Antialiasing: 2
   m_AntialiasingQuality: 2
   m_StopNaN: 0
   m_Dithering: 0

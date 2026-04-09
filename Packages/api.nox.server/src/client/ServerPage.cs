@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace api.nox.server.client {
 	public class ServerPage : IPage {
-		internal static string GetStaticKey()
+		static internal string GetStaticKey()
 			=> "server";
 
 		public string GetKey()
@@ -39,9 +39,9 @@ namespace api.nox.server.client {
 		}
 
 		internal bool IsHost(ICurrentUser current = null)
-			=> (current ?? Client.UserAPI.GetCurrent())?.GetServerAddress() == _address;
+			=> (current ?? Client.UserAPI.Current)?.Server == _address;
 
-		internal static IPage OnGotoAction(IMenu menu, object[] context) {
+		static internal IPage OnGotoAction(IMenu menu, object[] context) {
 			if (!T(context, 0, out string type)) return null;
 			switch (type) {
 				case "address" when T(context, 1, out string a0):
@@ -68,7 +68,7 @@ namespace api.nox.server.client {
 			var page = new ServerPage {
 				MId      = menu.Id,
 				_context = context,
-				_address = server.GetAddress(),
+				_address = server.Address,
 				Server   = server,
 			};
 			return page;

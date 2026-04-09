@@ -26,7 +26,7 @@ namespace api.nox.server.widget {
 			=> 70;
 
 		private static string GetAddress(ICurrentUser current = null)
-			=> (current ?? Client.UserAPI.GetCurrent())?.GetServerAddress();
+			=> (current ?? Client.UserAPI.Current)?.Server;
 
 		public static bool TryMake(IMenu menu, RectTransform parent, out (GameObject, IWidget) values) {
 			if (string.IsNullOrEmpty(GetAddress())) {
@@ -39,7 +39,7 @@ namespace api.nox.server.widget {
 			component._mid = menu.Id;
 			var button = Reference.GetComponent<Button>("button", instance);
 			button.onClick.AddListener(component.OnClick);
-			instance.name = $"[{component.GetKey()}_{instance.GetInstanceID()}]";
+			instance.name = $"[{component.GetKey()}_{instance.GetEntityId().GetHashCode()}]";
 			values        = (instance, component);
 			return true;
 		}

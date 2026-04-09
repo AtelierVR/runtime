@@ -6,19 +6,25 @@ using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
 using Nox.Jint;
+using Nox.Tables;
 using Nox.Worlds;
 
 namespace api.nox.session.jint {
 	public class Main : IMainModInitializer {
-		internal static IMainModCoreAPI      CoreAPI;
+		static internal IMainModCoreAPI      CoreAPI;
 		private         EventSubscription[] _events = Array.Empty<EventSubscription>();
 
-		internal static IWorldAPI WorldAPI
+		static internal IWorldAPI WorldAPI
 			=> CoreAPI.ModAPI
 				.GetMod("world")
 				.GetInstance<IWorldAPI>();
 
-		internal static IJintAPI JintAPI
+		static internal ITableAPI TableAPI
+			=> CoreAPI.ModAPI
+				.GetMod("tables")
+				.GetInstance<ITableAPI>();
+
+		static internal IJintAPI JintAPI
 			=> CoreAPI.ModAPI
 				.GetMod("jint")
 				.GetInstance<IJintAPI>();

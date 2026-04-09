@@ -1,107 +1,87 @@
 using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using Nox.CCK.Users;
+using Newtonsoft.Json;
+using Nox.CCK.Convertors;
 using Nox.CCK.Utils;
-using Nox.Servers;
 using Nox.Users;
-using UnityEngine;
 
 namespace api.nox.user {
 	[Serializable]
 	public class User : IUser, INoxObject {
-		public string   server;
-		public uint     id;
-		public string   display;
-		public string   username;
-		public string   bio;
-		public string   thumbnail;
-		public string   banner;
-		public Entry[]  links;
-		public string[] tags;
-		public float    rank;
-		public string   certificate;
-		public int      followers;
-		public int      following;
+		[JsonProperty("id")]
+		public uint Id { get; private set; }
 
-		public uint GetId()
-			=> id;
+		[JsonProperty("username")]
+		public string Username { get; private set; }
 
-		public string GetDisplay()
-			=> display;
+		[JsonProperty("display")]
+		public string Display { get; private set; }
 
-		public string GetUsername()
-			=> username;
+		[JsonProperty("bio")]
+		public string Bio { get; private set; }
 
-		public string GetBio()
-			=> bio;
+		[JsonProperty("pronoun")]
+		public string Pronoun { get; private set; }
 
-		public string GetServerAddress()
-			=> server;
+		[JsonProperty("server")]
+		public string Server { get; private set; }
 
-		public UniTask<IServer> GetServer()
-			=> Main.ServerAPI.Fetch(server);
+		[JsonProperty("tags")]
+		public string[] Tags { get; private set; }
 
-		public string GetThumbnailUrl()
-			=> thumbnail;
+		[JsonProperty("thumbnail")]
+		public string Thumbnail { get; private set; }
 
-		public UniTask<Texture2D> GetThumbnail()
-			=> Main.NetworkAPI.FetchTexture(thumbnail);
+		[JsonProperty("banner")]
+		public string Banner { get; private set; }
 
-		public string GetBannerUrl()
-			=> banner;
+		[JsonProperty("links")]
+		public LinkEntry[] Links { get; private set; }
 
-		public UniTask<Texture2D> GetBanner()
-			=> Main.NetworkAPI.FetchTexture(banner);
+		ILinkEntry[] IUser.Links
+			=> Links.ToArray<ILinkEntry>();
 
-		public IEntry[] GetLinks()
-			=> links.Cast<IEntry>().ToArray();
+		[JsonProperty("relations")]
+		public UserRelation Relations { get; private set; }
 
-		public IRelationship GetRelationships()
-			=> null;
+		IUserRelation IUser.Relations
+			=> Relations;
 
-		public string[] GetTags()
-			=> tags ?? Array.Empty<string>();
+		[JsonProperty("public"), JsonConverter(typeof(Base64ToBytes))]
+		public byte[] Public { get; private set; }
 
-		public float GetRank()
-			=> rank;
+		[JsonProperty("followers")]
+		public int Followers { get; }
 
-		public async UniTask<User> InternalRefresh()
-			=> await Main.Instance.Network.Fetch(ToInternalIdentifier(), server);
+		[JsonProperty("following")]
+		public int Following { get; }
 
-		public async UniTask<IUser> Refresh()
-			=> await InternalRefresh();
+		[JsonProperty("presence")]
+		public UserPresence Presence { get; private set; }
 
-		public UserIdentifier ToInternalIdentifier()
-			=> new(id, server);
+		IUserPresence IUser.Presence
+			=> Presence;
 
-		public IUserIdentifier ToIdentifier()
-			=> ToInternalIdentifier();
+		[JsonProperty("alias")]
+		public UserAlias[] Aliases { get; private set; }
 
-		public string GetCertificate() {
-			if (string.IsNullOrEmpty(certificate)) return null;
-			if (certificate.StartsWith("-----BEGIN CERTIFICATE-----\n"))
-				return certificate;
+		IUserAlias[] IUser.Aliases
+			=> Aliases.ToArray<IUserAlias>();
 
-			var lines = new string[certificate.Length / 64 + 1];
-			for (var i = 0; i < lines.Length; i++) {
-				var start  = i * 64;
-				var length = Math.Min(64, certificate.Length - start);
-				lines[i] = certificate.Substring(start, length);
-			}
+		[JsonProperty("created_at"), JsonConverter(typeof(UnixTimestampToDateTime))]
+		public DateTime CreatedAt { get; }
 
-			return "-----BEGIN CERTIFICATE-----\n"
-				+ string.Join("\n", lines)
-				+ "\n-----END CERTIFICATE-----";
-		}
+		public Identifier Identifier
+			=> new("u", Id, null, Server);
 
-		public int GetFollowers()
-			=> followers;
+		public async UniTask<User> Refresh()
+			=> await Main.Instance.Network.Fetch(Identifier, Server);
 
-		public int GetFollowing()
-			=> following;
+		async UniTask<IUser> IUser.Refresh()
+			=> await Refresh();
 
 		public override string ToString()
-			=> $"{GetType().Name}[id={id}, username={username}, server={server}]";
+			=> $"{GetType().Name}[id={Identifier.ToString()}, username={Username}]";
 	}
 }

@@ -30,14 +30,14 @@ namespace api.nox.user {
 
 			var user = Main.Instance.Network.CurrentUser;
 
-			_root.Q<UnsignedIntegerField>("id").value = user.GetId();
-			_root.Q<TextField>("server").value        = user.GetServerAddress();
-			_root.Q<TextField>("display").value       = user.GetDisplay();
-			_root.Q<TextField>("username").value      = user.GetUsername();
-			_root.Q<TextField>("email").value         = user.GetEmail();
+			_root.Q<UnsignedIntegerField>("id").value = user.Id;
+			_root.Q<TextField>("server").value        = user.Server;
+			_root.Q<TextField>("display").value       = user.Display;
+			_root.Q<TextField>("username").value      = user.Username;
+			_root.Q<TextField>("email").value         = user.Email;
 
-			var banner    = user.GetBannerUrl();
-			var thumbnail = user.GetThumbnailUrl();
+			var banner    = user.Banner;
+			var thumbnail = user.Thumbnail;
 
 			var withoutVisual = _root.Q<VisualElement>("without-banner");
 			var withVisual    = _root.Q<VisualElement>("with-banner");
@@ -47,7 +47,7 @@ namespace api.nox.user {
 				withVisual.style.display    = DisplayStyle.None;
 
 				var displayName = withoutVisual.Q<Label>("display_name");
-				displayName.text = user.GetDisplay();
+				displayName.text = user.Display;
 
 				var thumbnailImage = withoutVisual.Q<Image>("thumbnail");
 
@@ -59,7 +59,7 @@ namespace api.nox.user {
 				withVisual.style.display    = DisplayStyle.Flex;
 
 				var displayName = withVisual.Q<Label>("display_name");
-				displayName.text = user.GetDisplay();
+				displayName.text = user.Display;
 
 				var bannerImage    = withVisual.Q<Image>("banner");
 				var thumbnailImage = withVisual.Q<Image>("thumbnail");

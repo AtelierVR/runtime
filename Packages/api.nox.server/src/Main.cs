@@ -18,7 +18,7 @@ namespace api.nox.server {
 		internal static Main           Instance;
 
 		private  LanguagePack                    _lang;
-		internal (IUserIdentifier, ServerSocket) Socket = (null, null);
+		internal (Identifier, ServerSocket) Socket = (Identifier.Invalid, null);
 		private readonly object _socketLock = new object();
 		private bool _isConnecting;
 
@@ -89,7 +89,7 @@ namespace api.nox.server {
 
 
 		public async UniTask OnPostInitializeMainAsync() {
-			var user = UserAPI.GetCurrent() ?? await UserAPI.FetchCurrent();
+			var user = UserAPI.Current ?? await UserAPI.FetchCurrent();
 			await StartCurrentSocket(user);
 		}
 
@@ -104,7 +104,7 @@ namespace api.nox.server {
 		}
 
 		try {
-			if (Socket.Item2 != null && Socket.Item1 != null && Socket.Item1.Equals(user?.ToIdentifier())) {
+			if (Socket.Item2 != null && Socket.Item1.IsValid() && Socket.Item1.Equals(user?.Identifier)) {
 				Logger.LogDebug("Already connected to server for current user.");
 				return;
 			}
@@ -114,13 +114,13 @@ namespace api.nox.server {
 			
 			if(user == null) {
 				Logger.LogDebug("No current user, not connecting to server.");
-				Socket = (null, null);
+				Socket = (Identifier.Invalid, null);
 				return;
 			}
 
-			Socket = (user.ToIdentifier(), null);
+			Socket = (user.Identifier, null);
 
-			var address = user.GetServerAddress();
+			var address = user.Server;
 			if (address == null) {
 				Logger.LogWarning("Current user has no server address set, cannot connect to server.");
 				return;
@@ -134,7 +134,7 @@ namespace api.nox.server {
 				return;
 			}
 
-			Socket = (user.ToIdentifier(), socket);
+			Socket = (user.Identifier, socket);
 
 			socket.OnMessageReceived.AddListener(Instance.CoreAPI.LoggerAPI.LogDebug);
 			socket.OnError.AddListener(Instance.CoreAPI.LoggerAPI.LogException);
@@ -157,7 +157,7 @@ namespace api.nox.server {
 			if (Socket.Item2 != null)
 				await Socket.Item2.Dispose();
 			
-			Socket   = (null, null);
+			Socket   = (Identifier.Invalid, null);
 			
 			CoreAPI  = null;
 			Instance = null;

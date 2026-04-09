@@ -24,18 +24,18 @@ namespace api.nox.user.client {
 		public void UpdateContent(IUser user) {
 			if (user == null) return;
 
-			display.UpdateText("user.display", new[] { user.GetDisplay() });
+			display.UpdateText("user.display", new[] { user.Display });
 			identifier.UpdateText(
 				"user.identifier", new[] {
-					user.ToIdentifier().ToString(),
-					user.GetId().ToString(),
-					user.GetUsername(),
-					user.GetServerAddress()
+					user.Identifier.ToString(),
+					user.Id.ToString(),
+					user.Username,
+					user.Server
 				}
 			);
 
-			if (!string.IsNullOrEmpty(user.GetBio())) {
-				bioText.SetMarkdown(user.GetBio());
+			if (!string.IsNullOrEmpty(user.Bio)) {
+				bioText.SetMarkdown(user.Bio);
 				bioContainer.SetActive(true);
 			} else bioContainer.SetActive(false);
 
@@ -53,9 +53,9 @@ namespace api.nox.user.client {
 			}
 
 			_thumbnailTokenSource = new CancellationTokenSource();
-			if (user?.GetThumbnailUrl() != null) {
+			if (user?.Thumbnail != null) {
 				var texture = await Main.NetworkAPI
-					.FetchTexture(user.GetThumbnailUrl())
+					.FetchTexture(user.Thumbnail)
 					.AttachExternalCancellation(_thumbnailTokenSource.Token);
 				thumbnail.sprite = texture
 					? Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero)
@@ -72,9 +72,9 @@ namespace api.nox.user.client {
 			}
 
 			_bannerTokenSource = new CancellationTokenSource();
-			if (user?.GetBannerUrl() != null) {
+			if (user?.Banner != null) {
 				var texture = await Main.NetworkAPI
-					.FetchTexture(user.GetBannerUrl())
+					.FetchTexture(user.Banner)
 					.AttachExternalCancellation(_bannerTokenSource.Token);
 				if (texture && texture.height > 0) {
 					banner.sprite      = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
