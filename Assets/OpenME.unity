@@ -379,6 +379,58 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 822bc9090447b9c40833509c4a32e597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &564014822
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 564014824}
+  - component: {fileID: 564014823}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &564014823
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 564014822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58c9a6555da554441bfde5b0ab0e5a03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FPSGraph
+  position: {x: 10, y: 10}
+  size: {x: 300, y: 120}
+  historySize: 300
+  targetFPS: 60
+  backgroundColor: {r: 0, g: 0, b: 0, a: 0.7}
+  graphColor: {r: 0.2, g: 0.8, b: 0.2, a: 1}
+  lowColor: {r: 1, g: 0.3, b: 0.3, a: 1}
+  textColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!4 &564014824
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 564014822}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.19499, y: 0.35079, z: 7.8559}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &971469354
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -470,3 +522,4 @@ SceneRoots:
   m_Roots:
   - {fileID: 174006359}
   - {fileID: 971469354}
+  - {fileID: 564014824}
