@@ -88,7 +88,7 @@ namespace api.nox.server.client {
 
 			var component = content.AddComponent<ServerComponent>();
 			component.Page = worldPage;
-			content.name   = $"[{worldPage.GetKey()}_{content.GetInstanceID()}]";
+			content.name   = $"[{worldPage.GetKey()}_{content.GetEntityId().GetHashCode()}]";
 
 			var splitContent   = Reference.GetComponent<RectTransform>("content", content);
 			var containerAsset = Client.GetAsset<GameObject>("ui:prefabs/container.prefab");

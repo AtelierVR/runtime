@@ -45,7 +45,7 @@ namespace api.nox.session.client {
 
 			var component = content.AddComponent<SessionComponent>();
 			component.Page = sessionPage;
-			content.name   = $"[{sessionPage.GetKey()}_{content.GetInstanceID()}]";
+			content.name   = $"[{sessionPage.GetKey()}_{content.GetEntityId().GetHashCode()}]";
 
 			var splitContent = Reference.GetComponent<RectTransform>("content", content);
 
@@ -224,7 +224,7 @@ namespace api.nox.session.client {
 				var button = o.GetComponent<Button>();
 				button.onClick.AddListener(() => OnChangeHandler(handler.Item1));
 
-				o.name = $"{handler.Item1}_{o.GetInstanceID()}";
+				o.name = $"{handler.Item1}_{o.GetEntityId().GetHashCode()}";
 				o.SetActive(true);
 			}
 

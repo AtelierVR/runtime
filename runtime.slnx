@@ -31,6 +31,7 @@
   <Project Path="Nox.CCK.Avatars.Modules.Editor.csproj" />
   <Project Path="Nox.Settings.Runtime.csproj" />
   <Project Path="Nox.Control.csproj" />
+  <Project Path="Nox.Servers.csproj" />
   <Project Path="Nox.Avatars.csproj" />
   <Project Path="Nox.CCK.Avatars.Rigging.csproj" />
   <Project Path="Nox.Avatars.Runtime.Editor.csproj" />
@@ -44,6 +45,7 @@
   <Project Path="Nox.Notifications.csproj" />
   <Project Path="Nox.Jint.csproj" />
   <Project Path="api.nox.session.csproj" />
+  <Project Path="Nox.Instances.csproj" />
   <Project Path="Nox.Editor.Panel.Runtime.csproj" />
   <Project Path="StirlingLabs.MsQuic.Bindings.csproj" />
   <Project Path="Nox.Entities.csproj" />
@@ -62,7 +64,6 @@
   <Project Path="NoxEditor.csproj" />
   <Project Path="Nox.CCK.Avatars.Parameters.csproj" />
   <Project Path="Nox.AssetBundles.Runtime.csproj" />
-  <Project Path="Nox.Instances.csproj" />
   <Project Path="Nox.CCK.XR.csproj" />
   <Project Path="api.nox.jint.csproj" />
   <Project Path="Nox.CCK.Avatars.Proxies.csproj" />
@@ -76,10 +77,10 @@
   <Project Path="Nox.Desktop.Runtime.csproj" />
   <Project Path="dev.nox.development.csproj" />
   <Project Path="Autohand.XR.csproj" />
+  <Project Path="Nox.Users.csproj" />
   <Project Path="Nox.Relay.Runtime.csproj" />
   <Project Path="api.nox.search.csproj" />
   <Project Path="Nox.Worlds.Pipeline.csproj" />
-  <Project Path="Nox.Users.csproj" />
   <Project Path="Nox.CCK.Settings.csproj" />
   <Project Path="Nox.CCK.Network.csproj" />
   <Project Path="Nox.CCK.Notifications.csproj" />
@@ -110,7 +111,6 @@
   <Project Path="Nox.Entities.Runtime.csproj" />
   <Project Path="Nox.Worlds.Spawns.csproj" />
   <Project Path="Nox.CCK.AssetBundles.csproj" />
-  <Project Path="Nox.Servers.csproj" />
   <Project Path="Nox.Avatars.Parameters.csproj" />
   <Project Path="Nox.Microphone.csproj" />
   <Project Path="Nox.CCK.VideoPlayer.Nox.csproj" />
@@ -118,10 +118,10 @@
   <Project Path="Nox.Terminal.csproj" />
   <Project Path="Nox.Sessions.Clients.csproj" />
   <Project Path="Nox.CCK.Avatars.csproj" />
+  <Project Path="Nox.CCK.Instances.csproj" />
   <Project Path="Autohand.OpenXR.Editor.csproj" />
   <Project Path="Nox.KeyBindings.csproj" />
   <Project Path="Nox.Avatars.Scale.csproj" />
-  <Project Path="Nox.CCK.Users.csproj" />
   <Project Path="Nox.CCK.Sessions.csproj" />
   <Project Path="Nox.CCK.VideoPlayer.Unity.csproj" />
   <Project Path="Nox.CCK.Worlds.Scenes.csproj" />

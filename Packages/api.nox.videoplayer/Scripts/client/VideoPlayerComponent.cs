@@ -32,7 +32,7 @@ namespace api.nox.videoplayer.client {
 
 			var component = content.AddComponent<VideoPlayerComponent>();
 			component._page = page;
-			content.name    = $"[{page.GetKey()}_{content.GetInstanceID()}]";
+			content.name    = $"[{page.GetKey()}_{content.GetEntityId().GetHashCode()}]";
 			var splitContent = Reference.GetComponent<RectTransform>("content", content);
 
 			// generate dashboard

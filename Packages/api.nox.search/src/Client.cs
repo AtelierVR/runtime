@@ -16,12 +16,14 @@ namespace api.nox.search {
 		public static T GetAsset<T>(ResourceIdentifier path) where T : UnityEngine.Object
 			=> Main.Instance.CoreAPI.AssetAPI.GetAsset<T>(path);
 
-		private EventSubscription[] _events;
+		private EventSubscription[]  _events;
+		private IClientModCoreAPI    _api;
 
 		public void OnInitializeClient(IClientModCoreAPI api) {
+			_api    = api;
 			Logger.Log("OnInitializeClient");
 			_events = new[] {
-				Main.Instance.CoreAPI.EventAPI.Subscribe("menu_goto", OnGoto)
+				api.EventAPI.Subscribe("menu_goto", OnGoto)
 			};
 		}
 
@@ -39,8 +41,9 @@ namespace api.nox.search {
 
 		public void OnDisposeClient() {
 			foreach (var subscription in _events)
-				Main.Instance.CoreAPI.EventAPI.Unsubscribe(subscription);
+				_api.EventAPI.Unsubscribe(subscription);
 			_events = Array.Empty<EventSubscription>();
+			_api    = null;
 		}
 	}
 }

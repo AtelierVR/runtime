@@ -124,7 +124,7 @@ namespace api.nox.user.client {
 
 			var component = content.AddComponent<UserComponent>();
 			component.Page = userPage;
-			content.name   = $"[{userPage.GetKey()}_{content.GetInstanceID()}]";
+			content.name   = $"[{userPage.GetKey()}_{content.GetEntityId().GetHashCode()}]";
 
 			var splitContent   = Reference.GetComponent<RectTransform>("content", content);
 			var containerAsset = Client.GetAsset<GameObject>("ui:prefabs/container.prefab");

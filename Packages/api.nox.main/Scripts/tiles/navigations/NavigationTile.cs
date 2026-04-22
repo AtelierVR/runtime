@@ -324,7 +324,7 @@ namespace api.nox.game.Tiles
         {
             var pf = GameClientSystem.CoreAPI.AssetAPI.GetAsset<GameObject>("prefabs/navigation/result.prefab");
             var go = Object.Instantiate(pf, results.transform);
-            go.name = "result-" + go.GetInstanceID();
+            go.name = "result-" + go.GetEntityId().GetHashCode();
             Reference.GetReference("title", go)
                 .GetComponent<TextLanguage>()
                 .UpdateText(new[] { data.title });

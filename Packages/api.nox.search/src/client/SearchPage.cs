@@ -107,7 +107,7 @@ namespace api.nox.search.client {
 			if (_content)
 				return _content;
 			_content      = Client.GetAsset<GameObject>("ui:prefabs/split.prefab").Instantiate(parent);
-			_content.name = $"[{GetStaticKey()}_{_content.GetInstanceID()}]";
+			_content.name = $"[{GetStaticKey()}_{_content.GetEntityId().GetHashCode()}]";
 			var splitContent   = Reference.GetComponent<RectTransform>("content", _content);
 			var containerAsset = Client.GetAsset<GameObject>("ui:prefabs/container.prefab");
 			var iconAsset      = Client.GetAsset<GameObject>("ui:prefabs/header_icon.prefab");

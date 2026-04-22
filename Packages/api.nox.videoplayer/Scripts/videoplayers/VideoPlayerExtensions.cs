@@ -7,6 +7,6 @@ namespace api.nox.videoplayer {
 			=> self is MonoBehaviour mb ? mb.gameObject : null;
 
 		public static int GetId(this IVideoPlayer self)
-			=> self.GetGameObject().GetInstanceID();
+			=> self.GetGameObject().GetEntityId().GetHashCode();
 	}
 }

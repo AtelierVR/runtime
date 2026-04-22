@@ -302,7 +302,7 @@ namespace api.nox.instance.client {
 
 			var component = content.AddComponent<InstanceComponent>();
 			component.Page = instancePage;
-			content.name   = $"[{instancePage.GetKey()}_{content.GetInstanceID()}]";
+			content.name   = $"[{instancePage.GetKey()}_{content.GetEntityId().GetHashCode()}]";
 
 			var splitContent   = Reference.GetComponent<RectTransform>("content", content);
 			var containerAsset = Client.GetAsset<GameObject>("ui:prefabs/container.prefab");
