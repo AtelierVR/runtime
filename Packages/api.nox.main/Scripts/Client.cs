@@ -19,7 +19,7 @@ namespace api.nox.main {
 
 		private static IWorldAPI WorldAPI
 			=> _coreAPI.ModAPI
-				.GetMod("world")
+				.GetMod("worlds")
 				?.GetInstance<IWorldAPI>();
 
 		private static ISessionAPI SessionAPI

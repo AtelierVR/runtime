@@ -16,7 +16,7 @@ namespace api.nox.session.jint {
 
 		static internal IWorldAPI WorldAPI
 			=> CoreAPI.ModAPI
-				.GetMod("world")
+				.GetMod("worlds")
 				.GetInstance<IWorldAPI>();
 
 		static internal ITableAPI TableAPI

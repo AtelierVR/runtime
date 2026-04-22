@@ -8,13 +8,13 @@ namespace api.nox.instance.search {
 		public Instance Reference;
 
 		public int Id
-			=> Reference.ToIdentifier().ToString().GetHashCode();
+			=> Reference.Identifier.GetHashCode();
 
 		public string[] TitleArguments
-			=> new[] { Reference.GetTitle() ?? Reference.GetId().ToString() };
+			=> new[] { Reference.Title ?? Reference.Id.ToString() };
 
 		public UniTask<Texture2D> Image
-			=> Main.NetworkAPI.FetchTexture(Reference.GetThumbnailUrl());
+			=> Main.NetworkAPI.FetchTexture(Reference.Thumbnail);
 
 		public void OnClick(int menuId)
 			=> Client.UiAPI?.SendGoto(menuId, InstancePage.GetStaticKey(), "instance", Reference);

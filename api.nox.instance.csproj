@@ -50,7 +50,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Packages\api.nox.instance\Scripts\base\Connection.cs" />
-    <Compile Include="Packages\api.nox.instance\Scripts\base\InstanceIdentifier.cs" />
     <Compile Include="Packages\api.nox.instance\Scripts\Main.cs" />
     <Compile Include="Packages\api.nox.instance\Scripts\client\InstanceCreationComponent.cs" />
     <Compile Include="Packages\api.nox.instance\Scripts\search\SearchData.cs" />
@@ -64,7 +63,6 @@
     <Compile Include="Packages\api.nox.instance\Scripts\base\Owner.cs" />
     <Compile Include="Packages\api.nox.instance\Scripts\client\InstanceComponent.cs" />
     <Compile Include="Packages\api.nox.instance\Scripts\search\Search.cs" />
-    <Compile Include="Packages\api.nox.instance\Scripts\network\search\SearchRequest.cs" />
     <Compile Include="Packages\api.nox.instance\Scripts\search\SearchHandler.cs" />
     <Compile Include="Packages\api.nox.instance\Scripts\network\Network.cs" />
     <Compile Include="Packages\api.nox.instance\Scripts\client\InstancePage.cs" />
@@ -510,11 +508,20 @@
     <Reference Include="UnityEditor.Graphs">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\Managed\UnityEditor.Graphs.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEditor.OSXStandalone.Extensions">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\PlaybackEngines\MacStandaloneSupport\UnityEditor.OSXStandalone.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.VisionOS.Extensions">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\PlaybackEngines\VisionOSPlayer\UnityEditor.VisionOS.Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEditor.WindowsStandalone.Extensions">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\PlaybackEngines\WindowsStandaloneSupport\UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.Android.Extensions">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\PlaybackEngines\AndroidPlayer\UnityEditor.Android.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.iOS.Extensions">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\PlaybackEngines\iOSSupport\UnityEditor.iOS.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.LinuxStandalone.Extensions">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\PlaybackEngines\LinuxStandaloneSupport\UnityEditor.LinuxStandalone.Extensions.dll</HintPath>
@@ -648,11 +655,29 @@
     <Reference Include="ZString">
       <HintPath>D:\Projets\nox\runtime\Packages\nox.relay\Plugins\ZString.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEditor.iOS.Extensions.Xcode">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\PlaybackEngines\iOSSupport\UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.iOS.Extensions.Common">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\PlaybackEngines\iOSSupport\UnityEditor.iOS.Extensions.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.Apple.Extensions.Common">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\PlaybackEngines\iOSSupport\UnityEditor.Apple.Extensions.Common.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Android.Types">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Types.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Android.Gradle">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\PlaybackEngines\AndroidPlayer\Unity.Android.Gradle.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.iOS.Extensions.Xcode">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\PlaybackEngines\VisionOSPlayer\UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.Apple.Extensions.Common">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\PlaybackEngines\VisionOSPlayer\UnityEditor.Apple.Extensions.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.iOS.Extensions.Xcode">
+      <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\PlaybackEngines\MacStandaloneSupport\UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\NetStandard\ref\2.1.0\netstandard.dll</HintPath>
@@ -1106,6 +1131,10 @@
     <ProjectReference Include="Nox.Entities.csproj">
       <Project>{57446f06-06b0-94aa-6dd3-4195fbeb0f71}</Project>
       <Name>Nox.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Instances.csproj">
+      <Project>{5f0c5d6f-864d-db25-d867-2fd94cfb737a}</Project>
+      <Name>Nox.CCK.Instances</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

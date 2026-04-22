@@ -1,8 +1,8 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Instances;
 using Nox.CCK.Network;
 using Nox.CCK.Utils;
-using Nox.Instances;
 using UnityEngine.Events;
 
 namespace api.nox.instance.network {
@@ -15,46 +15,33 @@ namespace api.nox.instance.network {
 			_fetchEvent.Invoke(instance);
 			Main.Instance.CoreAPI.EventAPI.Emit("instance_fetch", instance);
 		}
+		
+		private (string, string) Optimize(Identifier ide) {
+			var crt = Main.UserAPI?.Current?.Server;
+			if (!string.IsNullOrEmpty(crt))
+				return ide.IsLocal(crt)
+					? (ide.ToShortString(false), crt)
+					: (ide.ToShortString(), crt);
+			return (ide.ToShortString(), ide.Server);
+		}
 
-		public async UniTask<Instance> Fetch(string identifier, string from = null, CancellationToken cancellationToken = default)
-			=> await Fetch(InstanceIdentifier.FromString(identifier), from, cancellationToken);
-
-		public async UniTask<Instance> Fetch(IInstanceIdentifier identifier, string from = null, CancellationToken cancellationToken = default)
-			=> await Fetch(InstanceIdentifier.FromBase(identifier), from, cancellationToken);
-
-		public UniTask<Instance> Fetch(uint id, string from = null, CancellationToken cancellationToken = default)
-			=> Fetch(id.ToString(), from, cancellationToken);
-
-		private async UniTask<Instance> Fetch(InstanceIdentifier identifier, string from = null, CancellationToken cancellationToken = default) {
-			if (Main.NetworkAPI == null)
-				return null;
-
-			if (identifier == null) {
-				Logger.LogError("Cannot fetch instance: identifier is null.");
+		public async UniTask<Instance> Fetch(Identifier ide, CancellationToken cancellationToken = default) {
+			var (id, address) = Optimize(ide);
+			if (address == Identifier.LOCAL_SERVER) {
+				Logger.LogError($"Cannot fetch world {ide} from {address}");
 				return null;
 			}
 
-			if (identifier.IsLocal())
-				identifier.Server = from;
-			var address = from ?? Main.UserAPI?.Current?.Server ?? identifier.GetServerAddress();
-			if (string.IsNullOrEmpty(address)) {
-				Logger.LogError($"Cannot fetch instance for {identifier}: no server address provided.");
-				return null;
-			}
-
-			if (address == identifier.GetServerAddress())
-				identifier.Server = "::"; // Use "::" to indicate local server in the identifier
-
-			var request = await RequestNode.To(address, $"/instances/{identifier.ToString()}");
+			var request = await RequestNode.To(address, $"/instances/{id}");
 			if (request == null) {
-				Logger.LogError($"Failed to create request for instance {identifier}");
+				Logger.LogError($"Failed to create request for instance {ide}");
 				return null;
 			}
 
 			await request.Send(cancellationToken);
 			var response = await request.Node<Instance>(cancellationToken);
 			if (response.HasError()) {
-				Logger.LogError($"Failed to fetch instance {identifier} from {address}: {response.Error.Message}");
+				Logger.LogError($"Failed to fetch instance {ide} from {address}: {response.Error.Message}");
 				return null;
 			}
 
@@ -63,17 +50,10 @@ namespace api.nox.instance.network {
 			return instance;
 		}
 
-		public async UniTask<SearchResponse> Search(SearchRequest data, string from = null, CancellationToken cancellationToken = default) {
-			if (Main.NetworkAPI == null)
-				return null;
-
-			var address = from ?? Main.UserAPI?.Current?.Server;
-			if (string.IsNullOrEmpty(address)) {
-				Logger.LogError("Cannot search instances: no server address provided.");
-				return null;
-			}
-
-			var request = await RequestNode.To(address, $"/instances?{data.ToParams()}");
+		public async UniTask<SearchResponse> Search(SearchRequest data, CancellationToken cancellationToken = default) {
+			var address = Main.UserAPI?.Current?.Server ?? data.Server;
+			
+			var request = await RequestNode.To(address, $"/instances{data}");
 			if (request == null) {
 				Logger.LogError($"Failed to create request for instance search");
 				return null;

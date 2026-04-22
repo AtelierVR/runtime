@@ -3,6 +3,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using Nox.CCK.Convertors;
+using Nox.CCK.Instances;
 using Nox.CCK.Utils;
 using Nox.Instances;
 using ISearchResponse = Nox.Instances.ISearchResponse;
@@ -58,8 +59,7 @@ namespace api.nox.instance.network {
 						Owner  = Request.Owner,
 						Offset = Offset + Limit,
 						Limit  = Limit
-					},
-					Server
+					}
 				)
 				: null;
 
@@ -72,8 +72,7 @@ namespace api.nox.instance.network {
 						Owner  = Request.Owner,
 						Offset = Offset - Limit,
 						Limit  = Limit
-					},
-					Server
+					}
 				)
 				: null;
 	}

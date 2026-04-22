@@ -21,6 +21,16 @@ namespace Nox.Editor {
 		private const string LinkXmlName = "link.xml";
 		
 
+		// Assemblies that must always be preserved regardless of mod discovery
+		// (system-level packages with no nox.mod.json, or precompiled DLLs)
+		private static readonly string[] AlwaysPreservedAssemblies = {
+			"Nox.ModLoader",
+			"Mono.Cecil",
+			"Mono.Cecil.Mdb",
+			"Mono.Cecil.Pdb",
+			"Mono.Cecil.Rocks",
+		};
+
 		[InitializeOnLoadMethod, MenuItem("Nox/Tools/Update Linker Files")]
 		public static void EnsureLinkerClassExists() {
 			var li = new List<string>();
@@ -32,7 +42,7 @@ namespace Nox.Editor {
 
 			UpdateLinkXml(
 				Path.Combine(Application.dataPath, LinkXmlName),
-				li.Distinct().ToArray()
+				li.Concat(AlwaysPreservedAssemblies).Distinct().ToArray()
 			);
 		}
 

@@ -3,9 +3,11 @@ using api.nox.instance.network;
 using api.nox.instance.search;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
+using Nox.CCK.Instances;
 using Nox.CCK.Language;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
+using Nox.CCK.Utils;
 using Nox.Instances;
 using Nox.Network;
 using Nox.Search;
@@ -17,25 +19,25 @@ using ISearchResponse = Nox.Instances.ISearchResponse;
 
 namespace api.nox.instance {
 	public class Main : IMainModInitializer, IInstanceAPI {
-		internal static Main           Instance;
+		static internal Main           Instance;
 		internal        IMainModCoreAPI CoreAPI;
 		internal        Network        Network;
 		private         LanguagePack   _language;
 		private         Search         _search;
 
-		internal static INetworkAPI NetworkAPI
+		static internal INetworkAPI NetworkAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("network")
 				?.GetInstance<INetworkAPI>();
 
-		internal static IUserAPI UserAPI
+		static internal IUserAPI UserAPI
 			=> Instance.CoreAPI.ModAPI
 				.GetMod("users")
 				?.GetInstance<IUserAPI>();
 
-		internal static IWorldAPI WorldAPI
+		static internal IWorldAPI WorldAPI
 			=> Instance.CoreAPI.ModAPI
-				.GetMod("world")
+				.GetMod("worlds")
 				?.GetInstance<IWorldAPI>();
 
 		static internal ISearchAPI SearchAPI
@@ -48,26 +50,11 @@ namespace api.nox.instance {
 				.GetMod("session")
 				?.GetInstance<ISessionAPI>();
 
-		public async UniTask<IInstance> Fetch(IInstanceIdentifier identifier)
-			=> await Network.Fetch(InstanceIdentifier.FromBase(identifier));
-
-		public async UniTask<IInstance> Fetch(uint id, string from = null)
-			=> await Network.Fetch(id, from);
-
-		public async UniTask<IInstance> Fetch(string identifier, string from = null)
-			=> await Network.Fetch(identifier, from);
+		public async UniTask<IInstance> Fetch(Identifier identifier)
+			=> await Network.Fetch(identifier);
 
 		public async UniTask<ISearchResponse> Search(ISearchRequest data, string from = null)
-			=> await Network.Search(SearchRequest.FromBase(data), from);
-
-		public IInstanceIdentifier Make(string identifier)
-			=> InstanceIdentifier.FromString(identifier);
-
-		public IInstanceIdentifier Make(uint id, string from)
-			=> new InstanceIdentifier(id, null, from);
-		
-		public ISearchRequest MakeSearchRequest()
-			=> new SearchRequest();
+			=> await Network.Search(SearchRequest.From(data));
 
 		public void OnInitializeMain(IMainModCoreAPI api) {
 			CoreAPI   = api;

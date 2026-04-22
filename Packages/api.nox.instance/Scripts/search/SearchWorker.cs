@@ -1,5 +1,6 @@
 using api.nox.instance.network;
 using Cysharp.Threading.Tasks;
+using Nox.CCK.Instances;
 using Nox.Search;
 
 namespace api.nox.instance.search {
@@ -21,7 +22,7 @@ namespace api.nox.instance.search {
 					Query = options.Query,
 					Offset = options.Page * options.Limit,
 					Limit = options.Limit,
-				}, Server
+				}
 			);
 			if (data == null) return new SearchResult { Error = "Error fetching instances." };
 			return new SearchResult {

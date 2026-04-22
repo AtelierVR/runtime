@@ -12,7 +12,7 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.instance.client {
 	public class InstancePage : IPage {
-		internal static string GetStaticKey()
+		static internal string GetStaticKey()
 			=> "instance";
 
 		public string GetKey()
@@ -22,7 +22,7 @@ namespace api.nox.instance.client {
 		private object[] _context;
 		private GameObject _content;
 		private InstanceComponent _component;
-		private IInstanceIdentifier _identifier;
+		private Identifier _identifier;
 		public IInstance Instance;
 		public IWorldAsset Asset;
 		public IWorld World;
@@ -46,14 +46,14 @@ namespace api.nox.instance.client {
 			return false;
 		}
 
-		internal static IPage OnGotoAction(IMenu menu, object[] context) {
+		static internal IPage OnGotoAction(IMenu menu, object[] context) {
 			if (!T(context, 0, out string type))
 				return null;
 			switch (type) {
 				case "id_server" when T(context, 1, out uint id0) && T(context, 2, out string ser0):
-					return OnPageByIdentifier(menu, context, new InstanceIdentifier(id0, null, ser0));
+					return OnPageByIdentifier(menu, context, new Identifier("i", id0, null, ser0));
 				case "identifier" when T(context, 1, out string id2):
-					return OnPageByIdentifier(menu, context, InstanceIdentifier.FromString(id2));
+					return OnPageByIdentifier(menu, context, Identifier.Parse(id2));
 				case "instance" when T(context, 1, out IInstance i0):
 					var w0 = T(context, 2, out IWorld world) ? world : null;
 					var a0 = T(context, 3, out IWorldAsset asset) ? asset : null;
@@ -63,7 +63,7 @@ namespace api.nox.instance.client {
 			return null;
 		}
 
-		private static InstancePage OnPageByIdentifier(IMenu menu, object[] context, InstanceIdentifier identifier) {
+		private static InstancePage OnPageByIdentifier(IMenu menu, object[] context, Identifier identifier) {
 			var page = new InstancePage {
 				MId         = menu.Id,
 				_context    = context,
@@ -79,7 +79,7 @@ namespace api.nox.instance.client {
 			var page = new InstancePage {
 				MId         = menu.Id,
 				_context    = context,
-				_identifier = instance.ToIdentifier(),
+				_identifier = instance.Identifier,
 				Instance    = instance,
 				World       = world,
 				Asset       = asset,
@@ -96,8 +96,7 @@ namespace api.nox.instance.client {
 			if (_isLoading)
 				return;
 			_isLoading = true;
-			try { await FetchAssetCore(); }
-			finally { _isLoading = false; }
+			try { await FetchAssetCore(); } finally { _isLoading = false; }
 			if (update)
 				_component.UpdateContent(Instance, World, Asset);
 		}
@@ -147,8 +146,7 @@ namespace api.nox.instance.client {
 			if (_isLoading)
 				return;
 			_isLoading = true;
-			try { await FetchInstanceCore(); }
-			finally { _isLoading = false; }
+			try { await FetchInstanceCore(); } finally { _isLoading = false; }
 			if (update)
 				_component.UpdateContent(Instance, World, Asset);
 		}
@@ -157,8 +155,7 @@ namespace api.nox.instance.client {
 			if (_isLoading || Instance == null)
 				return;
 			_isLoading = true;
-			try { await FetchWorldCore(); }
-			finally { _isLoading = false; }
+			try { await FetchWorldCore(); } finally { _isLoading = false; }
 			if (updateAsset)
 				await FetchAsset(false);
 			if (update)
@@ -254,10 +251,10 @@ namespace api.nox.instance.client {
 				return (false, 0f);
 			return cache.IsRunning ? (true, cache.Progress) : (false, 1f);
 		}
-		
-		
-		
-		
-		
+
+
+
+
+
 	}
 }

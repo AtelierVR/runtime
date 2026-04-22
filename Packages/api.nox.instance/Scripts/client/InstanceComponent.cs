@@ -74,17 +74,17 @@ namespace api.nox.instance.client {
 			if (instance == null)
 				return;
 
-			title.UpdateText("instance.title", new[] { instance.GetTitle() ?? world?.Title ?? instance.ToIdentifier().ToString() });
-			label.UpdateText("instance.about.title", new[] { instance.GetTitle() ?? world?.Title ?? instance.ToIdentifier().ToString() });
+			title.UpdateText("instance.title", new[] { instance.Title ?? world?.Title ?? instance.Identifier.ToString() });
+			label.UpdateText("instance.about.title", new[] { instance.Title ?? world?.Title ?? instance.Identifier.ToString() });
 			identifier.UpdateText(
 				"instance.identifier", new[] {
-					instance.ToIdentifier().ToString(),
-					instance.GetId().ToString(),
-					instance.GetServer()
+					instance.Identifier.ToString(),
+					instance.Id.ToString(),
+					instance.Server
 				}
 			);
 
-			var description = instance.GetDescription();
+			var description = instance.Description;
 			if (string.IsNullOrEmpty(description) && world != null)
 				description = world.Description;
 
@@ -108,7 +108,7 @@ namespace api.nox.instance.client {
 			}
 
 			_thumbnailTokenSource = new CancellationTokenSource();
-			var url = instance?.GetThumbnailUrl();
+			var url = instance?.Thumbnail;
 			if (string.IsNullOrEmpty(url) && world != null)
 				url = world.Thumbnail;
 
@@ -205,7 +205,7 @@ namespace api.nox.instance.client {
 			}
 
 			// Vérifier si on a des données de connexion
-			var connectionData = instance.GetConnectionData();
+			var connectionData = instance.Connection;
 			if (connectionData == null) {
 				joinButton.interactable = false;
 				joinLabel.UpdateText("instance.join.not_joinable");
@@ -215,7 +215,7 @@ namespace api.nox.instance.client {
 			// Vérifier si on est déjà connecté à cette instance
 			ISession session = null;
 			foreach (var s in Main.SessionAPI?.GetSessions() ?? Array.Empty<ISession>()) {
-				if (!s.GetInstance()?.Equals(instance.ToIdentifier()) ?? true)
+				if (!s.GetInstance().Equals(instance.Identifier))
 					continue;
 				session = s;
 				break;
@@ -244,25 +244,25 @@ namespace api.nox.instance.client {
 				return;
 
 			// Vérifier si on a des données de connexion
-			var connectionData = Page.Instance.GetConnectionData();
+			var connectionData = Page.Instance.Connection;
 			if (connectionData == null) {
 				Logger.LogWarning("Cannot join instance: no connection data available");
 				return;
 			}
+             
+             			// Vérifier si on est déjà connecté à cette instance
+             			var sessions = Main.SessionAPI?.GetSessions();
+             			if (sessions != null) {
+             				foreach (var session in sessions) {
+             					var sessionInstance = session.GetInstance();
+             					if (!sessionInstance.Equals(Page.Instance.Identifier))
+             						continue;
+             					Logger.LogWarning("Cannot join instance: already connected to this instance");
+             					return;
+             				}
+             			}
 
-			// Vérifier si on est déjà connecté à cette instance
-			var sessions = Main.SessionAPI?.GetSessions();
-			if (sessions != null) {
-				foreach (var session in sessions) {
-					var sessionInstance = session.GetInstance();
-					if (sessionInstance != null && sessionInstance.Equals(Page.Instance.ToIdentifier())) {
-						Logger.LogWarning("Cannot join instance: already connected to this instance");
-						return;
-					}
-				}
-			}
-
-			var th = Page.Instance.GetThumbnailUrl();
+			var th = Page.Instance.Thumbnail;
 			if (string.IsNullOrEmpty(th) && Page.World != null)
 				th = Page.World.Thumbnail;
 
@@ -271,15 +271,15 @@ namespace api.nox.instance.client {
 				"external:" + connectionData.GetMethod(),
 				new Dictionary<string, object> {
 					{ "set_current", true },
-					{ "instance", Page.Instance.ToIdentifier() }, {
+					{ "instance", Page.Instance.Identifier }, {
 						"title",
-						Page.Instance.GetTitle()
+						Page.Instance.Title
 						?? Page.World?.Title
-						?? Page.Instance.ToIdentifier().ToString()
+						?? Page.Instance.Identifier.ToString()
 					}, {
 						"short_name",
-						Page.Instance.GetName()
-						?? Page.Instance.ToIdentifier().ToString()
+						Page.Instance.Name
+						?? Page.Instance.Identifier.ToString()
 					}, {
 						"thumbnail",
 						Main.NetworkAPI.FetchTexture(th)
@@ -440,7 +440,7 @@ namespace api.nox.instance.client {
 			_playerListTokenSource = new CancellationTokenSource();
 			var tasks = new List<UniTask<(IUser, IInstancePlayer)[]>>();
 
-			var players = instance.GetPlayers();
+			var players = instance.Players;
 			var playersByServer = players
 				.GroupBy(p => p.Identifier.Server)
 				.ToDictionary(g => g.Key, g => g.ToArray());
@@ -450,7 +450,7 @@ namespace api.nox.instance.client {
 			var prefab  = PlayerComponent.PlayerPrefab;
 			var action = new Action<(IUser, IInstancePlayer)[]>(
 				users => {
-					Logger.LogDebug($"Found {users.Length} instances for world {instance.GetTitle()} ({instance.ToIdentifier()})");
+					Logger.LogDebug($"Found {users.Length} instances for world {instance.Title} ({instance.Identifier})");
 					if (isFirst)
 						foreach (Transform child in playerList.transform)
 							Destroy(child.gameObject);

@@ -5,63 +5,56 @@ using Nox.CCK.Convertors;
 using Nox.CCK.Utils;
 using Nox.Instances;
 
-// ReSharper disable once InconsistentNaming
 namespace api.nox.instance {
 	[Serializable]
 	public class Instance : IInstance, INoxObject {
-		public uint             id;
-		public string           server;
-		public string           name;
-		public string           title;
-		public string           description;
-		public string           thumbnail;
-		public ushort           capacity;
-		public string           owner;
-		public string[]         tags;
-		public Connection       connection;
-		public ushort           client_count;
-		public InstancePlayer[] players;
 
-		public uint GetId()
-			=> id;
+		[JsonProperty("id")]
+		public uint Id { get; private set; }
 
-		public string GetServer()
-			=> server;
+		[JsonProperty("server")]
+		public string Server { get; private set; }
 
-		public string GetName()
-			=> name;
+		[JsonProperty("name")]
+		public string Name { get; private set; }
 
-		public string GetTitle()
-			=> title;
+		[JsonProperty("title")]
+		public string Title { get; private set; }
 
-		public string GetDescription()
-			=> description;
+		[JsonProperty("description")]
+		public string Description { get; private set; }
 
-		public string GetThumbnailUrl()
-			=> thumbnail;
+		[JsonProperty("thumbnail")]
+		public string Thumbnail { get; private set; }
 
-		public IOwner GetOwner()
-			=> new Owner(owner);
-
-		public string[] GetTags()
-			=> tags;
+		[JsonProperty("owner"), JsonConverter(typeof(StringToIdentifierConverter))]
+		public Identifier Owner { get; private set; }
 
 		[JsonProperty("world"), JsonConverter(typeof(StringToIdentifierConverter))]
 		public Identifier World { get; private set; }
 
-		public IConnection GetConnectionData()
-			=> connection;
+		[JsonProperty("tags")]
+		public string[] Tags { get; private set; }
 
-		public ushort GetPlayerCount()
-			=> client_count;
+		[JsonProperty("connection")]
+		public Connection Connection { get; private set; }
 
-		public ushort GetCapacity()
-			=> capacity;
+		IConnection IInstance.Connection 
+			=> Connection;
 
-		public IInstancePlayer[] GetPlayers()
-			=> players.Cast<IInstancePlayer>().ToArray();
+		[JsonProperty("client_count")]
+		public ushort ClientCount { get; private set; }
 
-		public IInstanceIdentifier ToIdentifier()
-			=> new InstanceIdentifier(id, null, server);
+		[JsonProperty("players")]
+		public InstancePlayer[] Players { get; private set; }
+
+		IInstancePlayer[] IInstance.Players
+			=> Players.ToArray<IInstancePlayer>();
+
+		[JsonProperty("capacity")]
+		public ushort Capacity { get; private set; }
+		
+		public Identifier Identifier
+			=> new("i", Id, null, Server);
 	}
 }

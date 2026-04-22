@@ -30,12 +30,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.relay": {
-      "version": "file:api.nox.relay",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.search": {
       "version": "file:api.nox.search",
       "depth": 0,
