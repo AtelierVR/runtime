@@ -43,7 +43,7 @@
     <UnityVersion>6000.5.0a8</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="C:\Users\Hactazia\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.2.1\Analyzers\Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="C:\Users\Hactazia\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.2.2\Analyzers\Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.5.0a8\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
@@ -863,6 +863,10 @@
       <HintPath>Library\PackageCache\com.unity.nuget.newtonsoft-json@4dfd81071c64\Runtime\Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="AiEditorToolsSdk">
+      <HintPath>Library\PackageCache\com.unity.ai.assistant@fc16ca46e208\Modules\Unity.AI.Toolkit.Sdk\Editor\AiEditorToolsSdk.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.VisualScripting.TextureAssets">
       <HintPath>Library\PackageCache\com.unity.visualscripting@eb6004dcc707\Editor\VisualScripting.Core\EditorAssetResources\Unity.VisualScripting.TextureAssets.dll</HintPath>
       <Private>False</Private>
@@ -881,10 +885,6 @@
     </Reference>
     <Reference Include="ZString">
       <HintPath>Packages\nox.relay\Plugins\ZString.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="AiEditorToolsSdk">
-      <HintPath>Library\PackageCache\com.unity.ai.assistant@fc16ca46e208\Modules\Unity.AI.Toolkit.Sdk\Editor\AiEditorToolsSdk.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">

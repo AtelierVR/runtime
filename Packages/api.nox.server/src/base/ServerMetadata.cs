@@ -26,13 +26,19 @@ namespace api.nox.server
             return ts.Values.FirstOrDefault();
         }
 
+        private static string Resolve(DictionnaryOrString dos)
+        {
+            if (dos == null || dos.Count == 0) return null;
+            return dos.Values.FirstOrDefault();
+        }
+
         public static ServerMetadata From(NoxMetadata m)
             => m != null
                 ? new ServerMetadata
                 {
                     Title = Resolve(m.title),
                     Description = Resolve(m.description),
-                    Icon = m.icon,
+                    Icon = Resolve(m.icon),
                     Contact = m.contact
                 }
                 : null;

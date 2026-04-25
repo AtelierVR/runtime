@@ -10,6 +10,7 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.videoplayer.handlers {
 	public class Twitch : IHandler {
+		public const string SearchPrefix = "twitch:";
 		public string GetId()
 			=> "twitch";
 
@@ -20,7 +21,10 @@ namespace api.nox.videoplayer.handlers {
 			=> new string[] { };
 
 		public int EstimatePriority(IFetchOptions options)
-			=> IsUrl(options.GetQuery()) ? 100 : -1;
+			=> IsUrl(options.GetQuery()) 
+			|| options.GetQuery().StartsWith(SearchPrefix) 
+			? 100 
+			: -1;
 
 		private static bool IsUrl(string query)
 			=> query.StartsWith("https://www.twitch.tv/");
@@ -41,7 +45,10 @@ namespace api.nox.videoplayer.handlers {
 				if (EstimatePriority(options) < 0)
 					return new IResult[] { Result.FromError("Query is not a valid Twitch URL") };
 
-				var response = await YtDl.Extract(FormatUrl(options.GetQuery()), cancellationToken: options.GetCancellation().Token);
+				var twitchUrl = options.GetQuery().StartsWith(SearchPrefix)
+					? $"https://www.twitch.tv/{options.GetQuery()[SearchPrefix.Length..]}"
+					: FormatUrl(options.GetQuery());
+				var response = await YtDl.Extract(twitchUrl, cancellationToken: options.GetCancellation().Token);
 
 				if (response is not { Type: JTokenType.Object })
 					throw new InvalidDataException("Response from yt-dlp is not an object");

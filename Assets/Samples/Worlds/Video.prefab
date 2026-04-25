@@ -410,7 +410,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   worker: {fileID: 3532557049153115948}
-  source: {fileID: 0}
+  audioSource: {fileID: 0}
   lockVolume: 0
   volumeControlsMute: 0
   bufferDelay: 0.5
+  dbg_WritePos: 0
+  dbg_ReadPos: 0
+  dbg_Available: 0
+  dbg_RingSize: 0
+  dbg_BufferedSeconds: 0
+  dbg_FillPct: 0
+  dbg_QueueCount: 0
+  dbg_Underruns: 0
+  dbg_Overwrites: 0
+  dbg_Callbacks: 0
+  dbg_LastDataLength: 0
+  dbg_LastOutChannels: 0
+  dbg_SrcFreq: 0
+  dbg_SrcChannels: 0
+  dbg_UnityOutputRate: 0
+  dbg_IsActive: 0

@@ -9,6 +9,8 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.videoplayer.handlers {
 	public class Youtube : IHandler {
+		public const string SearchPrefix = "youtube:";
+
 		public string GetId()
 			=> "youtube";
 
@@ -21,21 +23,21 @@ namespace api.nox.videoplayer.handlers {
 		public int EstimatePriority(IFetchOptions options) {
 			if (IsUrl(options.GetQuery()))
 				return 100;
-			if (string.IsNullOrEmpty(options.GetQuery()))
-				return -1;
-			if (options.GetQuery().StartsWith("http"))
-				return -1;
-			return 10;
+			if (options.GetQuery().StartsWith(SearchPrefix))
+				return 10;
+			return -1;
 		}
 
 		private static bool IsUrl(string query)
 			=> query.StartsWith("https://www.youtube.com/watch")
+				|| query.StartsWith("https://music.youtube.com/watch")
 				|| query.StartsWith("https://youtu.be/");
 
 		private static string FormatUrl(string original) {
 			var id = "";
 
-			if (original.StartsWith("https://www.youtube.com/watch")) {
+			if (original.StartsWith("https://www.youtube.com/watch")
+				|| original.StartsWith("https://music.youtube.com/watch")) {
 				var uri   = new System.Uri(original);
 				var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
 				id = query.Get("v") ?? "";
@@ -52,9 +54,12 @@ namespace api.nox.videoplayer.handlers {
 				if (EstimatePriority(options) < 0)
 					return new IResult[] { Result.FromError("Cannot handle this query") };
 
+				var searchQuery = options.GetQuery().StartsWith(SearchPrefix)
+					? options.GetQuery().Substring(SearchPrefix.Length)
+					: options.GetQuery();
 				var response = IsUrl(options.GetQuery())
 					? await YtDl.Extract(FormatUrl(options.GetQuery()), cancellationToken: options.GetCancellation().Token)
-					: await YtDl.Extract($"ytsearch{options.GetLimit()}:{options.GetQuery()}", cancellationToken: options.GetCancellation().Token);
+					: await YtDl.Extract($"ytsearch{options.GetLimit()}:{searchQuery}", cancellationToken: options.GetCancellation().Token);
 
 				if (response is not { Type: JTokenType.Object })
 					throw new InvalidDataException("Response from yt-dlp is not an object");

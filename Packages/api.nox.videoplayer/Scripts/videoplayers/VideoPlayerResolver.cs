@@ -20,7 +20,10 @@ namespace api.nox.videoplayer {
 			CCKResolver.OnIsMedia.RemoveListener(OnIsMedia);
 		}
 		public static readonly List<Regex> MediaRegexes = new() {
+			// Direct media links — should be passed directly to the video player without going through a search engine
 			new Regex(@"^https?://.*\.(mp4|webm|ogg|mp3|wav|flac|aac|m4a|opus|avi|mkv|mpeg|mpg|mov|flv|swf|3gp|3g2|ogg|opus|oga|spx|opus)(\?.*)?$", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+			// Streaming protocols — must never be passed to a search engine
+			new Regex(@"^(rtmp|rtmps|rtsp|rtsps|srt|hls|mms|mmsh|mmst|rtp|udp)://", RegexOptions.IgnoreCase | RegexOptions.Compiled),
 		};
 
 		private static void OnIsMedia(IVideoPlayer player, string url, Action<string, bool> callback) {

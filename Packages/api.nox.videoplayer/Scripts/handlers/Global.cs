@@ -35,11 +35,18 @@ namespace api.nox.videoplayer.handlers {
 		public int EstimatePriority(IFetchOptions options) {
 			if (IsUrl(options.GetQuery()))
 				return 1;
+			if (options.GetQuery().StartsWith("search:"))
+				return 1;
 			return -1;
 		}
 
 		private static bool IsUrl(string query)
-			=> (query.StartsWith("https://") || query.StartsWith("http://"));
+			=> query.StartsWith("https://") || query.StartsWith("http://")
+			|| query.StartsWith("rtmp://") || query.StartsWith("rtmps://")
+			|| query.StartsWith("rtsp://")  || query.StartsWith("rtsps://")
+			|| query.StartsWith("srt://")   || query.StartsWith("hls://")
+			|| query.StartsWith("mms://")   || query.StartsWith("rtp://")
+			|| query.StartsWith("udp://");
 
 		private static string FormatUrl(string original)
 			=> original;
@@ -48,7 +55,10 @@ namespace api.nox.videoplayer.handlers {
 			try {
 				if (EstimatePriority(options) < 0)
 					return new IResult[] { Result.FromError("Cannot handle this query") };
-				var response = await YtDl.Extract(options.GetQuery(), cancellationToken: options.GetCancellation().Token);
+				var query = options.GetQuery().StartsWith("search:")
+					? options.GetQuery().Substring("search:".Length)
+					: options.GetQuery();
+				var response = await YtDl.Extract(query, cancellationToken: options.GetCancellation().Token);
 				if (response is not { Type: JTokenType.Object })
 					throw new InvalidDataException("Response from yt-dlp is not an object");
 				var type = ToObject(response["_type"], "unknown");

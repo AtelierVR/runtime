@@ -42,12 +42,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "api.nox.session": {
-      "version": "file:api.nox.session",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.session.jint": {
       "version": "file:api.nox.session.jint",
       "depth": 0,

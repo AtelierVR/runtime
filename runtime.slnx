@@ -44,7 +44,6 @@
   <Project Path="Nox.Terminal.Runtime.csproj" />
   <Project Path="Nox.Notifications.csproj" />
   <Project Path="Nox.Jint.csproj" />
-  <Project Path="api.nox.session.csproj" />
   <Project Path="Nox.Instances.csproj" />
   <Project Path="Nox.Editor.Panel.Runtime.csproj" />
   <Project Path="StirlingLabs.MsQuic.Bindings.csproj" />

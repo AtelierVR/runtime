@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Text;
+using Newtonsoft.Json;
 using Nox.Users;
 using UnityEngine;
 using UnityEngine.Events;
@@ -17,8 +18,10 @@ namespace api.nox.server.network {
 		public static readonly List<ServerSocket> Connections = new();
 
 		// Événements
-		public readonly UnityEvent OnConnected = new();
-		public readonly UnityEvent OnDisconnected = new();
+		public UnityEvent OnConnected { get; } = new();
+		public UnityEvent OnDisconnected { get; } = new();
+		public UnityEvent<byte[]> OnRaw { get; } = new();
+		public UnityEvent<SocketPacket> OnPacket { get; } = new();
 		public readonly UnityEvent<string> OnMessageReceived = new();
 		public readonly UnityEvent<Exception> OnError = new();
 
@@ -62,6 +65,13 @@ namespace api.nox.server.network {
 
 		private ClientWebSocket _webSocket;
 		private CancellationTokenSource _cts;
+
+		// ── Typed handler storage ─────────────────────────────────────────────────
+		private readonly Dictionary<string, List<Action<SocketPacket>>> _handlers = new();
+		// Maps original typed handler (object) → storage wrapper
+		private readonly Dictionary<object, Action<SocketPacket>> _handlerWrappers = new();
+		// Maps original handler → once-proxy (both typed, stored as object)
+		private readonly Dictionary<object, object> _onceOriginalToWrapper = new();
 
 
 		public ServerSocket(string server, string uri, IAuthToken authToken = null, Dictionary<string, string> headers = null) {
@@ -195,8 +205,12 @@ namespace api.nox.server.network {
 				try {
 					var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token);
 					if (result.MessageType == WebSocketMessageType.Text) {
-						var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+						var rawBytes = new byte[result.Count];
+						Array.Copy(buffer, rawBytes, result.Count);
+						var message = Encoding.UTF8.GetString(rawBytes);
 						OnMessageReceived.Invoke(message);
+						OnRaw.Invoke(rawBytes);
+						TryDispatchPacket(message);
 					}
 					else if (result.MessageType == WebSocketMessageType.Close) {
 						Logger.LogDebug("WebSocket connection closed by server.");
@@ -224,7 +238,7 @@ namespace api.nox.server.network {
 
 		private async UniTask HandleDisconnection() {
 			_isListening = false;
-			OnDisconnected?.Invoke();
+			OnDisconnected.Invoke();
 
 			if (_autoReconnect && _reconcilable) {
 				Logger.LogDebug("Attempting to reconnect...");
@@ -289,6 +303,79 @@ namespace api.nox.server.network {
 
 			Connections.Remove(this);
 			Logger.LogDebug($"ServerSocket for {_address} disposed.");
+		}
+
+		// ── Packet system ──────────────────────────────────────────────────────────
+
+		private void TryDispatchPacket(string message) {
+			try {
+				var packet = JsonConvert.DeserializeObject<SocketPacket>(message);
+				if (packet?.type == null) return;
+				OnPacket.Invoke(packet);
+				List<Action<SocketPacket>> snapshot;
+				lock (_handlers) {
+					if (!_handlers.TryGetValue(packet.type, out var list)) return;
+					snapshot = new List<Action<SocketPacket>>(list);
+				}
+				foreach (var h in snapshot)
+					h(packet);
+			} catch { /* ignore malformed packets */ }
+		}
+
+		private static SocketPacket<T> ToTyped<T>(SocketPacket raw) {
+			T typedPayload;
+			if (raw.payload is T direct)
+				typedPayload = direct;
+			else if (raw.payload is Newtonsoft.Json.Linq.JToken jt)
+				typedPayload = jt.ToObject<T>();
+			else {
+				var json = JsonConvert.SerializeObject((object)raw.payload);
+				typedPayload = JsonConvert.DeserializeObject<T>(json);
+			}
+			return new SocketPacket<T> { type = raw.type, id = raw.id, payload = typedPayload };
+		}
+
+		public async UniTask Emit<T>(SocketPacket<T> packet) {
+			var json = JsonConvert.SerializeObject(packet, new JsonSerializerSettings {
+				NullValueHandling = NullValueHandling.Ignore
+			});
+			await SendMessage(json);
+		}
+
+		public void On<T>(string type, Action<SocketPacket<T>> handler) {
+			Action<SocketPacket> wrapper = raw => handler(ToTyped<T>(raw));
+			lock (_handlers) {
+				_handlerWrappers[handler] = wrapper;
+				if (!_handlers.TryGetValue(type, out var list))
+					_handlers[type] = list = new List<Action<SocketPacket>>();
+				list.Add(wrapper);
+			}
+		}
+
+		public void Off<T>(string type, Action<SocketPacket<T>> handler) {
+			lock (_handlers) {
+				// If registered via Once, remove the once-proxy instead
+				if (_onceOriginalToWrapper.TryGetValue(handler, out var onceObj)) {
+					_onceOriginalToWrapper.Remove(handler);
+					Off(type, (Action<SocketPacket<T>>)onceObj);
+					return;
+				}
+				if (!_handlerWrappers.TryGetValue(handler, out var wrapper)) return;
+				_handlerWrappers.Remove(handler);
+				if (_handlers.TryGetValue(type, out var list))
+					list.Remove(wrapper);
+			}
+		}
+
+		public void Once<T>(string type, Action<SocketPacket<T>> handler) {
+			Action<SocketPacket<T>> onceProxy = null;
+			onceProxy = pkt => {
+				Off(type, handler);
+				handler(pkt);
+			};
+			lock (_handlers)
+				_onceOriginalToWrapper[handler] = onceProxy;
+			On(type, onceProxy);
 		}
 	}
 }
