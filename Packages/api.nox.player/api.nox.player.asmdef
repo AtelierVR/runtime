@@ -3,6 +3,7 @@
     "rootNamespace": "",
     "references": [
         "Nox.CCK",
+        "Nox.Entities",
         "UniTask",
         "Unity.InputSystem",
         "Nox.KeyBindings"

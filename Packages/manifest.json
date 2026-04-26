@@ -42,6 +42,7 @@
     "nox.offline": "https://github.com/AtelierVR/nox.offline.git",
     "nox.relay": "https://github.com/AtelierVR/nox.relay.git",
     "nox.sessions": "https://github.com/AtelierVR/nox.sessions.git",
+    "nox.entities": "file:nox.entities",
     "nox.social": "file:nox.social",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",
