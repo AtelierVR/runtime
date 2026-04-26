@@ -1,94 +1,80 @@
-name: Build Unity Project
+name: Build Project
 
 on:
   push:
     branches:
-      - main
-      - indev-*
-      - develop
+      - '**'
   pull_request:
     branches:
-      - main
-      - develop
-  workflow_dispatch:
-    inputs:
-      target_platforms:
-        description: 'Platforms to build (JSON array)'
-        required: false
-        default: '["StandaloneWindows64","StandaloneLinux64","Android"]'
-        type: string
-      development:
-        description: 'Development build'
-        required: false
-        default: true
-        type: boolean
+      - '**'
 
 jobs:
-  # ── Read Unity version from ProjectSettings/ProjectVersion.txt ──────────
-  resolve-version:
-    name: Resolve Unity version
+  check-secrets:
+    name: Check required secrets
     runs-on: ubuntu-latest
-    outputs:
-      unity_version:   ${{ steps.parse.outputs.unity_version }}
-      unity_changeset: ${{ steps.parse.outputs.unity_changeset }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Parse ProjectVersion.txt
-        id: parse
+      - name: Verify secrets are set
+        shell: bash
         run: |
-          VERSION=$(grep '^m_EditorVersion:' ProjectSettings/ProjectVersion.txt | awk '{print $2}')
-          CHANGESET=$(grep '^m_EditorVersionWithRevision:' ProjectSettings/ProjectVersion.txt | sed 's/.*(\(.*\))/\1/')
-          echo "unity_version=$VERSION"    >> "$GITHUB_OUTPUT"
-          echo "unity_changeset=$CHANGESET" >> "$GITHUB_OUTPUT"
-
-  # ── Delegate build to hactazia/unity reusable workflow ──────────────────
-  build:
-    name: Build
-    needs: resolve-version
-    uses: hactazia/unity/.github/workflows/build-unity-project.yml@main
-    with:
-      unity_version:     ${{ needs.resolve-version.outputs.unity_version }}
-      unity_changeset:   ${{ needs.resolve-version.outputs.unity_changeset }}
-      project_path:      '.'
-      build_method:      'dev.nox.game_builder.BuildGame.PerformBuild'
-      target_platforms:  ${{ github.event.inputs.target_platforms || '["StandaloneWindows64","StandaloneLinux64","Android"]' }}
-      custom_parameters: '-development ${{ github.event.inputs.development || ''true'' }}'
-      artifact_retention_days: 7
-    secrets:
-      unity_license:  ${{ secrets.UNITY_LICENSE }}
-      unity_email:    ${{ secrets.UNITY_EMAIL }}
-      unity_password: ${{ secrets.UNITY_PASSWORD }}
-
-  # ── Create GitHub release on tag push ────────────────────────────────────
-  release:
-    name: Create Release
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: builds
-
-      - name: Create archives
-        run: |
-          cd builds
-          for dir in Build-*/; do
-            platform=$(basename "$dir" | sed 's/Build-//')
-            if [ "$platform" = "StandaloneWindows64" ]; then
-              (cd "$dir" && zip -r "../NoxRuntime-${platform}.zip" .)
-            else
-              tar -czf "NoxRuntime-${platform}.tar.gz" -C "$dir" .
-            fi
-          done
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: builds/NoxRuntime-*
-          draft: false
-          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
-          generate_release_notes: true
+          missing=()
+          [ -z "$UNITY_LICENSE" ]  && missing+=(UNITY_LICENSE)
+          [ -z "$UNITY_EMAIL" ]    && missing+=(UNITY_EMAIL)
+          [ -z "$UNITY_PASSWORD" ] && missing+=(UNITY_PASSWORD)
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required secrets: ${missing[*]}"
+            exit 1
+          fi
+          echo "All required secrets are present."
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
+  build:
+    name: Build for ${{ matrix.targetPlatform }}
+    runs-on: ${{ matrix.runsOn }}
+    needs: check-secrets
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - targetPlatform: StandaloneWindows64
+            runsOn: windows-2022
+          - targetPlatform: StandaloneLinux64
+            runsOn: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-${{ matrix.targetPlatform }}-
+            Library-
+
+      - name: Build project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          # Reads m_EditorVersion from ProjectSettings/ProjectVersion.txt (currently 6000.5.0a8)
+          unityVersion: auto
+          targetPlatform: ${{ matrix.targetPlatform }}
+          buildMethod: Nox.GameBuilder.Pipeline.ExternalBuilder.Build
+          buildsPath: build
+          allowDirtyBuild: true
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}

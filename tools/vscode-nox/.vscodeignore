@@ -1,7 +1,0 @@
-node_modules/**
-src/**
-.vscode/**
-tsconfig.json
-out/**/*.map
-tmpclaude-*
-*.vsix
