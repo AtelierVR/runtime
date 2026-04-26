@@ -1,0 +1,219 @@
+name: Build Unity Project
+
+on:
+  push:
+    branches:
+      - main
+      - indev-*
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      buildTarget:
+        description: 'Build target platform'
+        required: true
+        default: 'win64'
+        type: choice
+        options:
+          - win64
+          - linux64
+          - osx
+          - android
+          - ios
+      development:
+        description: 'Development build'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  UNITY_VERSION: 6000.5.0a8
+  PROJECT_PATH: .
+
+jobs:
+  build:
+    name: Build for ${{ matrix.targetPlatform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - targetPlatform: win64
+            os: ubuntu-latest
+            buildTarget: StandaloneWindows64
+          - targetPlatform: linux64
+            os: ubuntu-latest
+            buildTarget: StandaloneLinux64
+          - targetPlatform: osx
+            os: macos-latest
+            buildTarget: StandaloneOSX
+          - targetPlatform: android
+            os: ubuntu-latest
+            buildTarget: Android
+          - targetPlatform: ios
+            os: macos-latest
+            buildTarget: iOS
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+      
+      - name: Cache Library folder
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-${{ matrix.targetPlatform }}-
+            Library-
+      
+      - name: Free Disk Space (Ubuntu)
+        if: runner.os == 'Linux'
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+      
+      - name: Build Unity Project
+        uses: game-ci/unity-builder@v4
+        env:
+          # Unity license configuration
+          # Pour configurer : https://github.com/AtelierVR/runtime/settings/secrets/actions
+          # Pour Unity Personal : encoder Unity_lic.ulf en base64 et créer UNITY_LICENSE
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: ${{ env.PROJECT_PATH }}
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: ${{ matrix.buildTarget }}
+          buildMethod: dev.nox.game_builder.BuildGame.PerformBuild
+          customParameters: -buildTarget ${{ matrix.targetPlatform }} -development ${{ github.event.inputs.development || 'true' }}
+          allowDirtyBuild: true
+          versioning: Semantic
+      
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.buildTarget }}
+          retention-days: 7
+      
+      - name: Upload Build Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-Logs-${{ matrix.targetPlatform }}
+          path: |
+            Library/LastBuild.buildreport
+            Library/Bee/fullprofile*.json
+          retention-days: 3
+          if-no-files-found: ignore
+
+  # Job pour tester le build sans Unity Builder (méthode manuelle)
+  build-manual:
+    name: Manual Build for Windows
+    runs-on: ubuntu-latest
+    if: false  # Désactivé par défaut, mettre à true pour tester
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+      
+      - name: Cache Library folder
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-manual-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-manual-
+            Library-
+      
+      - name: Setup Unity
+        uses: unity-actions/setup-unity@v1
+        with:
+          unity-version: ${{ env.UNITY_VERSION }}
+          unity-modules: windows-mono
+      
+      - name: Activate Unity License
+        run: |
+          unity-editor \
+            -quit \
+            -batchmode \
+            -nographics \
+            -serial ${{ secrets.UNITY_SERIAL }} \
+            -username ${{ secrets.UNITY_EMAIL }} \
+            -password ${{ secrets.UNITY_PASSWORD }} \
+            -logFile -
+      
+      - name: Build Project
+        run: |
+          unity-editor \
+            -quit \
+            -batchmode \
+            -nographics \
+            -projectPath . \
+            -executeMethod dev.nox.game_builder.BuildGame.PerformBuild \
+            -buildTarget win64 \
+            -customBuildPath ./Builds \
+            -customBuildName NoxRuntime \
+            -development true \
+            -logFile - \
+            || echo "Build completed with code $?"
+      - name: Upload Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-Manual-Windows
+          path: Builds/**/*
+          retention-days: 7
+
+  # Job pour créer une release
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: builds
+      
+      - name: Create Archives
+        run: |
+          cd builds
+          for dir in Build-*/; do
+            platform=$(basename "$dir" | sed 's/Build-//')
+            if [ -d "$dir" ]; then
+              if [ "$platform" = "win64" ]; then
+                (cd "$dir" && zip -r "../NoxRuntime-${platform}.zip" .)
+              else
+                tar -czf "NoxRuntime-${platform}.tar.gz" -C "$dir" .
+              fi
+            fi
+          done
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: builds/NoxRuntime-*
+          draft: false
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
