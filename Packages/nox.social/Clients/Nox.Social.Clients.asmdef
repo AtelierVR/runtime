@@ -1,21 +1,17 @@
 {
-    "name": "api.nox.user",
+    "name": "Nox.Social.Clients",
     "rootNamespace": "",
     "references": [
-        "Nox.CCK",
         "UniTask",
-        "Nox.Widgets",
-        "Nox.Network",
-        "Nox.Worlds",
-        "Nox.Users",
-        "Nox.Servers",
-        "Nox.Search",
+        "Nox.CCK",
         "Nox.UI",
-        "Nox.ModLoader",
+        "Nox.Users",
+        "Nox.Network",
+        "Nox.Tables",
         "Unity.TextMeshPro",
         "Nox.CCK.Users",
         "Nox.CCK.Network",
-        "Nox.Tables"
+        "Nox.CCK.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

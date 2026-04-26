@@ -832,6 +832,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "nox.social": {
+      "version": "file:nox.social",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "nox.table": {
       "version": "file:nox.table",
       "depth": 0,

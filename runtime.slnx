@@ -41,6 +41,7 @@
   <Project Path="Nox.Avatars.Editor.csproj" />
   <Project Path="Nox.Avatars.Runtime.csproj" />
   <Project Path="Nox.SDK.Control.csproj" />
+  <Project Path="Nox.Social.Clients.csproj" />
   <Project Path="Nox.Terminal.Runtime.csproj" />
   <Project Path="Nox.Notifications.csproj" />
   <Project Path="Nox.Jint.csproj" />
@@ -61,6 +62,7 @@
   <Project Path="Nox.UI.csproj" />
   <Project Path="Nox.CCK.Worlds.csproj" />
   <Project Path="NoxEditor.csproj" />
+  <Project Path="Nox.Tables.csproj" />
   <Project Path="Nox.CCK.Avatars.Parameters.csproj" />
   <Project Path="Nox.AssetBundles.Runtime.csproj" />
   <Project Path="Nox.CCK.XR.csproj" />
@@ -91,6 +93,7 @@
   <Project Path="Nox.Network.csproj" />
   <Project Path="Nox.Controllers.csproj" />
   <Project Path="Nox.Microphone.Runtime.csproj" />
+  <Project Path="Nox.Table.Runtime.csproj" />
   <Project Path="Nox.Relay.Tests.csproj" />
   <Project Path="Nox.Mirror.csproj" />
   <Project Path="Nox.CCK.VideoPlayer.csproj" />
@@ -99,13 +102,11 @@
   <Project Path="Nox.CCK.Mirror.csproj" />
   <Project Path="Nox.Controllers.Runtime.csproj" />
   <Project Path="Nox.Mods.UI.csproj" />
-  <Project Path="Nox.Table.Runtime.csproj" />
   <Project Path="Nox.Avatars.Modules.Runtime.csproj" />
   <Project Path="Nox.CCK.Avatars.Playable.csproj" />
   <Project Path="Nox.CCK.Avatars.Voice.csproj" />
   <Project Path="Nox.XR.Editor.csproj" />
   <Project Path="Nox.Discord.csproj" />
-  <Project Path="Nox.Tables.csproj" />
   <Project Path="Nox.AssetBundles.csproj" />
   <Project Path="Nox.Entities.Runtime.csproj" />
   <Project Path="Nox.Worlds.Spawns.csproj" />

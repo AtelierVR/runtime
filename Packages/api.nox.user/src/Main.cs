@@ -9,6 +9,7 @@ using Nox.CCK.Utils;
 using Nox.Network;
 using Nox.Search;
 using Nox.Servers;
+using Nox.Tables;
 using Nox.Users;
 using UnityEngine.Networking;
 
@@ -34,6 +35,11 @@ namespace api.nox.user {
 			=> Main.Instance.CoreAPI.ModAPI
 				.GetMod("search")
 				?.GetInstance<ISearchAPI>();
+
+		static internal ITableAPI TableAPI
+			=> Main.Instance.CoreAPI.ModAPI
+				.GetMod("tables")
+				?.GetInstance<ITableAPI>();
 
 		public async UniTask OnInitializeMainAsync(IMainModCoreAPI api) {
 			CoreAPI  = api;
@@ -93,6 +99,9 @@ namespace api.nox.user {
 		public async UniTask<ISearchResponse> Search(ISearchRequest request, string from = null)
 			=> await Network.Search(SearchRequest.FromBase(request), from);
 
+		public async UniTask<ISearchResponse> FetchFriends(uint offset = 0, uint limit = 50)
+			=> await Network.FetchFriends(offset, limit);
+
 		public async UniTask<IAuthToken> GetToken(string address)
 			=> await Network.GetToken(address);
 
@@ -101,5 +110,14 @@ namespace api.nox.user {
 
 		public IUpdateCurrentUserRequest MakeUpdateCurrentRequest()
 			=> new UpdateCurrentUserRequest();
+		
+		public async UniTask<IFavorites> AddFavorite(Identifier identifier)
+			=> await Network.AddFavorite(identifier);
+		
+		public async UniTask<IFavorites> RemoveFavorite(Identifier identifier)
+			=> await Network.RemoveFavorite(identifier);
+		
+		public async UniTask<IFavorites> GetFavorites()
+			=> (await Network.FetchFavorites());
 	}
 }

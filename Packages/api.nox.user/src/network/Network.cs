@@ -1,9 +1,13 @@
 using System;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Nox.CCK.Convertors;
 using Nox.CCK.Network;
 using Nox.CCK.Utils;
+using Nox.Users;
 using UnityEngine.Events;
 using Logger = Nox.CCK.Utils.Logger;
 
@@ -174,6 +178,36 @@ namespace api.nox.user.network {
 			config.Save();
 			InvokeLogout(loggedOutUser);
 			return true;
+		}
+
+		public async UniTask<FriendsResponse> FetchFriends(uint offset = 0, uint limit = 50, CancellationToken cancellationToken = default) {
+			var address = CurrentUser?.Server ?? ServerAddress;
+			if (string.IsNullOrEmpty(address)) {
+				Logger.LogError("Cannot fetch friends: no server address provided.");
+				return null;
+			}
+
+			var path    = $"/users/@me/friends?offset={offset}&limit={limit}";
+			var request = await RequestNode.To(address, path);
+			if (request == null) {
+				Logger.LogError("Failed to create request for friends list");
+				return null;
+			}
+
+			await request.Send(cancellationToken);
+			var response = await request.Node<FriendsResponse>(cancellationToken);
+			if (response.HasError() || !response.HasData()) {
+				Logger.LogError($"Failed to fetch friends from {address}: {response.Error?.Message ?? "No data returned"}");
+				return null;
+			}
+
+			var friends = response.Data;
+			friends.Server = address;
+
+			foreach (var user in friends.Items ?? System.Array.Empty<User>())
+				InvokeFetch(user);
+
+			return friends;
 		}
 
 		public void Dispose() {
@@ -358,6 +392,114 @@ namespace api.nox.user.network {
 			InvokeUpdate(CurrentUser);
 			Logger.LogDebug($"Current user updated: {CurrentUser}");
 			return CurrentUser;
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		[Serializable]
+		public class Favorites : IFavorites {
+			[JsonIgnore]
+			public string Key { get; set; }
+			[JsonProperty("label")]
+			public string Label { get; set; }
+			[JsonProperty("values"), JsonConverter(typeof(ArrayConverter<StringToIdentifierConverter>))]
+			#pragma warning disable UAC1001
+			public Identifier[] Values { get; set; }
+			#pragma warning restore UAC1001
+		}
+
+		/// <summary>
+		/// Fetch favorite users from the specified server
+		/// </summary>
+		/// <returns></returns>
+		public async UniTask<Favorites> FetchFavorites(uint group = 0, bool pub = true) {
+			var key   = $"{(pub ? "public." : "")}favorites.users.{group}";
+			var entry = await Main.TableAPI.Get(key);
+			if (entry == null)
+				return new Favorites {
+					Key    = key,
+					Label  = null,
+					Values = Array.Empty<Identifier>()
+				};
+			var result = JsonConvert.DeserializeObject<Favorites>(entry.AsString);
+			result.Key = entry.Key;
+			return result;
+		}
+
+		/// <summary>
+		/// Add a user to favorites on the specified server
+		/// </summary>
+		/// <param name="identifier"></param>
+		/// <param name="group"></param>
+		/// <param name="pub"></param>
+		/// <returns></returns>
+		public async UniTask<Favorites> AddFavorite(Identifier identifier, uint group = 0, bool pub = true)
+			=> await AddFavorites(new[] { identifier }, group, pub);
+
+		/// <summary>
+		/// Add users to favorites on the specified server
+		/// </summary>
+		/// <param name="identifier"></param>
+		/// <param name="group"></param>
+		/// <param name="pub"></param>
+		/// <returns></returns>
+		public async UniTask<Favorites> AddFavorites(Identifier[] identifier, uint group = 0, bool pub = true) {
+			var e = await FetchFavorites(group, pub);
+			e.Values = identifier
+				.Concat(e.Values)
+				.Distinct()
+				.ToArray();
+
+			var entry = await Main.TableAPI.Set(
+				e.Key,
+				JsonConvert.SerializeObject(e)
+			);
+
+			if (entry != null)
+				return null;
+
+			Logger.LogError("Failed to add favorites: entry not found.");
+			return e;
+		}
+
+		/// <summary>
+		/// Remove a world from favorites on the specified server
+		/// </summary>
+		/// <param name="identifier"></param>
+		/// <param name="group"></param>
+		/// <param name="pub"></param>
+		/// <returns></returns>
+		public async UniTask<Favorites> RemoveFavorite(Identifier identifier, uint group = 0, bool pub = true)
+			=> await RemoveFavorites(new[] { identifier }, group, pub);
+
+		/// <summary>
+		/// Remove users from favorites on the specified server
+		/// </summary>
+		/// <param name="identifier"></param>
+		/// <param name="group"></param>
+		/// <param name="pub"></param>
+		/// <returns></returns>
+		public async UniTask<Favorites> RemoveFavorites(Identifier[] identifier, uint group = 0, bool pub = true) {
+			var e = await FetchFavorites(group, pub);
+			e.Values = e.Values
+				.Where(i => !identifier.Contains(i))
+				.ToArray();
+
+			var entry = await Main.TableAPI.Set(
+				e.Key,
+				JsonConvert.SerializeObject(e)
+			);
+
+			if (entry != null)
+				return null;
+
+			Logger.LogError($"Failed to add favorites: entry not found.");
+			return e;
 		}
 	}
 }
