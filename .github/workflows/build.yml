@@ -86,8 +86,6 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          # ProjectVersion.txt reports 6000.5.0a8 (alpha, unavailable on game.ci).
-          # game.ci falls back to the closest available release: 6000.4.4f1.
           unityVersion: ${{ needs.read-version.outputs.unity_version }}
           targetPlatform: ${{ matrix.targetPlatform }}
           buildMethod: Nox.GameBuilder.Pipeline.ExternalBuilder.Build
