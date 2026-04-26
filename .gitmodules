@@ -94,3 +94,6 @@
 [submodule "Packages/nox.worlds.modules"]
 	path = Packages/nox.worlds.modules
 	url = https://github.com/AtelierVR/nox.worlds.modules.git
+[submodule "Packages/nox.social"]
+	path = Packages/nox.social
+	url = https://github.com/AtelierVR/nox.social.git
