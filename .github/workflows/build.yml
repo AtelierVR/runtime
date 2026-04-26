@@ -30,10 +30,30 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
+  read-version:
+    name: Read Unity version
+    runs-on: ubuntu-latest
+    outputs:
+      unity_version: ${{ steps.get-version.outputs.unity_version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: ProjectSettings/ProjectVersion.txt
+          sparse-checkout-cone-mode: false
+
+      - name: Extract Unity version
+        id: get-version
+        shell: bash
+        run: |
+          version=$(grep "^m_EditorVersion:" ProjectSettings/ProjectVersion.txt | awk '{print $2}')
+          echo "unity_version=$version" >> "$GITHUB_OUTPUT"
+          echo "Detected Unity version: $version"
+
   build:
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: ${{ matrix.runsOn }}
-    needs: check-secrets
+    needs: [check-secrets, read-version]
     strategy:
       fail-fast: false
       matrix:
@@ -66,8 +86,9 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          # Reads m_EditorVersion from ProjectSettings/ProjectVersion.txt (currently 6000.5.0a8)
-          unityVersion: auto
+          # ProjectVersion.txt reports 6000.5.0a8 (alpha, unavailable on game.ci).
+          # game.ci falls back to the closest available release: 6000.4.4f1.
+          unityVersion: ${{ needs.read-version.outputs.unity_version }}
           targetPlatform: ${{ matrix.targetPlatform }}
           buildMethod: Nox.GameBuilder.Pipeline.ExternalBuilder.Build
           buildsPath: build
