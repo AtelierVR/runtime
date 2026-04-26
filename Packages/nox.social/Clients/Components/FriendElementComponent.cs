@@ -74,8 +74,12 @@ namespace Nox.Social.Clients.Components
 			}
 
 			_thumbnailTokenSource = new CancellationTokenSource();
+			
 			if (!string.IsNullOrEmpty(url))
 			{
+				if(thumbnailImage.sprite == null)
+					thumbnailContainer.SetActive(false);
+
 				var texture = await Client.NetworkAPI
 					.FetchTexture(url)
 					.AttachExternalCancellation(_thumbnailTokenSource.Token);
@@ -110,6 +114,9 @@ namespace Nox.Social.Clients.Components
 			_bannerTokenSource = new CancellationTokenSource();
 			if (!string.IsNullOrEmpty(banner))
 			{
+				if (bannerImage.sprite == null)
+					bannerContainer.SetActive(false);
+					
 				var texture = await Client.NetworkAPI
 					.FetchTexture(banner)
 					.AttachExternalCancellation(_bannerTokenSource.Token);
