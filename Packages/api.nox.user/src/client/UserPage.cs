@@ -74,8 +74,12 @@ namespace api.nox.user.client {
 		private async UniTask Refresh() {
 			if (_isLoading) return;
 			_isLoading = true;
-			await UniTask.Yield();
+			if (_component != null) _component.UpdateLoading();
+			_user = await Main.Instance.Fetch(_identifier);
 			_isLoading = false;
+			if (_component == null) return;
+			if (_user != null) _component.UpdateContent(_user);
+			else _component.UpdateError("User not found or loading failed.");
 			UpdateLayout.UpdateImmediate(_content);
 		}
 

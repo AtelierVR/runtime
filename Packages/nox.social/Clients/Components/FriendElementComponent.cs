@@ -6,8 +6,10 @@ using Nox.CCK.Utils;
 using Nox.Users;
 using UnityEngine;
 using UnityEngine.UI;
-namespace Nox.Social.Clients.Components {
-	public class FriendElementComponent : MonoBehaviour {
+namespace Nox.Social.Clients.Components
+{
+	public class FriendElementComponent : MonoBehaviour
+	{
 		public static UniTask<GameObject> ElementPrefab
 			=> Client.GetAssetAsync<GameObject>("prefabs/element.prefab");
 		public static UniTask<GameObject> ItemPrefab
@@ -24,22 +26,36 @@ namespace Nox.Social.Clients.Components {
 		public Image thumbnailImage;
 		public GameObject thumbnailContainer;
 
-		public static async UniTask<FriendElementComponent> Create(Identifier identifier, RectTransform parent, GameObject itemPrefab = null, GameObject elementPrefab = null) {
-			itemPrefab    ??= await ItemPrefab;
+		public static async UniTask<FriendElementComponent> Create(Identifier identifier, RectTransform parent, GameObject itemPrefab = null, GameObject elementPrefab = null)
+		{
+			itemPrefab ??= await ItemPrefab;
 			elementPrefab ??= await ElementPrefab;
-			var go        = await itemPrefab.InstantiateAsync(parent);
+			var go = await itemPrefab.InstantiateAsync(parent);
 			var component = go.AddComponent<FriendElementComponent>();
-			go                           = await elementPrefab.InstantiateAsync(Reference.GetComponent<RectTransform>("content", go));
-			component.display            = Reference.GetComponent<TextLanguage>("display", go);
-			component.thumbnailImage     = Reference.GetComponent<Image>("thumbnail_image", go);
+			component.Identifier = identifier;
+
+			Reference.GetComponent<Button>("button", go)
+				.onClick.AddListener(component.OnClicked);
+
+			go = await elementPrefab.InstantiateAsync(Reference.GetComponent<RectTransform>("content", go));
+			component.display = Reference.GetComponent<TextLanguage>("display", go);
+			component.thumbnailImage = Reference.GetComponent<Image>("thumbnail_image", go);
 			component.thumbnailContainer = Reference.GetReference("thumbnail_container", go);
-			component.bannerImage        = Reference.GetComponent<Image>("banner_image", go);
-			component.bannerContainer    = Reference.GetReference("banner_container", go);
-			component.bannerAspect       = Reference.GetComponent<AspectRatioFitter>("banner_ratio", go);
+			component.bannerImage = Reference.GetComponent<Image>("banner_image", go);
+			component.bannerContainer = Reference.GetReference("banner_container", go);
+			component.bannerAspect = Reference.GetComponent<AspectRatioFitter>("banner_ratio", go);
 			return component;
 		}
 
-		public UniTask UpdateContent(IUser user) {
+		private void OnClicked()
+		{
+			var page   = GetComponentInParent<FriendsComponent>()?.Page;
+			var menuId = page?.GetMenu()?.Id ?? 0;
+			Client.UiAPI?.SendGoto(menuId, "users", "identifier", Identifier);
+		}
+
+		public UniTask UpdateContent(IUser user)
+		{
 			display.UpdateText("value", new[] { user.Display });
 			UpdateBanner(user.Banner).Forget();
 			UpdateThumbnail(user.Thumbnail).Forget();
@@ -49,25 +65,33 @@ namespace Nox.Social.Clients.Components {
 		private CancellationTokenSource _thumbnailTokenSource;
 		private CancellationTokenSource _bannerTokenSource;
 
-		private async UniTask UpdateThumbnail(string url) {
-			if (_thumbnailTokenSource != null) {
+		private async UniTask UpdateThumbnail(string url)
+		{
+			if (_thumbnailTokenSource != null)
+			{
 				_thumbnailTokenSource?.Cancel();
 				_thumbnailTokenSource?.Dispose();
 			}
 
 			_thumbnailTokenSource = new CancellationTokenSource();
-			if (!string.IsNullOrEmpty(url)) {
+			if (!string.IsNullOrEmpty(url))
+			{
 				var texture = await Client.NetworkAPI
 					.FetchTexture(url)
 					.AttachExternalCancellation(_thumbnailTokenSource.Token);
-				if (texture) {
+				if (texture)
+				{
 					thumbnailImage.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
 					thumbnailContainer.SetActive(true);
-				} else {
+				}
+				else
+				{
 					thumbnailImage.sprite = null;
 					thumbnailContainer.SetActive(false);
 				}
-			} else {
+			}
+			else
+			{
 				thumbnailImage.sprite = null;
 				thumbnailContainer.SetActive(false);
 			}
@@ -75,26 +99,34 @@ namespace Nox.Social.Clients.Components {
 			_thumbnailTokenSource = null;
 		}
 
-		private async UniTask UpdateBanner(string banner) {
-			if (_bannerTokenSource != null) {
+		private async UniTask UpdateBanner(string banner)
+		{
+			if (_bannerTokenSource != null)
+			{
 				_bannerTokenSource.Cancel();
 				_bannerTokenSource.Dispose();
 			}
 
 			_bannerTokenSource = new CancellationTokenSource();
-			if (!string.IsNullOrEmpty(banner)) {
+			if (!string.IsNullOrEmpty(banner))
+			{
 				var texture = await Client.NetworkAPI
 					.FetchTexture(banner)
 					.AttachExternalCancellation(_bannerTokenSource.Token);
-				if (texture && texture.height > 0) {
-					bannerImage.sprite       = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+				if (texture && texture.height > 0)
+				{
+					bannerImage.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
 					bannerAspect.aspectRatio = (float)texture.width / texture.height;
 					bannerContainer.SetActive(true);
-				} else {
+				}
+				else
+				{
 					bannerImage.sprite = null;
 					bannerContainer.SetActive(false);
 				}
-			} else {
+			}
+			else
+			{
 				bannerImage.sprite = null;
 				bannerContainer.SetActive(false);
 			}

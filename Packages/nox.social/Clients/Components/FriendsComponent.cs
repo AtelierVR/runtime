@@ -104,12 +104,10 @@ namespace Nox.Social.Clients.Components {
 			var groups = Page.Groups ?? Array.Empty<FriendsPage.Group>();
 
 			// Remove extra groups
-			for (var i = _groups.Count - 1; i >= groups.Length; i--) {
-				// Check if not present in groups
+			for (var i = _groups.Count - 1; i >= 0; i--) {
 				var group = _groups[i];
-				if (_groups.Any(g => g.key == group.key))
+				if (groups.Any(g => g.Key == group.key))
 					continue;
-				// Not present, remove
 				group.Destroy();
 				_groups.RemoveAt(i);
 			}

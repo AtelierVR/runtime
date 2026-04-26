@@ -50,7 +50,7 @@ namespace Nox.Social.Clients.Pages {
 		}
 
 		public void OnOpen(IPage lastPage)
-			=> Refresh(true).Forget();
+			=> Refresh(false).Forget();
 
 		public void OnDisplay(IPage lastPage)
 			=> Refresh(true).Forget();
