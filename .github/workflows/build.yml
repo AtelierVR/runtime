@@ -70,7 +70,7 @@ jobs:
           fetch-depth: 0
           lfs: true
           submodules: recursive
-          token: ${{ secrets.GH_PAT || github.token }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: Cache Library
         uses: actions/cache@v4
