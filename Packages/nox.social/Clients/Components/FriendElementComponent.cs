@@ -89,7 +89,7 @@ namespace Nox.Social.Clients.Components
 					thumbnailContainer.SetActive(true);
 				}
 				else
-				{ode 
+				{ 
 					thumbnailImage.sprite = null;
 					thumbnailContainer.SetActive(false);
 				}
