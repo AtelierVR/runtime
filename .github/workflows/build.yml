@@ -1,5 +1,7 @@
 name: Build Project
 
+
+
 on:
   push:
     branches:
@@ -69,22 +71,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          lfs: false
+          lfs: true
           submodules: recursive
           token: ${{ secrets.GH_TOKEN || github.token }}
-
-      - name: Cache Git LFS objects
-        uses: actions/cache@v4
-        id: lfs-cache
-        with:
-          path: .git/lfs/objects
-          key: lfs-${{ runner.os }}-${{ hashFiles('.gitattributes') }}-${{ github.sha }}
-          restore-keys: |
-            lfs-${{ runner.os }}-${{ hashFiles('.gitattributes') }}-
-            lfs-${{ runner.os }}-
-
-      - name: Fetch LFS objects
-        run: git lfs pull
 
       - name: Cache Library
         uses: actions/cache@v4
