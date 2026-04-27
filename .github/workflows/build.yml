@@ -7,6 +7,10 @@ on:
   pull_request:
     branches:
       - '**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   check-secrets:
@@ -50,17 +54,73 @@ jobs:
           echo "unity_version=$version" >> "$GITHUB_OUTPUT"
           echo "Detected Unity version: $version"
 
+  release-meta:
+    name: Compute release version and channel
+    runs-on: ubuntu-latest
+    outputs:
+      channel: ${{ steps.compute.outputs.channel }}
+      version: ${{ steps.compute.outputs.version }}
+      tag: ${{ steps.compute.outputs.tag }}
+      release_name: ${{ steps.compute.outputs.release_name }}
+    steps:
+      - name: Checkout repository with tags
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute weekly version and channel
+        id: compute
+        shell: bash
+        run: |
+          raw_channel="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
+          channel="$(echo "$raw_channel" | tr '[:upper:]' '[:lower:]' | sed -E 's#[^a-z0-9._-]+#-#g; s#-+#-#g; s#^-+##; s#-+$##')"
+          if [ -z "$channel" ]; then
+            channel="unknown"
+          fi
+
+          year="$(date -u +%G)"
+          week="$(date -u +%V)"
+          prefix="v${year}.${week}."
+          pattern="${prefix}*-${channel}"
+
+          max_build="$({
+            git tag -l "$pattern" \
+              | sed -E "s#^v${year}\\.${week}\\.([0-9]+)-${channel}$#\\1#" \
+              | grep -E '^[0-9]+$' \
+              | sort -n \
+              | tail -1
+          } || true)"
+
+          if [ -z "$max_build" ]; then
+            max_build=0
+          fi
+
+          build_num=$((max_build + 1))
+          version="${year}.${week}.${build_num}"
+          tag="v${version}-${channel}"
+          release_name="Runtime ${version} (${channel})"
+
+          echo "channel=$channel" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "release_name=$release_name" >> "$GITHUB_OUTPUT"
+          echo "Computed release: $tag"
+
   build:
     name: Build for ${{ matrix.targetPlatform }}
     runs-on: ${{ matrix.runsOn }}
-    needs: [check-secrets, read-version]
+    needs: [check-secrets, read-version, release-meta]
     strategy:
       fail-fast: false
       matrix:
         include:
           - targetPlatform: StandaloneWindows64
-            runsOn: windows-2022
+            runsOn: ubuntu-latest
           - targetPlatform: StandaloneLinux64
+            runsOn: ubuntu-latest
+          - targetPlatform: StandaloneOSX
+            runsOn: macos-13
+          - targetPlatform: Android
             runsOn: ubuntu-latest
 
     steps:
@@ -93,9 +153,34 @@ jobs:
           buildMethod: Nox.GameBuilder.Pipeline.ExternalBuilder.Build
           buildsPath: build
           allowDirtyBuild: true
+          customParameters: -noxReleaseVersion "${{ needs.release-meta.outputs.version }}" -noxReleaseChannel "${{ needs.release-meta.outputs.channel }}"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Build-${{ matrix.targetPlatform }}
+          name: Build-${{ matrix.targetPlatform }}-${{ needs.release-meta.outputs.tag }}
           path: build/${{ matrix.targetPlatform }}
+
+  release:
+    name: Create release
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs: [build, release-meta]
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: Build-*-${{ needs.release-meta.outputs.tag }}
+          merge-multiple: true
+          path: dist
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.release-meta.outputs.tag }}
+          name: ${{ needs.release-meta.outputs.release_name }}
+          prerelease: ${{ needs.release-meta.outputs.channel != 'main' && needs.release-meta.outputs.channel != 'development' }}
+          generate_release_notes: true
+          files: dist/**
