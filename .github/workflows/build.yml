@@ -108,7 +108,7 @@ jobs:
           echo "Computed release: ${tag}/v${version}"
 
   build:
-    name: Build for ${{ matrix.targetPlatform }}
+    name: Build for ${{ matrix.displayPlatform }}
     runs-on: ${{ matrix.runsOn }}
     needs: [check-secrets, read-version, release-meta]
     strategy:
@@ -116,12 +116,19 @@ jobs:
       matrix:
         include:
           - targetPlatform: StandaloneWindows64
+            displayPlatform: Windows
             runsOn: ubuntu-latest
           - targetPlatform: StandaloneLinux64
+            displayPlatform: Linux
             runsOn: ubuntu-latest
           - targetPlatform: StandaloneOSX
+            displayPlatform: OSX
+            runsOn: ubuntu-latest
+          - targetPlatform: iOS
+            displayPlatform: iOS
             runsOn: ubuntu-latest
           - targetPlatform: Android
+            displayPlatform: Android
             runsOn: ubuntu-latest
 
     steps:
