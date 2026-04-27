@@ -3,133 +3,63 @@ name: Build Project
 on:
   push:
     branches:
-      - '**'
+      - "**"
   pull_request:
     branches:
-      - '**'
+      - "**"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  check-secrets:
-    name: Check required secrets
+  check:
+    name: Check requirements
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: Verify secrets are set
         shell: bash
-        run: |
-          missing=()
-          [ -z "$UNITY_LICENSE" ]  && missing+=(UNITY_LICENSE)
-          [ -z "$UNITY_EMAIL" ]    && missing+=(UNITY_EMAIL)
-          [ -z "$UNITY_PASSWORD" ] && missing+=(UNITY_PASSWORD)
-          if [ ${#missing[@]} -gt 0 ]; then
-            echo "::error::Missing required secrets: ${missing[*]}"
-            exit 1
-          fi
-          echo "All required secrets are present."
+        run: bash ./.github/scripts/secrets.sh
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
-  read-version:
-    name: Read Unity version
+  prepare:
+    name: Prepare build metadata
     runs-on: ubuntu-latest
     outputs:
-      unity_version: ${{ steps.get-version.outputs.unity_version }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          sparse-checkout: ProjectSettings/ProjectVersion.txt
-          sparse-checkout-cone-mode: false
-
-      - name: Extract Unity version
-        id: get-version
-        shell: bash
-        run: |
-          version=$(grep "^m_EditorVersion:" ProjectSettings/ProjectVersion.txt | awk '{print $2}')
-          echo "unity_version=$version" >> "$GITHUB_OUTPUT"
-          echo "Detected Unity version: $version"
-
-  release-meta:
-    name: Compute release version and channel
-    runs-on: ubuntu-latest
-    outputs:
-      channel: ${{ steps.compute.outputs.channel }}
-      version: ${{ steps.compute.outputs.version }}
-      tag: ${{ steps.compute.outputs.tag }}
-      release_name: ${{ steps.compute.outputs.release_name }}
+      unity_version: ${{ steps.prepare.outputs.unity_version }}
+      channel: ${{ steps.prepare.outputs.channel }}
+      version: ${{ steps.prepare.outputs.version }}
+      tag: ${{ steps.prepare.outputs.tag }}
+      release_name: ${{ steps.prepare.outputs.release_name }}
+      platforms_json: ${{ steps.prepare.outputs.platforms_json }}
+      platforms_output: ${{ steps.prepare.outputs.platforms_output }}
     steps:
       - name: Checkout repository with tags
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Compute weekly version and channel
-        id: compute
+      - name: Prepare metadata
+        id: prepare
         shell: bash
-        run: |
-          raw_channel="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
-          channel="$(echo "$raw_channel" | tr '[:upper:]' '[:lower:]' | sed -E 's#[^a-z0-9._-]+#-#g; s#-+#-#g; s#^-+##; s#-+$##')"
-          if [ -z "$channel" ]; then
-            channel="unknown"
-          fi
-
-          current_year="$(date -u +%G)"
-          year="$((current_year - 2000))"
-          week="$(date -u +%V)"
-          prefix="v${year}.${week}."
-          pattern="${prefix}*-${channel}"
-
-          max_build="$({
-            git tag -l "$pattern" \
-              | sed -E "s#^v${year}\\.${week}\\.([0-9]+)-${channel}$#\\1#" \
-              | grep -E '^[0-9]+$' \
-              | sort -n \
-              | tail -1
-          } || true)"
-
-          if [ -z "$max_build" ]; then
-            max_build=0
-          fi
-
-          build_num=$((max_build + 1))
-          version="${year}.${week}.${build_num}"
-          tag="${channel}"
-          release_name="Runtime ${version} (${channel})"
-
-          echo "channel=$channel" >> "$GITHUB_OUTPUT"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "release_name=$release_name" >> "$GITHUB_OUTPUT"
-          echo "Computed release: ${tag}/v${version}"
+        run: bash ./.github/scripts/prepare.sh
 
   build:
     name: Build for ${{ matrix.displayPlatform }}
     runs-on: ${{ matrix.runsOn }}
-    needs: [check-secrets, read-version, release-meta]
+    needs: [ check, prepare ]
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - targetPlatform: StandaloneWindows64
-            displayPlatform: Windows
-            runsOn: ubuntu-latest
-          - targetPlatform: StandaloneLinux64
-            displayPlatform: Linux
-            runsOn: ubuntu-latest
-          - targetPlatform: StandaloneOSX
-            displayPlatform: OSX
-            runsOn: ubuntu-latest
-          - targetPlatform: iOS
-            displayPlatform: iOS
-            runsOn: ubuntu-latest
-          - targetPlatform: Android
-            displayPlatform: Android
-            runsOn: ubuntu-latest
+        include: ${{ fromJSON(needs.prepare.outputs.platforms_json) }}
 
     steps:
       - name: Checkout repository
@@ -144,7 +74,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Library
-          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**',
+            'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
             Library-${{ matrix.targetPlatform }}-
             Library-
@@ -156,17 +87,18 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
-          unityVersion: ${{ needs.read-version.outputs.unity_version }}
+          unityVersion: ${{ needs.prepare.outputs.unity_version }}
           targetPlatform: ${{ matrix.targetPlatform }}
           buildMethod: Nox.GameBuilder.Pipeline.ExternalBuilder.Build
           buildsPath: build
           allowDirtyBuild: true
-          customParameters: -noxReleaseVersion "${{ needs.release-meta.outputs.version }}" -noxReleaseChannel "${{ needs.release-meta.outputs.channel }}"
+          customParameters: -noxReleaseVersion "${{ needs.prepare.outputs.version }}"
+            -noxReleaseChannel "${{ needs.prepare.outputs.channel }}"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Build-${{ matrix.targetPlatform }}-${{ needs.release-meta.outputs.tag }}
+          name: Build-${{ matrix.targetPlatform }}-${{ needs.prepare.outputs.tag }}
           path: build/${{ matrix.targetPlatform }}
 
   release:
@@ -175,20 +107,21 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: [build, release-meta]
+    needs: [ build, prepare ]
     steps:
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: Build-*-${{ needs.release-meta.outputs.tag }}
+          pattern: Build-*-${{ needs.prepare.outputs.tag }}
           merge-multiple: true
           path: dist
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.release-meta.outputs.tag }}
-          name: ${{ needs.release-meta.outputs.release_name }}
-          prerelease: ${{ needs.release-meta.outputs.channel != 'main' && needs.release-meta.outputs.channel != 'development' }}
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          name: ${{ needs.prepare.outputs.release_name }}
+          prerelease: ${{ needs.prepare.outputs.channel != 'main' &&
+            needs.prepare.outputs.channel != 'development' }}
           generate_release_notes: true
           files: dist/**
