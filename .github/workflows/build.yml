@@ -43,6 +43,7 @@ jobs:
       platforms_json: ${{ steps.prepare.outputs.platforms_json }}
       platforms_output: ${{ steps.prepare.outputs.platforms_output }}
       artifact_pattern: ${{ steps.prepare.outputs.artifact_pattern }}
+      prerelease: ${{ steps.prepare.outputs.prerelease }}
     steps:
       - name: Checkout repository with tags
         uses: actions/checkout@v4
@@ -94,6 +95,7 @@ jobs:
           buildMethod: Nox.GameBuilder.Pipeline.ExternalBuilder.Build
           buildsPath: build
           allowDirtyBuild: true
+          manualExit: true
           customParameters: -noxReleaseVersion "${{ needs.prepare.outputs.version }}"
             -noxReleaseChannel "${{ needs.prepare.outputs.channel }}"
 
@@ -135,8 +137,7 @@ jobs:
         with:
           tag_name: ${{ needs.prepare.outputs.release_tag }}
           name: ${{ needs.prepare.outputs.release_name }}
-          prerelease: ${{ needs.prepare.outputs.channel != 'main' &&
-            needs.prepare.outputs.channel != 'development' }}
+          prerelease: ${{ needs.prepare.outputs.prerelease }}
           generate_release_notes: true
           files: |
             dist/*.zip

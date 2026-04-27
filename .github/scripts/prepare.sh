@@ -159,6 +159,12 @@ else
 fi
 artifact_pattern="${repo_name}_*_v${version}${tag_suffix}.zip"
 
+if [ "$channel" = "main" ]; then
+    prerelease="false"
+else
+    prerelease="true"
+fi
+
 matrix_json="["
 matrix_first=1
 platforms_output=""
@@ -239,6 +245,7 @@ fi
     echo "platforms_json=$matrix_json"
     echo "platforms_output=$platforms_output"
     echo "artifact_pattern=$artifact_pattern"
+    echo "prerelease=$prerelease"
 } >> "$GITHUB_OUTPUT"
 
 if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
