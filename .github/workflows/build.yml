@@ -78,7 +78,8 @@ jobs:
             channel="unknown"
           fi
 
-          year="$(date -u +%G)"
+          current_year="$(date -u +%G)"
+          year="$((current_year - 2000))"
           week="$(date -u +%V)"
           prefix="v${year}.${week}."
           pattern="${prefix}*-${channel}"
@@ -97,14 +98,14 @@ jobs:
 
           build_num=$((max_build + 1))
           version="${year}.${week}.${build_num}"
-          tag="v${version}-${channel}"
+          tag="${channel}"
           release_name="Runtime ${version} (${channel})"
 
           echo "channel=$channel" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "release_name=$release_name" >> "$GITHUB_OUTPUT"
-          echo "Computed release: $tag"
+          echo "Computed release: ${tag}/v${version}"
 
   build:
     name: Build for ${{ matrix.targetPlatform }}
@@ -119,7 +120,7 @@ jobs:
           - targetPlatform: StandaloneLinux64
             runsOn: ubuntu-latest
           - targetPlatform: StandaloneOSX
-            runsOn: macos-13
+            runsOn: ubuntu-latest
           - targetPlatform: Android
             runsOn: ubuntu-latest
 
