@@ -835,11 +835,10 @@
       "dependencies": {}
     },
     "nox.social": {
-      "version": "https://github.com/AtelierVR/nox.social.git",
+      "version": "file:nox.social",
       "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "e7ba767b19fce51312f5441324dd893f35f11eb3"
+      "source": "embedded",
+      "dependencies": {}
     },
     "nox.table": {
       "version": "file:nox.table",

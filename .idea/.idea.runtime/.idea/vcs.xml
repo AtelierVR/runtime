@@ -26,6 +26,7 @@
     <mapping directory="$PROJECT_DIR$/Packages/nox.relay" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.sessions" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.settings" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.social" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.table" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.terminal" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.ui" vcs="Git" />

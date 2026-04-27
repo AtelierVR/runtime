@@ -45,7 +45,6 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
-    <Analyzer Include="D:\Projets\nox\runtime\Packages\nox.cck\Plugins\BouncyCastle.Cryptography.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Packages\api.nox.instance\Scripts\base\Connection.cs" />
@@ -495,6 +494,9 @@
     <Reference Include="UnityEditor.LinuxStandalone.Extensions">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\PlaybackEngines\LinuxStandaloneSupport\UnityEditor.LinuxStandalone.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="websocket-sharp">
+      <HintPath>D:\Projets\nox\runtime\Packages\nox.control\Plugins\websocket-sharp.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Cecil.Pdb">
       <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\Mono.Cecil.0.11.6\lib\netstandard2.0\Mono.Cecil.Pdb.dll</HintPath>
     </Reference>
@@ -554,9 +556,6 @@
     </Reference>
     <Reference Include="StirlingLabs.MsQuic">
       <HintPath>D:\Projets\nox\runtime\Packages\nox.relay\Plugins\StirlingLabs.MsQuic.dll</HintPath>
-    </Reference>
-    <Reference Include="websocket-sharp">
-      <HintPath>D:\Projets\nox\runtime\Packages\nuget-packages\InstalledPackages\WebSocketSharp-netstandard.1.0.1\lib\netstandard2.0\websocket-sharp.dll</HintPath>
     </Reference>
     <Reference Include="System.Configuration.ConfigurationManager">
       <HintPath>D:\Projets\nox\runtime\Packages\nox.relay\Plugins\System.Configuration.ConfigurationManager.dll</HintPath>
