@@ -38,9 +38,11 @@ jobs:
       channel: ${{ steps.prepare.outputs.channel }}
       version: ${{ steps.prepare.outputs.version }}
       tag: ${{ steps.prepare.outputs.tag }}
+      release_tag: ${{ steps.prepare.outputs.release_tag }}
       release_name: ${{ steps.prepare.outputs.release_name }}
       platforms_json: ${{ steps.prepare.outputs.platforms_json }}
       platforms_output: ${{ steps.prepare.outputs.platforms_output }}
+      artifact_pattern: ${{ steps.prepare.outputs.artifact_pattern }}
     steps:
       - name: Checkout repository with tags
         uses: actions/checkout@v4
@@ -95,11 +97,18 @@ jobs:
           customParameters: -noxReleaseVersion "${{ needs.prepare.outputs.version }}"
             -noxReleaseChannel "${{ needs.prepare.outputs.channel }}"
 
+      - name: Package artifact zip
+        shell: bash
+        run: bash ./.github/scripts/package.sh
+        env:
+          TARGET_PLATFORM: ${{ matrix.targetPlatform }}
+          ARTIFACT_NAME: ${{ matrix.artifactName }}
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Build-${{ matrix.targetPlatform }}-${{ needs.prepare.outputs.tag }}
-          path: build/${{ matrix.targetPlatform }}
+          name: ${{ matrix.artifactName }}
+          path: artifacts/${{ matrix.artifactName }}
 
   release:
     name: Create release
@@ -112,16 +121,24 @@ jobs:
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: Build-*-${{ needs.prepare.outputs.tag }}
+          pattern: ${{ needs.prepare.outputs.artifact_pattern }}
           merge-multiple: true
           path: dist
+
+      - name: Generate SHA256SUMS
+        shell: bash
+        run: bash ./.github/scripts/hash.sh
+        env:
+          DIST_DIR: dist
 
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.prepare.outputs.tag }}
+          tag_name: ${{ needs.prepare.outputs.release_tag }}
           name: ${{ needs.prepare.outputs.release_name }}
           prerelease: ${{ needs.prepare.outputs.channel != 'main' &&
             needs.prepare.outputs.channel != 'development' }}
           generate_release_notes: true
-          files: dist/**
+          files: |
+            dist/*.zip
+            dist/SHA256SUMS.txt
