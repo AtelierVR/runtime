@@ -17,7 +17,7 @@ permissions:
 jobs:
   check:
     name: Check requirements
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -34,7 +34,7 @@ jobs:
 
   prepare:
     name: Prepare build metadata
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     outputs:
       unity_version: ${{ steps.prepare.outputs.unity_version }}
       channel: ${{ steps.prepare.outputs.channel }}
@@ -117,7 +117,7 @@ jobs:
   release:
     name: Create release
     if: github.event_name == 'push'
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: write
     needs: [ build, prepare ]

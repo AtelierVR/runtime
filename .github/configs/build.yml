@@ -1,18 +1,18 @@
 platforms:
   - targetPlatform: StandaloneWindows64
-    runsOn: self-hosted
+    runsOn: ubuntu-latest
 
   - targetPlatform: StandaloneLinux64
-    runsOn: self-hosted
+    runsOn: ubuntu-latest
 
   - targetPlatform: StandaloneOSX
-    runsOn: self-hosted
+    runsOn: ubuntu-latest
 
   - targetPlatform: iOS
-    runsOn: self-hosted
+    runsOn: ubuntu-latest
 
   - targetPlatform: Android
-    runsOn: self-hosted
+    runsOn: ubuntu-latest
 
 # You can add extra options per platform later, for example:
 #  - targetPlatform: WebGL
