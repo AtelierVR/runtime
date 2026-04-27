@@ -101,7 +101,6 @@ jobs:
         shell: bash
         run: bash ./.github/scripts/package.sh
         env:
-          TARGET_PLATFORM: ${{ matrix.targetPlatform }}
           ARTIFACT_NAME: ${{ matrix.artifactName }}
 
       - name: Upload build artifact
