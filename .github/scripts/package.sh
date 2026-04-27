@@ -13,7 +13,10 @@ fi
 
 mkdir -p artifacts
 
-build_dir="build/${TARGET_PLATFORM}"
+# game-ci sets -customBuildPath to build/{platform}/{buildName} (buildName defaults to
+# targetPlatform), and Builder.Build appends BuildName one more time as the filename root.
+# The actual output directory is therefore build/{platform}/{platform}/.
+build_dir="build/${TARGET_PLATFORM}/${TARGET_PLATFORM}"
 if [ ! -d "$build_dir" ]; then
   echo "::error::Missing build output directory: $build_dir"
   exit 1
@@ -32,5 +35,5 @@ echo "Found $file_count file(s), packaging..."
 
 (
   cd "$build_dir"
-  zip -r "../../artifacts/${ARTIFACT_NAME}" . -x "*.DS_Store" -x "__MACOSX/*"
+  zip -r "../../../artifacts/${ARTIFACT_NAME}" . -x "*.DS_Store" -x "__MACOSX/*"
 )
