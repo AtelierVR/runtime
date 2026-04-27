@@ -1,6 +1,6 @@
 platforms:
   - targetPlatform: StandaloneWindows64
-    runsOn: ubuntu-latest
+    runsOn: self-hosted
 
   - targetPlatform: StandaloneLinux64
     runsOn: self-hosted
