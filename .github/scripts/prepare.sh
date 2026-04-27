@@ -135,7 +135,9 @@ pattern="${prefix}*-${channel}"
 
 max_build="$({
     git tag -l "$pattern" \
-        | sed -E "s#^v${year}\\.${week}\\.([0-9]+)-${channel}$#\\1#" \
+        | grep -E "^v${year}\.${week}\.[0-9]+-${channel}$" \
+        | awk -F. '{print $3}' \
+        | cut -d- -f1 \
         | grep -E '^[0-9]+$' \
         | sort -n \
         | tail -1

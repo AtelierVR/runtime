@@ -1,12 +1,12 @@
 platforms:
   - targetPlatform: StandaloneWindows64
-    runsOn: self-hosted
+    runsOn: ubuntu-latest
 
   - targetPlatform: StandaloneLinux64
     runsOn: self-hosted
 
   - targetPlatform: StandaloneOSX
-    runs-on: self-hosted
+    runsOn: self-hosted
 
   - targetPlatform: iOS
     runsOn: self-hosted
