@@ -90,6 +90,10 @@ jobs:
         run: git lfs pull
         continue-on-error: true
 
+      - name: Fetch LFS objects for submodules
+        run: git submodule foreach --recursive 'git lfs pull || true'
+        continue-on-error: true
+
       - name: Cache Library
         uses: actions/cache@v4
         with:
