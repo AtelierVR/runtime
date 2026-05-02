@@ -823,7 +823,7 @@ MonoBehaviour:
   target: 2
   publishId: 1
   publishServer: hactazia.fr
-  publishVersion: 1
+  publishVersion: 2
   isCompiled: 0
 --- !u!1 &538460256
 GameObject:

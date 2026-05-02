@@ -121,6 +121,7 @@
   <Project Path="Nox.CCK.Instances.csproj" />
   <Project Path="Autohand.OpenXR.Editor.csproj" />
   <Project Path="Nox.KeyBindings.csproj" />
+  <Project Path="Nox.CCK.UI.csproj" />
   <Project Path="Nox.Avatars.Scale.csproj" />
   <Project Path="Nox.CCK.Sessions.csproj" />
   <Project Path="Nox.CCK.VideoPlayer.Unity.csproj" />
