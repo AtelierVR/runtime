@@ -116,6 +116,7 @@ jobs:
           customParameters: -noxReleaseVersion "${{ needs.prepare.outputs.version }}"
             -noxReleaseChannel "${{ needs.prepare.outputs.channel }}"
             -noxOutputPath "build/${{ matrix.targetPlatform }}"
+            -noxAutoConfirmClearOutput
 
       - name: Package artifact zip
         shell: bash
