@@ -102,3 +102,5 @@ mono_crash.*
 .env
 .env*
 build_log.txt
+build_*.log
+build_*.log.meta
