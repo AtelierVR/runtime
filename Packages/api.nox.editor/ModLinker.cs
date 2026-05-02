@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Xml;
 using Nox.ModLoader;
 using UnityEditor;
@@ -52,8 +53,26 @@ namespace Nox.Editor {
 			return (from mod in assetMods.Concat(packageMods).Distinct().ToArray()
 				select Path.GetDirectoryName(mod) into dir
 				let def = Directory.GetFiles(dir, "*.asmdef", SearchOption.AllDirectories)
-				let asmNames = def.Select(Path.GetFileNameWithoutExtension).ToArray()
-				select (Path.Combine(dir, LinkXmlName), asmNames)).ToArray();
+				let asmNames = def.Select(Path.GetFileNameWithoutExtension)
+				let pluginNames = GetManagedPluginAssemblyNames(dir)
+				select (Path.Combine(dir, LinkXmlName), asmNames.Concat(pluginNames).Distinct().ToArray())).ToArray();
+		}
+
+		private static IEnumerable<string> GetManagedPluginAssemblyNames(string modDir) {
+			var pluginsDir = Path.Combine(modDir, "Plugins");
+			if (!Directory.Exists(pluginsDir))
+				yield break;
+
+			foreach (var dll in Directory.GetFiles(pluginsDir, "*.dll", SearchOption.AllDirectories)) {
+				string name = null;
+				try {
+					name = AssemblyName.GetAssemblyName(dll).Name;
+				} catch {
+					// native DLL or invalid managed assembly — skip
+				}
+				if (name != null)
+					yield return name;
+			}
 		}
 
 

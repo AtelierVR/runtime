@@ -516,6 +516,9 @@
     <Reference Include="Unity.Plastic.Antlr3.Runtime">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.collab-proxy@e566cd3e7623\Lib\Editor\Unity.Plastic.Antlr3.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.nuget.mono-cecil@ecb9724e46ff\Mono.Cecil.dll</HintPath>
+    </Reference>
     <Reference Include="StirlingLabs.BigSpans">
       <HintPath>D:\Projets\nox\runtime\Packages\nox.relay\Plugins\StirlingLabs.BigSpans.dll</HintPath>
     </Reference>
@@ -560,9 +563,6 @@
     </Reference>
     <Reference Include="Unity.VisualScripting.TextureAssets">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.visualscripting@eb6004dcc707\Editor\VisualScripting.Core\EditorAssetResources\Unity.VisualScripting.TextureAssets.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil">
-      <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.nuget.mono-cecil@ecb9724e46ff\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="System.Security.Cryptography.Pkcs">
       <HintPath>D:\Projets\nox\runtime\Packages\nox.relay\Plugins\System.Security.Cryptography.Pkcs.dll</HintPath>
@@ -975,11 +975,11 @@
     <Reference Include="Unity.TextMeshPro">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\Unity.TextMeshPro.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
