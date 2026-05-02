@@ -32,7 +32,7 @@ namespace Nox.Editor {
 			"Mono.Cecil.Rocks",
 		};
 
-		[InitializeOnLoadMethod, MenuItem("Nox/Tools/Update Linker Files")]
+		[MenuItem("Nox/Tools/Update Linker Files")]
 		public static void EnsureLinkerClassExists() {
 			var li = new List<string>();
 
@@ -78,54 +78,37 @@ namespace Nox.Editor {
 
 		private static void UpdateLinkXml(string path, string[] assemblies) {
 			try {
-				XmlDocument doc;
-				XmlElement  linkerElement;
-
-				if (File.Exists(path)) {
-					// Charger le fichier existant
-					doc = new XmlDocument();
-					doc.Load(path);
-					linkerElement = doc.DocumentElement;
-				} else {
-					// Créer un nouveau fichier
-					doc = new XmlDocument();
-					doc.AppendChild(doc.CreateXmlDeclaration("1.0", "utf-8", null));
-					linkerElement = doc.CreateElement("linker");
-					doc.AppendChild(linkerElement);
-				}
-
-				// Supprimer les anciennes entrées de mods
-				var existingAssemblies = linkerElement?.SelectNodes("assembly");
-				var toRemove           = new List<XmlNode>();
-
-				if (existingAssemblies != null) {
-					toRemove.AddRange(
-						from XmlNode assemblyNode in existingAssemblies
-						let nameAttr = assemblyNode.Attributes?["fullname"]
-						select assemblyNode
-					);
-
-					foreach (var node in toRemove)
-						linkerElement.RemoveChild(node);
-				}
+				var doc           = new XmlDocument();
+				var linkerElement = doc.CreateElement("linker");
+				doc.AppendChild(doc.CreateXmlDeclaration("1.0", "utf-8", null));
+				doc.AppendChild(linkerElement);
 
 				// Ajouter les nouvelles entrées
 				foreach (var assembly in assemblies.OrderBy(a => a)) {
 					var assemblyElement = doc.CreateElement("assembly");
 					assemblyElement.SetAttribute("fullname", assembly);
 					assemblyElement.SetAttribute("preserve", "all");
-					if (linkerElement != null) linkerElement.AppendChild(assemblyElement);
+					linkerElement.AppendChild(assemblyElement);
 				}
 
-				// Sauvegarder le fichier
-				var settings = new XmlWriterSettings {
+				// Sérialiser en mémoire
+				var xmlSettings = new XmlWriterSettings {
 					Indent       = true,
 					IndentChars  = "\t",
 					NewLineChars = "\n"
 				};
+				string newContent;
+				using (var sw = new System.IO.StringWriter())
+				using (var xw = XmlWriter.Create(sw, xmlSettings)) {
+					doc.Save(xw);
+					newContent = sw.ToString();
+				}
 
-				using var writer = XmlWriter.Create(path, settings);
-				doc.Save(writer);
+				// N'écrire sur le disque que si le contenu a vraiment changé
+				if (File.Exists(path) && File.ReadAllText(path) == newContent)
+					return;
+
+				File.WriteAllText(path, newContent);
 			} catch (Exception e) {
 				Logger.LogError($"Failed to update link.xml at {path}: {e}");
 				Logger.LogError(e);

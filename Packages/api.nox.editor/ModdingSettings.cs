@@ -42,14 +42,22 @@ namespace Nox.Editor {
 		[InitializeOnLoadMethod]
 		public static void Init() {
 			ScriptingDefinitions.Add("NOX_SDK", NamedBuildTarget.Standalone);
-			PlayerSettings.stripEngineCode = false;
 
-			PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone, Implementation);
-			
-			PlayerSettings.SetApiCompatibilityLevel(NamedBuildTarget.Standalone, ApiCompatibilityLevel.NET_Standard_2_0);
-			PlayerSettings.SetEditorAssembliesCompatibilityLevel(EditorAssembliesCompatibilityLevel.NET_Standard);
+			if (PlayerSettings.stripEngineCode)
+				PlayerSettings.stripEngineCode = false;
 
-			PlayerSettings.insecureHttpOption = InsecureHttpOption.AlwaysAllowed;
+			if (PlayerSettings.GetScriptingBackend(NamedBuildTarget.Standalone) != Implementation)
+				PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone, Implementation);
+
+			if (PlayerSettings.GetApiCompatibilityLevel(NamedBuildTarget.Standalone) != ApiCompatibilityLevel.NET_Standard_2_0)
+				PlayerSettings.SetApiCompatibilityLevel(NamedBuildTarget.Standalone, ApiCompatibilityLevel.NET_Standard_2_0);
+
+			if (PlayerSettings.GetEditorAssembliesCompatibilityLevel() != EditorAssembliesCompatibilityLevel.NET_Standard)
+				PlayerSettings.SetEditorAssembliesCompatibilityLevel(EditorAssembliesCompatibilityLevel.NET_Standard);
+
+			if (PlayerSettings.insecureHttpOption != InsecureHttpOption.AlwaysAllowed)
+				PlayerSettings.insecureHttpOption = InsecureHttpOption.AlwaysAllowed;
+
 			ModLinkerHelper.EnsureLinkerClassExists();
 		}
 	}
