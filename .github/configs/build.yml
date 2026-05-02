@@ -1,10 +1,10 @@
 platforms:
-#  - targetPlatform: StandaloneWindows64
-#    runsOn: ubuntu-latest
-
-# Linux is only actived for prevent Github Bandwith LFS
-  - targetPlatform: StandaloneLinux64
+# Windows is only actived for prevent Github Bandwith LFS
+  - targetPlatform: StandaloneWindows64
     runsOn: ubuntu-latest
+
+#  - targetPlatform: StandaloneLinux64
+#    runsOn: ubuntu-latest
 
 #  - targetPlatform: StandaloneOSX
 #    runsOn: ubuntu-latest
