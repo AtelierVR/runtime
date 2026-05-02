@@ -85,13 +85,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "com.github-glitchenzo.nugetforunity": {
-      "version": "https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {},
-      "hash": "a7c6b49a0141a5bff9b1983e38137522ef61977d"
-    },
     "com.hecomi.ulipsync": {
       "version": "https://github.com/hecomi/uLipSync.git#upm",
       "depth": 0,
@@ -872,12 +865,6 @@
     },
     "nox.xr": {
       "version": "file:nox.xr",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "nuget-packages": {
-      "version": "file:nuget-packages",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
