@@ -1,18 +1,19 @@
 platforms:
-  - targetPlatform: StandaloneWindows64
-    runsOn: ubuntu-latest
+#  - targetPlatform: StandaloneWindows64
+#    runsOn: ubuntu-latest
 
+# Linux is only actived for prevent Github Bandwith LFS
   - targetPlatform: StandaloneLinux64
     runsOn: ubuntu-latest
 
-  - targetPlatform: StandaloneOSX
-    runsOn: ubuntu-latest
+#  - targetPlatform: StandaloneOSX
+#    runsOn: ubuntu-latest
 
-  - targetPlatform: iOS
-    runsOn: ubuntu-latest
+#  - targetPlatform: iOS
+#    runsOn: ubuntu-latest
 
-  - targetPlatform: Android
-    runsOn: ubuntu-latest
+#  - targetPlatform: Android
+#    runsOn: ubuntu-latest
 
 # You can add extra options per platform later, for example:
 #  - targetPlatform: WebGL
