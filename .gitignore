@@ -83,7 +83,7 @@ PackageExports/
 /[Pp]ackages/*
 !/[Pp]ackages/manifest.json
 !/[Pp]ackages/nuget-packages/
-/[Pp]ackages/nuget-packages/InstalledPackages
+!/[Pp]ackages/nuget-packages/InstalledPackages
 !/[Pp]ackages/*nox.*/
 !/[Pp]ackages/hactazia.*/
 /[Pp]ackages/*nox.*/link.xml

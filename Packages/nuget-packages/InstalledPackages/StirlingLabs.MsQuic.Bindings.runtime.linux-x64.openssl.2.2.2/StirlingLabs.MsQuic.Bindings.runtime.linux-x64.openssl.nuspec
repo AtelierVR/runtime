@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>StirlingLabs.MsQuic.Bindings.runtime.linux-x64.openssl</id>
+    <version>2.2.2</version>
+    <title>MsQuic runtime for linux-x64 v2.2.2</title>
+    <authors>Stirling Labs Team</authors>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <icon>images/icon.png</icon>
+    <readme>docs/README.md</readme>
+    <projectUrl>https://stirlinglabs.com/</projectUrl>
+    <description>Platform-specific runtime for MsQuic, Microsoft's C implementation of the IETF QUIC protocol.</description>
+    <tags>dotnet h3 http3 msquic networking quic github.com</tags>
+    <repository type="git" url="git://github.com/microsoft/msquic.git" branch="release/2.2" commit="b7b2d5e6df9c98ec8bad6d8dc8c6ef1a0e892abd" />
+    <dependencies>
+      <group targetFramework="net6.0" />
+      <group targetFramework=".NETStandard2.0" />
+      <group targetFramework=".NETStandard2.1" />
+    </dependencies>
+  </metadata>
+</package>
