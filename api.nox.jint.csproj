@@ -489,6 +489,9 @@
     <Reference Include="websocket-sharp">
       <HintPath>D:\Projets\nox\runtime\Packages\nox.control\Plugins\websocket-sharp.dll</HintPath>
     </Reference>
+    <Reference Include="System.Drawing.Common">
+      <HintPath>D:\Projets\nox\runtime\Assets\Plugins\Editor\System.Drawing.Common.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.VisualScripting.YamlDotNet">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.visualscripting@eb6004dcc707\Editor\VisualScripting.Core\Dependencies\YamlDotNet\Unity.VisualScripting.YamlDotNet.dll</HintPath>
     </Reference>
@@ -578,9 +581,6 @@
     </Reference>
     <Reference Include="ZString">
       <HintPath>D:\Projets\nox\runtime\Packages\nox.relay\Plugins\ZString.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Drawing.Common">
-      <HintPath>D:\Projets\nox\runtime\Assets\Plugins\Editor\System.Drawing.Common.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\PlaybackEngines\iOSSupport\UnityEditor.iOS.Extensions.Xcode.dll</HintPath>

@@ -304,6 +304,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Recovery/0 (2).unity
     guid: 9fea9878667e5034bbbfe3d02f4f1448
+  - enabled: 1
+    path: Assets/_Camela/OPEN ME.unity
+    guid: 71977d23d927d5e4bb72da9685c1668a
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     Unity.XR.OpenVR.Settings: {fileID: 11400000, guid: b8b1117bd0b659249ad8646d1ec58db3, type: 2}

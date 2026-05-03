@@ -102,3 +102,6 @@ mono_crash.*
 build_log.txt
 build_*.log
 build_*.log.meta
+
+Thry/*
+Poi/*
