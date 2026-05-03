@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Xml;
 using Nox.ModLoader;
 using UnityEditor;
@@ -95,20 +96,22 @@ namespace Nox.Editor {
 				var xmlSettings = new XmlWriterSettings {
 					Indent       = true,
 					IndentChars  = "\t",
-					NewLineChars = "\n"
+					NewLineChars = "\n",
+					Encoding     = new UTF8Encoding(false)
 				};
 				string newContent;
-				using (var sw = new System.IO.StringWriter())
-				using (var xw = XmlWriter.Create(sw, xmlSettings)) {
+				using (var ms = new MemoryStream())
+				using (var xw = XmlWriter.Create(ms, xmlSettings)) {
 					doc.Save(xw);
-					newContent = sw.ToString();
+					xw.Flush();
+					newContent = Encoding.UTF8.GetString(ms.ToArray());
 				}
 
 				// N'écrire sur le disque que si le contenu a vraiment changé
-				if (File.Exists(path) && File.ReadAllText(path) == newContent)
+				if (File.Exists(path) && File.ReadAllText(path, Encoding.UTF8) == newContent)
 					return;
 
-				File.WriteAllText(path, newContent);
+				File.WriteAllText(path, newContent, Encoding.UTF8);
 			} catch (Exception e) {
 				Logger.LogError($"Failed to update link.xml at {path}: {e}");
 				Logger.LogError(e);

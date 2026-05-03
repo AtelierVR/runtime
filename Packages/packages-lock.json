@@ -707,8 +707,20 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "nox.avatars.finalik": {
+      "version": "file:nox.avatars.finalik",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "nox.avatars.modules": {
       "version": "file:nox.avatars.modules",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.avatars.rigbuilder": {
+      "version": "file:nox.avatars.rigbuilder",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

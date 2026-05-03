@@ -22,10 +22,12 @@
 	<assembly fullname="Nox.Avatars" preserve="all" />
 	<assembly fullname="Nox.Avatars.Camera" preserve="all" />
 	<assembly fullname="Nox.Avatars.Editor" preserve="all" />
+	<assembly fullname="Nox.Avatars.FinalIK" preserve="all" />
 	<assembly fullname="nox.avatars.modules" preserve="all" />
 	<assembly fullname="Nox.Avatars.Modules.Runtime" preserve="all" />
 	<assembly fullname="Nox.Avatars.Parameters" preserve="all" />
 	<assembly fullname="Nox.Avatars.Pipeline" preserve="all" />
+	<assembly fullname="Nox.Avatars.RigBuilder" preserve="all" />
 	<assembly fullname="Nox.Avatars.Rigging" preserve="all" />
 	<assembly fullname="Nox.Avatars.Runtime" preserve="all" />
 	<assembly fullname="Nox.Avatars.Runtime.Editor" preserve="all" />

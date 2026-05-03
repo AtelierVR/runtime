@@ -97,3 +97,9 @@
 [submodule "Packages/nox.social"]
 	path = Packages/nox.social
 	url = https://github.com/AtelierVR/nox.social.git
+[submodule "Packages/nox.avatars.rigbuilder"]
+	path = Packages/nox.avatars.rigbuilder
+	url = https://github.com/AtelierVR/nox.avatars.rigbuilder.git
+[submodule "Packages/nox.avatars.finalik"]
+	path = Packages/nox.avatars.finalik
+	url = https://github.com/AtelierVR/nox.avatars.finalik.git
