@@ -25,9 +25,9 @@ function reset() {
 export function onUpdate() {
     let delta = Date.now() - d;
     d = Date.now();
-    transform.Rotate(delta * -speed, delta * speed, delta * -speed);
+    transform.rotate(delta * -speed, delta * speed, delta * -speed);
 
     if (!exports?.target) return;
-    var dis = Vector3.Distance(transform.position, exports.target.position);
+    const dis = transform.position.distance(exports.target.position);
     if (dis > exports.distance) reset();
 }

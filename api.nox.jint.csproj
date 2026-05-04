@@ -49,6 +49,8 @@
   <ItemGroup>
     <Compile Include="Packages\api.nox.jint\src\JintFileEditor.cs" />
     <Compile Include="Packages\api.nox.jint\src\JintScriptEditor.cs" />
+    <Compile Include="Packages\api.nox.jint\src\JintTypeAdapter.cs" />
+    <Compile Include="Packages\api.nox.jint\src\JintModuleAdapter.cs" />
     <Compile Include="Packages\api.nox.jint\src\Main.cs" />
     <Compile Include="Packages\api.nox.jint\src\JintBacking.cs" />
     <Compile Include="Packages\api.nox.jint\src\JintBackingEditor.cs" />
@@ -994,9 +996,17 @@
       <Project>{7c2c463a-26a3-7905-84ce-de910451931d}</Project>
       <Name>Nox.Jint</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.Scripting.csproj">
+      <Project>{4b919d35-2e21-7479-10ac-8ac6a313eede}</Project>
+      <Name>Nox.Scripting</Name>
+    </ProjectReference>
     <ProjectReference Include="Nox.CCK.Jint.csproj">
       <Project>{bd8d55ba-be6b-897f-8274-96e2b5d05912}</Project>
       <Name>Nox.CCK.Jint</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Scripting.csproj">
+      <Project>{b1d7bbed-f5f2-def1-b0e9-5d866b9dbffd}</Project>
+      <Name>Nox.CCK.Scripting</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

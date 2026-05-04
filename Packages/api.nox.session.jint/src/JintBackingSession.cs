@@ -5,64 +5,37 @@ using Jint.Runtime.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
 using Jint.Native;
 using Jint.Native.Array;
-using Jint.Native.Function;
-using Jint.Runtime;
 using Jint.Runtime.Modules;
-using Nox.CCK.Network;
 using Nox.CCK.Utils;
 using Nox.Jint;
 using Nox.Players;
-using Nox.Sessions;
 using JintEngine = Jint.Engine;
 using Logger = Nox.CCK.Utils.Logger;
 using Transform = UnityEngine.Transform;
+using api.nox.jint;
 
 namespace api.nox.session.jint {
 	public class JintBackingSession : MonoBehaviour, IJintBacking {
 		public JintBackingModule module;
-		public IJintScript Script;
-		public ObjectInstance Context;
-
-		private JintEngine _engine;
+		public IJintScript       Script;
+		public ObjectInstance    Context;
 
 		/// <summary>
-		/// Converts a JsValue (especially ArrayInstance) to byte array
+		/// Tags that identify the context this backing runs in (e.g. <c>"session"</c>, <c>"avatar"</c>).
+		/// Only modules whose <c>Tags</c> list is empty or shares at least one tag with this list are bound.
 		/// </summary>
-		private static byte[] JsValueToByteArray(JsValue value) {
-			if (!value.IsObject() || value.AsObject() is not ArrayInstance arrayInstance)
-				return (byte[])value.ToObject();
+		public string[] Tags = { "session" };
 
-			var length = (int)arrayInstance.Length;
-			var buffer = new byte[ length ];
+		private JintEngine _engine;
+		private bool       _initialized;
 
-			for (var i = 0; i < length; i++) {
-				var element = arrayInstance[(uint)i];
-				buffer[i] = element.IsNumber() ? (byte)(element.AsNumber() % 256) : (byte)0;
-			}
-
-			return buffer;
-		}
-
-		private static JsValue ConvertObject(JintEngine engine, object arg)
-			=> arg switch {
-				null                        => JsValue.Null,
-				_ when arg.GetType().IsEnum => JsValue.FromObject(engine, ConvertObjects(engine, arg)),
-				_                           => JsValue.FromObject(engine, arg),
-			};
-
-		private static JsValue[] ConvertObjects(JintEngine engine, params object[] args) {
-			var jsArgs = new JsValue[ args.Length ];
-			for (var i = 0; i < args.Length; i++)
-				jsArgs[i] = ConvertObject(engine, args[i]);
-			return jsArgs;
-		}
+		/// <summary>Expose the underlying engine for <see cref="JintScriptingContext"/>.</summary>
+		internal JintEngine Engine => _engine;
 
 		public void Initialize() {
-			if (_engine != null)
+			if (_initialized)
 				return;
 
 			try {
@@ -74,195 +47,26 @@ namespace api.nox.session.jint {
 					}
 				);
 
+				// Jint-specific globals (TypeReference cannot be expressed as a generic module)
 				_engine.SetValue("GameObject", TypeReference.CreateTypeReference(_engine, typeof(GameObject)));
-				_engine.SetValue("Vector3", TypeReference.CreateTypeReference(_engine, typeof(Vector3)));
-				_engine.SetValue("Vector2", TypeReference.CreateTypeReference(_engine, typeof(Vector2)));
+				_engine.SetValue("Vector3",    TypeReference.CreateTypeReference(_engine, typeof(Vector3)));
+				_engine.SetValue("Vector2",    TypeReference.CreateTypeReference(_engine, typeof(Vector2)));
 				_engine.SetValue("Quaternion", TypeReference.CreateTypeReference(_engine, typeof(Quaternion)));
-				_engine.SetValue("Transform", TypeReference.CreateTypeReference(_engine, typeof(Transform)));
+				_engine.SetValue("Transform",  TypeReference.CreateTypeReference(_engine, typeof(Transform)));
+				_engine.SetValue("Buffer",     TypeReference.CreateTypeReference(_engine, typeof(NodeBufferImpl)));
 
-				// add Buffer of nodejs
-				_engine.AddModule("buffer", builder => builder
-					.ExportFunction("from", args => {
-						var data     = args.At(0).AsString();
-						var encoding = args.Length > 1 ? args.At(1).AsString() : "utf8";
-						return JsValue.FromObject(_engine, NodeBufferImpl.from(data, encoding));
-					})
-					.ExportFunction("toString", args => {
-						var buffer   = JsValueToByteArray(args.At(0));
-						var encoding = args.Length > 1 ? args.At(1).AsString() : "utf8";
-						return JsValue.FromObject(_engine, NodeBufferImpl.toString(buffer, encoding));
-					})
-				);
-				_engine.SetValue("Buffer", TypeReference.CreateTypeReference(_engine, typeof(NodeBufferImpl)));
-
-				_engine.AddModule(
-					"console", builder => builder
-						.ExportFunction(
-							"log", objets => Logger.Log(
-								string.Join(" ", objets.Select(e => e.ToString())),
-								this,
-								$"{GetType().Name}_{GetEntityId().GetHashCode()}"
-							)
-						)
-						.ExportFunction(
-							"warn", objets => Logger.LogWarning(
-								string.Join(" ", objets.Select(e => e.ToString())),
-								this,
-								$"{GetType().Name}_{GetEntityId().GetHashCode()}"
-							)
-						)
-						.ExportFunction(
-							"error", objets => Logger.LogError(
-								string.Join(" ", objets.Select(e => e.ToString())),
-								this,
-								$"{GetType().Name}_{GetEntityId().GetHashCode()}"
-							)
-						)
-				);
-
-				_engine.AddModule(
-					"behaviour", builder => builder
-						.ExportObject("gameObject", gameObject)
-						.ExportObject("transform", gameObject.transform)
-						.ExportObject("rigidbody", gameObject.GetComponent<Rigidbody>())
-						.ExportObject("id", GetEntityId().GetHashCode())
-				);
-
-				_engine.AddModule(
-					"tables", builder => builder
-						.ExportFunction("getPrivate", () => ToPromise(GetTable(false).AsTask()))
-						.ExportFunction("getPublic", () => ToPromise(GetTable(true).AsTask()))
-						.ExportFunction("setPrivate", args => ToPromise(SetTable(false, args).AsTask()))
-						.ExportFunction("setPublic", args => ToPromise(SetTable(true, args).AsTask()))
-						.ExportFunction("delPrivate", () => ToPromise(DeleteTable(false).AsTask()))
-						.ExportFunction("delPublic", () => ToPromise(DeleteTable(true).AsTask()))
-				);
-
-				_engine.AddModule(
-					"players", builder => builder
-						.ExportFunction(
-							"getLocal", () => {
-								var player = module.Session.LocalPlayer;
-								return player != null
-									? new ObjectWrapper(_engine, player)
-									: JsValue.Null;
-							}
-						)
-						.ExportFunction(
-							"getMaster", () => {
-								var player = module.Session.MasterPlayer;
-								return player != null
-									? new ObjectWrapper(_engine, player)
-									: JsValue.Null;
-							}
-						)
-						.ExportFunction("getAll", () => module.Session.Entities.GetEntities<IPlayer>())
-						.ExportFunction("getCount", () => module.Session.Entities.GetCount<IPlayer>())
-						.ExportFunction(
-							"getAt", args => {
-								var players = module.Session.Entities.GetEntities<IPlayer>();
-								var index   = players.ElementAtOrDefault((int)args.At(0).AsNumber());
-								return index != null
-									? new ObjectWrapper(_engine, index)
-									: JsValue.Null;
-							}
-						)
-				);
-
-				var netSession = module.Session as INetSession;
-				_engine.AddModule(
-					"network", builder => builder
-						.ExportFunction("getTime", () => JsValue.FromObject(_engine, netSession?.Time ?? DateTime.UtcNow))
-						.ExportFunction("isConnected", () => netSession?.IsConnected ?? false)
-						.ExportFunction("eventToHash", args => JsValue.FromObject(_engine, Hash.CRC64(args.At(0).AsString())))
-						.ExportFunction(
-							"emitEvent", args => {
-								if (netSession == null) {
-									Logger.LogWarning("Network adapter is null", this);
-									return false;
-								}
-
-								var @event = args.At(0).IsNumber()
-									? (long)args.At(0).AsNumber()
-									: Hash.CRC64(args.At(0).AsString());
-								byte[] raw;
-
-								var dataArg = args.At(1);
-								if (dataArg.IsUndefined() || dataArg.IsNull())
-									raw = Array.Empty<byte>();
-								else if (!dataArg.IsObject()) {
-									Logger.LogWarning($"data argument is not an object (type: {dataArg.Type})", this);
-									return false;
-								} else {
-									var obj = dataArg.AsObject();
-									if (obj is not ArrayInstance arrayInstance) {
-										Logger.LogWarning("data argument is not an array", this);
-										return false;
-									}
-
-									var length = (int)arrayInstance.Length;
-									raw = new byte[ length ];
-									for (var i = 0; i < length; i++) {
-										var element = arrayInstance[(uint)i];
-										if (element.IsNumber()) {
-											var num = element.AsNumber();
-											raw[i] = (byte)(num % 256); // Ensure it's within byte range
-										} else if (element.IsString()) {
-											// Try to parse string as number
-											if (double.TryParse(element.AsString(), out var parsed))
-												raw[i] = (byte)(parsed % 256);
-											else
-												raw[i] = 0;
-										} else
-											raw[i] = 0;
-
-									}
-								}
-
-								var emitting = netSession.EmitEvent(@event, raw).AsTask();
-								if (emitting.IsCompletedSuccessfully)
-									return JsValue.FromObject(_engine, emitting.Result);
-								if (emitting.IsFaulted) {
-									Logger.LogError($"Error emitting event '{@event}': {emitting.Exception}", this);
-									return false;
-								}
-
-								if (emitting.IsCanceled) {
-									Logger.LogWarning($"Emitting event '{@event}' was canceled", this);
-									return false;
-								}
-
-								var promiseFactory = _engine.Evaluate(
-										@"(function() {
-												var resolve, reject;
-												var p = new Promise(function(res, rej) { resolve = res; reject = rej; });
-												return { promise: p, resolve: resolve, reject: reject };
-										})"
-									)
-									.AsObject();
-
-								var promise = promiseFactory.Get("promise");
-								var resolve = promiseFactory.Get("resolve") as FunctionInstance;
-								var reject  = promiseFactory.Get("reject") as FunctionInstance;
-
-								emitting.ContinueWith(
-									t => {
-										if (t.IsFaulted || t.IsCanceled) {
-											Logger.LogError($"Error emitting event '{@event}': {t.Exception}", this);
-											_engine.Invoke(reject!, false);
-										} else
-											_engine.Invoke(resolve!, JsValue.FromObject(_engine, t.Result));
-									}
-								);
-
-								return promise;
-							}
-						)
-				);
+				// Bind all modules registered in nox.scripting via the adapter
+				var scriptingAPI = Main.ScriptingAPI;
+				var context      = new JintScriptingContext(this, scriptingAPI);
+				if (scriptingAPI != null)
+					JintModuleAdapter.BindAllModules(_engine, context, scriptingAPI, Tags);
+				else
+					Logger.LogWarning("[session.jint] scripting API not found – no modules bound.", this);
 
 				var m = JintEngine.PrepareModule(Script.GetContent());
 				_engine.AddModule("__main__", x => x.AddModule(m));
 				Context = _engine.ImportModule("__main__");
+				_initialized = true;
 
 				try {
 					var exports = Script.GetExports();
@@ -274,70 +78,9 @@ namespace api.nox.session.jint {
 
 				Main.CoreAPI.EventAPI.Emit("jint_engine_created", this, _engine);
 			} catch (Exception e) {
+				_engine = null;
 				Logger.LogError(e, this);
 			}
-		}
-
-		private bool TryTableKey(bool isPublic, out string key) {
-			var id = module.Session.Dimensions.Identifier;
-			if (!id.IsValid()) {
-				key = null;
-				return false;
-			}
-			key = $"{(isPublic ? "public." : "")}worlds.{Uri.EscapeDataString(id.ToShortString(true))}";
-			return true;
-		}
-
-		private async UniTask<JsValue> GetTable(bool isPublic) {
-			var id = module.Session.Dimensions.Identifier;
-			if (!TryTableKey(isPublic, out var key))
-				return JsValue.Null;
-			var entry = await Main.TableAPI.Get(key);
-			return new ObjectWrapper(_engine, entry == null ? JsValue.Null : entry.AsBytes);
-		}
-
-		private async UniTask<JsValue> SetTable(bool isPublic, JsValue[] args) {
-			var id = module.Session.Dimensions.Identifier;
-			if (args.Length == 0 || !TryTableKey(isPublic, out var key))
-				return JsValue.Null;
-			var entry = await Main.TableAPI.Set(key, JsValueToByteArray(args[0]), "application/octet-stream+world");
-			return new ObjectWrapper(_engine, entry == null ? JsValue.Null : entry.AsBytes);
-		}
-
-		private async UniTask<JsValue> DeleteTable(bool isPublic) {
-			var id = module.Session.Dimensions.Identifier;
-			if (!TryTableKey(isPublic, out var key))
-				return JsBoolean.False;
-			return await Main.TableAPI.Delete(key)
-				? JsBoolean.True
-				: JsBoolean.False;
-		}
-
-		private JsValue CreatePromise(out FunctionInstance resolve, out FunctionInstance reject) {
-			var promiseFactory = _engine.Evaluate(
-					@"(function() {
-							var resolve, reject;
-							var p = new Promise(function(res, rej) { resolve = res; reject = rej; });
-							return { promise: p, resolve: resolve, reject: reject };
-					})"
-				)
-				.AsObject();
-			resolve = promiseFactory.Get("resolve") as FunctionInstance;
-			reject  = promiseFactory.Get("reject") as FunctionInstance;
-			return promiseFactory.Get("promise");
-		}
-
-		private JsValue ToPromise<T>(Task<T> task) {
-			var promise = CreatePromise(out var resolve, out var reject);
-			task.ContinueWith(t => {
-				if (t.IsFaulted || t.IsCanceled) {
-					Logger.LogError($"Error in task: {t.Exception}", this);
-					_engine.Invoke(reject!, false);
-					return;
-				}
-				_engine.Invoke(resolve!, JsValue.FromObject(_engine, t.Result));
-			});
-			return promise;
 		}
 
 		private void SetExports(string property, object value) {
@@ -358,10 +101,8 @@ namespace api.nox.session.jint {
 
 		public void Invoke(string method, params object[] args) {
 			try {
-				if (_engine == null || Context == null) {
-					Logger.LogWarning("Engine or Context is null", this);
+				if (!_initialized)
 					return;
-				}
 
 				var methodRef = Context.Get(method);
 				if (methodRef.IsUndefined())
@@ -375,10 +116,8 @@ namespace api.nox.session.jint {
 
 		public object Call(string method, object[] args) {
 			try {
-				if (_engine == null || Context == null) {
-					Logger.LogWarning("Engine or Context is null", this);
+				if (!_initialized)
 					return null;
-				}
 
 				var methodRef = Context.Get(method);
 				if (methodRef.IsUndefined())
@@ -409,10 +148,8 @@ namespace api.nox.session.jint {
 
 		public T Call<T>(string method, object[] args) {
 			try {
-				if (_engine == null || Context == null) {
-					Logger.LogWarning("Engine or Context is null", this);
+				if (!_initialized)
 					return default;
-				}
 
 				var methodRef = Context.Get(method);
 				if (methodRef.IsUndefined())
@@ -470,20 +207,6 @@ namespace api.nox.session.jint {
 			=> Invoke("onEvent", @event, raw, sender);
 	}
 
-	public interface NodeBuffer {
-		byte[] from(string data);
-		byte[] from(string data, string encoding);
-		string toString();
-		string toString(string encoding);
-	}
-
-	public interface NodeHash {
-		int crc32(byte[]  data);
-		int crc32(string  data);
-		long crc64(byte[] data);
-		long crc64(string data);
-	}
-
 	public static class NodeBufferImpl {
 		public static byte[] from(string data)
 			=> from(data, "utf8");
@@ -518,15 +241,15 @@ namespace api.nox.session.jint {
 
 	public static class NodeHashImpl {
 		public static int crc32(byte[] data)
-			=> Hash.CRC32(data);
+			=> Nox.CCK.Utils.Hash.CRC32(data);
 
 		public static int crc32(string data)
-			=> Hash.CRC32(data);
+			=> Nox.CCK.Utils.Hash.CRC32(data);
 
 		public static long crc64(byte[] data)
-			=> Hash.CRC64(data);
+			=> Nox.CCK.Utils.Hash.CRC64(data);
 
 		public static long crc64(string data)
-			=> Hash.CRC64(data);
+			=> Nox.CCK.Utils.Hash.CRC64(data);
 	}
 }

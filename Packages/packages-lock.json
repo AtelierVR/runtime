@@ -827,6 +827,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "nox.scripting": {
+      "version": "file:nox.scripting",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "nox.sessions": {
       "version": "file:nox.sessions",
       "depth": 0,

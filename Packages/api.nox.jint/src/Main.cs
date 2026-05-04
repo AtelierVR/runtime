@@ -3,6 +3,7 @@ using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 using Nox.CCK.Utils;
 using Nox.Jint;
+using Nox.Scripting;
 using UnityEngine.Events;
 
 namespace api.nox.jint {
@@ -13,6 +14,10 @@ namespace api.nox.jint {
 
 		public static readonly UnityEvent<JintBacking> OnBackingAdded   = new();
 		public static readonly UnityEvent<JintBacking> OnBackingRemoved = new();
+
+		/// <summary>Scripting registry, resolved lazily via the mod loader.</summary>
+		public static IScriptingAPI ScriptingAPI
+			=> Instance?.CoreAPI.ModAPI.GetMod("scripting")?.GetInstance<IScriptingAPI>();
 
 		public string GetModulesPath() {
 			var folder = Path.Combine(Constants.ConfigPath, "jint_modules");
@@ -25,6 +30,10 @@ namespace api.nox.jint {
 			CoreAPI  = api;
 			Instance = this;
 			Manager  = new Manager();
+		}
+
+		public void OnDisposeMain() {
+			Instance = null;
 		}
 	}
 }

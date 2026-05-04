@@ -2,7 +2,8 @@
     "name": "Nox.Jint",
     "rootNamespace": "",
     "references": [
-        "Nox.CCK"
+        "Nox.CCK",
+        "Nox.Scripting"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

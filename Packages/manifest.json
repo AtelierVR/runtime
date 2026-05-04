@@ -46,6 +46,8 @@
     "nox.entities": "https://github.com/AtelierVR/nox.entities.git",
     "nox.social": "https://github.com/AtelierVR/nox.social.git",
     "nox.ui": "https://github.com/AtelierVR/nox.ui.git",
+    "nox.worlds": "https://github.com/AtelierVR/nox.worlds.git",
+    "nox.scripting": "https://github.com/AtelierVR/nox.scripting.git",
     "com.unity.modules.accessibility": "1.0.0",
     "com.unity.modules.adaptiveperformance": "1.0.0",
     "com.unity.modules.ai": "1.0.0",

@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Packages\api.nox.session.jint\src\Main.cs" />
     <Compile Include="Packages\api.nox.session.jint\src\JintBackingSession.cs" />
+    <Compile Include="Packages\api.nox.session.jint\src\JintScriptingContext.cs" />
     <Compile Include="Packages\api.nox.session.jint\src\JintBackingModule.cs" />
     <None Include="Packages\api.nox.session.jint\nox.mod.json" />
     <None Include="Packages\api.nox.session.jint\api.nox.session.jint.asmdef" />
@@ -997,6 +998,10 @@
       <Project>{7c2c463a-26a3-7905-84ce-de910451931d}</Project>
       <Name>Nox.Jint</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.Scripting.csproj">
+      <Project>{4b919d35-2e21-7479-10ac-8ac6a313eede}</Project>
+      <Name>Nox.Scripting</Name>
+    </ProjectReference>
     <ProjectReference Include="Nox.Players.csproj">
       <Project>{0e499f4c-db68-9841-61eb-59e5a4ed821c}</Project>
       <Name>Nox.Players</Name>
@@ -1008,6 +1013,10 @@
     <ProjectReference Include="Nox.Tables.csproj">
       <Project>{0c3ec72f-1a6d-6f11-4b52-b30265f6622e}</Project>
       <Name>Nox.Tables</Name>
+    </ProjectReference>
+    <ProjectReference Include="Nox.CCK.Scripting.csproj">
+      <Project>{b1d7bbed-f5f2-def1-b0e9-5d866b9dbffd}</Project>
+      <Name>Nox.CCK.Scripting</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -8,9 +8,11 @@
     "Nox.Worlds",
     "api.nox.jint",
     "Nox.Jint",
+    "Nox.Scripting",
     "Nox.Players",
     "Nox.Entities",
-    "Nox.Tables"
+    "Nox.Tables",
+    "Nox.CCK.Scripting"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

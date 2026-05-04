@@ -53,6 +53,7 @@
 	<assembly fullname="Nox.CCK.Mirror" preserve="all" />
 	<assembly fullname="Nox.CCK.Network" preserve="all" />
 	<assembly fullname="Nox.CCK.Notifications" preserve="all" />
+	<assembly fullname="Nox.CCK.Scripting" preserve="all" />
 	<assembly fullname="Nox.CCK.Sessions" preserve="all" />
 	<assembly fullname="Nox.CCK.Settings" preserve="all" />
 	<assembly fullname="Nox.CCK.UI" preserve="all" />
@@ -116,6 +117,8 @@
 	<assembly fullname="Nox.Relay.Editor" preserve="all" />
 	<assembly fullname="Nox.Relay.Runtime" preserve="all" />
 	<assembly fullname="Nox.Relay.Tests" preserve="all" />
+	<assembly fullname="Nox.Scripting" preserve="all" />
+	<assembly fullname="Nox.Scripting.Runtime" preserve="all" />
 	<assembly fullname="Nox.SDK.Control" preserve="all" />
 	<assembly fullname="Nox.Search" preserve="all" />
 	<assembly fullname="Nox.Sessions" preserve="all" />

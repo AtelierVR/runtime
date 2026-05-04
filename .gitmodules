@@ -103,3 +103,6 @@
 [submodule "Packages/nox.avatars.finalik"]
 	path = Packages/nox.avatars.finalik
 	url = https://github.com/AtelierVR/nox.avatars.finalik.git
+[submodule "Packages/nox.scripting"]
+	path = Packages/nox.scripting
+	url = https://github.com/AtelierVR/nox.scripting.git

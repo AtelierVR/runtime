@@ -9,12 +9,10 @@ export function onUpdate() {
 
     let dayInMilliseconds = 24 * 60 * 60 * 1000;
     precentTime = (time % dayInMilliseconds) / dayInMilliseconds;
-    let vec = transform.localRotation.eulerAngles;
 
-    transform.SetLocalPositionAndRotation(
-        transform.localPosition,
-        Quaternion.Euler(precentTime * 360 + 270, 0, 0)
-    )
+    // SetLocalPositionAndRotation n'est pas exposé par le convertisseur —
+    // on assigne directement localRotation.
+    transform.localRotation = Quaternion.Euler(precentTime * 360 + 270, 0, 0);
 
     let lm = Math.floor((time / 1000 / 60) % 60);
     if (lm !== lastMinute) {

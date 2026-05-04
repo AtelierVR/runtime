@@ -5,8 +5,10 @@
         "Nox.CCK",
         "UniTask",
         "Nox.Jint",
+        "Nox.Scripting",
         "Unity.TextMeshPro",
-        "Nox.CCK.Jint"
+        "Nox.CCK.Jint",
+        "Nox.CCK.Scripting"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
