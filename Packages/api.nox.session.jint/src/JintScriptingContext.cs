@@ -1,8 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using api.nox.jint;
 using Jint;
-using Jint.Native;
 using Jint.Native.Object;
 using Nox.CCK.Scripting;
 using Nox.Jint;
@@ -16,19 +15,22 @@ namespace api.nox.session.jint {
 	/// Jint-specific <see cref="IScriptingContext"/> tied to a single
 	/// <see cref="JintBackingSession"/> instance.
 	/// </summary>
-	internal sealed class JintScriptingContext : IJintScriptingContext {
+	sealed internal class JintScriptingContext : IJintScriptingContext {
 		private readonly JintBackingSession _backing;
-		private readonly IScriptingAPI      _api;
+		private readonly IScriptingAPI _api;
 
 		public JintScriptingContext(JintBackingSession backing, IScriptingAPI api) {
 			_backing = backing;
 			_api     = api;
 		}
 
-		public IScriptingBackend Backend    { get; set; }
-		public ISession          Session    => _backing.module?.Session;
-		public GameObject        ScriptObject => _backing.gameObject;
-		public JintEngine        Engine      => _backing.Engine;
+		public IScriptingBackend Backend { get; set; }
+		public ISession Session
+			=> _backing.module?.Session;
+		public GameObject ScriptObject
+			=> _backing.gameObject;
+		public JintEngine Engine
+			=> _backing.Engine;
 
 		/// <summary>
 		/// Converts a C# value to a script-friendly object using registered converters.
@@ -37,13 +39,15 @@ namespace api.nox.session.jint {
 		/// Returns <paramref name="value"/> unchanged if no converter is found.
 		/// </summary>
 		public object ToScript(object value) {
-			if (value == null || _api == null) return value;
+			if (value == null || _api == null)
+				return value;
 			var type      = value.GetType();
 			var converter = _api.Converters.FirstOrDefault(c => c.HandledType.IsAssignableFrom(type));
-			if (converter == null) return value;
+			if (converter == null)
+				return value;
 			// If the converter declares bindings, build a Jint JS object
 			if (converter.Bindings.Count > 0)
-				return api.nox.jint.JintTypeAdapter.BuildObject(_backing.Engine, converter, value, this);
+				return api.nox.jint.JintTypeAdapter.BuildInstance(_backing.Engine, converter, value, this);
 			// Otherwise delegate to ToScript for raw conversion
 			return converter.ToScript(this, value);
 		}
@@ -68,9 +72,9 @@ namespace api.nox.session.jint {
 
 			// No converter → fall back to Convert.ChangeType
 			if (converter == null) {
-				if (scriptValue == null) return null;
-				try { return Convert.ChangeType(scriptValue, targetType); }
-				catch { return scriptValue; }
+				if (scriptValue == null)
+					return null;
+				try { return Convert.ChangeType(scriptValue, targetType); } catch { return scriptValue; }
 			}
 
 			// null → default
@@ -101,18 +105,19 @@ namespace api.nox.session.jint {
 
 		/// <summary>
 		/// Synchronously resolves an <see cref="IScriptingTypeDefaultDefinition"/>.
-		/// Prefers <see cref="IScriptingTypeDefaultDefinition.Getter"/>, then
-		/// <see cref="IScriptingTypeDefaultDefinition.Handler"/> (called with no args),
-		/// then blocks on <see cref="IScriptingTypeDefaultDefinition.AsyncHandler"/>.
+		/// Prefers <see cref="IScriptingTypeProperty.Getter"/>, then
+		/// <see cref="IScriptingTypeSyncMethod.Handler"/> (called with no args),
+		/// then blocks on <see cref="IScriptingTypeAsyncMethod.Handler"/>.
 		/// Returns <c>null</c> if <paramref name="def"/> is null.
 		/// </summary>
-		private static object ResolveDefault(IScriptingTypeDefaultDefinition def, IScriptingContext ctx) {
-			if (def == null) return null;
-			if (def is IScriptingTypeProperty prop) return prop.Getter(ctx, null);
-			if (def is IScriptingTypeSyncMethod sync) return sync.Handler(ctx, null, Array.Empty<object>());
-			if (def is IScriptingTypeAsyncMethod async_) return async_.Handler(ctx, null, Array.Empty<object>()).GetAwaiter().GetResult();
-			return null;
-		}
+		private static object ResolveDefault(IScriptingTypeDefaultDefinition def, IScriptingContext ctx)
+			=> def switch {
+				null                             => null,
+				IScriptingTypeProperty property  => property.Getter(ctx, null),
+				IScriptingTypeSyncMethod method  => method.Handler(ctx, null, Array.Empty<object>()),
+				IScriptingTypeAsyncMethod method => method.Handler(ctx, null, Array.Empty<object>()).GetAwaiter().GetResult(),
+				_                                => throw new ArgumentOutOfRangeException(nameof(def), def, null)
+			};
 
 		/// <summary>
 		/// Extracts property values from a Jint <see cref="ObjectInstance"/> in the
@@ -123,13 +128,13 @@ namespace api.nox.session.jint {
 			var props = converter.Bindings
 				.OfType<IScriptingTypeBindingPropertyDefinition>()
 				.ToArray();
-			var args = new object[props.Length];
+			var args = new object[ props.Length ];
 			for (var i = 0; i < props.Length; i++) {
-				var name = props[i].Name.Resolve(NameResolver.camelCaseStyle);
+				var name  = props[i].Name.Resolve(NameResolver.camelCaseStyle);
 				var jsVal = jsObj.Get(name);
 				args[i] = jsVal.IsUndefined() || jsVal.IsNull()
 					? null
-					: api.nox.jint.JintModuleAdapter.FromJsValue(jsVal);
+					: JintTypeAdapter.FromJsValue(jsVal);
 			}
 			return args;
 		}

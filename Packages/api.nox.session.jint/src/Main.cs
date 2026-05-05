@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using api.nox.jint;
+using Nox.CCK;
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Events;
 using Nox.CCK.Mods.Initializers;
@@ -73,19 +75,19 @@ namespace api.nox.session.jint {
 			// console
 			api.RegisterModule(ScriptingModuleBuilder.Create("console")
 				.AddMethod("log", (ctx, args) => {
-					Logger.Log(string.Join(" ", args.Select(a => a?.ToString() ?? "null")),
+					Logger.Log(string.Join(" ", args.Select(a => JintModuleAdapter.FormatArg(a))),
 						ctx.ScriptObject,
 						$"Script_{ctx.ScriptObject?.GetEntityId().GetHashCode()}");
 					return null;
 				})
 				.AddMethod("warn", (ctx, args) => {
-					Logger.LogWarning(string.Join(" ", args.Select(a => a?.ToString() ?? "null")),
+					Logger.LogWarning(string.Join(" ", args.Select(a => JintModuleAdapter.FormatArg(a))),
 						ctx.ScriptObject,
 						$"Script_{ctx.ScriptObject?.GetEntityId().GetHashCode()}");
 					return null;
 				})
 				.AddMethod("error", (ctx, args) => {
-					Logger.LogError(string.Join(" ", args.Select(a => a?.ToString() ?? "null")),
+					Logger.LogError(string.Join(" ", args.Select(a => JintModuleAdapter.FormatArg(a))),
 						ctx.ScriptObject,
 						$"Script_{ctx.ScriptObject?.GetEntityId().GetHashCode()}");
 					return null;
@@ -116,7 +118,7 @@ namespace api.nox.session.jint {
 							buf = b;
 							break;
 						case object[] arr:
-							buf = arr.Select(x => Convert.ToByte(x)).ToArray();
+							buf = arr.Select(x => x.ToByte()).ToArray();
 							break;
 						default:
 							return null;

@@ -241,7 +241,7 @@ namespace Nox.CCK.Jint {
 						if (type == typeof(Object))
 							return entry.reference;
 						if (typeof(Object).IsAssignableFrom(type))
-							return Convert.ChangeType(entry.reference, type);
+						return entry.reference; // runtime type is already the correct subclass
 						if (!string.IsNullOrEmpty(entry.value))
 							return JToken.Parse(entry.value).ToObject(type);
 					} catch {

@@ -1,26 +1,24 @@
 using Jint.Native.Object;
 using UnityEngine;
 using Jint;
-using Jint.Runtime.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Jint.Native;
-using Jint.Native.Array;
 using Jint.Runtime.Modules;
-using Nox.CCK.Utils;
 using Nox.Jint;
 using Nox.Players;
 using JintEngine = Jint.Engine;
 using Logger = Nox.CCK.Utils.Logger;
-using Transform = UnityEngine.Transform;
 using api.nox.jint;
+using Jint.Runtime.Interop;
+using Nox.CCK.Scripting;
 
 namespace api.nox.session.jint {
 	public class JintBackingSession : MonoBehaviour, IJintBacking {
 		public JintBackingModule module;
-		public IJintScript       Script;
-		public ObjectInstance    Context;
+		public IJintScript Script;
+		public ObjectInstance Context;
 
 		/// <summary>
 		/// Tags that identify the context this backing runs in (e.g. <c>"session"</c>, <c>"avatar"</c>).
@@ -28,18 +26,18 @@ namespace api.nox.session.jint {
 		/// </summary>
 		public string[] Tags = { "session" };
 
-		private JintEngine _engine;
-		private bool       _initialized;
+		private bool _initialized;
+		private JintScriptingContext _context;
 
 		/// <summary>Expose the underlying engine for <see cref="JintScriptingContext"/>.</summary>
-		internal JintEngine Engine => _engine;
+		internal JintEngine Engine { get; private set; }
 
 		public void Initialize() {
 			if (_initialized)
 				return;
 
 			try {
-				_engine = new JintEngine(
+				Engine = new JintEngine(
 					ctx => {
 						ctx.LimitMemory(4_194_304);
 						ctx.LimitRecursion(1024);
@@ -47,25 +45,25 @@ namespace api.nox.session.jint {
 					}
 				);
 
-				// Jint-specific globals (TypeReference cannot be expressed as a generic module)
-				_engine.SetValue("GameObject", TypeReference.CreateTypeReference(_engine, typeof(GameObject)));
-				_engine.SetValue("Vector3",    TypeReference.CreateTypeReference(_engine, typeof(Vector3)));
-				_engine.SetValue("Vector2",    TypeReference.CreateTypeReference(_engine, typeof(Vector2)));
-				_engine.SetValue("Quaternion", TypeReference.CreateTypeReference(_engine, typeof(Quaternion)));
-				_engine.SetValue("Transform",  TypeReference.CreateTypeReference(_engine, typeof(Transform)));
-				_engine.SetValue("Buffer",     TypeReference.CreateTypeReference(_engine, typeof(NodeBufferImpl)));
+				var registry = Main.ScriptingAPI;
+				_context = new JintScriptingContext(this, registry);
 
-				// Bind all modules registered in nox.scripting via the adapter
-				var scriptingAPI = Main.ScriptingAPI;
-				var context      = new JintScriptingContext(this, scriptingAPI);
-				if (scriptingAPI != null)
-					JintModuleAdapter.BindAllModules(_engine, context, scriptingAPI, Tags);
-				else
-					Logger.LogWarning("[session.jint] scripting API not found – no modules bound.", this);
+				foreach (var definition in registry.Converters) 
+					Engine.SetValue(
+						definition.HandledType.Name,
+						JintTypeAdapter.BuildType(Engine, definition, _context)
+					);
+
+				foreach (var definition in registry.Modules) 
+					if (JintModuleAdapter.ModuleMatchesTags(definition, Tags))
+						Engine.AddModule(
+							definition.Id.Resolve(NameResolver.snake_case_style),
+							x => JintTypeAdapter.BindModule(Engine, x, definition, _context)
+						);
 
 				var m = JintEngine.PrepareModule(Script.GetContent());
-				_engine.AddModule("__main__", x => x.AddModule(m));
-				Context = _engine.ImportModule("__main__");
+				Engine.AddModule("__main__", x => x.AddModule(m));
+				Context      = Engine.ImportModule("__main__");
 				_initialized = true;
 
 				try {
@@ -76,24 +74,25 @@ namespace api.nox.session.jint {
 					Logger.LogError(e, this);
 				}
 
-				Main.CoreAPI.EventAPI.Emit("jint_engine_created", this, _engine);
+				Main.CoreAPI.EventAPI.Emit("jint_engine_created", this, Engine);
 			} catch (Exception e) {
-				_engine = null;
+				Engine = null;
 				Logger.LogError(e, this);
 			}
 		}
 
 		private void SetExports(string property, object value) {
 			try {
-				if (_engine == null || Context == null)
+				if (Engine == null || Context == null)
 					return;
 				var export = Context.Get("exports");
 				if (export.IsUndefined())
-					export = new ObjectWrapper(_engine, new Dictionary<string, object>());
+					export = new ObjectWrapper(Engine, new Dictionary<string, object>());
 				if (!export.IsObject())
 					return;
-				var obj = export.AsObject();
-				obj.Set(property, new ObjectWrapper(_engine, value), true);
+				var obj   = export.AsObject();
+				var jsVal = JintTypeAdapter.ToValue(Engine, value, _context);
+				obj.Set(property, jsVal, true);
 			} catch (Exception e) {
 				Logger.LogError(new Exception($"Error setting export '{property}': {e.Message}", e), this);
 			}
@@ -108,7 +107,12 @@ namespace api.nox.session.jint {
 				if (methodRef.IsUndefined())
 					return;
 
-				_engine.Invoke(methodRef, args);
+				Engine.Invoke(methodRef, args);
+			} catch (Jint.Runtime.JavaScriptException jsEx) {
+				Logger.LogError(
+					$"[script] {method}(): {jsEx.Message}\n" +
+					$"  at {jsEx.Location.Source} line {jsEx.Location.Start.Line} col {jsEx.Location.Start.Column}",
+					this);
 			} catch (Exception e) {
 				Logger.LogError(new Exception($"Error invoking method '{method}'", e), this);
 			}
@@ -127,19 +131,19 @@ namespace api.nox.session.jint {
 				var jsArgs = new JsValue[ args.Length ];
 				for (var i = 0; i < args.Length; i++) {
 					if (args[i] is byte[] bytes) {
-						var jsArray = _engine.Realm.Intrinsics.Array.Construct(bytes.Length);
+						var jsArray = Engine.Realm.Intrinsics.Array.Construct(bytes.Length);
 						for (var j = 0; j < bytes.Length; j++) {
-							jsArray[(uint)j] = JsValue.FromObject(_engine, bytes[j]);
+							jsArray[(uint)j] = JsValue.FromObject(Engine, bytes[j]);
 						}
 						jsArgs[i] = jsArray;
 					} else if (args[i] is IPlayer player) {
-						jsArgs[i] = new ObjectWrapper(_engine, player);
+						jsArgs[i] = new ObjectWrapper(Engine, player);
 					} else {
-						jsArgs[i] = JsValue.FromObject(_engine, args[i]);
+						jsArgs[i] = JsValue.FromObject(Engine, args[i]);
 					}
 				}
 
-				return _engine.Invoke(methodRef, jsArgs);
+				return Engine.Invoke(methodRef, jsArgs);
 			} catch (Exception e) {
 				Logger.LogError(new Exception($"Error invoking method '{method}'", e), this);
 				return null;
@@ -159,19 +163,19 @@ namespace api.nox.session.jint {
 				var jsArgs = new JsValue[ args.Length ];
 				for (var i = 0; i < args.Length; i++) {
 					if (args[i] is byte[] bytes) {
-						var jsArray = _engine.Realm.Intrinsics.Array.Construct(bytes.Length);
+						var jsArray = Engine.Realm.Intrinsics.Array.Construct(bytes.Length);
 						for (var j = 0; j < bytes.Length; j++) {
-							jsArray[(uint)j] = JsValue.FromObject(_engine, bytes[j]);
+							jsArray[(uint)j] = JsValue.FromObject(Engine, bytes[j]);
 						}
 						jsArgs[i] = jsArray;
 					} else if (args[i] is IPlayer player) {
-						jsArgs[i] = new ObjectWrapper(_engine, player);
+						jsArgs[i] = new ObjectWrapper(Engine, player);
 					} else {
-						jsArgs[i] = JsValue.FromObject(_engine, args[i]);
+						jsArgs[i] = JsValue.FromObject(Engine, args[i]);
 					}
 				}
 
-				var result = _engine.Invoke(methodRef, jsArgs);
+				var result = Engine.Invoke(methodRef, jsArgs);
 				return (T)result.ToObject();
 			} catch (Exception e) {
 				Logger.LogError(new Exception($"Error invoking method '{method}'", e), this);
@@ -180,11 +184,11 @@ namespace api.nox.session.jint {
 		}
 
 		private void OnDestroy() {
-			if (_engine == null)
+			if (Engine == null)
 				return;
-			Main.CoreAPI.EventAPI.Emit("jint_engine_destroyed", this, _engine);
-			_engine.Dispose();
-			_engine = null;
+			Main.CoreAPI.EventAPI.Emit("jint_engine_destroyed", this, Engine);
+			Engine.Dispose();
+			Engine  = null;
 			Context = null;
 		}
 

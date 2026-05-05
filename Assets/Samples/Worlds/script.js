@@ -1,5 +1,6 @@
 import { transform, rigidbody } from 'behaviour';
 import { log } from 'console';
+import { Vector3 } from 'unity';
 
 let d = Date.now();
 export let speed = 0.1;
@@ -18,8 +19,8 @@ function reset() {
     if (!exports?.target) return;
     transform.position = exports.target.position;
     if (!rigidbody) return;
-    rigidbody.linearVelocity = new Vector3(0, 0, 0);
-    rigidbody.angularVelocity = new Vector3(0, 0, 0);
+    rigidbody.linearVelocity = Vector3.from(0, 0, 0);
+    rigidbody.angularVelocity = Vector3.from(0, 0, 0);
 }
 
 export function onUpdate() {
@@ -28,6 +29,6 @@ export function onUpdate() {
     transform.rotate(delta * -speed, delta * speed, delta * -speed);
 
     if (!exports?.target) return;
-    const dis = transform.position.distance(exports.target.position);
+    const dis = Vector3.distance(transform.position, exports.target.position);
     if (dis > exports.distance) reset();
 }
