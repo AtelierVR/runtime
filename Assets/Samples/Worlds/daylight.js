@@ -1,5 +1,6 @@
 import { log } from 'console';
 import { transform } from 'behaviour';
+import { Quaternion } from 'unity';
 
 export let lastMinute = -1;
 export let precentTime = -1;
@@ -7,16 +8,14 @@ export let precentTime = -1;
 export function onUpdate() {
     let time = Date.now();
 
-    let dayInMilliseconds = 24 * 60 * 60 * 1000;
-    precentTime = (time % dayInMilliseconds) / dayInMilliseconds;
+    const dayInSeconds = 24 * 60 * 60;
+    precentTime = (time % dayInSeconds) / dayInSeconds;
 
-    // SetLocalPositionAndRotation n'est pas exposé par le convertisseur —
-    // on assigne directement localRotation.
     transform.localRotation = Quaternion.Euler(precentTime * 360 + 270, 0, 0);
 
-    let lm = Math.floor((time / 1000 / 60) % 60);
+    const lm = Math.floor((time / 60) % 60);
     if (lm !== lastMinute) {
-        let hours = Math.floor((time / 1000 / 60 / 60) % 24);
+        const hours = Math.floor((time / 3600) % 24);
         lastMinute = lm;
         log(`Time: ${hours.toString().padStart(2, '0')}:${lm.toString().padStart(2, '0')}`);
     }

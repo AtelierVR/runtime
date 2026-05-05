@@ -176,7 +176,7 @@ namespace api.nox.jint {
 						}
 
 						case IScriptingAsyncMethodDefinition method: {
-							var name = binding.Name.Resolve(NameResolver.PascalCaseStyle);
+							var name = binding.Name.Resolve(NameResolver.camelCaseStyle);
 							builder.ExportFunction(name, (args) => {
 								var          nativeArgs = args.Select(FromJsValue).ToArray();
 								Task<object> task;

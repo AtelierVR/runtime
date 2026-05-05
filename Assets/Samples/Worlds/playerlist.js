@@ -20,7 +20,7 @@ export function onPlayerLeft(player) {
 }
 
 export function onAwake() {
-  for(var i = 0; i < getCount(); i++) {
+  for(let i = 0; i < getCount(); i++) {
     let p = getAt(i);
     players.push(p.Display);
     log(`Player ${p.Display} is in the game`);
