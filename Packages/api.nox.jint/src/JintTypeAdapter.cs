@@ -351,13 +351,17 @@ namespace api.nox.jint {
 
 		public static JsValue ToValue(JintEngine engine, object value, IJintScriptingContext context = null)
 			=> value switch {
-				JsValue v                      => v,
-				bool b                         => b ? JsBoolean.True : JsBoolean.False,
-				null                           => JsValue.Null,
-				Task<object> t                 => ToPromise(engine, t.AsUniTask(), context),
-				UniTask<object> t              => ToPromise(engine, t, context),
-				_ when value.GetType().IsArray => ToArray(engine, (Array)value, context),
-				_                              => JsValue.FromObject(engine, value)
+				JsValue v                                                              => v,
+				bool b                                                                 => b ? JsBoolean.True : JsBoolean.False,
+				null                                                                   => JsValue.Null,
+				Task<object> t when t.IsCompleted => (t.IsFaulted || t.IsCanceled)
+					? JsValue.Null
+					: ToValue(engine, t.GetAwaiter().GetResult(), context),
+				Task<object> t                                                         => ToPromise(engine, t.AsUniTask(), context),
+				UniTask<object> t when t.Status == UniTaskStatus.Succeeded            => ToValue(engine, t.GetAwaiter().GetResult(), context),
+				UniTask<object> t                                                      => ToPromise(engine, t, context),
+				_ when value.GetType().IsArray                                         => ToArray(engine, (Array)value, context),
+				_                                                                      => JsValue.FromObject(engine, value)
 			};
 
 		static internal JsValue ToPromise(JintEngine engine, UniTask<object> task, IJintScriptingContext context = null) {

@@ -8,7 +8,12 @@ export let exports = {
 
 let count = 0;
 
-async function load() {
+function updateLabel() {
+    if (exports?.result)
+        exports.result.text = count.toString();
+}
+
+export async function onAwake() {
     const raw = await getPublic();
     if (!raw || raw.length === 0) {
         count = 0;
@@ -21,23 +26,10 @@ async function load() {
     log(`Counter loaded: ${count}`);
 }
 
-async function save() {
-    const raw = bufferFrom(count.toString(), 'utf8');
-    await setPublic(raw);
-}
-
-function updateLabel() {
-    if (exports?.result) 
-        exports.result.text = count.toString();
-}
-
-export async function onAwake() {
-    await load();
-}
-
 export async function onClick() {
     count++;
     updateLabel();
-    await save();
+    const raw = bufferFrom(count.toString(), 'utf8');
+    await setPublic(raw);
     log(`Counter: ${count}`);
 }
