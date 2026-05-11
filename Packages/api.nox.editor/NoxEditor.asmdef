@@ -5,7 +5,9 @@
         "UniTask",
         "Nox.CCK",
         "Nox.ModLoader",
-        "Nox.Avatars"
+        "Nox.Avatars",
+        "Nox.Controllers",
+        "Nox.Controllers.Runtime"
     ],
     "includePlatforms": [
         "Editor"
