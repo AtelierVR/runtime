@@ -3,6 +3,7 @@ using UnityEngine;
 using Jint;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Jint.Native;
 using Jint.Runtime.Modules;
@@ -11,8 +12,10 @@ using Nox.Players;
 using JintEngine = Jint.Engine;
 using Logger = Nox.CCK.Utils.Logger;
 using api.nox.jint;
+using Jint.Runtime;
 using Jint.Runtime.Interop;
 using Nox.CCK.Scripting;
+using Cysharp.Threading.Tasks;
 
 namespace api.nox.session.jint {
 	public class JintBackingSession : MonoBehaviour, IJintBacking {
@@ -39,7 +42,7 @@ namespace api.nox.session.jint {
 			try {
 				Engine = new JintEngine(
 					ctx => {
-						ctx.LimitMemory(4_194_304);
+						ctx.LimitMemory(67_108_864); // 64 MB per invocation
 						ctx.LimitRecursion(1024);
 						ctx.EnableModules(new DefaultModuleLoader(Main.JintAPI.GetModulesPath()));
 					}
@@ -48,22 +51,21 @@ namespace api.nox.session.jint {
 				var registry = Main.ScriptingAPI;
 				_context = new JintScriptingContext(this, registry);
 
-				foreach (var definition in registry.Converters) 
+				foreach (var definition in registry.Converters)
 					Engine.SetValue(
 						definition.HandledType.Name,
 						JintTypeAdapter.BuildType(Engine, definition, _context)
 					);
 
-				foreach (var definition in registry.Modules) 
+				foreach (var definition in registry.Modules)
 					if (JintModuleAdapter.ModuleMatchesTags(definition, Tags))
-						Engine.AddModule(
+						Engine.Modules.Add(
 							definition.Id.Resolve(NameResolver.snake_case_style),
 							x => JintTypeAdapter.BindModule(Engine, x, definition, _context)
 						);
 
-				var m = JintEngine.PrepareModule(Script.GetContent());
-				Engine.AddModule("__main__", x => x.AddModule(m));
-				Context      = Engine.ImportModule("__main__");
+				Engine.Modules.Add("__main__", Script.GetContent());
+				Context = Engine.Modules.Import("__main__");
 				_initialized = true;
 
 				try {
@@ -87,7 +89,7 @@ namespace api.nox.session.jint {
 					return;
 				var export = Context.Get("exports");
 				if (export.IsUndefined())
-					export = new ObjectWrapper(Engine, new Dictionary<string, object>());
+					export = ObjectWrapper.Create(Engine, new Dictionary<string, object>(), typeof(Dictionary<string, object>));
 				if (!export.IsObject())
 					return;
 				var obj   = export.AsObject();
@@ -107,12 +109,18 @@ namespace api.nox.session.jint {
 				if (methodRef.IsUndefined())
 					return;
 
-				Engine.Invoke(methodRef, args);
-			} catch (Jint.Runtime.JavaScriptException jsEx) {
+				var jsArgs = new JsValue[args.Length];
+				for (var i = 0; i < args.Length; i++)
+					jsArgs[i] = JintTypeAdapter.ToValue(Engine, args[i], _context);
+				Engine.Invoke(methodRef, jsArgs);
+			} catch (JavaScriptException jsEx) {
 				Logger.LogError(
-					$"[script] {method}(): {jsEx.Message}\n" +
-					$"  at {jsEx.Location.Source} line {jsEx.Location.Start.Line} col {jsEx.Location.Start.Column}",
-					this);
+					$"{method}(): {jsEx.Message}\n"
+					+ $"  at {jsEx.Location.Start.Line}:{jsEx.Location.Start.Column} to {jsEx.Location.End.Line}:{jsEx.Location.End.Column}\n"
+					+ $"  stacktrace: {jsEx.StackTrace}",
+					context: this,
+					tag: "jint_exception"
+				);
 			} catch (Exception e) {
 				Logger.LogError(new Exception($"Error invoking method '{method}'", e), this);
 			}
@@ -131,13 +139,13 @@ namespace api.nox.session.jint {
 				var jsArgs = new JsValue[ args.Length ];
 				for (var i = 0; i < args.Length; i++) {
 					if (args[i] is byte[] bytes) {
-						var jsArray = Engine.Realm.Intrinsics.Array.Construct(bytes.Length);
+						var jsArray = Engine.Intrinsics.Array.Construct(bytes.Length);
 						for (var j = 0; j < bytes.Length; j++) {
 							jsArray[(uint)j] = JsValue.FromObject(Engine, bytes[j]);
 						}
 						jsArgs[i] = jsArray;
 					} else if (args[i] is IPlayer player) {
-						jsArgs[i] = new ObjectWrapper(Engine, player);
+						jsArgs[i] = ObjectWrapper.Create(Engine, player, player.GetType());
 					} else {
 						jsArgs[i] = JsValue.FromObject(Engine, args[i]);
 					}
@@ -163,13 +171,13 @@ namespace api.nox.session.jint {
 				var jsArgs = new JsValue[ args.Length ];
 				for (var i = 0; i < args.Length; i++) {
 					if (args[i] is byte[] bytes) {
-						var jsArray = Engine.Realm.Intrinsics.Array.Construct(bytes.Length);
+						var jsArray = Engine.Intrinsics.Array.Construct(bytes.Length);
 						for (var j = 0; j < bytes.Length; j++) {
 							jsArray[(uint)j] = JsValue.FromObject(Engine, bytes[j]);
 						}
 						jsArgs[i] = jsArray;
 					} else if (args[i] is IPlayer player) {
-						jsArgs[i] = new ObjectWrapper(Engine, player);
+						jsArgs[i] = ObjectWrapper.Create(Engine, player, player.GetType());
 					} else {
 						jsArgs[i] = JsValue.FromObject(Engine, args[i]);
 					}
@@ -192,7 +200,22 @@ namespace api.nox.session.jint {
 			Context = null;
 		}
 
-		public void OnSessionSelected()
+        public void Awake()
+			=> Invoke("onAwake");
+
+		public void Start()
+			=> Invoke("onStart");
+
+		public void Update()
+			=> Invoke("onUpdate");
+
+		public void LateUpdate()
+			=> Invoke("onLateUpdate");
+
+		public void FixedUpdate()
+			=> Invoke("onFixedUpdate");
+
+        public void OnSessionSelected()
 			=> Invoke("onSessionSelected");
 
 		public void OnSessionDeselected()
@@ -209,51 +232,14 @@ namespace api.nox.session.jint {
 
 		public void OnEvent(long @event, byte[] raw, IPlayer sender)
 			=> Invoke("onEvent", @event, raw, sender);
-	}
 
-	public static class NodeBufferImpl {
-		public static byte[] from(string data)
-			=> from(data, "utf8");
+		public void OnTick(long tick)
+			=> Invoke("onTick", tick);
 
-		public static byte[] from(string data, string encoding) {
-			return encoding.ToLower() switch {
-				"utf8"    => System.Text.Encoding.UTF8.GetBytes(data),
-				"ascii"   => System.Text.Encoding.ASCII.GetBytes(data),
-				"unicode" => System.Text.Encoding.Unicode.GetBytes(data),
-				"base64"  => Convert.FromBase64String(data),
-				"hex" => Enumerable.Range(0, data.Length / 2)
-					.Select(x => Convert.ToByte(data.Substring(x * 2, 2), 16))
-					.ToArray(),
-				_ => throw new NotSupportedException($"Encoding '{encoding}' is not supported"),
-			};
-		}
+		public void OnTickRateChanged(int tickRate)
+			=> Invoke("onTickRateChanged", tickRate);
 
-		public static string toString(byte[] buffer)
-			=> toString(buffer, "utf8");
-
-		public static string toString(byte[] buffer, string encoding) {
-			return encoding.ToLower() switch {
-				"utf8"    => System.Text.Encoding.UTF8.GetString(buffer),
-				"ascii"   => System.Text.Encoding.ASCII.GetString(buffer),
-				"unicode" => System.Text.Encoding.Unicode.GetString(buffer),
-				"base64"  => Convert.ToBase64String(buffer),
-				"hex"     => BitConverter.ToString(buffer).Replace("-", "").ToLower(),
-				_         => throw new NotSupportedException($"Encoding '{encoding}' is not supported"),
-			};
-		}
-	}
-
-	public static class NodeHashImpl {
-		public static int crc32(byte[] data)
-			=> Nox.CCK.Utils.Hash.CRC32(data);
-
-		public static int crc32(string data)
-			=> Nox.CCK.Utils.Hash.CRC32(data);
-
-		public static long crc64(byte[] data)
-			=> Nox.CCK.Utils.Hash.CRC64(data);
-
-		public static long crc64(string data)
-			=> Nox.CCK.Utils.Hash.CRC64(data);
+		public void OnDrawGizmos()
+			=> Invoke("onGizmo");
 	}
 }

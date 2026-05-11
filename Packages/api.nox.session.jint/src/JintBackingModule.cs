@@ -34,14 +34,15 @@ namespace api.nox.session.jint {
 
 		#endregion
 
-		public ISession                 Session;
+		public ISession Session;
 		public List<JintBackingSession> backings = new();
 
 		public void OnSceneLoaded(IWorldDescriptor _0, int _1, GameObject anchor) {
 			var scripts = anchor.GetComponentsInChildren<IJintScript>(true);
 			foreach (var script in scripts) {
 				var mono = script as MonoBehaviour;
-				if (backings.Any(b => b.GetEntityId() == mono!.GetEntityId())) continue;
+				if (backings.Any(b => b && ReferenceEquals(b.Script, script)))
+					continue;
 				var backing = mono!.gameObject.GetOrAddComponent<JintBackingSession>();
 				backing.module = this;
 				backing.Script = script;
@@ -52,6 +53,7 @@ namespace api.nox.session.jint {
 
 		public void OnSceneUnloaded(int index)
 			=> backings.RemoveAll(b => !b);
+
 
 		public void OnLoaded(ISession session)
 			=> Session = session;
@@ -91,6 +93,16 @@ namespace api.nox.session.jint {
 		public void OnEvent(long @event, byte[] payload, IPlayer sender) {
 			foreach (var backing in backings)
 				backing.OnEvent(@event, payload, sender);
+		}
+
+		public void OnTick(long tick) {
+			foreach (var backing in backings)
+				backing.OnTick(tick);
+		}
+
+		public void OnTickRateChanged(int tickRate) {
+			foreach (var backing in backings)
+				backing.OnTickRateChanged(tickRate);
 		}
 	}
 }

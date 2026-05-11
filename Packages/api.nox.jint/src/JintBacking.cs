@@ -34,7 +34,8 @@ namespace api.nox.jint {
 				: Array.Empty<string>();
 
 		public object GetProperty(string propertyName) {
-			if (ExecutionContext == null) return null;
+			if (ExecutionContext == null)
+				return null;
 			try {
 				var prop = ExecutionContext.Get(propertyName);
 				return prop.IsUndefined() ? null : prop.ToObject();
@@ -46,7 +47,8 @@ namespace api.nox.jint {
 
 		private void OnValidate() {
 			script ??= GetComponent<JintScript>();
-			if (Engine == null) Prepare();
+			if (Engine == null)
+				Prepare();
 		}
 
 		// ReSharper disable Unity.PerformanceAnalysis
@@ -56,8 +58,7 @@ namespace api.nox.jint {
 
 			NoxLogger.Log("Prepare");
 			Engine = new Engine(
-				ctx =>
-				{
+				ctx => {
 					ctx.LimitMemory(4_194_304);
 					ctx.LimitRecursion(1024);
 				}
@@ -71,30 +72,30 @@ namespace api.nox.jint {
 
 			// import json of Script.exports
 			try {
-				Engine.SetValue("exports", new ObjectWrapper(Engine, script.GetExports()));
+				Engine.SetValue("exports", ObjectWrapper.Create(Engine, script.GetExports(), typeof(Dictionary<string, object>)));
 			} catch (Exception e) {
 				NoxLogger.LogError($"Error parsing exports: {e.Message}", this);
 			}
 
-			Engine.AddModule(
+			Engine.Modules.Add(
 				"console", builder => builder
 					.ExportFunction("log", objets => Logger.Log(LogType.Log, string.Join(" ", objets.Select(e => e.ToString()))))
 					.ExportFunction("warn", objets => Logger.Log(LogType.Warning, string.Join(" ", objets.Select(e => e.ToString()))))
 					.ExportFunction("error", objets => Logger.Log(LogType.Error, string.Join(" ", objets.Select(e => e.ToString()))))
 			);
 
-			Engine.AddModule(
+			Engine.Modules.Add(
 				"behaviour", builder => builder
-					.ExportObject("transform", new ObjectWrapper(Engine, transform))
-					.ExportObject("gameObject", new ObjectWrapper(Engine, gameObject))
+					.ExportObject("transform", ObjectWrapper.Create(Engine, transform, typeof(Transform)))
+					.ExportObject("gameObject", ObjectWrapper.Create(Engine, gameObject, typeof(GameObject)))
 			);
 
 			// add Buffer of nodejs
-			Engine.AddModule("buffer", builder => builder.ExportType<NodeBuffer>("Buffer"));
+			Engine.Modules.Add("buffer", builder => builder.ExportType<NodeBuffer>("Buffer"));
 			Engine.SetValue("Buffer", TypeReference.CreateTypeReference(Engine, typeof(NodeBufferImpl)));
-			
+
 			// add Hash of nodejs
-			Engine.AddModule("hash", builder => builder.ExportType<NodeHash>("Hash"));
+			Engine.Modules.Add("hash", builder => builder.ExportType<NodeHash>("Hash"));
 			Engine.SetValue("Hash", TypeReference.CreateTypeReference(Engine, typeof(NodeHashImpl)));
 
 			try {
@@ -102,20 +103,20 @@ namespace api.nox.jint {
 				NoxLogger.LogDebug($"script.asset: {script.asset}");
 				NoxLogger.LogDebug($"script.asset.text: {script.asset.text}");
 
-				var module = Engine.PrepareModule(script.asset.text);
-				Engine.AddModule("__main__", x => x.AddModule(module));
-				ExecutionContext = Engine.ImportModule("__main__");
+				Engine.Modules.Add("__main__", script.asset.text);
+				ExecutionContext = Engine.Modules.Import("__main__");
 				Invoke("onPrepare");
 			} catch (Exception e) {
 				NoxLogger.LogError($"Error executing onPrepare function: {e.Message}", this);
 				NoxLogger.LogError(e, this);
-				Engine = null;
+				Engine           = null;
 				ExecutionContext = null;
 			}
 		}
 
 		private void OnDestroy() {
-			if (Engine == null) return;
+			if (Engine == null)
+				return;
 			try {
 				Invoke("onDestroy");
 			} catch (Exception e) {
@@ -123,16 +124,19 @@ namespace api.nox.jint {
 			}
 
 			Engine.Dispose();
-			Engine = null;
+			Engine           = null;
 			ExecutionContext = null;
 		}
 
 		public void Invoke(string methodName, params object[] args) {
-			if (Engine == null) Prepare();
-			if (Engine == null) return;
+			if (Engine == null)
+				Prepare();
+			if (Engine == null)
+				return;
 			try {
 				var method = ExecutionContext.Get(methodName);
-				if (method.IsUndefined()) return;
+				if (method.IsUndefined())
+					return;
 				Engine.Invoke(method, args);
 			} catch (Exception e) {
 				NoxLogger.LogError($"Error executing {methodName} function: {e.Message}", this);
@@ -140,8 +144,10 @@ namespace api.nox.jint {
 		}
 
 		public object Call(string functionName, object[] args) {
-			if (Engine == null) Prepare();
-			if (Engine == null) return null;
+			if (Engine == null)
+				Prepare();
+			if (Engine == null)
+				return null;
 			try {
 				var method = ExecutionContext.Get(functionName);
 				return !method.IsUndefined()
@@ -154,11 +160,14 @@ namespace api.nox.jint {
 		}
 
 		public T Call<T>(string functionName, object[] args) {
-			if (Engine == null) Prepare();
-			if (Engine == null) return default;
+			if (Engine == null)
+				Prepare();
+			if (Engine == null)
+				return default;
 			try {
 				var method = ExecutionContext.Get(functionName);
-				if (method.IsUndefined()) return default;
+				if (method.IsUndefined())
+					return default;
 				var result = Engine.Invoke(method, args);
 				return (T)result.ToObject();
 			} catch (Exception e) {
@@ -175,8 +184,8 @@ namespace api.nox.jint {
 	}
 
 	public interface NodeHash {
-		int crc32(byte[] data);
-		int crc32(string data);
+		int crc32(byte[]  data);
+		int crc32(string  data);
 		long crc64(byte[] data);
 		long crc64(string data);
 	}
