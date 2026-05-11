@@ -1,11 +1,5 @@
 {
   "dependencies": {
-    "api.nox.editor": {
-      "version": "file:api.nox.editor",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "api.nox.instance": {
       "version": "file:api.nox.instance",
       "depth": 0,
@@ -689,12 +683,6 @@
       },
       "url": "https://packages.unity.com"
     },
-    "dev.nox.development": {
-      "version": "file:dev.nox.development",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "nox.assetbundles": {
       "version": "file:nox.assetbundles",
       "depth": 0,
@@ -751,6 +739,12 @@
     },
     "nox.discord": {
       "version": "file:nox.discord",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.editor": {
+      "version": "file:nox.editor",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

@@ -11,7 +11,6 @@
 	<assembly fullname="api.nox.statistics" preserve="all" />
 	<assembly fullname="api.nox.user" preserve="all" />
 	<assembly fullname="api.nox.xr" preserve="all" />
-	<assembly fullname="dev.nox.development" preserve="all" />
 	<assembly fullname="Esprima" preserve="all" />
 	<assembly fullname="Jint" preserve="all" />
 	<assembly fullname="Mono.Cecil" preserve="all" />
@@ -74,6 +73,7 @@
 	<assembly fullname="Nox.Desktop" preserve="all" />
 	<assembly fullname="Nox.Desktop.Runtime" preserve="all" />
 	<assembly fullname="Nox.Discord" preserve="all" />
+	<assembly fullname="Nox.Editor" preserve="all" />
 	<assembly fullname="Nox.Editor.Panel" preserve="all" />
 	<assembly fullname="Nox.Editor.Panel.Runtime" preserve="all" />
 	<assembly fullname="Nox.Entities" preserve="all" />

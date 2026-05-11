@@ -14,6 +14,7 @@
     <mapping directory="$PROJECT_DIR$/Packages/nox.controllers" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.desktop" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.discord" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.editor" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.editor.panel" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.entities" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.ffmpeg" vcs="Git" />
