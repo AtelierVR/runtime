@@ -1,4 +1,4 @@
-import { log } from 'console';
+import console from 'console';
 import { transform } from 'behaviour';
 import { Quaternion } from 'unity';
 
@@ -17,6 +17,6 @@ export function onUpdate() {
     if (lm !== lastMinute) {
         const hours = Math.floor((time / 3600) % 24);
         lastMinute = lm;
-        log(`Time: ${hours.toString().padStart(2, '0')}:${lm.toString().padStart(2, '0')}`);
+        console.log(`Time: ${hours.toString().padStart(2, '0')}:${lm.toString().padStart(2, '0')}`);
     }
 }

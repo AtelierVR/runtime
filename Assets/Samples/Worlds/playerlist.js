@@ -1,5 +1,5 @@
-import { log } from 'console';
-import { getCount, getAt } from 'players';
+import console from 'console';
+import { count, at } from 'players';
 
 export let exports = {
   players: null,
@@ -8,25 +8,25 @@ export let exports = {
 let players = [];
 
 export function onPlayerJoined(player) {
-  log(`Player ${player.Display} joined the game`);
-  players.push(player.Display);
+  console.log(`Player ${player.display} joined the game`);
+  players.push(player.display);
   updatePlayerList();
 }
 
 export function onPlayerLeft(player) {
-  log(`Player ${player.Display} left the game`);
-  players = players.filter(p => p !== player.Display);
+  console.log(`Player ${player.display} left the game`);
+  players = players.filter(p => p !== player.display);
   updatePlayerList();
 }
 
 export function onAwake() {
-  for(let i = 0; i < getCount(); i++) {
-    let p = getAt(i);
-    players.push(p.Display);
-    log(`Player ${p.Display} is in the game`);
+  for(let i = 0; i < count; i++) {
+    let p = at(i);
+    players.push(p.display);
+    console.log(`Player ${p.display} is in the game`);
   }
   
-  log(players);
+  console.log(players);
   updatePlayerList();
 }
 

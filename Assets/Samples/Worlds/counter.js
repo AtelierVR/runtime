@@ -1,4 +1,4 @@
-import { log, warn } from 'console';
+import console from 'console';
 import { from as bufferFrom, toString as bufferToString } from 'buffer';
 import { getPublic, setPublic } from 'tables';
 
@@ -23,7 +23,7 @@ export async function onAwake() {
         count = isNaN(parsed) ? 0 : parsed;
     }
     updateLabel();
-    log(`Counter loaded: ${count}`);
+    console.log(`Counter loaded: ${count}`);
 }
 
 export async function onClick() {
@@ -31,5 +31,5 @@ export async function onClick() {
     updateLabel();
     const raw = bufferFrom(count.toString(), 'utf8');
     await setPublic(raw);
-    log(`Counter: ${count}`);
+    console.log(`Counter: ${count}`);
 }

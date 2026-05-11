@@ -1,5 +1,4 @@
 import { transform, rigidbody } from 'behaviour';
-import { log } from 'console';
 import { Vector3 } from 'unity';
 
 let d = Date.now();
@@ -11,7 +10,6 @@ export let exports = {
 };
 
 export function onAwake() {
-    log("Script Awake");
     reset();
 }
 
