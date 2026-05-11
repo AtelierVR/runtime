@@ -106,3 +106,7 @@
 [submodule "Packages/nox.scripting"]
 	path = Packages/nox.scripting
 	url = https://github.com/AtelierVR/nox.scripting.git
+
+[submodule "Packages/nox.editor"]
+        path = Packages/nox.editor
+        url = https://github.com/AtelierVR/nox.editor.git
