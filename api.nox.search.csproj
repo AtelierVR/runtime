@@ -571,6 +571,9 @@
     <Reference Include="System.Security.Cryptography.Pkcs">
       <HintPath>D:\Projets\nox\runtime\Packages\nox.relay\Plugins\System.Security.Cryptography.Pkcs.dll</HintPath>
     </Reference>
+    <Reference Include="Acornima">
+      <HintPath>D:\Projets\nox\runtime\Packages\api.nox.jint\Plugins\Acornima.dll</HintPath>
+    </Reference>
     <Reference Include="StirlingLabs.Utilities.NativeLibrary">
       <HintPath>D:\Projets\nox\runtime\Packages\nox.relay\Plugins\StirlingLabs.Utilities.NativeLibrary.dll</HintPath>
     </Reference>

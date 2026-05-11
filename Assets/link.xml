@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <linker>
+	<assembly fullname="Acornima" preserve="all" />
 	<assembly fullname="api.nox.instance" preserve="all" />
 	<assembly fullname="api.nox.jint" preserve="all" />
 	<assembly fullname="api.nox.main" preserve="all" />

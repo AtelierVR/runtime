@@ -91,7 +91,10 @@ PackageExports/
 /[Aa]ssets/[Tt]emp/
 /[Aa]ssets/[Aa]uto[Hh]and/
 /[Aa]ssets/[Pp]olygonmaker/
-/[Tt]hry/*
+/[Tt]hry/
+/[Pp]oi/
+/[Pp]rofiler[Cc]aptures/
+/[Uu][Ii][Ee]lements[Ss]chema/
 
 _*
 
@@ -102,6 +105,3 @@ mono_crash.*
 build_log.txt
 build_*.log
 build_*.log.meta
-
-Thry/*
-Poi/*

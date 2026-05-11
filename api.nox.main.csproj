@@ -76,14 +76,14 @@
     <Compile Include="Packages\api.nox.main\Scripts\tiles\settings\ControlSettings.cs" />
     <Compile Include="Packages\api.nox.main\Scripts\tiles\server\ServerTile.cs" />
     <Compile Include="Packages\api.nox.main\Scripts\tiles\settings\SettingTile.cs" />
-    <None Include="Packages\api.nox.main\Assets\api.nox.main\worlds\default\TexturedFresnelStandard.shader" />
-    <None Include="Packages\api.nox.main\Assets\api.nox.main\shaders\BluredColor.hlsl" />
+    <None Include="Packages\api.nox.main\Assets\main\worlds\default\TexturedFresnelStandard.shader" />
+    <None Include="Packages\api.nox.main\Assets\main\shaders\BluredColor.hlsl" />
     <None Include="Packages\api.nox.main\package.json" />
     <None Include="Packages\api.nox.main\nox.mod.json" />
-    <None Include="Packages\api.nox.main\Assets\api.nox.main\worlds\default\TexturedStableFresnelCommon.cginc" />
+    <None Include="Packages\api.nox.main\Assets\main\worlds\default\TexturedStableFresnelCommon.cginc" />
     <None Include="Packages\api.nox.main\link.xml" />
     <None Include="Packages\api.nox.main\api.nox.main.asmdef" />
-    <None Include="Packages\api.nox.main\Assets\api.nox.main\worlds\default\Horizontal Skybox.shader" />
+    <None Include="Packages\api.nox.main\Assets\main\worlds\default\Horizontal Skybox.shader" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -593,6 +593,9 @@
     </Reference>
     <Reference Include="System.Security.Cryptography.Pkcs">
       <HintPath>D:\Projets\nox\runtime\Packages\nox.relay\Plugins\System.Security.Cryptography.Pkcs.dll</HintPath>
+    </Reference>
+    <Reference Include="Acornima">
+      <HintPath>D:\Projets\nox\runtime\Packages\api.nox.jint\Plugins\Acornima.dll</HintPath>
     </Reference>
     <Reference Include="StirlingLabs.Utilities.NativeLibrary">
       <HintPath>D:\Projets\nox\runtime\Packages\nox.relay\Plugins\StirlingLabs.Utilities.NativeLibrary.dll</HintPath>

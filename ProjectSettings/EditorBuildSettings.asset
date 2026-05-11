@@ -39,9 +39,6 @@ EditorBuildSettings:
     path: Assets/Samples/Avatars/1.0.0/OpenMe.unity
     guid: d1daeea0afdffe74c9af7111ca457ca0
   - enabled: 1
-    path: Assets/Samples/Worlds/DemoWorld.unity
-    guid: 39830c7dbe00a6843a4da18a86873368
-  - enabled: 1
     path: Assets/Samples/Worlds/New Scene.unity
     guid: b8ce853cf9a3b2b478f94ddd668c4528
   - enabled: 1
@@ -257,10 +254,10 @@ EditorBuildSettings:
     path: Packages/nox.game.builder/BuildScenes/main.unity
     guid: eaaaa443d7bb2384a99758427d41bfd8
   - enabled: 1
-    path: Packages/api.nox.main/Assets/api.nox.main/worlds/default/default.unity
+    path: Packages/api.nox.main/Assets/main/worlds/default/default.unity
     guid: 6846bd5ba84175847ac059e62f04fe89
   - enabled: 1
-    path: Packages/api.nox.main/Assets/api.nox.main/worlds/error/error.unity
+    path: Packages/api.nox.main/Assets/main/worlds/error/error.unity
     guid: 39db45c140203674a86a8de1e290e984
   - enabled: 1
     path: Packages/com.unity.render-pipelines.universal/Editor/SceneTemplates/Basic.unity
@@ -307,6 +304,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Camela/OPEN ME.unity
     guid: 71977d23d927d5e4bb72da9685c1668a
+  - enabled: 1
+    path: Assets/_Recovery/0 (3).unity
+    guid: 8f96b936257734e45b64caafb9aeb309
+  - enabled: 1
+    path: Assets/Samples/Worlds/DemoWorld.unity
+    guid: 2558dd75f4df7e44590c530ac53775b5
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     Unity.XR.OpenVR.Settings: {fileID: 11400000, guid: b8b1117bd0b659249ad8646d1ec58db3, type: 2}
