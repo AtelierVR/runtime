@@ -59,7 +59,9 @@
       "api.nox.user.Client"
     ],
     "editor": [
-      "api.nox.user.EditorUser"
+      "api.nox.user.EditorUser",
+      "api.nox.user.AuthentificationPanel",
+      "api.nox.user.ProfilePanel"
     ]
   }
 }

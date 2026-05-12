@@ -10,7 +10,7 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.user {
 	public class LoginInput : IDisposable {
-		private AuthentificationPanel   _panel;
+		private AuthentificationInstance _panel;
 		private VisualElement           _container;
 		private Label                   _error;
 		private TextField               _inputIdentifier;
@@ -19,7 +19,7 @@ namespace api.nox.user {
 		private Button                  _back;
 		private CancellationTokenSource _cts;
 
-		public LoginInput(VisualElement root, AuthentificationPanel panel) {
+		public LoginInput(VisualElement root, AuthentificationInstance panel) {
 			_panel           = panel;
 			_container       = root.Q<VisualElement>("login");
 			_error           = root.Q<Label>("login_error");
@@ -189,8 +189,8 @@ namespace api.nox.user {
 
 			SetEnabled(true);
 
-			EditorUser.CoreAPI.PanelAPI.SetActivePanel(EditorUser.Profile.GetId());
-			EditorUser.CoreAPI.PanelAPI.UpdatePanelList();
+			var panelApi = EditorUser.CoreAPI?.ModAPI?.GetMod("editor.panel")?.GetInstance<Nox.Editor.Panel.IPanelAPI>();
+			panelApi?.TryOpen(EditorUser.Profile);
 		}
 
 		private IServer _server;

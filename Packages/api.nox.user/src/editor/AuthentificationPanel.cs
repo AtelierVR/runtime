@@ -1,40 +1,56 @@
 using System.Collections.Generic;
 using api.nox.user.network;
-using Nox.CCK.Mods.Panels;
+using Nox.CCK.Mods.Cores;
+using Nox.CCK.Mods.Initializers;
+using Nox.Editor.Panel;
 using UnityEngine.UIElements;
 
 namespace api.nox.user {
-	public class AuthentificationPanel : IEditorPanelBuilder {
-		public string GetId()
-			=> "auth";
+	public class AuthentificationPanel : IEditorModInitializer, Nox.Editor.Panel.IPanel {
+		internal IEditorModCoreAPI          API;
+		internal AuthentificationInstance   Instance;
 
-		public string GetName()
-			=> "User/Authentification";
+		public void OnInitializeEditor(IEditorModCoreAPI api) { API = api; EditorUser.Auth = this; }
+		public void OnDisposeEditor() { Instance?.OnDestroy(); API = null; EditorUser.Auth = null; }
 
-		public string GetTitle()
-			=> "Authentification";
+		public string[] GetPath()  => new[] { "user", "auth" };
+		public string   GetLabel() => "User/Authentification";
+		public bool     IsVisible() => Main.Instance?.Network?.CurrentUser == null;
 
-		public bool IsHidden()
-			=> Main.Instance.Network.CurrentUser != null;
+		public IInstance[] GetInstances()
+			=> Instance != null ? new IInstance[] { Instance } : System.Array.Empty<IInstance>();
 
-		private readonly VisualElement     _root = new();
-		public           AddressInput      Address;
-		public           LoginInput        Login;
-		public           VerificationInput Verification;
+		public IInstance Instantiate(IWindow window, Dictionary<string, object> data)
+			=> Instance = new AuthentificationInstance(this, window);
+	}
 
-		public VisualElement Make(Dictionary<string, object> data) {
-			_root.ClearBindings();
-			_root.Clear();
+	public class AuthentificationInstance : IInstance {
+		private readonly AuthentificationPanel _panel;
+		private readonly IWindow              _window;
+		private          VisualElement        _root;
+		internal         AddressInput         Address;
+		internal         LoginInput           Login;
+		internal         VerificationInput    Verification;
 
-			var child = EditorUser.CoreAPI.AssetAPI
+		public AuthentificationInstance(AuthentificationPanel panel, IWindow window) {
+			_panel  = panel;
+			_window = window;
+		}
+
+		public Nox.Editor.Panel.IPanel GetPanel()  => _panel;
+		public IWindow                 GetWindow() => _window;
+		public string                  GetTitle()  => "Authentification";
+		public void                    OnDestroy() => _panel.Instance = null;
+
+		public VisualElement GetContent() {
+			if (_root != null) return _root;
+			_root = EditorUser.CoreAPI.AssetAPI
 				.GetAsset<VisualTreeAsset>("auth.uxml")
 				.CloneTree();
-			_root.Add(child);
 
 			Address      = new AddressInput(_root, this);
 			Login        = new LoginInput(_root, this);
 			Verification = new VerificationInput(_root, this);
-
 
 			Address.SetActive(true);
 			Login.SetActive(false);

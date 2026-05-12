@@ -9,13 +9,13 @@ namespace api.nox.user {
 	public class AddressInput : IDisposable {
 		public IServer Server;
 
-		private AuthentificationPanel _panel;
+		private AuthentificationInstance _panel;
 		private VisualElement         _container;
 		private Label                 _error;
 		private TextField             _input;
 		private Button                _submit;
 
-		public AddressInput(VisualElement root, AuthentificationPanel panel) {
+		public AddressInput(VisualElement root, AuthentificationInstance panel) {
 			_panel     = panel;
 			_container = root.Q<VisualElement>("address");
 			_error     = root.Q<Label>("address_error");

@@ -9,7 +9,7 @@ using Logger = Nox.CCK.Utils.Logger;
 
 namespace api.nox.user {
 	public class VerificationInput : IDisposable {
-		private AuthentificationPanel   _panel;
+		private AuthentificationInstance _panel;
 		private VisualElement           _container;
 		private Label                   _error;
 		private TextField               _input;
@@ -20,7 +20,7 @@ namespace api.nox.user {
 		private Label                   _methodDescription;
 		private CancellationTokenSource _cts;
 
-		public VerificationInput(VisualElement root, AuthentificationPanel panel) {
+		public VerificationInput(VisualElement root, AuthentificationInstance panel) {
 			_panel             = panel;
 			_container         = root.Q<VisualElement>("verification");
 			_error             = root.Q<Label>("verification_error");
@@ -185,8 +185,8 @@ namespace api.nox.user {
 				return;
 			}
 
-			EditorUser.CoreAPI.PanelAPI.SetActivePanel(EditorUser.Profile.GetId());
-			EditorUser.CoreAPI.PanelAPI.UpdatePanelList();
+			var panelApi = EditorUser.CoreAPI?.ModAPI?.GetMod("editor.panel")?.GetInstance<Nox.Editor.Panel.IPanelAPI>();
+			panelApi?.TryOpen(EditorUser.Profile);
 		}
 
 		private IServer              _server;

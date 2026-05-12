@@ -1029,6 +1029,10 @@
       <Project>{39bf21be-d0c7-e647-0301-babd67a9c8f6}</Project>
       <Name>Nox.CCK</Name>
     </ProjectReference>
+    <ProjectReference Include="Nox.Editor.Panel.csproj">
+      <Project>{6649157f-98c3-24ed-1b8f-f23595159e53}</Project>
+      <Name>Nox.Editor.Panel</Name>
+    </ProjectReference>
     <ProjectReference Include="Nox.Network.csproj">
       <Project>{d72e3f1d-b6a9-ae1f-6165-22b88075502b}</Project>
       <Name>Nox.Network</Name>
