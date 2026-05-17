@@ -79,7 +79,6 @@
 	<assembly fullname="Nox.Entities" preserve="all" />
 	<assembly fullname="Nox.Entities.Runtime" preserve="all" />
 	<assembly fullname="Nox.FFmpeg" preserve="all" />
-	<assembly fullname="Nox.FFmpeg.Editor" preserve="all" />
 	<assembly fullname="Nox.GameBuilder" preserve="all" />
 	<assembly fullname="Nox.GameBuilder.Pipeline" preserve="all" />
 	<assembly fullname="Nox.Instances" preserve="all" />

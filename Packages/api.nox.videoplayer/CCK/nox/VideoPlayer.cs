@@ -1,4 +1,4 @@
-#if HAS_NOX_FFMPEG
+/*#if HAS_NOX_FFMPEG
 using System;
 using System.Linq;
 using Cysharp.Threading.Tasks;
@@ -306,12 +306,15 @@ namespace Nox.CCK.VideoPlayer.Nox {
 			ResolveAsync(new VideoFetchOptions { Query = query }).Forget();
 		}
 
+		[ContextMenu("Pause")]
 		public void Pause()
 			=> Player.Pause();
 
+		[ContextMenu("Resume")]
 		public void Resume()
 			=> Player.Resume();
 
+		[ContextMenu("Stop")]
 		public void Stop()
 			=> Player.Stop();
 
@@ -435,4 +438,4 @@ namespace Nox.CCK.VideoPlayer.Nox {
 		#endregion Debug
 	}
 }
-#endif
+#endif*/

@@ -310,6 +310,18 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Samples/Worlds/DemoWorld.unity
     guid: 2558dd75f4df7e44590c530ac53775b5
+  - enabled: 1
+    path: Assets/_AVProVideo/Demos/Scenes/Demo_MediaPlayer.unity
+    guid: 839cc75f049d0ea44a78c639e529d44a
+  - enabled: 1
+    path: Assets/_AVProVideo/Demos/Scenes/Demo_360Stereo.unity
+    guid: ca8fdd4aa85509743878be7fbacf5a4f
+  - enabled: 1
+    path: Assets/_AVProVideo/Demos/Scenes/Demo_DisplayComponents.unity
+    guid: 4313ef3d8aef8764ea98fd3a15361c9b
+  - enabled: 1
+    path: Assets/_AVProVideo/Demos/Scenes/Demo_Playlist.unity
+    guid: 0317dfde9ab745b4e9ef01be5f43c7ce
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     Unity.XR.OpenVR.Settings: {fileID: 11400000, guid: b8b1117bd0b659249ad8646d1ec58db3, type: 2}
