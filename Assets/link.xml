@@ -84,6 +84,7 @@
 	<assembly fullname="Nox.GameBuilder" preserve="all" />
 	<assembly fullname="Nox.GameBuilder.Pipeline" preserve="all" />
 	<assembly fullname="Nox.Instances" preserve="all" />
+	<assembly fullname="Nox.Jiggles" preserve="all" />
 	<assembly fullname="Nox.Jint" preserve="all" />
 	<assembly fullname="Nox.KeyBinding.Editor" preserve="all" />
 	<assembly fullname="Nox.KeyBinding.Runtime" preserve="all" />

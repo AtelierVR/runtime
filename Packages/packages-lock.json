@@ -79,6 +79,16 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.gator-dragon-games.jigglephysics": {
+      "version": "https://github.com/naelstrof/JigglePhysics.git#upm",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.mathematics": "1.0.0",
+        "com.unity.collections": "2.0.0"
+      },
+      "hash": "6e570101c19bee452a31e0f75acb304ebbac8471"
+    },
     "com.hecomi.ulipsync": {
       "version": "https://github.com/hecomi/uLipSync.git#upm",
       "depth": 0,
@@ -775,6 +785,12 @@
     },
     "nox.game.builder": {
       "version": "file:nox.game.builder",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.jiggles": {
+      "version": "file:nox.jiggles",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

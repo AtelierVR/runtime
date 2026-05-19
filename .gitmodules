@@ -114,3 +114,7 @@
 	path = Packages/nox.avatars.autohand
 	url = https://github.com/AtelierVR/nox.avatars.autohand
 	branch = developement
+[submodule "Packages/nox.jiggles"]
+	path = Packages/nox.jiggles
+	url = https://github.com/AtelierVR/nox.jiggles.git
+	branch = development

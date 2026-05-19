@@ -6,6 +6,7 @@
     <mapping directory="$PROJECT_DIR$/Packages/com.keviniglesias.basicmotions" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.assetbundles" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.avatars" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.avatars.autohand" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.avatars.finalik" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.avatars.modules" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.avatars.rigbuilder" vcs="Git" />

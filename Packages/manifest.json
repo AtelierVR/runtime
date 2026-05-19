@@ -2,6 +2,7 @@
   "dependencies": {
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.hecomi.ulipsync": "https://github.com/hecomi/uLipSync.git#upm",
+    "com.gator-dragon-games.jigglephysics": "https://github.com/naelstrof/JigglePhysics.git#upm",
     "com.spoiledcat.git": "1.0.62",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.ai.assistant": "2.6.0-pre.1",
