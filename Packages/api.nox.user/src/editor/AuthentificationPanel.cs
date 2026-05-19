@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using api.nox.user.network;
 using Nox.CCK.Mods.Cores;
@@ -60,3 +61,4 @@ namespace api.nox.user {
 		}
 	}
 }
+#endif

@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using Cysharp.Threading.Tasks;
 using Nox.Servers;
@@ -100,3 +101,4 @@ namespace api.nox.user {
 		}
 	}
 }
+#endif

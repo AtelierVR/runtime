@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Mods.Cores;
@@ -98,3 +99,4 @@ namespace api.nox.user {
 		}
 	}
 }
+#endif

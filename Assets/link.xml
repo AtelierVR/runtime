@@ -23,6 +23,7 @@
 	<assembly fullname="Nox.Avatars.Camera" preserve="all" />
 	<assembly fullname="Nox.Avatars.Editor" preserve="all" />
 	<assembly fullname="Nox.Avatars.FinalIK" preserve="all" />
+	<assembly fullname="Nox.Avatars.Hand" preserve="all" />
 	<assembly fullname="nox.avatars.modules" preserve="all" />
 	<assembly fullname="Nox.Avatars.Modules.Runtime" preserve="all" />
 	<assembly fullname="Nox.Avatars.Parameters" preserve="all" />
@@ -39,6 +40,7 @@
 	<assembly fullname="Nox.CCK.Avatars.Camera" preserve="all" />
 	<assembly fullname="Nox.CCK.Avatars.Common" preserve="all" />
 	<assembly fullname="Nox.CCK.Avatars.EyeLooks" preserve="all" />
+	<assembly fullname="Nox.CCK.Avatars.Hand" preserve="all" />
 	<assembly fullname="Nox.CCK.Avatars.Modules.Editor" preserve="all" />
 	<assembly fullname="Nox.CCK.Avatars.Parameters" preserve="all" />
 	<assembly fullname="Nox.CCK.Avatars.Playable" preserve="all" />

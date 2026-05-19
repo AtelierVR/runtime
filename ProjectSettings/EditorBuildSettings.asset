@@ -322,6 +322,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_AVProVideo/Demos/Scenes/Demo_Playlist.unity
     guid: 0317dfde9ab745b4e9ef01be5f43c7ce
+  - enabled: 1
+    path: Assets/AutoHand/Examples/Scenes/FinalIK (Full Body)/Demo (BETA).unity
+    guid: 15b1b958630b36b45ad5d22e80afc709
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     Unity.XR.OpenVR.Settings: {fileID: 11400000, guid: b8b1117bd0b659249ad8646d1ec58db3, type: 2}

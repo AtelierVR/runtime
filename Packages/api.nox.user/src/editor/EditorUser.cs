@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using Nox.CCK.Mods.Cores;
 using Nox.CCK.Mods.Initializers;
 
@@ -11,3 +12,4 @@ namespace api.nox.user {
 		public void OnDisposeEditor()                         => CoreAPI = null;
 	}
 }
+#endif

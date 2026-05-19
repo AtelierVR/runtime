@@ -110,3 +110,7 @@
 [submodule "Packages/nox.editor"]
         path = Packages/nox.editor
         url = https://github.com/AtelierVR/nox.editor.git
+[submodule "Packages/nox.avatars.autohand"]
+	path = Packages/nox.avatars.autohand
+	url = https://github.com/AtelierVR/nox.avatars.autohand
+	branch = developement

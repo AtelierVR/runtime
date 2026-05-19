@@ -695,6 +695,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "nox.avatars.autohand": {
+      "version": "file:nox.avatars.autohand",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "nox.avatars.finalik": {
       "version": "file:nox.avatars.finalik",
       "depth": 0,

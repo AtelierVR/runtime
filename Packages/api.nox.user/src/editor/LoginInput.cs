@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.Threading;
 using api.nox.user.network;
@@ -199,3 +200,4 @@ namespace api.nox.user {
 			=> _server = server;
 	}
 }
+#endif
