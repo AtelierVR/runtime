@@ -10,7 +10,7 @@
 	<assembly fullname="api.nox.session.jint" preserve="all" />
 	<assembly fullname="api.nox.statistics" preserve="all" />
 	<assembly fullname="api.nox.user" preserve="all" />
-	<assembly fullname="api.nox.xr" preserve="all" />
+	<assembly fullname="api.nox.videoplayer" preserve="all" />
 	<assembly fullname="Esprima" preserve="all" />
 	<assembly fullname="Jint" preserve="all" />
 	<assembly fullname="Mono.Cecil" preserve="all" />
@@ -22,13 +22,13 @@
 	<assembly fullname="Nox.Avatars" preserve="all" />
 	<assembly fullname="Nox.Avatars.Camera" preserve="all" />
 	<assembly fullname="Nox.Avatars.Editor" preserve="all" />
-	<assembly fullname="Nox.Avatars.FinalIK" preserve="all" />
+	<assembly fullname="Nox.Avatars.FinalIK.Runtime" preserve="all" />
 	<assembly fullname="Nox.Avatars.Hand" preserve="all" />
 	<assembly fullname="nox.avatars.modules" preserve="all" />
 	<assembly fullname="Nox.Avatars.Modules.Runtime" preserve="all" />
 	<assembly fullname="Nox.Avatars.Parameters" preserve="all" />
 	<assembly fullname="Nox.Avatars.Pipeline" preserve="all" />
-	<assembly fullname="Nox.Avatars.RigBuilder" preserve="all" />
+	<assembly fullname="Nox.Avatars.RigBuilder.Runtime" preserve="all" />
 	<assembly fullname="Nox.Avatars.Rigging" preserve="all" />
 	<assembly fullname="Nox.Avatars.Runtime" preserve="all" />
 	<assembly fullname="Nox.Avatars.Runtime.Editor" preserve="all" />
@@ -124,6 +124,7 @@
 	<assembly fullname="Nox.Scripting.Runtime" preserve="all" />
 	<assembly fullname="Nox.SDK.Control" preserve="all" />
 	<assembly fullname="Nox.Search" preserve="all" />
+	<assembly fullname="Nox.Servers" preserve="all" />
 	<assembly fullname="Nox.Sessions" preserve="all" />
 	<assembly fullname="Nox.Sessions.Clients" preserve="all" />
 	<assembly fullname="Nox.Sessions.Editor" preserve="all" />
