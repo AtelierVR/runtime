@@ -116,6 +116,17 @@ namespace api.nox.server.network {
 			_webSocket = new ClientWebSocket();
 			_cts = new CancellationTokenSource();
 
+			// Force-initialise ServicePointManager before the first TLS handshake.
+			// In built Unity (Mono) builds the static constructor fails if System.Configuration
+			// is stripped; this surfaces the error early and sets the security protocol explicitly.
+			try {
+				System.Net.ServicePointManager.SecurityProtocol =
+					System.Net.SecurityProtocolType.Tls12 |
+					(System.Net.SecurityProtocolType)12288; // Tls13 (not defined in Unity's Mono)
+			} catch (Exception ex) {
+				Logger.LogError(new Exception("Failed to initialise ServicePointManager. TLS connections will not work. Ensure System and System.Configuration are preserved in link.xml.", ex));
+			}
+
 			foreach (var header in _headers)
 				try {
 					_webSocket.Options.SetRequestHeader(header.Key, header.Value);

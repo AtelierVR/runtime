@@ -20,6 +20,7 @@
     <mapping directory="$PROJECT_DIR$/Packages/nox.entities" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.ffmpeg" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.game.builder" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.jiggles" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.keybinding" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.loader" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.microphone" vcs="Git" />

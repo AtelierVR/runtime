@@ -35,6 +35,7 @@
 	<assembly fullname="Nox.Avatars.Scale" preserve="all" />
 	<assembly fullname="Nox.Avatars.StateMachines" preserve="all" />
 	<assembly fullname="Nox.Avatars.Voice" preserve="all" />
+	<assembly fullname="Nox.CCK" preserve="all" />
 	<assembly fullname="Nox.CCK.AssetBundles" preserve="all" />
 	<assembly fullname="Nox.CCK.Avatars" preserve="all" />
 	<assembly fullname="Nox.CCK.Avatars.Camera" preserve="all" />
@@ -158,8 +159,10 @@
 	<assembly fullname="StirlingLabs.Utilities" preserve="all" />
 	<assembly fullname="StirlingLabs.Utilities.Magic" preserve="all" />
 	<assembly fullname="StirlingLabs.Utilities.NativeLibrary" preserve="all" />
+	<assembly fullname="System" preserve="all" />
 	<assembly fullname="System.Buffers" preserve="all" />
 	<assembly fullname="System.Collections.Immutable" preserve="all" />
+	<assembly fullname="System.Configuration" preserve="all" />
 	<assembly fullname="System.Configuration.ConfigurationManager" preserve="all" />
 	<assembly fullname="System.Formats.Asn1" preserve="all" />
 	<assembly fullname="System.Memory" preserve="all" />

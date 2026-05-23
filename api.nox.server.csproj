@@ -541,6 +541,9 @@
     <Reference Include="Unity.VisualScripting.IonicZip">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.visualscripting@eb6004dcc707\Editor\VisualScripting.Core\Dependencies\DotNetZip\Unity.VisualScripting.IonicZip.dll</HintPath>
     </Reference>
+    <Reference Include="System.Security.Cryptography.Pkcs">
+      <HintPath>D:\Projets\nox\runtime\Packages\nox.cck\Plugins\System.Security.Cryptography.Pkcs.dll</HintPath>
+    </Reference>
     <Reference Include="System.IO.Hashing">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.collections@9c2353fb96f6\Unity.Collections.Tests\System.IO.Hashing\System.IO.Hashing.dll</HintPath>
     </Reference>
@@ -570,9 +573,6 @@
     </Reference>
     <Reference Include="Unity.VisualScripting.TextureAssets">
       <HintPath>D:\Projets\nox\runtime\Library\PackageCache\com.unity.visualscripting@eb6004dcc707\Editor\VisualScripting.Core\EditorAssetResources\Unity.VisualScripting.TextureAssets.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Security.Cryptography.Pkcs">
-      <HintPath>D:\Projets\nox\runtime\Packages\nox.relay\Plugins\System.Security.Cryptography.Pkcs.dll</HintPath>
     </Reference>
     <Reference Include="Acornima">
       <HintPath>D:\Projets\nox\runtime\Packages\api.nox.jint\Plugins\Acornima.dll</HintPath>
