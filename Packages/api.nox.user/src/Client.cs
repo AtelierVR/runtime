@@ -36,7 +36,8 @@ namespace api.nox.user {
 			CoreAPI  = api;
 			_events = new[] {
 				CoreAPI.EventAPI.Subscribe("menu_goto", OnGoto),
-				CoreAPI.EventAPI.Subscribe("widget_request", OnWidgetRequest)
+				CoreAPI.EventAPI.Subscribe("widget_request", OnWidgetRequest),
+				CoreAPI.EventAPI.Subscribe("user_update", OnUserUpdate)
 			};
 		}
 
@@ -54,6 +55,27 @@ namespace api.nox.user {
 			Main.Instance.CoreAPI.EventAPI.Emit("menu_display", menu.Id, page);
 		}
 
+		private void OnUserUpdate(EventData context) {
+			var isLoggedIn = context.Data.Length > 0 && context.Data[0] != null;
+			if (isLoggedIn) {
+				foreach (var w in AuthWidget.All.ToArray()) {
+					var parent = w.transform.parent as RectTransform;
+					var menu   = UiAPI?.Get<IMenu>(w._mid);
+					CoreAPI.EventAPI.Emit("widget_removed", w.GetKey());
+					if (parent && menu != null && UserWidget.TryMake(menu, parent, out var widget) && widget.Item2 != null)
+						CoreAPI.EventAPI.Emit("widget_added", widget.Item2);
+				}
+			} else {
+				foreach (var w in UserWidget.All.ToArray()) {
+					var parent = w.transform.parent as RectTransform;
+					var menu   = UiAPI?.Get<IMenu>(w._mid);
+					CoreAPI.EventAPI.Emit("widget_removed", w.GetKey());
+					if (parent && menu != null && AuthWidget.TryMake(menu, parent, out var widget) && widget.Item2 != null)
+						CoreAPI.EventAPI.Emit("widget_added", widget.Item2);
+				}
+			}
+		}
+
 		private void OnWidgetRequest(EventData context) {
 			if (!context.TryGet(0, out int mid)) return;
 			if (!context.TryGet(1, out RectTransform tr)) return;
@@ -69,6 +91,10 @@ namespace api.nox.user {
 		}
 
 		public void OnDisposeClient() {
+			foreach (var w in AuthWidget.All.ToArray())
+				CoreAPI.EventAPI.Emit("widget_removed", w.GetKey());
+			foreach (var w in UserWidget.All.ToArray())
+				CoreAPI.EventAPI.Emit("widget_removed", w.GetKey());
 			foreach (var e in _events)
 				CoreAPI.EventAPI.Unsubscribe(e);
 			_events  = Array.Empty<EventSubscription>();

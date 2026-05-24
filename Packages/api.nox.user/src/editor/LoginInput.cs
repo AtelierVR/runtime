@@ -190,8 +190,7 @@ namespace api.nox.user {
 
 			SetEnabled(true);
 
-			var panelApi = EditorUser.CoreAPI?.ModAPI?.GetMod("editor.panel")?.GetInstance<Nox.Editor.Panel.IPanelAPI>();
-			panelApi?.TryOpen(EditorUser.Profile);
+			_panel.GetWindow().SetActive(EditorUser.Profile);
 		}
 
 		private IServer _server;

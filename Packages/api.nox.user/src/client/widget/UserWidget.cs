@@ -1,4 +1,5 @@
-﻿using api.nox.user.client;
+﻿using System.Collections.Generic;
+using api.nox.user.client;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
 using Nox.CCK.Utils;
@@ -17,7 +18,11 @@ namespace api.nox.user.widget {
 			=> GetDefaultKey();
 
 
-		private int               _mid;
+		internal static readonly HashSet<UserWidget> All = new();
+		private void Awake()     => All.Add(this);
+		private void OnDestroy() => All.Remove(this);
+
+		internal int              _mid;
 		private Image             _image;
 		private AspectRatioFitter _ratio;
 		private GameObject        _container;

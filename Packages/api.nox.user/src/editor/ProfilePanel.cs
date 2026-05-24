@@ -45,10 +45,8 @@ namespace api.nox.user {
 
 		private async void OnLogout() {
 			var success = await Main.Instance.Network.Logout();
-			if (success) {
-				var panelApi = EditorUser.CoreAPI?.ModAPI?.GetMod("editor.panel")?.GetInstance<IPanelAPI>();
-				panelApi?.TryOpen(EditorUser.Auth);
-			}
+			if (success)
+				_window.SetActive(EditorUser.Auth);
 		}
 
 		public VisualElement GetContent() {

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using api.nox.user.client;
 using Cysharp.Threading.Tasks;
 using Nox.CCK.Language;
@@ -15,7 +16,11 @@ namespace api.nox.user.widget {
 		public string GetKey()
 			=> GetDefaultKey();
 
-		private int          _mid;
+		internal static readonly HashSet<AuthWidget> All = new();
+		private void Awake()     => All.Add(this);
+		private void OnDestroy() => All.Remove(this);
+
+		internal int         _mid;
 		private Image        _icon;
 		private TextLanguage _label;
 
