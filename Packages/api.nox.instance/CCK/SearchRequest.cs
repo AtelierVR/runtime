@@ -17,6 +17,8 @@ namespace Nox.CCK.Instances {
 
 		public override string ToString() {
 			var text = "";
+			if (!string.IsNullOrEmpty(Server))
+				text += (text.Length > 0 ? "&" : "") + $"server={Server}";
 			if (!string.IsNullOrEmpty(Query))
 				text += (text.Length > 0 ? "&" : "") + $"query={Query}";
 			if (World.IsValid())
@@ -32,6 +34,7 @@ namespace Nox.CCK.Instances {
 
 		public static SearchRequest From(ISearchRequest identifier)
 			=> new() {
+				Server = identifier.Server,
 				Query  = identifier.Query,
 				World  = identifier.World,
 				Owner  = identifier.Owner,
