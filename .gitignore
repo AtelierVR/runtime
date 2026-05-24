@@ -89,6 +89,10 @@ PackageExports/
 /[Pp]ackages/*hactazia.*/link.xml
 /[Pp]ackages/*hactazia.*/link.xml.meta
 /[Aa]ssets/[Tt]emp/
+/[Aa]ssets/[Rr]esources/[Pp]erformance[Tt]est[Rr]un[Ii]nfo.json
+/[Aa]ssets/[Rr]esources/[Pp]erformance[Tt]est[Rr]un[Ii]nfo.json.meta
+/[Aa]ssets/[Rr]esources/[Pp]erformance[Tt]est[Rr]un[Ss]ettings.json
+/[Aa]ssets/[Rr]esources/[Pp]erformance[Tt]est[Rr]un[Ss]ettings.json.meta
 /[Aa]ssets/[Aa]uto[Hh]and/
 /[Aa]ssets/[Pp]olygonmaker/
 /[Tt]hry/
