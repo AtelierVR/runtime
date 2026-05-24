@@ -16,5 +16,7 @@ namespace Nox.Instances {
 		public uint Offset { get; set; }
 		
 		public uint Limit { get; set; }
+		
+		
 	}
 }

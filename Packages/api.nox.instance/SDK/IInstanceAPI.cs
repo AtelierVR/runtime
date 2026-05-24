@@ -18,8 +18,7 @@ namespace Nox.Instances {
 		/// Optionally specify a server to search from; if not provided, will attempt to search from the current user's server.
 		/// </summary>
 		/// <param name="data"></param>
-		/// <param name="from"></param>
 		/// <returns></returns>
-		public UniTask<ISearchResponse> Search(ISearchRequest data, string from = null);
+		public UniTask<ISearchResponse> Search(ISearchRequest data);
 	}
 }

@@ -53,7 +53,7 @@ namespace api.nox.instance {
 		public async UniTask<IInstance> Fetch(Identifier identifier)
 			=> await Network.Fetch(identifier);
 
-		public async UniTask<ISearchResponse> Search(ISearchRequest data, string from = null)
+		public async UniTask<ISearchResponse> Search(ISearchRequest data)
 			=> await Network.Search(SearchRequest.From(data));
 
 		public void OnInitializeMain(IMainModCoreAPI api) {

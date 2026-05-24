@@ -12,7 +12,6 @@ namespace api.nox.instance.network {
 	[Serializable]
 	public class SearchResponse : ISearchResponse, INoxObject {
 		internal SearchRequest Request;
-		internal string Server;
 
 		[JsonProperty("query")]
 		public string Query { get; private set; }
@@ -54,6 +53,7 @@ namespace api.nox.instance.network {
 			=> HasNext()
 				? await Main.Instance.Network.Search(
 					new SearchRequest {
+						Server = Request.Server,
 						Query  = Request.Query,
 						World  = Request.World,
 						Owner  = Request.Owner,
@@ -67,6 +67,7 @@ namespace api.nox.instance.network {
 			=> HasPrevious()
 				? await Main.Instance.Network.Search(
 					new SearchRequest {
+						Server = Request.Server,
 						Query  = Request.Query,
 						World  = Request.World,
 						Owner  = Request.Owner,

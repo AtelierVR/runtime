@@ -19,6 +19,7 @@ namespace api.nox.instance.search {
 				return new SearchResult { Error = "Invalid server address." };
 			var data = await Main.Instance.Network.Search(
 				new SearchRequest {
+					Server = Server,
 					Query = options.Query,
 					Offset = options.Page * options.Limit,
 					Limit = options.Limit,

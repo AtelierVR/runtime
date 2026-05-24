@@ -68,7 +68,6 @@ namespace api.nox.instance.network {
 
 			var instances = response.Data;
 			instances.Request = data;
-			instances.Server  = address;
 
 			foreach (var instance in instances.Items)
 				InvokeFetch(instance);
