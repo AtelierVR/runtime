@@ -1,32 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <linker>
 	<assembly fullname="Acornima" preserve="all" />
-	<assembly fullname="api.nox.instance" preserve="all" />
-	<assembly fullname="api.nox.jint" preserve="all" />
-	<assembly fullname="api.nox.main" preserve="all" />
-	<assembly fullname="api.nox.player" preserve="all" />
-	<assembly fullname="api.nox.search" preserve="all" />
-	<assembly fullname="api.nox.server" preserve="all" />
-	<assembly fullname="api.nox.statistics" preserve="all" />
-	<assembly fullname="api.nox.user" preserve="all" />
-	<assembly fullname="api.nox.videoplayer" preserve="all" />
-	<assembly fullname="AutoHandAssembly" preserve="all" />
-	<assembly fullname="com.gator-dragon-games.jigglephysics" preserve="all" />
 	<assembly fullname="Esprima" preserve="all" />
-	<assembly fullname="FFmpeg.AutoGen" preserve="all" />
 	<assembly fullname="Jint" preserve="all" />
 	<assembly fullname="Mono.Cecil" preserve="all" />
 	<assembly fullname="Mono.Cecil.Mdb" preserve="all" />
 	<assembly fullname="Mono.Cecil.Pdb" preserve="all" />
 	<assembly fullname="Mono.Cecil.Rocks" preserve="all" />
-	<assembly fullname="NaughtyAttributes.Core" preserve="all" />
-	<assembly fullname="NaughtyAttributes.Editor" preserve="all" />
-	<assembly fullname="Newtonsoft.Json" preserve="all" />
 	<assembly fullname="Nox.AssetBundles" preserve="all" />
 	<assembly fullname="Nox.AssetBundles.Runtime" preserve="all" />
 	<assembly fullname="Nox.Avatars" preserve="all" />
-	<assembly fullname="Nox.Avatars.AutoHand" preserve="all" />
-	<assembly fullname="Nox.Avatars.Builder" preserve="all" />
 	<assembly fullname="Nox.Avatars.Camera" preserve="all" />
 	<assembly fullname="Nox.Avatars.Editor" preserve="all" />
 	<assembly fullname="Nox.Avatars.FinalIK.Runtime" preserve="all" />
@@ -39,12 +22,10 @@
 	<assembly fullname="Nox.Avatars.Rigging" preserve="all" />
 	<assembly fullname="Nox.Avatars.Runtime" preserve="all" />
 	<assembly fullname="Nox.Avatars.Runtime.Editor" preserve="all" />
-	<assembly fullname="Nox.Avatars.Runtime.Modules" preserve="all" />
 	<assembly fullname="Nox.Avatars.Scale" preserve="all" />
 	<assembly fullname="Nox.Avatars.StateMachines" preserve="all" />
 	<assembly fullname="Nox.Avatars.Voice" preserve="all" />
 	<assembly fullname="Nox.CCK" preserve="all" />
-	<assembly fullname="Nox.CCK." preserve="all" />
 	<assembly fullname="Nox.CCK.AssetBundles" preserve="all" />
 	<assembly fullname="Nox.CCK.Avatars" preserve="all" />
 	<assembly fullname="Nox.CCK.Avatars.Camera" preserve="all" />
@@ -60,21 +41,16 @@
 	<assembly fullname="Nox.CCK.Avatars.StateMachines" preserve="all" />
 	<assembly fullname="Nox.CCK.Avatars.Voice" preserve="all" />
 	<assembly fullname="Nox.CCK.Desktop" preserve="all" />
-	<assembly fullname="Nox.CCK.Editor" preserve="all" />
-	<assembly fullname="Nox.CCK.Entities" preserve="all" />
 	<assembly fullname="Nox.CCK.Instances" preserve="all" />
 	<assembly fullname="Nox.CCK.Jint" preserve="all" />
 	<assembly fullname="Nox.CCK.Mirror" preserve="all" />
-	<assembly fullname="Nox.CCK.Mods" preserve="all" />
 	<assembly fullname="Nox.CCK.Network" preserve="all" />
 	<assembly fullname="Nox.CCK.Notifications" preserve="all" />
-	<assembly fullname="Nox.CCK.Players" preserve="all" />
 	<assembly fullname="Nox.CCK.Scripting" preserve="all" />
 	<assembly fullname="Nox.CCK.Sessions" preserve="all" />
 	<assembly fullname="Nox.CCK.Settings" preserve="all" />
 	<assembly fullname="Nox.CCK.UI" preserve="all" />
 	<assembly fullname="Nox.CCK.Users" preserve="all" />
-	<assembly fullname="Nox.CCK.Utils" preserve="all" />
 	<assembly fullname="Nox.CCK.VideoPlayer" preserve="all" />
 	<assembly fullname="Nox.CCK.VideoPlayer.Nox" preserve="all" />
 	<assembly fullname="Nox.CCK.VideoPlayer.Unity" preserve="all" />
@@ -99,11 +75,14 @@
 	<assembly fullname="Nox.GameBuilder" preserve="all" />
 	<assembly fullname="Nox.GameBuilder.Pipeline" preserve="all" />
 	<assembly fullname="Nox.Instances" preserve="all" />
+	<assembly fullname="Nox.Instances.Runtime" preserve="all" />
 	<assembly fullname="Nox.Jiggles" preserve="all" />
 	<assembly fullname="Nox.Jint" preserve="all" />
+	<assembly fullname="Nox.Jint.Runtime" preserve="all" />
 	<assembly fullname="Nox.KeyBinding" preserve="all" />
 	<assembly fullname="Nox.KeyBinding.Editor" preserve="all" />
 	<assembly fullname="Nox.KeyBinding.Runtime" preserve="all" />
+	<assembly fullname="Nox.Main.Runtime" preserve="all" />
 	<assembly fullname="Nox.Microphone" preserve="all" />
 	<assembly fullname="Nox.Microphone.Runtime" preserve="all" />
 	<assembly fullname="Nox.Mirror" preserve="all" />
@@ -113,56 +92,64 @@
 	<assembly fullname="Nox.Mods.Controllers" preserve="all" />
 	<assembly fullname="Nox.Mods.Desktop" preserve="all" />
 	<assembly fullname="Nox.Mods.Entities" preserve="all" />
+	<assembly fullname="Nox.Mods.Instances" preserve="all" />
+	<assembly fullname="Nox.Mods.Jint" preserve="all" />
 	<assembly fullname="Nox.Mods.KeyBinding" preserve="all" />
+	<assembly fullname="Nox.Mods.Main" preserve="all" />
 	<assembly fullname="Nox.Mods.Microphone" preserve="all" />
 	<assembly fullname="Nox.Mods.Network" preserve="all" />
 	<assembly fullname="Nox.Mods.Notifications" preserve="all" />
 	<assembly fullname="Nox.Mods.Offline" preserve="all" />
+	<assembly fullname="Nox.Mods.Players" preserve="all" />
 	<assembly fullname="Nox.Mods.Relay" preserve="all" />
+	<assembly fullname="Nox.Mods.Search" preserve="all" />
+	<assembly fullname="Nox.Mods.Servers" preserve="all" />
 	<assembly fullname="Nox.Mods.Sessions" preserve="all" />
 	<assembly fullname="Nox.Mods.Settings" preserve="all" />
+	<assembly fullname="Nox.Mods.Statistics" preserve="all" />
 	<assembly fullname="Nox.Mods.Table" preserve="all" />
 	<assembly fullname="Nox.Mods.Terminal" preserve="all" />
 	<assembly fullname="Nox.Mods.UI" preserve="all" />
+	<assembly fullname="Nox.Mods.Users" preserve="all" />
+	<assembly fullname="Nox.Mods.VideoPlayer" preserve="all" />
 	<assembly fullname="Nox.Mods.Worlds" preserve="all" />
 	<assembly fullname="Nox.Network" preserve="all" />
 	<assembly fullname="Nox.Network.Runtime" preserve="all" />
 	<assembly fullname="Nox.Notifications" preserve="all" />
 	<assembly fullname="Nox.Notifications.Runtime" preserve="all" />
-	<assembly fullname="Nox.Offline" preserve="all" />
 	<assembly fullname="Nox.Offline.Runtime" preserve="all" />
 	<assembly fullname="Nox.Players" preserve="all" />
-	<assembly fullname="Nox.Relay" preserve="all" />
-	<assembly fullname="Nox.Relay.Connectors" preserve="all" />
 	<assembly fullname="Nox.Relay.Core" preserve="all" />
 	<assembly fullname="Nox.Relay.Editor" preserve="all" />
 	<assembly fullname="Nox.Relay.Runtime" preserve="all" />
 	<assembly fullname="Nox.Relay.Tests" preserve="all" />
-	<assembly fullname="Nox.Relay.Types" preserve="all" />
 	<assembly fullname="Nox.Scripting" preserve="all" />
 	<assembly fullname="Nox.Scripting.Runtime" preserve="all" />
 	<assembly fullname="Nox.SDK.Control" preserve="all" />
 	<assembly fullname="Nox.Search" preserve="all" />
+	<assembly fullname="Nox.Search.Runtime" preserve="all" />
 	<assembly fullname="Nox.Servers" preserve="all" />
+	<assembly fullname="Nox.Servers.Runtime" preserve="all" />
 	<assembly fullname="Nox.Sessions" preserve="all" />
 	<assembly fullname="Nox.Sessions.Clients" preserve="all" />
 	<assembly fullname="Nox.Sessions.Editor" preserve="all" />
-	<assembly fullname="Nox.Sessions.Jint" preserve="all" />
+	<assembly fullname="Nox.Sessions.Jint.Runtime" preserve="all" />
 	<assembly fullname="Nox.Sessions.Runtime" preserve="all" />
 	<assembly fullname="Nox.Settings" preserve="all" />
 	<assembly fullname="Nox.Settings.Runtime" preserve="all" />
 	<assembly fullname="Nox.Social" preserve="all" />
 	<assembly fullname="Nox.Social.Clients" preserve="all" />
+	<assembly fullname="Nox.Statistics.Runtime" preserve="all" />
 	<assembly fullname="Nox.Table" preserve="all" />
 	<assembly fullname="Nox.Table.Runtime" preserve="all" />
 	<assembly fullname="Nox.Terminal" preserve="all" />
 	<assembly fullname="Nox.Terminal.Runtime" preserve="all" />
-	<assembly fullname="Nox.Terminals" preserve="all" />
 	<assembly fullname="Nox.UI" preserve="all" />
 	<assembly fullname="Nox.UI.Runtime" preserve="all" />
 	<assembly fullname="Nox.Users" preserve="all" />
+	<assembly fullname="Nox.Users.Runtime" preserve="all" />
 	<assembly fullname="Nox.VideoPlayer" preserve="all" />
-	<assembly fullname="Nox.Widgets" preserve="all" />
+	<assembly fullname="Nox.VideoPlayer.Runtime" preserve="all" />
 	<assembly fullname="Nox.Worlds" preserve="all" />
 	<assembly fullname="nox.worlds.modules" preserve="all" />
 	<assembly fullname="Nox.Worlds.Modules.Runtime" preserve="all" />
@@ -173,7 +160,6 @@
 	<assembly fullname="Nox.Worlds.Spawns" preserve="all" />
 	<assembly fullname="Nox.XR" preserve="all" />
 	<assembly fullname="Nox.XR.Editor" preserve="all" />
-	<assembly fullname="RootMotion" preserve="all" />
 	<assembly fullname="StirlingLabs.BigSpans" preserve="all" />
 	<assembly fullname="StirlingLabs.MsQuic" preserve="all" />
 	<assembly fullname="StirlingLabs.MsQuic.Bindings" preserve="all" />
@@ -197,55 +183,6 @@
 	<assembly fullname="System.Security.Cryptography.ProtectedData" preserve="all" />
 	<assembly fullname="System.Security.Permissions" preserve="all" />
 	<assembly fullname="System.Security.Principal.Windows" preserve="all" />
-	<assembly fullname="UniTask" preserve="all" />
-	<assembly fullname="Unity.Animation.Rigging" preserve="all" />
-	<assembly fullname="Unity.Burst" preserve="all" />
-	<assembly fullname="Unity.Collections" preserve="all" />
-	<assembly fullname="Unity.Collections.LowLevel.ILSupport" preserve="all" />
-	<assembly fullname="Unity.InputSystem" preserve="all" />
-	<assembly fullname="Unity.InputSystem.ForUI" preserve="all" />
-	<assembly fullname="Unity.InternalAPIEngineBridge.004" preserve="all" />
-	<assembly fullname="Unity.InternalAPIEngineBridge.RenderPipelines.Core.Runtime.Shared" preserve="all" />
-	<assembly fullname="Unity.Mathematics" preserve="all" />
-	<assembly fullname="Unity.PathTracing.Runtime" preserve="all" />
-	<assembly fullname="Unity.PlayableGraphVisualizer" preserve="all" />
-	<assembly fullname="Unity.Postprocessing.Runtime" preserve="all" />
-	<assembly fullname="Unity.Properties" preserve="all" />
-	<assembly fullname="Unity.RenderPipeline.Universal.ShaderLibrary" preserve="all" />
-	<assembly fullname="Unity.RenderPipelines.Core.Runtime" preserve="all" />
-	<assembly fullname="Unity.RenderPipelines.Core.Runtime.Shared" preserve="all" />
-	<assembly fullname="Unity.RenderPipelines.GPUDriven.Runtime" preserve="all" />
-	<assembly fullname="Unity.RenderPipelines.HighDefinition.Runtime" preserve="all" />
-	<assembly fullname="Unity.RenderPipelines.Universal.Config.Runtime" preserve="all" />
-	<assembly fullname="Unity.RenderPipelines.Universal.Runtime" preserve="all" />
-	<assembly fullname="Unity.ScriptableBuildPipeline" preserve="all" />
-	<assembly fullname="Unity.ScriptableBuildPipeline.Editor" preserve="all" />
-	<assembly fullname="Unity.SurfaceCache.Runtime" preserve="all" />
-	<assembly fullname="Unity.TextMeshPro" preserve="all" />
-	<assembly fullname="Unity.ugui" preserve="all" />
-	<assembly fullname="Unity.UnifiedRayTracing.Runtime" preserve="all" />
-	<assembly fullname="Unity.XR.ARFoundation" preserve="all" />
-	<assembly fullname="Unity.XR.ARFoundation.InternalUtils" preserve="all" />
-	<assembly fullname="Unity.XR.ARSubsystems" preserve="all" />
-	<assembly fullname="Unity.XR.CompositionLayers" preserve="all" />
-	<assembly fullname="Unity.XR.CoreUtils" preserve="all" />
-	<assembly fullname="Unity.XR.CoreUtils.Editor" preserve="all" />
-	<assembly fullname="Unity.XR.Hands" preserve="all" />
-	<assembly fullname="Unity.XR.Interaction.Toolkit" preserve="all" />
-	<assembly fullname="Unity.XR.Management" preserve="all" />
-	<assembly fullname="Unity.XR.Management.Editor" preserve="all" />
-	<assembly fullname="Unity.XR.OpenXR" preserve="all" />
-	<assembly fullname="Unity.XR.OpenXR.Features.MetaQuestSupport" preserve="all" />
-	<assembly fullname="Unity.XR.OpenXR.Features.OculusQuestSupport" preserve="all" />
-	<assembly fullname="Unity.XR.Simulation" preserve="all" />
-	<assembly fullname="UnityEditor.CacheServer" preserve="all" />
-	<assembly fullname="UnityEditor.TestRunner" preserve="all" />
-	<assembly fullname="UnityEngine.SpatialTracking" preserve="all" />
-	<assembly fullname="UnityEngine.TestRunner" preserve="all" />
-	<assembly fullname="UnityEngine.UI" preserve="all" />
-	<assembly fullname="UnityEngine.UIElementsModule" preserve="all" />
-	<assembly fullname="UnityEngine.XR.LegacyInputHelpers" preserve="all" />
 	<assembly fullname="websocket-sharp" preserve="all" />
-	<assembly fullname="Windows.UI.Input.Spatial" preserve="all" />
 	<assembly fullname="ZString" preserve="all" />
 </linker>
