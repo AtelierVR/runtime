@@ -47,8 +47,8 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.statistics\src\Editor\StatisticsEditorMenu.cs" />
-    <Compile Include="Packages\api.nox.statistics\src\Main.cs" />
+    <Compile Include="Packages\api.nox.statistics\Runtime\Editor\StatisticsEditorMenu.cs" />
+    <Compile Include="Packages\api.nox.statistics\Runtime\Main.cs" />
     <None Include="Packages\api.nox.statistics\link.xml" />
     <None Include="Packages\api.nox.statistics\nox.mod.json" />
     <None Include="Packages\api.nox.statistics\api.nox.statistics.asmdef" />
@@ -971,11 +971,11 @@
     <Reference Include="UniTask">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UniTask.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

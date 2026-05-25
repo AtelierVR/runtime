@@ -47,31 +47,31 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\client\VideoPlayerPage.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\Client.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\handlers\Twitch.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\base\AudioVideoFormat.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\base\Subtitle.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\Main.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\processors\YtDl.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\client\VideoPlayerComponent.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\base\Result.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\client\widget\VideoPlayerWidget.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\base\Resolve.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\videoplayers\VideoPlayerResolver.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\videoplayers\VideoPlayerManager.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\base\AudioFormat.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\videoplayers\VideoPlayerExtensions.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\base\Format.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\base\VideoFormat.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\processors\FFmpeg.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\handlers\Youtube.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\base\Thumbnail.cs" />
-    <Compile Include="Packages\api.nox.videoplayer\Scripts\handlers\Global.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\handlers\Twitch.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\Main.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\videoplayers\VideoPlayerResolver.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\processors\YtDl.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\base\AudioFormat.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\client\VideoPlayerPage.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\client\widget\VideoPlayerWidget.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\base\Format.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\base\VideoFormat.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\videoplayers\VideoPlayerManager.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\videoplayers\VideoPlayerExtensions.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\base\Subtitle.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\base\Resolve.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\handlers\Global.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\base\Thumbnail.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\Client.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\base\Result.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\processors\FFmpeg.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\handlers\Youtube.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\base\AudioVideoFormat.cs" />
+    <Compile Include="Packages\api.nox.videoplayer\Runtime\client\VideoPlayerComponent.cs" />
     <None Include="Packages\api.nox.videoplayer\link.xml" />
     <None Include="Packages\api.nox.videoplayer\nox.mod.json" />
     <None Include="Packages\api.nox.videoplayer\package.json" />
-    <None Include="Packages\api.nox.videoplayer\api.nox.xr.asmdef" />
+    <None Include="Packages\api.nox.videoplayer\api.nox.videoplayer.asmdef" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -990,11 +990,11 @@
     <Reference Include="UniTask">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UniTask.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

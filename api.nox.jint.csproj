@@ -47,16 +47,16 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.jint\src\JintFileEditor.cs" />
-    <Compile Include="Packages\api.nox.jint\src\JintScriptEditor.cs" />
-    <Compile Include="Packages\api.nox.jint\src\JintTypeAdapter.cs" />
-    <Compile Include="Packages\api.nox.jint\src\JintModuleAdapter.cs" />
-    <Compile Include="Packages\api.nox.jint\src\Main.cs" />
-    <Compile Include="Packages\api.nox.jint\src\JintBacking.cs" />
-    <Compile Include="Packages\api.nox.jint\src\JintBackingEditor.cs" />
-    <Compile Include="Packages\api.nox.jint\src\Manager.cs" />
-    <Compile Include="Packages\api.nox.jint\src\FileImporter.cs" />
-    <Compile Include="Packages\api.nox.jint\src\Logger.cs" />
+    <Compile Include="Packages\api.nox.jint\Runtime\JintBackingEditor.cs" />
+    <Compile Include="Packages\api.nox.jint\Runtime\JintBacking.cs" />
+    <Compile Include="Packages\api.nox.jint\Runtime\Manager.cs" />
+    <Compile Include="Packages\api.nox.jint\Runtime\JintScriptEditor.cs" />
+    <Compile Include="Packages\api.nox.jint\Runtime\JintFileEditor.cs" />
+    <Compile Include="Packages\api.nox.jint\Runtime\JintModuleAdapter.cs" />
+    <Compile Include="Packages\api.nox.jint\Runtime\FileImporter.cs" />
+    <Compile Include="Packages\api.nox.jint\Runtime\Logger.cs" />
+    <Compile Include="Packages\api.nox.jint\Runtime\Main.cs" />
+    <Compile Include="Packages\api.nox.jint\Runtime\JintTypeAdapter.cs" />
     <None Include="Packages\api.nox.jint\nox.mod.json" />
     <None Include="Packages\api.nox.jint\link.xml" />
     <None Include="Packages\api.nox.jint\Resources\api.nox.jint.jintscript.uxml" />
@@ -983,11 +983,11 @@
     <Reference Include="Unity.TextMeshPro">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\Unity.TextMeshPro.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

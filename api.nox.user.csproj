@@ -47,55 +47,55 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.user\src\client\widget\UserWidget.cs" />
-    <Compile Include="Packages\api.nox.user\src\obsolete\pages\ProfilePage.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\update\UpdateCurrentUserRequest.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\friends\FriendsResponse.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\login\LoginRequest.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\update\UpdateCurrentUserResponse.cs" />
-    <Compile Include="Packages\api.nox.user\src\search\SearchHandler.cs" />
-    <Compile Include="Packages\api.nox.user\src\editor\ProfilePanel.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\Network.cs" />
-    <Compile Include="Packages\api.nox.user\src\base\UserAlias.cs" />
-    <Compile Include="Packages\api.nox.user\src\client\AuthServerPage.cs" />
-    <Compile Include="Packages\api.nox.user\src\editor\AuthentificationPanel.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\search\SearchResponse.cs" />
-    <Compile Include="Packages\api.nox.user\src\client\UserComponent.cs" />
-    <Compile Include="Packages\api.nox.user\src\base\UserPresence.cs" />
-    <Compile Include="Packages\api.nox.user\src\editor\LoginInput.cs" />
-    <Compile Include="Packages\api.nox.user\src\base\UserRelation.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\login\LoginResponse.cs" />
-    <Compile Include="Packages\api.nox.user\src\Client.cs" />
-    <Compile Include="Packages\api.nox.user\src\base\CurrentUser.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\login\SendVerificationCodeResponse.cs" />
-    <Compile Include="Packages\api.nox.user\src\client\AuthLoginWidget.cs" />
-    <Compile Include="Packages\api.nox.user\src\client\AuthRegisterWidget.cs" />
-    <Compile Include="Packages\api.nox.user\src\search\SearchWorker.cs" />
-    <Compile Include="Packages\api.nox.user\src\editor\AddressInput.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\login\VerificationMethod.cs" />
-    <Compile Include="Packages\api.nox.user\src\search\SearchResult.cs" />
-    <Compile Include="Packages\api.nox.user\src\editor\VerificationInput.cs" />
-    <Compile Include="Packages\api.nox.user\src\editor\EditorUser.cs" />
-    <Compile Include="Packages\api.nox.user\src\base\User.cs" />
-    <Compile Include="Packages\api.nox.user\src\obsolete\pages\ProfileComportment.cs" />
-    <Compile Include="Packages\api.nox.user\src\search\Search.cs" />
-    <Compile Include="Packages\api.nox.user\src\client\UserPage.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\integrity\IntegrityResponse.cs" />
-    <Compile Include="Packages\api.nox.user\src\base\LinkEntry.cs" />
-    <Compile Include="Packages\api.nox.user\src\Main.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\login\VerificationRequired.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\search\SearchRequest.cs" />
-    <Compile Include="Packages\api.nox.user\src\search\SearchData.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\login\ErrorResponseWithData.cs" />
-    <Compile Include="Packages\api.nox.user\src\client\widget\AuthWidget.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\AuthToken.cs" />
-    <Compile Include="Packages\api.nox.user\src\network\UpdateCurrentUserRequest.cs" />
-    <None Include="Packages\api.nox.user\assets\users\profile.uxml" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\update\UpdateCurrentUserRequest.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\update\UpdateCurrentUserResponse.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\search\Search.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\UpdateCurrentUserRequest.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\base\UserPresence.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\search\SearchHandler.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\client\UserComponent.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\base\User.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\search\SearchResponse.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\client\AuthServerPage.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\login\ErrorResponseWithData.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\client\AuthRegisterWidget.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\editor\AuthentificationPanel.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\client\AuthLoginWidget.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\client\widget\AuthWidget.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\base\LinkEntry.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\integrity\IntegrityResponse.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\base\UserAlias.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\editor\VerificationInput.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\base\CurrentUser.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\obsolete\pages\ProfileComportment.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\Main.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\search\SearchRequest.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\editor\LoginInput.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\client\widget\UserWidget.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\search\SearchWorker.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\login\LoginResponse.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\editor\ProfilePanel.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\login\SendVerificationCodeResponse.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\client\UserPage.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\obsolete\pages\ProfilePage.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\editor\EditorUser.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\base\UserRelation.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\Client.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\search\SearchResult.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\login\VerificationMethod.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\AuthToken.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\login\LoginRequest.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\editor\AddressInput.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\Network.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\search\SearchData.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\friends\FriendsResponse.cs" />
+    <Compile Include="Packages\api.nox.user\Runtime\network\login\VerificationRequired.cs" />
+    <None Include="Packages\api.nox.user\Assets\users\profile.uxml" />
     <None Include="Packages\api.nox.user\link.xml" />
     <None Include="Packages\api.nox.user\package.json" />
-    <None Include="Packages\api.nox.user\assets\users\auth.uxml" />
+    <None Include="Packages\api.nox.user\Assets\users\auth.uxml" />
     <None Include="Packages\api.nox.user\api.nox.user.asmdef" />
-    <None Include="Packages\api.nox.user\assets\users\style.uss" />
+    <None Include="Packages\api.nox.user\Assets\users\style.uss" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -1017,11 +1017,11 @@
     <Reference Include="Unity.TextMeshPro">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\Unity.TextMeshPro.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -1065,9 +1065,9 @@
       <Project>{bca56c8d-40b6-af13-a4c1-b2489c8358d5}</Project>
       <Name>Nox.CCK.Network</Name>
     </ProjectReference>
-    <ProjectReference Include="Nox.Tables.csproj">
-      <Project>{0c3ec72f-1a6d-6f11-4b52-b30265f6622e}</Project>
-      <Name>Nox.Tables</Name>
+    <ProjectReference Include="Nox.Table.csproj">
+      <Project>{4aef827a-b75c-39a2-95e3-d34183865fa8}</Project>
+      <Name>Nox.Table</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

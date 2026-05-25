@@ -47,17 +47,17 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.search\src\client\components\ResultComponent.cs" />
-    <Compile Include="Packages\api.nox.search\src\client\components\HandlerComponent.cs" />
-    <Compile Include="Packages\api.nox.search\src\client\WorkerTask.cs" />
-    <Compile Include="Packages\api.nox.search\src\Main.cs" />
-    <Compile Include="Packages\api.nox.search\src\client\GridFitter.cs" />
-    <Compile Include="Packages\api.nox.search\src\client\SearchPage.cs" />
-    <Compile Include="Packages\api.nox.search\src\Client.cs" />
-    <Compile Include="Packages\api.nox.search\src\client\WorkerTaskStatus.cs" />
-    <Compile Include="Packages\api.nox.search\src\client\FetchOptions.cs" />
-    <Compile Include="Packages\api.nox.search\src\client\components\SearchComponent.cs" />
-    <Compile Include="Packages\api.nox.search\src\client\components\WorkerComponent.cs" />
+    <Compile Include="Packages\api.nox.search\Runtime\client\components\SearchComponent.cs" />
+    <Compile Include="Packages\api.nox.search\Runtime\client\FetchOptions.cs" />
+    <Compile Include="Packages\api.nox.search\Runtime\Client.cs" />
+    <Compile Include="Packages\api.nox.search\Runtime\client\components\HandlerComponent.cs" />
+    <Compile Include="Packages\api.nox.search\Runtime\client\WorkerTaskStatus.cs" />
+    <Compile Include="Packages\api.nox.search\Runtime\client\GridFitter.cs" />
+    <Compile Include="Packages\api.nox.search\Runtime\Main.cs" />
+    <Compile Include="Packages\api.nox.search\Runtime\client\components\ResultComponent.cs" />
+    <Compile Include="Packages\api.nox.search\Runtime\client\WorkerTask.cs" />
+    <Compile Include="Packages\api.nox.search\Runtime\client\SearchPage.cs" />
+    <Compile Include="Packages\api.nox.search\Runtime\client\components\WorkerComponent.cs" />
     <None Include="Packages\api.nox.search\link.xml" />
     <None Include="Packages\api.nox.search\package.json" />
     <None Include="Packages\api.nox.search\api.nox.search.asmdef" />
@@ -982,11 +982,11 @@
     <Reference Include="Unity.TextMeshPro">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\Unity.TextMeshPro.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

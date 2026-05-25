@@ -47,20 +47,20 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.server\src\network\ServerSocket.cs" />
-    <Compile Include="Packages\api.nox.server\src\base\Server.cs" />
-    <Compile Include="Packages\api.nox.server\src\Client.cs" />
-    <Compile Include="Packages\api.nox.server\src\client\ServerComponent.cs" />
-    <Compile Include="Packages\api.nox.server\src\base\Gateways.cs" />
-    <Compile Include="Packages\api.nox.server\src\client\widget\HostWidget.cs" />
-    <Compile Include="Packages\api.nox.server\src\network\Network.cs" />
-    <Compile Include="Packages\api.nox.server\src\base\ServerMetadata.cs" />
-    <Compile Include="Packages\api.nox.server\src\base\ServerSoftware.cs" />
-    <Compile Include="Packages\api.nox.server\src\client\ServerPage.cs" />
-    <Compile Include="Packages\api.nox.server\src\Main.cs" />
-    <Compile Include="Packages\api.nox.server\src\base\ServerVersions.cs" />
-    <Compile Include="Packages\api.nox.server\src\base\ServerEndpoints.cs" />
-    <Compile Include="Packages\api.nox.server\src\base\ServerGateway.cs" />
+    <Compile Include="Packages\api.nox.server\Runtime\base\Server.cs" />
+    <Compile Include="Packages\api.nox.server\Runtime\Main.cs" />
+    <Compile Include="Packages\api.nox.server\Runtime\base\ServerSoftware.cs" />
+    <Compile Include="Packages\api.nox.server\Runtime\network\Network.cs" />
+    <Compile Include="Packages\api.nox.server\Runtime\base\ServerEndpoints.cs" />
+    <Compile Include="Packages\api.nox.server\Runtime\base\ServerGateway.cs" />
+    <Compile Include="Packages\api.nox.server\Runtime\base\ServerMetadata.cs" />
+    <Compile Include="Packages\api.nox.server\Runtime\network\ServerSocket.cs" />
+    <Compile Include="Packages\api.nox.server\Runtime\client\ServerPage.cs" />
+    <Compile Include="Packages\api.nox.server\Runtime\base\ServerVersions.cs" />
+    <Compile Include="Packages\api.nox.server\Runtime\client\ServerComponent.cs" />
+    <Compile Include="Packages\api.nox.server\Runtime\base\Gateways.cs" />
+    <Compile Include="Packages\api.nox.server\Runtime\client\widget\HostWidget.cs" />
+    <Compile Include="Packages\api.nox.server\Runtime\Client.cs" />
     <None Include="Packages\api.nox.server\package.json" />
     <None Include="Packages\api.nox.server\link.xml" />
     <None Include="Packages\api.nox.server\api.nox.server.asmdef" />
@@ -985,11 +985,11 @@
     <Reference Include="Unity.TextMeshPro">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\Unity.TextMeshPro.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

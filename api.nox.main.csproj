@@ -47,35 +47,35 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.4.4f1\Editor\Data\Tools\BuildPipeline\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\TileObject.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\HomeWidget.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\navigations\ServerNav.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\instance\MakeInstanceTile.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\Main.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\instance\InstanceTile.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\settings\SettingHandler.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\session\SessionHandler.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\navigations\InstanceNav.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\world\WorldTile.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\session\SessionTile.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\TileManager.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\user\UserWidget.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\settings\PerformanceSettings.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\home\HomeTile.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\user\UserTile.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\settings\AudioSettings.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\settings\GraphicSettings.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\navigations\NavigationTile.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\home\WidgetManager.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\navigations\WorldNav.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\Client.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\navigations\NavigationHandler.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\navigations\UserNav.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\session\MainOnlineHandler.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\settings\AccessibilitySettings.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\settings\ControlSettings.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\server\ServerTile.cs" />
-    <Compile Include="Packages\api.nox.main\Scripts\tiles\settings\SettingTile.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\settings\SettingHandler.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\server\ServerTile.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\session\SessionHandler.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\TileObject.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\Client.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\instance\MakeInstanceTile.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\settings\ControlSettings.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\settings\PerformanceSettings.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\user\UserTile.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\navigations\NavigationTile.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\settings\AudioSettings.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\navigations\UserNav.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\settings\SettingTile.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\navigations\InstanceNav.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\navigations\NavigationHandler.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\TileManager.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\HomeWidget.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\navigations\ServerNav.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\instance\InstanceTile.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\home\HomeTile.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\world\WorldTile.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\settings\AccessibilitySettings.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\Main.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\home\WidgetManager.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\session\SessionTile.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\session\MainOnlineHandler.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\settings\GraphicSettings.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\navigations\WorldNav.cs" />
+    <Compile Include="Packages\api.nox.main\Runtime\tiles\user\UserWidget.cs" />
     <None Include="Packages\api.nox.main\Assets\main\worlds\default\TexturedFresnelStandard.shader" />
     <None Include="Packages\api.nox.main\Assets\main\shaders\BluredColor.hlsl" />
     <None Include="Packages\api.nox.main\package.json" />
@@ -1002,11 +1002,11 @@
     <Reference Include="UniTask">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UniTask.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>D:\Projets\nox\runtime\Library\ScriptAssemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
