@@ -82,12 +82,6 @@ PackageExports/
 /[Pp]roject[Ss]ettings/EditorBuildSettings.asset
 /[Pp]ackages/*
 !/[Pp]ackages/manifest.json
-!/[Pp]ackages/*nox.*/
-!/[Pp]ackages/hactazia.*/
-/[Pp]ackages/*nox.*/link.xml
-/[Pp]ackages/*nox.*/link.xml.meta
-/[Pp]ackages/*hactazia.*/link.xml
-/[Pp]ackages/*hactazia.*/link.xml.meta
 /[Aa]ssets/[Tt]emp/
 /[Aa]ssets/[Rr]esources/[Pp]erformance[Tt]est[Rr]un[Ii]nfo.json
 /[Aa]ssets/[Rr]esources/[Pp]erformance[Tt]est[Rr]un[Ii]nfo.json.meta
