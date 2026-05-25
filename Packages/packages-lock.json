@@ -1,65 +1,5 @@
 {
   "dependencies": {
-    "api.nox.instance": {
-      "version": "file:api.nox.instance",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.jint": {
-      "version": "file:api.nox.jint",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.main": {
-      "version": "file:api.nox.main",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.player": {
-      "version": "file:api.nox.player",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.search": {
-      "version": "file:api.nox.search",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.server": {
-      "version": "file:api.nox.server",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.session.jint": {
-      "version": "file:api.nox.session.jint",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.statistics": {
-      "version": "file:api.nox.statistics",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.user": {
-      "version": "file:api.nox.user",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "api.nox.videoplayer": {
-      "version": "file:api.nox.videoplayer",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "com.cysharp.unitask": {
       "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
       "depth": 0,
@@ -796,8 +736,20 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "nox.instances": {
+      "version": "file:nox.instances",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "nox.jiggles": {
       "version": "file:nox.jiggles",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.jint": {
+      "version": "file:nox.jint",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
@@ -810,6 +762,12 @@
     },
     "nox.loader": {
       "version": "file:nox.loader",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.main": {
+      "version": "file:nox.main",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
@@ -844,6 +802,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "nox.players": {
+      "version": "file:nox.players",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "nox.relay": {
       "version": "file:nox.relay",
       "depth": 0,
@@ -856,8 +820,26 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "nox.search": {
+      "version": "file:nox.search",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.servers": {
+      "version": "file:nox.servers",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "nox.sessions": {
       "version": "file:nox.sessions",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.sessions.jint": {
+      "version": "file:nox.sessions.jint",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
@@ -870,6 +852,12 @@
     },
     "nox.social": {
       "version": "file:nox.social",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.statistics": {
+      "version": "file:nox.statistics",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
@@ -888,6 +876,18 @@
     },
     "nox.ui": {
       "version": "file:nox.ui",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.users": {
+      "version": "file:nox.users",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "nox.videoplayer": {
+      "version": "file:nox.videoplayer",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
