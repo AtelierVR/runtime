@@ -118,3 +118,33 @@
 	path = Packages/nox.jiggles
 	url = https://github.com/AtelierVR/nox.jiggles.git
 	branch = development
+[submodule "Packages/nox.instances"]
+	path = Packages/nox.instances
+	url = https://github.com/AtelierVR/nox.instances.git
+[submodule "Packages/nox.jint"]
+	path = Packages/nox.jint
+	url = https://github.com/AtelierVR/nox.jint.git
+[submodule "Packages/nox.main"]
+	path = Packages/nox.main
+	url = https://github.com/AtelierVR/nox.main.git
+[submodule "Packages/nox.players"]
+	path = Packages/nox.players
+	url = https://github.com/AtelierVR/nox.players.git
+[submodule "Packages/nox.search"]
+	path = Packages/nox.search
+	url = https://github.com/AtelierVR/nox.search.git
+[submodule "Packages/nox.servers"]
+	path = Packages/nox.servers
+	url = https://github.com/AtelierVR/nox.servers.git
+[submodule "Packages/nox.sessions.jint"]
+	path = Packages/nox.sessions.jint
+	url = https://github.com/AtelierVR/nox.sessions.jint.git
+[submodule "Packages/nox.statistics"]
+	path = Packages/nox.statistics
+	url = https://github.com/AtelierVR/nox.statistics.git
+[submodule "Packages/nox.users"]
+	path = Packages/nox.users
+	url = https://github.com/AtelierVR/nox.users.git
+[submodule "Packages/nox.videoplayer"]
+	path = Packages/nox.videoplayer
+	url = https://github.com/AtelierVR/nox.videoplayer.git
