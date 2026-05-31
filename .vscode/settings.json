@@ -1,4 +1,8 @@
 {
+    "omnisharp.enableRoslynAnalyzers": true,
+    "omnisharp.useModernNet": true,
+    "omnisharp.enableEditorConfigSupport": true,
+    "dotnet.server.useOmnisharp": true,
     "files.exclude": {
         "**/.DS_Store": true,
         "**/.git": true,

@@ -1,0 +1,10 @@
+root = true
+
+# Treat unused using directives as warnings
+[*.cs]
+dotnet_diagnostic.IDE0005.severity = warning
+dotnet_diagnostic.CS8019.severity = warning
+dotnet_diagnostic.RCS1003.severity = none
+
+# You can add other diagnostics here, e.g. to escalate suggestions:
+# dotnet_diagnostic.IDE0022.severity = warning
