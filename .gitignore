@@ -104,3 +104,7 @@ mono_crash.*
 build_log.txt
 build_*.log
 build_*.log.meta
+
+# Example mod build artifacts
+example_mods/**/obj/
+example_mods/**/bin/
