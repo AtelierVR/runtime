@@ -8,7 +8,6 @@ import console from 'console';
 import Gizmo, { isEnabled, wireSphere, wireDisc, line } from 'gizmo';
 
 // Event ID for sphere sync packets
-const SYNC_EVENT = crc64('sphere.sync');
 
 export let exports = {
     zoneRadius: 5,
@@ -22,6 +21,8 @@ export function onAwake() {
     zoneCenter = exports?.target?.position ?? transform.position;
     console.log(`SyncedSphere: zone center (${zoneCenter.x}, ${zoneCenter.y}, ${zoneCenter.z}), radius ${exports.zoneRadius}`);
 }
+
+const SYNC_EVENT = crc64('sphere.sync');
 
 // Master broadcasts physics state every tick
 export function onTick() {

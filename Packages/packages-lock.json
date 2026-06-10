@@ -650,7 +650,9 @@
       "version": "file:nox.avatars",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {}
+      "dependencies": {
+        "com.unity.animation.rigging": "1.4.1"
+      }
     },
     "nox.avatars.autohand": {
       "version": "file:nox.avatars.autohand",
@@ -848,7 +850,9 @@
       "version": "file:nox.settings",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {}
+      "dependencies": {
+        "com.unity.render-pipelines.universal": "17.5.0"
+      }
     },
     "nox.social": {
       "version": "file:nox.social",
@@ -896,7 +900,10 @@
       "version": "file:nox.worlds",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {}
+      "dependencies": {
+        "com.unity.scriptablebuildpipeline": "2.6.1",
+        "nox.assetbundles": "https://github.com/AtelierVR/nox.assetbundles.git"
+      }
     },
     "nox.worlds.modules": {
       "version": "file:nox.worlds.modules",
