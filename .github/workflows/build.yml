@@ -10,6 +10,11 @@ on:
 #    branches:
 #      - "**"
   workflow_dispatch:
+    inputs:
+      noLibraryCache:
+        type: boolean
+        default: false
+        description: "Skip restoring the Library cache"
 
 permissions:
   contents: read
@@ -95,6 +100,7 @@ jobs:
         continue-on-error: true
 
       - name: Cache Library
+        if: ${{ !inputs.noLibraryCache }}
         uses: actions/cache@v4
         with:
           path: Library
@@ -117,7 +123,7 @@ jobs:
           buildsPath: build
           allowDirtyBuild: true
           manualExit: true
-          customParameters: -noxReleaseVersion "${{ needs.prepare.outputs.version }}"
+          customParameters: -accept-apiupdate -noxReleaseVersion "${{ needs.prepare.outputs.version }}"
             -noxReleaseChannel "${{ needs.prepare.outputs.channel }}"
             -noxOutputPath "build/${{ matrix.targetPlatform }}"
             -noxAutoConfirmClearOutput
