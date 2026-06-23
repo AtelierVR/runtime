@@ -20,6 +20,72 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Recovery/0 (4).unity
     guid: 17c878ca3d0b87a498c23e4510d49ead
+  - enabled: 1
+    path: Assets/Samples/Worlds/New Scene.unity
+    guid: b8ce853cf9a3b2b478f94ddd668c4528
+  - enabled: 1
+    path: Assets/_BORDEL/BORDEL/VRCDefaultWorldScene.unity
+    guid: 3a376bda79aebc04da612b859a4aab40
+  - enabled: 1
+    path: Assets/_BORDEL/BORDEL/OpenMe.unity
+    guid: f76a4b4cc6fed0a4eb97657257962a00
+  - enabled: 1
+    path: Assets/AutoHand/Examples/Scenes/FinalIK (Full Body)/Demo (BETA).unity
+    guid: 15b1b958630b36b45ad5d22e80afc709
+  - enabled: 1
+    path: Assets/Samples/XR Interaction Toolkit/3.4.0/Starter Assets/DemoScene.unity
+    guid: 319dafa5c80f29f428dc1e0d03f04177
+  - enabled: 1
+    path: Assets/_Recovery/0 (1).unity
+    guid: 6eb4073766e721640be1e6ae3cd5824a
+  - enabled: 1
+    path: Assets/Samples/XR Hands/1.7.3/HandVisualizer/HandVisualizer.unity
+    guid: ab7acf0d9677fbe4db51bc36647d4fcb
+  - enabled: 1
+    path: Assets/Scenes/FFPlay.unity
+    guid: a234dbeba8bb05d4a81925a855e3ecb0
+  - enabled: 1
+    path: Assets/_Recovery/0.unity
+    guid: b97c96fc31061d049bee8cd9d28bb627
+  - enabled: 1
+    path: Assets/Portable-Panel/Examples/PortablePanelDemoScene.unity
+    guid: fc5720f1d55a43a48800e885c236766b
+  - enabled: 1
+    path: Assets/_Example/OpenMe.unity
+    guid: f87e70a5d263c8346a611db2bedbd708
+  - enabled: 1
+    path: Assets/_Camela/OPEN ME.unity
+    guid: 71977d23d927d5e4bb72da9685c1668a
+  - enabled: 1
+    path: Assets/_RINDO/OpenMe.unity
+    guid: ec77359729a5c644c8c8de8d15b80f40
+  - enabled: 1
+    path: Assets/_Recovery/0 (3).unity
+    guid: 8f96b936257734e45b64caafb9aeb309
+  - enabled: 1
+    path: Assets/_Recovery/0 (2).unity
+    guid: 9fea9878667e5034bbbfe3d02f4f1448
+  - enabled: 1
+    path: Assets/Samples/Avatars/1.0.0/OpenMe.unity
+    guid: d1daeea0afdffe74c9af7111ca457ca0
+  - enabled: 1
+    path: Assets/_BORDEL/Bitgem/StylisedWater/URP/Examples/Example-Scene-01.unity
+    guid: fc967860e2508924e943ba0223c2ed3b
+  - enabled: 1
+    path: Assets/_BORDEL/FastSky/Demo/FastSkyDemo.unity
+    guid: 66ba89bf341ac754b8002ea71a6aa1e1
+  - enabled: 1
+    path: Assets/_Avatar/GoGo/GoModel/GoBone/Avatar GoBone.unity
+    guid: 798fd65a9d8b3ec4382d9d07e5a384a7
+  - enabled: 1
+    path: Assets/Samples/Worlds/DemoWorld.unity
+    guid: 2558dd75f4df7e44590c530ac53775b5
+  - enabled: 1
+    path: Assets/Samples/XR Interaction Toolkit/3.1.1/Hands Interaction Demo/HandsDemoScene.unity
+    guid: 3ff35cecbcc52cc42945cf531638a60a
+  - enabled: 1
+    path: Assets/_Fantasy Portal VFX/Scenes/Demo.unity
+    guid: a7975afe44c61b34e8bd1335b575bdb0
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: cbe1aa6e3fc98024d8e2426664a9b867, type: 2}
     Unity.XR.OpenVR.Settings: {fileID: 11400000, guid: b8b1117bd0b659249ad8646d1ec58db3, type: 2}
