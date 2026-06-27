@@ -774,8 +774,8 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "nox.microphone": {
-      "version": "file:nox.microphone",
+    "nox.audio": {
+      "version": "file:nox.audio",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

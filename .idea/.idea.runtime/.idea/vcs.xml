@@ -5,6 +5,7 @@
     <mapping directory="$PROJECT_DIR$/Packages/com.earnestrobot.autohand" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/com.keviniglesias.basicmotions" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.assetbundles" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/nox.audio" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.avatars" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.avatars.autohand" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.avatars.finalik" vcs="Git" />
@@ -26,7 +27,6 @@
     <mapping directory="$PROJECT_DIR$/Packages/nox.keybinding" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.loader" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.main" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Packages/nox.microphone" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.mirror" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.network" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/nox.notifications" vcs="Git" />
