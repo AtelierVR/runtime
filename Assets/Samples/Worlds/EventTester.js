@@ -21,10 +21,9 @@ export function onClick() {
 }
 
 export function onEvent(key, raw, sender) {
-    if (key !== crc64(exports.listen)) {
-        console.warn(`Received unknown event: ${key} (expected ${exports.listen}/${crc64(exports.listen)})`);
+    if (key !== crc64(exports.listen)) 
         return;
-    }
+    
     console.log(raw);
     
     const message = Buffer.from(raw).toString("utf8");
