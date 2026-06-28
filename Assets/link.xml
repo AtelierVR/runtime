@@ -95,6 +95,7 @@
 	<assembly fullname="Nox.Notifications.Runtime" preserve="all" />
 	<assembly fullname="Nox.Offline.Runtime" preserve="all" />
 	<assembly fullname="Nox.Players" preserve="all" />
+	<assembly fullname="Nox.Players.Runtime" preserve="all" />
 	<assembly fullname="Nox.Relay.Core" preserve="all" />
 	<assembly fullname="Nox.Relay.Runtime" preserve="all" />
 	<assembly fullname="Nox.Scripting" preserve="all" />
