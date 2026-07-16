@@ -148,3 +148,6 @@
 [submodule "Packages/nox.videoplayer"]
 	path = Packages/nox.videoplayer
 	url = https://github.com/AtelierVR/nox.videoplayer.git
+[submodule "Packages/nox.notifications"]
+	path = Packages/nox.notifications
+	url = https://github.com/AtelierVR/nox.notifications.git
