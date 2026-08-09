@@ -1,153 +1,153 @@
 [submodule "Packages/nox.discord"]
 	path = Packages/nox.discord
-	url = https://github.com/AtelierVR/nox.discord.git
+	url = git@github.com:AtelierVR/nox.discord.git
 [submodule "Packages/nox.cck"]
 	path = Packages/nox.cck
-	url = https://github.com/AtelierVR/nox.cck.git
+	url = git@github.com:AtelierVR/nox.cck.git
 [submodule "Packages/nox.loader"]
 	path = Packages/nox.loader
-	url = https://github.com/AtelierVR/nox.loader.git
+	url = git@github.com:AtelierVR/nox.loader.git
 [submodule "Packages/nox.avatars"]
 	path = Packages/nox.avatars
-	url = https://github.com/AtelierVR/nox.avatars.git
+	url = git@github.com:AtelierVR/nox.avatars.git
 [submodule "Packages/nox.avatars.modules"]
 	path = Packages/nox.avatars.modules
-	url = https://github.com/AtelierVR/nox.avatars.modules.git
+	url = git@github.com:AtelierVR/nox.avatars.modules.git
 [submodule "Packages/nox.control"]
 	path = Packages/nox.control
-	url = https://github.com/AtelierVR/nox.control.git
+	url = git@github.com:AtelierVR/nox.control.git
 [submodule "Packages/nox.offline"]
 	path = Packages/nox.offline
-	url = https://github.com/AtelierVR/nox.offline.git
+	url = git@github.com:AtelierVR/nox.offline.git
 [submodule "Packages/nox.sessions"]
 	path = Packages/nox.sessions
-	url = https://github.com/AtelierVR/nox.sessions.git
+	url = git@github.com:AtelierVR/nox.sessions.git
 [submodule "Packages/nox.game.builder"]
 	path = Packages/nox.game.builder
-	url = https://github.com/AtelierVR/nox.game.builder.git
+	url = git@github.com:AtelierVR/nox.game.builder.git
 [submodule "Packages/com.earnestrobot.autohand"]
 	path = Packages/com.earnestrobot.autohand
-	url = https://github.com/AtelierVR/nox.autohand.git
+	url = git@github.com:AtelierVR/nox.autohand.git
 [submodule "Packages/rootmotion.finalik"]
 	path = Packages/rootmotion.finalik
-	url = https://github.com/AtelierVR/nox.finalik.git
+	url = git@github.com:AtelierVR/nox.finalik.git
 [submodule "Packages/nox.relay"]
 	path = Packages/nox.relay
-	url = https://github.com/AtelierVR/nox.relay.git
+	url = git@github.com:AtelierVR/nox.relay.git
 [submodule "Packages/nox.network"]
 	path = Packages/nox.network
-	url = https://github.com/AtelierVR/nox.network.git
+	url = git@github.com:AtelierVR/nox.network.git
 [submodule "Packages/nox.worlds"]
 	path = Packages/nox.worlds
-	url = https://github.com/AtelierVR/nox.worlds.git
+	url = git@github.com:AtelierVR/nox.worlds.git
 [submodule "Packages/nox.assetbundles"]
 	path = Packages/nox.assetbundles
-	url = https://github.com/AtelierVR/nox.assetbundles.git
+	url = git@github.com:AtelierVR/nox.assetbundles.git
 [submodule "Packages/nox.terminal"]
 	path = Packages/nox.terminal
-	url = https://github.com/AtelierVR/nox.terminal.git
+	url = git@github.com:AtelierVR/nox.terminal.git
 [submodule "Packages/nox.settings"]
 	path = Packages/nox.settings
-	url = https://github.com/AtelierVR/nox.settings.git
+	url = git@github.com:AtelierVR/nox.settings.git
 [submodule "Packages/ffmpeg.unity"]
 	path = Packages/ffmpeg.unity
-	url = https://github.com/hactazia/FFmpeg.Unity.git
+	url = git@github.com:hactazia/FFmpeg.Unity.git
 [submodule "Packages/nox.xr"]
 	path = Packages/nox.xr
-	url = https://github.com/AtelierVR/nox.xr.git
+	url = git@github.com:AtelierVR/nox.xr.git
 [submodule "Packages/nox.mirror"]
 	path = Packages/nox.mirror
-	url = https://github.com/AtelierVR/nox.mirror.git
+	url = git@github.com:AtelierVR/nox.mirror.git
 [submodule "Packages/nox.editor.panel"]
 	path = Packages/nox.editor.panel
-	url = https://github.com/AtelierVR/nox.editor.panel.git
+	url = git@github.com:AtelierVR/nox.editor.panel.git
 [submodule "Packages/nox.ffmpeg"]
 	path = Packages/nox.ffmpeg
-	url = https://github.com/AtelierVR/nox.ffmpeg.git
+	url = git@github.com:AtelierVR/nox.ffmpeg.git
 [submodule "Packages/com.keviniglesias.basicmotions"]
 	path = Packages/com.keviniglesias.basicmotions
-	url = https://github.com/AtelierVR/nox.animations.git
+	url = git@github.com:AtelierVR/nox.animations.git
 [submodule "Packages/nox.audio"]
 	path = Packages/nox.audio
-	url = https://github.com/AtelierVR/nox.audio.git
+	url = git@github.com:AtelierVR/nox.audio.git
 [submodule "Packages/nox.desktop"]
 	path = Packages/nox.desktop
-	url = https://github.com/AtelierVR/nox.desktop.git
+	url = git@github.com:AtelierVR/nox.desktop.git
 [submodule "Packages/nox.keybinding"]
 	path = Packages/nox.keybinding
-	url = https://github.com/AtelierVR/nox.keybinding.git
+	url = git@github.com:AtelierVR/nox.keybinding.git
 [submodule "Packages/nox.microphone"]
 	path = Packages/nox.microphone
-	url = https://github.com/AtelierVR/nox.microphone.git
+	url = git@github.com:AtelierVR/nox.microphone.git
 [submodule "Packages/nox.table"]
 	path = Packages/nox.table
-	url = https://github.com/AtelierVR/nox.table.git
+	url = git@github.com:AtelierVR/nox.table.git
 [submodule "Packages/nox.entities"]
 	path = Packages/nox.entities
-	url = https://github.com/AtelierVR/nox.entities.git
+	url = git@github.com:AtelierVR/nox.entities.git
 [submodule "Packages/nox.controllers"]
 	path = Packages/nox.controllers
-	url = https://github.com/AtelierVR/nox.controllers.git
+	url = git@github.com:AtelierVR/nox.controllers.git
 [submodule "Packages/nox.ui"]
 	path = Packages/nox.ui
-	url = https://github.com/AtelierVR/nox.ui.git
+	url = git@github.com:AtelierVR/nox.ui.git
 [submodule "Packages/nox.worlds.modules"]
 	path = Packages/nox.worlds.modules
-	url = https://github.com/AtelierVR/nox.worlds.modules.git
+	url = git@github.com:AtelierVR/nox.worlds.modules.git
 [submodule "Packages/nox.social"]
 	path = Packages/nox.social
-	url = https://github.com/AtelierVR/nox.social.git
+	url = git@github.com:AtelierVR/nox.social.git
 [submodule "Packages/nox.avatars.rigbuilder"]
 	path = Packages/nox.avatars.rigbuilder
-	url = https://github.com/AtelierVR/nox.avatars.rigbuilder.git
+	url = git@github.com:AtelierVR/nox.avatars.rigbuilder.git
 [submodule "Packages/nox.avatars.finalik"]
 	path = Packages/nox.avatars.finalik
-	url = https://github.com/AtelierVR/nox.avatars.finalik.git
+	url = git@github.com:AtelierVR/nox.avatars.finalik.git
 [submodule "Packages/nox.scripting"]
 	path = Packages/nox.scripting
-	url = https://github.com/AtelierVR/nox.scripting.git
+	url = git@github.com:AtelierVR/nox.scripting.git
 
 [submodule "Packages/nox.editor"]
         path = Packages/nox.editor
-        url = https://github.com/AtelierVR/nox.editor.git
+        url = git@github.com:AtelierVR/nox.editor.git
 [submodule "Packages/nox.avatars.autohand"]
 	path = Packages/nox.avatars.autohand
-	url = https://github.com/AtelierVR/nox.avatars.autohand
+	url = git@github.com:AtelierVR/nox.avatars.autohand
 	branch = developement
 [submodule "Packages/nox.jiggles"]
 	path = Packages/nox.jiggles
-	url = https://github.com/AtelierVR/nox.jiggles.git
+	url = git@github.com:AtelierVR/nox.jiggles.git
 	branch = development
 [submodule "Packages/nox.instances"]
 	path = Packages/nox.instances
-	url = https://github.com/AtelierVR/nox.instances.git
+	url = git@github.com:AtelierVR/nox.instances.git
 [submodule "Packages/nox.jint"]
 	path = Packages/nox.jint
-	url = https://github.com/AtelierVR/nox.jint.git
+	url = git@github.com:AtelierVR/nox.jint.git
 [submodule "Packages/nox.main"]
 	path = Packages/nox.main
-	url = https://github.com/AtelierVR/nox.main.git
+	url = git@github.com:AtelierVR/nox.main.git
 [submodule "Packages/nox.players"]
 	path = Packages/nox.players
-	url = https://github.com/AtelierVR/nox.players.git
+	url = git@github.com:AtelierVR/nox.players.git
 [submodule "Packages/nox.search"]
 	path = Packages/nox.search
-	url = https://github.com/AtelierVR/nox.search.git
+	url = git@github.com:AtelierVR/nox.search.git
 [submodule "Packages/nox.servers"]
 	path = Packages/nox.servers
-	url = https://github.com/AtelierVR/nox.servers.git
+	url = git@github.com:AtelierVR/nox.servers.git
 [submodule "Packages/nox.sessions.jint"]
 	path = Packages/nox.sessions.jint
-	url = https://github.com/AtelierVR/nox.sessions.jint.git
+	url = git@github.com:AtelierVR/nox.sessions.jint.git
 [submodule "Packages/nox.statistics"]
 	path = Packages/nox.statistics
-	url = https://github.com/AtelierVR/nox.statistics.git
+	url = git@github.com:AtelierVR/nox.statistics.git
 [submodule "Packages/nox.users"]
 	path = Packages/nox.users
-	url = https://github.com/AtelierVR/nox.users.git
+	url = git@github.com:AtelierVR/nox.users.git
 [submodule "Packages/nox.videoplayer"]
 	path = Packages/nox.videoplayer
-	url = https://github.com/AtelierVR/nox.videoplayer.git
+	url = git@github.com:AtelierVR/nox.videoplayer.git
 [submodule "Packages/nox.notifications"]
 	path = Packages/nox.notifications
-	url = https://github.com/AtelierVR/nox.notifications.git
+	url = git@github.com:AtelierVR/nox.notifications.git

@@ -1092,7 +1092,7 @@ MonoBehaviour:
   target: 0
   publishId: 1
   publishServer: hactazia.fr
-  publishVersion: 4
+  publishVersion: 7
   isCompiled: 0
 --- !u!1 &516264473
 GameObject:

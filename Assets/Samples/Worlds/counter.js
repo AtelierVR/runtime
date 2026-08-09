@@ -7,10 +7,19 @@ export let exports = {
 };
 
 let count = 0;
+let lastClickTime = 0;
+const SAVE_DELAY_MS = 5000;
+let dirty = false;
 
 function updateLabel() {
     if (exports?.result)
         exports.result.text = count.toString();
+}
+
+async function saveCount() {
+    const raw = bufferFrom(count.toString(), 'utf8');
+    await setPublic(raw);
+    console.log(`Counter saved: ${count}`);
 }
 
 export async function onAwake() {
@@ -29,7 +38,28 @@ export async function onAwake() {
 export async function onClick() {
     count++;
     updateLabel();
-    const raw = bufferFrom(count.toString(), 'utf8');
-    await setPublic(raw);
+    lastClickTime = Date.now();
+    dirty = true;
     console.log(`Counter: ${count}`);
+}
+
+export async function onUpdate() {
+    if (dirty && Date.now() - lastClickTime >= SAVE_DELAY_MS) {
+        dirty = false;
+        await saveCount();
+    }
+}
+
+export async function onDestroy() {
+    if (dirty) {
+        dirty = false;
+        await saveCount();
+    }
+}
+
+export async function onDisable() {
+    if (dirty) {
+        dirty = false;
+        await saveCount();
+    }
 }
