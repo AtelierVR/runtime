@@ -357,11 +357,11 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.sdk.linux-x86_64": {
-      "version": "1.0.2",
+      "version": "1.1.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.sysroot.base": "1.0.2"
+        "com.unity.sysroot.base": "1.1.0"
       },
       "url": "https://packages.unity.com"
     },
@@ -410,7 +410,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.sysroot.base": {
-      "version": "1.0.2",
+      "version": "1.1.0",
       "depth": 1,
       "source": "registry",
       "dependencies": {},
@@ -480,11 +480,11 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.toolchain.linux-x86_64-linux": {
-      "version": "1.0.2",
+      "version": "1.1.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.sysroot.base": "1.0.2"
+        "com.unity.sysroot.base": "1.1.0"
       },
       "url": "https://packages.unity.com"
     },
@@ -646,6 +646,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "nox.audio": {
+      "version": "file:nox.audio",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "nox.avatars": {
       "version": "file:nox.avatars",
       "depth": 0,
@@ -770,12 +776,6 @@
     },
     "nox.main": {
       "version": "file:nox.main",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "nox.audio": {
-      "version": "file:nox.audio",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}

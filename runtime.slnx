@@ -58,6 +58,7 @@
   <Project Path="Nox.Sessions.Runtime.csproj" />
   <Project Path="Nox.XR.Editor.csproj" />
   <Project Path="Nox.Settings.csproj" />
+  <Project Path="Nox.Control.Editor.csproj" />
   <Project Path="Nox.Search.csproj" />
   <Project Path="Unity.XR.Interaction.Toolkit.Samples.Hands.Editor.csproj" />
   <Project Path="Nox.Worlds.csproj" />
