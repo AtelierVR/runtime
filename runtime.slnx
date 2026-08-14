@@ -150,4 +150,5 @@
   <Project Path="Nox.Avatars.Voice.csproj" />
   <Project Path="Nox.CCK.Avatars.Common.csproj" />
   <Project Path="Nox.Worlds.Modules.Runtime.csproj" />
+  <Project Path="Nox.CCK.Avatars.AutoHand.csproj" />
 </Solution>

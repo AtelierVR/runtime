@@ -72,5 +72,6 @@
     "dotnet.defaultSolution": "runtime.slnx",
     "dotnet.preferCSharpExtension": true,
     "git.repositoryScanMaxDepth": 2,
-    "git.openRepositoryInParentFolders": "always"
+    "git.openRepositoryInParentFolders": "always",
+    "cmake.ignoreCMakeListsMissing": true
 }
