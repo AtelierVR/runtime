@@ -5071,7 +5071,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5835205266736964192, guid: 203d5b3156d8ac84ba23f1f9e126755c, type: 3}
       propertyPath: m_text
-      value: 18:46
+      value: 18:31
       objectReference: {fileID: 0}
     - target: {fileID: 5852704773064091709, guid: 203d5b3156d8ac84ba23f1f9e126755c, type: 3}
       propertyPath: m_AnchorMax.y

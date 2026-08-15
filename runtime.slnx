@@ -29,7 +29,6 @@
   <Project Path="AutoHandAssembly.csproj" />
   <Project Path="Nox.CCK.Worlds.Spawns.csproj" />
   <Project Path="Nox.CCK.Scripting.csproj" />
-  <Project Path="Nox.Relay.Runtime.csproj" />
   <Project Path="Nox.Instances.Runtime.csproj" />
   <Project Path="Nox.CCK.Avatars.Modules.Editor.csproj" />
   <Project Path="Nox.Settings.Runtime.csproj" />
@@ -86,6 +85,7 @@
   <Project Path="Nox.Notifications.Runtime.csproj" />
   <Project Path="Nox.Table.Runtime.csproj" />
   <Project Path="Nox.Desktop.Runtime.csproj" />
+  <Project Path="Nox.Relay.Runtime.csproj" />
   <Project Path="Nox.Avatars.FinalIK.Runtime.csproj" />
   <Project Path="Nox.Players.Runtime.csproj" />
   <Project Path="Autohand.XR.csproj" />
