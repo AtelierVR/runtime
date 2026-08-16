@@ -151,3 +151,6 @@
 [submodule "Packages/nox.notifications"]
 	path = Packages/nox.notifications
 	url = git@github.com:AtelierVR/nox.notifications.git
+[submodule "Packages/com.unity.xr.openxr"]
+	path = Packages/com.unity.xr.openxr
+	url = git@github.com:AtelierVR/com.unity.xr.openxr.git
