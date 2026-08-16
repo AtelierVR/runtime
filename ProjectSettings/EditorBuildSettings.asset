@@ -372,8 +372,8 @@ EditorBuildSettings:
     path: Assets/_Recovery/0 (6).unity
     guid: cb63e003921d2f0428da9b12d1f979da
   m_configObjects:
-    Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 7cbbf415687a31a49b88456fd5f46f8c, type: 2}
+    Unity.XR.Oculus.Settings: {fileID: 11400000, guid: a471c0a8f61b80f42a397314c234f982, type: 2}
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 98fb429ff7e4ac64e9e1528bfb8ea425, type: 2}
-    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: cfd1eeda9a5661e4281be2efc713dd7b, type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 1a4c68ca72a83449f938d669337cb305, type: 2}
     com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 0f6a1efefe42da842a7b187413f14da7, type: 2}

@@ -1089,7 +1089,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c09e8a494922ca846b0ed9ef00d3e2f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Nox.CCK.Worlds::Nox.CCK.Worlds.WorldDescriptor
-  target: 1
+  target: 2
   publishId: 42
   publishServer: hactazia.fr
   publishVersion: 2
