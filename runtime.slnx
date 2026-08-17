@@ -86,7 +86,6 @@
   <Project Path="Nox.Table.Runtime.csproj" />
   <Project Path="Nox.Desktop.Runtime.csproj" />
   <Project Path="Nox.Relay.Runtime.csproj" />
-  <Project Path="Nox.Avatars.FinalIK.Runtime.csproj" />
   <Project Path="Nox.Players.Runtime.csproj" />
   <Project Path="Autohand.XR.csproj" />
   <Project Path="Nox.CCK.Jint.csproj" />
@@ -108,9 +107,11 @@
   <Project Path="Nox.GameBuilder.csproj" />
   <Project Path="Nox.Relay.Tests.csproj" />
   <Project Path="Nox.Sessions.Jint.Runtime.csproj" />
+  <Project Path="Nox.Avatars.Rigging.csproj" />
   <Project Path="Nox.Mirror.csproj" />
   <Project Path="Nox.Worlds.Scenes.csproj" />
   <Project Path="Nox.CCK.Mirror.csproj" />
+  <Project Path="Nox.Avatars.FinalIK.Runtime.csproj" />
   <Project Path="Nox.Main.Runtime.csproj" />
   <Project Path="Nox.Controllers.Runtime.csproj" />
   <Project Path="Nox.Mods.UI.csproj" />
@@ -130,7 +131,6 @@
   <Project Path="Nox.CCK.Avatars.Hand.csproj" />
   <Project Path="Nox.CCK.Avatars.csproj" />
   <Project Path="Autohand.OpenXR.Editor.csproj" />
-  <Project Path="Nox.Avatars.Rigging.csproj" />
   <Project Path="Nox.Discord.csproj" />
   <Project Path="Nox.KeyBinding.csproj" />
   <Project Path="Nox.Jiggles.csproj" />
@@ -146,7 +146,6 @@
   <Project Path="Nox.Avatars.Camera.csproj" />
   <Project Path="Nox.Network.Runtime.csproj" />
   <Project Path="Nox.Statistics.Runtime.csproj" />
-  <Project Path="Nox.CCK.VideoPlayer.Nox.csproj" />
   <Project Path="Nox.Avatars.Voice.csproj" />
   <Project Path="Nox.CCK.Avatars.Common.csproj" />
   <Project Path="Nox.Worlds.Modules.Runtime.csproj" />

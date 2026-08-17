@@ -68,7 +68,6 @@
 	<assembly fullname="Nox.CCK.UI" preserve="all" />
 	<assembly fullname="Nox.CCK.Users" preserve="all" />
 	<assembly fullname="Nox.CCK.VideoPlayer" preserve="all" />
-	<assembly fullname="Nox.CCK.VideoPlayer.Nox" preserve="all" />
 	<assembly fullname="Nox.CCK.VideoPlayer.Unity" preserve="all" />
 	<assembly fullname="Nox.CCK.Worlds" preserve="all" />
 	<assembly fullname="Nox.CCK.Worlds.FellInVoid" preserve="all" />
