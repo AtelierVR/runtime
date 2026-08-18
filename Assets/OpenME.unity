@@ -177,7 +177,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2688594718750464282, guid: d3b20aac36dab2442b9f1a70738a28bc, type: 3}
       propertyPath: Url
-      value: https://www.youtube.com/watch?v=XuBAVI5fCUM
+      value: https://youtu.be/XuBAVI5fCUM?si=wEvJ3KP292eGpHBO
       objectReference: {fileID: 0}
     - target: {fileID: 2688594718750464282, guid: d3b20aac36dab2442b9f1a70738a28bc, type: 3}
       propertyPath: DumpAudioPcm
