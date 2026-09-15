@@ -3,7 +3,6 @@
   <Project Path="Nox.Worlds.Runtime.csproj" />
   <Project Path="ThryAssemblyDefinition.csproj" />
   <Project Path="RootMotion.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Nox.CCK.Control.csproj" />
   <Project Path="NaughtyAttributes.Editor.csproj" />
   <Project Path="Unity.XR.Interaction.Toolkit.Samples.Hands.csproj" />
@@ -11,6 +10,8 @@
   <Project Path="Nox.Offline.Runtime.csproj" />
   <Project Path="Nox.Sessions.csproj" />
   <Project Path="Nox.Avatars.Pipeline.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Nox.CCK.Avatars.Menus.csproj" />
   <Project Path="Nox.CCK.csproj" />
   <Project Path="Poiyomi.ModularShaderSystem.csproj" />
   <Project Path="Nox.Servers.Runtime.csproj" />
@@ -18,8 +19,8 @@
   <Project Path="Nox.Editor.Panel.csproj" />
   <Project Path="Autohand.XR.Editor.csproj" />
   <Project Path="Nox.Control.Runtime.csproj" />
-  <Project Path="Nox.FFmpeg.csproj" />
   <Project Path="Nox.Control.csproj" />
+  <Project Path="Nox.FFmpeg.csproj" />
   <Project Path="RootMotion.Editor.csproj" />
   <Project Path="Nox.VideoPlayer.Runtime.csproj" />
   <Project Path="Nox.CCK.Avatars.Camera.csproj" />
@@ -27,6 +28,7 @@
   <Project Path="NaughtyAttributes.Core.csproj" />
   <Project Path="Nox.CCK.Jiggles.Editor.csproj" />
   <Project Path="AutoHandAssembly.csproj" />
+  <Project Path="Nox.UI.csproj" />
   <Project Path="Nox.CCK.Worlds.Spawns.csproj" />
   <Project Path="Nox.CCK.Scripting.csproj" />
   <Project Path="Nox.Instances.Runtime.csproj" />
@@ -48,6 +50,7 @@
   <Project Path="Nox.Jint.Runtime.csproj" />
   <Project Path="Nox.Terminal.Runtime.csproj" />
   <Project Path="Nox.Notifications.csproj" />
+  <Project Path="Nox.Editor.csproj" />
   <Project Path="Nox.Avatars.RigBuilder.Runtime.csproj" />
   <Project Path="Nox.Jint.csproj" />
   <Project Path="Nox.Editor.Panel.Runtime.csproj" />
@@ -67,8 +70,8 @@
   <Project Path="Nox.CCK.Avatars.StateMachines.csproj" />
   <Project Path="Nox.UI.Runtime.csproj" />
   <Project Path="Nox.Users.csproj" />
-  <Project Path="Nox.UI.csproj" />
   <Project Path="Nox.CCK.Worlds.csproj" />
+  <Project Path="Nox.CCK.UI.csproj" />
   <Project Path="Nox.Table.csproj" />
   <Project Path="Nox.CCK.Avatars.Parameters.csproj" />
   <Project Path="Nox.AssetBundles.Runtime.csproj" />
@@ -94,7 +97,7 @@
   <Project Path="Nox.Worlds.Pipeline.csproj" />
   <Project Path="Nox.CCK.Settings.csproj" />
   <Project Path="Nox.Search.Runtime.csproj" />
-  <Project Path="Nox.Editor.csproj" />
+  <Project Path="Nox.Network.Runtime.csproj" />
   <Project Path="Nox.CCK.Audio.csproj" />
   <Project Path="Nox.CCK.Network.csproj" />
   <Project Path="Nox.CCK.Notifications.csproj" />
@@ -121,6 +124,7 @@
   <Project Path="Nox.AssetBundles.csproj" />
   <Project Path="Nox.Entities.Runtime.csproj" />
   <Project Path="Nox.GameBuilder.Pipeline.csproj" />
+  <Project Path="Nox.Avatars.Menus.csproj" />
   <Project Path="Nox.Worlds.Spawns.csproj" />
   <Project Path="Nox.CCK.AssetBundles.csproj" />
   <Project Path="Nox.Avatars.Parameters.csproj" />
@@ -135,7 +139,6 @@
   <Project Path="Nox.KeyBinding.csproj" />
   <Project Path="Nox.Jiggles.csproj" />
   <Project Path="Nox.Scripting.Runtime.csproj" />
-  <Project Path="Nox.CCK.UI.csproj" />
   <Project Path="Nox.Avatars.Scale.csproj" />
   <Project Path="Nox.CCK.Editor.csproj" />
   <Project Path="Nox.CCK.Sessions.csproj" />
@@ -144,7 +147,6 @@
   <Project Path="Nox.CCK.Worlds.Scenes.csproj" />
   <Project Path="Unity.XR.Interaction.Toolkit.Samples.StarterAssets.Editor.csproj" />
   <Project Path="Nox.Avatars.Camera.csproj" />
-  <Project Path="Nox.Network.Runtime.csproj" />
   <Project Path="Nox.Statistics.Runtime.csproj" />
   <Project Path="Nox.Avatars.Voice.csproj" />
   <Project Path="Nox.CCK.Avatars.Common.csproj" />
