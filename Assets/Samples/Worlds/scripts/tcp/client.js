@@ -1,6 +1,7 @@
 import { connect } from 'tcp';
 import console from 'console';
-import { from as bufferFrom } from 'buffer';
+import { from } from 'buffer';
+import { setTimeout } from 'scheduler';
 
 export let exports = {
     result: null,
@@ -12,77 +13,82 @@ let socket = null;
 let destroyed = false;
 
 export async function onAwake() {
-   start();
+    destroyed = false;
+    loop();
 }
 
-async function start() {
-     destroyed = false;
+async function loop() {
+    if (destroyed) return;
 
-    while (!destroyed) {
-        try {
-            socket = await connect(exports.host, exports.port);
+    console.log(`[TCP Client] Connecting to ${exports.host}:${exports.port}...`);
+    
+    // Indique que la tentative de connexion est en cours
+    if (exports.result)
+        exports.result.text = "connecting...";
 
-            if (destroyed)
-                break;
+    await tryConnect();
 
-            if (!socket?.connected) {
-                console.log(`[TCP Client] Failed to connect to ${exports.host}:${exports.port}`);
-                await new Promise(resolve => setTimeout(resolve, 15000));
-                continue;
+    if (!destroyed) {
+        // Indique la déconnexion après l'échec ou la fermeture du socket
+        if (exports.result)
+            exports.result.text = "disconnected";
+        
+        console.log(`[TCP Client] Reconnection in 15sec...`);
+        setTimeout(loop, 15000);
+    }
+}
+
+async function tryConnect() {
+    try {
+        socket = await connect(exports.host, exports.port);
+        if (destroyed || !socket?.connected) return;
+
+        console.log(`[TCP Client] Connected to ${exports.host}:${exports.port}`);
+
+        // Indique que la connexion est établie
+        if (exports.result)
+            exports.result.text = "connected";
+
+        socket.on("data", (data) => {
+            if (destroyed || !exports.result)
+                return;
+            let text = from(data).toString("utf8");
+            exports.result.text = text;
+        });
+
+        socket.on("error", (message) => {
+            if (destroyed) 
+                return;
+            console.error(`[TCP Client] ${message}`);
+        });
+
+        await new Promise(resolve => {
+            if (destroyed || !socket?.connected) {
+                resolve();
+                return;
             }
 
-            console.log(`[TCP Client] Connected to ${exports.host}:${exports.port}`);
-
-            socket.on("data", (data) => {
-                if (destroyed || !exports.result)
-                    return;
-                let text = data.length !== 0 
-                    ? bufferFrom(data).toString("utf8")
-                    : "";
-                exports.result.text = text;
+            socket.on("closed", () => {
+                if (!destroyed)
+                    console.log("[TCP Client] Connection closed");
+                resolve();
             });
-
-            socket.on("error", (message) => {
-                if (destroyed) 
-                    return;
-                console.error(`[TCP Client] Error: ${message}`);
-            });
-
-            await new Promise(resolve => {
-                if (destroyed || !socket?.connected) {
-                    resolve();
-                    return;
-                }
-
-                socket.on("closed", () => {
-                    if (!destroyed)
-                        console.log("[TCP Client] Connection closed");
-
-                    resolve();
-                });
-            });
-
-            if (destroyed)
-                break;
-
-            console.log("[TCP Client] Disconnected, reconnecting in 15s...");
-        } catch (error) {
-            if (!destroyed)
-                console.error("[TCP Client] Error:", error);
-        } finally {
-            if (socket) {
-                await socket.close();
-                socket = null;
-            }
+        });
+    } catch (error) {
+        console.error("[TCP Client]", error);
+    } finally {
+        if (socket) {
+            await socket.close();
+            socket = null;
         }
-
-        if (!destroyed)
-            await new Promise(resolve => setTimeout(resolve, 15000));
     }
 }
 
 export async function onDestroy() {
     destroyed = true;
+
+    if (exports.result)
+        exports.result.text = "disconnected";
 
     if (socket) {
         await socket.close();

@@ -1,6 +1,7 @@
 import { transform, rigidbody } from 'behaviour';
 import { Vector3 } from 'unity';
-import { deltaTime } from 'time';
+import time from 'time';
+import console from 'console';
 
 export let speed = 0.1;
 
@@ -22,7 +23,7 @@ function reset() {
 }
 
 export function onUpdate() {
-    transform.rotate(deltaTime * -speed, deltaTime * speed, deltaTime * -speed);
+    transform.rotate(time.deltaTime * -speed, time.deltaTime * speed, time.deltaTime * -speed);
 
     if (!exports?.target) return;
     const dis = Vector3.distance(transform.position, exports.target.position);

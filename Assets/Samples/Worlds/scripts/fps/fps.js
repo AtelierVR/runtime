@@ -1,4 +1,5 @@
-import { deltaTime } from 'time';
+import time from 'time';
+import console from 'console';
 
 export let exports = {
     pattern: "{fps} FPS",
@@ -13,7 +14,7 @@ export function onUpdate() {
         return;
 
     frameCount++;
-    elapsedTime += deltaTime;
+    elapsedTime += time.deltaTime;
 
     if (elapsedTime >= 1.0) {
         const fps = Math.round(frameCount / elapsedTime);
