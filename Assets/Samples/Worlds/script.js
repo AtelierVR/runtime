@@ -1,13 +1,11 @@
 import { transform, rigidbody } from 'behaviour';
 import { Vector3 } from 'unity';
 import time from 'time';
-import console from 'console';
-
-export let speed = 0.1;
 
 export let exports = {
     target: null,
-    distance: 10
+    distance: 10,
+    speed: 0.1
 };
 
 export function onAwake() {
@@ -23,7 +21,11 @@ function reset() {
 }
 
 export function onUpdate() {
-    transform.rotate(time.deltaTime * -speed, time.deltaTime * speed, time.deltaTime * -speed);
+    transform.rotate(
+        time.deltaTime * -exports.speed, 
+        time.deltaTime * exports.speed, 
+        time.deltaTime * -exports.speed
+    );
 
     if (!exports?.target) return;
     const dis = Vector3.distance(transform.position, exports.target.position);

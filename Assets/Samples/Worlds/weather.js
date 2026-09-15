@@ -1,12 +1,13 @@
 import console from 'console';
 import { get } from 'http';
+import { setTimeout } from 'scheduler';
 
 export let exports = {
     result: null,
 };
 
 async function fetch() {
-    let delay = 900 * 1000; // Délai par défaut (15 min en ms)
+    let delay = 900 * 1000;
 
     try {
         let res = await get('https://ipinfo.io/json');
@@ -34,19 +35,16 @@ async function fetch() {
         
         console.log(`Weather: ${data.current.temperature_2m}${data.current_units.temperature_2m}`);
 
-        // --- Calcule le délai dynamique ---
-        const time = new Date(data.current.time + 'Z').getTime(); // Heure du relevé en UTC
-        const interval = data.current.interval * 1000; // 900 sec -> 900 000 ms
+        const time = new Date(data.current.time + 'Z').getTime();
+        const interval = data.current.interval * 1000;
         const next = time + interval;
         const now = Date.now();
 
-        // Temps restant + 5 secondes de marge pour laisser à l'API le temps de générer la donnée
         delay = Math.max(1000, (next - now) + 5000);
 
     } catch (err) {
         console.error('Network error:', err.message || err);
     } finally {
-        // Planifie la prochaine exécution au moment exact
         setTimeout(fetch, delay);
     }
 }
