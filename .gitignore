@@ -77,23 +77,42 @@ PackageExports/
 
 # Remove Temps from Nox
 /[Aa]ssets/*[Bb]uild*/
+/[Aa]ssets/*[Bb]uild*.meta
 /[Aa]ssets/link.xml
 /[Aa]ssets/link.xml.meta
 /[Pp]roject[Ss]ettings/EditorBuildSettings.asset
 /[Pp]ackages/*
 !/[Pp]ackages/manifest.json
 /[Aa]ssets/[Tt]emp/
+/[Aa]ssets/[Tt]emp.meta
 /[Aa]ssets/[Rr]esources/[Pp]erformance[Tt]est[Rr]un[Ii]nfo.json
 /[Aa]ssets/[Rr]esources/[Pp]erformance[Tt]est[Rr]un[Ii]nfo.json.meta
 /[Aa]ssets/[Rr]esources/[Pp]erformance[Tt]est[Rr]un[Ss]ettings.json
 /[Aa]ssets/[Rr]esources/[Pp]erformance[Tt]est[Rr]un[Ss]ettings.json.meta
 /[Aa]ssets/[Aa]uto[Hh]and/
+/[Aa]ssets/[Aa]uto[Hh]and.meta
 /[Aa]ssets/[Pp]olygonmaker/
 /[Tt]hry/
 /[Pp]oi/
 /[Pp]rofiler[Cc]aptures/
 /[Uu][Ii][Ee]lements[Ss]chema/
 /[Bb]uild[Mm]ods/
+
+# Rebuilt by a lighting bake
+/[Aa]ssets/**/[Ll]ightmap-*.exr
+/[Aa]ssets/**/[Ll]ightmap-*.exr.meta
+/[Aa]ssets/**/[Rr]eflection[Pp]robe-*.exr
+/[Aa]ssets/**/[Rr]eflection[Pp]robe-*.exr.meta
+/[Aa]ssets/**/[Ll]ighting[Dd]ata.asset
+/[Aa]ssets/**/[Ll]ighting[Dd]ata.asset.meta
+
+# Re-importable from the Package Manager (Assets/Samples/Worlds is ours)
+/[Aa]ssets/[Ss]amples/[Aa]vatars/
+/[Aa]ssets/[Ss]amples/[Aa]vatars.meta
+/[Aa]ssets/[Ss]amples/[Xx][Rr] [Hh]ands/
+/[Aa]ssets/[Ss]amples/[Xx][Rr] [Hh]ands.meta
+/[Aa]ssets/[Ss]amples/[Xx][Rr] [Ii]nteraction [Tt]oolkit/
+/[Aa]ssets/[Ss]amples/[Xx][Rr] [Ii]nteraction [Tt]oolkit.meta
 
 _*
 
