@@ -55,6 +55,12 @@
 [submodule "Packages/nox.xr"]
 	path = Packages/nox.xr
 	url = git@github.com:AtelierVR/nox.xr.git
+[submodule "Packages/nox.xr.openxr"]
+	path = Packages/nox.xr.openxr
+	url = git@github.com:AtelierVR/nox.xr.openxr.git
+[submodule "Packages/nox.xr.openvr"]
+	path = Packages/nox.xr.openvr
+	url = git@github.com:AtelierVR/nox.xr.openvr.git
 [submodule "Packages/nox.mirror"]
 	path = Packages/nox.mirror
 	url = git@github.com:AtelierVR/nox.mirror.git

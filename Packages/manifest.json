@@ -32,6 +32,7 @@
     "com.unity.xr.hands": "1.7.3",
     "com.unity.xr.interaction.toolkit": "3.4.0",
     "com.unity.xr.openxr": "1.18.0",
+    "com.valvesoftware.unity.openvr": "https://github.com/ValveSoftware/unity-xr-plugin.git?path=/com.valve.openvr",
     "nox.avatars": "https://github.com/AtelierVR/nox.avatars.git",
     "nox.avatars.finalik": "https://github.com/AtelierVR/nox.avatars.finalik.git",
     "nox.avatars.modules": "https://github.com/AtelierVR/nox.avatars.modules.git",
