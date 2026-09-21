@@ -160,3 +160,6 @@
 [submodule "Packages/nox.nameplate"]
 	path = Packages/nox.nameplate
 	url = git@github.com:AtelierVR/nox.nameplate.git
+[submodule "Packages/com.unity.xr.openxr"]
+	path = Packages/com.unity.xr.openxr
+	url = https://github.com/AtelierVR/com.unity.xr.openxr.git
