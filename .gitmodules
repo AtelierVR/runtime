@@ -157,3 +157,6 @@
 [submodule "Packages/nox.notifications"]
 	path = Packages/nox.notifications
 	url = git@github.com:AtelierVR/nox.notifications.git
+[submodule "Packages/nox.nameplate"]
+	path = Packages/nox.nameplate
+	url = git@github.com:AtelierVR/nox.nameplate.git
