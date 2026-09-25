@@ -773,6 +773,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "nox.nameplate": {
+      "version": "file:nox.nameplate",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "nox.network": {
       "version": "file:nox.network",
       "depth": 0,
@@ -904,12 +910,6 @@
       "source": "embedded",
       "dependencies": {}
     },
-    "nox.xr.openxr": {
-      "version": "file:nox.xr.openxr",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "nox.xr.openvr": {
       "version": "file:nox.xr.openvr",
       "depth": 0,
@@ -917,6 +917,12 @@
       "dependencies": {
         "com.valvesoftware.unity.openvr": "https://github.com/ValveSoftware/unity-xr-plugin.git?path=/com.valve.openvr"
       }
+    },
+    "nox.xr.openxr": {
+      "version": "file:nox.xr.openxr",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
     },
     "rootmotion.finalik": {
       "version": "file:rootmotion.finalik",
