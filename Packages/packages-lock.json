@@ -605,16 +605,18 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.xr.openxr": {
-      "version": "file:com.unity.xr.openxr",
+      "version": "1.18.0",
       "depth": 0,
-      "source": "embedded",
+      "source": "registry",
       "dependencies": {
-        "com.unity.xr.management": "4.4.0",
-        "com.unity.xr.legacyinputhelpers": "2.1.2",
+        "com.unity.modules.xr": "1.0.0",
         "com.unity.inputsystem": "1.6.3",
         "com.unity.xr.core-utils": "2.3.0",
-        "com.unity.modules.androidjni": "1.0.0"
-      }
+        "com.unity.xr.management": "4.4.0",
+        "com.unity.modules.androidjni": "1.0.0",
+        "com.unity.xr.legacyinputhelpers": "2.1.2"
+      },
+      "url": "https://packages.unity.com"
     },
     "com.valvesoftware.unity.openvr": {
       "version": "https://github.com/ValveSoftware/unity-xr-plugin.git?path=/com.valve.openvr",
