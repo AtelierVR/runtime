@@ -1,6 +1,11 @@
 import console from 'console';
-import { local } from 'players';
-import { all as registered, create } from 'teams';
+
+// The values of a module (players.local, players.all, teams.all, ...) are live properties of its
+// namespace: import the namespace to read them, a named import is a copy taken when the script is
+// loaded (before the session and the local player exist). Functions and types can be imported by
+// name (`import { create } from 'teams'`).
+import players from 'players';
+import teams from 'teams';
 import { emit } from 'network';
 import { crc64 } from 'hashing';
 import { from as bufferFrom, toString as bufferToString } from 'buffer';
@@ -60,7 +65,7 @@ const chosen = {};
 
 export function onAwake() {
     ensure();
-    if (local) {
+    if (players.local) {
         announce();
         announced = true;
     }
@@ -69,7 +74,7 @@ export function onAwake() {
 
 export function onUpdate() {
     // The session (and so the local player) may not be ready on awake.
-    if (announced || !local) return;
+    if (announced || !players.local) return;
 
     ensure();
     announce();
@@ -120,7 +125,7 @@ export function choose(target) {
 
     ensure();
     myTeam = index;
-    apply(local, index);
+    apply(players.local, index);
 
     announce();
     console.log(`Local team: ${teamName(index)}`);
@@ -147,11 +152,11 @@ export function teamOf(player) {
  * registered under the same name so every client ends up with the same ids.
  */
 function ensure() {
-    const existing = registered ?? [];
+    const existing = teams.all ?? [];
 
     for (const team of TEAMS) {
         if (team.id === 0)
-            team.id = findId(existing, team.name) ?? (create(team.name, team.color)?.id ?? 0);
+            team.id = findId(existing, team.name) ?? (teams.create(team.name, team.color)?.id ?? 0);
     }
 }
 
@@ -195,7 +200,7 @@ const teamName = index => index >= 0 && index < TEAMS.length ? TEAMS[index].name
 
 /** Broadcasts the local choice (its index, identical on every client) to the other clients. */
 function announce() {
-    if (!local) return;
+    if (!players.local) return;
     emit(CHOOSE_EVENT, bufferFrom(`${myTeam}`, 'utf8'));
 }
 

@@ -1,5 +1,9 @@
 import console from 'console';
-import { all } from 'players';
+
+// The values of a module (players.all, players.local, ...) are live properties of its namespace:
+// import the namespace to read them, a named import (`import { all } from 'players'`) is a copy
+// taken when the script is loaded (before any player joins).
+import players from 'players';
 
 export let exports = {
   players: null,
@@ -19,7 +23,7 @@ export function onPlayerLeft(player) {
 }
 
 export function onAwake() {
-  all.forEach(p => console.log(`Player ${p.display} is in the game`));
+  (players.all ?? []).forEach(p => console.log(`Player ${p.display} is in the game`));
   updateList();
 }
 
@@ -31,7 +35,7 @@ export function onUpdate() {
 function updateList() {
   if (!exports || !exports.players) return;
 
-  const text = all.map(format).join('\n');
+  const text = (players.all ?? []).map(format).join('\n');
   if (text === last) return;
 
   last = text;
