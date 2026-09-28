@@ -152,7 +152,7 @@ export function teamOf(player) {
  * registered under the same name so every client ends up with the same ids.
  */
 function ensure() {
-    const existing = teams.all ?? [];
+    const existing = teams.all;
 
     for (const team of TEAMS) {
         if (team.id === 0)

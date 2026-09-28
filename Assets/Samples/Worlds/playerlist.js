@@ -23,7 +23,7 @@ export function onPlayerLeft(player) {
 }
 
 export function onAwake() {
-  (players.all ?? []).forEach(p => console.log(`Player ${p.display} is in the game`));
+  players.all.forEach(p => console.log(`Player ${p.display} is in the game`));
   updateList();
 }
 
@@ -35,7 +35,7 @@ export function onUpdate() {
 function updateList() {
   if (!exports || !exports.players) return;
 
-  const text = (players.all ?? []).map(format).join('\n');
+  const text = players.all.map(format).join('\n');
   if (text === last) return;
 
   last = text;
