@@ -163,3 +163,6 @@
 [submodule "Packages/com.unity.xr.openxr"]
 	path = Packages/com.unity.xr.openxr
 	url = https://github.com/AtelierVR/com.unity.xr.openxr.git
+[submodule "Packages/nox.mods"]
+	path = Packages/nox.mods
+	url = git@github.com:AtelierVR/nox.mods.git

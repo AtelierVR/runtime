@@ -3,6 +3,7 @@
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.gator-dragon-games.jigglephysics": "https://github.com/naelstrof/JigglePhysics.git#upm",
     "com.hecomi.ulipsync": "https://github.com/hecomi/uLipSync.git#upm",
+    "com.htc.upm.vive.openxr": "https://github.com/ViveSoftware/VIVE-OpenXR-Unity.git?path=com.htc.upm.vive.openxr",
     "com.spoiledcat.git": "1.0.62",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.ai.inference": "2.6.1",
@@ -43,6 +44,7 @@
     "nox.entities": "https://github.com/AtelierVR/nox.entities.git",
     "nox.game.builder": "https://github.com/AtelierVR/nox.game.builder.git",
     "nox.loader": "https://github.com/AtelierVR/nox.loader.git",
+    "nox.mods": "https://github.com/AtelierVR/nox.mods.git",
     "nox.offline": "https://github.com/AtelierVR/nox.offline.git",
     "nox.relay": "https://github.com/AtelierVR/nox.relay.git",
     "nox.scripting": "https://github.com/AtelierVR/nox.scripting.git",
@@ -81,6 +83,7 @@
     "com.unity.modules.vectorgraphics": "1.0.0",
     "com.unity.modules.vehicles": "1.0.0",
     "com.unity.modules.video": "1.0.0",
+    "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
   },
