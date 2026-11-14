@@ -127,3 +127,18 @@ build_*.log.meta
 # Example mod build artifacts
 example_mods/**/obj/
 example_mods/**/bin/
+Packages/packages-lock.json
+
+# Local editor state: absolute paths, pending diffs and MCP tokens
+/.idea/
+/.vscode/mcp.json
+
+# Local scratch space and personal tooling
+/StyleExample/
+
+# Editor backups
+*.bak
+*.orig
+
+# Generated when the SteamVR input setup is opened (embeds an absolute path)
+/[Uu]nityProject.vrmanifest
