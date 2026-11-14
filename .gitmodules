@@ -172,3 +172,7 @@
 [submodule "Packages/nox.assets"]
 	path = Packages/nox.assets
 	url = git@github.com:AtelierVR/nox.assets.git
+[submodule "Packages/nox.interactions"]
+	path = Packages/nox.interactions
+	url = git@github.com:AtelierVR/nox.interactions.git
+	branch = main
