@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "nox": {
+      "type": "http",
+      "url": "http://localhost:50000/mcp",
+      "headers": {
+        "Authorization": "Bearer <NOX_CONTROL_TOKEN>"
+      }
+    }
+  }
+}
