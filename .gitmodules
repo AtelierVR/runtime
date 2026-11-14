@@ -166,3 +166,9 @@
 [submodule "Packages/nox.mods"]
 	path = Packages/nox.mods
 	url = git@github.com:AtelierVR/nox.mods.git
+[submodule "Packages/nox.portals"]
+	path = Packages/nox.portals
+	url = git@github.com:AtelierVR/nox.portals.git
+[submodule "Packages/nox.assets"]
+	path = Packages/nox.assets
+	url = git@github.com:AtelierVR/nox.assets.git

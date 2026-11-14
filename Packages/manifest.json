@@ -35,6 +35,7 @@
     "com.unity.xr.openxr": "1.18.0",
     "com.valvesoftware.unity.openvr": "https://github.com/ValveSoftware/unity-xr-plugin.git?path=/com.valve.openvr",
     "nox.avatars": "https://github.com/AtelierVR/nox.avatars.git",
+    "nox.assets": "https://github.com/AtelierVR/nox.assets.git",
     "nox.avatars.finalik": "https://github.com/AtelierVR/nox.avatars.finalik.git",
     "nox.avatars.modules": "https://github.com/AtelierVR/nox.avatars.modules.git",
     "nox.avatars.rigbuilder": "https://github.com/AtelierVR/nox.avatars.rigbuilder.git",
