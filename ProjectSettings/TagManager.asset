@@ -19,6 +19,7 @@ TagManager:
   - VRUICheckbox
   - VRUIToggle
   - VRUISlider
+  - CameraGuard
   layers:
   - Default
   - TransparentFX
@@ -40,7 +41,7 @@ TagManager:
   - 
   - 
   - 
-  - 
+  - GlowHighlight
   - 
   - 
   - 
