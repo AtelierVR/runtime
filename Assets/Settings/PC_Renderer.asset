@@ -35,7 +35,8 @@ MonoBehaviour:
       type: 3}
   m_RendererFeatures:
   - {fileID: 7833122117494664109}
-  m_RendererFeatureMap: ad6b866f10d7b46c
+  - {fileID: 8451236974123654789}
+  m_RendererFeatureMap: ad6b866f10d7b46c0000000000000000
   m_UseNativeRenderPass: 1
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   m_AssetVersion: 2
@@ -93,3 +94,29 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 3302065f671a8450b82c9ddf07426f3a, type: 3}
   - {fileID: 2800000, guid: 56a77a3e8d64f47b6afe9e3c95cb57d5, type: 3}
   m_Shader: {fileID: 4800000, guid: 0849e84e3d62649e8882e9d6f056a017, type: 3}
+--- !u!114 &8451236974123654789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a8b7c6d5e4f30211203f4e5d6c7b8a9, type: 3}
+  m_Name: OutlineGlowFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    layerMask:
+      serializedVersion: 2
+      m_Bits: 32
+    outlineColor: {r: 2.5, g: 0.9, b: 0.1, a: 1}
+    outlineWidth: 2
+    glowColor: {r: 2.5, g: 0.9, b: 0.1, a: 1}
+    glowWidth: 16
+    glowIntensity: 1.5
+    glowFalloff: 1.5
+    gradientMinMax: {x: 0, y: 1}
+    renderPassEvent: 500
+    shader: {fileID: 4800000, guid: 7c1e9b3d5a2f4e6b8c0d1e3f5a7b9c0d, type: 3}
