@@ -17,8 +17,17 @@
     "explorer.fileNesting.patterns": {
         "*.sln": "*.csproj"
     },
-    "dotnet.defaultSolution": "runtime.linux.slnx",
+    "dotnet.defaultSolution": "runtime.slnx",
     "dotnet.preferCSharpExtension": true,
+    "[csharp]": {
+        "editor.insertSpaces": false,
+        "editor.tabSize": 4,
+        "editor.detectIndentation": false,
+        "editor.formatOnSave": false,
+        "files.insertFinalNewline": true,
+        "files.trimTrailingWhitespace": true
+    },
+    "dotnet.formatting.organizeImportsOnFormat": false,
     "git.repositoryScanMaxDepth": 2,
     "git.openRepositoryInParentFolders": "always",
     "cmake.ignoreCMakeListsMissing": true,
