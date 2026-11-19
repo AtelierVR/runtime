@@ -41,7 +41,18 @@ MonoBehaviour:
     m_Compliance:
       m_Status: 0
       m_Violations: []
-  m_UserSelectedRegistryName: spoiledcat
+  - m_Id: scoped:project:nox
+    m_Name: nox
+    m_Url: https://nox.hactazia.fr/upm
+    m_Scopes:
+    - com.nox
+    m_IsDefault: 0
+    m_Capabilities: 0
+    m_ConfigSource: 4
+    m_Compliance:
+      m_Status: 0
+      m_Violations: []
+  m_UserSelectedRegistryName: nox
   m_UserAddingNewScopedRegistry: 0
   m_RegistryInfoDraft:
     m_Modified: 0
