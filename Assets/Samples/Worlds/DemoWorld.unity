@@ -1131,7 +1131,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Nox.CCK.Worlds::Nox.CCK.Worlds.WorldDescriptor
   _attached: 42?v=2@hactazia.fr
-  targets: []
+  targets:
+  - windows
+  - linux
+  - android
   isCompiled: 0
   detected:
   - {fileID: 497432696}
