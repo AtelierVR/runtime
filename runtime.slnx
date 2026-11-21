@@ -15,6 +15,7 @@
   <Project Path="Nox.Offline.Runtime.csproj" />
   <Project Path="Nox.Sessions.csproj" />
   <Project Path="Nox.Assets.Editor.csproj" />
+  <Project Path="Nox.Relay.Runtime.csproj" />
   <Project Path="Nox.Avatars.Pipeline.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Nox.CCK.Avatars.Menus.csproj" />
@@ -42,7 +43,6 @@
   <Project Path="UnityEngine.XR.OpenXR.CodeSamples.Editor.Tests.csproj" />
   <Project Path="AutoHandAssembly.csproj" />
   <Project Path="Nox.UI.csproj" />
-  <Project Path="Nox.Relay.Runtime.csproj" />
   <Project Path="Nox.CCK.Worlds.Spawns.csproj" />
   <Project Path="SteamVR_Input_Editor.csproj" />
   <Project Path="Nox.CCK.Scripting.csproj" />
@@ -118,10 +118,12 @@
   <Project Path="Nox.Avatars.FinalIK.Runtime.csproj" />
   <Project Path="Nox.CCK.Jint.csproj" />
   <Project Path="Nox.Players.csproj" />
+  <Project Path="Nox.CCK.Worlds.csproj" />
   <Project Path="Nox.Avatars.Hand.csproj" />
   <Project Path="Nox.Worlds.Pipeline.csproj" />
   <Project Path="Nox.Avatars.Scale.csproj" />
   <Project Path="Nox.Players.Runtime.csproj" />
+  <Project Path="Nox.Sessions.Editor.csproj" />
   <Project Path="Nox.Mirror.csproj" />
   <Project Path="Nox.XR.Interactions.csproj" />
   <Project Path="Nox.CCK.Settings.csproj" />
@@ -131,6 +133,7 @@
   <Project Path="Nox.Network.Runtime.csproj" />
   <Project Path="Nox.CCK.Editor.csproj" />
   <Project Path="Nox.Mods.Runtime.csproj" />
+  <Project Path="Nox.CCK.Interactions.Network.csproj" />
   <Project Path="Unity.XR.OpenXR.Features.RuntimeDebugger.csproj" />
   <Project Path="Nox.Avatars.Editor.csproj" />
   <Project Path="Nox.XR.OpenXR.csproj" />
@@ -145,7 +148,6 @@
   <Project Path="Nox.Servers.csproj" />
   <Project Path="ThryExternal.csproj" />
   <Project Path="Nox.Controllers.csproj" />
-  <Project Path="Nox.Sessions.Editor.csproj" />
   <Project Path="Nox.GameBuilder.csproj" />
   <Project Path="Nox.Relay.Tests.csproj" />
   <Project Path="Nox.Sessions.Jint.Runtime.csproj" />
@@ -160,7 +162,6 @@
   <Project Path="Nox.Main.Runtime.csproj" />
   <Project Path="Nox.Controllers.Runtime.csproj" />
   <Project Path="Nox.Mods.UI.csproj" />
-  <Project Path="Nox.CCK.Worlds.csproj" />
   <Project Path="Nox.Nameplate.Runtime.csproj" />
   <Project Path="Nox.Avatars.Modules.Runtime.csproj" />
   <Project Path="Nox.CCK.Avatars.Playable.csproj" />
@@ -195,6 +196,7 @@
   <Project Path="Unity.XR.OpenXR.Features.MetaQuestSupport.csproj" />
   <Project Path="Unity.XR.OpenXR.Features.RuntimeDebugger.Editor.csproj" />
   <Project Path="SteamVR_Windows_EditorHelper.csproj" />
+  <Project Path="Nox.CCK.Worlds.Entities.csproj" />
   <Project Path="Nox.CCK.Instances.csproj" />
   <Project Path="Nox.CCK.Search.csproj" />
   <Project Path="Nox.CCK.Worlds.Scenes.csproj" />
